@@ -29,7 +29,7 @@
 #include <unistd.h>
 
 /* use product definitions temporarily */
-#define DEFAULT_FILE_PERMISSION 0666
+#define DEFAULT_FILE_PERMISSION 0700
 #else
 
 #include <utils_file.h>
