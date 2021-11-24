@@ -87,6 +87,8 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
             HKS_LOG_E("RSA_set0_key error %s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
+        rsaN = NULL;
+        rsaE = NULL;
         pkey = EVP_PKEY_new();
         if (pkey == NULL) {
             HKS_LOG_E("pkey is null");
@@ -179,8 +181,6 @@ static int32_t EccToX509PublicKey(
             break;
         }
 
-        /* ecKey need to be set to null to prevent Double-Free */
-        ecKey = NULL;
         ret = EvpKeyToX509Format(pkey, x509Key);
     } while (0);
 
@@ -614,7 +614,8 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
     const BIGNUM *pubKey = DH_get0_pub_key(dh);
     uint32_t pubKeySize = BN_num_bytes(pubKey);
 
-    uint8_t *keyBuffer = HksMalloc(sizeof(struct KeyMaterialDh) + pubKeySize);
+    uint32_t totalSize = sizeof(struct KeyMaterialDh) + pubKeySize;
+    uint8_t *keyBuffer = HksMalloc(totalSize);
     if (keyBuffer == NULL) {
         HKS_LOG_E("alloc keyBuffer failed");
         return HKS_ERROR_MALLOC_FAIL;
@@ -628,7 +629,7 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
 
     BN_bn2bin(pubKey, keyBuffer + sizeof(struct KeyMaterialDh));
 
-    dhPublicKey->size = pubKeySize;
+    dhPublicKey->size = totalSize;
     dhPublicKey->data = keyBuffer;
 
     return HKS_SUCCESS;
@@ -642,7 +643,9 @@ int32_t TranslateFromX509PublicKey(const struct HksBlob *x509Key, struct HksBlob
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    EVP_PKEY *pkey = d2i_PUBKEY(NULL, (const unsigned char **)&x509Key->data, x509Key->size);
+    uint8_t *data = x509Key->data;
+
+    EVP_PKEY *pkey = d2i_PUBKEY(NULL, (const unsigned char **)&data, x509Key->size);
     if (pkey == NULL) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }

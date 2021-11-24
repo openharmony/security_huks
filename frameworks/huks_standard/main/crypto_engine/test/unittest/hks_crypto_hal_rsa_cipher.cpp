@@ -22,35 +22,869 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
-namespace RsaCipher {
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 namespace {
-const char RSA_2048_NOPADDING_KEY[] =
-    "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "000000000000000000000000000000000000000000000000000000000000000000000000";
-const char RSA_3072_NOPADDING_KEY[] =
-    "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-const char RSA_4096_NOPADDING_KEY[] =
-    "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-    "0000000000000000000000000000000000";
+struct TestCaseParams {
+    HksKeySpec spec;
+    HksUsageSpec usageSpec;
+    std::string hexData;
+
+    HksErrorCode generateKeyResult;
+    HksErrorCode encryptResult;
+    HksErrorCode decryptResult;
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_001_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_512,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff000000000000000000000000000"
+                          "0000000000000000000000000000000000000",
+    
+    .generateKeyResult = HKS_SUCCESS,
+#if defined(_USE_OPENSSL_)
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+#endif
+#if defined(_USE_MBEDTLS_)
+    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_002_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_768,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+
+    .generateKeyResult = HKS_SUCCESS,
+#if defined(_USE_OPENSSL_)
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+#endif
+#if defined(_USE_MBEDTLS_)
+    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_003_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff000000000000000000000000000"
+                          "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+                          "00000000000000000000000000000000000000000000000000000000000000000000000000",
+
+    .generateKeyResult = HKS_SUCCESS,
+#if defined(_USE_OPENSSL_)
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+#endif
+#if defined(_USE_MBEDTLS_)
+    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_004_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000000000000000",
+
+    .generateKeyResult = HKS_SUCCESS,
+#if defined(_USE_OPENSSL_)
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+#endif
+#if defined(_USE_MBEDTLS_)
+    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_005_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+
+    .generateKeyResult = HKS_SUCCESS,
+#if defined(_USE_OPENSSL_)
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+#endif
+#if defined(_USE_MBEDTLS_)
+    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_006_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000",
+
+    .generateKeyResult = HKS_SUCCESS,
+#if defined(_USE_OPENSSL_)
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+#endif
+#if defined(_USE_MBEDTLS_)
+    .encryptResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_007_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_512,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_PKCS1_V1_5,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_008_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_768,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_PKCS1_V1_5,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_009_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_PKCS1_V1_5,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_010_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_PKCS1_V1_5,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_011_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_PKCS1_V1_5,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_012_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_PKCS1_V1_5,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_013_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_512,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccdd",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_014_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_768,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_015_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_016_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_017_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_018_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_019_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_512,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "001122334455",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_020_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_768,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_021_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_022_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_023_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_024_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_025_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_768,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "001122334455",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_026_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_027_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_028_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_029_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "001122334455",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_031_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_032_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_033_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccdd",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_034_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccdd",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_035_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccdd",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_036_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_RSA,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_OAEP,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        .algParam = nullptr,
+    },
+    .hexData = "00112233445566778899aabbccdd",
+
+    .generateKeyResult = HKS_SUCCESS,
+    .encryptResult = HKS_SUCCESS,
+    .decryptResult = HKS_SUCCESS,
+};
 }  // namespace
-class HksCryptoHalRsaCipher : public HksCryptoHalCommon, public testing::Test {};
+
+class HksCryptoHalRsaCipher : public HksCryptoHalCommon, public testing::Test {
+protected:
+    void RunTestCase(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+
+        uint32_t inLen = testCaseParams.hexData.length() / 2;
+        uint32_t outLen = HKS_KEY_BYTES(testCaseParams.spec.keyLen);
+
+        HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
+        for (uint32_t ii = 0; ii < inLen; ii++) {
+            message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
+        }
+
+        HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
+
+        HksBlob tagAead = { .size = 0, .data = nullptr };
+
+        EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+        EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
+            testCaseParams.encryptResult);
+        if (testCaseParams.encryptResult == HKS_SUCCESS) {
+            HksBlob inscription = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
+            EXPECT_EQ(HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &cipherText, &inscription),
+                testCaseParams.decryptResult);
+            EXPECT_EQ(inscription.size, message.size);
+            EXPECT_EQ(HksMemCmp(message.data, inscription.data, inscription.size), HKS_SUCCESS);
+            HksFree(inscription.data);
+        }
+        HksFree(key.data);
+        HksFree(message.data);
+        HksFree(cipherText.data);
+    }
+};
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_001
@@ -59,61 +893,7 @@ class HksCryptoHalRsaCipher : public HksCryptoHalCommon, public testing::Test {}
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_001, Function | SmallTest | Level1)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_512,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff000000000000000000000000000"
-                          "0000000000000000000000000000000000000";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_512);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalGenerateKey(&spec, &key));
-#if defined(_USE_OPENSSL_)
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message));
-    EXPECT_EQ(inscription.size, message.size);
-    EXPECT_EQ(0, HksMemCmp(inscription.data, message.data, message.size));
-#endif
-#if defined(_USE_MBEDTLS_)
-    EXPECT_EQ(HKS_ERROR_NOT_SUPPORTED, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-#endif
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_001_PARAMS);
 }
 
 /**
@@ -123,62 +903,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_001, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_002, Function | SmallTest | Level1)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_768,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData =
-        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
-        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_768);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalGenerateKey(&spec, &key));
-#if defined(_USE_OPENSSL_)
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message));
-    EXPECT_EQ(inscription.size, message.size);
-    EXPECT_EQ(0, HksMemCmp(inscription.data, message.data, message.size));
-#endif
-#if defined(_USE_MBEDTLS_)
-    EXPECT_EQ(HKS_ERROR_NOT_SUPPORTED, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-#endif
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_002_PARAMS);
 }
 
 /**
@@ -188,62 +913,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_002, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_003, Function | SmallTest | Level1)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff000000000000000000000000000"
-                          "0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-                          "00000000000000000000000000000000000000000000000000000000000000000000000000";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_1024);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalGenerateKey(&spec, &key));
-#if defined(_USE_OPENSSL_)
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message));
-    EXPECT_EQ(inscription.size, message.size);
-    EXPECT_EQ(0, HksMemCmp(inscription.data, message.data, message.size));
-#endif
-#if defined(_USE_MBEDTLS_)
-    EXPECT_EQ(HKS_ERROR_NOT_SUPPORTED, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-#endif
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_003_PARAMS);
 }
 
 /**
@@ -253,59 +923,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_003, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_004, Function | SmallTest | Level1)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    uint32_t dataLen = strlen(RSA_2048_NOPADDING_KEY) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&RSA_2048_NOPADDING_KEY[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&RSA_2048_NOPADDING_KEY[2 * ii]);
-    }
-
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalGenerateKey(&spec, &key));
-#if defined(_USE_OPENSSL_)
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message));
-    EXPECT_EQ(inscription.size, message.size);
-    EXPECT_EQ(0, HksMemCmp(inscription.data, message.data, message.size));
-#endif
-#if defined(_USE_MBEDTLS_)
-    EXPECT_EQ(HKS_ERROR_NOT_SUPPORTED, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-#endif
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_004_PARAMS);
 }
 
 /**
@@ -315,59 +933,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_004, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_005, Function | SmallTest | Level1)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    uint32_t dataLen = strlen(RSA_3072_NOPADDING_KEY) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&RSA_3072_NOPADDING_KEY[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&RSA_3072_NOPADDING_KEY[2 * ii]);
-    }
-
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalGenerateKey(&spec, &key));
-#if defined(_USE_OPENSSL_)
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message));
-    EXPECT_EQ(inscription.size, message.size);
-    EXPECT_EQ(0, HksMemCmp(inscription.data, message.data, message.size));
-#endif
-#if defined(_USE_MBEDTLS_)
-    EXPECT_EQ(HKS_ERROR_NOT_SUPPORTED, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-#endif
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_005_PARAMS);
 }
 
 /**
@@ -377,59 +943,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_005, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_006, Function | SmallTest | Level1)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    uint32_t dataLen = strlen(RSA_4096_NOPADDING_KEY) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&RSA_4096_NOPADDING_KEY[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&RSA_4096_NOPADDING_KEY[2 * ii]);
-    }
-
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalGenerateKey(&spec, &key));
-#if defined(_USE_OPENSSL_)
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    EXPECT_EQ(HKS_SUCCESS, HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message));
-    EXPECT_EQ(inscription.size, message.size);
-    EXPECT_EQ(0, HksMemCmp(inscription.data, message.data, message.size));
-#endif
-#if defined(_USE_MBEDTLS_)
-    EXPECT_EQ(HKS_ERROR_NOT_SUPPORTED, HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead));
-#endif
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_006_PARAMS);
 }
 
 /**
@@ -439,61 +953,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_006, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_007, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_512,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_PKCS1_V1_5,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_512);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_007_PARAMS);
 }
 
 /**
@@ -503,61 +963,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_007, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_008, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_768,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_PKCS1_V1_5,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_768);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_008_PARAMS);
 }
 
 /**
@@ -567,61 +973,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_008, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_009, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_PKCS1_V1_5,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_1024);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_009_PARAMS);
 }
 
 /**
@@ -631,61 +983,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_009, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_010, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_PKCS1_V1_5,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_010_PARAMS);
 }
 
 /**
@@ -695,61 +993,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_010, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_011, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_PKCS1_V1_5,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_011_PARAMS);
 }
 
 /**
@@ -759,61 +1003,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_011, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_012, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_PKCS1_V1_5,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_012_PARAMS);
 }
 
 /**
@@ -823,61 +1013,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_012, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_013, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_512,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccdd";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_512);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_013_PARAMS);
 }
 
 /**
@@ -887,61 +1023,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_013, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_014, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_768,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_768);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_014_PARAMS);
 }
 
 /**
@@ -951,61 +1033,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_014, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_015, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_1024);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_015_PARAMS);
 }
 
 /**
@@ -1015,61 +1043,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_015, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_016, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_016_PARAMS);
 }
 
 /**
@@ -1079,61 +1053,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_016, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_017, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_017_PARAMS);
 }
 
 /**
@@ -1143,61 +1063,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_017, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_018, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_018_PARAMS);
 }
 
 /**
@@ -1207,61 +1073,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_018, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_019, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_512,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "001122334455";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_512);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_019_PARAMS);
 }
 
 /**
@@ -1271,61 +1083,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_019, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_020, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_768,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_768);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_020_PARAMS);
 }
 
 /**
@@ -1335,61 +1093,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_020, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_021, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_1024);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_021_PARAMS);
 }
 
 /**
@@ -1399,61 +1103,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_021, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_022, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_022_PARAMS);
 }
 
 /**
@@ -1463,61 +1113,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_022, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_023, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_023_PARAMS);
 }
 
 /**
@@ -1527,61 +1123,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_023, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_024, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_024_PARAMS);
 }
 
 /**
@@ -1591,61 +1133,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_024, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_025, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_768,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "001122334455";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_768);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_025_PARAMS);
 }
 
 /**
@@ -1655,61 +1143,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_025, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_026, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_1024);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_026_PARAMS);
 }
 
 /**
@@ -1719,61 +1153,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_026, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_027, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_027_PARAMS);
 }
 
 /**
@@ -1783,61 +1163,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_027, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_028, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_028_PARAMS);
 }
 
 /**
@@ -1847,61 +1173,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_028, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_029, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_029_PARAMS);
 }
 
 /**
@@ -1911,61 +1183,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_029, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_030, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "001122334455";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_1024);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS);
 }
 
 /**
@@ -1975,61 +1193,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_030, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_031, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_031_PARAMS);
 }
 
 /**
@@ -2039,61 +1203,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_031, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_032, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_032_PARAMS);
 }
 
 /**
@@ -2103,61 +1213,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_032, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_033, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccdd";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_033_PARAMS);
 }
 
 /**
@@ -2167,61 +1223,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_033, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_034, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccdd";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_2048);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_034_PARAMS);
 }
 
 /**
@@ -2231,61 +1233,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_034, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_035, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccdd";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_3072);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_035_PARAMS);
 }
 
 /**
@@ -2295,60 +1243,9 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_035, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_036, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_RSA,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_OAEP,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = nullptr,
-    };
-
-    const char *hexData = "00112233445566778899aabbccdd";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    uint32_t inLen = dataLen;
-    uint32_t outLen = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    uint32_t inscriptionLen = dataLen;
-
-    HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-
-    HksBlob tagAead = { .size = 0, .data = nullptr };
-
-    HksBlob inscription = { .size = inscriptionLen, .data = (uint8_t *)HksMalloc(inscriptionLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        inscription.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    ret = HksCryptoHalEncrypt(&key, &usageSpec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    HksFree(message.data);
-    message = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
-    ret = HksCryptoHalDecrypt(&key, &usageSpec, &cipherText, &message);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-    EXPECT_EQ(inscription.size, message.size);
-    ret = HksMemCmp(inscription.data, message.data, message.size);
-    EXPECT_EQ(0, ret);
-    HksFree(key.data);
-    HksFree(message.data);
-    HksFree(cipherText.data);
-    HksFree(inscription.data);
+    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_036_PARAMS);
 }
-}  // namespace RsaCipher
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

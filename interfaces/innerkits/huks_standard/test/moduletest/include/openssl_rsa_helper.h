@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_OPENSSL_RSA_TEST_MT_H
-#define HKS_OPENSSL_RSA_TEST_MT_H
+#ifndef OPENSSL_RSA_MT_HELPER_H
+#define OPENSSL_RSA_MT_HELPER_H
 
 #include <securec.h>
 
@@ -29,7 +29,7 @@ extern "C" {
 #endif
 
 #define BIT_NUM_OF_UINT8 8
-#define RSA_FAILED 1
+#define RSA_FAILED (-1)
 #define RSA_SUCCESS 0
 
 void SaveRsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key);

@@ -342,7 +342,7 @@ static int32_t GetEvpKey(const struct HksBlob *keyBlob, EVP_PKEY *key, bool priv
     return HKS_SUCCESS;
 }
 
-int32_t GetNativePKey(const struct HksBlob *nativeKey, EVP_PKEY *key)
+static int32_t GetNativePKey(const struct HksBlob *nativeKey, EVP_PKEY *key)
 {
     int32_t ret = GetEvpKey(nativeKey, key, true);
     if (ret != HKS_SUCCESS) {
@@ -352,7 +352,7 @@ int32_t GetNativePKey(const struct HksBlob *nativeKey, EVP_PKEY *key)
     return ret;
 }
 
-int32_t GetPeerKey(const struct HksBlob *pubKey, EVP_PKEY *key)
+static int32_t GetPeerKey(const struct HksBlob *pubKey, EVP_PKEY *key)
 {
     int32_t ret = GetEvpKey(pubKey, key, false);
     if (ret != HKS_SUCCESS) {
@@ -362,7 +362,7 @@ int32_t GetPeerKey(const struct HksBlob *pubKey, EVP_PKEY *key)
     return ret;
 }
 
-int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *sharedKey)
+static int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *sharedKey)
 {
     size_t tmpSharedKeySize = (size_t)sharedKey->size;
     if (EVP_PKEY_derive_init(ctx) != 1) {
@@ -378,22 +378,20 @@ int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *sharedK
         return HKS_FAILURE;
     }
 
-    uint8_t *buffer = (uint8_t *)HksMalloc(tmpSharedKeySize);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc size %u failed", tmpSharedKeySize);
-        return HKS_ERROR_MALLOC_FAIL;
+    if (tmpSharedKeySize > sharedKey->size) {
+        return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (EVP_PKEY_derive(ctx, buffer, &tmpSharedKeySize) != 1) {
+
+    if (EVP_PKEY_derive(ctx, sharedKey->data, &tmpSharedKeySize) != 1) {
         HksLogOpensslError();
-        HksFree(sharedKey->data);
         return HKS_FAILURE;
     }
-    sharedKey->size = (uint32_t)tmpSharedKeySize;
-    sharedKey->data = buffer;
+    sharedKey->size = tmpSharedKeySize;
+    
     return HKS_SUCCESS;
 }
 
-int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlob *pubKey, struct HksBlob *sharedKey)
+static int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlob *pubKey, struct HksBlob *sharedKey)
 {
     int32_t res = HKS_FAILURE;
     EVP_PKEY *pKey = EVP_PKEY_new();
@@ -443,6 +441,7 @@ int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlob *pubK
     return res;
 }
 
+#ifdef HKS_SUPPORT_ECDH_AGREE_KEY
 int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
@@ -458,6 +457,7 @@ int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct Hks
 
     return ret;
 }
+#endif
 
 static EVP_MD_CTX *InitEccMdCtx(const struct HksBlob *mainKey, uint32_t digest, bool sign)
 {

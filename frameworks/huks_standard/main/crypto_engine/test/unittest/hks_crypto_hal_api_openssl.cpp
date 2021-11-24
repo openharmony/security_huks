@@ -22,7 +22,10 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
-namespace {
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 class HksCryptoHalApiOpenssl : public HksCryptoHalCommon, public testing::Test {};
 
 /**
@@ -30,7 +33,7 @@ class HksCryptoHalApiOpenssl : public HksCryptoHalCommon, public testing::Test {
  * @tc.name      : HksCryptoHalApiOpenssl_001
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate key -- key is NULL.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_001, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -48,7 +51,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_001, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_002
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate key -- algType is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_002, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -68,7 +71,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_002, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_003
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate key -- keyLen is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_003, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_003, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -110,7 +113,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_003, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_004
  * @tc.desc      : Using HksCryptoHalEncrypt -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_004, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_004, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -145,7 +148,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_004, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_005
  * @tc.desc      : Using HksCryptoHalDecrypt -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_005, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_005, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -179,7 +182,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_005, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_006
  * @tc.desc      : Using HksCryptoHalEncrypt -- AES encrypt parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_006, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_006, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -215,7 +218,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_006, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_007
  * @tc.desc      : Using HksCryptoHalDecrypt -- AES decrypt parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_007, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_007, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -243,7 +246,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_007, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_008
  * @tc.desc      : Using HksCryptoHalDecrypt -- decrypt padding is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_008, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_008, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -270,7 +273,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_008, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_009
  * @tc.desc      : Using HksCryptoHalSign -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_009, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_009, Function | SmallTest | Level0)
 {
     HksBlob key = { .size = 0, .data = nullptr };
     HksUsageSpec spec = { .algType = 0xffff };
@@ -297,7 +300,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_009, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_010
  * @tc.desc      : Using HksCryptoHalVerify -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_010, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_010, Function | SmallTest | Level0)
 {
     HksBlob key = { .size = 0, .data = nullptr };
     HksUsageSpec spec = { .algType = 0xffff };
@@ -324,7 +327,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_010, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_011
  * @tc.desc      : RSA Using HksCryptoHalSign -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_011, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_011, Function | SmallTest | Level0)
 {
     HksKeySpec spec = {
         .algType = HKS_ALG_RSA,
@@ -352,7 +355,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_011, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_012
  * @tc.desc      : RSA Using HksCryptoHalVerify -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_012, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_012, Function | SmallTest | Level0)
 {
     uint8_t buff[HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_512)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
@@ -371,7 +374,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_012, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_013
  * @tc.desc      : DSA Using HksCryptoHalSign -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTest | Level0)
 {
     HksKeySpec spec = {
         .algType = HKS_ALG_DSA,
@@ -396,7 +399,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_014
  * @tc.desc      : DSA Using HksCryptoHalVerify -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTest | Level0)
 {
     uint8_t buff[HKS_KEY_BYTES(256)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
@@ -412,7 +415,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_015
  * @tc.desc      : ECDSA Using HksCryptoHalSign -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_015, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_015, Function | SmallTest | Level0)
 {
     uint8_t buff[HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_256)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
@@ -428,7 +431,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_015, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_016
  * @tc.desc      : ECDSA Using HksCryptoHalVerify -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_016, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_016, Function | SmallTest | Level0)
 {
     HksKeySpec spec = {
         .algType = HKS_ALG_ECC,
@@ -453,7 +456,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_016, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_017
  * @tc.desc      : Using HksCryptoHalAgreeKey -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_017, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_017, Function | SmallTest | Level0)
 {
     HksBlob key = { .size = 0, .data = nullptr };
     HksBlob pubKey = { .size = 0, .data = nullptr };
@@ -480,7 +483,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_017, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_018
  * @tc.desc      : ECDH Using HksCryptoHalAgreeKey -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_018, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_018, Function | SmallTest | Level0)
 {
     HksKeySpec keySpec = {
         .algType = HKS_ALG_ECC,
@@ -509,7 +512,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_018, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_019
  * @tc.desc      : DH Using HksCryptoHalAgreeKey -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_019, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_019, Function | SmallTest | Level0)
 {
     HksKeySpec keySpec = {
         .algType = HKS_ALG_DH,
@@ -539,7 +542,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_019, Function | SmallTes
  * @tc.name      : HksCryptoHalApiOpenssl_020
  * @tc.desc      : Using HksCryptoHalAgreeKey -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_020, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_020, Function | SmallTest | Level0)
 {
     HksBlob key = { .size = 0, .data = nullptr };
     HksBlob message = { .size = 0, .data = nullptr };
@@ -559,4 +562,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_020, Function | SmallTes
 
     EXPECT_EQ(HksCryptoHalHmac(&key, HKS_DIGEST_SHA512, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

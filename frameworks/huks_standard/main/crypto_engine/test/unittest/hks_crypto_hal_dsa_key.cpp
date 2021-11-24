@@ -22,7 +22,10 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
-namespace {
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 class HksCryptoHalDsaKey : public HksCryptoHalCommon, public testing::Test {};
 
 /**
@@ -30,7 +33,7 @@ class HksCryptoHalDsaKey : public HksCryptoHalCommon, public testing::Test {};
  * @tc.name      : HksCryptoHalDsaKey_001
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate DSA-256bit key.
  */
-HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_001, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -64,7 +67,7 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_001, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalDsaKey_002
  * @tc.desc      : Generate key and export public key with DSA.
  */
-HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_002, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -100,4 +103,7 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_002, Function | SmallTest | Leve
     HKS_FREE_BLOB(key);
     HKS_FREE_BLOB(keyOut);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

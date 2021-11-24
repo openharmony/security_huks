@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_OPENSSL_DH_TEST_MT_H
-#define HKS_OPENSSL_DH_TEST_MT_H
+#ifndef OPENSSL_DH_HELPER_H
+#define OPENSSL_DH_HELPER_H
 
 #include <stdbool.h>
 
@@ -32,7 +32,6 @@ extern "C" {
 
 #define DH_FAILED 1
 #define DH_SUCCESS 0
-#define DH_KEY_SIZE 2048
 
 int32_t DhGenerateKey(const int keyLen, struct HksBlob *key);
 

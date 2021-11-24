@@ -22,35 +22,79 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 namespace {
-class HksCryptoHalAesKey : public HksCryptoHalCommon, public testing::Test {};
+struct TestCaseParams {
+    HksKeySpec spec;
+
+    HksErrorCode generateKeyResult;
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_AES_KEY_001_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_AES,
+        .keyLen = HKS_AES_KEY_SIZE_128,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_AES_KEY_002_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_AES,
+        .keyLen = HKS_AES_KEY_SIZE_192,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_AES_KEY_003_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_AES,
+        .keyLen = HKS_AES_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+}  // namespace
+
+class HksCryptoHalAesKey : public HksCryptoHalCommon, public testing::Test {
+protected:
+    void RunTestCase(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+        ASSERT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+        if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
+            ASSERT_NE((uint32_t)0, key.size);
+            ASSERT_NE(nullptr, key.data);
+            HksFree(key.data);
+        }
+    }
+};
 
 /**
  * @tc.number    : HksCryptoHalAesKey_001
  * @tc.name      : HksCryptoHalAesKey_001
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate AES-128bit key.
  */
-HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_001, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_AES,
-        .keyLen = HKS_AES_KEY_SIZE_128,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_AES_KEY_001_PARAMS);
 }
 
 /**
@@ -58,27 +102,9 @@ HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_001, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalAesKey_002
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate AES-192bit key.
  */
-HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_002, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_AES,
-        .keyLen = HKS_AES_KEY_SIZE_192,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_AES_KEY_002_PARAMS);
 }
 
 /**
@@ -86,26 +112,11 @@ HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_002, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalAesKey_003
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate AES-256bit key.
  */
-HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_003, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalAesKey, HksCryptoHalAesKey_003, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_AES,
-        .keyLen = HKS_AES_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_AES_KEY_003_PARAMS);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

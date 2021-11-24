@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_openssl_dh_mt_test.h"
+#include "openssl_dh_helper.h"
 
 #include <openssl/dh.h>
 #include <openssl/evp.h>
@@ -64,8 +64,12 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
     offset += keyMaterial->priKeySize;
 
     key->size = rawMaterialLen;
-    key->data = rawMaterial;
+    if (memcpy_s(key->data, key->size, rawMaterial, rawMaterialLen) != 0) {
+        free(rawMaterial);
+        return DH_FAILED;
+    }
 
+    free(rawMaterial);
     return DH_SUCCESS;
 }
 
@@ -119,6 +123,12 @@ static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponen
     BIGNUM *privKey = BN_bin2bn(key->data + offset, keyMaterial->priKeySize, NULL);
 
     if (DH_set0_key(dh, pubKey, privKey) != 1) {
+        if (pubKey != NULL) {
+            BN_free(pubKey);
+        }
+        if (privKey != NULL) {
+            BN_free(privKey);
+        }
         DH_free(dh);
         return NULL;
     }
@@ -130,19 +140,20 @@ int32_t DhAgreeKey(
     const int keyLen, const struct HksBlob *nativeKey, const struct HksBlob *pubKey, struct HksBlob *sharedKey)
 {
     int32_t ret;
+
     if ((uint32_t)HKS_KEY_BYTES(keyLen) > sharedKey->size) {
+        return DH_FAILED;
+    }
+
+    DH *dh = InitDhStruct(nativeKey, true);
+    if (dh == NULL) {
         return DH_FAILED;
     }
 
     struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)pubKey->data;
     BIGNUM *pub = BN_bin2bn(pubKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize, NULL);
     if (pub == NULL) {
-        return DH_FAILED;
-    }
-
-    DH *dh = InitDhStruct(nativeKey, true);
-    if (dh == NULL) {
-        BN_free(pub);
+        DH_free(dh);
         return DH_FAILED;
     }
 
@@ -200,6 +211,7 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
 
     DH *dh = EVP_PKEY_get0_DH(pkey);
     if (dh == NULL) {
+        EVP_PKEY_free(pkey);
         return DH_FAILED;
     }
 
@@ -208,6 +220,7 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
 
     uint8_t *keyBuffer = HksMalloc(sizeof(struct KeyMaterialDh) + dhpubKeySize);
     if (keyBuffer == NULL) {
+        EVP_PKEY_free(pkey);
         return DH_FAILED;
     }
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)keyBuffer;
@@ -219,24 +232,22 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
 
     BN_bn2bin(pubKey, keyBuffer + sizeof(struct KeyMaterialDh));
 
-    publicKey->size = dhpubKeySize;
-    publicKey->data = keyBuffer;
+    publicKey->size = sizeof(struct KeyMaterialDh) + dhpubKeySize;
+    if (memcpy_s(publicKey->data, publicKey->size, keyBuffer, sizeof(struct KeyMaterialDh) + dhpubKeySize) != 0) {
+        EVP_PKEY_free(pkey);
+        free(keyBuffer);
+        return DH_FAILED;
+    }
 
-    SELF_FREE_PTR(pkey, EVP_PKEY_free);
+    free(keyBuffer);
+    EVP_PKEY_free(pkey);
     return DH_SUCCESS;
 }
 
 int32_t DhHksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
 {
-    struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)key->data;
-    BIGNUM *pub = BN_bin2bn(key->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize, NULL);
-    if (pub == NULL) {
-        return DH_FAILED;
-    }
-
     DH *dh = InitDhStruct(key, true);
     if (dh == NULL) {
-        BN_free(pub);
         return DH_FAILED;
     }
     EVP_PKEY *pkey = EVP_PKEY_new();
@@ -245,7 +256,7 @@ int32_t DhHksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
         return DH_FAILED;
     }
 
-    if (EVP_PKEY_assign_DH(pkey, dh) <= 0) {
+    if (EVP_PKEY_assign_DH(pkey, dh) != 1) {
         DH_free(dh);
         EVP_PKEY_free(pkey);
         return DH_FAILED;
@@ -254,6 +265,17 @@ int32_t DhHksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     uint8_t *tmp = NULL;
     int32_t length = i2d_PUBKEY(pkey, &tmp);
     x509Key->size = length;
-    x509Key->data = tmp;
+    if (tmp == NULL) {
+        EVP_PKEY_free(pkey);
+        return DH_FAILED;
+    }
+    if (memcpy_s(x509Key->data, x509Key->size, tmp, length) != 0) {
+        EVP_PKEY_free(pkey);
+        free(tmp);
+        return DH_FAILED;
+    }
+
+    EVP_PKEY_free(pkey);
+    free(tmp);
     return DH_SUCCESS;
 }
