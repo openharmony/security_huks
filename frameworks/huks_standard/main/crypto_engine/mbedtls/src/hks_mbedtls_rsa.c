@@ -246,7 +246,7 @@ static int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPri
 #endif /* HKS_SUPPORT_RSA_CRYPT or HKS_SUPPORT_RSA_SIGN_VERIFY */
 
 #ifdef HKS_SUPPORT_RSA_CRYPT
-int32_t HksToMbedtlsPadding(uint32_t hksPadding, int32_t *padding)
+static int32_t HksToMbedtlsPadding(uint32_t hksPadding, int32_t *padding)
 {
     switch (hksPadding) {
         case HKS_PADDING_PKCS1_V1_5:
@@ -325,7 +325,7 @@ int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec 
 #endif /* HKS_SUPPORT_RSA_CRYPT */
 
 #ifdef HKS_SUPPORT_RSA_SIGN_VERIFY
-int32_t HksToMbedtlsSignPadding(uint32_t hksPadding, int32_t *padding)
+static int32_t HksToMbedtlsSignPadding(uint32_t hksPadding, int32_t *padding)
 {
     switch (hksPadding) {
         case HKS_PADDING_PKCS1_V1_5:

@@ -22,55 +22,518 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 namespace {
-class HksCryptoHalEcdsaSign : public HksCryptoHalCommon, public testing::Test {};
+struct TestCaseParams {
+    HksKeySpec spec;
+    HksUsageSpec usageSpec;
+
+    HksErrorCode generateKeyResult;
+    HksErrorCode signResult;
+    HksErrorCode verifyResult;
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_002_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_003_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_004_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_NONE,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_005_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_006_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_007_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_008_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA1,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_009_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_010_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_011_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_012_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA224,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_013_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_014_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_015_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_016_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA256,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_017_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_018_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_019_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_020_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA384,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_021_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_022_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_023_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_024_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+    .usageSpec = {
+        .algType = HKS_ALG_ECC,
+        .mode = HKS_MODE_ECB,
+        .padding = HKS_PADDING_NONE,
+        .digest = HKS_DIGEST_SHA512,
+        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
+    },
+
+    .generateKeyResult = HKS_SUCCESS,
+    .signResult = HKS_SUCCESS,
+    .verifyResult = HKS_SUCCESS,
+};
+}  // namespace
+
+class HksCryptoHalEcdsaSign : public HksCryptoHalCommon, public testing::Test {
+protected:
+    void RunTestCase(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+
+        EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+
+        const char *hexData = "00112233445566778899aabbccddeeff";
+        uint32_t dataLen = strlen(hexData) / 2;
+
+        HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+        for (uint32_t ii = 0; ii < dataLen; ii++) {
+            message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+        }
+        struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
+
+        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, &message, &signature), testCaseParams.signResult);
+
+        struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
+
+        EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
+
+        EXPECT_EQ(
+            HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, &message, &signature), testCaseParams.verifyResult);
+
+        HksFree(message.data);
+        HksFree(signature.data);
+        HksFree(pubKey.data);
+        HksFree(key.data);
+    }
+};
 
 /**
  * @tc.number    : HksCryptoHalEcdsaSign_001
  * @tc.name      : HksCryptoHalEcdsaSign_001
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-224-NONE key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_001, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS);
 }
 
 /**
@@ -78,47 +541,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_001, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_002
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-NONE key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_002, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_002_PARAMS);
 }
 
 /**
@@ -126,47 +551,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_002, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_003
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-NONE key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_003, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_003, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_003_PARAMS);
 }
 
 /**
@@ -174,47 +561,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_003, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_004
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-NONE key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_004, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_004, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_NONE,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_004_PARAMS);
 }
 
 /**
@@ -222,47 +571,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_004, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_005
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-224-SHA1 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_005, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_005, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_005_PARAMS);
 }
 
 /**
@@ -270,47 +581,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_005, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_006
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-SHA1 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_006, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_006, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_006_PARAMS);
 }
 
 /**
@@ -318,47 +591,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_006, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_007
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-SHA1 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_007, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_007, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_007_PARAMS);
 }
 
 /**
@@ -366,47 +601,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_007, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_008
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-SHA1 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_008, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_008, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA1,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_008_PARAMS);
 }
 
 /**
@@ -414,47 +611,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_008, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_009
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-224-SHA224 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_009, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_009, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_009_PARAMS);
 }
 
 /**
@@ -462,47 +621,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_009, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_010
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-SHA224 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_010, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_010, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_010_PARAMS);
 }
 
 /**
@@ -510,47 +631,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_010, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_011
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-SHA224 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_011, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_011, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_011_PARAMS);
 }
 
 /**
@@ -558,47 +641,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_011, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_012
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-SHA224 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_012, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_012, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA224,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_012_PARAMS);
 }
 
 /**
@@ -606,47 +651,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_012, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_013
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-224-SHA256 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_013, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_013, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_013_PARAMS);
 }
 
 /**
@@ -654,47 +661,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_013, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_014
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-SHA256 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_014, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_014, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_014_PARAMS);
 }
 
 /**
@@ -702,47 +671,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_014, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_015
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-SHA256 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_015, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_015, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_015_PARAMS);
 }
 
 /**
@@ -750,47 +681,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_015, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_016
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-SHA256 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_016, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_016, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA256,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_016_PARAMS);
 }
 
 /**
@@ -798,47 +691,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_016, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_017
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-224-SHA384 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_017, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_017, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_017_PARAMS);
 }
 
 /**
@@ -846,47 +701,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_017, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_018
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-SHA384 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_018, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_018, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_018_PARAMS);
 }
 
 /**
@@ -894,47 +711,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_018, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_019
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-SHA384 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_019, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_019, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_019_PARAMS);
 }
 
 /**
@@ -942,47 +721,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_019, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_020
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-SHA384 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_020, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_020, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA384,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_020_PARAMS);
 }
 
 /**
@@ -990,47 +731,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_020, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_021
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-224-SHA512 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_021, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_021, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_021_PARAMS);
 }
 
 /**
@@ -1038,47 +741,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_021, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_022
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-SHA512 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_022, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_022, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_022_PARAMS);
 }
 
 /**
@@ -1086,47 +751,9 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_022, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_023
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-SHA512 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_023, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_023, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_023_PARAMS);
 }
 
 /**
@@ -1134,46 +761,11 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_023, Function | SmallTest 
  * @tc.name      : HksCryptoHalEcdsaSign_024
  * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-SHA512 key.
  */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_024, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_024, Function | SmallTest | Level0)
 {
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-
-    HksUsageSpec usageSpec = {
-        .algType = HKS_ALG_ECC,
-        .mode = HKS_MODE_ECB,
-        .padding = HKS_PADDING_NONE,
-        .digest = HKS_DIGEST_SHA512,
-        .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-    };
-
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-    struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
-
-    EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
-
-    EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
-
-    EXPECT_EQ(HksCryptoHalVerify(&pubKey, &usageSpec, &message, &signature), HKS_SUCCESS);
-
-    HksFree(message.data);
-    HksFree(signature.data);
-    HksFree(pubKey.data);
-    HksFree(key.data);
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_024_PARAMS);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

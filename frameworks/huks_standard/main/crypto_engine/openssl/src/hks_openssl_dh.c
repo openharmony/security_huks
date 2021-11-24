@@ -192,7 +192,7 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    if (HKS_KEY_BYTES(spec->keyLen) > DH_size(dh)) {
+    if (HKS_KEY_BYTES(spec->keyLen) > (uint32_t)DH_size(dh)) {
         ret = HKS_ERROR_INVALID_KEY_SIZE;
     } else {
         (void)memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(spec->keyLen));

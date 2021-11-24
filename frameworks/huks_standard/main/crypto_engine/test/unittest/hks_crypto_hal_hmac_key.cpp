@@ -22,7 +22,10 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
-namespace {
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 class HksCryptoHalHmacKey : public HksCryptoHalCommon, public testing::Test {};
 
 /**
@@ -30,7 +33,7 @@ class HksCryptoHalHmacKey : public HksCryptoHalCommon, public testing::Test {};
  * @tc.name      : HksCryptoHalHmacKey_001
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate HMAC-256bit key.
  */
-HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -52,4 +55,7 @@ HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Le
     ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
 #endif
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_openssl_hmac_mt_test.h"
+#include "openssl_hmac_helper.h"
 
 int32_t HmacGenerateKey(int key_len, struct HksBlob *key)
 {
@@ -24,7 +24,8 @@ int32_t HmacGenerateKey(int key_len, struct HksBlob *key)
         return HMAC_FAILED;
     }
 
-    if (RAND_bytes(tmpKey, keySizeByte) <= 0) {
+    if (RAND_bytes(tmpKey, keySizeByte) != 1) {
+        free(tmpKey);
         return HMAC_FAILED;
     }
 
