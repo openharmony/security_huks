@@ -77,11 +77,6 @@ int32_t HksTeeExportTrustCerts(struct HksBlob *certChain);
 
 int32_t HksTeeImportTrustCerts(const struct HksBlob *certChain);
 
-int32_t HksTeeExportDevPriKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *devPriKey);
-
-int32_t HksTeeDeleteTrustCerts(void);
-
 int32_t HcmTeeIsDeviceKeyExist(void);
 
 int32_t HksTeeProvision(const struct HksBlob *keybox, struct HksBlob *challenge,
