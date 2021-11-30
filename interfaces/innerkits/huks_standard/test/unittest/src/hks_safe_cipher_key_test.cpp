@@ -84,7 +84,7 @@ static int32_t CompareTwoKey(const struct HksBlob *keyAliasOne, const struct Hks
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, TestSize.Level1)
+HWTEST_F(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, TestSize.Level0)
 {
     struct HksBlob ed25519Alias = { strlen(g_testEd25519), (uint8_t *)g_testEd25519 };
     int32_t ret = TestGenerateEd25519Key(ed25519Alias);

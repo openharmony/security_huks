@@ -55,7 +55,7 @@ void HksCurve25519Test::TearDown()
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksCurve25519Test, HksCurve25519Test001, TestSize.Level1)
+HWTEST_F(HksCurve25519Test, HksCurve25519Test001, TestSize.Level0)
 {
     ASSERT_TRUE(TestCurve25519All() == 0);
 }
@@ -65,7 +65,7 @@ HWTEST_F(HksCurve25519Test, HksCurve25519Test001, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksCurve25519Test, HksCurve25519Test002, TestSize.Level1)
+HWTEST_F(HksCurve25519Test, HksCurve25519Test002, TestSize.Level0)
 {
     ASSERT_TRUE(TestEd25519SignTeeVerifyLocal() == 0);
 }
@@ -75,7 +75,7 @@ HWTEST_F(HksCurve25519Test, HksCurve25519Test002, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksCurve25519Test, HksCurve25519Test003, TestSize.Level1)
+HWTEST_F(HksCurve25519Test, HksCurve25519Test003, TestSize.Level0)
 {
     ASSERT_TRUE(TestCurve25519SignWrong() == 0);
 }
@@ -85,7 +85,7 @@ HWTEST_F(HksCurve25519Test, HksCurve25519Test003, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksCurve25519Test, HksCurve25519Test004, TestSize.Level1)
+HWTEST_F(HksCurve25519Test, HksCurve25519Test004, TestSize.Level0)
 {
     ASSERT_TRUE(TestCurve25519verifyWrong() == 0);
 }

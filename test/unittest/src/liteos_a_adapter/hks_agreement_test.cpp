@@ -98,7 +98,7 @@ static int32_t AgreeKey(const struct HksTestAgreeParamSet *agreeParamSetParams, 
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level1)
+HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level0)
 {
      /* 1. generate key */
     struct HksBlob *privateKey = NULL;
@@ -147,7 +147,7 @@ HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksAgreementTest, HksAgreementTest002, TestSize.Level1)
+HWTEST_F(HksAgreementTest, HksAgreementTest002, TestSize.Level0)
 {
      /* 1. generate key */
     struct HksBlob *privateKey = NULL;

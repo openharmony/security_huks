@@ -33,7 +33,7 @@ class HksInnerTest : public testing::Test {};
  * @tc.desc: CheckPurposeValid HMAC & DSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest001, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest001, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     ret = HksCheckGenKeyPurpose(HKS_ALG_HMAC, HKS_KEY_PURPOSE_MAC);
@@ -47,7 +47,7 @@ HWTEST_F(HksInnerTest, HksInnerTest001, Function | SmallTest | Level1)
  * @tc.desc: InitInputParamsByAlg HMAC & DSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest002, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest002, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     ret = HksGetInputParmasByAlg(HKS_ALG_HMAC, HKS_CHECK_TYPE_GEN_KEY, NULL, NULL);
@@ -59,7 +59,7 @@ HWTEST_F(HksInnerTest, HksInnerTest002, Function | SmallTest | Level1)
  * @tc.desc: GetExpectParams HMAC & DSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest003, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest003, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     ParamsValues values = {0, 0, 0, 0, 0};
@@ -72,7 +72,7 @@ HWTEST_F(HksInnerTest, HksInnerTest003, Function | SmallTest | Level1)
  * @tc.desc: CheckAesPadding CTR & ECB mode
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest004, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest004, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     ParamsValues values = {
@@ -92,7 +92,7 @@ HWTEST_F(HksInnerTest, HksInnerTest004, Function | SmallTest | Level1)
  * @tc.desc: CheckImportMutableParams CTR & ECB mode
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest005, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest005, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     ret = CheckImportMutableParams(HKS_ALG_AES, NULL);
@@ -122,7 +122,7 @@ HWTEST_F(HksInnerTest, HksInnerTest005, Function | SmallTest | Level1)
  * @tc.desc: CheckImportKeySize DSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest006, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest006, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
 
@@ -169,7 +169,7 @@ HWTEST_F(HksInnerTest, HksInnerTest006, Function | SmallTest | Level1)
  * @tc.desc: CheckImportKeySize DSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest007, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest007, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
 
@@ -218,7 +218,7 @@ HWTEST_F(HksInnerTest, HksInnerTest007, Function | SmallTest | Level1)
  * @tc.desc: HksLocalCheckCipherParams AES RSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest008, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest008, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
 
@@ -251,7 +251,7 @@ HWTEST_F(HksInnerTest, HksInnerTest008, Function | SmallTest | Level1)
  * @tc.desc: HksGetDigestLen sha1 sha224 digest
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest009, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest009, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     uint32_t len;
@@ -264,7 +264,7 @@ HWTEST_F(HksInnerTest, HksInnerTest009, Function | SmallTest | Level1)
  * @tc.desc: HksFormatKeyFromMaterial AES RSA HMAC DSA ECC algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest010, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest010, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     uint32_t len;
@@ -281,7 +281,7 @@ HWTEST_F(HksInnerTest, HksInnerTest010, Function | SmallTest | Level1)
  * @tc.desc: HksFormatKeyFromMaterial AES RSA HMAC DSA ECC algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest011, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest011, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
     uint32_t len;
@@ -298,7 +298,7 @@ HWTEST_F(HksInnerTest, HksInnerTest011, Function | SmallTest | Level1)
  * @tc.desc: CheckLocalGenerateKeyParams function
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest012, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest012, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
 
@@ -343,7 +343,7 @@ HWTEST_F(HksInnerTest, HksInnerTest012, Function | SmallTest | Level1)
  * @tc.desc: CheckLocalCipherParams AES RSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest013, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest013, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
 
@@ -381,7 +381,7 @@ HWTEST_F(HksInnerTest, HksInnerTest013, Function | SmallTest | Level1)
  * @tc.desc: TranslateToX509PublicKey and TranslateFromX509PublicKey DSA algrithom
  * @tc.type: FUNC
  */
-HWTEST_F(HksInnerTest, HksInnerTest014, Function | SmallTest | Level1)
+HWTEST_F(HksInnerTest, HksInnerTest014, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
 

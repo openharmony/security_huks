@@ -55,7 +55,7 @@ void HksAesTest::TearDown()
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksAesTest, HksAesTest001, TestSize.Level1)
+HWTEST_F(HksAesTest, HksAesTest001, TestSize.Level0)
 {
     ASSERT_TRUE(TestAes256ByAgree() == 0);
 }
@@ -65,7 +65,7 @@ HWTEST_F(HksAesTest, HksAesTest001, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksAesTest, HksAesTest002, TestSize.Level1)
+HWTEST_F(HksAesTest, HksAesTest002, TestSize.Level0)
 {
     ASSERT_TRUE(TestAes256ByAgree1() == 0);
 }
@@ -75,7 +75,7 @@ HWTEST_F(HksAesTest, HksAesTest002, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksAesTest, HksAesTest003, TestSize.Level1)
+HWTEST_F(HksAesTest, HksAesTest003, TestSize.Level0)
 {
     ASSERT_TRUE(TestAes256ByAgree2() == 0);
 }
