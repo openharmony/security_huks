@@ -181,7 +181,7 @@ static int32_t BaseTestMac(uint32_t index)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksMacTest, HksMacTest001, TestSize.Level1)
+HWTEST_F(HksMacTest, HksMacTest001, TestSize.Level0)
 {
     int32_t ret = BaseTestMac(0);
     ASSERT_TRUE(ret == 0);
@@ -192,7 +192,7 @@ HWTEST_F(HksMacTest, HksMacTest001, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksMacTest, HksMacTest002, TestSize.Level1)
+HWTEST_F(HksMacTest, HksMacTest002, TestSize.Level0)
 {
     int32_t ret = BaseTestMac(1);
     ASSERT_TRUE(ret == 0);

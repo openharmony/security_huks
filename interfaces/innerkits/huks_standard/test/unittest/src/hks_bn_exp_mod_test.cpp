@@ -95,7 +95,7 @@ static int32_t TestValue()
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksBnExpModTest, HksBnExpModTest001, TestSize.Level1)
+HWTEST_F(HksBnExpModTest, HksBnExpModTest001, TestSize.Level0)
 {
     int32_t ret;
     if (g_testBnExpModParams[0].isTestValue) {

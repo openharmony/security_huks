@@ -76,7 +76,7 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level1)
+HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level0)
 {
     uint32_t times = 1;
     uint32_t index = 0;

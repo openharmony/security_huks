@@ -57,7 +57,7 @@ void HksOthersTest::TearDown()
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level0)
 {
     int32_t ret = HksGetKeyParamSet(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
@@ -68,7 +68,7 @@ HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level0)
 {
     int32_t ret = HksGetKeyInfoList(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
@@ -79,7 +79,7 @@ HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest003, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest003, TestSize.Level0)
 {
     int32_t ret = HksAttestKey(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
@@ -90,7 +90,7 @@ HWTEST_F(HksOthersTest, HksOthersTest003, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest004, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest004, TestSize.Level0)
 {
     int32_t ret = HksGetCertificateChain(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
@@ -101,7 +101,7 @@ HWTEST_F(HksOthersTest, HksOthersTest004, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest005, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest005, TestSize.Level0)
 {
     int32_t ret = HksWrapKey(NULL, NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
@@ -112,7 +112,7 @@ HWTEST_F(HksOthersTest, HksOthersTest005, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest006, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest006, TestSize.Level0)
 {
     int32_t ret = HksUnwrapKey(NULL, NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
@@ -123,7 +123,7 @@ HWTEST_F(HksOthersTest, HksOthersTest006, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest007, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest007, TestSize.Level0)
 {
     int32_t ret = HksGetSdkVersion(NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
@@ -134,7 +134,7 @@ HWTEST_F(HksOthersTest, HksOthersTest007, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksOthersTest, HksOthersTest008, TestSize.Level1)
+HWTEST_F(HksOthersTest, HksOthersTest008, TestSize.Level0)
 {
     int32_t ret = HksInitialize();
     ASSERT_TRUE(ret == HKS_SUCCESS);
