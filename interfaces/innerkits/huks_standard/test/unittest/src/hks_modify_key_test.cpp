@@ -302,7 +302,7 @@ int32_t BaseTestCipher(struct HksBlob *keyAlias, uint32_t index)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level1)
+HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
 {
     uint32_t index = 0;
     struct HksBlob keyAlias = { strlen(g_testName), (uint8_t *)g_testName };

@@ -63,7 +63,7 @@ static const struct HksTestKeyExistParams g_testKeyExistParams[] = {
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksDeleteTest, HksDeleteTest001, TestSize.Level1)
+HWTEST_F(HksDeleteTest, HksDeleteTest001, TestSize.Level0)
 {
     int32_t ret;
     struct HksBlob *keyAlias = NULL;

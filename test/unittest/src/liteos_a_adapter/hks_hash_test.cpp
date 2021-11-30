@@ -73,7 +73,7 @@ const struct HksTestHashParams g_testHashParams[] = {
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksHashTest, HksHashTest001, TestSize.Level1)
+HWTEST_F(HksHashTest, HksHashTest001, TestSize.Level0)
 {
     struct HksParamSet *paramSet = NULL;
     struct HksBlob *srcData = NULL;
