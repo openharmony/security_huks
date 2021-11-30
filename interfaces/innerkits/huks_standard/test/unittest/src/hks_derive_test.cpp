@@ -201,7 +201,7 @@ static int32_t BaseTestDerive(uint32_t index)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksDeriveTest, HksDeriveTest001, TestSize.Level1)
+HWTEST_F(HksDeriveTest, HksDeriveTest001, TestSize.Level0)
 {
     int32_t ret = BaseTestDerive(0);
     ASSERT_TRUE(ret == 0);
@@ -212,7 +212,7 @@ HWTEST_F(HksDeriveTest, HksDeriveTest001, TestSize.Level1)
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksDeriveTest, HksDeriveTest002, TestSize.Level1)
+HWTEST_F(HksDeriveTest, HksDeriveTest002, TestSize.Level0)
 {
     int32_t ret = BaseTestDerive(1);
     ASSERT_TRUE(ret == 0);

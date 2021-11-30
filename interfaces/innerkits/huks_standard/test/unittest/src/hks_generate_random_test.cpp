@@ -62,7 +62,7 @@ static const struct HksTestGenRandomParams g_testGenRandomParams[] = {
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest001, TestSize.Level1)
+HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest001, TestSize.Level0)
 {
     int32_t ret;
     struct HksBlob *random = NULL;

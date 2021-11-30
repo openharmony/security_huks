@@ -143,7 +143,7 @@ static int32_t CompareKeyData(struct HksBlob *keyAliasOne, struct HksBlob *keyAl
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
  */
-HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level1)
+HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level0)
 {
     struct HksBlob keyAliasOne = { strlen(g_testOne), (uint8_t *)g_testOne };
     int32_t ret = SafeTestGenerateKey(&keyAliasOne);
