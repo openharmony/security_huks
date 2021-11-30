@@ -691,44 +691,6 @@ int32_t HksTeeImportTrustCerts(const struct HksBlob *certChain)
     return ret;
 }
 
-#ifdef HKS_SUPPORT_API_EXPORT_DEVICE_PRI_KEY_MOD
-int32_t HksTeeExportDevPriKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *devPriKey)
-{
-    uint32_t paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT, TEEC_MEMREF_TEMP_INPUT,
-        TEEC_MEMREF_TEMP_OUTPUT, TEEC_NONE);
-    struct HksParam params[MAX_TEE_PARAMS_NUMS];
-
-    InitializeBlob(&params[0].blob, key->size, key->data);
-    InitializeBlob(&params[1].blob, paramSet->paramSetSize, (uint8_t *)paramSet);
-    InitializeBlob(&params[2].blob, devPriKey->size, devPriKey->data); /* 2 is array index */
-
-    TEEC_Operation operation;
-    int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_EXPORT_DEV_PRIVATE_KEY, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invoke HKS_CMD_ID_EXPORT_DEV_PRIVATE_KEY failed");
-        return ret;
-    }
-    devPriKey->size = operation.params[2].tmpref.size; /* 2 is array index */
-    return ret;
-}
-#endif
-
-#ifdef HKS_SUPPORT_API_DELETE_DEVICE_CERTS_MOD
-int32_t HksTeeDeleteTrustCerts(void)
-{
-    uint32_t paramTypes = TEEC_PARAM_TYPES(TEEC_NONE, TEEC_NONE, TEEC_NONE, TEEC_NONE);
-    struct HksParam params[MAX_TEE_PARAMS_NUMS] = {0};
-
-    TEEC_Operation operation;
-    int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_DELETE_TRUST_CERT, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invoke HKS_CMD_ID_DELETE_TRUST_CERT failed");
-    }
-    return ret;
-}
-#endif
-
 int32_t HcmTeeIsDeviceKeyExist(void)
 {
     HKS_LOG_D("enter");
