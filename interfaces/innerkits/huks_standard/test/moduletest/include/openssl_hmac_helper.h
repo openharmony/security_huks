@@ -13,38 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef HKS_OPENSSL_DSA_SIGN_TEST_MT_H
-#define HKS_OPENSSL_DSA_SIGN_TEST_MT_H
+#ifndef OPENSSL_HMAC_HELPER_H
+#define OPENSSL_HMAC_HELPER_H
+
+#include <stdbool.h>
 
 #include <securec.h>
 
 #include <openssl/evp.h>
-#include <openssl/dsa.h>
+#include <openssl/hmac.h>
+#include <openssl/rand.h>
 
 #include "hks_type.h"
-#include "hks_param.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #define BIT_NUM_OF_UINT8 8
-#define DSA_FAILED 1
-#define DSA_SUCCESS 0
+#define HMAC_KEY_SIZE 512
+#define HMAC_MESSAGE_SIZE 64
+#define HMAC_FAILED 1
+#define HMAC_SUCCESS 0
+#define OUT_PARAMSET_SIZE 2048
 
-EVP_PKEY *GenerateDsaKey(const uint32_t keySize);
+int32_t HmacGenerateKey(int key_len, struct HksBlob *key);
 
-void DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key);
-
-int32_t OpensslSignDsa(
-    const struct HksBlob *plainText, struct HksBlob *signData, struct HksBlob *key, enum HksKeyDigest digestType);
-
-int32_t OpensslVerifyDsa(
-    const struct HksBlob *plainText, struct HksBlob *signData, struct HksBlob *key, enum HksKeyDigest digestType);
-
-int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey);
-
-int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key);
+int32_t HmacHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac);
 
 #ifdef __cplusplus
 #if __cplusplus

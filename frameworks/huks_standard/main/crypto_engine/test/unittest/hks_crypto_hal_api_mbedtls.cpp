@@ -22,7 +22,10 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
-namespace {
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 class HksCryptoHalApiMbedtls : public HksCryptoHalCommon, public testing::Test {};
 
 /**
@@ -30,7 +33,7 @@ class HksCryptoHalApiMbedtls : public HksCryptoHalCommon, public testing::Test {
  * @tc.name      : HksCryptoHalApiMbedtls_001
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate key -- key is NULL.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_001, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -49,7 +52,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_001, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_002
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate key -- algType is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_002, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -70,7 +73,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_002, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_003
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate key -- algType is AES keyLen is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_003, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_003, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -91,7 +94,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_003, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_004
  * @tc.desc      : Using HksCryptoHalEncrypt -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_004, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_004, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -126,7 +129,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_004, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_005
  * @tc.desc      : Using HksCryptoHalDecrypt -- parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_005, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_005, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -160,7 +163,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_005, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_006
  * @tc.desc      : Using HksCryptoHalEncrypt -- AES encrypt parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_006, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_006, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -184,7 +187,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_006, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_007
  * @tc.desc      : Using HksCryptoHalDecrypt -- AES decrypt parameter is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_007, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_007, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -207,7 +210,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_007, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_008
  * @tc.desc      : Using HksCryptoHalDecrypt -- AES decrypt padding is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_008, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_008, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -230,7 +233,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_008, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_009
  * @tc.desc      : Using HksCryptoHalDecrypt -- AES decrypt CBC mode nopadding with large iv.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_009, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_009, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -252,7 +255,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_009, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_010
  * @tc.desc      : Using HksCryptoHalDecrypt -- RSA decrypt key is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_010, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_010, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -297,7 +300,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_010, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_011
  * @tc.desc      : Using HksMbedtlsGetRsaPubKey -- RSA in/out key is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_011, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_011, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -331,7 +334,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_011, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_012
  * @tc.desc      : Using HksMbedtlsEccGenerateKey -- key size is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_012, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_012, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -351,7 +354,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_012, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_013
  * @tc.desc      : Using HksMbedtlsGetEccPubKey -- Ecc in/out key is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_013, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_013, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -395,7 +398,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_013, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_014
  * @tc.desc      : Using HksMbedtlsDhGenerateKey -- key size is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_014, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_014, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -415,7 +418,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_014, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_015
  * @tc.desc      : Using HksMbedtlsGetDhPubKey -- Ecc in/out key is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_015, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_015, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -448,7 +451,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_015, Function | SmallTes
  * @tc.name      : HksCryptoHalApiMbedtls_016
  * @tc.desc      : Using HksMbedtlsDhAgreeKey -- Ecc in/out key is invalid.
  */
-HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_016, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_016, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -477,4 +480,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_016, Function | SmallTes
     HKS_FREE_BLOB(key);
 }
 #endif
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

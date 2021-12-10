@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_openssl_ecc_mt_test.h"
+#include "openssl_ecc_helper.h"
 
 #include <openssl/ec.h>
 #include <openssl/evp.h>
@@ -105,29 +105,38 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keyLen, u
         return ECC_FAILED;
     }
 
-    const EC_GROUP *ecGroup = EC_KEY_get0_group(eccKey);
-    if (ecGroup == NULL) {
-        return ECC_FAILED;
-    }
+    int32_t result = ECC_FAILED;
+    do {
+        const EC_GROUP *ecGroup = EC_KEY_get0_group(eccKey);
+        if (ecGroup == NULL) {
+            break;
+        }
 
-    if (EC_POINT_get_affine_coordinates_GFp(ecGroup, EC_KEY_get0_public_key(eccKey), pubX, pubY, NULL) <= 0) {
-        return ECC_FAILED;
-    }
+        if (EC_POINT_get_affine_coordinates_GFp(ecGroup, EC_KEY_get0_public_key(eccKey), pubX, pubY, NULL) != 1) {
+            break;
+        }
 
-    const BIGNUM *priv = EC_KEY_get0_private_key(eccKey);
-    if (priv == NULL) {
-        return ECC_FAILED;
-    }
+        const BIGNUM *priv = EC_KEY_get0_private_key(eccKey);
+        if (priv == NULL) {
+            break;
+        }
 
-    if (TransEccKeyToKeyBlob(keyMaterial, pubX, pubY, priv, rawMaterial) == ECC_FAILED) {
-        return ECC_FAILED;
-    }
+        if (TransEccKeyToKeyBlob(keyMaterial, pubX, pubY, priv, rawMaterial) == ECC_FAILED) {
+            break;
+        }
 
-    *output = rawMaterial;
-    *outputSize = rawMaterialLen;
+        *outputSize = rawMaterialLen;
+
+        if (memcpy_s(*output, *outputSize, rawMaterial, rawMaterialLen) != 0) {
+            break;
+        }
+
+        result = ECC_SUCCESS;
+    } while (0);
 
     BN_free(pubX);
     BN_free(pubY);
+    free(rawMaterial);
     return ECC_SUCCESS;
 }
 
@@ -144,10 +153,12 @@ int32_t ECCGenerateKey(const int keyLen, struct HksBlob *key)
     }
 
     if (EC_KEY_generate_key(eccKey) <= 0) {
+        EC_KEY_free(eccKey);
         return ECC_FAILED;
     }
 
     if (EccSaveKeyMaterial(eccKey, keyLen, &key->data, &key->size) != ECC_SUCCESS) {
+        EC_KEY_free(eccKey);
         return ECC_FAILED;
     }
 
@@ -242,7 +253,11 @@ static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool sign)
 
     if (sign) {
         BIGNUM *pri = BN_bin2bn(keyPair + sizeof(struct KeyMaterialEcc) + publicXSize + publicYSize, privateSize, NULL);
-        if (pri == NULL || EC_KEY_set_private_key(eccKey, pri) <= 0) {
+        if (pri == NULL) {
+            EC_KEY_free(eccKey);
+            return NULL;
+        }
+        if (EC_KEY_set_private_key(eccKey, pri) != 1) {
             BN_free(pri);
             EC_KEY_free(eccKey);
             return NULL;
@@ -268,7 +283,7 @@ static EVP_MD_CTX *InitEccMdCtx(const struct HksBlob *mainKey, uint32_t digest, 
         return NULL;
     }
 
-    if (EVP_PKEY_assign_EC_KEY(key, eccKey) <= 0) {
+    if (EVP_PKEY_assign_EC_KEY(key, eccKey) != 1) {
         EC_KEY_free(eccKey);
         EVP_PKEY_free(key);
         return NULL;
@@ -283,14 +298,14 @@ static EVP_MD_CTX *InitEccMdCtx(const struct HksBlob *mainKey, uint32_t digest, 
     if (sign) {
         int32_t ret = EVP_DigestSignInit(ctx, NULL, md, NULL, key);
         EVP_PKEY_free(key);
-        if (ret <= 0) {
+        if (ret != 1) {
             EVP_MD_CTX_free(ctx);
             return NULL;
         }
     } else {
         int ret = EVP_DigestVerifyInit(ctx, NULL, md, NULL, key);
         EVP_PKEY_free(key);
-        if (ret <= 0) {
+        if (ret != 1) {
             EVP_MD_CTX_free(ctx);
             return NULL;
         }
@@ -305,18 +320,18 @@ int32_t EcdsaSign(const struct HksBlob *key, int digest, const struct HksBlob *m
         return ECC_FAILED;
     }
 
-    if (EVP_DigestSignUpdate(ctx, message->data, message->size) <= 0) {
+    if (EVP_DigestSignUpdate(ctx, message->data, message->size) != 1) {
         EVP_MD_CTX_free(ctx);
         return ECC_FAILED;
     }
     size_t req = 0;
 
-    if (EVP_DigestSignFinal(ctx, NULL, &req) <= 0) {
+    if (EVP_DigestSignFinal(ctx, NULL, &req) != 1) {
         EVP_MD_CTX_free(ctx);
         return ECC_FAILED;
     }
 
-    if (EVP_DigestSignFinal(ctx, signature->data, &req) <= 0) {
+    if (EVP_DigestSignFinal(ctx, signature->data, &req) != 1) {
         EVP_MD_CTX_free(ctx);
         return ECC_FAILED;
     }
@@ -334,12 +349,12 @@ int32_t EcdsaVerify(
         return ECC_FAILED;
     }
 
-    if (EVP_DigestVerifyUpdate(ctx, message->data, message->size) <= 0) {
+    if (EVP_DigestVerifyUpdate(ctx, message->data, message->size) != 1) {
         EVP_MD_CTX_free(ctx);
         return ECC_FAILED;
     }
 
-    if (EVP_DigestVerifyFinal(ctx, signature->data, signature->size) <= 0) {
+    if (EVP_DigestVerifyFinal(ctx, signature->data, signature->size) != 1) {
         EVP_MD_CTX_free(ctx);
         return ECC_FAILED;
     }
@@ -412,8 +427,12 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
         }
 
         ret = ECC_SUCCESS;
-        eccPublicKey->data = keyBuffer;
         eccPublicKey->size = totalSize;
+        if (memcpy_s(eccPublicKey->data, eccPublicKey->size, keyBuffer, totalSize) != 0) {
+            HKS_FREE_PTR(keyBuffer);
+            break;
+        }
+        HKS_FREE_PTR(keyBuffer);
     } while (0);
 
     SELF_FREE_PTR(x, BN_free);
@@ -436,14 +455,16 @@ int32_t X509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey)
 
     EC_KEY *ecKey = EVP_PKEY_get0_EC_KEY(pkey);
     if (ecKey == NULL) {
+        EVP_PKEY_free(pkey);
         return ECC_FAILED;
     }
 
     if (EcKeyToPublicKey(ecKey, publicKey) != ECC_SUCCESS) {
+        EVP_PKEY_free(pkey);
         return ECC_FAILED;
     };
 
-    SELF_FREE_PTR(pkey, EVP_PKEY_free);
+    EVP_PKEY_free(pkey);
     return ECC_SUCCESS;
 }
 
@@ -489,7 +510,19 @@ int32_t HksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     uint8_t *tmp = NULL;
     int32_t length = i2d_PUBKEY(pkey, &tmp);
     x509Key->size = length;
-    x509Key->data = tmp;
+    if (tmp == NULL) {
+        EVP_PKEY_free(pkey);
+        return ECC_FAILED;
+    }
+
+    if (memcpy_s(x509Key->data, x509Key->size, tmp, length) != 0) {
+        EVP_PKEY_free(pkey);
+        free(tmp);
+        return ECC_FAILED;
+    }
+
+    EVP_PKEY_free(pkey);
+    free(tmp);
     return ECC_SUCCESS;
 }
 
@@ -582,7 +615,9 @@ int32_t EcdhAgreeKey(
         ret = ECC_SUCCESS;
     } while (0);
 
-    EVP_PKEY_CTX_free(ctx);
+    if (ctx != NULL) {
+        EVP_PKEY_CTX_free(ctx);
+    }
     if (peerKey != NULL) {
         EVP_PKEY_free(peerKey);
     }

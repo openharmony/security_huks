@@ -45,7 +45,7 @@ static BOOL MessageHandle(Service *service, Request *request)
 static TaskConfig GetTaskConfig(Service *service)
 {
     (void)service;
-    TaskConfig config = {LEVEL_HIGH, PRI_NORMAL, STACK_SIZE, QUEUE_SIZE, SINGLE_TASK};
+    TaskConfig config = { LEVEL_HIGH, PRI_NORMAL, STACK_SIZE, QUEUE_SIZE, SINGLE_TASK };
     return config;
 }
 
@@ -54,7 +54,7 @@ static HksMgrService g_hksMgrService = {
     .Initialize = Initialize,
     .MessageHandle = MessageHandle,
     .GetTaskConfig = GetTaskConfig,
-    .identity = {-1, -1, NULL}
+    .identity = { -1, -1, NULL }
 };
 
 static void Init(void)

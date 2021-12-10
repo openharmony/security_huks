@@ -55,6 +55,7 @@ static DSA *InitDsaStruct(const struct HksBlob *key, const bool needPrivateExpon
     BIGNUM *x = NULL;
     if (needPrivateExponent == true) {
         if (keyMaterial->xSize == 0) {
+            DSA_free(dsa);
             return NULL;
         } else {
             (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->xSize);
@@ -199,7 +200,7 @@ static int32_t DsaSaveKeyMaterial(const DSA *dsa, const uint32_t keySize, uint8_
 int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
     int32_t ret;
-    if (spec->keyLen % HKS_BITS_PER_BYTE != 0) {
+    if ((spec->keyLen == 0) || (spec->keyLen % HKS_BITS_PER_BYTE != 0)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

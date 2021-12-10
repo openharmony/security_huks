@@ -80,6 +80,9 @@ static int32_t EncryptCheckParam(const struct HksBlob *key, const struct HksUsag
 int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg,
     struct HksBlob *mac)
 {
+    if (CheckBlob(key) != HKS_SUCCESS || CheckBlob(msg) != HKS_SUCCESS || CheckBlob(mac) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 #ifdef HKS_SUPPORT_HMAC_C
     return HksMbedtlsHmac(key, digestAlg, msg, mac);
 #else
@@ -235,6 +238,10 @@ int32_t HksCryptoHalDeriveKey(const struct HksBlob *mainKey,
 int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
+    if (CheckBlob(nativeKey) != HKS_SUCCESS || CheckBlob(pubKey) != HKS_SUCCESS || spec == NULL ||
+        CheckBlob(sharedKey) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     switch (spec->algType) {
 #if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECDH_C) && defined(HKS_SUPPORT_ECDH_AGREE_KEY)
         case HKS_ALG_ECDH:
@@ -261,6 +268,10 @@ int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
+    if (CheckBlob(key) != HKS_SUCCESS || usageSpec == NULL || CheckBlob(message) != HKS_SUCCESS ||
+        CheckBlob(signature) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     switch (usageSpec->algType) {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
         case HKS_ALG_RSA:
@@ -283,6 +294,10 @@ int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *u
 int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
+    if (CheckBlob(key) != HKS_SUCCESS || usageSpec == NULL || CheckBlob(message) != HKS_SUCCESS ||
+        CheckBlob(signature) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     switch (usageSpec->algType) {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
         case HKS_ALG_RSA:

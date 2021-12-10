@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_OPENSSL_ECC_TEST_MT_H
-#define HKS_OPENSSL_ECC_TEST_MT_H
+#ifndef OPENSSL_ECC_HELPER_H
+#define OPENSSL_ECC_HELPER_H
 
 #include <stdbool.h>
 

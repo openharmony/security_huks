@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_OPENSSL_RSA_TEST_MT_H
-#define HKS_OPENSSL_RSA_TEST_MT_H
+#ifndef OPENSSL_AES_HELPER_H
+#define OPENSSL_AES_HELPER_H
 
 #include <securec.h>
 
@@ -28,24 +28,23 @@ extern "C" {
 #endif
 
 #define AAD_SIZE 16
-#define AES_FAILED ((uint32_t)1)
-#define AES_SUCCESS ((uint32_t)0)
 #define COMPLEMENT_LEN 16
 #define IV_SIZE 16
 #define OUT_PARAMSET_SIZE 2048
+#define AUTHID_KEY_SIZE 256
 
 int32_t GenerateAesKey(const int key_len, struct HksBlob *randomKey);
 
-uint32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey);
 
-uint32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey);
 
-uint32_t AesGCMEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesGCMEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey, const struct HksBlob *tagAead);
 
-uint32_t AesGCMDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesGCMDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey, const struct HksBlob *tagDec);
 
 #ifdef __cplusplus

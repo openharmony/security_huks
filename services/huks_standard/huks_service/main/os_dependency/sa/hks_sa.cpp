@@ -251,6 +251,6 @@ void HksService::OnStop()
     runningState_ = STATE_NOT_START;
     registerToService_ = false;
 }
-} // UniversalKeystore
+} // Hks
 } // Security
 } // OHOS

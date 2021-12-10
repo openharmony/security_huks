@@ -331,7 +331,7 @@ static int32_t GetRsaSignPadding(uint32_t padding, uint32_t *rsaPadding)
     }
 }
 
-static EVP_MD_CTX *InitRSAMdCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
+static EVP_MD_CTX *InitRsaMdCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
 {
     int32_t ret = HKS_FAILURE;
     uint32_t opensslPadding = 0;
@@ -397,7 +397,7 @@ static EVP_MD_CTX *InitRSAMdCtx(const struct HksBlob *key, const struct HksUsage
 int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    EVP_MD_CTX *ctx = InitRSAMdCtx(key, usageSpec, true);
+    EVP_MD_CTX *ctx = InitRsaMdCtx(key, usageSpec, true);
     if (ctx == NULL) {
         HKS_LOG_E("initialize rsa md context failed");
         return HKS_ERROR_INVALID_KEY_INFO;
@@ -437,7 +437,7 @@ int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
 int32_t HksOpensslRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    EVP_MD_CTX *ctx = InitRSAMdCtx(key, usageSpec, false);
+    EVP_MD_CTX *ctx = InitRsaMdCtx(key, usageSpec, false);
     if (ctx == NULL) {
         HKS_LOG_E("initialize rsa md context failed");
         return HKS_ERROR_INVALID_KEY_INFO;

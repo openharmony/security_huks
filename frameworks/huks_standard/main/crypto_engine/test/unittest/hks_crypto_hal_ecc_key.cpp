@@ -22,35 +22,92 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 namespace {
-class HksCryptoHalEccKey : public HksCryptoHalCommon, public testing::Test {};
+struct TestCaseParams {
+    HksKeySpec spec;
+
+    HksErrorCode generateKeyResult;
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_224,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_002_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_256,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_003_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_384,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_004_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_ECC,
+        .keyLen = HKS_ECC_KEY_SIZE_521,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+}  // namespace
+
+class HksCryptoHalEccKey : public HksCryptoHalCommon, public testing::Test {
+protected:
+    void RunTestCase(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+        ASSERT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+        if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
+            ASSERT_NE((uint32_t)0, key.size);
+            ASSERT_NE(nullptr, key.data);
+            HksFree(key.data);
+        }
+    }
+};
 
 /**
  * @tc.number    : HksCryptoHalEccKey_001
  * @tc.name      : HksCryptoHalEccKey_001
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate ECC-224bit key.
  */
-HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_001, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_224,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS);
 }
 
 /**
@@ -58,27 +115,9 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_001, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalEccKey_002
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate ECC-256bit key.
  */
-HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_002, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_256,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_ECC_KEY_002_PARAMS);
 }
 
 /**
@@ -86,27 +125,9 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_002, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalEccKey_003
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate ECC-384bit key.
  */
-HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_003, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_003, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_384,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_ECC_KEY_003_PARAMS);
 }
 
 /**
@@ -114,27 +135,9 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_003, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalEccKey_004
  * @tc.desc      : Using HksCryptoHalGenerateKey Generate ECC-521bit key.
  */
-HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_004, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_004, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_ECC,
-        .keyLen = HKS_ECC_KEY_SIZE_521,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_ECC_KEY_004_PARAMS);
 }
 
 /**
@@ -142,7 +145,7 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_004, Function | SmallTest | Leve
  * @tc.name      : HksCryptoHalEccKey_005
  * @tc.desc      : Generate key and export public key with ECC.
  */
-HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_005, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_005, Function | SmallTest | Level0)
 {
     int32_t ret;
 
@@ -166,4 +169,7 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_005, Function | SmallTest | Leve
     HKS_FREE_BLOB(key);
     HKS_FREE_BLOB(keyOut);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

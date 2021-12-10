@@ -30,7 +30,7 @@ static HksMgrFeature g_hksMgrFeature = {
     SERVER_IPROXY_IMPL_BEGIN,
     .Invoke = Invoke,
     IPROXY_END,
-    .identity = {-1, -1, NULL},
+    .identity = { -1, -1, NULL },
 };
 static const char *FEATURE_GetName(Feature *feature)
 {
