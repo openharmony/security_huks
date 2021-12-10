@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
-#ifdef HKS_SUPPORT_DH_C
 #include <gtest/gtest.h>
 #include <iostream>
 
@@ -22,27 +21,54 @@
 #include "hks_crypto_hal_common.h"
 #include "hks_config.h"
 
+#ifdef HKS_SUPPORT_DH_C
+
 using namespace testing::ext;
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 namespace {
-class HksCryptoHalDh : public HksCryptoHalCommon, public testing::Test {};
+struct TestCaseParams {
+    HksKeySpec spec;
+
+    HksErrorCode generateKeyResult;
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_DH_001_PARAMS = {
+    .spec = { .algType = HKS_ALG_DH, .keyLen = HKS_DH_KEY_SIZE_2048, },
+    .generateKeyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_DH_002_PARAMS = {
+    .spec = { .algType = HKS_ALG_DH, .keyLen = HKS_DH_KEY_SIZE_3072, },
+    .generateKeyResult = HKS_SUCCESS,
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_DH_003_PARAMS = {
+    .spec = { .algType = HKS_ALG_DH, .keyLen = HKS_DH_KEY_SIZE_4096, },
+    .generateKeyResult = HKS_SUCCESS,
+};
+}  // namespace
+
+class HksCryptoHalDh : public HksCryptoHalCommon, public testing::Test {
+protected:
+    void RunTestCase(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { 0, NULL };
+        EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+        HKS_FREE_BLOB(key);
+    }
+};
 
 /**
  * @tc.number    : HksCryptoHalDh_001
  * @tc.name      : HksCryptoHalDh_001
  * @tc.desc      : Generate Dh-2048 key pair
  */
-HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_001, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_001, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = { .algType = HKS_ALG_DH, .keyLen = HKS_DH_KEY_SIZE_2048 };
-
-    HksBlob key = { 0, NULL };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-
-    HKS_FREE_BLOB(key);
+    RunTestCase(HKS_CRYPTO_HAL_DH_001_PARAMS);
 }
 
 /**
@@ -50,18 +76,9 @@ HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_001, Function | SmallTest | Level1)
  * @tc.name      : HksCryptoHalDh_002
  * @tc.desc      : Generate Dh-3072 key pair
  */
-HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_002, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_002, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = { .algType = HKS_ALG_DH, .keyLen = HKS_DH_KEY_SIZE_3072 };
-
-    HksBlob key = { 0, NULL };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-
-    HKS_FREE_BLOB(key);
+    RunTestCase(HKS_CRYPTO_HAL_DH_002_PARAMS);
 }
 
 /**
@@ -69,18 +86,12 @@ HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_002, Function | SmallTest | Level1)
  * @tc.name      : HksCryptoHalDh_003
  * @tc.desc      : Generate Dh-4096 key pair
  */
-HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_003, Function | SmallTest | Level1)
+HWTEST_F(HksCryptoHalDh, HksCryptoHalDh_003, Function | SmallTest | Level0)
 {
-    int32_t ret;
-
-    HksKeySpec spec = { .algType = HKS_ALG_DH, .keyLen = HKS_DH_KEY_SIZE_4096 };
-
-    HksBlob key = { 0, NULL };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HKS_SUCCESS, ret);
-
-    HKS_FREE_BLOB(key);
+    RunTestCase(HKS_CRYPTO_HAL_DH_003_PARAMS);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS
 #endif

@@ -22,8 +22,109 @@
 #include "hks_mem.h"
 
 using namespace testing::ext;
+namespace OHOS {
+namespace Security {
+namespace Huks {
+namespace UnitTest {
 namespace {
-class HksCryptoHalRsaKey : public HksCryptoHalCommon, public testing::Test {};
+struct TestCaseParams {
+    HksKeySpec spec;
+
+    HksErrorCode generateKeyResult;
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_001_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_512,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_002_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_768,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_003_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_1024,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_004_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_2048,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_005_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_3072,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+
+const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_006_PARAMS = {
+    .spec = {
+        .algType = HKS_ALG_RSA,
+        .keyLen = HKS_RSA_KEY_SIZE_4096,
+        .algParam = nullptr,
+    },
+#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
+    .generateKeyResult = HKS_SUCCESS,
+#else
+    .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
+#endif
+};
+}  // namespace
+
+class HksCryptoHalRsaKey : public HksCryptoHalCommon, public testing::Test {
+protected:
+    void RunTestCase(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+        ASSERT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+        if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
+            ASSERT_NE((uint32_t)0, key.size);
+            ASSERT_NE(nullptr, key.data);
+            HksFree(key.data);
+        }
+    }
+};
 
 /**
  * @tc.number    : HksCryptoHalRsaKey_001
@@ -32,25 +133,7 @@ class HksCryptoHalRsaKey : public HksCryptoHalCommon, public testing::Test {};
  */
 HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_001, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_512,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_RSA_KEY_001_PARAMS);
 }
 
 /**
@@ -60,25 +143,7 @@ HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_001, Function | SmallTest | Leve
  */
 HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_002, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_768,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_RSA_KEY_002_PARAMS);
 }
 
 /**
@@ -88,25 +153,7 @@ HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_002, Function | SmallTest | Leve
  */
 HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_003, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_1024,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_RSA_KEY_003_PARAMS);
 }
 
 /**
@@ -116,25 +163,7 @@ HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_003, Function | SmallTest | Leve
  */
 HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_004, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_2048,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_RSA_KEY_004_PARAMS);
 }
 
 /**
@@ -144,25 +173,7 @@ HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_004, Function | SmallTest | Leve
  */
 HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_005, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_3072,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_RSA_KEY_005_PARAMS);
 }
 
 /**
@@ -172,25 +183,7 @@ HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_005, Function | SmallTest | Leve
  */
 HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_006, Function | SmallTest | Level1)
 {
-    int32_t ret;
-
-    HksKeySpec spec = {
-        .algType = HKS_ALG_RSA,
-        .keyLen = HKS_RSA_KEY_SIZE_4096,
-        .algParam = nullptr,
-    };
-
-    HksBlob key = { .size = 0, .data = nullptr };
-
-    ret = HksCryptoHalGenerateKey(&spec, &key);
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_NE((uint32_t)0, key.size);
-    ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
-#else
-    ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-#endif
+    RunTestCase(HKS_CRYPTO_HAL_RSA_KEY_006_PARAMS);
 }
 
 /**
@@ -222,4 +215,7 @@ HWTEST_F(HksCryptoHalRsaKey, HksCryptoHalRsaKey_007, Function | SmallTest | Leve
     HKS_FREE_BLOB(key);
     HKS_FREE_BLOB(keyOut);
 }
-}  // namespace
+}  // namespace UnitTest
+}  // namespace Huks
+}  // namespace Security
+}  // namespace OHOS

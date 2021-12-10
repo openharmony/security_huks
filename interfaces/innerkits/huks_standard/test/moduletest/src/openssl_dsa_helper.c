@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_openssl_dsa_sign_test_mt.h"
+#include "openssl_dsa_helper.h"
 
 #include <openssl/evp.h>
 #include <openssl/x509.h>
@@ -27,70 +27,103 @@
 
 EVP_PKEY *GenerateDsaKey(const uint32_t keySize)
 {
-    EVP_PKEY *pkey = EVP_PKEY_new();
-    if (pkey == NULL) {
-        return NULL;
-    }
     DSA *dsa = DSA_new();
     if (dsa == NULL) {
-        EVP_PKEY_free(pkey);
         return NULL;
     }
     if (DSA_generate_parameters_ex(dsa, keySize, NULL, 0, NULL, NULL, NULL) != 1) {
-        EVP_PKEY_free(pkey);
         DSA_free(dsa);
         return NULL;
     }
     if (DSA_generate_key(dsa) != 1) {
+        DSA_free(dsa);
+        return NULL;
+    }
+
+    EVP_PKEY *pkey = EVP_PKEY_new();
+    if (pkey == NULL) {
+        DSA_free(dsa);
+        return NULL;
+    }
+
+    if (EVP_PKEY_assign_DSA(pkey, dsa) != 1) {
         EVP_PKEY_free(pkey);
         DSA_free(dsa);
         return NULL;
     }
 
-    EVP_PKEY_assign_DSA(pkey, dsa);
-
     return pkey;
+}
+
+static BIGNUM *BinToBN(uint8_t *data, uint32_t length)
+{
+    uint8_t buff[length];
+    if (memcpy_s(buff, sizeof(buff), data, length) != 0) {
+        return NULL;
+    }
+    return BN_bin2bn(buff, length, NULL);
+}
+
+static void FreeBN(BIGNUM *bn)
+{
+    if (bn != NULL) {
+        BN_free(bn);
+    }
 }
 
 static DSA *InitDsa(struct HksBlob *key, const bool needPrivateExponent)
 {
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
-    uint8_t buff[HKS_KEY_BYTES(keyMaterial->keySize)];
 
     uint32_t offset = sizeof(*keyMaterial);
     BIGNUM *x = NULL;
+    BIGNUM *y = NULL;
+    BIGNUM *p = NULL;
+    BIGNUM *q = NULL;
+    BIGNUM *g = NULL;
+
     if (needPrivateExponent) {
-        (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->xSize);
-        x = BN_bin2bn(buff, keyMaterial->xSize, NULL);
+        x = BinToBN(key->data + offset, keyMaterial->xSize);
+        offset += keyMaterial->xSize;
     }
 
-    offset += keyMaterial->xSize;
-    if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->ySize) != 0) {
-        return NULL;
-    }
-    BIGNUM *y = BN_bin2bn(buff, keyMaterial->ySize, NULL);
-
+    y = BinToBN(key->data + offset, keyMaterial->ySize);
     offset += keyMaterial->ySize;
-    if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->pSize) != 0) {
-        return NULL;
-    }
-    BIGNUM *p = BN_bin2bn(buff, keyMaterial->pSize, NULL);
 
+    p = BinToBN(key->data + offset, keyMaterial->pSize);
     offset += keyMaterial->pSize;
-    if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->qSize) != 0) {
-        return NULL;
-    }
-    BIGNUM *q = BN_bin2bn(buff, keyMaterial->qSize, NULL);
 
+    q = BinToBN(key->data + offset, keyMaterial->qSize);
     offset += keyMaterial->qSize;
-    if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->gSize) != 0) {
-        return NULL;
-    }
-    BIGNUM *g = BN_bin2bn(buff, keyMaterial->gSize, NULL);
 
-    DSA *dsa = DSA_new();
-    if (DSA_set0_key(dsa, y, x) != 1 || DSA_set0_pqg(dsa, p, q, g) != 1) {
-        return NULL;
+    g = BinToBN(key->data + offset, keyMaterial->gSize);
+
+    DSA *dsa = NULL;
+    do {
+        dsa = DSA_new();
+        if (dsa == NULL) {
+            break;
+        }
+
+        if (DSA_set0_key(dsa, y, x) != 1) {
+            DSA_free(dsa);
+            dsa = NULL;
+            break;
+        }
+
+        if (DSA_set0_pqg(dsa, p, q, g) != 1) {
+            DSA_free(dsa);
+            dsa = NULL;
+            break;
+        }
+    } while (0);
+
+    if (dsa == NULL) {
+        FreeBN(x);
+        FreeBN(y);
+        FreeBN(p);
+        FreeBN(q);
+        FreeBN(g);
     }
 
     return dsa;
@@ -126,14 +159,19 @@ int32_t OpensslSignDsa(
 
     EVP_PKEY *pkey = EVP_PKEY_new();
     if (pkey == NULL) {
-        EVP_PKEY_free(pkey);
+        DSA_free(dsa);
         return DSA_FAILED;
     }
 
-    EVP_PKEY_assign_DSA(pkey, dsa);
+    if (EVP_PKEY_assign_DSA(pkey, dsa) != 1) {
+        EVP_PKEY_free(pkey);
+        DSA_free(dsa);
+        return DSA_FAILED;
+    }
+
     EVP_MD_CTX *mctx = EVP_MD_CTX_new();
     if (mctx == NULL) {
-        EVP_MD_CTX_free(mctx);
+        EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
 
@@ -145,22 +183,22 @@ int32_t OpensslSignDsa(
     }
 
     if (EVP_DigestSignUpdate(mctx, plainText->data, plainText->size) != 1) {
-        EVP_MD_CTX_free(mctx);
         EVP_PKEY_free(pkey);
+        EVP_MD_CTX_free(mctx);
         return DSA_FAILED;
     }
 
     size_t signLen = signData->size;
     if (EVP_DigestSignFinal(mctx, signData->data, &signLen) != 1) {
-        EVP_MD_CTX_free(mctx);
         EVP_PKEY_free(pkey);
+        EVP_MD_CTX_free(mctx);
         return DSA_FAILED;
     }
 
     signData->size = signLen;
 
-    EVP_MD_CTX_free(mctx);
     EVP_PKEY_free(pkey);
+    EVP_MD_CTX_free(mctx);
 
     return DSA_SUCCESS;
 }
@@ -175,14 +213,19 @@ int32_t OpensslVerifyDsa(
 
     EVP_PKEY *pkey = EVP_PKEY_new();
     if (pkey == NULL) {
-        EVP_PKEY_free(pkey);
+        DSA_free(dsa);
         return DSA_FAILED;
     }
 
-    EVP_PKEY_assign_DSA(pkey, dsa);
+    if (EVP_PKEY_assign_DSA(pkey, dsa) != 1) {
+        EVP_PKEY_free(pkey);
+        DSA_free(dsa);
+        return DSA_FAILED;
+    }
+
     EVP_MD_CTX *mctx = EVP_MD_CTX_new();
     if (mctx == NULL) {
-        EVP_MD_CTX_free(mctx);
+        EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
 
@@ -194,32 +237,35 @@ int32_t OpensslVerifyDsa(
     }
 
     if (EVP_DigestVerifyUpdate(mctx, plainText->data, plainText->size) != 1) {
-        EVP_MD_CTX_free(mctx);
         EVP_PKEY_free(pkey);
+        EVP_MD_CTX_free(mctx);
         return DSA_FAILED;
     }
 
     if (EVP_DigestVerifyFinal(mctx, signData->data, signData->size) != 1) {
-        EVP_MD_CTX_free(mctx);
         EVP_PKEY_free(pkey);
+        EVP_MD_CTX_free(mctx);
         return DSA_FAILED;
     }
 
-    EVP_MD_CTX_free(mctx);
     EVP_PKEY_free(pkey);
+    EVP_MD_CTX_free(mctx);
 
     return DSA_SUCCESS;
 }
 
 int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
 {
-    EVP_PKEY *pkey = d2i_PUBKEY(NULL, (const unsigned char **)&x509Key->data, x509Key->size);
+    uint8_t *data = x509Key->data;
+
+    EVP_PKEY *pkey = d2i_PUBKEY(NULL, (const unsigned char **)&data, x509Key->size);
     if (pkey == NULL) {
         return DSA_FAILED;
     }
 
-    DSA *dsa = EVP_PKEY_get1_DSA(pkey);
+    DSA *dsa = EVP_PKEY_get0_DSA(pkey);
     if (dsa == NULL) {
+        EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
     int32_t ySize = BN_num_bytes(DSA_get0_pub_key(dsa));
@@ -227,6 +273,7 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
     int32_t qSize = BN_num_bytes(DSA_get0_q(dsa));
     int32_t gSize = BN_num_bytes(DSA_get0_g(dsa));
     if ((ySize <= 0) || (pSize <= 0) || (qSize <= 0) || (gSize <= 0)) {
+        EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)publicKey->data;
@@ -238,18 +285,26 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
     keyMaterial->qSize = qSize;
     keyMaterial->gSize = gSize;
 
-    if ((BN_bn2bin(DSA_get0_pub_key(dsa), publicKey->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize) == 0) ||
-        (BN_bn2bin(DSA_get0_p(dsa), publicKey->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize) ==
-            0) ||
-        (BN_bn2bin(DSA_get0_q(dsa),
-            publicKey->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize + pSize) == 0) ||
-        (BN_bn2bin(DSA_get0_g(dsa),
-            publicKey->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize + pSize + qSize) == 0)) {
-        free(publicKey->data);
-        return DSA_FAILED;
-    }
+    int32_t result = DSA_FAILED;
+    uint32_t offset = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize;
+    do {
+        if ((BN_bn2bin(DSA_get0_pub_key(dsa), publicKey->data + offset) == 0)) {
+            break;
+        }
+        if (BN_bn2bin(DSA_get0_p(dsa), publicKey->data + offset + ySize) == 0) {
+            break;
+        }
+        if (BN_bn2bin(DSA_get0_q(dsa), publicKey->data + offset + ySize + pSize) == 0) {
+            break;
+        }
+        if (BN_bn2bin(DSA_get0_g(dsa), publicKey->data + offset + ySize + pSize + qSize) == 0) {
+            break;
+        }
+        result = DSA_SUCCESS;
+    } while (0);
 
-    return DSA_SUCCESS;
+    EVP_PKEY_free(pkey);
+    return result;
 }
 
 void DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
@@ -257,12 +312,14 @@ void DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
     uint8_t *tmp = NULL;
     int32_t length = i2d_PUBKEY(pkey, &tmp);
     x509Key->size = length;
-    x509Key->data = tmp;
+    if (tmp != NULL) {
+        (void)memcpy_s(x509Key->data, x509Key->size, tmp, length);
+        free(tmp);
+    }
 }
 
 int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key)
 {
-    int32_t ret;
     uint32_t opensslKeyByteLen = HKS_KEY_BYTES(keySize);
     if (opensslKeyByteLen < OPENSSL_DSA_MIN_KEY_LEN) {
         opensslKeyByteLen = OPENSSL_DSA_MIN_KEY_LEN;
@@ -285,7 +342,7 @@ int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBl
     const BIGNUM *g = DSA_get0_g(EVP_PKEY_get0_DSA(pkey));
 
     int32_t offset = sizeof(struct KeyMaterialDsa);
-    ret = BN_bn2bin(x, key->data + offset + (keyMaterial->xSize - BN_num_bytes(x)));
+    int32_t ret = BN_bn2bin(x, key->data + offset + (keyMaterial->xSize - BN_num_bytes(x)));
     if (ret <= 0) {
         return DSA_FAILED;
     }

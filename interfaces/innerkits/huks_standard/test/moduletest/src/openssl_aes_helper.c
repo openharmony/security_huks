@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_openssl_aes_test_mt.h"
+#include "openssl_aes_helper.h"
 
 #include <openssl/evp.h>
 
@@ -25,14 +25,19 @@ int32_t GenerateAesKey(const int keyLen, struct HksBlob *randomKey)
     uint32_t keySize = keyLen / BIT_NUM_OF_UINT8;
     uint8_t *Key = (uint8_t *)malloc(keySize);
     do {
-        if (RAND_bytes(Key, keySize) <= 0) {
-            return AES_FAILED;
+        if (RAND_bytes(Key, keySize) != 1) {
+            free(Key);
+            return HKS_FAILURE;
         }
-        randomKey->data = Key;
         randomKey->size = keySize;
+        if (memcpy_s(randomKey->data, randomKey->size, Key, keySize) != 0) {
+            free(Key);
+            return HKS_FAILURE;
+        }
     } while (0);
 
-    return AES_SUCCESS;
+    free(Key);
+    return HKS_SUCCESS;
 }
 
 static const EVP_CIPHER *AesCBCCrypt(uint32_t keyLen)
@@ -97,13 +102,12 @@ static uint32_t AesInit(EVP_CIPHER_CTX **ctx, const EVP_CIPHER **ciper, uint32_t
 
     *ctx = EVP_CIPHER_CTX_new();
     if (*ctx == NULL) {
-        EVP_CIPHER_CTX_free(*ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
-    return AES_SUCCESS;
+    return HKS_SUCCESS;
 }
 
-uint32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey)
 {
     struct HksParam *mode = NULL;
@@ -117,19 +121,19 @@ uint32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *
 
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
-    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != AES_SUCCESS) {
+    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != HKS_SUCCESS) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_EncryptInit_ex(ctx, ciper, NULL, NULL, NULL) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_EncryptInit_ex(ctx, NULL, NULL, randomKey->data, iv->blob.data) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     int ret = 1;
@@ -146,19 +150,19 @@ uint32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *
     int outLen = 0;
     if (EVP_EncryptUpdate(ctx, outData->data, &outLen, inData->data, inData->size) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     outData->size = outLen;
     if (EVP_EncryptFinal_ex(ctx, outData->data + outLen, &outLen) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     outData->size += outLen;
     EVP_CIPHER_CTX_free(ctx);
-    return AES_SUCCESS;
+    return HKS_SUCCESS;
 }
 
-uint32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey)
 {
     struct HksParam *mode = NULL;
@@ -172,19 +176,19 @@ uint32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *
 
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
-    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != AES_SUCCESS) {
+    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != HKS_SUCCESS) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_DecryptInit_ex(ctx, ciper, NULL, NULL, NULL) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_DecryptInit_ex(ctx, NULL, NULL, randomKey->data, iv->blob.data) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     int ret = 1;
@@ -201,19 +205,19 @@ uint32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *
     int outLen = 0;
     if (EVP_DecryptUpdate(ctx, outData->data, &outLen, inData->data, inData->size) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     outData->size = outLen;
     if (EVP_DecryptFinal_ex(ctx, outData->data + outLen, &outLen) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     outData->size += outLen;
     EVP_CIPHER_CTX_free(ctx);
-    return AES_SUCCESS;
+    return HKS_SUCCESS;
 }
 
-uint32_t AesGCMEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesGCMEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey, const struct HksBlob *tagAead)
 {
     struct HksParam *mode = NULL;
@@ -227,49 +231,49 @@ uint32_t AesGCMEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlo
 
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
-    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != AES_SUCCESS) {
+    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != HKS_SUCCESS) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_EncryptInit_ex(ctx, ciper, NULL, NULL, NULL) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, iv->blob.size, NULL) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_EncryptInit_ex(ctx, NULL, NULL, randomKey->data, iv->blob.data) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     int outLen = 0;
     if (EVP_EncryptUpdate(ctx, NULL, &outLen, aad->blob.data, aad->blob.size) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     if (EVP_EncryptUpdate(ctx, outData->data, &outLen, inData->data, inData->size) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     outData->size = outLen;
     if (EVP_EncryptFinal_ex(ctx, outData->data, &outLen) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, HKS_AE_TAG_LEN, tagAead->data) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     EVP_CIPHER_CTX_free(ctx);
-    return AES_SUCCESS;
+    return HKS_SUCCESS;
 }
 
-uint32_t AesGCMDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesGCMDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey, const struct HksBlob *tagDec)
 {
     struct HksParam *mode = NULL;
@@ -283,45 +287,45 @@ uint32_t AesGCMDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlo
 
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
-    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != AES_SUCCESS) {
+    if (AesInit(&ctx, &ciper, mode->uint32Param, keyLen->uint32Param) != HKS_SUCCESS) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_DecryptInit_ex(ctx, ciper, NULL, NULL, NULL) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, iv->blob.size, NULL) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     if (EVP_DecryptInit_ex(ctx, NULL, NULL, randomKey->data, iv->blob.data) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
 
     int outLen = 0;
     if (EVP_DecryptUpdate(ctx, NULL, &outLen, aad->blob.data, aad->blob.size) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     if (EVP_DecryptUpdate(ctx, outData->data, &outLen, inData->data, inData->size) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     outData->size = outLen;
 
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tagDec->size, tagDec->data) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     if (EVP_DecryptFinal_ex(ctx, outData->data, &outLen) != 1) {
         EVP_CIPHER_CTX_free(ctx);
-        return AES_FAILED;
+        return HKS_FAILURE;
     }
     EVP_CIPHER_CTX_free(ctx);
-    return AES_SUCCESS;
+    return HKS_SUCCESS;
 }
