@@ -98,8 +98,6 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
             HKS_LOG_E("EVP_PKEY_set1_RSA error %s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
-        /* rsa need to be set to null to prevent Double-Free */
-        rsa = NULL;
         result = EvpKeyToX509Format(pkey, x509Key);
     } while (0);
 
