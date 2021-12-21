@@ -96,18 +96,30 @@ int32_t HksAccessInitialize(void)
 int32_t HksAccessProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     uint64_t *operationHandle)
 {
+    (void)msgId;
+    (void)key;
+    (void)paramSet;
+    (void)operationHandle;
     return 0;
 }
 
 int32_t HksAccessProcessMultiUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
+    (void)msgId;
+    (void)operationHandle;
+    (void)inData;
+    (void)outData;
     return 0;
 }
 
 int32_t HksAccessProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
+    (void)msgId;
+    (void)operationHandle;
+    (void)inData;
+    (void)outData;
     return 0;
 }
 

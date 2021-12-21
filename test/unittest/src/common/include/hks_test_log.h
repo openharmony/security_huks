@@ -16,8 +16,10 @@
 #ifndef HKS_TEST_LOG_H
 #define HKS_TEST_LOG_H
 
-#include "stdint.h"
-#include "stdbool.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+#include "securec.h"
 
 enum HksLogLevel {
     HKS_LOG_LEVEL_I,

@@ -534,7 +534,7 @@ int32_t TestAes256ByLocal()
         testKey[i] = i + TEST_AES_32;
     }
 
-    keyBlob.data = testKey;
+    keyBlob.data = (uint8_t *)testKey;
     keyBlob.size = sizeof(testKey);
 
     /* encrypt by aes key 1 */

@@ -343,6 +343,7 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
     return ret;
 }
 
+#ifdef HKS_SUPPORT_API_SIGN_VERIFY
 static int32_t CheckSignVerifyParamsByAlg(uint32_t cmdId, uint32_t alg, const struct ParamsValues *inputParams)
 {
     int32_t ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_USE_KEY, inputParams);
@@ -358,6 +359,7 @@ static int32_t CheckSignVerifyParamsByAlg(uint32_t cmdId, uint32_t alg, const st
 
     return ret;
 }
+#endif
 #endif /* _CUT_AUTHENTICATE_ */
 
 static int32_t CheckCipherParamsByAlg(
