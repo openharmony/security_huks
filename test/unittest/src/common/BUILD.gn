@@ -50,6 +50,10 @@ static_library("huks_3.0_test_common") {
     configs += [ ":hilog_lite_dir" ]
     deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
   } else {
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
     configs += [ ":hilog_dir" ]
     deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
   }

@@ -1156,6 +1156,7 @@ int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose)
     return CheckPurposeValid(alg, inputPurpose);
 }
 
+#ifdef HKS_SUPPORT_DSA_C
 static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
 
 {
@@ -1180,6 +1181,7 @@ static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
     *keySize = keySizeParam->uint32Param;
     return ret;
 }
+#endif
 
 int32_t HksGetKeySize(uint32_t alg, const struct HksBlob *key, uint32_t *keySize)
 {
