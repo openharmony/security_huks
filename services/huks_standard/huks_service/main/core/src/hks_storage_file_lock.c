@@ -134,9 +134,18 @@ static void AppendFileLock(HksStorageFileLock *lock)
 
 HksStorageFileLock *HksStorageFileLockCreate(char *path)
 {
-    HksStorageFileLock *lock = NULL;
-    HksMutexLock(g_lockListLock);
-    lock = FindFileLock(path);
+    if (path == NULL) {
+        return NULL;
+    }
+
+    if (g_lockListLock == NULL) {
+        return NULL;
+    }
+
+    if (HksMutexLock(g_lockListLock) != 0) {
+        return NULL;
+    }
+    HksStorageFileLock *lock = FindFileLock(path);
     if (lock == NULL) {
         lock = AllocFileLock(path);
         if (lock != NULL) {
@@ -145,7 +154,7 @@ HksStorageFileLock *HksStorageFileLockCreate(char *path)
     } else {
         AddRef(lock);
     }
-    HksMutexUnlock(g_lockListLock);
+    (void)HksMutexUnlock(g_lockListLock);
 
     return lock;
 }
@@ -236,23 +245,29 @@ void HksStorageFileLockRelease(HksStorageFileLock *lock)
         return;
     }
 
-    HksMutexLock(g_lockListLock);
+    if (g_lockListLock == NULL) {
+        return;
+    }
+
+    if (HksMutexLock(g_lockListLock) != 0) {
+        return;
+    }
 
     if (IsLockInList(lock)) {
         Release(lock);
     }
 
-    HksMutexUnlock(g_lockListLock);
+    (void)HksMutexUnlock(g_lockListLock);
 }
 
-__attribute__((constructor)) void OnLoad(void)
+__attribute__((constructor)) static void OnLoad(void)
 {
     g_lockListLock = HksMutexCreate();
     g_lockListFirst = NULL;
     g_lockListLast = NULL;
 }
 
-__attribute__((destructor)) void OnUnload(void)
+__attribute__((destructor)) static void OnUnload(void)
 {
     if (g_lockListLock != NULL) {
         HksMutexClose(g_lockListLock);
