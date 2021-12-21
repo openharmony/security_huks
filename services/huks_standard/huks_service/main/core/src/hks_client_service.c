@@ -1217,6 +1217,11 @@ int32_t HksServiceProcessFinal(uint32_t msgId, uint64_t operationHandle, const s
 int32_t HksServiceSignWithDeviceKey(const struct HksBlob *processName, uint32_t keyId,
     const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature)
 {
+    (void)processName;
+    (void)keyId;
+    (void)paramSet;
+    (void)srcData;
+    (void)signature;
     return 0;
 }
 
@@ -1255,6 +1260,10 @@ int32_t HksServiceAttestKey(const struct HksBlob *processName, const struct HksB
     HksFreeParamSet(&newParamSet)
     return ret;
 #else
+    (void)processName;
+    (void)keyAlias;
+    (void)paramSet;
+    (void)certChain;
     return HKS_ERROR_NOT_SUPPORTED;
 #endif
 }
@@ -1282,6 +1291,10 @@ int32_t HksServiceGetCertificateChain(const struct HksBlob *processName, const s
     HKS_FREE_BLOB(certFromFile);
     return ret;
 #else
+    (void)processName;
+    (void)keyAlias;
+    (void)paramSet;
+    (void)certChain;
     return HKS_ERROR_NOT_SUPPORTED;
 #endif
 }
@@ -1289,27 +1302,43 @@ int32_t HksServiceGetCertificateChain(const struct HksBlob *processName, const s
 int32_t HksServiceWrapKey(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksBlob *targetKeyAlias, const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
 {
+    (void)processName;
+    (void)keyAlias;
+    (void)targetKeyAlias;
+    (void)paramSet;
+    (void)wrappedData;
     return 0;
 }
 
 int32_t HksServiceUnwrapKey(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksBlob *targetKeyAlias, const struct HksBlob *wrappedData, const struct HksParamSet *paramSet)
 {
+    (void)processName;
+    (void)keyAlias;
+    (void)targetKeyAlias;
+    (void)paramSet;
+    (void)wrappedData;
     return 0;
 }
 
 int32_t HksServiceProvision(const struct HksBlob *srcData, const struct HksBlob *challengeIn)
 {
+    (void)srcData;
+    (void)challengeIn;
     return 0;
 }
 
 int32_t HksServiceProvisionVerify(const struct HksBlob *srcData, const struct HksBlob *challengeIn)
 {
+    (void)srcData;
+    (void)challengeIn;
     return 0;
 }
 
 int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct HksBlob *certChain)
 {
+    (void)processName;
+    (void)certChain;
     return 0;
 }
 #endif

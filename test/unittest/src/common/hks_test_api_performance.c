@@ -16,6 +16,9 @@
 #include <assert.h>
 
 #include "hks_test_api_performance.h"
+
+#include "securec.h"
+
 #include "hks_api.h"
 #include "hks_param.h"
 

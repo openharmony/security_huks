@@ -430,6 +430,7 @@ static int32_t AesEcbNoPaddingCrypt(const struct HksBlob *key, const struct HksU
 }
 #endif
 
+#if defined(HKS_SUPPORT_AES_ECB_NOPADDING) || defined(HKS_SUPPORT_AES_ECB_PKCS7PADDING)
 static int32_t AesEcbCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
@@ -445,6 +446,7 @@ static int32_t AesEcbCrypt(const struct HksBlob *key, const struct HksUsageSpec 
             return HKS_ERROR_INVALID_PADDING;
     }
 }
+#endif
 
 static int32_t CheckKeySize(const struct HksBlob *key)
 {

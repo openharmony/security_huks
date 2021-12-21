@@ -49,8 +49,11 @@ unittest("huks_3.0_test") {
     "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/src/common:huks_3.0_test_common",
   ]
-  cflags = [ "-Wno-error" ]
 
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
   if (disable_authenticate == true) {
     defines = [ "_CUT_AUTHENTICATE_" ]
   }
