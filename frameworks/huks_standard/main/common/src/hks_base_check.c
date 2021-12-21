@@ -1359,6 +1359,9 @@ int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params
 
 int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const struct HksBlob *signature)
 {
+    (void)cmdId;
+    (void)keySize;
+    (void)signature;
     switch (alg) {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
         case HKS_ALG_RSA:
