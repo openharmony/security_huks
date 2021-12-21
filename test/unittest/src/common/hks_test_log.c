@@ -19,8 +19,6 @@
 
 #include "stdlib.h"
 
-#include "time.h"
-
 #define MAX_LOG_BUFF_LEN    512
 #define WAIT_TO_LOG_DONE    100000
 
@@ -53,8 +51,6 @@ void HksTestLog(uint32_t logLevel, const char *funcName, int32_t lineNo, const c
         default:
             return;
     }
-
-    usleep(WAIT_TO_LOG_DONE);
 }
 
 void HksAssertLog(bool test)

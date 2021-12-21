@@ -106,6 +106,7 @@ config("soft_huks_config") {
   cflags = [
     "-fvisibility=hidden",
     "-Wall",
+    "-Werror",
   ]
 
   if (disable_authenticate == true) {
