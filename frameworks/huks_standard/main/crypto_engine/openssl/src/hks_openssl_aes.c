@@ -28,6 +28,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
 #include "hks_type_inner.h"
 
@@ -49,31 +50,7 @@ int32_t HksOpensslAesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    uint32_t keySizeByte = spec->keyLen / BIT_NUM_OF_UINT8;
-    int32_t ret = HKS_FAILURE;
-
-    uint8_t *tmpKey = (uint8_t *)HksMalloc(keySizeByte);
-    if (tmpKey == NULL) {
-        HKS_LOG_E("malloc buffer failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    do {
-        if (RAND_bytes(tmpKey, keySizeByte) <= 0) {
-            HKS_LOG_E("generate key is failed:0x%x", ret);
-            break;
-        }
-
-        key->data = tmpKey;
-        key->size = keySizeByte;
-        ret = HKS_SUCCESS;
-    } while (0);
-
-    if (ret != HKS_SUCCESS) {
-        (void)memset_s(tmpKey, keySizeByte, 0, keySizeByte);
-        HksFree(tmpKey);
-    }
-    return ret;
+    return HksOpensslGenerateRandomKey(spec->keyLen, key);
 }
 #endif
 
@@ -159,6 +136,9 @@ static int32_t OpensslAesAeadInit(
 {
     int32_t ret;
     struct HksAeadParam *aeadParam = (struct HksAeadParam *)usageSpec->algParam;
+    if (aeadParam == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     *ctx = EVP_CIPHER_CTX_new();
     if (*ctx == NULL) {

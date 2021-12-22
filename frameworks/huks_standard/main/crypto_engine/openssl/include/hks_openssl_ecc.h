@@ -24,12 +24,10 @@ extern "C" {
 
 #define ECC_KEYPAIR_CNT 3
 
-#if defined(HKS_SUPPORT_ECC_GENERATE_KEY) || defined(HKS_SUPPORT_ECDH_GENERATE_KEY) || \
-    defined(HKS_SUPPORT_ECDSA_GENERATE_KEY)
+#if defined(HKS_SUPPORT_ECC_GENERATE_KEY)
 int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key);
 #endif
-#if defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY) || defined(HKS_SUPPORT_ECDH_GET_PUBLIC_KEY) || \
-    defined(HKS_SUPPORT_EDDSA_GET_PUBLIC_KEY)
+#if defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY)
 int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *output);
 #endif
 

@@ -167,7 +167,7 @@ static napi_value DecryptAsyncWork(napi_env env, DecryptAsyncContext context)
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
 
-    napi_value resourceName;
+    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "decryptAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
     napi_create_async_work(

@@ -29,8 +29,12 @@
 extern "C" {
 #endif
 
+#ifdef HKS_SUPPORT_ECDSA_C
+#ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
 int32_t HksMbedtlsEcdsaSignVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature, bool isVerify);
+#endif /* HKS_SUPPORT_ECDSA_SIGN_VERIFY */
+#endif /* HKS_SUPPORT_ECDSA_C */
 
 #ifdef __cplusplus
 }

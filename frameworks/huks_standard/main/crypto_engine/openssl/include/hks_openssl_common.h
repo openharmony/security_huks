@@ -13,26 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef HKS_STORAGE_FILE_LOCK_H
-#define HKS_STORAGE_FILE_LOCK_H
+#ifndef HKS_OPENSSL_COMMON_H
+#define HKS_OPENSSL_COMMON_H
 
-#include <stdint.h>
+#include "hks_type_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-typedef struct HksStorageFileLock HksStorageFileLock;
-
-HksStorageFileLock *HksStorageFileLockCreate(const char *path);
-int32_t HksStorageFileLockRead(HksStorageFileLock *lock);
-int32_t HksStorageFileUnlockRead(HksStorageFileLock *lock);
-int32_t HksStorageFileLockWrite(HksStorageFileLock *lock);
-int32_t HksStorageFileUnlockWrite(HksStorageFileLock *lock);
-void HksStorageFileLockRelease(HksStorageFileLock *lock);
+int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // HKS_STORAGE_FILE_LOCK_H
+#endif /* HKS_OPENSSL_COMMON_H */
