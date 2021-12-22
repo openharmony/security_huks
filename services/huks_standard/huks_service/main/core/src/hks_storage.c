@@ -283,20 +283,34 @@ static int32_t MakeDirIfNotExist(const char *path)
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_SUPPORT_THREAD
+static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *fileName)
+{
+    char *fullPath = HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    if (fullPath == NULL) {
+        return NULL;
+    }
+
+    int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get full path failed, ret = %d.", ret);
+        HksFree(fullPath);
+        return NULL;
+    }
+
+    HksStorageFileLock *lock = HksStorageFileLockCreate(fullPath);
+    HksFree(fullPath);
+    return lock;
+}
+#endif
+
 static int32_t HksStorageWriteFile(
     const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
 {
 #ifdef HKS_SUPPORT_THREAD
-    char fullPath[HKS_MAX_FILE_NAME_LEN] = {0};
-    int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get full path failed, ret = %d.", ret);
-        return ret;
-    }
-
-    HksStorageFileLock *lock = HksStorageFileLockCreate(fullPath);
+    HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HksStorageFileLockWrite(lock);
-    ret = HksFileWrite(path, fileName, offset, buf, len);
+    int32_t ret = HksFileWrite(path, fileName, offset, buf, len);
     HksStorageFileUnlockWrite(lock);
     HksStorageFileLockRelease(lock);
     return ret;
@@ -309,14 +323,7 @@ static uint32_t HksStorageReadFile(
     const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
 {
 #ifdef HKS_SUPPORT_THREAD
-    char fullPath[HKS_MAX_FILE_NAME_LEN] = {0};
-    int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get full path failed, ret = %d.", ret);
-        return 0;
-    }
-
-    HksStorageFileLock *lock = HksStorageFileLockCreate(fullPath);
+    HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HksStorageFileLockRead(lock);
     uint32_t size = HksFileRead(path, fileName, offset, buf, len);
     HksStorageFileUnlockRead(lock);
@@ -330,16 +337,9 @@ static uint32_t HksStorageReadFile(
 static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
 {
 #ifdef HKS_SUPPORT_THREAD
-    char fullPath[HKS_MAX_FILE_NAME_LEN] = {0};
-    int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get full path failed, ret = %d.", ret);
-        return ret;
-    }
-
-    HksStorageFileLock *lock = HksStorageFileLockCreate(fullPath);
+    HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HksStorageFileLockWrite(lock);
-    ret = HksFileRemove(path, fileName);
+    int32_t ret = HksFileRemove(path, fileName);
     HksStorageFileUnlockWrite(lock);
     HksStorageFileLockRelease(lock);
 #else

@@ -33,7 +33,7 @@
 #ifdef HKS_SUPPORT_HMAC_GENERATE_KEY
 int32_t HksMbedtlsHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (spec->keyLen % HKS_BITS_PER_BYTE != 0) {
+    if ((spec->keyLen == 0) || (spec->keyLen % HKS_BITS_PER_BYTE != 0)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

@@ -210,7 +210,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_006, Function | SmallTes
 
     spec.mode = HKS_MODE_GCM;
     ret = HksCryptoHalEncrypt(&key, &spec, &message, &cipherText, &tagAead);
-    EXPECT_EQ(HKS_ERROR_CRYPTO_ENGINE_ERROR, ret);
+    EXPECT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
 /**
@@ -238,7 +238,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_007, Function | SmallTes
     spec.mode = HKS_MODE_GCM;
     key.size = 1;
     ret = HksCryptoHalDecrypt(&key, &spec, &message, &cipherText);
-    EXPECT_EQ(HKS_ERROR_CRYPTO_ENGINE_ERROR, ret);
+    EXPECT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
 /**
@@ -336,14 +336,14 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_011, Function | SmallTes
 
     uint8_t buff[HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_512)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
-    HksUsageSpec signSpec = { .algType = HKS_ALG_RSA };
+    HksUsageSpec signSpec = { .algType = HKS_ALG_RSA, .padding = HKS_PADDING_PKCS1_V1_5 };
     HksBlob message = { .size = 1, .data = buff };
     HksBlob signature = { .size = 1, .data = buff };
 
     EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 
     signSpec.padding = HKS_PADDING_PSS;
-    EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_CRYPTO_ENGINE_ERROR);
+    EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 
     HksCryptoHalGenerateKey(&spec, &key);
     EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_BUFFER_TOO_SMALL);
@@ -366,7 +366,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_012, Function | SmallTes
     EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 
     signSpec.padding = HKS_PADDING_PSS;
-    EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_CRYPTO_ENGINE_ERROR);
+    EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 }
 
 /**
@@ -549,16 +549,16 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_020, Function | SmallTes
     HksBlob signature = { .size = 0, .data = nullptr };
     uint8_t buff[1] = {0};
 
-    EXPECT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCryptoHalHmac(&key, 0, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 
     key = { .size = 1, .data = buff };
-    EXPECT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCryptoHalHmac(&key, 0, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 
     message = { .size = 1, .data = buff };
-    EXPECT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCryptoHalHmac(&key, 0, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 
     signature = { .size = 1, .data = buff };
-    EXPECT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCryptoHalHmac(&key, 0, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 
     EXPECT_EQ(HksCryptoHalHmac(&key, HKS_DIGEST_SHA512, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 }

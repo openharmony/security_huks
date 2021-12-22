@@ -40,24 +40,36 @@ int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
 {
     int32_t ret;
     switch (alg) {
+#ifdef HKS_SUPPORT_HASH_MD5
         case HKS_DIGEST_MD5:
             ret = mbedtls_md5_ret(msg->data, msg->size, hash->data); /* 0 for MD5 */
             break;
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA1
         case HKS_DIGEST_SHA1:
             ret = mbedtls_sha1_ret(msg->data, msg->size, hash->data); /* 0 for SHA-1 */
             break;
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA224
         case HKS_DIGEST_SHA224:
             ret = mbedtls_sha256_ret(msg->data, msg->size, hash->data, 1); /* 0 for SHA-224 */
             break;
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA256
         case HKS_DIGEST_SHA256:
             ret = mbedtls_sha256_ret(msg->data, msg->size, hash->data, 0); /* 0 for SHA-256 */
             break;
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA384
         case HKS_DIGEST_SHA384:
             ret = mbedtls_sha512_ret(msg->data, msg->size, hash->data, 1); /* 1 for SHA-384 */
             break;
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA512
         case HKS_DIGEST_SHA512:
             ret = mbedtls_sha512_ret(msg->data, msg->size, hash->data, 0); /* 0 for SHA-512 */
             break;
+#endif
         default:
             return HKS_ERROR_INVALID_DIGEST;
     }

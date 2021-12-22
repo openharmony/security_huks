@@ -73,7 +73,7 @@ static void ClearLockList(void)
     g_lockListLast = NULL;
 }
 
-static HksStorageFileLock *FindFileLock(char *path)
+static HksStorageFileLock *FindFileLock(const char *path)
 {
     HksStorageFileLock *iter = g_lockListFirst;
     while (iter != NULL) {
@@ -86,23 +86,28 @@ static HksStorageFileLock *FindFileLock(char *path)
     return NULL;
 }
 
-static HksStorageFileLock *AllocFileLock(char *path)
+static HksStorageFileLock *AllocFileLock(const char *path)
 {
     HksStorageFileLock *lock = HksMalloc(sizeof(HksStorageFileLock));
-    if (lock != NULL) {
-        size_t len = strlen(path);
-        lock->path = HksMalloc(len + 1);
-        if (lock->path != NULL) {
-            (void)strcpy_s(lock->path, len + 1, path);
-        }
-        lock->lock = HksLockCreate();
-        lock->ref = 1;
-        lock->next = NULL;
-
-        if (lock->path == NULL || lock->lock == NULL) {
-            FreeFileLock(lock);
-            lock = NULL;
-        }
+    if (lock == NULL) {
+        return NULL;
+    }
+    size_t len = strlen(path);
+    lock->path = HksMalloc(len + 1);
+    if (lock->path == NULL) {
+        FreeFileLock(lock);
+        return NULL;
+    }
+    if (strcpy_s(lock->path, len + 1, path) != EOK) {
+        FreeFileLock(lock);
+        return NULL;
+    }
+    lock->lock = HksLockCreate();
+    lock->ref = 1;
+    lock->next = NULL;
+    if (lock->path == NULL || lock->lock == NULL) {
+        FreeFileLock(lock);
+        return NULL;
     }
     return lock;
 }
@@ -132,7 +137,7 @@ static void AppendFileLock(HksStorageFileLock *lock)
     }
 }
 
-HksStorageFileLock *HksStorageFileLockCreate(char *path)
+HksStorageFileLock *HksStorageFileLockCreate(const char *path)
 {
     if (path == NULL) {
         return NULL;

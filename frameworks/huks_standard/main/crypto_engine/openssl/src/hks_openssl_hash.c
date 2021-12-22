@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
+#ifdef HKS_SUPPORT_HASH_C
+
 #include "hks_openssl_hash.h"
 
 #include <openssl/evp.h>
@@ -24,11 +32,24 @@
 static int32_t CheckDigestAlg(uint32_t alg)
 {
     switch (alg) {
+#ifdef HKS_SUPPORT_HASH_SHA1
         case HKS_DIGEST_SHA1:
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA224
         case HKS_DIGEST_SHA224:
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA256
         case HKS_DIGEST_SHA256:
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA384
         case HKS_DIGEST_SHA384:
+#endif
+#ifdef HKS_SUPPORT_HASH_SHA512
         case HKS_DIGEST_SHA512:
+#endif
+#ifdef HKS_SUPPORT_HASH_MD5
+        case HKS_DIGEST_MD5:
+#endif
             break;
         default:
             HKS_LOG_E("Unsupport HASH Type!");
@@ -75,3 +96,4 @@ int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
     }
     return HKS_SUCCESS;
 }
+#endif

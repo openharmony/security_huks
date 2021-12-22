@@ -59,23 +59,33 @@ static DSA *InitDsaStruct(const struct HksBlob *key, const bool needPrivateExpon
             return NULL;
         } else {
             (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->xSize);
-            x = BN_bin2bn(buff, keyMaterial->xSize, NULL);
+            x = BN_bin2bn(&buff[0], keyMaterial->xSize, NULL);
         }
     }
     offset += keyMaterial->xSize;
     (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->ySize);
-    BIGNUM *y = BN_bin2bn(buff, keyMaterial->ySize, NULL);
+    BIGNUM *y = BN_bin2bn(&buff[0], keyMaterial->ySize, NULL);
     offset += keyMaterial->ySize;
+    if (DSA_set0_key(dsa, y, x) != HKS_OPENSSL_SUCCESS) {
+        BN_free(y);
+        BN_free(x);
+        DSA_free(dsa);
+        return NULL;
+    }
+
     (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->pSize);
-    BIGNUM *p = BN_bin2bn(buff, keyMaterial->pSize, NULL);
+    BIGNUM *p = BN_bin2bn(&buff[0], keyMaterial->pSize, NULL);
     offset += keyMaterial->pSize;
     (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->qSize);
-    BIGNUM *q = BN_bin2bn(buff, keyMaterial->qSize, NULL);
+    BIGNUM *q = BN_bin2bn(&buff[0], keyMaterial->qSize, NULL);
     offset += keyMaterial->qSize;
     (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->gSize);
-    BIGNUM *g = BN_bin2bn(buff, keyMaterial->gSize, NULL);
+    BIGNUM *g = BN_bin2bn(&buff[0], keyMaterial->gSize, NULL);
 
-    if (DSA_set0_key(dsa, y, x) != HKS_OPENSSL_SUCCESS || DSA_set0_pqg(dsa, p, q, g) != HKS_OPENSSL_SUCCESS) {
+    if (DSA_set0_pqg(dsa, p, q, g) != HKS_OPENSSL_SUCCESS) {
+        BN_free(p);
+        BN_free(q);
+        BN_free(g);
         DSA_free(dsa);
         return NULL;
     }
@@ -257,10 +267,12 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->qSize = keyMaterial->qSize;
     publickeyMaterial->gSize = keyMaterial->gSize;
 
-    memcpy_s(output->data + sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize,
-        output->size - (sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize),
-        input->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize,
-        keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize);
+    if (memcpy_s(output->data + sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize,
+                 output->size - (sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize),
+                 input->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize,
+                 keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize) != EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
 
     return HKS_SUCCESS;
 }

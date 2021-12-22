@@ -276,10 +276,10 @@ static int32_t DsaToX509PublicKey(const struct HksBlob *y, const struct HksBlob 
 
 static int32_t DsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlob *x509Key)
 {
-    struct HksBlob y;
-    struct HksBlob p;
-    struct HksBlob q;
-    struct HksBlob g;
+    struct HksBlob y = {0};
+    struct HksBlob p = {0};
+    struct HksBlob q = {0};
+    struct HksBlob g = {0};
     int32_t ret = GetDsaPubKeyParam(publicKey, &y, &p, &q, &g);
     if (ret != HKS_SUCCESS) {
         return ret;

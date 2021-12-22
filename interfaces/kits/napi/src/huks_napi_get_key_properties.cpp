@@ -140,7 +140,7 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
 
-    napi_value resourceName;
+    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "getKeyPropertiesAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
     napi_create_async_work(

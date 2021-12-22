@@ -495,7 +495,11 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, sizeof(struct KeyMaterialDsa));
     uint32_t inOffset = sizeof(struct KeyMaterialDsa);
     uint32_t outOffset = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize;
-    (void)memcpy_s(publicKey + inOffset, publicKeySize - inOffset, keyIn->data + outOffset, publicKeySize - inOffset);
+    if (memcpy_s(publicKey + inOffset, publicKeySize - inOffset, keyIn->data + outOffset, publicKeySize - inOffset) !=
+        EOK) {
+        HKS_FREE_PTR(publicKey);
+        return HKS_ERROR_INVALID_OPERATION;
+    }
     ((struct KeyMaterialDsa *)publicKey)->xSize = 0;
 
     struct HksParam params[] = {
@@ -610,7 +614,9 @@ int32_t HksSetKeyToMaterial(uint32_t alg, bool isPubKey, const struct HksBlob *k
             keyMaterial->size = key->size;
             keyMaterial->data = HksMalloc(keyMaterial->size);
             if (keyMaterial->data != NULL) {
-                (void)memcpy_s(keyMaterial->data, keyMaterial->size, key->data, key->size);
+                if (memcpy_s(keyMaterial->data, keyMaterial->size, key->data, key->size) != EOK) {
+                    return HKS_ERROR_INVALID_OPERATION;
+                }
                 return HKS_SUCCESS;
             } else {
                 return HKS_ERROR_MALLOC_FAIL;
