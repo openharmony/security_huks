@@ -88,6 +88,7 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_002, Function | SmallTest | Leve
 #endif
 
     KeyMaterialDsa *keyMaterial = (KeyMaterialDsa *)key.data;
+    ASSERT_NE(keyMaterial, nullptr);
 
     uint32_t keyOutLen =
         sizeof(KeyMaterialDsa) + keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize;

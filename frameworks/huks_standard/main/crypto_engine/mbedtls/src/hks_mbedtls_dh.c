@@ -29,36 +29,36 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
 
-#define HKS_Dh_KEYPAIR_CNT 2
+#define HKS_DH_KEYPAIR_CNT 2
 
 #if defined(HKS_SUPPORT_DH_GENERATE_KEY) || defined(HKS_SUPPORT_DH_AGREE_KEY)
-static uint8_t ffdhe2048ParamG[] = MBEDTLS_DHM_RFC7919_FFDHE2048_G_BIN;
-static uint8_t ffdhe2048ParamP[] = MBEDTLS_DHM_RFC7919_FFDHE2048_P_BIN;
-static uint8_t ffdhe3072ParamG[] = MBEDTLS_DHM_RFC7919_FFDHE3072_G_BIN;
-static uint8_t ffdhe3072ParamP[] = MBEDTLS_DHM_RFC7919_FFDHE3072_P_BIN;
-static uint8_t ffdhe4096ParamG[] = MBEDTLS_DHM_RFC7919_FFDHE4096_G_BIN;
-static uint8_t ffdhe4096ParamP[] = MBEDTLS_DHM_RFC7919_FFDHE4096_P_BIN;
+static uint8_t g_ffdhe2048ParamG[] = MBEDTLS_DHM_RFC7919_FFDHE2048_G_BIN;
+static uint8_t g_ffdhe2048ParamP[] = MBEDTLS_DHM_RFC7919_FFDHE2048_P_BIN;
+static uint8_t g_ffdhe3072ParamG[] = MBEDTLS_DHM_RFC7919_FFDHE3072_G_BIN;
+static uint8_t g_ffdhe3072ParamP[] = MBEDTLS_DHM_RFC7919_FFDHE3072_P_BIN;
+static uint8_t g_ffdhe4096ParamG[] = MBEDTLS_DHM_RFC7919_FFDHE4096_G_BIN;
+static uint8_t g_ffdhe4096ParamP[] = MBEDTLS_DHM_RFC7919_FFDHE4096_P_BIN;
 
 static int32_t GetDhParam(uint32_t keySize, struct HksBlob *P, struct HksBlob *G)
 {
     switch (keySize) {
         case HKS_DH_KEY_SIZE_2048:
-            P->data = ffdhe2048ParamP;
-            P->size = sizeof(ffdhe2048ParamP);
-            G->data = ffdhe2048ParamG;
-            G->size = sizeof(ffdhe2048ParamG);
+            P->data = g_ffdhe2048ParamP;
+            P->size = sizeof(g_ffdhe2048ParamP);
+            G->data = g_ffdhe2048ParamG;
+            G->size = sizeof(g_ffdhe2048ParamG);
             return HKS_SUCCESS;
         case HKS_DH_KEY_SIZE_3072:
-            P->data = ffdhe3072ParamP;
-            P->size = sizeof(ffdhe3072ParamP);
-            G->data = ffdhe3072ParamG;
-            G->size = sizeof(ffdhe3072ParamG);
+            P->data = g_ffdhe3072ParamP;
+            P->size = sizeof(g_ffdhe3072ParamP);
+            G->data = g_ffdhe3072ParamG;
+            G->size = sizeof(g_ffdhe3072ParamG);
             return HKS_SUCCESS;
         case HKS_DH_KEY_SIZE_4096:
-            P->data = ffdhe4096ParamP;
-            P->size = sizeof(ffdhe4096ParamP);
-            G->data = ffdhe4096ParamG;
-            G->size = sizeof(ffdhe4096ParamG);
+            P->data = g_ffdhe4096ParamP;
+            P->size = sizeof(g_ffdhe4096ParamP);
+            G->data = g_ffdhe4096ParamG;
+            G->size = sizeof(g_ffdhe4096ParamG);
             return HKS_SUCCESS;
         default:
             return HKS_ERROR_INVALID_KEY_SIZE;
@@ -70,7 +70,7 @@ static int32_t GetDhParam(uint32_t keySize, struct HksBlob *P, struct HksBlob *G
 static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t keySize, struct HksBlob *key)
 {
     const uint32_t keyByteLen = HKS_KEY_BYTES(keySize);
-    const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + keyByteLen * HKS_Dh_KEYPAIR_CNT;
+    const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + keyByteLen * HKS_DH_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
     if (rawMaterial == NULL) {
         return HKS_ERROR_MALLOC_FAIL;

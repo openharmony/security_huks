@@ -370,14 +370,14 @@ static int32_t AesCtrCrypt(const struct HksBlob *key, const struct HksUsageSpec 
             break;
         }
 
-        size_t olen;
+        size_t outLen;
         ret = mbedtls_cipher_crypt(
-            &ctx, cipherParam->iv.data, cipherParam->iv.size, message->data, message->size, cipherText->data, &olen);
+            &ctx, cipherParam->iv.data, cipherParam->iv.size, message->data, message->size, cipherText->data, &outLen);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls failed ret = 0x%X", ret);
             break;
         }
-        cipherText->size = olen;
+        cipherText->size = outLen;
 
         mbedtls_cipher_free(&ctx);
         return HKS_SUCCESS;
@@ -413,13 +413,13 @@ static int32_t AesEcbNoPaddingCrypt(const struct HksBlob *key, const struct HksU
             break;
         }
 
-        size_t olen;
-        ret = mbedtls_cipher_crypt(&ctx, NULL, 0, message->data, message->size, cipherText->data, &olen);
+        size_t outLen;
+        ret = mbedtls_cipher_crypt(&ctx, NULL, 0, message->data, message->size, cipherText->data, &outLen);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls failed ret = 0x%X", ret);
             break;
         }
-        cipherText->size = olen;
+        cipherText->size = outLen;
 
         mbedtls_cipher_free(&ctx);
         return HKS_SUCCESS;

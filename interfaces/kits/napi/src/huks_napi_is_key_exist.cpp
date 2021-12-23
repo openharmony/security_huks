@@ -137,7 +137,7 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
 
-    napi_value resourceName;
+    napi_value resourceName = nullptr;
     napi_create_string_latin1(env, "isKeyExistAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
     napi_create_async_work(

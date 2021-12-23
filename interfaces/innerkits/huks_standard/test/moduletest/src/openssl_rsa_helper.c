@@ -210,6 +210,7 @@ int32_t EncryptRSA(const struct HksBlob *inData, struct HksBlob *outData, struct
     }
     EVP_PKEY *pkey = EVP_PKEY_new();
     if (pkey == NULL) {
+        RSA_free(rsa);
         return RSA_FAILED;
     }
     if (EVP_PKEY_assign_RSA(pkey, rsa) != 1) {

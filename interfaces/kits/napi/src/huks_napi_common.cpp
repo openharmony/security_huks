@@ -197,19 +197,24 @@ napi_ref GetCallback(napi_env env, napi_value object)
 
 static napi_value GenerateAarrayBuffer(napi_env env, uint8_t *data, uint32_t size)
 {
-    napi_value outBuffer = nullptr;
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
-    if (buffer != nullptr) {
-        memcpy_s(buffer, size, data, size);
-
-        napi_status status = napi_create_external_arraybuffer(
-            env, buffer, size, [](napi_env env, void *data, void *hint) { HksFree(data); }, nullptr, &outBuffer);
-        if (status != napi_ok) {
-            HksFree(buffer);
-            GET_AND_THROW_LAST_ERROR((env));
-            return nullptr;
-        }
+    if (buffer == nullptr) {
+        return nullptr;
     }
+
+    napi_value outBuffer = nullptr;
+    memcpy_s(buffer, size, data, size);
+
+    napi_status status = napi_create_external_arraybuffer(
+        env, buffer, size, [](napi_env env, void *data, void *hint) { HksFree(data); }, nullptr, &outBuffer);
+    if (status == napi_ok) {
+        // free by finalize callback
+        buffer = nullptr;
+    } else {
+        HksFree(buffer);
+        GET_AND_THROW_LAST_ERROR((env));
+    }
+
     return outBuffer;
 }
 

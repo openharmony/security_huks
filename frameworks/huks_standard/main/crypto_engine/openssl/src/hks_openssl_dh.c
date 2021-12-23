@@ -185,7 +185,7 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 
     uint8_t computeKey[DH_size(dh)];
 
-    if (DH_compute_key_padded(computeKey, pub, dh) <= 0) {
+    if (DH_compute_key_padded(&computeKey[0], pub, dh) <= 0) {
         HksLogOpensslError();
         BN_free(pub);
         DH_free(dh);
@@ -195,9 +195,12 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     if (HKS_KEY_BYTES(spec->keyLen) > (uint32_t)DH_size(dh)) {
         ret = HKS_ERROR_INVALID_KEY_SIZE;
     } else {
-        (void)memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(spec->keyLen));
-        sharedKey->size = DH_size(dh);
-        ret = HKS_SUCCESS;
+        if (memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(spec->keyLen)) != EOK) {
+            ret = HKS_ERROR_INVALID_OPERATION;
+        } else {
+            sharedKey->size = DH_size(dh);
+            ret = HKS_SUCCESS;
+        }
     }
 
     BN_free(pub);
