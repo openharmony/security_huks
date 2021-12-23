@@ -411,7 +411,7 @@ static const struct ExpectParamsValuesChecker g_expectEcdhParams[] = {
 };
 #endif
 
-static uint32_t INVALID_PURPOSE[][2] = {
+static uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_RSA_C
     {
         HKS_ALG_RSA,
@@ -551,14 +551,14 @@ static int32_t CheckPurposeUnique(uint32_t inputPurpose)
 static int32_t GetInvalidPurpose(uint32_t alg, uint32_t *inputPurpose)
 {
     int32_t result = HKS_ERROR_INVALID_ALGORITHM;
-    if (sizeof(INVALID_PURPOSE) == 0) {
+    if (sizeof(g_invalidPurpose) == 0) {
         return result;
     }
-    uint32_t count = sizeof(INVALID_PURPOSE) / sizeof(INVALID_PURPOSE[0]);
+    uint32_t count = sizeof(g_invalidPurpose) / sizeof(g_invalidPurpose[0]);
     for (uint32_t i = 0; i < count; i++) {
-        if (alg == INVALID_PURPOSE[i][0]) {
+        if (alg == g_invalidPurpose[i][0]) {
             result = HKS_SUCCESS;
-            *inputPurpose = INVALID_PURPOSE[i][1];
+            *inputPurpose = g_invalidPurpose[i][1];
             break;
         }
     }
@@ -935,11 +935,11 @@ static int32_t CheckAesPadding(uint32_t mode, uint32_t padding)
     }
 
     if (mode == HKS_MODE_CTR) {
-        return HksCheckValue(padding, g_aesCtrPadding, HKS_ARRAY_SIZE(g_aesCbcPadding));
+        return HksCheckValue(padding, g_aesCtrPadding, HKS_ARRAY_SIZE(g_aesCtrPadding));
     }
 
     if (mode == HKS_MODE_ECB) {
-        return HksCheckValue(padding, g_aesEcbPadding, HKS_ARRAY_SIZE(g_aesCbcPadding));
+        return HksCheckValue(padding, g_aesEcbPadding, HKS_ARRAY_SIZE(g_aesEcbPadding));
     }
 
     if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {

@@ -30,6 +30,7 @@
 #include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
 #include "hks_type_inner.h"
 
@@ -50,25 +51,9 @@ static int32_t HmacCheckBuffer(const struct HksBlob *key, const struct HksBlob *
     return HKS_SUCCESS;
 }
 
-static uint32_t HmacGetDigestLen(uint32_t alg)
-{
-    switch (alg) {
-        case HKS_DIGEST_SHA1:
-            return HKS_DIGEST_SHA1_LEN;
-        case HKS_DIGEST_SHA224:
-            return HKS_DIGEST_SHA224_LEN;
-        case HKS_DIGEST_SHA256:
-            return HKS_DIGEST_SHA256_LEN;
-        case HKS_DIGEST_SHA384:
-            return HKS_DIGEST_SHA384_LEN;
-        default:
-            return HKS_DIGEST_SHA512_LEN;
-    }
-}
-
 static int32_t HmacGenKeyCheckParam(const struct HksKeySpec *spec)
 {
-    if (spec->keyLen % BIT_NUM_OF_UINT8 != 0) {
+    if ((spec->keyLen == 0) || (spec->keyLen % BIT_NUM_OF_UINT8 != 0)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -82,31 +67,7 @@ int32_t HksOpensslHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    uint32_t keySizeByte = spec->keyLen / BIT_NUM_OF_UINT8;
-    int32_t ret = HKS_FAILURE;
-
-    uint8_t *tmpKey = (uint8_t *)HksMalloc(keySizeByte);
-    if (tmpKey == NULL) {
-        HKS_LOG_E("malloc buffer failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    do {
-        if (RAND_bytes(tmpKey, keySizeByte) <= 0) {
-            HKS_LOG_E("generate key is failed:0x%x", ret);
-            break;
-        }
-
-        key->data = tmpKey;
-        key->size = keySizeByte;
-        ret = HKS_SUCCESS;
-    } while (0);
-
-    if (ret != HKS_SUCCESS) {
-        (void)memset_s(tmpKey, keySizeByte, 0, keySizeByte);
-        HksFree(tmpKey);
-    }
-    return ret;
+    return HksOpensslGenerateRandomKey(spec->keyLen, key);
 }
 #endif /* HKS_SUPPORT_HMAC_GENERATE_KEY */
 
@@ -124,7 +85,12 @@ static int32_t HmacCheckParam(
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    uint32_t digestLen = HmacGetDigestLen(alg);
+    uint32_t digestLen;
+    if (HksGetDigestLen(alg, &digestLen) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid alg(0x%x)", alg);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     if (mac->size < digestLen) {
         HKS_LOG_E("invalid mac->size(0x%x) for digestLen(0x%x)", mac->size, digestLen);
         return HKS_ERROR_INVALID_ARGUMENT;

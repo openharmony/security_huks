@@ -64,24 +64,44 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
     uint8_t buff[HKS_KEY_BYTES(keyMaterial->keySize)];
 
+    bool copyFail = false;
+
     uint32_t offset = sizeof(*keyMaterial);
-    (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->nSize);
-    BIGNUM *n = BN_bin2bn(buff, keyMaterial->nSize, NULL);
+    if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->nSize) != EOK) {
+        copyFail = true;
+    }
+    BIGNUM *n = BN_bin2bn(&buff[0], keyMaterial->nSize, NULL);
     offset += keyMaterial->nSize;
-    (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->eSize);
-    BIGNUM *e = BN_bin2bn(buff, keyMaterial->eSize, NULL);
+    if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->eSize) != EOK) {
+        copyFail = true;
+    }
+    BIGNUM *e = BN_bin2bn(&buff[0], keyMaterial->eSize, NULL);
     offset += keyMaterial->eSize;
     BIGNUM *d = NULL;
     if (needPrivateExponent) {
-        (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->dSize);
-        d = BN_bin2bn(buff, keyMaterial->dSize, NULL);
+        if (memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->dSize) != EOK) {
+            copyFail = true;
+        }
+        d = BN_bin2bn(&buff[0], keyMaterial->dSize, NULL);
+    }
+    if (copyFail) {
+        SELF_FREE_PTR(n, BN_free);
+        SELF_FREE_PTR(e, BN_free);
+        SELF_FREE_PTR(d, BN_free);
+        return NULL;
     }
 
     RSA *rsa = RSA_new();
-    int32_t ret = RSA_set0_key(rsa, n, e, d);
-    if (ret != HKS_OPENSSL_SUCCESS) {
-        RSA_free(rsa);
-        return NULL;
+    if (rsa != NULL) {
+        int32_t ret = RSA_set0_key(rsa, n, e, d);
+        if (ret != HKS_OPENSSL_SUCCESS) {
+            RSA_free(rsa);
+            return NULL;
+        }
+    } else {
+        SELF_FREE_PTR(n, BN_free);
+        SELF_FREE_PTR(e, BN_free);
+        SELF_FREE_PTR(d, BN_free);
     }
 
     return rsa;
@@ -106,15 +126,21 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
 
     uint32_t offset = sizeof(*keyMaterial);
     keyMaterial->nSize = BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
-    memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize);
+    if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize) != EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
 
     offset += keyMaterial->nSize;
     keyMaterial->eSize = BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
-    memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize);
+    if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize) != EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
 
     offset += keyMaterial->eSize;
     keyMaterial->dSize = BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
-    memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize);
+    if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize) != EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
 
     key->data = rawMaterial;
     key->size = sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize;
@@ -163,10 +189,12 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->eSize = keyMaterial->eSize;
     publickeyMaterial->dSize = 0;
 
-    memcpy_s(output->data + sizeof(struct KeyMaterialRsa),
-        output->size - sizeof(struct KeyMaterialRsa),
-        input->data + sizeof(struct KeyMaterialRsa),
-        keyMaterial->nSize + keyMaterial->eSize);
+    if (memcpy_s(output->data + sizeof(struct KeyMaterialRsa),
+                 output->size - sizeof(struct KeyMaterialRsa),
+                 input->data + sizeof(struct KeyMaterialRsa),
+                 keyMaterial->nSize + keyMaterial->eSize) != EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
 
     return HKS_SUCCESS;
 }
@@ -176,15 +204,23 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
 static int32_t GetRsaCryptPadding(uint32_t padding, uint32_t *rsaPadding)
 {
     switch (padding) {
+#ifdef HKS_SUPPORT_RSA_ECB_NOPADDING
         case HKS_PADDING_NONE:
             *rsaPadding = RSA_NO_PADDING;
             return HKS_SUCCESS;
+#endif
+#ifdef HKS_SUPPORT_RSA_ECB_PKCS1PADDING
         case HKS_PADDING_PKCS1_V1_5:
             *rsaPadding = RSA_PKCS1_PADDING;
             return HKS_SUCCESS;
+#endif
+#if defined(HKS_SUPPORT_RSA_ECB_OEAPPADDING) || defined(HKS_SUPPORT_RSA_ECB_OAEPPADDING_SHA1MGF1) ||              \
+    defined(HKS_SUPPORT_RSA_ECB_OAEPPADDING_SHA224MGF1) || defined(HKS_SUPPORT_RSA_ECB_OAEPPADDING_SHA256MGF1) || \
+    defined(HKS_SUPPORT_RSA_ECB_OAEPPADDING_SHA384MGF1) || defined(HKS_SUPPORT_RSA_ECB_OAEPPADDING_SHA512MGF1)
         case HKS_PADDING_OAEP:
             *rsaPadding = RSA_PKCS1_OAEP_PADDING;
             return HKS_SUCCESS;
+#endif
         default:
             return HKS_FAILURE;
     }
@@ -234,6 +270,7 @@ static EVP_PKEY_CTX *InitEvpPkeyCtx(const struct HksBlob *key, bool encrypt)
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_PKEY_free(pkey);
+        EVP_PKEY_CTX_free(ctx);
         return NULL;
     }
 
