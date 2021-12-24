@@ -14,7 +14,7 @@
 #
 group("huks_3.0_test") {
   if (ohos_kernel_type == "liteos_m") {
-    deps = [ "unittest/src/liteos_m_adapter:huks_3.0_test" ]
+    #deps = [ "unittest/src/liteos_m_adapter:huks_3.0_test" ]
   } else {
     deps = [ "unittest/src/liteos_a_adapter:unittest" ]
   }
