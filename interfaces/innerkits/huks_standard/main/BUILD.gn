@@ -29,6 +29,9 @@ ohos_shared_library("libhukssdk") {
   include_dirs = [ "//utils/native/base/include" ]
 
   sources = [ "src/hks_api.c" ]
-
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
   deps = [ "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks" ]
 }

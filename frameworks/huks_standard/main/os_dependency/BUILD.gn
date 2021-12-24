@@ -52,7 +52,11 @@ ohos_static_library("libhuks_os_dependency_standard_static") {
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",
   ]
-  cflags_cc = [ "-DHILOG_ENABLE" ]
-  cflags = [ "-DHILOG_ENABLE" ]
+  cflags_cc = [
+    "-DHILOG_ENABLE",
+    "-Wall",
+    "-Werror",
+  ]
+  cflags = cflags_cc
   complete_static_lib = true
 }

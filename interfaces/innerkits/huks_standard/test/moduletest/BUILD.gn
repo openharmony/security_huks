@@ -73,6 +73,12 @@ ohos_moduletest("huks_mt_test") {
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
     "include",
   ]
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
+  cflags = cflags_cc
+
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
