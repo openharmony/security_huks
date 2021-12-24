@@ -50,6 +50,8 @@ hctest_suite("huks_3.0_test") {
   cflags = [
     "-D_CUT_ED25519_",
     "-D_CUT_LOG_",
+    "-Wall",
+    "-Werror",
   ]
   if (disable_authenticate == true) {
     cflags += [ "-D_CUT_AUTHENTICATE_" ]
