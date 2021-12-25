@@ -18,6 +18,7 @@ shared_library("ace_kit_cipher") {
   cflags = [
     "-fPIC",
     "-Wall",
+    "-Werror",
   ]
 
   cflags_cc = cflags

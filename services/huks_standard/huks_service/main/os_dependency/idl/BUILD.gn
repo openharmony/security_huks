@@ -43,6 +43,11 @@ ohos_static_library("libhuks_service_idl_standard_static") {
   ]
   external_deps = [ "ipc:ipc_core" ]
 
-  cflags_cc = [ "-DHILOG_ENABLE" ]
+  cflags_cc = [
+    "-DHILOG_ENABLE",
+    "-Wall",
+    "-Werror",
+  ]
+  cflags = cflags_cc
   complete_static_lib = true
 }

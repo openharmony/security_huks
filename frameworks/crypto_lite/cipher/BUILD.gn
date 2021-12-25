@@ -32,6 +32,7 @@ shared_library("cipher_shared") {
 
   cflags = [
     "-Wall",
+    "-Werror",
     "-Wno-format",
     "-Wno-format-extra-args",
   ]
