@@ -58,5 +58,5 @@ ohos_shared_library("huks") {
 
   relative_install_dir = "module/security"
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
 }

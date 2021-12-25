@@ -21,12 +21,12 @@ ohos_prebuilt_etc("huks_service.rc") {
   }
   relative_install_dir = "init"
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
 }
 
 ohos_shared_library("huks_service") {
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",

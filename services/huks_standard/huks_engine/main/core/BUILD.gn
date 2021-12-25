@@ -19,7 +19,7 @@ config("huks_config") {
 
 ohos_static_library("libhuks_engine_core_standard_static") {
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
   public_configs = [ ":huks_config" ]
   defines = [
     "L2_STANDARD",

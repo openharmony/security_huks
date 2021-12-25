@@ -19,7 +19,7 @@ config("huks_config") {
 
 ohos_static_library("libhuks_service_idl_standard_static") {
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
   public_configs = [ ":huks_config" ]
   include_dirs = [
     "//utils/native/base/include",
