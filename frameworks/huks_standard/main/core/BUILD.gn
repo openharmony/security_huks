@@ -28,6 +28,10 @@ ohos_static_library("libhuks_core_standard_static") {
     "_HUKS_LOG_ENABLE_",
   ]
   sources = [ "./src/hks_local_engine.c" ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
   deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
   complete_static_lib = true
 }

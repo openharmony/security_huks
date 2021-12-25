@@ -20,6 +20,10 @@ ohos_moduletest("huks_fuzz_test") {
   module_out_path = module_output_path
   sources = [ "src/huks_fuzz_test.cpp" ]
 
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
   if (use_crypto_lib == "openssl") {
     defines = [ "_USE_OPENSSL_" ]
   }
