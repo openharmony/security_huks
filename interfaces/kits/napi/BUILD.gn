@@ -54,7 +54,7 @@ ohos_shared_library("huks") {
 
   deps = [ "//foundation/ace/napi:ace_napi" ]
 
-  external_deps = [ "huks_standard:libhukssdk" ]
+  external_deps = [ "huks:libhukssdk" ]
 
   relative_install_dir = "module/security"
   subsystem_name = "security"
