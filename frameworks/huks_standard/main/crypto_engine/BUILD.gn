@@ -21,7 +21,7 @@ ohos_static_library("libhuks_crypto_engine_standard_static") {
     "_HUKS_LOG_ENABLE_",
   ]
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
   if (use_crypto_lib == "openssl") {
     public_deps = [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static" ]
   }
