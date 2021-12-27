@@ -19,7 +19,7 @@ config("huks_config") {
 
 ohos_shared_library("libhukssdk") {
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
   public_configs = [ ":huks_config" ]
   defines = [
     "L2_STANDARD",
