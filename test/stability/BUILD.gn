@@ -24,6 +24,10 @@ ohos_moduletest("huks_stability_test") {
     "src/api_pressure_test.cpp",
     "src/pressure_test.cpp",
   ]
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
 
   defines = [
     "L2_STANDARD",

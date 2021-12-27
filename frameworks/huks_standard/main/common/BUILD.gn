@@ -38,6 +38,10 @@ ohos_static_library("libhuks_common_standard_static") {
     "src/hks_param.c",
   ]
 
-  cflags_cc = [ "-DHILOG_ENABLE" ]
+  cflags = [
+    "-DHILOG_ENABLE",
+    "-Wall",
+    "-Werror",
+  ]
   complete_static_lib = true
 }

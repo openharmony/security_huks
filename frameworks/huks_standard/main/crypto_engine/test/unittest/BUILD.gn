@@ -75,6 +75,10 @@ ohos_unittest("crypto_engine_unit_test") {
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
 
   if (use_crypto_lib == "openssl") {
     deps += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static" ]
