@@ -31,6 +31,10 @@ ohos_static_library("libhuks_engine_core_standard_static") {
     "//third_party/openssl/include/",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
   ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
   sources = [
     "src/hks_auth.c",
     "src/hks_core_service.c",

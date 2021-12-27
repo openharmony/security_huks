@@ -45,7 +45,10 @@ ohos_static_library("libhuks_service_core_standard_static") {
   } else {
     sources += [ "src/hks_lock.c" ]
   }
-
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//third_party/openssl:libcrypto_static",

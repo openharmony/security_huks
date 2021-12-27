@@ -35,6 +35,12 @@ ohos_unittest("huks_multithread_test") {
     "src/hks_storage_test.cpp",
   ]
 
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
+  cflags = cflags_cc
+
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",

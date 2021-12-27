@@ -57,6 +57,10 @@ ohos_static_library("libhuks_mbedtls_standard_static") {
     "//third_party/mbedtls:mbedtls_shared",
     "//third_party/openssl:libcrypto_static",
   ]
-  cflags_cc = [ "-DHILOG_ENABLE" ]
+  cflags = [
+    "-DHILOG_ENABLE",
+    "-Wall",
+    "-Werror",
+  ]
   complete_static_lib = true
 }
