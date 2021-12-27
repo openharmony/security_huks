@@ -88,5 +88,5 @@ ohos_unittest("crypto_engine_unit_test") {
   }
 
   subsystem_name = "security"
-  part_name = "huks_standard"
+  part_name = "huks"
 }
