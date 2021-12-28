@@ -411,6 +411,7 @@ static const struct ExpectParamsValuesChecker g_expectEcdhParams[] = {
 };
 #endif
 
+#ifndef _CUT_AUTHENTICATE_
 static uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_RSA_C
     {
@@ -474,6 +475,7 @@ static uint32_t g_invalidPurpose[][2] = {
     },
 #endif
 };
+#endif
 
 #ifndef _CUT_AUTHENTICATE_
 #ifndef _STORAGE_LITE_
