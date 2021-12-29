@@ -392,6 +392,7 @@ static int32_t AesCtrCrypt(const struct HksBlob *key, const struct HksUsageSpec 
 static int32_t AesEcbNoPaddingCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
+    (void)usageSpec;
     mbedtls_cipher_context_t ctx;
     mbedtls_cipher_init(&ctx);
 
