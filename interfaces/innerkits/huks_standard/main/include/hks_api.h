@@ -90,6 +90,14 @@ HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
 
 HKS_API_EXPORT int32_t HcmIsDeviceKeyExist(const struct HksParamSet *paramSet);
 
+HKS_API_EXPORT int32_t HksImportId(const uint32_t idType, const struct HksBlob *id);
+
+HKS_API_EXPORT int32_t HksIsIdExist(const uint32_t idType);
+
+HKS_API_EXPORT int32_t HksIsAttestReady(void);
+
+HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksBlob *certChain, struct HksParamSet *paramSetOut);
+
 #ifdef __cplusplus
 }
 #endif

@@ -25,6 +25,7 @@
 #include "hks_local_engine.h"
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_type.h"
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_API_GENERATE_KEY
@@ -42,6 +43,15 @@
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #undef HKS_SUPPORT_API_WRAP_KEY
 #undef HKS_SUPPORT_API_UNWRAP_KEY
+#endif
+
+#ifdef HKS_SUPPORT_SEC_LEVEL
+uint8_t g_secInfo[HKS_MAX_RANDOM_LEN] = {0};
+uint8_t g_challengeInfo[HKS_MAX_RANDOM_LEN] = {0};
+const char g_certInfo[] = "hello_cert_chain_hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh";
+struct HksBlob g_secLevelInfo = { HKS_MAX_RANDOM_LEN, g_secInfo };
+struct HksBlob g_challenge = { HKS_MAX_RANDOM_LEN, g_challengeInfo };
+const struct HksBlob g_cert = { sizeof(g_certInfo), (uint8_t *)g_certInfo };
 #endif
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
@@ -478,6 +488,30 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
 HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain)
 {
+#ifdef HKS_SUPPORT_SEC_LEVEL
+    if ((keyAlias == NULL) || (paramSet == NULL) || (certChain == NULL)) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    if (certChain->certs == NULL || certChain->certs->data == NULL ||
+        HksCheckParamSet(paramSet, paramSet->paramSetSize) != HKS_SUCCESS) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag == HKS_TAG_ATTESTATION_CHALLENGE) {
+            if (memcpy_s(g_challenge.data, HKS_MAX_RANDOM_LEN, paramSet->params[i].blob.data,
+                paramSet->params[i].blob.size) != EOK) {
+                return HKS_ERROR_NOT_SUPPORTED;
+                }
+            g_challenge.size = paramSet->params[i].blob.size;
+        }
+    }
+    if (memcpy_s(certChain->certs->data, certChain->certs->size, g_cert.data, g_cert.size) != EOK) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    certChain->certs->size = g_cert.size;
+    return HKS_SUCCESS;
+#endif
+
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
     HKS_LOG_I("enter attest key");
     if ((keyAlias == NULL) || (paramSet == NULL) || (certChain == NULL)) {
@@ -578,5 +612,84 @@ HKS_API_EXPORT int32_t HcmIsDeviceKeyExist(const struct HksParamSet *paramSet)
 {
     (void)paramSet;
     return HKS_ERROR_NOT_SUPPORTED;
+}
+
+HKS_API_EXPORT int32_t HksImportId(const uint32_t idType, const struct HksBlob *id)
+{
+#ifdef HKS_SUPPORT_SEC_LEVEL
+    if (id == NULL || id->data == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (idType != HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO) {
+        HKS_LOG_E("invalid idType %x", idType);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    if (id->size >= HKS_MAX_RANDOM_LEN) {
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (memcmp(g_secLevelInfo.data, id->data, id->size) != 0) {
+        if (memcpy_s(g_secLevelInfo.data, HKS_MAX_RANDOM_LEN, id->data, id->size) != EOK) {
+            return HKS_ERROR_BAD_STATE;
+        }
+        g_secLevelInfo.size = id->size;
+    }
+
+    HKS_LOG_I("importId success, idType is %x", idType);
+    return HKS_SUCCESS;
+#else
+    (void)idType;
+    (void)id;
+    return HKS_SUCCESS;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksIsIdExist(const uint32_t idType)
+{
+    if (idType == HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO) {
+        return HKS_SUCCESS;
+    } else {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+}
+
+HKS_API_EXPORT int32_t HksIsAttestReady(void)
+{
+    return HKS_SUCCESS;
+}
+
+HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksBlob *certChain, struct HksParamSet *paramSetOut)
+{
+    (void)certChain;
+#ifdef HKS_SUPPORT_SEC_LEVEL
+    for (uint32_t i = 0; i < paramSetOut->paramsCnt; i++) {
+        switch (paramSetOut->params[i].tag) {
+            case HKS_TAG_ATTESTATION_CHALLENGE:
+                HKS_LOG_I("getting challenge");
+                if (memcpy_s(paramSetOut->params[i].blob.data, paramSetOut->params[i].blob.size,
+                    g_challenge.data, g_challenge.size) != EOK) {
+                    return HKS_ERROR_BAD_STATE;
+                }
+                paramSetOut->params[i].blob.size = g_challenge.size;
+                continue;
+            case HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
+                HKS_LOG_I("getting sec level");
+                if (memcpy_s(paramSetOut->params[i].blob.data, paramSetOut->params[i].blob.size,
+                    g_secLevelInfo.data, g_secLevelInfo.size) != EOK) {
+                    return HKS_ERROR_BAD_STATE;
+                }
+                paramSetOut->params[i].blob.size = g_secLevelInfo.size;
+                continue;
+            default:
+                HKS_LOG_I("invalid tag %x", paramSetOut->params[i].tag);
+                return HKS_ERROR_NOT_SUPPORTED;
+        }
+    }
+    return HKS_SUCCESS;
+#else
+    (void)paramSetOut;
+    return HKS_SUCCESS;
+#endif
 }
 
