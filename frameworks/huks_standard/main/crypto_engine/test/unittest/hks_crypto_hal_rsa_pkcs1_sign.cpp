@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -839,6 +840,11 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_040_PARAMS = {
 }  // namespace
 
 class HksCryptoHalRsaPkcs1Sign : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -852,16 +858,25 @@ protected:
         for (uint32_t ii = 0; ii < dataLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
+
+        uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
+        struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
+        /* NONEwithECDSA default sha256: ec_pkey_ctrl default md nid */
+        struct HksUsageSpec usageSpec = testCaseParams.usageSpec;
+        uint32_t inputDigest = usageSpec.digest;
+        usageSpec.digest = (inputDigest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : inputDigest;
+        EXPECT_EQ(HksCryptoHalHash(usageSpec.digest, &message, &hash), HKS_SUCCESS);
+
         struct HksBlob signature = { .size = 512, .data = (uint8_t *)HksMalloc(512) };
 
-        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, &message, &signature), testCaseParams.signResult);
+        EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &hash, &signature), testCaseParams.signResult);
 
         struct HksBlob pubKey = { .size = 1044, .data = (uint8_t *)HksMalloc(1044) };
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
         EXPECT_EQ(
-            HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, &message, &signature), testCaseParams.verifyResult);
+            HksCryptoHalVerify(&pubKey, &usageSpec, &hash, &signature), testCaseParams.verifyResult);
 
         HksFree(message.data);
         HksFree(signature.data);
@@ -869,6 +884,23 @@ protected:
         HksFree(key.data);
     }
 };
+
+void HksCryptoHalRsaPkcs1Sign::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalRsaPkcs1Sign::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalRsaPkcs1Sign::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalRsaPkcs1Sign::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_001
@@ -910,6 +942,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_004, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_004_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_005
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_005
@@ -929,6 +962,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_006, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_006_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_007
@@ -970,6 +1004,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_010, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_010_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_011
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_011
@@ -989,6 +1024,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_012, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_012_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_013
@@ -1030,6 +1066,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_016, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_016_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_017
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_017
@@ -1049,6 +1086,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_018, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_018_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_019
@@ -1090,6 +1128,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_022, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_022_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_023
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_023
@@ -1109,6 +1148,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_024, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_024_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_025
@@ -1150,6 +1190,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_028, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_028_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_029
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_029
@@ -1169,6 +1210,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_030, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_030_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_031
@@ -1200,6 +1242,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_033, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_033_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_034
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_034
@@ -1219,6 +1262,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_035, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_035_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_036
@@ -1250,6 +1294,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_038, Function | Smal
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_038_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPkcs1Sign_039
  * @tc.name      : HksCryptoHalRsaPkcs1Sign_039
@@ -1269,6 +1314,7 @@ HWTEST_F(HksCryptoHalRsaPkcs1Sign, HksCryptoHalRsaPkcs1Sign_040, Function | Smal
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PKCS1_SIGN_040_PARAMS);
 }
+#endif
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

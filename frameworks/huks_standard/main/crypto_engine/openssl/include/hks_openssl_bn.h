@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_MBEDTLS_ECDSA_H
-#define HKS_MBEDTLS_ECDSA_H
+#ifndef HKS_OPENSSL_BN_H
+#define HKS_OPENSSL_BN_H
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -22,25 +22,27 @@
 #include "hks_config.h"
 #endif
 
-#include "hks_crypto_hal.h"
-#include "hks_type.h"
+#include <openssl/bn.h>
+
+#include "hks_type_inner.h"
+
+struct HksBnExpModParams {
+    BIGNUM *bnX;
+    BIGNUM *bnA;
+    BIGNUM *bnE;
+    BIGNUM *bnN;
+    BN_CTX *ctx;
+};
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#ifdef HKS_SUPPORT_ECDSA_C
-#ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
-int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *message, struct HksBlob *signature);
-
-int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *message, const struct HksBlob *signature);
-#endif /* HKS_SUPPORT_ECDSA_SIGN_VERIFY */
-#endif /* HKS_SUPPORT_ECDSA_C */
+int32_t HksOpensslBnExpMod(struct HksBlob *x, const struct HksBlob *a,
+    const struct HksBlob *e, const struct HksBlob *n);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HKS_MBEDTLS_ECDSA_H */
+#endif /* HKS_OPENSSL_BN_H */

@@ -223,8 +223,9 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsX25519GenerateKey(struct HksBlob *key)
+int32_t HksMbedtlsX25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
+    (void)spec;
     mbedtls_ecp_group grp;
     mbedtls_ecp_point pub;
     mbedtls_mpi pri;
@@ -320,8 +321,9 @@ static int32_t X25519KeyMaterialToPri(const struct HksBlob *nativeKey, mbedtls_m
 }
 
 int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
-    const struct HksBlob *pubKey, struct HksBlob *sharedKey)
+    const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
+    (void)spec;
     int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey);
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -824,8 +826,9 @@ void HksFreeKeyInfo(struct HksEd25519ToX25519Blob *key)
 }
 
 int32_t HksMbedtlsEd25519KeyAgreement(const struct HksBlob *nativeKey,
-    const struct HksBlob *pubKey, struct HksBlob *sharedKey)
+    const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
+    (void)spec;
     int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey);
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -864,7 +867,7 @@ int32_t HksMbedtlsEd25519KeyAgreement(const struct HksBlob *nativeKey,
             break;
         }
 
-        ret = HksMbedtlsX25519KeyAgreement(&(key.kmX25519NativeKey), &(key.kmX25519PubKey), sharedKey);
+        ret = HksMbedtlsX25519KeyAgreement(&(key.kmX25519NativeKey), &(key.kmX25519PubKey), NULL, sharedKey);
     } while (0);
 
     HksFreeKeyInfo(&key);

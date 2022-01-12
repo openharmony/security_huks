@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -26,7 +27,30 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 namespace UnitTest {
-class HksCryptoHalHmacKey : public HksCryptoHalCommon, public testing::Test {};
+class HksCryptoHalHmacKey : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+};
+
+void HksCryptoHalHmacKey::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalHmacKey::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalHmacKey::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalHmacKey::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalHmacKey_001

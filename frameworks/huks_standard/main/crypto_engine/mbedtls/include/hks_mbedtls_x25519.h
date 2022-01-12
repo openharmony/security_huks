@@ -30,12 +30,12 @@ extern "C" {
 #endif
 
 #ifdef HKS_SUPPORT_X25519_GENERATE_KEY
-int32_t HksMbedtlsX25519GenerateKey(struct HksBlob *key);
+int32_t HksMbedtlsX25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key);
 #endif
 
 #ifdef HKS_SUPPORT_X25519_AGREE_KEY
 int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
-    const struct HksBlob *pubKey, struct HksBlob *sharedKey);
+    const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey);
 #endif
 
 #ifdef HKS_SUPPORT_X25519_GET_PUBLIC_KEY
@@ -44,7 +44,7 @@ int32_t HksMbedtlsGetX25519PubKey(const struct HksBlob *keyIn, struct HksBlob *k
 
 #ifdef HKS_SUPPORT_ED25519_TO_X25519
 int32_t HksMbedtlsEd25519KeyAgreement(const struct HksBlob *nativeKey,
-    const struct HksBlob *pubKey, struct HksBlob *sharedKey);
+    const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey);
 #endif
 
 #ifdef __cplusplus

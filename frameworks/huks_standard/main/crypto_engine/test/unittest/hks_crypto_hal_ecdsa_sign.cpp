@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -494,6 +495,11 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_024_PARAMS = {
 }  // namespace
 
 class HksCryptoHalEcdsaSign : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -508,16 +514,25 @@ protected:
         for (uint32_t ii = 0; ii < dataLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
         }
+
+        uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
+        struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
+        /* NONEwithECDSA default sha256: ec_pkey_ctrl default md nid */
+        struct HksUsageSpec usageSpec = testCaseParams.usageSpec;
+        uint32_t inputDigest = usageSpec.digest;
+        usageSpec.digest = (inputDigest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : inputDigest;
+        EXPECT_EQ(HksCryptoHalHash(usageSpec.digest, &message, &hash), HKS_SUCCESS);
+
         struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
 
-        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, &message, &signature), testCaseParams.signResult);
+        EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &hash, &signature), testCaseParams.signResult);
 
         struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
         EXPECT_EQ(
-            HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, &message, &signature), testCaseParams.verifyResult);
+            HksCryptoHalVerify(&pubKey, &usageSpec, &hash, &signature), testCaseParams.verifyResult);
 
         HksFree(message.data);
         HksFree(signature.data);
@@ -525,6 +540,23 @@ protected:
         HksFree(key.data);
     }
 };
+
+void HksCryptoHalEcdsaSign::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalEcdsaSign::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalEcdsaSign::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalEcdsaSign::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalEcdsaSign_001
