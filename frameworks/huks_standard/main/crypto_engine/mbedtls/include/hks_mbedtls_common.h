@@ -25,7 +25,7 @@
 #include <mbedtls/ctr_drbg.h>
 #include <mbedtls/entropy.h>
 
-#include "hks_type.h"
+#include "hks_type_inner.h"
 
 #define HKS_MBEDTLS_SUCCESS ((int32_t)0)
 
@@ -36,6 +36,10 @@ extern "C" {
 int32_t HksToMbedtlsDigestAlg(const uint32_t hksAlg, uint32_t *mbedtlsAlg);
 
 int32_t HksCtrDrbgSeed(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_context *entropy);
+
+int32_t HksMbedtlsFillRandom(struct HksBlob *randomData);
+
+int32_t HksMbedtlsGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
 
 #ifdef __cplusplus
 }

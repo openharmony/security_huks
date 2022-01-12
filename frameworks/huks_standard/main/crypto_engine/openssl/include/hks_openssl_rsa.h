@@ -34,8 +34,11 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
 #endif /* HKS_SUPPORT_RSA_GET_PUBLIC_KEY */
 
 #ifdef HKS_SUPPORT_RSA_CRYPT
-int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText);
+int32_t HksOpensslRsaEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead);
+
+int32_t HksOpensslRsaDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText);
 #endif /* HKS_SUPPORT_RSA_CRYPT */
 
 #ifdef HKS_SUPPORT_RSA_SIGN_VERIFY

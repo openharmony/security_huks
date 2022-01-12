@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -629,6 +630,11 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_PSS_SIGN_029_PARAMS = {
 }  // namespace
 
 class HksCryptoHalRsaPssSign : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -642,15 +648,20 @@ protected:
         for (uint32_t ii = 0; ii < dataLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
+
+        uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
+        struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
+        EXPECT_EQ(HksCryptoHalHash(testCaseParams.usageSpec.digest, &message, &hash), HKS_SUCCESS);
+
         struct HksBlob signature = { .size = 512, .data = (uint8_t *)HksMalloc(512) };
 
-        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, &message, &signature), testCaseParams.signResult);
+        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, &hash, &signature), testCaseParams.signResult);
 
         if (testCaseParams.signResult == HKS_SUCCESS) {
             struct HksBlob pubKey = { .size = 1044, .data = (uint8_t *)HksMalloc(1044) };
             EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
-            EXPECT_EQ(HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, &message, &signature),
+            EXPECT_EQ(HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, &hash, &signature),
                 testCaseParams.verifyResult);
             HksFree(pubKey.data);
         }
@@ -659,6 +670,23 @@ protected:
         HksFree(key.data);
     }
 };
+
+void HksCryptoHalRsaPssSign::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalRsaPssSign::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalRsaPssSign::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalRsaPssSign::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_001
@@ -700,6 +728,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_004, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_004_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_005
  * @tc.name      : HksCryptoHalRsaPssSign_005
@@ -719,6 +748,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_006, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_006_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_007
@@ -760,6 +790,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_010, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_010_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_011
  * @tc.name      : HksCryptoHalRsaPssSign_011
@@ -779,6 +810,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_012, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_012_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_013
@@ -820,6 +852,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_016, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_016_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_017
  * @tc.name      : HksCryptoHalRsaPssSign_017
@@ -839,6 +872,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_018, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_018_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_019
@@ -880,6 +914,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_022, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_022_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_023
  * @tc.name      : HksCryptoHalRsaPssSign_023
@@ -899,6 +934,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_024, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_024_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_025
@@ -930,6 +966,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_027, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_027_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaPssSign_028
  * @tc.name      : HksCryptoHalRsaPssSign_028
@@ -949,6 +986,7 @@ HWTEST_F(HksCryptoHalRsaPssSign, HksCryptoHalRsaPssSign_029, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_PSS_SIGN_029_PARAMS);
 }
+#endif
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

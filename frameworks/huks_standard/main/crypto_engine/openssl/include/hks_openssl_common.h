@@ -24,6 +24,8 @@ extern "C" {
 
 int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key);
 
+int32_t HksOpensslFillRandom(struct HksBlob *randomData);
+
 #ifdef __cplusplus
 }
 #endif

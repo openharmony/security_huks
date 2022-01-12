@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -97,6 +98,11 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_004_PARAMS = {
 }  // namespace
 
 class HksCryptoHalEcdhAgree : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -131,6 +137,23 @@ protected:
         HksFree(agreeKeyBob.data);
     }
 };
+
+void HksCryptoHalEcdhAgree::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalEcdhAgree::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalEcdhAgree::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalEcdhAgree::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalEcdhAgree_001

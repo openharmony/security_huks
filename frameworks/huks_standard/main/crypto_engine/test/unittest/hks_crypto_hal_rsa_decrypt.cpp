@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -463,6 +464,11 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_DECRYPT_012_PARAMS = {
 }  // namespace
 
 class HksCryptoHalRsaDecrypt : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -489,6 +495,23 @@ protected:
         HksFree(cipherText.data);
     }
 };
+
+void HksCryptoHalRsaDecrypt::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalRsaDecrypt::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalRsaDecrypt::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalRsaDecrypt::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_001
@@ -530,6 +553,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_004, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_DECRYPT_004_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_005
  * @tc.name      : HksCryptoHalRsaDecrypt_005
@@ -549,6 +573,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_006, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_DECRYPT_006_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_007
@@ -590,6 +615,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_010, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_RSA_DECRYPT_010_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_011
  * @tc.name      : HksCryptoHalRsaDecrypt_011
@@ -609,6 +635,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_012, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_DECRYPT_012_PARAMS);
 }
+#endif
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

@@ -34,8 +34,11 @@ int32_t HksMbedtlsRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 #endif
 
 #ifdef HKS_SUPPORT_RSA_CRYPT
-int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText);
+int32_t HksMbedtlsRsaEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead);
+
+int32_t HksMbedtlsRsaDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText);
 #endif
 
 #ifdef HKS_SUPPORT_RSA_SIGN_VERIFY

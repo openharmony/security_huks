@@ -114,6 +114,38 @@ struct KeyMaterial25519 {
     uint32_t reserved;
 };
 
+typedef int32_t (*GetMainKey)(const struct HksBlob *, struct HksBlob *);
+
+typedef int32_t (*GenerateKey)(const struct HksKeySpec *, struct HksBlob *);
+
+typedef int32_t (*PubKey)(const struct HksBlob *, struct HksBlob *);
+
+typedef int32_t (*DeriveKey)(const struct HksBlob *, const struct HksKeySpec *, struct HksBlob *);
+
+typedef int32_t (*FillRandom)(struct HksBlob *);
+
+typedef int32_t (*AgreeKey)(const struct HksBlob *, const struct HksBlob *, const struct HksKeySpec *,
+    struct HksBlob *);
+
+typedef int32_t (*Sign)(const struct HksBlob *, const struct HksUsageSpec *, const struct HksBlob *,
+    struct HksBlob *);
+
+typedef int32_t (*Verify)(const struct HksBlob *, const struct HksUsageSpec *, const struct HksBlob *,
+    const struct HksBlob *);
+
+typedef int32_t (*Hmac)(const struct HksBlob *, uint32_t, const struct HksBlob *, struct HksBlob *);
+
+typedef int32_t (*Hash)(uint32_t, const struct HksBlob *, struct HksBlob *);
+
+typedef int32_t (*Encrypt)(const struct HksBlob *, const struct HksUsageSpec *,
+    const struct HksBlob *, struct HksBlob *, struct HksBlob *);
+
+typedef int32_t (*Decrypt)(const struct HksBlob *, const struct HksUsageSpec *,
+    const struct HksBlob *, struct HksBlob *);
+
+typedef int32_t (*BnExpMod)(struct HksBlob *, const struct HksBlob *,
+    const struct HksBlob *, const struct HksBlob *);
+
 int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
 
 int32_t HksCryptoHalGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key);
