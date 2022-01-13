@@ -22,6 +22,7 @@
 #include "hks_config.h"
 #endif
 
+#include "hks_crypto_hal.h"
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
@@ -29,7 +30,7 @@ extern "C" {
 #endif
 
 #if defined(HKS_SUPPORT_ED25519_C) || defined(HKS_SUPPORT_ED25519_GENERATE_KEY)
-int32_t HksEd25519GenerateKey(struct HksBlob *keyOut);
+int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *keyOut);
 #endif
 
 #if defined(HKS_SUPPORT_ED25519_C) || defined(HKS_SUPPORT_ED2519_GET_PUBLIC_KEY)
@@ -37,10 +38,11 @@ int32_t HksGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
 #endif
 
 #if defined(HKS_SUPPORT_ED25519_C) || defined(HKS_SUPPORT_ED25519_SIGN_VERIFY)
-int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksBlob *message, struct HksBlob *signature);
+int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature);
 
-int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksBlob *message,
-    const struct HksBlob *signature);
+int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature);
 #endif
 
 #ifdef __cplusplus

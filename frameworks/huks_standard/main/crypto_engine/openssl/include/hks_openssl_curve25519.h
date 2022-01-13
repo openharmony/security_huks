@@ -28,16 +28,16 @@ extern "C" {
 int32_t HksOpensslCurve25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key);
 
 int32_t HksOpensslX25519AgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
-    struct HksBlob *sharedKey);
+    const struct HksKeySpec *spec, struct HksBlob *sharedKey);
 
 int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
-    struct HksBlob *sharedKey);
+    const struct HksKeySpec *spec, struct HksBlob *sharedKey);
 
-int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksBlob *message,
-    struct HksBlob *signature);
+int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature);
 
-int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksBlob *message,
-    const struct HksBlob *signature);
+int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature);
 
 int32_t HksOpensslGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output);
 

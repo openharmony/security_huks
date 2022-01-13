@@ -15,6 +15,7 @@
 
 #include "hks_local_engine.h"
 
+#include "hks_ability.h"
 #include "hks_check_paramset.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
@@ -26,6 +27,15 @@
 
 #define MAX_DEGIST_SIZE 64
 #define X25519_KEY_BYTE_SIZE 32
+
+static void HksLocalCryptoAbilityInit(void)
+{
+    int32_t ret = HksCryptoAbilityInit();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Hks local init crypto ability failed, ret = %d", ret);
+        return;
+    }
+}
 
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksLocalHash(const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *hash)
@@ -52,7 +62,7 @@ int32_t HksLocalHash(const struct HksParamSet *paramSet, const struct HksBlob *s
         HKS_LOG_E("hash len too small, size = %u", hash->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-
+    HksLocalCryptoAbilityInit();
     return HksCryptoHalHash(digestAlg->uint32Param, srcData, hash);
 }
 #endif
@@ -74,7 +84,7 @@ int32_t HksLocalMac(const struct HksBlob *key, const struct HksParamSet *paramSe
         HKS_LOG_E("get param digest failed");
         return HKS_ERROR_CHECK_GET_DIGEST_FAIL;
     }
-
+    HksLocalCryptoAbilityInit();
     return HksCryptoHalHmac(key, digestAlg->uint32Param, srcData, mac);
 }
 
@@ -84,6 +94,7 @@ int32_t HksLocalBnExpMod(struct HksBlob *x, const struct HksBlob *a, const struc
     if (ret != HKS_SUCCESS) {
         return ret;
     }
+    HksLocalCryptoAbilityInit();
     return HksCryptoHalBnExpMod(x, a, e, n);
 }
 
@@ -115,6 +126,7 @@ int32_t HksLocalGenerateKey(const struct HksParamSet *paramSetIn, struct HksPara
     HksFillKeySpec(paramSetIn, &spec);
     struct HksBlob key = { 0, NULL };
 
+    HksLocalCryptoAbilityInit();
     ret = HksCryptoHalGenerateKey(&spec, &key);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("local engine generate key failed, ret:%x!", ret);
@@ -158,6 +170,7 @@ int32_t HksLocalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlo
         return ret;
     }
 
+    HksLocalCryptoAbilityInit();
     ret = HksCryptoHalAgreeKey(&privateKeyMaterial, &publicKeyMaterial, &spec, agreedKey);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("local engine agree key failed, ret:%x!", ret);
@@ -250,18 +263,21 @@ static int32_t EncryptAndDecrypt(uint32_t cmdId, const struct HksBlob *key, cons
 int32_t HksLocalEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *plainText, struct HksBlob *cipherText)
 {
+    HksLocalCryptoAbilityInit();
     return EncryptAndDecrypt(HKS_CMD_ID_ENCRYPT, key, paramSet, plainText, cipherText);
 }
 
 int32_t HksLocalDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText)
 {
+    HksLocalCryptoAbilityInit();
     return EncryptAndDecrypt(HKS_CMD_ID_DECRYPT, key, paramSet, cipherText, plainText);
 }
 
 int32_t HksLocalDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *mainKey,
     struct HksBlob *derivedKey)
 {
+    HksLocalCryptoAbilityInit();
     if (HksCheckBlob2AndParamSet(mainKey, derivedKey, paramSet) != HKS_SUCCESS) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -284,6 +300,7 @@ int32_t HksLocalDeriveKey(const struct HksParamSet *paramSet, const struct HksBl
 static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature)
 {
+    HksLocalCryptoAbilityInit();
     if (HksCheckBlob3AndParamSet(key, srcData, signature, paramSet) != HKS_SUCCESS) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -326,6 +343,36 @@ static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *
     return HKS_SUCCESS;
 }
 
+static int32_t GetSignVerifyMessage(struct HksUsageSpec *usageSpec, const struct HksBlob *srcData,
+    struct HksBlob *message, bool *needFree)
+{
+    if (usageSpec->algType != HKS_ALG_ED25519) {
+        message->size = MAX_DEGIST_SIZE;
+        message->data = (uint8_t *)HksMalloc(MAX_DEGIST_SIZE);
+        if (message->data == NULL) {
+            HKS_LOG_E("SignVerify malloc message data failed!");
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+
+        /* NONEwithECDSA/RSA default sha256 */
+        usageSpec->digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
+        int32_t ret = HksCryptoHalHash(usageSpec->digest, srcData, message);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("SignVerify calc hash failed!");
+            HKS_FREE_PTR(message->data);
+            return ret;
+        }
+
+        *needFree = true;
+    } else {
+        message->size = srcData->size;
+        message->data = srcData->data;
+        *needFree = false;
+    }
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramSet, const struct HksBlob *srcData,
     struct HksBlob *signature)
 {
@@ -336,21 +383,36 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
-
+    bool needFree = true;
+    struct HksBlob message = { 0, NULL };
     struct HksBlob keyMaterial = { 0, NULL };
-    ret = HksSetKeyToMaterial(usageSpec.algType, false, key, &keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("set key to material failed, ret:%x!", ret);
-        return ret;
-    }
+    do {
+        ret = HksSetKeyToMaterial(usageSpec.algType, false, key, &keyMaterial);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("set key to material failed, ret:%x!", ret);
+            break;
+        }
+        ret = GetSignVerifyMessage(&usageSpec, srcData, &message, &needFree);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("SignVerify calc hash failed!");
+            break;
+        }
 
-    ret = HksCryptoHalSign(&keyMaterial, &usageSpec, srcData, signature);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local engine verify failed, ret:%x!", ret);
-    }
+        HksLocalCryptoAbilityInit();
+        ret = HksCryptoHalSign(&keyMaterial, &usageSpec, &message, signature);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("local engine verify failed, ret:%x!", ret);
+            break;
+        }
+    } while (0);
 
-    (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
-    HKS_FREE_PTR(keyMaterial.data);
+    if (needFree) {
+        HKS_FREE_PTR(message.data);
+    }
+    if (keyMaterial.data != NULL) {
+        (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
+        HKS_FREE_PTR(keyMaterial.data);
+    }
     return ret;
 }
 
@@ -365,20 +427,37 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
 
+    bool needFree = true;
+    struct HksBlob message = { 0, NULL };
     struct HksBlob keyMaterial = { 0, NULL };
-    ret = HksSetKeyToMaterial(usageSpec.algType, true, key, &keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("set key to material failed, ret:%x!", ret);
-        return ret;
-    }
+    do {
+        ret = HksSetKeyToMaterial(usageSpec.algType, true, key, &keyMaterial);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("set key to material failed, ret:%x!", ret);
+            break;
+        }
 
-    ret = HksCryptoHalVerify(&keyMaterial, &usageSpec, srcData, signature);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local engine verify failed, ret:%x!", ret);
-    }
+        ret = GetSignVerifyMessage(&usageSpec, srcData, &message, &needFree);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("SignVerify calc hash failed!");
+            break;
+        }
 
-    (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
-    HKS_FREE_PTR(keyMaterial.data);
+        HksLocalCryptoAbilityInit();
+        ret = HksCryptoHalVerify(&keyMaterial, &usageSpec, &message, signature);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("local engine verify failed, ret:%x!", ret);
+            break;
+        }
+    } while (0);
+
+    if (needFree) {
+        HKS_FREE_PTR(message.data);
+    }
+    if (keyMaterial.data != NULL) {
+        (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
+        HKS_FREE_PTR(keyMaterial.data);
+    }
     return ret;
 }
 #endif

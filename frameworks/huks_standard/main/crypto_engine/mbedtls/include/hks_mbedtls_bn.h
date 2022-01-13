@@ -28,8 +28,8 @@
 extern "C" {
 #endif
 
-int32_t HksMbedtlsBnExpMod(const struct HksBlob *a,
-    const struct HksBlob *e, const struct HksBlob *n, struct HksBlob *x);
+int32_t HksMbedtlsBnExpMod(struct HksBlob *x, const struct HksBlob *a,
+    const struct HksBlob *e, const struct HksBlob *n);
 
 #ifdef __cplusplus
 }

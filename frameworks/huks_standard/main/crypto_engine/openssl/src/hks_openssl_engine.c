@@ -21,25 +21,12 @@
 
 #include "hks_openssl_engine.h"
 
-#include <openssl/bn.h>
 #include <openssl/err.h>
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/rand.h>
 
+#include "hks_ability.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
-#include "hks_mem.h"
-#include "hks_openssl_aes.h"
-#include "hks_openssl_curve25519.h"
-#include "hks_openssl_dh.h"
-#include "hks_openssl_dsa.h"
-#include "hks_openssl_ecc.h"
-#include "hks_openssl_ed25519tox25519.h"
-#include "hks_openssl_hash.h"
-#include "hks_openssl_hmac.h"
-#include "hks_openssl_kdf.h"
-#include "hks_openssl_rsa.h"
+
 #include "hks_type_inner.h"
 
 void HksLogOpensslError(void)
@@ -188,24 +175,11 @@ int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    RAND_bytes(randomData->data, randomData->size);
-    if (randomData->size == 1) {
-        return HKS_SUCCESS;
+    FillRandom func = (FillRandom)GetAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM);
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
-
-    uint32_t j = 0;
-
-    for (uint32_t i = 0; i < randomData->size; i++) {
-        if (randomData->data[i] == 0) {
-            j++;
-        }
-    }
-    if (j == randomData->size) {
-        HKS_LOG_E("fill random failed, size %x", randomData->size);
-        return HKS_ERROR_UNKNOWN_ERROR;
-    }
-    HKS_LOG_D("generate random success");
-    return HKS_SUCCESS;
+    return func(randomData);
 }
 
 int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
@@ -216,29 +190,11 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
     }
 
     struct KeyMaterialRsa *key = (struct KeyMaterialRsa *)(keyIn->data);
-    switch (key->keyAlg) {
-#if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_GET_PUBLIC_KEY)
-        case HKS_ALG_DSA:
-            return HksOpensslGetDsaPubKey(keyIn, keyOut);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GET_PUBLIC_KEY)
-        case HKS_ALG_RSA:
-            return HksOpensslGetRsaPubKey(keyIn, keyOut);
-#endif
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY)
-        case HKS_ALG_ECC:
-            return HksOpensslGetEccPubKey(keyIn, keyOut);
-#endif
-#if defined(HKS_SUPPORT_DH_C) && defined(HKS_SUPPORT_DH_GET_PUBLIC_KEY)
-        case HKS_ALG_DH:
-            return HksOpensslGetDhPubKey(keyIn, keyOut);
-#endif
-        case HKS_ALG_ED25519:
-            return HksOpensslGetEd25519PubKey(keyIn, keyOut);
-        default:
-            HKS_LOG_E("Unsupport key mode or macro is not on! mode = 0x%X", key->keyAlg);
-            return HKS_ERROR_INVALID_ARGUMENT;
+    PubKey func = (PubKey)GetAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(key->keyAlg));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(keyIn, keyOut);
 }
 
 int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
@@ -249,121 +205,30 @@ int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *ma
 
 int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac)
 {
-#if defined(HKS_SUPPORT_HMAC_C)
-#if defined(HKS_SUPPORT_HMAC_SHA1) || defined(HKS_SUPPORT_HMAC_SHA224) || defined(HKS_SUPPORT_HMAC_SHA256) || \
-    defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512)
-    return HksOpensslHmac(key, digestAlg, msg, mac);
-#else
-    return HKS_ERROR_INVALID_ARGUMENT;
-#endif
-#else
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif /* HKS_SUPPORT_HMAC_C */
+    Hmac func = (Hmac)GetAbility(HKS_CRYPTO_ABILITY_HMAC);
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return func(key, digestAlg, msg, mac);
 }
 
 int32_t HksCryptoHalHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    return HksOpensslHash(alg, msg, hash);
-}
-
-static void BnFreeParams(struct HksBnExpModParams *bnParams)
-{
-    BN_free(bnParams->bnX);
-    BN_free(bnParams->bnA);
-    BN_free(bnParams->bnE);
-    BN_free(bnParams->bnN);
-    BN_CTX_free(bnParams->ctx);
-}
-
-static int32_t BnBuildParams(
-    struct HksBnExpModParams *bnParams, const struct HksBlob *a, const struct HksBlob *e, const struct HksBlob *n)
-{
-    bnParams->ctx = BN_CTX_new();
-    bnParams->bnX = BN_new();
-    bnParams->bnA = BN_bin2bn(a->data, a->size, NULL);
-    bnParams->bnE = BN_bin2bn(e->data, e->size, NULL);
-    bnParams->bnN = BN_bin2bn(n->data, n->size, NULL);
-    if ((bnParams->ctx == NULL) || (bnParams->bnX == NULL) || (bnParams->bnA == NULL) || (bnParams->bnE == NULL) ||
-        (bnParams->bnN == NULL)) {
-        BnFreeParams(bnParams);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    Hash func = (Hash)GetAbility(HKS_CRYPTO_ABILITY_HASH);
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
-    return HKS_SUCCESS;
-}
-
-static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
-{
-    int32_t outLen = BN_num_bytes(bnX);
-    if ((outLen < 0) || (x->size < (uint32_t)outLen)) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    (void)memset_s(x->data, x->size, 0, x->size);
-    if (outLen == 0) {
-        return HKS_SUCCESS;
-    }
-
-    uint8_t *bnOutput = (uint8_t *)HksMalloc(outLen);
-    if (bnOutput == NULL) {
-        HKS_LOG_E("malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    int32_t ret = HKS_SUCCESS;
-    do {
-        int32_t realOutLen = BN_bn2bin(bnX, bnOutput);
-        if (realOutLen != outLen) {
-            HKS_LOG_E("BN_bn2bin fail");
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
-
-        uint32_t i = x->size - 1;
-        int32_t j = realOutLen - 1; /* realOutLen is greater than 0; x->size is no less than realOutLen */
-        for (; j >= 0; --i, --j) {  /* i is no less than j */
-            x->data[i] = bnOutput[j];
-        }
-    } while (0);
-
-    HksFree(bnOutput);
-    return ret;
+    return func(alg, msg, hash);
 }
 
 int32_t HksCryptoHalBnExpMod(
     struct HksBlob *x, const struct HksBlob *a, const struct HksBlob *e, const struct HksBlob *n)
 {
-    struct HksBnExpModParams bnParams;
-    (void)memset_s(&bnParams, sizeof(bnParams), 0, sizeof(bnParams));
-    int32_t ret = BnBuildParams(&bnParams, a, e, n);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("BnInitParams fail");
-        return ret;
+    BnExpMod func = (BnExpMod)GetAbility(HKS_CRYPTO_ABILITY_BN_EXP_MOD);
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
-
-    do {
-        /* mod 0 is not supported */
-        if (BN_is_zero(bnParams.bnN)) {
-            HKS_LOG_E("not support mod 0 operation.");
-            ret = HKS_ERROR_INVALID_ARGUMENT;
-            break;
-        }
-
-        ret = BN_mod_exp(bnParams.bnX, bnParams.bnA, bnParams.bnE, bnParams.bnN, bnParams.ctx);
-        if (ret != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("BN_mod_exp fail, ret = %d", ret);
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
-
-        ret = BnExpModExport(bnParams.bnX, x);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("BnExpModExport fail");
-            break;
-        }
-    } while (0);
-
-    BnFreeParams(&bnParams);
-    return ret;
+    return func(x, a, e, n);
 }
 
 int32_t HksCryptoHalGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
@@ -375,41 +240,11 @@ int32_t HksCryptoHalGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
     }
 
     HKS_LOG_I("generate key type %x", spec->algType);
-    switch (spec->algType) {
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)
-        case HKS_ALG_ECC:
-        case HKS_ALG_ECDH:
-            return HksOpensslEccGenerateKey(spec, key);
-#endif
-#if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
-        case HKS_ALG_AES:
-            return HksOpensslAesGenerateKey(spec, key);
-#endif
-#if defined(HKS_SUPPORT_ED25519_GENERATE_KEY) || defined(HKS_SUPPORT_X25519_GENERATE_KEY)
-        case HKS_ALG_X25519:
-        case HKS_ALG_ED25519:
-            return HksOpensslCurve25519GenerateKey(spec, key);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
-        case HKS_ALG_RSA:
-            return HksOpensslRsaGenerateKey(spec, key);
-#endif
-#if defined(HKS_SUPPORT_HMAC_C) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY)
-        case HKS_ALG_HMAC:
-            return HksOpensslHmacGenerateKey(spec, key);
-#endif
-#if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_GENERATE_KEY)
-        case HKS_ALG_DSA:
-            return HksOpensslDsaGenerateKey(spec, key);
-#endif
-#if defined(HKS_SUPPORT_DH_C) && defined(HKS_SUPPORT_DH_GENERATE_KEY)
-        case HKS_ALG_DH:
-            return HksOpensslDhGenerateKey(spec, key);
-#endif
-        default:
-            HKS_LOG_E("Unsupport algType now!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    GenerateKey func = (GenerateKey)GetAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(spec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(spec, key);
 }
 
 int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
@@ -421,23 +256,11 @@ int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (spec->algType) {
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECDH_C) && defined(HKS_SUPPORT_ECDH_AGREE_KEY)
-        case HKS_ALG_ECDH:
-            return HksOpensslEcdhAgreeKey(nativeKey, pubKey, spec, sharedKey);
-#endif
-#if defined(HKS_SUPPORT_DH_C) && defined(HKS_SUPPORT_DH_AGREE_KEY)
-        case HKS_ALG_DH:
-            return HksOpensslDhAgreeKey(nativeKey, pubKey, spec, sharedKey);
-#endif
-        case HKS_ALG_X25519:
-            return HksOpensslX25519AgreeKey(nativeKey, pubKey, sharedKey);
-        case HKS_ALG_ED25519:
-            return HksOpensslEd25519AgreeKey(nativeKey, pubKey, sharedKey);
-        default:
-            HKS_LOG_E("Unsupport alg now!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    AgreeKey func = (AgreeKey)GetAbility(HKS_CRYPTO_ABILITY_AGREE_KEY(spec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(nativeKey, pubKey, spec, sharedKey);
 }
 
 int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, const struct HksBlob *message,
@@ -449,25 +272,11 @@ int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *u
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (usageSpec->algType) {
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECDSA_C) && defined(HKS_SUPPORT_ECDSA_SIGN_VERIFY)
-        case HKS_ALG_ECC:
-            return HksOpensslEcdsaSign(key, usageSpec, message, signature);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
-        case HKS_ALG_RSA:
-            return HksOpensslRsaSign(key, usageSpec, message, signature);
-#endif
-#if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_SIGN_VERIFY)
-        case HKS_ALG_DSA:
-            return HksOpensslDsaSign(key, usageSpec, message, signature);
-#endif
-        case HKS_ALG_ED25519:
-            return HksOpensslEd25519Sign(key, message, signature);
-        default:
-            HKS_LOG_E("Unsupport alg now!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    Sign func = (Sign)GetAbility(HKS_CRYPTO_ABILITY_SIGN(usageSpec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(key, usageSpec, message, signature);
 }
 
 int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
@@ -479,25 +288,11 @@ int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec 
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (usageSpec->algType) {
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECDSA_C) && defined(HKS_SUPPORT_ECDSA_SIGN_VERIFY)
-        case HKS_ALG_ECC:
-            return HksOpensslEcdsaVerify(key, usageSpec, message, signature);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
-        case HKS_ALG_RSA:
-            return HksOpensslRsaVerify(key, usageSpec, message, signature);
-#endif
-#if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_SIGN_VERIFY)
-        case HKS_ALG_DSA:
-            return HksOpensslDsaVerify(key, usageSpec, message, signature);
-#endif
-        case HKS_ALG_ED25519:
-            return HksOpensslEd25519Verify(key, message, signature);
-        default:
-            HKS_LOG_E("Unsupport alg now!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    Verify func = (Verify)GetAbility(HKS_CRYPTO_ABILITY_VERIFY(usageSpec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(key, usageSpec, message, signature);
 }
 
 int32_t HksCryptoHalDeriveKey(
@@ -509,15 +304,11 @@ int32_t HksCryptoHalDeriveKey(
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (derivationSpec->algType) {
-        case HKS_ALG_HKDF:
-            return HksOpensslHkdf(masterKey, derivationSpec, derivedKey);
-        case HKS_ALG_PBKDF2:
-            return HksOpensslPbkdf2(masterKey, derivationSpec, derivedKey);
-        default:
-            HKS_LOG_E("Unsupport Derive Key alg!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    DeriveKey func = (DeriveKey)GetAbility(HKS_CRYPTO_ABILITY_DERIVE_KEY(derivationSpec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(masterKey, derivationSpec, derivedKey);
 }
 
 int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
@@ -529,19 +320,11 @@ int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (usageSpec->algType) {
-#ifdef HKS_SUPPORT_AES_C
-        case HKS_ALG_AES:
-            return HksOpensslAesEncrypt(key, usageSpec, message, cipherText, tagAead);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_CRYPT)
-        case HKS_ALG_RSA:
-            return HksOpensslRsaCrypt(key, usageSpec, message, true, cipherText);
-#endif
-        default:
-            HKS_LOG_E("Unsupport alg now!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    Encrypt func = (Encrypt)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT(usageSpec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(key, usageSpec, message, cipherText, tagAead);
 }
 
 int32_t HksCryptoHalDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
@@ -553,17 +336,9 @@ int32_t HksCryptoHalDecrypt(const struct HksBlob *key, const struct HksUsageSpec
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (usageSpec->algType) {
-#ifdef HKS_SUPPORT_AES_C
-        case HKS_ALG_AES:
-            return HksOpensslAesDecrypt(key, usageSpec, message, cipherText);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_CRYPT)
-        case HKS_ALG_RSA:
-            return HksOpensslRsaCrypt(key, usageSpec, message, false, cipherText);
-#endif
-        default:
-            HKS_LOG_E("Unsupport alg now!");
-            return HKS_ERROR_INVALID_ARGUMENT;
+    Decrypt func = (Decrypt)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT(usageSpec->algType));
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return func(key, usageSpec, message, cipherText);
 }

@@ -730,6 +730,7 @@ HWTEST_F(HksRsaEcbOaepSha256Mt, HksRsaEcbOaepSha256Mt12400, TestSize.Level1)
     GenerateKeyTestCase(HKS_RSA_MT_12400_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaEcbOaepSha256Mt12500
  * @tc.name      : HksRsaEcbOaepSha256Mt12500
@@ -749,6 +750,7 @@ HWTEST_F(HksRsaEcbOaepSha256Mt, HksRsaEcbOaepSha256Mt12600, TestSize.Level1)
 {
     GenerateKeyTestCase(HKS_RSA_MT_12600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha256Mt12700
@@ -830,6 +832,7 @@ HWTEST_F(HksRsaEcbOaepSha256Mt, HksRsaEcbOaepSha256Mt13400, TestSize.Level1)
     EncryptServiceTestCase(HKS_RSA_MT_13400_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaEcbOaepSha256Mt00100
  * @tc.name      : HksRsaEcbOaepSha256Mt00100
@@ -869,6 +872,7 @@ HWTEST_F(HksRsaEcbOaepSha256Mt, HksRsaEcbOaepSha256Mt13800, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_13800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha256Mt13900
@@ -950,6 +954,7 @@ HWTEST_F(HksRsaEcbOaepSha256Mt, HksRsaEcbOaepSha256Mt14600, TestSize.Level1)
     DecryptServiceTestCase(HKS_RSA_MT_14600_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaEcbOaepSha256Mt14700
  * @tc.name      : HksRsaEcbOaepSha256Mt14700
@@ -989,6 +994,7 @@ HWTEST_F(HksRsaEcbOaepSha256Mt, HksRsaEcbOaepSha256Mt15000, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_15000_PARAMS);
 }
+#endif
 }  // namespace MT
 }  // namespace Huks
 }  // namespace Security

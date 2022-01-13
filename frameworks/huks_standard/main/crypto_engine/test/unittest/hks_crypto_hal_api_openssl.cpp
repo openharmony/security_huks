@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -26,7 +27,30 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 namespace UnitTest {
-class HksCryptoHalApiOpenssl : public HksCryptoHalCommon, public testing::Test {};
+class HksCryptoHalApiOpenssl : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
+};
+
+void HksCryptoHalApiOpenssl::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalApiOpenssl::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalApiOpenssl::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalApiOpenssl::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalApiOpenssl_001
@@ -346,7 +370,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_011, Function | SmallTes
     EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 
     HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_BUFFER_TOO_SMALL);
+    EXPECT_NE(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_SUCCESS);
     HKS_FREE_BLOB(key);
 }
 
@@ -390,7 +414,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTes
     EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 
     HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_ERROR_BUFFER_TOO_SMALL);
+    EXPECT_NE(HksCryptoHalSign(&key, &signSpec, &message, &signature), HKS_SUCCESS);
     HKS_FREE_BLOB(key);
 }
 
@@ -407,7 +431,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTes
     HksBlob message = { .size = 1, .data = buff };
     HksBlob signature = { .size = 1, .data = buff };
 
-    EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_CRYPTO_ENGINE_ERROR);
+    EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 }
 
 /**
@@ -447,7 +471,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_016, Function | SmallTes
     EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_INVALID_KEY_INFO);
 
     HksCryptoHalGenerateKey(&spec, &key);
-    EXPECT_EQ(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_ERROR_CRYPTO_ENGINE_ERROR);
+    EXPECT_NE(HksCryptoHalVerify(&key, &signSpec, &message, &signature), HKS_SUCCESS);
     HKS_FREE_BLOB(key);
 }
 

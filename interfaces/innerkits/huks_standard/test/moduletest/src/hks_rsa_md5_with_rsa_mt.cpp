@@ -698,6 +698,7 @@ HWTEST_F(HksRsaMd5WithRsaMt, HksRsaMd5WithRsaMt25600, TestSize.Level1)
     VerifyServiceTestCase(HKS_RSA_MT_25600_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaMd5WithRsaMt25700
  * @tc.name      : HksRsaMd5WithRsaMt25700
@@ -777,6 +778,7 @@ HWTEST_F(HksRsaMd5WithRsaMt, HksRsaMd5WithRsaMt26400, TestSize.Level1)
 {
     VerifyServiceTestCase(HKS_RSA_MT_26400_PARAMS);
 }
+#endif
 }  // namespace MT
 }  // namespace Huks
 }  // namespace Security

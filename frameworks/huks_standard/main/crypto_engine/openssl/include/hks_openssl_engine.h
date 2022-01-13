@@ -16,17 +16,9 @@
 #ifndef HKS_OPENSSL_ENGINE_H
 #define HKS_OPENSSL_ENGINE_H
 
-#include <openssl/bn.h>
+#include <openssl/evp.h>
 
 #include "hks_type_inner.h"
-
-struct HksBnExpModParams {
-    BIGNUM *bnX;
-    BIGNUM *bnA;
-    BIGNUM *bnE;
-    BIGNUM *bnN;
-    BN_CTX *ctx;
-};
 
 #ifdef __cplusplus
 extern "C" {
