@@ -303,7 +303,7 @@ static int32_t HksOpensslRsaCryptInit(EVP_PKEY_CTX *ctx, const struct HksUsageSp
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+static int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     int32_t ret;
@@ -351,6 +351,19 @@ int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec 
     EVP_PKEY_CTX_free(ctx);
     return HKS_SUCCESS;
 }
+
+int32_t HksOpensslRsaEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead)
+{
+    (void)tagAead;
+    return HksOpensslRsaCrypt(key, usageSpec, message, true, cipherText);
+}
+
+int32_t HksOpensslRsaDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText)
+{
+    return HksOpensslRsaCrypt(key, usageSpec, message, false, cipherText);
+}
 #endif /* HKS_SUPPORT_RSA_CRYPT */
 
 #ifdef HKS_SUPPORT_RSA_SIGN_VERIFY
@@ -368,64 +381,94 @@ static int32_t GetRsaSignPadding(uint32_t padding, uint32_t *rsaPadding)
     }
 }
 
-static EVP_MD_CTX *InitRsaMdCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
+static int32_t SetRsaPadding(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usageSpec)
 {
-    int32_t ret = HKS_FAILURE;
     uint32_t opensslPadding = 0;
-
-    if (GetRsaSignPadding(usageSpec->padding, &opensslPadding) != HKS_SUCCESS) {
+    int32_t ret = GetRsaSignPadding(usageSpec->padding, &opensslPadding);
+    if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Unsupport padding.");
+        return HKS_ERROR_INVALID_PADDING;
+    }
+
+    if (usageSpec->padding == HKS_PADDING_PSS) {
+        if (EVP_PKEY_CTX_set_rsa_padding(ctx, opensslPadding) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+static EVP_PKEY *InitRsaEvpKey(const struct HksBlob *key, bool signing)
+{
+    RSA *rsa = InitRsaStruct(key, signing);
+    if (rsa == NULL) {
+        HKS_LOG_E("initialize rsa key failed");
         return NULL;
     }
 
-    RSA *rsa = NULL;
+    EVP_PKEY *pkey = EVP_PKEY_new();
+    if (pkey == NULL) {
+        HKS_LOG_E("evp pkey new failed");
+        SELF_FREE_PTR(rsa, RSA_free);
+        return NULL;
+    }
+
+    if (EVP_PKEY_assign_RSA(pkey, rsa) != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        SELF_FREE_PTR(rsa, RSA_free);
+        SELF_FREE_PTR(pkey, EVP_PKEY_free);
+        return NULL;
+    }
+
+    return pkey;
+}
+
+static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
+{
+    const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return NULL;
+    }
+
     EVP_PKEY *pkey = NULL;
-    EVP_MD_CTX *ctx = NULL;
-
+    EVP_PKEY_CTX *ctx = NULL;
+    int32_t ret = HKS_FAILURE;
     do {
-        rsa = InitRsaStruct(key, signing);
-        if (rsa == NULL) {
-            HKS_LOG_E("initialize rsa key failed");
-            break;
-        }
-
-        pkey = EVP_PKEY_new();
+        pkey = InitRsaEvpKey(key, signing);
         if (pkey == NULL) {
             break;
         }
 
-        if (EVP_PKEY_assign_RSA(pkey, rsa) != HKS_OPENSSL_SUCCESS) {
-            break;
-        }
-        rsa = NULL;
-
-        ctx = EVP_MD_CTX_new();
+        ctx = EVP_PKEY_CTX_new(pkey, NULL);
         if (ctx == NULL) {
             break;
         }
 
         if (signing) {
-            ret = EVP_DigestSignInit(ctx, NULL, GetOpensslAlg(usageSpec->digest), NULL, pkey);
+            ret = EVP_PKEY_sign_init(ctx);
         } else {
-            ret = EVP_DigestVerifyInit(ctx, NULL, GetOpensslAlg(usageSpec->digest), NULL, pkey);
+            ret = EVP_PKEY_verify_init(ctx);
         }
         if (ret != HKS_OPENSSL_SUCCESS) {
             break;
         }
 
-        if (usageSpec->padding == HKS_PADDING_PSS) {
-            if (EVP_PKEY_CTX_set_rsa_padding(EVP_MD_CTX_pkey_ctx(ctx), opensslPadding) != HKS_OPENSSL_SUCCESS) {
-                break;
-            }
+        ret = HKS_FAILURE;
+        if (SetRsaPadding(ctx, usageSpec) != HKS_SUCCESS) {
+            break;
+        }
+        if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS) {
+            break;
         }
         ret = HKS_SUCCESS;
     } while (0);
 
-    SELF_FREE_PTR(rsa, RSA_free);
     SELF_FREE_PTR(pkey, EVP_PKEY_free);
     if (ret != HKS_SUCCESS) {
         HksLogOpensslError();
-        SELF_FREE_PTR(ctx, EVP_MD_CTX_free);
+        SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
     }
 
     return ctx;
@@ -434,68 +477,39 @@ static EVP_MD_CTX *InitRsaMdCtx(const struct HksBlob *key, const struct HksUsage
 int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    EVP_MD_CTX *ctx = InitRsaMdCtx(key, usageSpec, true);
+    EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, true);
     if (ctx == NULL) {
-        HKS_LOG_E("initialize rsa md context failed");
+        HKS_LOG_E("initialize rsa context failed");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
-    if (EVP_DigestSignUpdate(ctx, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
+    size_t sigSize = (size_t)signature->size;
+    if (EVP_PKEY_sign(ctx, signature->data, &sigSize, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        EVP_MD_CTX_free(ctx);
+        EVP_PKEY_CTX_free(ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-
-    size_t outLen = 0;
-    if (EVP_DigestSignFinal(ctx, NULL, &outLen) != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        EVP_MD_CTX_free(ctx);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-
-    if (outLen > signature->size) {
-        HksLogOpensslError();
-        EVP_MD_CTX_free(ctx);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    if (EVP_DigestSignFinal(ctx, signature->data, &outLen) != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        EVP_MD_CTX_free(ctx);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    signature->size = outLen;
-
-    EVP_MD_CTX_free(ctx);
-
+    signature->size = (uint32_t)sigSize;
+    EVP_PKEY_CTX_free(ctx);
     return HKS_SUCCESS;
 }
 
 int32_t HksOpensslRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    EVP_MD_CTX *ctx = InitRsaMdCtx(key, usageSpec, false);
+    EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, false);
     if (ctx == NULL) {
-        HKS_LOG_E("initialize rsa md context failed");
+        HKS_LOG_E("initialize rsa context failed");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
-    if (EVP_DigestVerifyUpdate(ctx, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
+    if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        EVP_MD_CTX_free(ctx);
+        EVP_PKEY_CTX_free(ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-
-    if (EVP_DigestVerifyFinal(ctx, signature->data, signature->size) != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        EVP_MD_CTX_free(ctx);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-
-    EVP_MD_CTX_free(ctx);
-
+    EVP_PKEY_CTX_free(ctx);
     return HKS_SUCCESS;
 }
 #endif /* HKS_SUPPORT_RSA_SIGN_VERIFY */
-
 #endif /* HKS_SUPPORT_RSA_C */

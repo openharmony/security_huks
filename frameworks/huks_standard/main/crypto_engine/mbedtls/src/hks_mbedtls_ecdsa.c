@@ -41,7 +41,7 @@
 
 #ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
 /* users must ensure the input params not null */
-static int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
     int32_t ret = EccKeyCheck(key);
@@ -100,7 +100,7 @@ static int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUs
 }
 
 /* users must ensure the input params not null */
-static int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     (void)usageSpec;
@@ -140,36 +140,6 @@ static int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct Hks
     } while (0);
 
     mbedtls_ecdsa_free(&ctx);
-    return ret;
-}
-
-int32_t HksMbedtlsEcdsaSignVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *message, const struct HksBlob *signature, bool isVerify)
-{
-    uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
-    uint32_t digestLen;
-    int32_t ret = HksGetDigestLen(digest, &digestLen);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-    struct HksBlob hash = { .size = digestLen, .data = HksMalloc(digestLen) };
-    if (hash.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    ret = HksMbedtlsHash(digest, message, &hash);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_BLOB(hash);
-        return ret;
-    }
-
-    if (isVerify) {
-        ret = HksMbedtlsEcdsaVerify(key, usageSpec, &hash, signature);
-    } else {
-        ret = HksMbedtlsEcdsaSign(key, usageSpec, &hash, (struct HksBlob *)signature);
-    }
-    HKS_FREE_BLOB(hash);
-
     return ret;
 }
 #endif /* HKS_SUPPORT_ECDSA_SIGN_VERIFY */

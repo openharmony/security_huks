@@ -17,6 +17,7 @@ import("//base/security/huks/build/config.gni")
 import("//build/lite/config/component/lite_component.gni")
 
 huks_sources = [
+  "../../../frameworks/huks_standard/main/common/src/hks_ability.c",
   "../../../frameworks/huks_standard/main/common/src/hks_base_check.c",
   "../../../frameworks/huks_standard/main/common/src/hks_check_paramset.c",
   "../../../frameworks/huks_standard/main/common/src/hks_common_check.c",
@@ -44,6 +45,7 @@ huks_sources = [
 if (huks_use_mbedtls == true) {
   huks_mbedtls_engine_sources = [
     "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_crypto_ed25519.c",
+    "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_ability.c",
     "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_aes.c",
     "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_bn.c",
     "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_common.c",

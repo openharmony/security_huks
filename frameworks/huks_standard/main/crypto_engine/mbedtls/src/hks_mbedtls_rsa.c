@@ -261,7 +261,7 @@ static int32_t HksToMbedtlsPadding(uint32_t hksPadding, int32_t *padding)
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     int32_t ret = RsaKeyCheck(key);
@@ -322,6 +322,19 @@ int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec 
     mbedtls_entropy_free(&entropy);
     return ret;
 }
+
+int32_t HksMbedtlsRsaEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead)
+{
+    (void)tagAead;
+    return HksMbedtlsRsaCrypt(key, usageSpec, message, true, cipherText);
+}
+
+int32_t HksMbedtlsRsaDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText)
+{
+    return HksMbedtlsRsaCrypt(key, usageSpec, message, false, cipherText);
+}
 #endif /* HKS_SUPPORT_RSA_CRYPT */
 
 #ifdef HKS_SUPPORT_RSA_SIGN_VERIFY
@@ -339,6 +352,7 @@ static int32_t HksToMbedtlsSignPadding(uint32_t hksPadding, int32_t *padding)
     }
     return HKS_SUCCESS;
 }
+
 static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool sign, struct HksBlob *signature)
 {
@@ -402,26 +416,7 @@ int32_t HksMbedtlsRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
         return ret;
     }
 
-    uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
-    uint32_t digestLen;
-    ret = HksGetDigestLen(digest, &digestLen);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-    struct HksBlob hash = { .size = digestLen, .data = HksMalloc(digestLen) };
-    if (hash.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    ret = HksMbedtlsHash(digest, message, &hash);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_BLOB(hash);
-        return ret;
-    }
-
-    ret = HksMbedtlsRsaSignVerify(key, usageSpec, &hash, true, signature); /* true: is sign */
-    HKS_FREE_BLOB(hash);
-    return ret;
+    return HksMbedtlsRsaSignVerify(key, usageSpec, message, true, signature); /* true: is sign */
 }
 
 int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
@@ -432,26 +427,7 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
         return ret;
     }
 
-    uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
-    uint32_t digestLen;
-    ret = HksGetDigestLen(digest, &digestLen);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-    struct HksBlob hash = { .size = digestLen, .data = HksMalloc(digestLen) };
-    if (hash.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    ret = HksMbedtlsHash(digest, message, &hash);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_BLOB(hash);
-        return ret;
-    }
-
-    ret = HksMbedtlsRsaSignVerify(key, usageSpec, &hash, false, (struct HksBlob *)signature); /* false: is verify */
-    HKS_FREE_BLOB(hash);
-    return ret;
+    return HksMbedtlsRsaSignVerify(key, usageSpec, message, false, (struct HksBlob *)signature); /* false: is verify */
 }
 #endif /* HKS_SUPPORT_RSA_SIGN_VERIFY */
 

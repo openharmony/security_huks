@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -69,6 +70,11 @@ const HksUsageSpec HKS_CRYPTO_HAL_DSA_SIGN_005_SPEC = {
 }  // namespace
 
 class HksCryptoHalDsaSign : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const HksUsageSpec &hksUsageSpec)
     {
@@ -95,15 +101,20 @@ protected:
         for (uint32_t ii = 0; ii < dataLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
         }
+
+        uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
+        struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
+        EXPECT_EQ(HksCryptoHalHash(hksUsageSpec.digest, &message, &hash), HKS_SUCCESS);
+
         struct HksBlob signature = { .size = 1024, .data = (uint8_t *)HksMalloc(1024) };
 
-        EXPECT_EQ(HksCryptoHalSign(&key, &hksUsageSpec, &message, &signature), HKS_SUCCESS);
+        EXPECT_EQ(HksCryptoHalSign(&key, &hksUsageSpec, &hash, &signature), HKS_SUCCESS);
 
         struct HksBlob pubKey = { .size = 1024, .data = (uint8_t *)HksMalloc(1024) };
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
-        EXPECT_EQ(HksCryptoHalVerify(&pubKey, &hksUsageSpec, &message, &signature), HKS_SUCCESS);
+        EXPECT_EQ(HksCryptoHalVerify(&pubKey, &hksUsageSpec, &hash, &signature), HKS_SUCCESS);
 
         HksFree(key.data);
         HksFree(message.data);
@@ -111,6 +122,23 @@ protected:
         HksFree(pubKey.data);
     }
 };
+
+void HksCryptoHalDsaSign::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalDsaSign::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalDsaSign::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalDsaSign::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalDsaSign_001

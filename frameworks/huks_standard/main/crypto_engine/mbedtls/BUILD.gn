@@ -36,6 +36,7 @@ ohos_static_library("libhuks_mbedtls_standard_static") {
   ]
   sources = [
     "src/hks_crypto_ed25519.c",
+    "src/hks_mbedtls_ability.c",
     "src/hks_mbedtls_aes.c",
     "src/hks_mbedtls_bn.c",
     "src/hks_mbedtls_common.c",

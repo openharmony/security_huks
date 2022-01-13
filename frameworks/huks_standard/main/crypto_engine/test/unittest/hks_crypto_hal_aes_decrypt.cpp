@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "hks_ability.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
 #include "hks_mem.h"
@@ -309,6 +310,11 @@ const TestCaseParamsForGcm HKS_CRYPTO_HAL_AES_DECRYPT_018_PARAMS = {
 }  // namespace
 
 class HksCryptoHalAesDecrypt : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -374,6 +380,23 @@ protected:
         HksFree(tagDecBlob.data);
     }
 };
+
+void HksCryptoHalAesDecrypt::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalAesDecrypt::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalAesDecrypt::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalAesDecrypt::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalAesDecrypt_001

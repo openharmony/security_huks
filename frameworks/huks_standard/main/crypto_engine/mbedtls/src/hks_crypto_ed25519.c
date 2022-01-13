@@ -85,8 +85,9 @@ static bool IsBlobZero(const struct HksBlob *key)
     return true;
 }
 
-int32_t HksEd25519GenerateKey(struct HksBlob *keyOut)
+int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *keyOut)
 {
+    (void)spec;
     uint8_t pubKey[ED25519_PUBLIC_KEY_LEN] = {0};
     uint8_t priKey[ED25519_PRIVATE_KEY_LEN] = {0};
     struct HksBlob pubKeyBlob = { ED25519_PUBLIC_KEY_LEN, pubKey };
@@ -167,8 +168,10 @@ int32_t HksGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
 #endif
 
 #ifdef HKS_SUPPORT_ED25519_SIGN_VERIFY
-int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksBlob *message, struct HksBlob *signature)
+int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature)
 {
+    (void)usageSpec;
     int32_t ret = CheckEd25519Material(key);
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -189,9 +192,10 @@ int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksBlob *message,
     return HKS_SUCCESS;
 }
 
-int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksBlob *message,
-    const struct HksBlob *signature)
+int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature)
 {
+    (void)usageSpec;
     int32_t ret = CheckEd25519Material(key);
     if (ret != HKS_SUCCESS) {
         return ret;

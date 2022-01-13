@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -113,6 +114,11 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_KEY_006_PARAMS = {
 }  // namespace
 
 class HksCryptoHalRsaKey : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -125,6 +131,23 @@ protected:
         }
     }
 };
+
+void HksCryptoHalRsaKey::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalRsaKey::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalRsaKey::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalRsaKey::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalRsaKey_001

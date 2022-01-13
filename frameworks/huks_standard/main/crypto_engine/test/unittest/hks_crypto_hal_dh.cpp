@@ -16,10 +16,11 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
-#include "hks_mem.h"
+#include "hks_ability.h"
+#include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
-#include "hks_config.h"
+#include "hks_mem.h"
 
 #ifdef HKS_SUPPORT_DH_C
 
@@ -52,6 +53,11 @@ const TestCaseParams HKS_CRYPTO_HAL_DH_003_PARAMS = {
 }  // namespace
 
 class HksCryptoHalDh : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -60,6 +66,23 @@ protected:
         HKS_FREE_BLOB(key);
     }
 };
+
+void HksCryptoHalDh::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalDh::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalDh::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalDh::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalDh_001

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -53,7 +54,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_001_PARAMS = {
     },
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff000000000000000000000000000"
                           "0000000000000000000000000000000000000",
-    
+
     .generateKeyResult = HKS_SUCCESS,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_SUCCESS,
@@ -852,6 +853,11 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_036_PARAMS = {
 }  // namespace
 
 class HksCryptoHalRsaCipher : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -885,6 +891,23 @@ protected:
         HksFree(cipherText.data);
     }
 };
+
+void HksCryptoHalRsaCipher::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalRsaCipher::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalRsaCipher::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalRsaCipher::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_001
@@ -926,6 +949,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_004, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_004_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_005
  * @tc.name      : HksCryptoHalRsaCipher_005
@@ -945,6 +969,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_006, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_006_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_007
@@ -986,6 +1011,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_010, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_010_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_011
  * @tc.name      : HksCryptoHalRsaCipher_011
@@ -1005,6 +1031,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_012, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_012_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_013
@@ -1046,6 +1073,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_016, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_016_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_017
  * @tc.name      : HksCryptoHalRsaCipher_017
@@ -1065,6 +1093,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_018, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_018_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_019
@@ -1096,6 +1125,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_021, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_021_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_022
  * @tc.name      : HksCryptoHalRsaCipher_022
@@ -1125,6 +1155,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_024, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_024_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_025
@@ -1156,6 +1187,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_027, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_027_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_028
  * @tc.name      : HksCryptoHalRsaCipher_028
@@ -1175,6 +1207,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_029, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_029_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_030
@@ -1186,6 +1219,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_030, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_031
  * @tc.name      : HksCryptoHalRsaCipher_031
@@ -1215,6 +1249,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_033, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_033_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaCipher_034
@@ -1226,6 +1261,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_034, Function | SmallTest 
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_034_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaCipher_035
  * @tc.name      : HksCryptoHalRsaCipher_035
@@ -1245,6 +1281,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_036, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_036_PARAMS);
 }
+#endif
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

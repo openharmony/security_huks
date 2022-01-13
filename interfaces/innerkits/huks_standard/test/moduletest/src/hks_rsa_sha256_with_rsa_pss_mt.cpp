@@ -698,6 +698,7 @@ HWTEST_F(HksRsaSha256WithRsaPssMt, HksRsaSha256WithRsaPssMt42400, TestSize.Level
     VerifyServiceTestCase(HKS_RSA_MT_42400_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaSha256WithRsaPssMt42500
  * @tc.name      : HksRsaSha256WithRsaPssMt42500
@@ -777,6 +778,7 @@ HWTEST_F(HksRsaSha256WithRsaPssMt, HksRsaSha256WithRsaPssMt43200, TestSize.Level
 {
     VerifyServiceTestCase(HKS_RSA_MT_43200_PARAMS);
 }
+#endif
 }  // namespace MT
 }  // namespace Huks
 }  // namespace Security

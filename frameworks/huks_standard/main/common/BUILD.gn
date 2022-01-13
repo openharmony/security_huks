@@ -31,6 +31,7 @@ ohos_static_library("libhuks_common_standard_static") {
   include_dirs = [ "//utils/native/base/include" ]
 
   sources = [
+    "src/hks_ability.c",
     "src/hks_base_check.c",
     "src/hks_check_paramset.c",
     "src/hks_common_check.c",

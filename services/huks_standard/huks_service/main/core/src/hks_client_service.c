@@ -1072,13 +1072,11 @@ int32_t HksServiceInitialize(void)
     }
 #endif
 
-#ifndef _HARDWARE_ROOT_KEY_
     ret = HksAccessInitialize();
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("hks core service initialize failed! ret = %d", ret);
         return ret;
     }
-#endif
 
 #ifdef _STORAGE_LITE_
     ret = HksLoadFileToBuffer();

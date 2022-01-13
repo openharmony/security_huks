@@ -44,8 +44,8 @@ static int32_t CheckBnExpModNx(const struct HksBlob *n, const struct HksBlob *x)
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsBnExpMod(const struct HksBlob *a,
-    const struct HksBlob *e, const struct HksBlob *n, struct HksBlob *x)
+int32_t HksMbedtlsBnExpMod(struct HksBlob *x, const struct HksBlob *a,
+    const struct HksBlob *e, const struct HksBlob *n)
 {
     int32_t ret = CheckBnExpModNx(n, x);
     if (ret != HKS_SUCCESS) {

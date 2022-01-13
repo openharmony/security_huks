@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -1166,6 +1167,11 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_048_PARAMS = {
 }  // namespace
 
 class HksCryptoHalRsaOaepEncrypt : public HksCryptoHalCommon, public testing::Test {
+public:
+    static void SetUpTestCase(void);
+    static void TearDownTestCase(void);
+    void SetUp();
+    void TearDown();
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -1193,6 +1199,23 @@ protected:
         HksFree(cipherText.data);
     }
 };
+
+void HksCryptoHalRsaOaepEncrypt::SetUpTestCase(void)
+{
+}
+
+void HksCryptoHalRsaOaepEncrypt::TearDownTestCase(void)
+{
+}
+
+void HksCryptoHalRsaOaepEncrypt::SetUp()
+{
+    EXPECT_EQ(HksCryptoAbilityInit(), 0);
+}
+
+void HksCryptoHalRsaOaepEncrypt::TearDown()
+{
+}
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_013
@@ -1234,6 +1257,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_016, Function | 
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_016_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_017
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_017
@@ -1253,6 +1277,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_018, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_018_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_019
@@ -1294,6 +1319,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_022, Function | 
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_022_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_023
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_023
@@ -1313,6 +1339,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_024, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_024_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_025
@@ -1354,6 +1381,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_028, Function | 
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_028_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_029
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_029
@@ -1373,6 +1401,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_030, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_030_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_031
@@ -1414,6 +1443,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_034, Function | 
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_034_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_035
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_035
@@ -1433,6 +1463,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_036, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_036_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_037
@@ -1474,6 +1505,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_040, Function | 
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_040_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_041
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_041
@@ -1493,6 +1525,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_042, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_042_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_043
@@ -1534,6 +1567,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_046, Function | 
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_046_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_047
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_047
@@ -1553,6 +1587,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_048, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_048_PARAMS);
 }
+#endif
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

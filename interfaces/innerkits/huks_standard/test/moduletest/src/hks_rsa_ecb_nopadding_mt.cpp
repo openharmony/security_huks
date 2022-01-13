@@ -912,6 +912,7 @@ HWTEST_F(HksRsaEcbNopaddingMt, HksRsaEcbNopaddingMt00400, TestSize.Level1)
     GenerateKeyTestCase(HKS_RSA_MT_00400_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaEcbNopaddingMt00500
  * @tc.name      : HksRsaEcbNopaddingMt00500
@@ -931,6 +932,7 @@ HWTEST_F(HksRsaEcbNopaddingMt, HksRsaEcbNopaddingMt00600, TestSize.Level1)
 {
     GenerateKeyTestCase(HKS_RSA_MT_00600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbNopaddingMt00700
@@ -1012,6 +1014,7 @@ HWTEST_F(HksRsaEcbNopaddingMt, HksRsaEcbNopaddingMt01400, TestSize.Level1)
     EncryptServiceTestCase(HKS_RSA_MT_01400_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaEcbNopaddingMt01500
  * @tc.name      : HksRsaEcbNopaddingMt01500
@@ -1051,6 +1054,7 @@ HWTEST_F(HksRsaEcbNopaddingMt, HksRsaEcbNopaddingMt01800, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_01800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbNopaddingMt01900
@@ -1132,6 +1136,7 @@ HWTEST_F(HksRsaEcbNopaddingMt, HksRsaEcbNopaddingMt02600, TestSize.Level1)
     DecryptServiceTestCase(HKS_RSA_MT_02600_PARAMS);
 }
 
+#ifndef CUT_RSA_4096_TEST
 /**
  * @tc.number    : HksRsaEcbNopaddingMt02700
  * @tc.name      : HksRsaEcbNopaddingMt02700
@@ -1171,6 +1176,7 @@ HWTEST_F(HksRsaEcbNopaddingMt, HksRsaEcbNopaddingMt03000, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_03000_PARAMS);
 }
+#endif
 }  // namespace MT
 }  // namespace Huks
 }  // namespace Security

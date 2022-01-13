@@ -138,8 +138,9 @@ static int32_t ImportX25519EvpKey(EVP_PKEY **ours, EVP_PKEY **theirs, const stru
 }
 
 int32_t HksOpensslX25519AgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
-    struct HksBlob *sharedKey)
+    const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
+    (void)spec;
     EVP_PKEY *ours = NULL;
     EVP_PKEY *theirs = NULL;
     EVP_PKEY_CTX *ctx = NULL;
@@ -197,8 +198,9 @@ static void FreeEd25519KeyData(uint8_t *priData, uint8_t *pubData, uint8_t *pubK
 }
 
 int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
-    struct HksBlob *sharedKey)
+    const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
+    (void)spec;
     uint32_t priSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
     uint8_t *priData = HksMalloc(priSize);
     struct HksBlob nKey = { priSize, priData };
@@ -236,7 +238,7 @@ int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct 
             HKS_LOG_E("set mkey data to key material failed");
             break;
         }
-        ret = HksOpensslX25519AgreeKey(&nKey, &pubKm, sharedKey);
+        ret = HksOpensslX25519AgreeKey(&nKey, &pubKm, NULL, sharedKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("x25519 agree key failed");
             break;
@@ -248,9 +250,10 @@ int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct 
     return ret;
 }
 
-int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksBlob *message,
-    struct HksBlob *signature)
+int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature)
 {
+    (void)usageSpec;
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
     uint32_t offset = sizeof(struct KeyMaterial25519) + km->pubKeySize;
     EVP_PKEY *edKey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, key->data + offset, km->priKeySize);
@@ -293,9 +296,10 @@ int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksBlob *m
     return ret;
 }
 
-int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksBlob *message,
-    const struct HksBlob *signature)
+int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature)
 {
+    (void)usageSpec;
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
     EVP_PKEY *edKey = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, key->data + sizeof(struct KeyMaterial25519),
         km->pubKeySize);

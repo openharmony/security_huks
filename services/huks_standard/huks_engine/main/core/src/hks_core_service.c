@@ -21,6 +21,7 @@
 
 #include "hks_core_service.h"
 
+#include "hks_ability.h"
 #include "hks_auth.h"
 #include "hks_check_paramset.h"
 #include "hks_cmd_id.h"
@@ -324,8 +325,7 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const st
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
-    if (algParam->uint32Param != HKS_ALG_ED25519 && algParam->uint32Param != HKS_ALG_RSA &&
-        algParam->uint32Param != HKS_ALG_DSA && algParam->uint32Param != HKS_ALG_ECC) {
+    if (algParam->uint32Param != HKS_ALG_ED25519) {
         struct HksParam *digestParam = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestParam);
         if (ret != HKS_SUCCESS) {
@@ -340,7 +340,9 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const st
             return HKS_ERROR_MALLOC_FAIL;
         }
 
-        ret = HksCryptoHalHash(digestParam->uint32Param, srcData, message);
+        /* NONEwithECDSA/RSA default sha256 */
+        uint32_t digest = (digestParam->uint32Param == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : digestParam->uint32Param;
+        ret = HksCryptoHalHash(digest, srcData, message);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("SignVerify calc hash failed!");
             HKS_FREE_PTR(message->data);
@@ -395,6 +397,8 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
         struct HksUsageSpec usageSpec = {0};
         HksFillUsageSpec(paramSet, &usageSpec);
+        /* NONEwithECDSA/RSA default sha256 */
+        usageSpec.digest = (usageSpec.digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec.digest;
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);
         } else {
@@ -681,16 +685,18 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
 
 int32_t HksCoreInitialize(void)
 {
+    int32_t ret = HksCryptoAbilityInit();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Hks init crypto ability failed, ret = %d", ret);
+        return ret;
+    }
 #ifndef _HARDWARE_ROOT_KEY_
-    int32_t ret = HksRkcInit();
+    ret = HksRkcInit();
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Hks rkc init failed! ret = 0x%X", ret);
     }
-
-    return ret;
-#else
-    return HKS_SUCCESS;
 #endif
+    return ret;
 }
 
 int32_t HksCoreRefreshKeyInfo(void)
