@@ -51,7 +51,7 @@ static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
 
 static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponent)
 {
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret;
     const struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)(key->data);
     if (key->size != sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize + keyMaterial->priKeySize) {
         return NULL;

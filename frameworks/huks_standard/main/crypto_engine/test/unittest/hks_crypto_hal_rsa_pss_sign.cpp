@@ -642,7 +642,7 @@ protected:
 
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
 
-        uint32_t dataLen = testCaseParams.hexData.length() / 2;
+        uint32_t dataLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
 
         HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
         for (uint32_t ii = 0; ii < dataLen; ii++) {

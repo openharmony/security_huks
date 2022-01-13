@@ -57,8 +57,10 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
-    HksBlob plainText = { .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0] };
+    HksBlob plainText = {
+        .size = (uint32_t)testCaseParams.hexData.length(),
+        .data = (uint8_t *)&testCaseParams.hexData[0]
+    };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
@@ -119,8 +121,10 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
-    HksBlob plainText = { .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0] };
+    HksBlob plainText = {
+        .size = (uint32_t)testCaseParams.hexData.length(),
+        .data = (uint8_t *)&testCaseParams.hexData[0]
+    };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
@@ -151,8 +155,10 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
 
 void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &testCaseParams)
 {
-    struct HksBlob authId = { .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0] };
+    struct HksBlob authId = {
+        .size = (uint32_t)testCaseParams.alias.length(),
+        .data = (uint8_t *)&testCaseParams.alias[0]
+    };
 
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
@@ -162,8 +168,10 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
 
     EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
 
-    HksBlob plainText = { .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0] };
+    HksBlob plainText = {
+        .size = (uint32_t)testCaseParams.hexData.length(),
+        .data = (uint8_t *)&testCaseParams.hexData[0]
+    };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
@@ -238,8 +246,10 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
-    HksBlob plainText = { .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0] };
+    HksBlob plainText = {
+        .size = (uint32_t)testCaseParams.hexData.length(),
+        .data = (uint8_t *)&testCaseParams.hexData[0]
+    };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
@@ -268,8 +278,10 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
 
 void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &testCaseParams)
 {
-    struct HksBlob authId = { .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0] };
+    struct HksBlob authId = {
+        .size = (uint32_t)testCaseParams.alias.length(),
+        .data = (uint8_t *)&testCaseParams.alias[0]
+    };
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
@@ -294,8 +306,10 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
     HksBlob publicKey = { .size = rsaPublicKeyInfo.size, .data = (uint8_t *)HksMalloc(rsaPublicKeyInfo.size) };
     (void)memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size);
 
-    HksBlob plainText = { .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0] };
+    HksBlob plainText = {
+        .size = (uint32_t)testCaseParams.hexData.length(),
+        .data = (uint8_t *)&testCaseParams.hexData[0]
+    };
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
     uint32_t inLength = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
@@ -374,8 +388,10 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
 
 void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCaseParams)
 {
-    struct HksBlob authId = { .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0] };
+    struct HksBlob authId = {
+        .size = (uint32_t)testCaseParams.alias.length(),
+        .data = (uint8_t *)&testCaseParams.alias[0]
+    };
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
@@ -473,8 +489,10 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
 
 void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCaseParams)
 {
-    struct HksBlob authId = { .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0] };
+    struct HksBlob authId = {
+        .size = (uint32_t)testCaseParams.alias.length(),
+        .data = (uint8_t *)&testCaseParams.alias[0]
+    };
 
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);

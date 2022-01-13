@@ -494,8 +494,10 @@ void ApiPressureTest::GetSdkVersionTest()
         if (!GetThreadState()) {
             break;
         }
-        struct HksBlob sdkVersion = { .size = MAX_SDK_VERSION_SIZE,
-            .data = (uint8_t *)HksMalloc(MAX_SDK_VERSION_SIZE) };
+        struct HksBlob sdkVersion = {
+            .size = MAX_SDK_VERSION_SIZE,
+            .data = (uint8_t *)HksMalloc(MAX_SDK_VERSION_SIZE)
+        };
 
         EXPECT_EQ(HksGetSdkVersion(&sdkVersion), HKS_SUCCESS);
 
@@ -608,8 +610,10 @@ void ApiPressureTest::GetKeyParamSetTest(const struct HksBlob *authId, const str
     do {
         struct HksParamSet *paramOutSet = nullptr;
         HksInitParamSet(&paramOutSet);
-        struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-            .blob = { .size = KEY_PARAMSET_SIZE, .data = (uint8_t *)HksMalloc(KEY_PARAMSET_SIZE) } };
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = { .size = KEY_PARAMSET_SIZE, .data = (uint8_t *)HksMalloc(KEY_PARAMSET_SIZE) }
+        };
         HksAddParams(paramOutSet, &localKey, 1);
         HksBuildParamSet(&paramOutSet);
         if (!GetThreadState()) {

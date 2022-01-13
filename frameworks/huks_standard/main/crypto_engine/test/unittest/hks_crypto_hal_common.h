@@ -29,6 +29,7 @@ protected:
     uint8_t HexChar(char hex) const;
     uint8_t ReadHex(const uint8_t hex[2]) const;
 
+    const int HKS_COUNT_OF_HALF = 2;
     const uint32_t HKS_PADDING_SUPPLENMENT = 16;
 };
 #endif  // HKS_CRYPTO_HAL_COMMON_H

@@ -23,7 +23,6 @@
 
 #include <unistd.h>
 
-#include "hks_access.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "tee_client_api.h"

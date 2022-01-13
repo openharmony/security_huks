@@ -318,12 +318,12 @@ public:
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
-        uint32_t keyLen = testCaseParams.keyData.length() / 2;
+        uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
         for (uint32_t ii = 0; ii < keyLen; ii++) {
             key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[2 * ii]);
         }
-        uint32_t inLen = testCaseParams.hexData.length() / 2;
+        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = inLen;
         if (testCaseParams.usageSpec.padding == HKS_PADDING_PKCS7) {
             outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
@@ -342,19 +342,19 @@ protected:
 
     void GcmRunTestCase(const TestCaseParamsForGcm &testCaseParamsForGcm)
     {
-        uint32_t keyLen = testCaseParamsForGcm.keyData.length() / 2;
+        uint32_t keyLen = testCaseParamsForGcm.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
         for (uint32_t ii = 0; ii < keyLen; ii++) {
             key.data[ii] = ReadHex((const uint8_t *)&testCaseParamsForGcm.keyData[2 * ii]);
         }
-        uint32_t inLen = testCaseParamsForGcm.hexData.length() / 2;
+        uint32_t inLen = testCaseParamsForGcm.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = inLen;
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParamsForGcm.hexData[2 * ii]);
         }
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
-        uint32_t tagDecSize = testCaseParamsForGcm.tagDec.length() / 2;
+        uint32_t tagDecSize = testCaseParamsForGcm.tagDec.length() / HKS_COUNT_OF_HALF;
         HksBlob tagDecBlob = { .size = tagDecSize, .data = (uint8_t *)HksMalloc(tagDecSize) };
         for (uint32_t ii = 0; ii < tagDecSize; ii++) {
             tagDecBlob.data[ii] = ReadHex((const uint8_t *)&testCaseParamsForGcm.tagDec[2 * ii]);

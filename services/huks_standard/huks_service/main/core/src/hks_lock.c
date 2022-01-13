@@ -24,7 +24,7 @@ struct HksLock {
 
 HksLock *HksLockCreate(void)
 {
-    HksLock *lock = HksMalloc(sizeof(HksLock));
+    HksLock *lock = (HksLock *)HksMalloc(sizeof(HksLock));
     if (lock != NULL) {
         lock->lock = HksRwlockCreate();
         if (lock->lock == NULL) {
