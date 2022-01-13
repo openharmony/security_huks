@@ -25,7 +25,7 @@ struct HksMutex {
 
 HksMutex *HksMutexCreate(void)
 {
-    HksMutex *mutex = HksMalloc(sizeof(HksMutex));
+    HksMutex *mutex = (HksMutex *)HksMalloc(sizeof(HksMutex));
     if (mutex != NULL) {
         int result = pthread_mutex_init(&mutex->mutex, NULL);
         if (result != 0) {

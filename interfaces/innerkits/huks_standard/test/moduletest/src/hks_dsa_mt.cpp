@@ -622,8 +622,10 @@ protected:
 
         struct HksParamSet *paramSetOut = NULL;
         HksInitParamSet(&paramSetOut);
-        struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) } };
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
+        };
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -636,15 +638,19 @@ protected:
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
             HksParam *pubKeyExport = NULL;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
-            HksBlob publicKey = { .size = pubKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+            HksBlob publicKey = {
+                .size = pubKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size)
+            };
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
             HksParam *priKeyExport = NULL;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
-            HksBlob privateKey = { .size = priKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+            HksBlob privateKey = {
+                .size = priKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size)
+            };
             ASSERT_NE(privateKey.data, nullptr);
             (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
@@ -678,8 +684,10 @@ protected:
 
         struct HksParamSet *paramSetOut = NULL;
         HksInitParamSet(&paramSetOut);
-        struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) } };
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
+        };
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -692,15 +700,19 @@ protected:
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
             HksParam *pubKeyExport = NULL;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
-            HksBlob publicKey = { .size = pubKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+            HksBlob publicKey = {
+                .size = pubKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size)
+            };
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
             HksParam *priKeyExport = NULL;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
-            HksBlob privateKey = { .size = priKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+            HksBlob privateKey = {
+                .size = priKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size)
+            };
             ASSERT_NE(privateKey.data, nullptr);
             (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
@@ -734,8 +746,10 @@ protected:
 
         struct HksParamSet *paramSetOut = NULL;
         HksInitParamSet(&paramSetOut);
-        struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) } };
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
+        };
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -787,8 +801,10 @@ protected:
 
         struct HksParamSet *paramSetOut = NULL;
         HksInitParamSet(&paramSetOut);
-        struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) } };
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
+        };
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -802,16 +818,20 @@ protected:
             HksParam *pubKeyExport = NULL;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
-            HksBlob publicKey = { .size = pubKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+            HksBlob publicKey = {
+                .size = pubKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size)
+            };
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
             HksParam *priKeyExport = NULL;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
-            HksBlob privateKey = { .size = priKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+            HksBlob privateKey = {
+                .size = priKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size)
+            };
             ASSERT_NE(privateKey.data, nullptr);
             (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 

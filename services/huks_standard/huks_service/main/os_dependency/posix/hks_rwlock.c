@@ -25,7 +25,7 @@ struct HksRwlock {
 
 HksRwlock *HksRwlockCreate(void)
 {
-    HksRwlock *rwLock = HksMalloc(sizeof(HksRwlock));
+    HksRwlock *rwLock = (HksRwlock *)HksMalloc(sizeof(HksRwlock));
     if (rwLock != NULL) {
         int result = pthread_rwlock_init(&rwLock->lock, NULL);
         if (result != 0) {

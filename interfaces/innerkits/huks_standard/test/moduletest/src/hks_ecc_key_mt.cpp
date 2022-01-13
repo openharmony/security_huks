@@ -449,8 +449,13 @@ protected:
 
         struct HksParamSet *paramOutSet = NULL;
         HksInitParamSet(&paramOutSet);
-        struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-            .blob = { .size = HKS_ECC_KEY_SIZE_521, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_521) } };
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = {
+                .size = HKS_ECC_KEY_SIZE_521,
+                .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_521)
+            }
+        };
         HksAddParams(paramOutSet, &localKey, 1);
 
         HksBuildParamSet(&paramOutSet);
