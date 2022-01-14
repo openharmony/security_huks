@@ -296,8 +296,10 @@ protected:
         if (storage == HKS_STORAGE_TEMP) {
             struct HksParamSet *paramOutSet = NULL;
             HksInitParamSet(&paramOutSet);
-            struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-                .blob = { .size = HMAC_KEY_SIZE, .data = (uint8_t *)HksMalloc(HMAC_KEY_SIZE) } };
+            struct HksParam localKey = {
+                .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+                .blob = { .size = HMAC_KEY_SIZE, .data = (uint8_t *)HksMalloc(HMAC_KEY_SIZE) }
+            };
             HksAddParams(paramOutSet, &localKey, 1);
             HksBuildParamSet(&paramOutSet);
             if (scenario == 0) {

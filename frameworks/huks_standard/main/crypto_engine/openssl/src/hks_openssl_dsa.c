@@ -268,9 +268,9 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->gSize = keyMaterial->gSize;
 
     if (memcpy_s(output->data + sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize,
-                 output->size - (sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize),
-                 input->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize,
-                 keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize) != EOK) {
+        output->size - (sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize),
+        input->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize,
+        keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize) != EOK) {
         return HKS_ERROR_INVALID_OPERATION;
     }
 

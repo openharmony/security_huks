@@ -111,7 +111,7 @@ protected:
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
 
         const char *hexData = "00112233445566778899aabbccddeeff";
-        uint32_t dataLen = strlen(hexData) / 2;
+        uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
 
         HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
         for (uint32_t ii = 0; ii < dataLen; ii++) {

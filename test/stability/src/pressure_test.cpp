@@ -72,8 +72,10 @@ int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBl
 {
     struct HksParamSet *paramOutSet = nullptr;
     HksInitParamSet(&paramOutSet);
-    struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-        .blob = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) } };
+    struct HksParam localKey = {
+        .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+        .blob = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) }
+    };
     HksAddParams(paramOutSet, &localKey, 1);
     HksBuildParamSet(&paramOutSet);
 

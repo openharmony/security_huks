@@ -863,7 +863,7 @@ protected:
     {
         HksBlob key = { .size = 0, .data = nullptr };
 
-        uint32_t inLen = testCaseParams.hexData.length() / 2;
+        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = HKS_KEY_BYTES(testCaseParams.spec.keyLen);
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT) };

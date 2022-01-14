@@ -1300,13 +1300,13 @@ public:
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
-        uint32_t keyLen = testCaseParams.keyData.length() / 2;
+        uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
         for (uint32_t ii = 0; ii < keyLen; ii++) {
             key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[2 * ii]);
         }
 
-        uint32_t inLen = testCaseParams.hexData.length() / 2;
+        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = inLen;
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };

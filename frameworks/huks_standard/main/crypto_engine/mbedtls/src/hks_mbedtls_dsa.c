@@ -23,10 +23,6 @@
 
 #include "hks_mbedtls_dsa.h"
 
-#include "hks_log.h"
-#include "hks_mbedtls_common.h"
-#include "hks_mem.h"
-
 int32_t HksMbedtlsDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
     return HKS_ERROR_NOT_SUPPORTED;

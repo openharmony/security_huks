@@ -211,9 +211,9 @@ int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->zSize = 0;
 
     if (memcpy_s(output->data + sizeof(struct KeyMaterialEcc),
-                 output->size - sizeof(struct KeyMaterialEcc),
-                 input->data + sizeof(struct KeyMaterialEcc),
-                 keyMaterial->xSize + keyMaterial->ySize) != EOK) {
+        output->size - sizeof(struct KeyMaterialEcc),
+        input->data + sizeof(struct KeyMaterialEcc),
+        keyMaterial->xSize + keyMaterial->ySize) != EOK) {
         return HKS_ERROR_INVALID_OPERATION;
     }
 

@@ -437,8 +437,10 @@ protected:
 
         HksParam *symmetricParam = NULL;
         HksGetParam(paramSetOut, HKS_TAG_SYMMETRIC_KEY_DATA, &symmetricParam);
-        HksBlob symmetricKey = { .size = symmetricParam->blob.size,
-            .data = (uint8_t *)HksMalloc(symmetricParam->blob.size) };
+        HksBlob symmetricKey = {
+            .size = symmetricParam->blob.size,
+            .data = (uint8_t *)HksMalloc(symmetricParam->blob.size)
+        };
         (void)memcpy_s(
             symmetricKey.data, symmetricParam->blob.size, symmetricParam->blob.data, symmetricParam->blob.size);
 
