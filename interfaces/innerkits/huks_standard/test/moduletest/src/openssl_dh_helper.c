@@ -100,7 +100,7 @@ int32_t DhGenerateKey(const int keyLen, struct HksBlob *key)
 
 static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponent)
 {
-    int32_t ret = DH_SUCCESS;
+    int32_t ret;
     const struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)(key->data);
     if (key->size != sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize + keyMaterial->priKeySize) {
         return NULL;

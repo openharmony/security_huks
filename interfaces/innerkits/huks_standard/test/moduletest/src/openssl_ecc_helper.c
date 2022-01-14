@@ -137,7 +137,7 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keyLen, u
     BN_free(pubX);
     BN_free(pubY);
     free(rawMaterial);
-    return ECC_SUCCESS;
+    return result;
 }
 
 int32_t ECCGenerateKey(const int keyLen, struct HksBlob *key)
@@ -377,9 +377,9 @@ int32_t GetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
     publickeyMaterial->zSize = 0;
 
     if (memcpy_s(output->data + sizeof(struct KeyMaterialEcc),
-                 output->size - sizeof(struct KeyMaterialEcc),
-                 input->data + sizeof(struct KeyMaterialEcc),
-                 keyMaterial->xSize + keyMaterial->ySize) != 0) {
+        output->size - sizeof(struct KeyMaterialEcc),
+        input->data + sizeof(struct KeyMaterialEcc),
+        keyMaterial->xSize + keyMaterial->ySize) != 0) {
         return ECC_FAILED;
     }
 

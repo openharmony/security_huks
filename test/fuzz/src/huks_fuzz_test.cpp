@@ -175,7 +175,7 @@ uint8_t *HuksFuzzTest::RandomByte(uint32_t length) const
 
     uint8_t *data = (uint8_t *)HksMalloc(length);
     if (data != nullptr) {
-        std::generate(data, data + (length > MAX_RANDOM_BYTES ? MAX_RANDOM_BYTES : length), []() {
+        std::generate(data, data + ((length > MAX_RANDOM_BYTES) ? MAX_RANDOM_BYTES : length), []() {
             std::random_device rd;
             return rd();
         });

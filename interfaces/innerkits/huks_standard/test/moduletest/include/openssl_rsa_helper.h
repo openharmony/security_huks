@@ -22,7 +22,6 @@
 #include <openssl/rsa.h>
 
 #include "hks_type.h"
-#include "hks_param.h"
 
 #ifdef __cplusplus
 extern "C" {

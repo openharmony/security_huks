@@ -184,7 +184,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
 {
-    int32_t ret =- ValidateCertChainTest();
+    int32_t ret = ValidateCertChainTest();
     ASSERT_TRUE(ret == 0);
 }
 }

@@ -621,6 +621,7 @@ int32_t HksSetKeyToMaterial(uint32_t alg, bool isPubKey, const struct HksBlob *k
             } else {
                 return HKS_ERROR_MALLOC_FAIL;
             }
+            break;
         default:
             HKS_LOG_E("alg not support");
             return HKS_ERROR_INVALID_ALGORITHM;
