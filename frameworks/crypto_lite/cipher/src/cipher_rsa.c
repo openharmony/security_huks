@@ -59,7 +59,7 @@ static char *RsaMallocPrivateKey(const unsigned char *key, size_t *keyLen)
     ret = memcpy_s(privateKey + startLen + *keyLen, keyFinalLen - startLen - *keyLen, end, endLen);
     if (ret) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
-        memset_s(privateKey, keyFinalLen, 0, keyFinalLen);
+        (void)memset_s(privateKey, keyFinalLen, 0, keyFinalLen);
         free(privateKey);
         return NULL;
     }
@@ -100,7 +100,7 @@ static char *RsaMallocPublicKey(const unsigned char *key, size_t *keyLen)
     ret = memcpy_s(pubKey + startLen + *keyLen, keyFinalLen - startLen - *keyLen, end, endLen);
     if (ret) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
-        memset_s(pubKey, keyFinalLen, 0, keyFinalLen);
+        (void)memset_s(pubKey, keyFinalLen, 0, keyFinalLen);
         free(pubKey);
         return NULL;
     }
@@ -139,12 +139,12 @@ static int32_t RsaLoadPrivateKey(int32_t mode, mbedtls_pk_context *pk, const uns
 
     /* set padding as OAEPWITHSHA256 */
     mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
+    (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_SUCCESS;
 
 ERROR:
-    memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
+    (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_CODE_GENERAL;
 }
@@ -178,12 +178,12 @@ static int32_t RsaLoadPublicKey(int32_t mode, mbedtls_pk_context *pk, const unsi
     }
     /* set padding as OAEPWITHSHA256 */
     mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
+    (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_SUCCESS;
 
 ERROR:
-    memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
+    (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_CODE_GENERAL;
 }
@@ -379,7 +379,7 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
     }
     int32_t count = dataLen / rsaLen;
     for (int32_t i = 0; i < count; i++) {
-        memset_s(buf, rsaLen, 0, rsaLen);
+        (void)memset_s(buf, rsaLen, 0, rsaLen);
         if (mbedtls_rsa_pkcs1_decrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
             MBEDTLS_RSA_PRIVATE, &plainLen, tembuf + i * rsaLen, buf, rsaLen)) {
             goto ERROR;

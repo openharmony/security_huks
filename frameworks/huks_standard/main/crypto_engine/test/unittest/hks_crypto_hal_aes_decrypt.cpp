@@ -30,18 +30,18 @@ namespace Huks {
 namespace UnitTest {
 namespace {
 struct TestCaseParams {
-    HksUsageSpec usageSpec;
+    HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
 
-    HksErrorCode decryptResult;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 struct TestCaseParamsForGcm {
     std::string keyData;
     std::string hexData;
     std::string tagDec;
 
-    HksErrorCode decryptResult;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 uint8_t IV[16] = {0};

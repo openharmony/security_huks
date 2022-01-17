@@ -29,12 +29,12 @@ namespace Huks {
 namespace UnitTest {
 namespace {
 struct TestCaseParams {
-    HksUsageSpec usageSpec;
+    HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
-    HksKeySize keySize;
+    HksKeySize keySize = HksKeySize::HKS_RSA_KEY_SIZE_512;
 
-    HksErrorCode encryptResult;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_013_PARAMS = {

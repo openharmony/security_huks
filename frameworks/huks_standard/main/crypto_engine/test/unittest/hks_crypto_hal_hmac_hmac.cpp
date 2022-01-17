@@ -29,11 +29,11 @@ namespace Huks {
 namespace UnitTest {
 namespace {
 struct TestCaseParams {
-    HksKeySpec spec;
-    HksKeyDigest digest;
+    HksKeySpec spec = {0};
+    HksKeyDigest digest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode hmacResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode hmacResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_001_PARAMS = {

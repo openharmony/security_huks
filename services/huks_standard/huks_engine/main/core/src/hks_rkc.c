@@ -332,7 +332,7 @@ static int32_t RkcRecoverMkTime(const struct HksRkcKsfData *ksfData)
         (void)RkcMaskMk(&mk);
     } while (0);
 
-    memset_s(mk.data, mk.size, 0, mk.size);
+    (void)memset_s(mk.data, mk.size, 0, mk.size);
     HKS_FREE_BLOB(mk);
     return ret;
 }

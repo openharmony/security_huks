@@ -451,7 +451,7 @@ static int32_t FormatRsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
         },
     };
     int32_t ret = BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
-    memset_s(publicKey, publicKeySize, 0x00, publicKeySize);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
@@ -492,11 +492,15 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    (void)memcpy_s(publicKey, publicKeySize, keyIn->data, sizeof(struct KeyMaterialDsa));
+    if (memcpy_s(publicKey, publicKeySize, keyIn->data, sizeof(struct KeyMaterialDsa)) != EOK) {
+        HKS_FREE_PTR(publicKey);
+        return HKS_ERROR_INVALID_OPERATION;
+    }
     uint32_t inOffset = sizeof(struct KeyMaterialDsa);
     uint32_t outOffset = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize;
     if (memcpy_s(publicKey + inOffset, publicKeySize - inOffset, keyIn->data + outOffset, publicKeySize - inOffset) !=
         EOK) {
+        (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
         HKS_FREE_PTR(publicKey);
         return HKS_ERROR_INVALID_OPERATION;
     }
@@ -514,7 +518,7 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     };
 
     int32_t ret = BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
-    memset_s(publicKey, publicKeySize, 0x00, publicKeySize);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
@@ -554,7 +558,7 @@ static int32_t FormatEccKey(const struct HksBlob *keyIn, struct HksParamSet *par
         },
     };
     int32_t ret = BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
-    memset_s(publicKey, publicKeySize, 0x00, publicKeySize);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
@@ -594,7 +598,7 @@ static int32_t FormatDhKey(const struct HksBlob *keyIn, struct HksParamSet *para
         },
     };
     int32_t ret = BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
-    memset_s(publicKey, publicKeySize, 0x00, publicKeySize);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }

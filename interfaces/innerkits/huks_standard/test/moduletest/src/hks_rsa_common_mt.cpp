@@ -14,12 +14,14 @@
  */
 
 #include "hks_rsa_common_mt.h"
-#include "openssl_rsa_helper.h"
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "hks_api.h"
 #include "hks_mem.h"
+#include "hks_param.h"
+#include "openssl_rsa_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -68,7 +70,7 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
     HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
     ASSERT_NE(cipherText.data, nullptr);
 
-    EXPECT_EQ(EncryptRSA(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
+    EXPECT_EQ(EncryptRsa(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
         testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
@@ -76,7 +78,7 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
         ASSERT_NE(decryptedText.data, nullptr);
 
         EXPECT_EQ(
-            DecryptRSA(&cipherText, &decryptedText, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
+            DecryptRsa(&cipherText, &decryptedText, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
             testCaseParams.decryptResult);
         EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
 
@@ -139,7 +141,7 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
         ASSERT_NE(decryptedText.data, nullptr);
 
         EXPECT_EQ(
-            DecryptRSA(&cipherText, &decryptedText, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
+            DecryptRsa(&cipherText, &decryptedText, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
             testCaseParams.decryptResult);
 
         EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
@@ -184,7 +186,7 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
 
     struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
 
-    EVP_PKEY *pkey = GenerateRSAKey(testCaseParams.keySize);
+    EVP_PKEY *pkey = GenerateRsaKey(testCaseParams.keySize);
     ASSERT_NE(pkey, nullptr);
 
     OpensslGetx509PubKey(pkey, &x509Key);
@@ -199,7 +201,7 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
         ASSERT_NE(decryptedText.data, nullptr);
 
         EXPECT_EQ(
-            DecryptRSA(
+            DecryptRsa(
                 &cipherText, &decryptedText, &opensslRsaKeyInfo, testCaseParams.padding, testCaseParams.keyDigest),
             testCaseParams.decryptResult);
 
@@ -257,7 +259,7 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
     HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
     ASSERT_NE(cipherText.data, nullptr);
 
-    EXPECT_EQ(EncryptRSA(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
+    EXPECT_EQ(EncryptRsa(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
         testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
@@ -304,7 +306,8 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
     struct HksBlob rsaPublicKeyInfo = { rsaPublicKeyLen, rsaPublicKey };
     EXPECT_EQ(X509ToRsaPublicKey(&opensslRsaKeyInfo, &rsaPublicKeyInfo), 0);
     HksBlob publicKey = { .size = rsaPublicKeyInfo.size, .data = (uint8_t *)HksMalloc(rsaPublicKeyInfo.size) };
-    (void)memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size);
+    ASSERT_NE(publicKey.data, nullptr);
+    ASSERT_EQ(memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size), 0);
 
     HksBlob plainText = {
         .size = (uint32_t)testCaseParams.hexData.length(),
@@ -315,7 +318,7 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
     uint32_t inLength = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
     HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
     ASSERT_NE(cipherText.data, nullptr);
-    EXPECT_EQ(EncryptRSA(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
+    EXPECT_EQ(EncryptRsa(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
         testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
@@ -427,7 +430,8 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
         EXPECT_EQ(X509ToRsaPublicKey(&opensslRsaKeyInfo, &rsaPublicKeyInfo), 0);
 
         HksBlob publicKey = { .size = rsaPublicKeyInfo.size, .data = (uint8_t *)HksMalloc(rsaPublicKeyInfo.size) };
-        (void)memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size);
+        ASSERT_NE(publicKey.data, nullptr);
+        ASSERT_EQ(memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size), 0);
 
         EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
             testCaseParams.verifyResult);
@@ -514,7 +518,7 @@ void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCa
 
     struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
 
-    EVP_PKEY *pkey = GenerateRSAKey(testCaseParams.keySize);
+    EVP_PKEY *pkey = GenerateRsaKey(testCaseParams.keySize);
     ASSERT_NE(pkey, nullptr);
 
     OpensslGetx509PubKey(pkey, &x509Key);

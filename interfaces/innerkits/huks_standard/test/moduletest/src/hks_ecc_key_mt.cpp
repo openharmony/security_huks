@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "openssl_ecc_helper.h"
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "openssl_ecc_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -31,9 +34,9 @@ struct TestCaseParams {
     std::vector<HksParam> params;
     std::string hexData;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const char ECC_KEY[] = "This is a ECC key";
@@ -439,7 +442,7 @@ protected:
     {
         struct HksBlob authId = { (uint32_t)strlen(ECC_KEY), (uint8_t *)ECC_KEY };
 
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
 
         HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
@@ -447,7 +450,7 @@ protected:
 
         uint32_t digest = ReadValueByTag(testCaseParams.params, HKS_TAG_DIGEST);
 
-        struct HksParamSet *paramOutSet = NULL;
+        struct HksParamSet *paramOutSet = nullptr;
         HksInitParamSet(&paramOutSet);
         struct HksParam localKey = {
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
@@ -461,12 +464,12 @@ protected:
         HksBuildParamSet(&paramOutSet);
 
         EXPECT_EQ(HksGenerateKey(&authId, paramInSet, paramOutSet), testCaseParams.generateKeyResult);
-        HksParam *priParam = NULL;
+        HksParam *priParam = nullptr;
         HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priParam);
         HksBlob priKey = { .size = priParam->blob.size, .data = (uint8_t *)HksMalloc(priParam->blob.size) };
         (void)memcpy_s(priKey.data, priParam->blob.size, priParam->blob.data, priParam->blob.size);
 
-        HksParam *pubParam = NULL;
+        HksParam *pubParam = nullptr;
         HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubParam);
         HksBlob pubKey = { .size = pubParam->blob.size, .data = (uint8_t *)HksMalloc(pubParam->blob.size) };
         (void)memcpy_s(pubKey.data, pubParam->blob.size, pubParam->blob.data, pubParam->blob.size);

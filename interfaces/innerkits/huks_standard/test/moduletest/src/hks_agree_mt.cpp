@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#include "openssl_ecc_helper.h"
-#include "openssl_dh_helper.h"
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "hks_api.h"
 #include "hks_config.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "openssl_ecc_helper.h"
+#include "openssl_dh_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -34,8 +37,8 @@ struct TestCaseParams {
     std::vector<HksParam> agreeKeyParams;
     std::string hexData;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode agreeResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode agreeResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const char ALISE_KEY[] = "This is a alise key";
@@ -45,14 +48,15 @@ const uint32_t KEY_MEMORY = 4096;
 int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, const struct HksParamSet *paramSetIn,
     struct HksBlob *priKey, struct HksBlob *pubKey)
 {
-    struct HksParamSet *paramOutSet = NULL;
-    HksInitParamSet(&paramOutSet);
     if (keyLen == 0) {
         return HKS_FAILURE;
     }
+    struct HksParamSet *paramOutSet = nullptr;
+    HksInitParamSet(&paramOutSet);
 
     uint8_t *localData = (uint8_t *)HksMalloc(keyLen);
-    if (localData == NULL) {
+    if (localData == nullptr) {
+        HksFreeParamSet(&paramOutSet);
         return HKS_FAILURE;
     }
     struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA, .blob = { .size = keyLen, .data = localData } };
@@ -63,15 +67,15 @@ int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, co
         return HKS_FAILURE;
     }
 
-    HksParam *priParam = NULL;
+    HksParam *priParam = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priParam);
     priKey->size = priParam->blob.size;
-    (void)memcpy_s(priKey->data, priKey->size, priParam->blob.data, priParam->blob.size);
+    (void)memcpy_s(priKey->data, priParam->blob.size, priParam->blob.data, priParam->blob.size);
 
-    HksParam *pubParam = NULL;
+    HksParam *pubParam = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubParam);
     pubKey->size = pubParam->blob.size;
-    (void)memcpy_s(pubKey->data, pubKey->size, pubParam->blob.data, pubParam->blob.size);
+    (void)memcpy_s(pubKey->data, pubParam->blob.size, pubParam->blob.data, pubParam->blob.size);
 
     HksFree(localData);
     HksFreeParamSet(&paramOutSet);
@@ -498,7 +502,7 @@ protected:
     void ServiceAgreeScenario(const TestCaseParams &testCaseParams, const struct HksParamSet *generateKeyParams,
         struct HksBlob *agreeKeyAlise, struct HksBlob *agreeKeyBob)
     {
-        struct HksParamSet *agreeKeyParams = NULL;
+        struct HksParamSet *agreeKeyParams = nullptr;
         HksInitParamSet(&agreeKeyParams);
         HksAddParams(agreeKeyParams, testCaseParams.agreeKeyParams.data(), testCaseParams.agreeKeyParams.size());
         HksBuildParamSet(&agreeKeyParams);
@@ -520,7 +524,7 @@ protected:
 #ifdef HKS_SUPPORT_DH_C
         if (algorithm == HKS_ALG_ECDH) {
 #endif
-            EXPECT_EQ(ECCGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
+            EXPECT_EQ(EccGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
             EXPECT_EQ(X509ToHksBlob(&x509KeyBob, &pubKeyBob), ECC_SUCCESS);
             EXPECT_EQ(EcdhAgreeKey(keySize, &alise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
 
@@ -550,7 +554,7 @@ protected:
     void LocalAgreeScenario(const TestCaseParams &testCaseParams, const struct HksParamSet *generateKeyParams,
         struct HksBlob *agreeKeyAlise, struct HksBlob *agreeKeyBob, int32_t scenario)
     {
-        struct HksParamSet *agreeKeyParams = NULL;
+        struct HksParamSet *agreeKeyParams = nullptr;
         HksInitParamSet(&agreeKeyParams);
         HksAddParams(agreeKeyParams, testCaseParams.agreeKeyParams.data(), testCaseParams.agreeKeyParams.size());
         HksBuildParamSet(&agreeKeyParams);
@@ -573,8 +577,8 @@ protected:
         } else if (scenario == 1) {
             struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
             struct HksBlob bob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-            EXPECT_EQ(ECCGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
-            EXPECT_EQ(ECCGenerateKey(keySize, &bob), testCaseParams.generateKeyResult);
+            EXPECT_EQ(EccGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
+            EXPECT_EQ(EccGenerateKey(keySize, &bob), testCaseParams.generateKeyResult);
             EXPECT_EQ(GetEccPubKey(&alise, &pubKeyAlise), ECC_SUCCESS);
             EXPECT_EQ(GetEccPubKey(&bob, &pubKeyBob), ECC_SUCCESS);
             EXPECT_EQ(HksAgreeKey(agreeKeyParams, &alise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
@@ -589,7 +593,7 @@ protected:
 
     void EcdhRunTestCase(const TestCaseParams &testCaseParams, int32_t scenario)
     {
-        struct HksParamSet *generateKeyParams = NULL;
+        struct HksParamSet *generateKeyParams = nullptr;
         HksInitParamSet(&generateKeyParams);
         HksAddParams(
             generateKeyParams, testCaseParams.generateKeyParams.data(), testCaseParams.generateKeyParams.size());

@@ -42,6 +42,94 @@ static uint32_t GetOpensslKeyBlocksLen(uint32_t keylen)
     return (keylen + OPENSSL_KEY_BLOCK - 1) / OPENSSL_KEY_BLOCK * OPENSSL_KEY_BLOCK;
 }
 
+static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExponent, DSA *dsa, uint32_t *offset)
+{
+    int ret;
+    const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
+    uint8_t *buff = HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
+    if (buff == NULL) {
+        return HKS_FAILURE;
+    }
+
+    BIGNUM *x = NULL;
+    if (needPrivateExponent == true) {
+        if (keyMaterial->xSize == 0) {
+            HksFree(buff);
+            return HKS_FAILURE;
+        } else {
+            if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->xSize) != EOK) {
+                HksFree(buff);
+                return HKS_FAILURE;
+            }
+            x = BN_bin2bn(buff, keyMaterial->xSize, NULL);
+        }
+    }
+    *offset += keyMaterial->xSize;
+    if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->ySize) != EOK) {
+        HksFree(buff);
+        SELF_FREE_PTR(x, BN_free);
+        return HKS_FAILURE;
+    }
+    BIGNUM *y = BN_bin2bn(buff, keyMaterial->ySize, NULL);
+    *offset += keyMaterial->ySize;
+    if (DSA_set0_key(dsa, y, x) != HKS_OPENSSL_SUCCESS) {
+        SELF_FREE_PTR(x, BN_free);
+        SELF_FREE_PTR(y, BN_free);
+        ret = HKS_FAILURE;
+    } else {
+        ret = HKS_SUCCESS;
+    }
+
+    (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
+    HksFree(buff);
+    return ret;
+}
+
+static int InitDsaStructParameter(const struct HksBlob *key, const bool needPrivateExponent, DSA *dsa, uint32_t* offset)
+{
+    int ret;
+    const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
+    uint8_t *buff = HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
+    if (buff == NULL) {
+        return HKS_FAILURE;
+    }
+
+    if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->pSize) != EOK) {
+        HksFree(buff);
+        return HKS_FAILURE;
+    }
+    BIGNUM *p = BN_bin2bn(buff, keyMaterial->pSize, NULL);
+    *offset += keyMaterial->pSize;
+    if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->qSize) != EOK) {
+        HksFree(buff);
+        SELF_FREE_PTR(p, BN_free);
+        return HKS_FAILURE;
+    }
+    BIGNUM *q = BN_bin2bn(buff, keyMaterial->qSize, NULL);
+    *offset += keyMaterial->qSize;
+    if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->gSize) != EOK) {
+        (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
+        HksFree(buff);
+        SELF_FREE_PTR(p, BN_free);
+        SELF_FREE_PTR(q, BN_free);
+        return HKS_FAILURE;
+    }
+    BIGNUM *g = BN_bin2bn(buff, keyMaterial->gSize, NULL);
+
+    if (DSA_set0_pqg(dsa, p, q, g) != HKS_OPENSSL_SUCCESS) {
+        SELF_FREE_PTR(p, BN_free);
+        SELF_FREE_PTR(q, BN_free);
+        SELF_FREE_PTR(g, BN_free);
+        ret = HKS_FAILURE;
+    } else {
+        ret = HKS_SUCCESS;
+    }
+
+    (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
+    HksFree(buff);
+    return ret;
+}
+
 static DSA *InitDsaStruct(const struct HksBlob *key, const bool needPrivateExponent)
 {
     DSA *dsa = DSA_new();
@@ -49,46 +137,17 @@ static DSA *InitDsaStruct(const struct HksBlob *key, const bool needPrivateExpon
         return NULL;
     }
 
-    const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
-    uint8_t buff[HKS_KEY_BYTES(keyMaterial->keySize)];
-    uint32_t offset = sizeof(*keyMaterial);
-    BIGNUM *x = NULL;
-    if (needPrivateExponent == true) {
-        if (keyMaterial->xSize == 0) {
-            DSA_free(dsa);
-            return NULL;
-        } else {
-            (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->xSize);
-            x = BN_bin2bn(&buff[0], keyMaterial->xSize, NULL);
-        }
-    }
-    offset += keyMaterial->xSize;
-    (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->ySize);
-    BIGNUM *y = BN_bin2bn(&buff[0], keyMaterial->ySize, NULL);
-    offset += keyMaterial->ySize;
-    if (DSA_set0_key(dsa, y, x) != HKS_OPENSSL_SUCCESS) {
-        BN_free(y);
-        BN_free(x);
-        DSA_free(dsa);
+    uint32_t offset = sizeof(struct KeyMaterialDsa);
+    if (InitDsaStructKey(key, needPrivateExponent, dsa, &offset) != HKS_SUCCESS) {
+        SELF_FREE_PTR(dsa, DSA_free);
         return NULL;
     }
 
-    (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->pSize);
-    BIGNUM *p = BN_bin2bn(&buff[0], keyMaterial->pSize, NULL);
-    offset += keyMaterial->pSize;
-    (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->qSize);
-    BIGNUM *q = BN_bin2bn(&buff[0], keyMaterial->qSize, NULL);
-    offset += keyMaterial->qSize;
-    (void)memcpy_s(buff, sizeof(buff), key->data + offset, keyMaterial->gSize);
-    BIGNUM *g = BN_bin2bn(&buff[0], keyMaterial->gSize, NULL);
-
-    if (DSA_set0_pqg(dsa, p, q, g) != HKS_OPENSSL_SUCCESS) {
-        BN_free(p);
-        BN_free(q);
-        BN_free(g);
-        DSA_free(dsa);
+    if (InitDsaStructParameter(key, needPrivateExponent, dsa, &offset) != HKS_SUCCESS) {
+        SELF_FREE_PTR(dsa, DSA_free);
         return NULL;
     }
+
     return dsa;
 }
 
@@ -192,6 +251,8 @@ static int32_t DsaSaveKeyMaterial(const DSA *dsa, const uint32_t keySize, uint8_
         HKS_LOG_E("malloc buffer failed!");
         return HKS_ERROR_MALLOC_FAIL;
     }
+
+    (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     if (DsaKeyMaterialParam(rawMaterial, dsa, keyLen) != HKS_SUCCESS) {
         HksFree(rawMaterial);

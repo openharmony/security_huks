@@ -244,7 +244,7 @@ static int32_t Ed25519BlobToKeyMaterial(const struct HksBlob *key, struct HksBlo
     if (memcpy_s(adjustedKey->data + offset, adjustedKey->size - offset,
         key->data, (HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256) << 1)) != EOK) {
         HKS_LOG_E("copy ed25519 public and private value failed");
-        memset_s(adjustedKey->data, adjustedKey->size, 0, adjustedKey->size);
+        (void)memset_s(adjustedKey->data, adjustedKey->size, 0, adjustedKey->size);
         HKS_FREE_PTR(adjustedKey->data);
         return HKS_ERROR_BAD_STATE;
     }

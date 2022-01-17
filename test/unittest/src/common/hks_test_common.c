@@ -676,15 +676,17 @@ int32_t GenerateLocalX25519Key(struct HksBlob **privateKey, struct HksBlob **pub
     if ((publicKey != NULL) && ((*publicKey) != NULL) &&
         (localPublicKeyParams->blobDataExist) &&
         (localPublicKeyParams->blobDataSize == (HKS_CURVE25519_KEY_SIZE_256 / HKS_TEST_COMMON_8))) {
-        (void)memcpy_s((*publicKey)->data, (*publicKey)->size,
+        ret = memcpy_s((*publicKey)->data, (*publicKey)->size,
             paramSetOut->params[0].blob.data, paramSetOut->params[0].blob.size);
+        HKS_TEST_ASSERT(ret == 0);
     }
 
     if ((privateKey != NULL) && ((*privateKey) != NULL) &&
         (localPrivateKeyParams->blobDataExist) &&
         (localPrivateKeyParams->blobDataSize == (HKS_CURVE25519_KEY_SIZE_256 / HKS_TEST_COMMON_8))) {
-        (void)memcpy_s((*privateKey)->data, (*privateKey)->size,
+        ret = memcpy_s((*privateKey)->data, (*privateKey)->size,
             paramSetOut->params[1].blob.data, paramSetOut->params[1].blob.size);
+        HKS_TEST_ASSERT(ret == 0);
     }
 
     HksFreeParamSet(&paramSet);
