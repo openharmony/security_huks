@@ -86,12 +86,12 @@ int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBl
     HksParam *priParam = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priParam);
     priKey->size = priParam->blob.size;
-    (void)memcpy_s(priKey->data, priKey->size, priParam->blob.data, priParam->blob.size);
+    (void)memcpy_s(priKey->data, priParam->blob.size, priParam->blob.data, priParam->blob.size);
 
     HksParam *pubParam = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubParam);
     pubKey->size = pubParam->blob.size;
-    (void)memcpy_s(pubKey->data, pubKey->size, pubParam->blob.data, pubParam->blob.size);
+    (void)memcpy_s(pubKey->data, pubParam->blob.size, pubParam->blob.data, pubParam->blob.size);
 
     HksFree(localKey.blob.data);
     HksFreeParamSet(&paramOutSet);
@@ -671,25 +671,36 @@ HWTEST_F(PressureTest, PressureTest01500, TestSize.Level1)
     double programTimes = 0;
     struct HksBlob authId = { strlen(GENERATE_KEY), (uint8_t *)GENERATE_KEY };
 
+    struct HksParamSet *paramInSetForKey = nullptr;
+    HksInitParamSet(&paramInSetForKey);
     struct HksParamSet *paramInSet = nullptr;
     HksInitParamSet(&paramInSet);
 
     struct HksParam tmpParams[] = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_224 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     };
 
+    HksAddParams(paramInSetForKey, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     HksAddParams(paramInSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+
+    HksParam algForKey = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC };
+    HksParam alg = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH };
+
+    HksAddParams(paramInSetForKey, &algForKey, 1);
+    HksAddParams(paramInSet, &alg, 1);
+    HksParam degistForKey = { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE };
+    HksAddParams(paramInSetForKey, &degistForKey, 1);
+    HksBuildParamSet(&paramInSetForKey);
     HksBuildParamSet(&paramInSet);
 
-    HksGenerateKey(&authId, paramInSet, NULL);
+    HksGenerateKey(&authId, paramInSetForKey, NULL);
 
     struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
-    HksExportPublicKey(&authId, paramInSet, &pubKey);
+    HksExportPublicKey(&authId, paramInSetForKey, &pubKey);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob agreeKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
@@ -703,6 +714,7 @@ HWTEST_F(PressureTest, PressureTest01500, TestSize.Level1)
     }
     HksDeleteKey(&authId, paramInSet);
     HksFree(pubKey.data);
+    HksFreeParamSet(&paramInSetForKey);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("HksAgreeKey Interface Call Duration: %f", (programTimes / TEST_FREQUENCY));
 }
@@ -1029,7 +1041,7 @@ HWTEST_F(PressureTest, PressureTest02200, TestSize.Level1)
     HksParam *paramOut = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &paramOut);
     HksBlob authKey = { .size = paramOut->blob.size, .data = (uint8_t *)HksMalloc(paramOut->blob.size) };
-    (void)memcpy_s(authKey.data, authKey.size, paramOut->blob.data, paramOut->blob.size);
+    (void)memcpy_s(authKey.data, paramOut->blob.size, paramOut->blob.data, paramOut->blob.size);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         const char *hexData = "0123456789abcdef";
@@ -1086,7 +1098,7 @@ HWTEST_F(PressureTest, PressureTest02300, TestSize.Level1)
     HksParam *paramOut = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &paramOut);
     HksBlob authKey = { .size = paramOut->blob.size, .data = (uint8_t *)HksMalloc(paramOut->blob.size) };
-    (void)memcpy_s(authKey.data, authKey.size, paramOut->blob.data, paramOut->blob.size);
+    (void)memcpy_s(authKey.data, paramOut->blob.size, paramOut->blob.data, paramOut->blob.size);
 
     const char *hexData = "0123456789abcdef";
     uint32_t dataLen = strlen(hexData);
@@ -1125,25 +1137,36 @@ HWTEST_F(PressureTest, PressureTest02400, TestSize.Level1)
     double programTimes = 0;
     struct HksBlob authId = { strlen(GENERATE_KEY), (uint8_t *)GENERATE_KEY };
 
+    struct HksParamSet *paramInSetForKey = nullptr;
+    HksInitParamSet(&paramInSetForKey);
     struct HksParamSet *paramInSet = nullptr;
     HksInitParamSet(&paramInSet);
 
     struct HksParam tmpParams[] = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_224 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     };
 
+    HksAddParams(paramInSetForKey, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     HksAddParams(paramInSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+
+    HksParam algForKey = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC };
+    HksParam alg = { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH };
+
+    HksAddParams(paramInSetForKey, &algForKey, 1);
+    HksAddParams(paramInSet, &alg, 1);
+    HksParam degistForKey = { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE };
+    HksAddParams(paramInSetForKey, &degistForKey, 1);
+    HksBuildParamSet(&paramInSetForKey);
     HksBuildParamSet(&paramInSet);
 
     HksBlob priKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
     HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
 
-    PressureTest::LocalHksGenerate(HKS_ECC_KEY_SIZE_224, &authId, paramInSet, &priKey, &pubKey);
+    PressureTest::LocalHksGenerate(HKS_ECC_KEY_SIZE_224, &authId, paramInSetForKey, &priKey, &pubKey);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob agreeKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
@@ -1157,6 +1180,7 @@ HWTEST_F(PressureTest, PressureTest02400, TestSize.Level1)
     }
     HksFree(priKey.data);
     HksFree(pubKey.data);
+    HksFreeParamSet(&paramInSetForKey);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("Local HksAgreeKey Interface Call Duration: %f", (programTimes / TEST_FREQUENCY));
 }
@@ -1241,7 +1265,7 @@ HWTEST_F(PressureTest, PressureTest02600, TestSize.Level1)
     HksParam *paramOut = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &paramOut);
     HksBlob authKey = { .size = paramOut->blob.size, .data = (uint8_t *)HksMalloc(paramOut->blob.size) };
-    (void)memcpy_s(authKey.data, authKey.size, paramOut->blob.data, paramOut->blob.size);
+    (void)memcpy_s(authKey.data, paramOut->blob.size, paramOut->blob.data, paramOut->blob.size);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         const char *hexData = "0123456789abcdef";

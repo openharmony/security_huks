@@ -31,10 +31,10 @@ namespace Huks {
 namespace UnitTest {
 namespace {
 struct TestCaseParams {
-    HksKeySpec spec;
+    HksKeySpec spec = {0};
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode agreeResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode agreeResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_DH_AGREE_001_PARAMS = {

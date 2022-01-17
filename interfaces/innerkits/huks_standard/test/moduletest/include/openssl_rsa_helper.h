@@ -16,10 +16,7 @@
 #ifndef OPENSSL_RSA_MT_HELPER_H
 #define OPENSSL_RSA_MT_HELPER_H
 
-#include <securec.h>
-
 #include <openssl/evp.h>
-#include <openssl/rsa.h>
 
 #include "hks_type.h"
 
@@ -31,18 +28,18 @@ extern "C" {
 #define RSA_FAILED (-1)
 #define RSA_SUCCESS 0
 
-void SaveRsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key);
+int32_t SaveRsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key);
 
-EVP_PKEY *GenerateRSAKey(const uint32_t keySize);
+EVP_PKEY *GenerateRsaKey(const uint32_t keySize);
 
-void OpensslGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key);
+bool OpensslGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key);
 
 int32_t X509ToRsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey);
 
-int32_t EncryptRSA(const struct HksBlob *inData, struct HksBlob *outData, struct HksBlob *key, int padding,
+int32_t EncryptRsa(const struct HksBlob *inData, struct HksBlob *outData, struct HksBlob *key, int padding,
     enum HksKeyDigest digestType);
 
-int32_t DecryptRSA(const struct HksBlob *inData, struct HksBlob *outData, struct HksBlob *key, int padding,
+int32_t DecryptRsa(const struct HksBlob *inData, struct HksBlob *outData, struct HksBlob *key, int padding,
     enum HksKeyDigest digestType);
 
 int32_t OpensslSignRsa(const struct HksBlob *plainText, struct HksBlob *signData, struct HksBlob *key, int padding,

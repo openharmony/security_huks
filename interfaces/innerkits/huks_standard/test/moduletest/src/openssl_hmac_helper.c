@@ -15,6 +15,12 @@
 
 #include "openssl_hmac_helper.h"
 
+#include <stdlib.h>
+
+#include <openssl/evp.h>
+#include <openssl/hmac.h>
+#include <openssl/rand.h>
+
 int32_t HmacGenerateKey(int key_len, struct HksBlob *key)
 {
     uint32_t keySizeByte = key_len / BIT_NUM_OF_UINT8;

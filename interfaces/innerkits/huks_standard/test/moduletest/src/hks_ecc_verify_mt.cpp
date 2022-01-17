@@ -13,13 +13,15 @@
  * limitations under the License.
  */
 
-#include "openssl_ecc_helper.h"
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
 
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "openssl_ecc_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -31,9 +33,9 @@ struct TestCaseParams {
     std::vector<HksParam> params;
     std::string hexData;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 const char PUB_KEY[] = "This is a public key";
 
@@ -822,7 +824,7 @@ protected:
     {
         struct HksBlob authId = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
 
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
 
         HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
@@ -834,7 +836,7 @@ protected:
         struct HksBlob pubKey = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
 
         uint32_t keySize = ReadValueByTag(testCaseParams.params, HKS_TAG_KEY_SIZE);
-        EXPECT_EQ(ECCGenerateKey(keySize, &authId), testCaseParams.generateKeyResult);
+        EXPECT_EQ(EccGenerateKey(keySize, &authId), testCaseParams.generateKeyResult);
         EXPECT_EQ(GetEccPubKey(&authId, &pubKey), ECC_SUCCESS);
 
         HksBlob message = {

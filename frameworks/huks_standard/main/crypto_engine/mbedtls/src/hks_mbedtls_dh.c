@@ -75,7 +75,9 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
     if (rawMaterial == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
+    if (memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen) != EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
 
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)rawMaterial;
     keyMaterial->keyAlg = HKS_ALG_DH;
@@ -83,12 +85,14 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
     keyMaterial->pubKeySize = mbedtls_mpi_size(&ctx->GX);
     keyMaterial->priKeySize = mbedtls_mpi_size(&ctx->X);
 
-    int32_t ret;
+    int32_t ret = HKS_MBEDTLS_SUCCESS;
     do {
         uint32_t offset = sizeof(*keyMaterial);
         ret = mbedtls_mpi_write_binary(&(ctx->GX), rawMaterial + offset, keyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%X", ret);
+            (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
+            HksFree(rawMaterial);
             break;
         }
 
@@ -96,6 +100,8 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
         ret = mbedtls_mpi_write_binary(&(ctx->X), rawMaterial + offset, keyMaterial->priKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%X", ret);
+            (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
+            HksFree(rawMaterial);
             break;
         }
 
@@ -103,7 +109,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
         key->size = rawMaterialLen;
     } while (0);
 
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
@@ -164,7 +170,10 @@ int32_t HksMbedtlsGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize);
+    if (memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize) !=
+        EOK) {
+        return HKS_ERROR_INVALID_OPERATION;
+    }
     ((struct KeyMaterialDh *)output->data)->priKeySize = 0;
     ((struct KeyMaterialDh *)output->data)->reserved = 0;
     output->size = sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize;

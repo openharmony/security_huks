@@ -16,14 +16,6 @@
 #ifndef OPENSSL_ECC_HELPER_H
 #define OPENSSL_ECC_HELPER_H
 
-#include <stdbool.h>
-
-#include <securec.h>
-
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/rand.h>
-
 #include "hks_type.h"
 
 #ifdef __cplusplus
@@ -36,7 +28,7 @@ extern "C" {
 #define ECC_KEY_SIZE 528
 #define ECC_MESSAGE_SIZE 141
 
-int32_t ECCGenerateKey(const int keyLen, struct HksBlob *key);
+int32_t EccGenerateKey(const int keyLen, struct HksBlob *key);
 
 int32_t EcdsaSign(const struct HksBlob *key, int digest, const struct HksBlob *message, struct HksBlob *signature);
 

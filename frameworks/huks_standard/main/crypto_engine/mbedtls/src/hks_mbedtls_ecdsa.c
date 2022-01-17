@@ -32,12 +32,9 @@
 #include <mbedtls/ecp.h>
 #include <mbedtls/entropy.h>
 
-#include "hks_common_check.h"
 #include "hks_log.h"
-#include "hks_mem.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mbedtls_ecc.h"
-#include "hks_mbedtls_hash.h"
 
 #ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
 /* users must ensure the input params not null */

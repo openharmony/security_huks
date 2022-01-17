@@ -13,12 +13,16 @@
  * limitations under the License.
  */
 
-#include "openssl_aes_helper.h"
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "hks_api.h"
 #include "hks_mem.h"
+#include "hks_param.h"
+#include "openssl_aes_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -31,9 +35,9 @@ struct TestCaseParams {
     std::string hexData;
     uint32_t inLenAppend = 0;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const uint8_t IV[IV_SIZE] = {0};
@@ -420,7 +424,7 @@ protected:
     {
         struct HksBlob authId = { (uint32_t)strlen(TEST_AES_KEY), (uint8_t *)TEST_AES_KEY };
 
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
 
         HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
@@ -456,9 +460,9 @@ protected:
         ASSERT_NE(plainTextDecrypt.data, nullptr);
         if (blockMode == HKS_MODE_GCM) {
             HksBlob tagAead = { .size = AAD_SIZE, .data = (uint8_t *)HksMalloc(AAD_SIZE) };
-            EXPECT_EQ(AesGCMEncrypt(paramInSet, &plainText, &cipherText, &symmetricKey, &tagAead),
+            EXPECT_EQ(AesGcmEncrypt(paramInSet, &plainText, &cipherText, &symmetricKey, &tagAead),
                 testCaseParams.encryptResult);
-            EXPECT_EQ(AesGCMDecrypt(paramInSet, &cipherText, &plainTextDecrypt, &symmetricKey, &tagAead),
+            EXPECT_EQ(AesGcmDecrypt(paramInSet, &cipherText, &plainTextDecrypt, &symmetricKey, &tagAead),
                 testCaseParams.decryptResult);
             HksFree(tagAead.data);
         } else {

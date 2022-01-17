@@ -95,6 +95,8 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
         return HKS_ERROR_MALLOC_FAIL;
     }
 
+    (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
+
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)rawMaterial;
     keyMaterial->keyAlg = HKS_ALG_DH;
     keyMaterial->keySize = keySize;
@@ -153,7 +155,10 @@ int32_t HksOpensslGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    (void)memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize);
+    if (memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize) !=
+        EOK) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     ((struct KeyMaterialDh *)output->data)->priKeySize = 0;
     ((struct KeyMaterialDh *)output->data)->reserved = 0;
     output->size = sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize;
@@ -183,12 +188,18 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    uint8_t computeKey[DH_size(dh)];
+    uint8_t *computeKey = HksMalloc(DH_size(dh));
+    if (computeKey == NULL) {
+        BN_free(pub);
+        DH_free(dh);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
 
-    if (DH_compute_key_padded(&computeKey[0], pub, dh) <= 0) {
+    if (DH_compute_key_padded(computeKey, pub, dh) <= 0) {
         HksLogOpensslError();
         BN_free(pub);
         DH_free(dh);
+        HksFree(computeKey);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -203,8 +214,10 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         }
     }
 
+    (void)memset_s(computeKey, DH_size(dh), 0, DH_size(dh));
     BN_free(pub);
     DH_free(dh);
+    HksFree(computeKey);
     return ret;
 }
 #endif /* HKS_SUPPORT_DH_AGREE_KEY */
