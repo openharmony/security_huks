@@ -491,7 +491,7 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
 
 int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
-    uint32_t ret = HksCheckIpcGetKeyInfoList(keyInfoList, *listCount);
+    int32_t ret = HksCheckIpcGetKeyInfoList(keyInfoList, *listCount);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCheckIpcGetKeyInfoList fail");
         return ret;

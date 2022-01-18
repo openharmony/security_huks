@@ -36,7 +36,7 @@
     defined(HKS_SUPPORT_DH_C)
 static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
-    int32_t length = i2d_PUBKEY(pkey, NULL);
+    uint32_t length = i2d_PUBKEY(pkey, NULL);
     if (length <= 0) {
         HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -453,8 +453,8 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t nSize = BN_num_bytes(RSA_get0_n(rsa));
-    int32_t eSize = BN_num_bytes(RSA_get0_e(rsa));
+    uint32_t nSize = (uint32_t)BN_num_bytes(RSA_get0_n(rsa));
+    uint32_t eSize = (uint32_t)BN_num_bytes(RSA_get0_e(rsa));
     if (nSize <= 0 || eSize <= 0) {
         HKS_LOG_E("X509PublicKeyToRsa BN_num_bytes failed");
         return HKS_ERROR_INTERNAL_ERROR;
@@ -506,8 +506,8 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
             break;
         }
 
-        int32_t xSize = BN_num_bytes(x);
-        int32_t ySize = BN_num_bytes(y);
+        uint32_t xSize = (uint32_t)BN_num_bytes(x);
+        uint32_t ySize = (uint32_t)BN_num_bytes(y);
         if (xSize <= 0 || ySize <= 0) {
             HKS_LOG_E("X509PublicKeyToEcc get x or y size failed");
             break;
@@ -523,7 +523,7 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
 
         struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
         pubKeyInfo->keyAlg = HKS_ALG_ECC;
-        pubKeyInfo->keySize = EC_GROUP_order_bits(EC_KEY_get0_group(ecKey));
+        pubKeyInfo->keySize = (uint32_t)EC_GROUP_order_bits(EC_KEY_get0_group(ecKey));
         pubKeyInfo->nOrXSize = xSize;
         pubKeyInfo->eOrYSize = ySize;
         pubKeyInfo->placeHolder = 0;
@@ -569,10 +569,10 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
     const BIGNUM *p = DSA_get0_p(dsa);
     const BIGNUM *q = DSA_get0_q(dsa);
     const BIGNUM *g = DSA_get0_g(dsa);
-    uint32_t ySize = BN_num_bytes(y);
-    uint32_t pSize = BN_num_bytes(p);
-    uint32_t qSize = BN_num_bytes(q);
-    uint32_t gSize = BN_num_bytes(g);
+    uint32_t ySize = (uint32_t)BN_num_bytes(y);
+    uint32_t pSize = (uint32_t)BN_num_bytes(p);
+    uint32_t qSize = (uint32_t)BN_num_bytes(q);
+    uint32_t gSize = (uint32_t)BN_num_bytes(g);
 
     uint32_t totalSize = sizeof(struct KeyMaterialDsa) + ySize + pSize + qSize + gSize;
     uint8_t *keyBuffer = HksMalloc(totalSize);

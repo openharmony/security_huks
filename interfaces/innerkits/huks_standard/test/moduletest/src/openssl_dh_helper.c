@@ -48,7 +48,8 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
     const BIGNUM *pubKey = NULL;
     const BIGNUM *privKey = NULL;
     DH_get0_key(dh, &pubKey, &privKey);
-    const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + BN_num_bytes(pubKey) + BN_num_bytes(privKey);
+    const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + (uint32_t)BN_num_bytes(pubKey) +
+                                    (uint32_t)BN_num_bytes(privKey);
     uint8_t *rawMaterial = (uint8_t *)malloc(rawMaterialLen);
     if (rawMaterial == NULL) {
         return DH_FAILED;
@@ -181,7 +182,7 @@ int32_t DhAgreeKey(
         if (memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(keyLen)) != 0) {
             ret = DH_FAILED;
         } else {
-            sharedKey->size = DH_size(dh);
+            sharedKey->size = (uint32_t)DH_size(dh);
             ret = DH_SUCCESS;
         }
     }
@@ -243,7 +244,7 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
     }
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)keyBuffer;
     keyMaterial->keyAlg = HKS_ALG_DH;
-    keyMaterial->keySize = DH_bits(dh);
+    keyMaterial->keySize = (uint32_t)DH_bits(dh);
     keyMaterial->pubKeySize = dhpubKeySize;
     keyMaterial->priKeySize = 0;
     keyMaterial->reserved = 0;
@@ -281,7 +282,7 @@ int32_t DhHksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     }
 
     uint8_t *tmp = NULL;
-    int32_t length = i2d_PUBKEY(pkey, &tmp);
+    uint32_t length = i2d_PUBKEY(pkey, &tmp);
     x509Key->size = length;
     if (tmp == NULL) {
         EVP_PKEY_free(pkey);

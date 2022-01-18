@@ -27,6 +27,7 @@
 #include <openssl/rand.h>
 
 #include "hks_log.h"
+#include "hks_mem.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
 #include "hks_type_inner.h"
@@ -192,7 +193,7 @@ static int32_t OpensslAesAeadEncryptFinal(EVP_CIPHER_CTX *ctx, const struct HksU
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    cipherText->size = outLen;
+    cipherText->size = (uint32_t)outLen;
 
     if (EVP_EncryptFinal_ex(ctx, cipherText->data, &outLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
@@ -222,7 +223,7 @@ static int32_t OpensslAesAeadDecryptFinal(
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    plainText->size = outLen;
+    plainText->size = (uint32_t)outLen;
 
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, aeadParam->tagDec.size, aeadParam->tagDec.data) !=
         HKS_OPENSSL_SUCCESS) {
@@ -311,7 +312,7 @@ static int32_t OpensslAesCipherEncryptFinal(
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    cipherText->size += outLen;
+    cipherText->size += (uint32_t)outLen;
 
     return HKS_SUCCESS;
 }
@@ -325,7 +326,7 @@ static int32_t OpensslAesCipherDecryptFinal(
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    plainText->size = outLen;
+    plainText->size = (uint32_t)outLen;
 
     if (EVP_DecryptFinal_ex(ctx, plainText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
