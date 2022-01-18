@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "hks_type.h"
-#include "hks_param.h"
 
 namespace OHOS {
 namespace Security {
@@ -31,102 +30,102 @@ namespace MT {
 struct GenerateKeyCaseParams {
     std::vector<HksParam> params;
     std::string hexData;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct EncryptLocalCaseParams {
     std::vector<HksParam> params;
     std::string hexData;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct EncryptServiceCaseParams {
     std::string alias;
     std::vector<HksParam> params;
     std::string hexData;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
     uint32_t keySize;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct DecryptLocalCaseParams {
     std::vector<HksParam> params;
     std::string hexData;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct DecryptServiceCaseParams {
     std::string alias;
     std::vector<HksParam> params;
     std::string hexData;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct SignLocalCaseParams {
     std::vector<HksParam> params;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct SignServiceCaseParams {
     std::string alias;
     std::vector<HksParam> params;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct VerifyLocalCaseParams {
     std::vector<HksParam> params;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 struct VerifyServiceCaseParams {
     std::string alias;
     std::vector<HksParam> params;
-    int padding;
-    HksKeyDigest keyDigest;
+    int padding = 0;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
     uint32_t keySize;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 class HksRsaCommonMt {

@@ -32,10 +32,8 @@
 #include <mbedtls/entropy.h>
 #include <mbedtls/rsa.h>
 
-#include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
-#include "hks_mbedtls_hash.h"
 #include "hks_mem.h"
 
 #define HKS_RSA_PUBLIC_EXPONENT 65537

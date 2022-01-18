@@ -15,9 +15,13 @@
 
 #include "openssl_dh_helper.h"
 
+#include <stdlib.h>
+
+#include <openssl/bn.h>
 #include <openssl/dh.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
+#include <securec.h>
 
 #include "hks_crypto_hal.h"
 #include "hks_mem.h"
@@ -157,9 +161,15 @@ int32_t DhAgreeKey(
         return DH_FAILED;
     }
 
-    uint8_t computeKey[DH_size(dh)];
+    uint8_t *computeKey = (uint8_t *)malloc(DH_size(dh));
+    if (computeKey == NULL) {
+        BN_free(pub);
+        DH_free(dh);
+        return DH_FAILED;
+    }
 
     if (DH_compute_key_padded(computeKey, pub, dh) <= 0) {
+        free(computeKey);
         BN_free(pub);
         DH_free(dh);
         return DH_FAILED;
@@ -168,11 +178,16 @@ int32_t DhAgreeKey(
     if (HKS_KEY_BYTES(keyLen) > DH_size(dh)) {
         ret = DH_FAILED;
     } else {
-        (void)memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(keyLen));
-        sharedKey->size = DH_size(dh);
-        ret = DH_SUCCESS;
+        if (memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(keyLen)) != 0) {
+            ret = DH_FAILED;
+        } else {
+            sharedKey->size = DH_size(dh);
+            ret = DH_SUCCESS;
+        }
     }
 
+    (void)memset_s(computeKey, DH_size(dh), 0, DH_size(dh));
+    free(computeKey);
     BN_free(pub);
     DH_free(dh);
     return ret;
@@ -188,7 +203,10 @@ int32_t DhGetDhPubKey(const struct HksBlob *input, struct HksBlob *output)
         return DH_FAILED;
     }
 
-    (void)memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize);
+    if (memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize) !=
+        0) {
+        return DH_FAILED;
+    }
     ((struct KeyMaterialDh *)output->data)->priKeySize = 0;
     ((struct KeyMaterialDh *)output->data)->reserved = 0;
     output->size = sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize;
@@ -235,11 +253,11 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
     publicKey->size = sizeof(struct KeyMaterialDh) + dhpubKeySize;
     if (memcpy_s(publicKey->data, publicKey->size, keyBuffer, sizeof(struct KeyMaterialDh) + dhpubKeySize) != 0) {
         EVP_PKEY_free(pkey);
-        free(keyBuffer);
+        HksFree(keyBuffer);
         return DH_FAILED;
     }
 
-    free(keyBuffer);
+    HksFree(keyBuffer);
     EVP_PKEY_free(pkey);
     return DH_SUCCESS;
 }

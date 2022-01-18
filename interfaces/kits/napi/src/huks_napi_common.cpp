@@ -203,7 +203,7 @@ static napi_value GenerateAarrayBuffer(napi_env env, uint8_t *data, uint32_t siz
     }
 
     napi_value outBuffer = nullptr;
-    memcpy_s(buffer, size, data, size);
+    (void)memcpy_s(buffer, size, data, size);
 
     napi_status status = napi_create_external_arraybuffer(
         env, buffer, size, [](napi_env env, void *data, void *hint) { HksFree(data); }, nullptr, &outBuffer);

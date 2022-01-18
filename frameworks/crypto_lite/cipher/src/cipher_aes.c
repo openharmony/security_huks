@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#include "cipher.h"
 #include <stdlib.h>
 #include "aes.h"
 #include "base64.h"
+#include "cipher.h"
 #include "log.h"
 #include "md.h"
 #include "md_internal.h"
@@ -73,7 +73,7 @@ static char *MallocDecodeData(const char *text, size_t *olen)
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc failed, length:%{public}d.", (int32_t)(decodeLen + 1));
         return NULL;
     }
-    memset_s(decData,  decodeLen + 1, 0, decodeLen + 1);
+    (void)memset_s(decData, decodeLen + 1, 0, decodeLen + 1);
     if (mbedtls_base64_decode((unsigned char *)decData, decodeLen + 1, olen,
         (const unsigned char *)text, strlen(text)) != 0) {
         free(decData);
@@ -99,7 +99,7 @@ static char *MallocEncodeData(const unsigned char *text, size_t *olen)
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc data failed, expect len:%{public}zu.", dataLen);
         return NULL;
     }
-    memset_s(encData, dataLen, 0, dataLen);
+    (void)memset_s(encData, dataLen + 1, 0, dataLen + 1);
     if (mbedtls_base64_encode((unsigned char *)(encData), dataLen, olen, text, *olen) != 0) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "encode data failed.");
         free(encData);
@@ -224,7 +224,7 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
     if (data->keyLen != KEY_LEN) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "key length:%{public}d error, need be %{public}d Bytes.",
             data->keyLen, KEY_LEN);
-        memset_s(data->key, data->keyLen, 0, data->keyLen);
+        (void)memset_s(data->key, data->keyLen, 0, data->keyLen);
         free(data->key);
         data->key = NULL;
         goto ERROR;
@@ -249,7 +249,7 @@ void DeinitAesCryptData(AesCryptContext *ctx)
     }
 
     if (ctx->data.key != NULL) {
-        memset_s(ctx->data.key, ctx->data.keyLen, 0, ctx->data.keyLen);
+        (void)memset_s(ctx->data.key, ctx->data.keyLen, 0, ctx->data.keyLen);
         free(ctx->data.key);
         ctx->data.key = NULL;
     }

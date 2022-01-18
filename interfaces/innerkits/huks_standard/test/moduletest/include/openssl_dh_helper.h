@@ -16,14 +16,6 @@
 #ifndef OPENSSL_DH_HELPER_H
 #define OPENSSL_DH_HELPER_H
 
-#include <stdbool.h>
-
-#include <securec.h>
-
-#include <openssl/evp.h>
-#include <openssl/hmac.h>
-#include <openssl/rand.h>
-
 #include "hks_type.h"
 
 #ifdef __cplusplus

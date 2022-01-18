@@ -17,11 +17,7 @@
 #ifndef OPENSSL_AES_HELPER_H
 #define OPENSSL_AES_HELPER_H
 
-#include <securec.h>
-
-#include "hks_param.h"
 #include "hks_type.h"
-#include "openssl/rand.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,10 +37,10 @@ int32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
 int32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey);
 
-int32_t AesGCMEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesGcmEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey, const struct HksBlob *tagAead);
 
-int32_t AesGCMDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
+int32_t AesGcmDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *inData, struct HksBlob *outData,
     const struct HksBlob *randomKey, const struct HksBlob *tagDec);
 
 #ifdef __cplusplus

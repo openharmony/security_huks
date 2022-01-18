@@ -29,12 +29,12 @@ namespace Huks {
 namespace UnitTest {
 namespace {
 struct TestCaseParams {
-    HksKeySpec spec;
-    HksUsageSpec usageSpec;
+    HksKeySpec spec = {0};
+    HksUsageSpec usageSpec = {0};
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS = {

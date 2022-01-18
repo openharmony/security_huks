@@ -13,13 +13,16 @@
  * limitations under the License.
  */
 
-#include "openssl_hmac_helper.h"
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <securec.h>
 
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "openssl_hmac_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -31,8 +34,8 @@ struct TestCaseParams {
     std::vector<HksParam> params;
     std::string hexData;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode hmacResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode hmacResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const char HMAC_KEY[] = "This is a HMAC key";
@@ -279,7 +282,7 @@ protected:
     {
         struct HksBlob authId = { (uint32_t)strlen(HMAC_KEY), (uint8_t *)HMAC_KEY };
 
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
         HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
         HksBuildParamSet(&paramInSet);
@@ -294,7 +297,7 @@ protected:
         HksBlob macForHuks = { .size = HMAC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(HMAC_MESSAGE_SIZE) };
 
         if (storage == HKS_STORAGE_TEMP) {
-            struct HksParamSet *paramOutSet = NULL;
+            struct HksParamSet *paramOutSet = nullptr;
             HksInitParamSet(&paramOutSet);
             struct HksParam localKey = {
                 .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
@@ -308,7 +311,7 @@ protected:
                 EXPECT_EQ(HmacGenerateKey(HMAC_KEY_SIZE, &authId), testCaseParams.generateKeyResult);
             }
 
-            HksParam *outParam = NULL;
+            HksParam *outParam = nullptr;
             HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &outParam);
             HksBlob key = { .size = outParam->blob.size, .data = (uint8_t *)HksMalloc(outParam->blob.size) };
             (void)memcpy_s(key.data, outParam->blob.size, outParam->blob.data, outParam->blob.size);

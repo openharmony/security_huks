@@ -29,11 +29,11 @@ namespace Huks {
 namespace UnitTest {
 namespace {
 struct TestCaseParams {
-    HksUsageSpec usageSpec;
+    HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
 
-    HksErrorCode encryptResult;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 uint8_t IV[16] = {0};
