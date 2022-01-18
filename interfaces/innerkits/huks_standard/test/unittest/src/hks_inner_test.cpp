@@ -388,7 +388,7 @@ HWTEST_F(HksInnerTest, HksInnerTest014, Function | SmallTest | Level0)
     HksBlob publicKey = {.size = sizeof(KeyMaterialDsa) + 5, .data = (uint8_t *)HksMalloc(sizeof(KeyMaterialDsa) + 5)};
     HksBlob x509Key = {.size = 0, .data = nullptr};
     KeyMaterialDsa *keyMaterial = (KeyMaterialDsa *)publicKey.data;
-    memset_s(publicKey.data, publicKey.size, 0x01, publicKey.size);
+    (void)memset_s(publicKey.data, publicKey.size, 0x01, publicKey.size);
     keyMaterial->keyAlg = HKS_ALG_DSA;
     keyMaterial->keySize = 256;
 

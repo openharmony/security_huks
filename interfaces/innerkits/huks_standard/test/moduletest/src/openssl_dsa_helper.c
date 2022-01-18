@@ -15,8 +15,11 @@
 
 #include "openssl_dsa_helper.h"
 
+#include <openssl/bn.h>
+#include <openssl/dsa.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
+#include <securec.h>
 
 #include "hks_crypto_hal.h"
 #include "hks_common_check.h"
@@ -75,7 +78,7 @@ static DSA *InitDsa(struct HksBlob *key, const bool needPrivateExponent)
 {
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
 
-    uint32_t offset = sizeof(*keyMaterial);
+    uint32_t offset = sizeof(struct KeyMaterialDsa);
     BIGNUM *x = NULL;
     BIGNUM *y = NULL;
     BIGNUM *p = NULL;
@@ -307,19 +310,34 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
     return result;
 }
 
-void DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
+bool DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
     uint8_t *tmp = NULL;
-    int32_t length = i2d_PUBKEY(pkey, &tmp);
+    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
+    if (x509Key->size < length) {
+        OPENSSL_free(tmp);
+        return false;
+    }
     x509Key->size = length;
     if (tmp != NULL) {
-        (void)memcpy_s(x509Key->data, x509Key->size, tmp, length);
-        free(tmp);
+        if (memcpy_s(x509Key->data, x509Key->size, tmp, length) != EOK) {
+            OPENSSL_free(tmp);
+            return false;
+        }
+        OPENSSL_free(tmp);
+    } else {
+        return false;
     }
+    return true;
 }
 
 int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key)
 {
+    DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+    if (dsa == NULL) {
+        return DSA_FAILED;
+    }
+
     uint32_t opensslKeyByteLen = HKS_KEY_BYTES(keySize);
     if (opensslKeyByteLen < OPENSSL_DSA_MIN_KEY_LEN) {
         opensslKeyByteLen = OPENSSL_DSA_MIN_KEY_LEN;
@@ -335,35 +353,34 @@ int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBl
     keyMaterial->qSize = (keyByteLen > OPENSSL_DSA_KEY_LEN_DIVID) ? HKS_DIGEST_SHA256_LEN : HKS_DIGEST_SHA1_LEN;
     keyMaterial->gSize = keyByteLen;
 
-    const BIGNUM *x = DSA_get0_priv_key(EVP_PKEY_get0_DSA(pkey));
-    const BIGNUM *y = DSA_get0_pub_key(EVP_PKEY_get0_DSA(pkey));
-    const BIGNUM *p = DSA_get0_p(EVP_PKEY_get0_DSA(pkey));
-    const BIGNUM *q = DSA_get0_q(EVP_PKEY_get0_DSA(pkey));
-    const BIGNUM *g = DSA_get0_g(EVP_PKEY_get0_DSA(pkey));
+    const BIGNUM *x = DSA_get0_priv_key(dsa);
+    const BIGNUM *y = DSA_get0_pub_key(dsa);
+    const BIGNUM *p = DSA_get0_p(dsa);
+    const BIGNUM *q = DSA_get0_q(dsa);
+    const BIGNUM *g = DSA_get0_g(dsa);
+
+    if (x == NULL || y == NULL || p == NULL || q == NULL || g == NULL) {
+        return DSA_FAILED;
+    }
 
     int32_t offset = sizeof(struct KeyMaterialDsa);
-    int32_t ret = BN_bn2bin(x, key->data + offset + (keyMaterial->xSize - BN_num_bytes(x)));
-    if (ret <= 0) {
+    if (BN_bn2bin(x, key->data + offset + (keyMaterial->xSize - BN_num_bytes(x))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->xSize;
-    ret = BN_bn2bin(y, key->data + offset + (keyMaterial->ySize - BN_num_bytes(y)));
-    if (ret <= 0) {
+    if (BN_bn2bin(y, key->data + offset + (keyMaterial->ySize - BN_num_bytes(y))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->ySize;
-    ret = BN_bn2bin(p, key->data + offset + (keyMaterial->pSize - BN_num_bytes(p)));
-    if (ret <= 0) {
+    if (BN_bn2bin(p, key->data + offset + (keyMaterial->pSize - BN_num_bytes(p))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->pSize;
-    ret = BN_bn2bin(q, key->data + offset + (keyMaterial->qSize - BN_num_bytes(q)));
-    if (ret <= 0) {
+    if (BN_bn2bin(q, key->data + offset + (keyMaterial->qSize - BN_num_bytes(q))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->qSize;
-    ret = BN_bn2bin(g, key->data + offset + (keyMaterial->gSize - BN_num_bytes(g)));
-    if (ret <= 0) {
+    if (BN_bn2bin(g, key->data + offset + (keyMaterial->gSize - BN_num_bytes(g))) <= 0) {
         return DSA_FAILED;
     }
     return DSA_SUCCESS;

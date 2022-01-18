@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "openssl_aes_helper.h"
-
 #include <string>
 #include <vector>
 
@@ -22,6 +20,8 @@
 
 #include "hks_api.h"
 #include "hks_mem.h"
+#include "hks_param.h"
+#include "openssl_aes_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -34,9 +34,9 @@ struct TestCaseParams {
     std::string hexData;
     uint32_t inLenAppend = 0;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode encryptResult;
-    HksErrorCode decryptResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const uint8_t IV[IV_SIZE] = {0};

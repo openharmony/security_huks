@@ -15,9 +15,13 @@
 
 #include "openssl_ecc_helper.h"
 
+#include <stdlib.h>
+
+#include <openssl/bn.h>
 #include <openssl/ec.h>
 #include <openssl/evp.h>
 #include <openssl/x509.h>
+#include <securec.h>
 
 #include "hks_crypto_hal.h"
 #include "hks_mem.h"
@@ -100,13 +104,12 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keyLen, u
     BIGNUM *pubX = BN_new();
     BIGNUM *pubY = BN_new();
 
-    if ((pubX == NULL) || (pubY == NULL)) {
-        free(rawMaterial);
-        return ECC_FAILED;
-    }
-
     int32_t result = ECC_FAILED;
     do {
+        if ((pubX == NULL) || (pubY == NULL)) {
+            break;
+        }
+
         const EC_GROUP *ecGroup = EC_KEY_get0_group(eccKey);
         if (ecGroup == NULL) {
             break;
@@ -134,13 +137,17 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keyLen, u
         result = ECC_SUCCESS;
     } while (0);
 
-    BN_free(pubX);
-    BN_free(pubY);
+    if (pubX != NULL) {
+        BN_free(pubX);
+    }
+    if (pubX != NULL) {
+        BN_free(pubY);
+    }
     free(rawMaterial);
     return result;
 }
 
-int32_t ECCGenerateKey(const int keyLen, struct HksBlob *key)
+int32_t EccGenerateKey(const int keyLen, struct HksBlob *key)
 {
     int curveId;
     if (GetCurveId(keyLen, &curveId) != ECC_SUCCESS) {
@@ -365,6 +372,10 @@ int32_t EcdsaVerify(
 
 int32_t GetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
+    if (input == NULL || input->data == NULL || input->size < sizeof(struct KeyMaterialEcc) || output == NULL ||
+        output->data == NULL || output->size < sizeof(struct KeyMaterialEcc)) {
+        return ECC_FAILED;
+    }
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;
 
     output->size = sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
@@ -517,16 +528,16 @@ int32_t HksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
 
     if (memcpy_s(x509Key->data, x509Key->size, tmp, length) != 0) {
         EVP_PKEY_free(pkey);
-        free(tmp);
+        OPENSSL_free(tmp);
         return ECC_FAILED;
     }
 
     EVP_PKEY_free(pkey);
-    free(tmp);
+    OPENSSL_free(tmp);
     return ECC_SUCCESS;
 }
 
-int32_t GetNativePKey(const struct HksBlob *nativeKey, EVP_PKEY *key)
+int32_t GetNativePkey(const struct HksBlob *nativeKey, EVP_PKEY *key)
 {
     EC_KEY *eccKey = EccInitKey(nativeKey, true);
     if (eccKey == NULL) {
@@ -562,7 +573,7 @@ int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *sharedK
     if (EVP_PKEY_derive_set_peer(ctx, peerKey) != 1) {
         return ECC_FAILED;
     }
-    size_t keyLen;
+    size_t keyLen = 0;
     if (EVP_PKEY_derive(ctx, NULL, &keyLen) != 1) {
         return ECC_FAILED;
     }
@@ -595,7 +606,7 @@ int32_t EcdhAgreeKey(
         if ((peerKey == NULL) || (pKey == NULL)) {
             break;
         }
-        if (GetNativePKey(nativeKey, pKey) != ECC_SUCCESS) {
+        if (GetNativePkey(nativeKey, pKey) != ECC_SUCCESS) {
             break;
         }
 

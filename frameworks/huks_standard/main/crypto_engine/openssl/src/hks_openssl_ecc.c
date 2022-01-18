@@ -111,6 +111,9 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keySize, 
         HKS_LOG_E("malloc buffer failed!");
         return HKS_ERROR_MALLOC_FAIL;
     }
+
+    (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
+
     /*
      * ECC key data internel struct:
      * struct KeyMaterialEcc + pubX_data + pubY_data + pri_data

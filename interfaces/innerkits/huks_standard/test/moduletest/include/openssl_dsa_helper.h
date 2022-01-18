@@ -16,13 +16,9 @@
 #ifndef OPENSSL_DSA_SIGN_MT_HELPER_H
 #define OPENSSL_DSA_SIGN_MT_HELPER_H
 
-#include <securec.h>
-
 #include <openssl/evp.h>
-#include <openssl/dsa.h>
 
 #include "hks_type.h"
-#include "hks_param.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,7 +30,7 @@ extern "C" {
 
 EVP_PKEY *GenerateDsaKey(const uint32_t keySize);
 
-void DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key);
+bool DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key);
 
 int32_t OpensslSignDsa(
     const struct HksBlob *plainText, struct HksBlob *signData, struct HksBlob *key, enum HksKeyDigest digestType);

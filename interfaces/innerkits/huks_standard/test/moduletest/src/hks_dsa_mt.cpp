@@ -13,12 +13,17 @@
  * limitations under the License.
  */
 
-#include "openssl_dsa_helper.h"
+#include <string>
+#include <vector>
 
 #include <gtest/gtest.h>
+#include <openssl/evp.h>
+#include <securec.h>
 
 #include "hks_api.h"
 #include "hks_mem.h"
+#include "hks_param.h"
+#include "openssl_dsa_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -32,11 +37,11 @@ const int KEY_SIZE_1024 = 1024;
 
 struct TestCaseParams {
     std::vector<HksParam> params;
-    HksKeyDigest keyDigest;
+    HksKeyDigest keyDigest = HksKeyDigest::HKS_DIGEST_NONE;
 
-    HksErrorCode generateKeyResult;
-    HksErrorCode signResult;
-    HksErrorCode verifyResult;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_DSA_MT_00100_PARAMS = {
@@ -616,11 +621,11 @@ class HksDsaMt : public testing::Test {
 protected:
     void GenerateKeyTestCase(const TestCaseParams &testCaseParams)
     {
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
         ASSERT_NE(paramInSet, nullptr);
 
-        struct HksParamSet *paramSetOut = NULL;
+        struct HksParamSet *paramSetOut = nullptr;
         HksInitParamSet(&paramSetOut);
         struct HksParam localKey = {
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
@@ -636,7 +641,7 @@ protected:
 
         EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOut), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
-            HksParam *pubKeyExport = NULL;
+            HksParam *pubKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
             HksBlob publicKey = {
                 .size = pubKeyExport->blob.size,
@@ -645,7 +650,7 @@ protected:
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-            HksParam *priKeyExport = NULL;
+            HksParam *priKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
             HksBlob privateKey = {
                 .size = priKeyExport->blob.size,
@@ -678,11 +683,11 @@ protected:
 
     void SignLocalTestCase(const TestCaseParams &testCaseParams)
     {
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
         ASSERT_NE(paramInSet, nullptr);
 
-        struct HksParamSet *paramSetOut = NULL;
+        struct HksParamSet *paramSetOut = nullptr;
         HksInitParamSet(&paramSetOut);
         struct HksParam localKey = {
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
@@ -698,7 +703,7 @@ protected:
 
         EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOut), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
-            HksParam *pubKeyExport = NULL;
+            HksParam *pubKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
             HksBlob publicKey = {
                 .size = pubKeyExport->blob.size,
@@ -707,7 +712,7 @@ protected:
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-            HksParam *priKeyExport = NULL;
+            HksParam *priKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
             HksBlob privateKey = {
                 .size = priKeyExport->blob.size,
@@ -740,11 +745,11 @@ protected:
     void SignServiceTestCase(const TestCaseParams &testCaseParams)
     {
         struct HksBlob authId = { (uint32_t)strlen(TEST_KEY_AUTH_ID), (uint8_t *)TEST_KEY_AUTH_ID };
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
         ASSERT_NE(paramInSet, nullptr);
 
-        struct HksParamSet *paramSetOut = NULL;
+        struct HksParamSet *paramSetOut = nullptr;
         HksInitParamSet(&paramSetOut);
         struct HksParam localKey = {
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
@@ -771,7 +776,8 @@ protected:
             EXPECT_EQ(X509ToDsaPublicKey(&opensslDsaKeyInfo, &dsaPublicKeyInfo), 0);
 
             HksBlob publicKey = { .size = dsaPublicKeyInfo.size, .data = (uint8_t *)HksMalloc(dsaPublicKeyInfo.size) };
-            (void)memcpy_s(publicKey.data, publicKey.size, dsaPublicKeyInfo.data, dsaPublicKeyInfo.size);
+            ASSERT_NE(publicKey.data, nullptr);
+            ASSERT_EQ(memcpy_s(publicKey.data, publicKey.size, dsaPublicKeyInfo.data, dsaPublicKeyInfo.size), 0);
 
             const char *hexData = "00112233445566778899aabbccddeeff";
 
@@ -788,6 +794,7 @@ protected:
             HksFree(publicKey.data);
             HksFree(signData.data);
         }
+
         HksFree(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
         HksFreeParamSet(&paramInSet);
@@ -795,11 +802,11 @@ protected:
 
     void VerifyLocalTestCase(const TestCaseParams &testCaseParams)
     {
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
         ASSERT_NE(paramInSet, nullptr);
 
-        struct HksParamSet *paramSetOut = NULL;
+        struct HksParamSet *paramSetOut = nullptr;
         HksInitParamSet(&paramSetOut);
         struct HksParam localKey = {
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
@@ -815,7 +822,7 @@ protected:
 
         EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOut), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
-            HksParam *pubKeyExport = NULL;
+            HksParam *pubKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
             HksBlob publicKey = {
@@ -825,7 +832,7 @@ protected:
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-            HksParam *priKeyExport = NULL;
+            HksParam *priKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
             HksBlob privateKey = {
@@ -860,7 +867,7 @@ protected:
     {
         struct HksBlob authId = { (uint32_t)strlen(TEST_KEY_AUTH_ID), (uint8_t *)TEST_KEY_AUTH_ID };
 
-        struct HksParamSet *paramInSet = NULL;
+        struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
         ASSERT_NE(paramInSet, nullptr);
 

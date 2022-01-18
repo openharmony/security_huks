@@ -484,7 +484,7 @@ public:
     void AgreeScene(uint32_t ii);
 
 private:
-    bool threadState_;
+    bool threadState_ = false;
     std::mutex mutex_;
 };
 
