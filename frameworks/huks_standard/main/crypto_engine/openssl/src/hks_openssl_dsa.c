@@ -209,32 +209,32 @@ static int32_t DsaKeyMaterialData(uint8_t *rawMaterial, const DSA *dsa)
     const BIGNUM *q = DSA_get0_q(dsa);
     const BIGNUM *g = DSA_get0_g(dsa);
 
-    int32_t offset = sizeof(struct KeyMaterialDsa);
-    ret = BN_bn2bin(x, rawMaterial + offset + (keyMaterial->xSize - BN_num_bytes(x)));
+    uint32_t offset = sizeof(struct KeyMaterialDsa);
+    ret = BN_bn2bin(x, rawMaterial + offset + (keyMaterial->xSize - (uint32_t)BN_num_bytes(x)));
     if (ret <= 0) {
         HksLogOpensslError();
         return HKS_FAILURE;
     }
     offset += keyMaterial->xSize;
-    ret = BN_bn2bin(y, rawMaterial + offset + (keyMaterial->ySize - BN_num_bytes(y)));
+    ret = BN_bn2bin(y, rawMaterial + offset + (keyMaterial->ySize - (uint32_t)BN_num_bytes(y)));
     if (ret <= 0) {
         HksLogOpensslError();
         return HKS_FAILURE;
     }
     offset += keyMaterial->ySize;
-    ret = BN_bn2bin(p, rawMaterial + offset + (keyMaterial->pSize - BN_num_bytes(p)));
+    ret = BN_bn2bin(p, rawMaterial + offset + (keyMaterial->pSize - (uint32_t)BN_num_bytes(p)));
     if (ret <= 0) {
         HksLogOpensslError();
         return HKS_FAILURE;
     }
     offset += keyMaterial->pSize;
-    ret = BN_bn2bin(q, rawMaterial + offset + (keyMaterial->qSize - BN_num_bytes(q)));
+    ret = BN_bn2bin(q, rawMaterial + offset + (keyMaterial->qSize - (uint32_t)BN_num_bytes(q)));
     if (ret <= 0) {
         HksLogOpensslError();
         return HKS_FAILURE;
     }
     offset += keyMaterial->qSize;
-    ret = BN_bn2bin(g, rawMaterial + offset + (keyMaterial->gSize - BN_num_bytes(g)));
+    ret = BN_bn2bin(g, rawMaterial + offset + (keyMaterial->gSize - (uint32_t)BN_num_bytes(g)));
     if (ret <= 0) {
         HksLogOpensslError();
         return HKS_FAILURE;

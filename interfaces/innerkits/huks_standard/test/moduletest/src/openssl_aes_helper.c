@@ -165,7 +165,7 @@ int32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
         EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
-    outData->size = outLen;
+    outData->size = (uint32_t)outLen;
     if (EVP_EncryptFinal_ex(ctx, outData->data + outLen, &outLen) != 1) {
         EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
@@ -225,7 +225,7 @@ int32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
         EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
-    outData->size += outLen;
+    outData->size += (uint32_t)outLen;
     EVP_CIPHER_CTX_free(ctx);
     return HKS_SUCCESS;
 }
@@ -273,7 +273,7 @@ int32_t AesGcmEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob
         EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
-    outData->size = outLen;
+    outData->size = (uint32_t)outLen;
     if (EVP_EncryptFinal_ex(ctx, outData->data, &outLen) != 1) {
         EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
@@ -329,7 +329,7 @@ int32_t AesGcmDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob
         EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
-    outData->size = outLen;
+    outData->size = (uint32_t)outLen;
 
     if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tagDec->size, tagDec->data) != 1) {
         EVP_CIPHER_CTX_free(ctx);

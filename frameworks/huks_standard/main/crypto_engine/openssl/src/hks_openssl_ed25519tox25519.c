@@ -345,7 +345,7 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
         if (BN_bn2bin(var->c, tmpKey) <= 0) {
             break;
         }
-        tmpSize = BN_num_bytes(var->c);
+        tmpSize = (uint32_t)BN_num_bytes(var->c);
         if (FillPubKeyByZero(tmpKey, &tmpSize) != HKS_SUCCESS) {
             break;
         }
