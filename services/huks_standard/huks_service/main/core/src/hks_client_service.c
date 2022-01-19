@@ -1116,6 +1116,7 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     return ret;
 }
 
+#ifndef __LITEOS_M__
 int32_t HksServiceProcessInit(uint32_t msgId, const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, uint64_t *operationHandle)
 {
@@ -1211,6 +1212,7 @@ int32_t HksServiceProcessFinal(uint32_t msgId, uint64_t operationHandle, const s
 
     return ret;
 }
+#endif // __LITEOS_M__
 
 int32_t HksServiceSignWithDeviceKey(const struct HksBlob *processName, uint32_t keyId,
     const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature)
