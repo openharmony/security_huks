@@ -14,7 +14,7 @@
 #
 
 import("//base/security/huks/build/config.gni")
-import("//build/lite/config/component/lite_component.gni")
+import("//build/ohos.gni")
 
 huks_sources = [
   "../../../frameworks/huks_standard/main/common/src/hks_ability.c",
@@ -154,9 +154,9 @@ config("get_dev_udid_config") {
 
 #begin: add
 if (ohos_kernel_type == "liteos_m") {
-  static_library("huks_3.0_sdk") {
+  ohos_static_library("huks_3.0_sdk") {
     public_configs = [ ":public_huks_config" ]
-    configs += [ ":soft_huks_config" ]
+    configs = [ ":soft_huks_config" ]
 
     sources = huks_sources
     sources += huks_storage_source
@@ -186,9 +186,9 @@ if (ohos_kernel_type == "liteos_m") {
   #  }
   #}
 } else {
-  shared_library("huks_3.0_sdk") {
+  ohos_shared_library("huks_3.0_sdk") {
     public_configs = [ ":public_huks_config" ]
-    configs += [ ":soft_huks_config" ]
+    configs = [ ":soft_huks_config" ]
     configs += [ ":get_dev_udid_config" ]
     sources = huks_sources
     sources += huks_storage_source

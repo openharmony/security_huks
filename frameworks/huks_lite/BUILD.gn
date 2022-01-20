@@ -16,8 +16,10 @@
 import("//base/security/huks/build/config.gni")
 
 group("huks_sdk") {
-  deps = [
-    "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
-    "//base/security/huks/test:huks_3.0_test",
-  ]
+  if (os_level == "mini" || os_level == "small") {
+    deps = [
+      "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
+      "//base/security/huks/test:huks_3.0_test",
+    ]
+  }
 }
