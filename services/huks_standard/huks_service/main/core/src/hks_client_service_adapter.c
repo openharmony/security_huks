@@ -36,7 +36,7 @@
     defined(HKS_SUPPORT_DH_C)
 static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
-    uint32_t length = i2d_PUBKEY(pkey, NULL);
+    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, NULL);
     if (length <= 0) {
         HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
