@@ -519,7 +519,7 @@ int32_t HksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     }
 
     uint8_t *tmp = NULL;
-    uint32_t length = i2d_PUBKEY(pkey, &tmp);
+    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
     x509Key->size = length;
     if (tmp == NULL) {
         EVP_PKEY_free(pkey);
