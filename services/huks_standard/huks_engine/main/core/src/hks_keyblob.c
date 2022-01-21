@@ -200,8 +200,10 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
     }
 
     struct HksKeyBlobInfo *keyBlobInfo = (struct HksKeyBlobInfo *)keyParam->blob.data;
+    uint32_t keySize;
+    (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keySize));
     aeadParam->aad = *aad;
-    aeadParam->payloadLen = keyBlobInfo->keySize;
+    aeadParam->payloadLen = keySize;
     aeadParam->nonce.data = keyBlobInfo->nonce;
     aeadParam->nonce.size = HKS_KEY_BLOB_NONCE_SIZE;
     if (isEncrypt) {
@@ -238,13 +240,15 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     }
 
     struct HksKeyBlobInfo *keyBlobInfo = (struct HksKeyBlobInfo *)keyParam->blob.data;
-    if ((keyParam->blob.size - sizeof(*keyBlobInfo)) != keyBlobInfo->keySize) {
-        HKS_LOG_E("invalid key size in keyBlob, keySize: %u, blobSize: %u", keyBlobInfo->keySize, keyParam->blob.size);
+    uint32_t keySize;
+    (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keySize));
+    if ((keyParam->blob.size - sizeof(*keyBlobInfo)) != keySize) {
+        HKS_LOG_E("invalid key size in keyBlob, keySize: %u, blobSize: %u", keySize, keyParam->blob.size);
         HksFreeUsageSpec(&usageSpec);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
     /* encrypt/decrypt will override the srcData, so encKey and decKey point to the same buffer */
-    struct HksBlob srcKey = { keyBlobInfo->keySize, keyParam->blob.data + sizeof(*keyBlobInfo) };
+    struct HksBlob srcKey = { keySize, keyParam->blob.data + sizeof(*keyBlobInfo) };
     struct HksBlob encKey = srcKey;
 
     struct HksBlob derivedKey = { 0, NULL };
@@ -508,18 +512,20 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     }
 
     struct HksKeyBlobInfo *keyBlobInfo = (struct HksKeyBlobInfo *)keyParam->blob.data;
-    if ((keyParam->blob.size - sizeof(*keyBlobInfo)) != keyBlobInfo->keySize) {
-        HKS_LOG_E("invalid key size in keyBlob, keySize: %u, blobSize: %u", keyBlobInfo->keySize, keyParam->blob.size);
+    uint32_t keySize;
+    (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keySize));
+    if ((keyParam->blob.size - sizeof(*keyBlobInfo)) != keySize) {
+        HKS_LOG_E("invalid key size in keyBlob, keySize: %u, blobSize: %u", keySize, keyParam->blob.size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
-    uint8_t *data = HksMalloc(keyBlobInfo->keySize);
+    uint8_t *data = HksMalloc(keySize);
     if (data == NULL) {
         HKS_LOG_E("fail to malloc raw key");
         return HKS_ERROR_BAD_STATE;
     }
-    (void)memcpy_s(data, keyBlobInfo->keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keyBlobInfo->keySize);
-    rawKey->size = keyBlobInfo->keySize;
+    (void)memcpy_s(data, keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keySize);
+    rawKey->size = keySize;
     rawKey->data = data;
     return HKS_SUCCESS;
 }
