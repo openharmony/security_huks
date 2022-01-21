@@ -13,14 +13,42 @@
 
 group("huks_sdk_test") {
   testonly = true
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/crypto_engine/test:crypto_engine_test",
-    "//base/security/huks/interfaces/innerkits/huks_standard/test:hukssdk_test",
-  ]
+  if (os_level == "standard") {
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/test:crypto_engine_test",
+      "//base/security/huks/interfaces/innerkits/huks_standard/test:hukssdk_test",
+      "//base/security/huks/interfaces/innerkits/huks_standard/test/moduletest:huks_mt_test",
+      "//base/security/huks/services/huks_standard/huks_service/main/test/unittest:huks_multithread_test",
+      "//base/security/huks/test/fuzz:huks_fuzz_test",
+      "//base/security/huks/test/stability:huks_stability_test",
+    ]
+  } else {
+  }
 }
 
 group("huks_napi") {
-  if (support_jsapi) {
-    deps = [ "//base/security/huks/interfaces/kits/napi:huks" ]
+  if (os_level == "standard") {
+    if (support_jsapi) {
+      deps = [ "//base/security/huks/interfaces/kits/napi:huks" ]
+    }
+  }
+}
+
+group("huks_components") {
+  if (os_level == "standard") {
+    deps = [
+      "//base/security/huks:huks_napi",
+      "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks/services/huks_standard:huks_service",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
+    ]
+  } else if (os_level == "small") {
+    deps = [
+      "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
+      "//base/security/huks/frameworks/crypto_lite/js/builtin:ace_kit_cipher",
+      "//base/security/huks/frameworks/huks_lite:huks_sdk",
+    ]
+  } else {
+    deps = [ "//base/security/huks/frameworks/huks_lite:huks_sdk" ]
   }
 }

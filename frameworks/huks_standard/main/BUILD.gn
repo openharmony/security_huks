@@ -14,7 +14,7 @@
 import("//build/ohos.gni")
 
 group("huks_standard_frameworks") {
-  if (is_standard_system) {
+  if (os_level == "standard") {
     public_deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/core:libhuks_core_standard_static",
