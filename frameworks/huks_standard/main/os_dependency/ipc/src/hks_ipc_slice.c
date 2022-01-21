@@ -101,7 +101,7 @@ static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const 
     struct HksBlob ipcBlob = { totalBufSize, buffer };
 
     uint32_t offset = 0;
-    uint32_t ret = HksOnceParamPack(&ipcBlob, key, paramSet, &offset);
+    int32_t ret = HksOnceParamPack(&ipcBlob, key, paramSet, &offset);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksOnceParamPack fail");
         HKS_FREE_BLOB(ipcBlob);
@@ -143,7 +143,7 @@ static int32_t SliceDataInit(uint32_t cmdId, const struct HksBlob *key, struct S
 
     struct HksBlob inBlob = { bufSize, buffer };
     struct HksBlob outBlob = { sizeof(sliceParam->operationHandle), (uint8_t *)&sliceParam->operationHandle };
-    uint32_t ret = HksInitPack(&inBlob, key, sliceParam->paramSet);
+    int32_t ret = HksInitPack(&inBlob, key, sliceParam->paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksInitPack fail");
         HKS_FREE_BLOB(inBlob);

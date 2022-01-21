@@ -23,7 +23,7 @@
 
 int32_t HmacGenerateKey(int key_len, struct HksBlob *key)
 {
-    uint32_t keySizeByte = key_len / BIT_NUM_OF_UINT8;
+    uint32_t keySizeByte = (uint32_t)key_len / BIT_NUM_OF_UINT8;
 
     uint8_t *tmpKey = (uint8_t *)malloc(keySizeByte);
     if (tmpKey == NULL) {

@@ -271,11 +271,11 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
         EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
-    int32_t ySize = BN_num_bytes(DSA_get0_pub_key(dsa));
-    int32_t pSize = BN_num_bytes(DSA_get0_p(dsa));
-    int32_t qSize = BN_num_bytes(DSA_get0_q(dsa));
-    int32_t gSize = BN_num_bytes(DSA_get0_g(dsa));
-    if ((ySize <= 0) || (pSize <= 0) || (qSize <= 0) || (gSize <= 0)) {
+    uint32_t ySize = (uint32_t)BN_num_bytes(DSA_get0_pub_key(dsa));
+    uint32_t pSize = (uint32_t)BN_num_bytes(DSA_get0_p(dsa));
+    uint32_t qSize = (uint32_t)BN_num_bytes(DSA_get0_q(dsa));
+    uint32_t gSize = (uint32_t)BN_num_bytes(DSA_get0_g(dsa));
+    if ((ySize = 0) || (pSize = 0) || (qSize = 0) || (gSize = 0)) {
         EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
@@ -363,24 +363,24 @@ int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBl
         return DSA_FAILED;
     }
 
-    int32_t offset = sizeof(struct KeyMaterialDsa);
-    if (BN_bn2bin(x, key->data + offset + (keyMaterial->xSize - BN_num_bytes(x))) <= 0) {
+    uint32_t offset = sizeof(struct KeyMaterialDsa);
+    if (BN_bn2bin(x, key->data + offset + (keyMaterial->xSize - (uint32_t)BN_num_bytes(x))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->xSize;
-    if (BN_bn2bin(y, key->data + offset + (keyMaterial->ySize - BN_num_bytes(y))) <= 0) {
+    if (BN_bn2bin(y, key->data + offset + (keyMaterial->ySize - (uint32_t)BN_num_bytes(y))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->ySize;
-    if (BN_bn2bin(p, key->data + offset + (keyMaterial->pSize - BN_num_bytes(p))) <= 0) {
+    if (BN_bn2bin(p, key->data + offset + (keyMaterial->pSize - (uint32_t)BN_num_bytes(p))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->pSize;
-    if (BN_bn2bin(q, key->data + offset + (keyMaterial->qSize - BN_num_bytes(q))) <= 0) {
+    if (BN_bn2bin(q, key->data + offset + (keyMaterial->qSize - (uint32_t)BN_num_bytes(q))) <= 0) {
         return DSA_FAILED;
     }
     offset += keyMaterial->qSize;
-    if (BN_bn2bin(g, key->data + offset + (keyMaterial->gSize - BN_num_bytes(g))) <= 0) {
+    if (BN_bn2bin(g, key->data + offset + (keyMaterial->gSize - (uint32_t)BN_num_bytes(g))) <= 0) {
         return DSA_FAILED;
     }
     return DSA_SUCCESS;

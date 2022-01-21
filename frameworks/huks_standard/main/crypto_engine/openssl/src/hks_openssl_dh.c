@@ -100,8 +100,8 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)rawMaterial;
     keyMaterial->keyAlg = HKS_ALG_DH;
     keyMaterial->keySize = keySize;
-    keyMaterial->pubKeySize = BN_num_bytes(pubKey);
-    keyMaterial->priKeySize = BN_num_bytes(privKey);
+    keyMaterial->pubKeySize = (uint32_t)BN_num_bytes(pubKey);
+    keyMaterial->priKeySize = (uint32_t)BN_num_bytes(privKey);
     keyMaterial->reserved = 0;
 
     uint32_t offset = sizeof(struct KeyMaterialDh);
@@ -209,7 +209,7 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         if (memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(spec->keyLen)) != EOK) {
             ret = HKS_ERROR_INVALID_OPERATION;
         } else {
-            sharedKey->size = DH_size(dh);
+            sharedKey->size = (uint32_t)DH_size(dh);
             ret = HKS_SUCCESS;
         }
     }
