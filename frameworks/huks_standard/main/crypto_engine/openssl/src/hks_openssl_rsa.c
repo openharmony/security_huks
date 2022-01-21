@@ -139,21 +139,21 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
     }
 
     uint32_t offset = sizeof(*keyMaterial);
-    keyMaterial->nSize = BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
+    keyMaterial->nSize = (uint32_t)BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize) != EOK) {
         HksFree(rawMaterial);
         return HKS_ERROR_INVALID_OPERATION;
     }
 
     offset += keyMaterial->nSize;
-    keyMaterial->eSize = BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
+    keyMaterial->eSize = (uint32_t)BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize) != EOK) {
         HksFree(rawMaterial);
         return HKS_ERROR_INVALID_OPERATION;
     }
 
     offset += keyMaterial->eSize;
-    keyMaterial->dSize = BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
+    keyMaterial->dSize = (uint32_t)BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize) != EOK) {
         HksFree(rawMaterial);
         return HKS_ERROR_INVALID_OPERATION;

@@ -413,8 +413,8 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
             break;
         }
 
-        int32_t xSize = BN_num_bytes(x);
-        int32_t ySize = BN_num_bytes(y);
+        uint32_t xSize = (uint32_t)BN_num_bytes(x);
+        uint32_t ySize = (uint32_t)BN_num_bytes(y);
         if (xSize <= 0 || ySize <= 0) {
             break;
         }
@@ -428,7 +428,7 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
 
         struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
         pubKeyInfo->keyAlg = HKS_ALG_ECC;
-        pubKeyInfo->keySize = EC_GROUP_order_bits(EC_KEY_get0_group(ecKey));
+        pubKeyInfo->keySize = (uint32_t)EC_GROUP_order_bits(EC_KEY_get0_group(ecKey));
         pubKeyInfo->nOrXSize = xSize;
         pubKeyInfo->eOrYSize = ySize;
         if (BN_bn2bin(x, keyBuffer + sizeof(struct HksPubKeyInfo)) == 0 ||
@@ -519,7 +519,7 @@ int32_t HksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     }
 
     uint8_t *tmp = NULL;
-    int32_t length = i2d_PUBKEY(pkey, &tmp);
+    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
     x509Key->size = length;
     if (tmp == NULL) {
         EVP_PKEY_free(pkey);

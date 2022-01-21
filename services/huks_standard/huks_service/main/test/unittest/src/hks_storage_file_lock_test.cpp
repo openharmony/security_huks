@@ -33,7 +33,7 @@ HWTEST_F(HksStorageFileLockTest, HksStorageFileLockTest_00100, Function | SmallT
     std::string path = "/test/test";
     HksStorageFileLock *lock = HksStorageFileLockCreate(&path[0]);
     EXPECT_NE(lock, nullptr);
-    uint32_t result = HksStorageFileLockRead(lock);
+    int32_t result = HksStorageFileLockRead(lock);
     EXPECT_EQ(result, (uint32_t)0);
     result = HksStorageFileUnlockRead(lock);
     EXPECT_EQ(result, (uint32_t)0);
@@ -91,7 +91,7 @@ HWTEST_F(HksStorageFileLockTest, HksStorageFileLockTest_00400, Function | SmallT
     HksStorageFileLock *lock2 = HksStorageFileLockCreate(&path[0]);
     EXPECT_EQ(lock1, lock2);
 
-    uint32_t result = HksStorageFileLockRead(lock1);
+    int32_t result = HksStorageFileLockRead(lock1);
     EXPECT_EQ(result, (uint32_t)0);
     result = HksStorageFileUnlockRead(lock1);
     EXPECT_EQ(result, (uint32_t)0);
