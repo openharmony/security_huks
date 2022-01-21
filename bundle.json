@@ -1,18 +1,30 @@
 {
-    "name": "@openharmony/huks",
-    "version": "3.1.0",
-    "description": "huks",
+    "name": "@ohos/huks",
+    "description": "The provider of key and certificate manangement capbility, which belongs to security subsystem",
+    "version": "3.1",
+    "license": "Apache License 2.0",
     "publishAs": "code-segment",
+    "segment": {
+        "destPath": "base/security/huks"
+    },
+    "dirs":{},
     "scripts": {
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/base/security/huks && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
     },
     "author": {},
     "repository": "",
-    "license": "Apache License 2.0",
     "component": {
       "name": "huks",
       "subsystem": "security",
-      "adapted_system_type": [ "standard" ],
+      "syscap": [ "SystemCapbility.Security.Huks" ],
+      "features": [],
+      "adapted_system_type": [
+          "standard",
+          "small",
+          "mini"
+        ],
+      "rom": "5000KB",
+      "ram": "500kB",
       "deps": {
         "components": [
           "libhilog",
@@ -28,10 +40,7 @@
       },
       "build": {
         "sub_component": [
-          "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
-          "//base/security/huks/services/huks_standard:huks_service",
-          "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
-          "//base/security/huks:huks_napi"
+          "//base/security/huks:huks_components"
         ],
         "inner_kits": [
           {
@@ -45,11 +54,7 @@
           }
         ],
         "test": [ 
-          "//base/security/huks:huks_sdk_test",
-          "//base/security/huks/services/huks_standard/huks_service/main/test/unittest:huks_multithread_test",
-          "//base/security/huks/interfaces/innerkits/huks_standard/test/moduletest:huks_mt_test",
-          "//base/security/huks/test/stability:huks_stability_test",
-          "//base/security/huks/test/fuzz:huks_fuzz_test"
+          "//base/security/huks:huks_sdk_test"
         ]
       }
     }
