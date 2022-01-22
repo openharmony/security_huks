@@ -275,7 +275,7 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
     uint32_t pSize = (uint32_t)BN_num_bytes(DSA_get0_p(dsa));
     uint32_t qSize = (uint32_t)BN_num_bytes(DSA_get0_q(dsa));
     uint32_t gSize = (uint32_t)BN_num_bytes(DSA_get0_g(dsa));
-    if ((ySize = 0) || (pSize = 0) || (qSize = 0) || (gSize = 0)) {
+    if ((ySize == 0) || (pSize == 0) || (qSize == 0) || (gSize == 0)) {
         EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
