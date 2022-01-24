@@ -22,9 +22,6 @@ declare_args() {
   # if HUKS use mbedtls engine
   huks_use_mbedtls = true
 
-  # mbedtls path when HUKS using mbedlts engine
-  huks_mbedtls_path = "//third_party/mbedtls/include"
-
   # whether use lite storeage
   huks_use_lite_storage = false
 
