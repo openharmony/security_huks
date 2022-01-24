@@ -21,13 +21,12 @@ shared_library("cipher_shared") {
 
   include_dirs = [
     "include",
-    "//third_party/mbedtls/include/mbedtls",
     "//third_party/bounds_checking_function/include",
   ]
   deps = [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/mbedtls:mbedtls_shared",
+    "//third_party/mbedtls",
   ]
 
   cflags = [
