@@ -84,10 +84,8 @@ config("hilog_lite_dir") {
 }
 
 config("mbedtls_engine") {
-  include_dirs = [
-    "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include",
-    huks_mbedtls_path,
-  ]
+  include_dirs =
+      [ "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include" ]
 }
 
 config("soft_huks_config") {
@@ -165,12 +163,7 @@ if (ohos_kernel_type == "liteos_m") {
 
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
-      deps = []
-
-      #deps += [ "//build/lite/config/component/openssl:openssl_static" ]
-      if (huks_mbedtls_path == "//third_party/mbedtls/include") {
-        deps += [ "//third_party/mbedtls:mbedtls_static" ]
-      }
+      deps = [ "//third_party/mbedtls" ]
       configs += [ ":mbedtls_engine" ]
     }
 
