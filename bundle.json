@@ -16,7 +16,7 @@
     "component": {
       "name": "huks",
       "subsystem": "security",
-      "syscap": [ "SystemCapbility.Security.Huks" ],
+      "syscap": [ "SystemCapability.Security.Huks" ],
       "features": [],
       "adapted_system_type": [
           "standard",
