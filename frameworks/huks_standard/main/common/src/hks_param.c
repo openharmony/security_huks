@@ -43,6 +43,9 @@ enum HksTag g_validTags[] = {
     HKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS,
     HKS_TAG_AGREE_PRIVATE_KEY_ALIAS,
     HKS_TAG_AGREE_PUBLIC_KEY,
+    HKS_TAG_PEER_PUBLIC_KEY,
+    HKS_TAG_KEY_ALIAS,
+    HKS_TAG_DERIVE_KEY_SIZE,
 
     HKS_TAG_ACTIVE_DATETIME,
     HKS_TAG_ORIGINATION_EXPIRE_DATETIME,
@@ -146,7 +149,7 @@ static int32_t CheckBeforeAddParams(const struct HksParamSet *paramSet, const st
 
     for (uint32_t i = 0; i < paramCnt; i++) {
         if ((GetTagType(params[i].tag) == HKS_TAG_TYPE_BYTES) &&
-            ((params[i].blob.data == NULL) || (params[i].blob.size == 0))) {
+            (params[i].blob.data == NULL)) {
             HKS_LOG_E("invalid blob param!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -203,6 +206,11 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
                 HKS_LOG_E("blob size overflow!");
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
+            if (paramSet->params[i].blob.size == 0) {
+                HKS_LOG_E("paramSet->params[%d].blob.size == 0!", i);
+                continue;
+            }
+
             if (isCopy && (memcpy_s((uint8_t *)paramSet + offset, size - offset,
                 paramSet->params[i].blob.data, paramSet->params[i].blob.size) != EOK)) {
                 HKS_LOG_E("copy param blob failed!");
@@ -350,6 +358,8 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
             return HKS_SUCCESS;
         }
     }
+
+    HKS_LOG_E("param not exist!");
     return HKS_ERROR_PARAM_NOT_EXIST;
 }
 

@@ -90,6 +90,7 @@ enum HksKeyPurpose {
     HKS_KEY_PURPOSE_WRAP = 32,                     /* Usable with wrap key. */
     HKS_KEY_PURPOSE_UNWRAP = 64,                   /* Usable with unwrap key. */
     HKS_KEY_PURPOSE_MAC = 128,                     /* Usable with mac. */
+    HKS_KEY_PURPOSE_AGREE = 256,                   /* Usable with agree. */
 };
 
 enum HksKeyDigest {
@@ -283,6 +284,8 @@ enum HksTag {
     HKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS = HKS_TAG_TYPE_BOOL | 20,
     HKS_TAG_AGREE_PRIVATE_KEY_ALIAS = HKS_TAG_TYPE_BYTES | 21,
     HKS_TAG_AGREE_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 22,
+    HKS_TAG_KEY_ALIAS = HKS_TAG_TYPE_BYTES | 24,
+    HKS_TAG_DERIVE_KEY_SIZE = HKS_TAG_TYPE_UINT | 25,
 
     /*
      * Key authentication related TAG: 201 - 300

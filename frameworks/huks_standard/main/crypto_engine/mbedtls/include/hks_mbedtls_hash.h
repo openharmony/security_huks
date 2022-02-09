@@ -30,6 +30,13 @@ extern "C" {
 
 int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash);
 
+int32_t HksMbedtlsHashInit(void **CryptoCtx, uint32_t digestAlg);
+
+int32_t HksMbedtlsHashUpdate(void *CryptoCtx, const struct HksBlob *msg);
+
+int32_t HksMbedtlsHashFinal(void **CryptoCtx, const struct HksBlob *msg, struct HksBlob *hash);
+
+void HksMbedtlsHashFreeCtx(void **CryptoCtx);
 #ifdef __cplusplus
 }
 #endif

@@ -30,6 +30,12 @@
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
 #include "hks_type_inner.h"
+#define DATA_SIZE_MAX (1 * 1024 * 1024) // 1M
+
+struct HksOpensslRsaCtx {
+    struct HksBlob rsaMessageTotal;
+    void *append;
+} HksOpensslRsaCtx;
 
 static int32_t RsaGenKeyCheckParam(const struct HksKeySpec *spec)
 {
@@ -323,7 +329,7 @@ static int32_t HksOpensslRsaCryptInit(EVP_PKEY_CTX *ctx, const struct HksUsageSp
         const EVP_MD *md = GetOpensslAlg(usageSpec->digest);
         if (md == NULL || EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0 || EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, md) <= 0) {
             HksLogOpensslError();
-            return HKS_FAILURE;
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     }
     return HKS_SUCCESS;
@@ -353,13 +359,13 @@ static int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsa
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_PKEY_CTX_free(ctx);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (outLen > cipherText->size) {
         HksLogOpensslError();
         EVP_PKEY_CTX_free(ctx);
-        return HKS_FAILURE;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (encrypt) {
@@ -370,7 +376,7 @@ static int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsa
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_PKEY_CTX_free(ctx);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     cipherText->size = outLen;
 
@@ -390,6 +396,213 @@ int32_t HksOpensslRsaDecrypt(const struct HksBlob *key, const struct HksUsageSpe
 {
     return HksOpensslRsaCrypt(key, usageSpec, message, false, cipherText);
 }
+
+int32_t HksOpensslRsaEncryptDecrypt(void *ctx, const struct HksBlob *message)
+{
+    if (ctx == NULL || message == NULL) {
+        HKS_LOG_E("invalid argument");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksOpensslRsaCtx *rsaCtx = (struct HksOpensslRsaCtx *)ctx;
+
+    if (message->size == 0||(message->size) > DATA_SIZE_MAX||(rsaCtx->rsaMessageTotal.size) > DATA_SIZE_MAX) {
+        HKS_LOG_E("invalid message size");
+        return HKS_FAILURE;
+    }
+
+    uint32_t len = (uint32_t)(rsaCtx->rsaMessageTotal.size + message->size);
+    if (len > DATA_SIZE_MAX) {
+        HKS_LOG_E("invalid all size");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    uint8_t *newTotalMessageData = (uint8_t *)HksMalloc(len);
+    if (newTotalMessageData == NULL) {
+        HKS_LOG_E("initialize newTotalMessageData failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    errno_t ret;
+    if (rsaCtx->rsaMessageTotal.size != 0) {
+        ret = memcpy_s(newTotalMessageData, rsaCtx->rsaMessageTotal.size, rsaCtx->rsaMessageTotal.data,
+            rsaCtx->rsaMessageTotal.size);
+        if (ret != EOK) {
+            HKS_LOG_E("memcpy_s fail, error code = %d", ret);
+            HksFree(newTotalMessageData);
+            return HKS_ERROR_BAD_STATE;
+        }
+    } else {
+        HKS_LOG_E("Encrypt/Decrypt first updata(ctx.rsaCtx->rsaMessageTotal no data)");
+    }
+
+    ret = memcpy_s((newTotalMessageData + rsaCtx->rsaMessageTotal.size), message->size, message->data, message->size);
+    if (ret != EOK) {
+        HKS_LOG_E("memcpy_s fail, error code = %d", ret);
+        HksFree(newTotalMessageData);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (rsaCtx->rsaMessageTotal.size != 0) {
+        HksFree(rsaCtx->rsaMessageTotal.data);
+    }
+
+    rsaCtx->rsaMessageTotal.data = newTotalMessageData;
+    rsaCtx->rsaMessageTotal.size = len;
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslRsaEncryptDecryptInit(void **ctx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const bool encrypt)
+{
+    if (ctx == NULL || key == NULL || usageSpec == NULL) {
+        HKS_LOG_E("invalid argument");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    EVP_PKEY_CTX *context = InitEvpPkeyCtx(key, encrypt);
+    if (context == NULL) {
+        HKS_LOG_E("InitEvpPkeyCtx fail");
+        return HKS_FAILURE;
+    }
+
+    if (HksOpensslRsaCryptInit(context, usageSpec) != HKS_SUCCESS) {
+        HKS_LOG_E("initialize cryp failed");
+        EVP_PKEY_CTX_free(context);
+        return HKS_FAILURE;
+    }
+
+    struct HksOpensslRsaCtx *outCtx = (struct HksOpensslRsaCtx *)HksMalloc(sizeof(struct HksOpensslRsaCtx));
+    if (outCtx == NULL) {
+        HKS_LOG_E("initialize outCtx fail");
+        EVP_PKEY_CTX_free(context);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    outCtx->rsaMessageTotal.data = NULL;
+    outCtx->rsaMessageTotal.size = 0;
+    outCtx->append = (void *)context;
+    *ctx = (void *)outCtx;
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslRsaEncryptDecryptUpdate(void *ctx, const struct HksBlob *message, struct HksBlob *out,
+    const bool encrypt)
+{
+    out->size = 0;
+    return HksOpensslRsaEncryptDecrypt(ctx, message);
+}
+
+static int32_t HksOpensslRsaEncryptDecryptLen(EVP_PKEY_CTX *context, struct HksBlob *message,
+    const bool encrypt, size_t outBufferSize, size_t *outLen)
+{
+    int32_t ret;
+    if (encrypt) {
+        ret = EVP_PKEY_encrypt(context, NULL, outLen, message->data, message->size);
+    } else {
+        ret = EVP_PKEY_decrypt(context, NULL, outLen, message->data, message->size);
+    }
+
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        HKS_LOG_E("EVP_PKEY fail, error code = %d", ret);
+        return HKS_FAILURE;
+    }
+
+    if (*outLen > outBufferSize) {
+        return HKS_FAILURE;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
+    struct HksBlob *tagAead, const bool encrypt)
+{
+    if (ctx == NULL || message == NULL || cipherText == NULL) {
+        HKS_LOG_E("invalid argument");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksOpensslRsaCtx *rsaCtx = (struct HksOpensslRsaCtx *)(*ctx);
+    if (rsaCtx == NULL || rsaCtx->append == NULL) {
+        HKS_LOG_E("rsaCtx or rsaMessageTotal invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    EVP_PKEY_CTX *context = (EVP_PKEY_CTX *)rsaCtx->append;
+    if (context == NULL) {
+        HKS_LOG_E("context is null");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret;
+    if (message->size != 0) {
+        ret = HksOpensslRsaEncryptDecrypt((void *)*ctx, message);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("Last message operation fail! error code =%d", ret);
+            EVP_PKEY_CTX_free(context);
+            rsaCtx->append = NULL;
+            return ret;
+        }
+    }
+
+    size_t outLen;
+    struct HksBlob totalMessage = (struct HksBlob)rsaCtx->rsaMessageTotal;
+    ret = HksOpensslRsaEncryptDecryptLen(context, &totalMessage, encrypt, cipherText->size, &outLen);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksOpensslRsaEncryptDecryptLen fail");
+        EVP_PKEY_CTX_free(context);
+        rsaCtx->append = NULL;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    if (encrypt) {
+        ret = EVP_PKEY_encrypt(context, cipherText->data, &outLen, totalMessage.data, totalMessage.size);
+    } else {
+        ret = EVP_PKEY_decrypt(context, cipherText->data, &outLen, rsaCtx->rsaMessageTotal.data,
+            rsaCtx->rsaMessageTotal.size);
+    }
+
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("EVP_PKEY fail, error code = %lu", ret);
+        EVP_PKEY_CTX_free(context);
+        rsaCtx->append = NULL;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    cipherText->size = outLen;
+
+    HksOpensslRsaHalFreeCtx(ctx);
+    return HKS_SUCCESS;
+}
+
+void HksOpensslRsaHalFreeCtx(void **cryptCtx)
+{
+    if (cryptCtx == NULL || *cryptCtx == NULL) {
+        HKS_LOG_E("Openssl hmac free ctx is null");
+        return;
+    }
+
+    struct HksOpensslRsaCtx *opensslRsaCtx = (struct HksOpensslRsaCtx *)*cryptCtx;
+
+    if (opensslRsaCtx->append != NULL) {
+        EVP_PKEY_CTX_free((EVP_PKEY_CTX *)opensslRsaCtx->append);
+        opensslRsaCtx->append = NULL;
+    }
+
+    if (opensslRsaCtx->rsaMessageTotal.data != NULL) {
+        HksFree(opensslRsaCtx->rsaMessageTotal.data);
+        opensslRsaCtx->rsaMessageTotal.data = NULL;
+    }
+
+    if (*cryptCtx != NULL) {
+        HksFree(*cryptCtx);
+        *cryptCtx = NULL;
+    }
+}
+
 #endif /* HKS_SUPPORT_RSA_CRYPT */
 
 #ifdef HKS_SUPPORT_RSA_SIGN_VERIFY

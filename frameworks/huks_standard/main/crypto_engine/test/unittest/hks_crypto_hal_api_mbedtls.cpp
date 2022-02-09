@@ -504,6 +504,112 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_016, Function | SmallTes
     HKS_FREE_BLOB(key);
 }
 #endif
+
+/**
+ * @tc.number    : HksCryptoHalApiMbedtls_017
+ * @tc.name      : HksCryptoHalApiMbedtls_017
+ * @tc.desc      : Using HksCryptoHalHmacInit -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_017, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    uint8_t buff[1] = {0};
+    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+
+    ASSERT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+
+    key = { .size = 1, .data = buff };
+    ASSERT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_DIGEST);
+
+    HksFree(hmactestctx);
+    hmactestctx = nullptr;
+    ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, NULL), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiMbedtls_018
+ * @tc.name      : HksCryptoHalApiMbedtls_018
+ * @tc.desc      : Using HksCryptoHalHmacUpdate -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_018, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksBlob message = { .size = 0, .data = nullptr };
+    uint8_t buff[1] = {0};
+    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+
+    ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+
+    key = { .size = 0, .data = nullptr };
+    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
+    ASSERT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
+
+    hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, &hmactestctx), HKS_SUCCESS);
+    ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+
+    message = { .size = 1, .data = buff };
+    ASSERT_EQ(HksCryptoHalHmacUpdate(&message, NULL), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiMbedtls_019
+ * @tc.name      : HksCryptoHalApiMbedtls_019
+ * @tc.desc      : Using HksCryptoHalHmacFinal -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_019, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
+    ASSERT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
+    const char *hexData = "00112233445566778899aabbccddeeff";
+    uint32_t dataLen = strlen(hexData) / 2;
+
+    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+    for (uint32_t ii = 0; ii < dataLen; ii++) {
+        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+    }
+
+    uint8_t buff[1] = {0};
+    HksBlob signature = { .size = 1, .data = buff };
+    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA1, &hmactestctx), HKS_SUCCESS);
+    ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_SUCCESS);
+    ASSERT_EQ(HksCryptoHalHmacFinal(NULL, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
+
+    ASSERT_EQ(HksCryptoHalHmacFinal(&message, NULL, &signature), HKS_ERROR_INVALID_ARGUMENT);
+
+    signature = { .size = 0, .data = nullptr };
+    ASSERT_EQ(HksCryptoHalHmacFinal(&message, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+    HksFree(message.data);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiMbedtls_020
+ * @tc.name      : HksCryptoHalApiMbedtls_020
+ * @tc.desc      : Using HksCryptoHalHmac -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_020, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksBlob message = { .size = 0, .data = nullptr };
+    HksBlob signature = { .size = 0, .data = nullptr };
+    uint8_t buff[1] = {0};
+
+    ASSERT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+
+    key = { .size = 1, .data = buff };
+    ASSERT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+
+    message = { .size = 1, .data = buff };
+    ASSERT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
+
+    signature = { .size = 1, .data = buff };
+    ASSERT_EQ(HksCryptoHalHmac(&key, NULL, &message, &signature), HKS_ERROR_INVALID_DIGEST);
+}
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

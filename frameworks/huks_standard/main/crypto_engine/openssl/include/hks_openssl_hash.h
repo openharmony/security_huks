@@ -24,6 +24,13 @@ extern "C" {
 
 int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash);
 
+int32_t HksOpensslHashInit(void **CryptoCtx, uint32_t alg);
+
+int32_t HksOpensslHashUpdate(void *CryptoCtx, const struct HksBlob *msg);
+
+int32_t HksOpensslHashFinal(void **CryptoCtx, const struct HksBlob *msg, struct HksBlob *hash);
+
+void HksOpensslHashFreeCtx(void **CryptoCtx);
 #ifdef __cplusplus
 }
 #endif

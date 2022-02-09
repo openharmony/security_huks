@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,20 @@ int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *t
 
 int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
     const struct HksBlob *wrappedData, const struct HksParamSet *paramSet);
+
+int32_t HksClientDeleteUserIDKeyAliasFile(const char *userID);
+
+int32_t HksClientDeleteUIDKeyAliasFile(const char *userID, const char *uid);
+
+int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *handle);
+
+int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData);
+
+int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData);
+
+int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }

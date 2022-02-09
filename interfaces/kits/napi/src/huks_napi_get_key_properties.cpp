@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_GET_KEY_PROPERTIES_MAX_ARGS = 3;
 constexpr int HKS_DEFAULT_OUTPARAMSET_SIZE = 2048;
 }  // namespace
 
-struct GetKeyPropertiesAsyncContext_t {
+struct GetKeyPropertiesAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -42,14 +42,14 @@ struct GetKeyPropertiesAsyncContext_t {
     struct HksParamSet *paramSetIn = nullptr;
     struct HksParamSet *paramSetOut = nullptr;
 };
-using GetKeyPropertiesAsyncContext = GetKeyPropertiesAsyncContext_t *;
+using GetKeyPropertiesAsyncContext = GetKeyPropertiesAsyncContextT *;
 
 static GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext()
 {
     GetKeyPropertiesAsyncContext context =
-        (GetKeyPropertiesAsyncContext)HksMalloc(sizeof(GetKeyPropertiesAsyncContext_t));
+        (GetKeyPropertiesAsyncContext)HksMalloc(sizeof(GetKeyPropertiesAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(GetKeyPropertiesAsyncContext_t), 0, sizeof(GetKeyPropertiesAsyncContext_t));
+        (void)memset_s(context, sizeof(GetKeyPropertiesAsyncContextT), 0, sizeof(GetKeyPropertiesAsyncContextT));
     }
     return context;
 }

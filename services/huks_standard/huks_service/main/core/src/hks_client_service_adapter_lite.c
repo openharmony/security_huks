@@ -417,8 +417,11 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
     return HKS_SUCCESS;
 }
 #endif
+#endif
+
 int32_t TranslateFromX509PublicKey(const struct HksBlob *x509Key, struct HksBlob *publicKey)
 {
+#if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C)
     mbedtls_pk_context ctx;
     mbedtls_pk_init(&ctx);
 
@@ -448,8 +451,12 @@ int32_t TranslateFromX509PublicKey(const struct HksBlob *x509Key, struct HksBlob
 
     mbedtls_pk_free(&ctx);
     return ret;
-}
+#else
+    (void)publicKey;
+    (void)x509Key;
+    return HKS_ERROR_NOT_SUPPORTED;
 #endif
+}
 
 #if defined(HKS_SUPPORT_ED25519_C) || defined(HKS_SUPPORT_X25519_C)
 int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct HksBlob *key, struct HksBlob *publicKey)

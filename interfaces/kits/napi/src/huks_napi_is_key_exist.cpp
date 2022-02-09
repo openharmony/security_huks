@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_IS_KEY_EXIST_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_IS_KEY_EXIST_MAX_ARGS = 3;
 }  // namespace
 
-struct IsKeyExistAsyncContext_t {
+struct IsKeyExistAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -39,13 +39,13 @@ struct IsKeyExistAsyncContext_t {
     struct HksBlob *keyAlias = nullptr;
     struct HksParamSet *paramSet = nullptr;
 };
-using IsKeyExistAsyncContext = IsKeyExistAsyncContext_t *;
+using IsKeyExistAsyncContext = IsKeyExistAsyncContextT *;
 
 static IsKeyExistAsyncContext CreateIsKeyExistAsyncContext()
 {
-    IsKeyExistAsyncContext context = (IsKeyExistAsyncContext)HksMalloc(sizeof(IsKeyExistAsyncContext_t));
+    IsKeyExistAsyncContext context = (IsKeyExistAsyncContext)HksMalloc(sizeof(IsKeyExistAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(IsKeyExistAsyncContext_t), 0, sizeof(IsKeyExistAsyncContext_t));
+        (void)memset_s(context, sizeof(IsKeyExistAsyncContextT), 0, sizeof(IsKeyExistAsyncContextT));
     }
     return context;
 }

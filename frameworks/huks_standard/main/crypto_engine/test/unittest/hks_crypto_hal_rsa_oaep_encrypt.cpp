@@ -32,9 +32,13 @@ struct TestCaseParams {
     HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
     HksKeySize keySize = HksKeySize::HKS_RSA_KEY_SIZE_512;
 
     HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptInitResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptUpdateResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode encryptFinalResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_013_PARAMS = {
@@ -55,6 +59,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_013_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_512,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_014_PARAMS = {
@@ -77,6 +84,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_014_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_768,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_015_PARAMS = {
@@ -101,6 +111,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_015_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_1024,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_016_PARAMS = {
@@ -132,6 +145,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_016_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_2048,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_017_PARAMS = {
@@ -170,6 +186,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_017_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_3072,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_018_PARAMS = {
@@ -215,6 +234,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_018_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_4096,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_019_PARAMS = {
@@ -235,6 +257,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_019_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_512,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_020_PARAMS = {
@@ -257,6 +282,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_020_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_768,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_021_PARAMS = {
@@ -281,6 +309,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_021_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_1024,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_022_PARAMS = {
@@ -312,6 +343,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_022_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_2048,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_023_PARAMS = {
@@ -350,6 +384,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_023_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_3072,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_024_PARAMS = {
@@ -395,6 +432,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_024_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_4096,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_025_PARAMS = {
@@ -415,9 +455,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_025_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_512,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -441,6 +487,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_026_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_768,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_027_PARAMS = {
@@ -465,6 +514,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_027_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_1024,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_028_PARAMS = {
@@ -496,6 +548,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_028_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_2048,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_029_PARAMS = {
@@ -534,6 +589,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_029_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_3072,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_030_PARAMS = {
@@ -579,6 +637,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_030_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_4096,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_031_PARAMS = {
@@ -599,9 +660,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_031_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_512,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -625,9 +692,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_032_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_768,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -653,6 +726,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_033_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_1024,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_034_PARAMS = {
@@ -684,6 +760,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_034_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_2048,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_035_PARAMS = {
@@ -722,6 +801,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_035_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_3072,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_036_PARAMS = {
@@ -767,6 +849,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_036_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_4096,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_037_PARAMS = {
@@ -787,9 +872,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_037_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_512,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -813,9 +904,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_038_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_768,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -841,9 +938,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_039_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_1024,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -876,6 +979,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_040_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_2048,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_041_PARAMS = {
@@ -914,6 +1020,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_041_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_3072,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_042_PARAMS = {
@@ -959,6 +1068,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_042_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_4096,
 
     .encryptResult = HKS_SUCCESS,
+    .encryptInitResult = HKS_SUCCESS,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_043_PARAMS = {
@@ -979,9 +1091,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_043_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_512,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_FAILURE,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
 
@@ -1005,9 +1123,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_044_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_768,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_FAILURE,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
 
@@ -1033,9 +1157,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_045_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_1024,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_FAILURE,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
 
@@ -1068,9 +1198,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_046_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_2048,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_FAILURE,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
 
@@ -1110,9 +1246,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_047_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_3072,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_FAILURE,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
 
@@ -1159,9 +1301,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_048_PARAMS = {
     .keySize = HKS_RSA_KEY_SIZE_4096,
 #if defined(_USE_OPENSSL_)
     .encryptResult = HKS_FAILURE,
+    .encryptInitResult = HKS_FAILURE,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptUpdateResult = HKS_SUCCESS,
+    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
 }  // namespace
@@ -1186,14 +1334,44 @@ protected:
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
         for (uint32_t ii = 0; ii < inLen; ii++) {
-            message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
+            message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[HKS_COUNT_OF_HALF * ii]);
         }
 
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
         HksBlob tagAead = { .size = 0, .data = nullptr };
 
-        EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
-            testCaseParams.encryptResult);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            void* context = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+            EXPECT_EQ(HksCryptoHalEncryptInit(&key, &testCaseParams.usageSpec, &context),
+                testCaseParams.encryptInitResult);
+            uint32_t point = 0;
+            if (inLen > HKS_UPDATE_DATA_MAX) {
+                HksBlob messageUpdate = {
+                    .size = HKS_UPDATE_DATA_MAX,
+                    .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
+                };
+                HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(inLen) };
+                while (point < inLen - HKS_UPDATE_DATA_MAX) {
+                    memcpy_s(messageUpdate.data, messageUpdate.size, &message.data[point], HKS_UPDATE_DATA_MAX);
+                    EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, context, &out,
+                        testCaseParams.usageSpec.algType), testCaseParams.encryptFinalResult);
+                    point = point + HKS_UPDATE_DATA_MAX;
+                }
+
+                HksFree(out.data);
+                HksFree(messageUpdate.data);
+            }
+
+            uint32_t lastLen = inLen - point;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            (void)memcpy_s(messageLast.data, lastLen, &message.data[point], lastLen);
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &context, &cipherText, &tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptFinalResult);
+        } else {
+            EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText,
+                &tagAead), testCaseParams.encryptResult);
+        }
+
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);

@@ -99,6 +99,7 @@ config("soft_huks_config") {
     "../../../services/huks_standard/huks_service/main/core/include",
     "//utils/native/lite/memory/include/",
     "//utils/native/lite/include/",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
   ]
 
   defines = [ "_FORTIFY_SOURCE = 2" ]
@@ -160,6 +161,18 @@ if (ohos_kernel_type == "liteos_m") {
     sources += huks_storage_source
     sources += huks_access_sources
     sources += [ "hks_tmp_client.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_double_list.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_mutex.c" ]
+
+    include_dirs = [
+      "//utils/native/base/include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    ]
 
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
@@ -188,6 +201,20 @@ if (ohos_kernel_type == "liteos_m") {
     sources += huks_access_sources
     sources += [
       "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c",
+    ]
+
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_double_list.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_mutex.c" ]
+
+    include_dirs = [
+      "//utils/native/base/include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+      "//frameworks/huks_standard/main/os_dependency/ipc/include",
     ]
 
     deps = [ "//base/startup/syspara_lite/frameworks/parameter/src:sysparam" ]

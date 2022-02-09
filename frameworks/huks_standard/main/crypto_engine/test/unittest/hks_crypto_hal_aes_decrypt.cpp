@@ -33,6 +33,7 @@ struct TestCaseParams {
     HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
@@ -40,6 +41,7 @@ struct TestCaseParamsForGcm {
     std::string keyData;
     std::string hexData;
     std::string tagDec;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
@@ -323,21 +325,76 @@ protected:
         for (uint32_t ii = 0; ii < keyLen; ii++) {
             key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[2 * ii]);
         }
+
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = inLen;
         if (testCaseParams.usageSpec.padding == HKS_PADDING_PKCS7) {
             outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
         }
+
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
+
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
-        EXPECT_EQ(
-            HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText), testCaseParams.decryptResult);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            RunTestGcmDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText);
+        } else {
+            EXPECT_EQ(HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText),
+                testCaseParams.decryptResult);
+        }
+
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);
+    }
+
+    void RunTestGcmDecrypt(struct HksBlob *key, const HksUsageSpec *usageSpec, struct HksBlob *decryptMsg,
+        struct HksBlob *decryptOut)
+    {
+        void* decryptCtx = (void *)HksMalloc(1024 * 1024);
+        EXPECT_EQ(HksCryptoHalDecryptInit(key, usageSpec, &decryptCtx), HKS_SUCCESS);
+        uint32_t decrytopoint = 0;
+        uint32_t decrytooutPoint = 0;
+        uint32_t decrytoinLen = decryptMsg->size;
+
+        if (decrytoinLen > HKS_UPDATE_DATA_MAX) {
+            HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
+                memcpy_s(messageUpdate.data, messageUpdate.size, decryptMsg->data + decrytopoint, HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out, usageSpec->algType), HKS_SUCCESS);
+                (void)memcpy_s((decryptOut->data + decrytooutPoint), out.size, out.data, out.size);
+                decryptOut->size += out.size;
+                decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
+                decrytooutPoint = decrytooutPoint + out.size;
+            }
+            HksFree(out.data);
+            HksFree(messageUpdate.data);
+
+            uint32_t lastLen = decrytoinLen - decrytopoint;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            (void)memcpy_s(messageLast.data, lastLen, (decryptMsg->data + decrytopoint), lastLen);
+            HksBlob tmpTagAead = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, decryptOut, &tmpTagAead,
+                usageSpec->algType), HKS_SUCCESS) << "HksCryptoHalEncryptFinal failed.";
+            HksFree(messageLast.data);
+        } else {
+            HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out,
+                usageSpec->algType), HKS_SUCCESS);
+            (void)memcpy_s((decryptOut->data), out.size, out.data, out.size);
+            decryptOut->size = out.size;
+            HksBlob tmpTagAead = { .size = 0, .data = nullptr };
+
+            HksBlob deMessageLast = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, &tmpTagAead,
+                usageSpec->algType), HKS_SUCCESS);
+
+            HksFree(deMessageLast.data);
+            HksFree(out.data);
+        }
     }
 
     void GcmRunTestCase(const TestCaseParamsForGcm &testCaseParamsForGcm)
@@ -373,7 +430,13 @@ protected:
             .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
             .algParam = &aeadParam,
         };
-        EXPECT_EQ(HksCryptoHalDecrypt(&key, &usageSpec, &message, &cipherText), testCaseParamsForGcm.decryptResult);
+
+        if (testCaseParamsForGcm.runStage == HksStageType::HKS_STAGE_THREE) {
+            RunTestGcmDecrypt(&key, &usageSpec, &message, &cipherText);
+        } else {
+            EXPECT_EQ(HksCryptoHalDecrypt(&key, &usageSpec, &message, &cipherText), testCaseParamsForGcm.decryptResult);
+        }
+
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);

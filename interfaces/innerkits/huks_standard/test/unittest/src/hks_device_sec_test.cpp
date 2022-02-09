@@ -119,7 +119,7 @@ static int32_t ValidateCertChainTest()
         FreeBuf(challengeData, sec, cert);
         return HKS_ERROR_MALLOC_FAIL;
     }
-    
+
     struct HksBlob challenge = { g_size, challengeData };
     struct HksBlob secInfo = { g_size, sec };
     struct HksBlob certChain = { g_size, cert };
