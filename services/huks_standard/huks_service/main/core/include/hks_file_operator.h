@@ -21,7 +21,7 @@
 #define HKS_MAX_FILE_NAME_LEN 512
 
 #ifdef _STORAGE_LITE_
-    #define HKS_KEY_STORE_PATH            "/storage/"
+    #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
 #else
     #ifdef L2_STANDARD
         #define HKS_KEY_STORE_PATH            "/data/data/maindata"

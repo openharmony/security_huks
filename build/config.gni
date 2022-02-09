@@ -31,6 +31,9 @@ declare_args() {
   # whether use hks config file
   huks_config_file = ""
 
+  # whether use hks key store path
+  huks_key_store_path = "/storage/"
+
   # whether huks enable log
   huks_enable_log = false
 }
