@@ -586,6 +586,311 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_020, Function | SmallTes
 
     EXPECT_EQ(HksCryptoHalHmac(&key, HKS_DIGEST_SHA512, &message, &signature), HKS_ERROR_INVALID_ARGUMENT);
 }
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_021
+ * @tc.name      : HksCryptoHalApiOpenssl_021
+ * @tc.desc      : Using HksCryptoHalHmacInit -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_021, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    uint8_t buff[1] = {0};
+    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+
+    key = { .size = 1, .data = buff };
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_NONE, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+
+    HksFree(hmactestctx);
+    hmactestctx = nullptr;
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, NULL), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_022
+ * @tc.name      : HksCryptoHalApiOpenssl_022
+ * @tc.desc      : Using HksCryptoHalHmacUpdate -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_022, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksBlob message = { .size = 0, .data = nullptr };
+    uint8_t buff[1] = {0};
+    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+
+    EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+
+    key = { .size = 0, .data = nullptr };
+    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
+    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
+
+    hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, &hmactestctx), HKS_SUCCESS);
+    EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+
+    message = { .size = 1, .data = buff };
+    EXPECT_EQ(HksCryptoHalHmacUpdate(&message, NULL), HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_023
+ * @tc.name      : HksCryptoHalApiOpenssl_023
+ * @tc.desc      : Using HksCryptoHalHmacFinal -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_023, Function | SmallTest | Level0)
+{
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
+    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
+    const char *hexData = "00112233445566778899aabbccddeeff";
+    uint32_t dataLen = strlen(hexData) / 2;
+
+    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+    for (uint32_t ii = 0; ii < dataLen; ii++) {
+        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+    }
+
+    HksBlob messageLast = { .size = 0, .data = nullptr };
+    uint8_t buff[1] = {0};
+    HksBlob signature = { .size = 1, .data = buff };
+    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA1, &hmactestctx), HKS_SUCCESS);
+    EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_SUCCESS);
+    EXPECT_EQ(HksCryptoHalHmacFinal(&messageLast, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+
+    EXPECT_EQ(HksCryptoHalHmacFinal(&message, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
+
+    signature = { .size = 0, .data = nullptr };
+    hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    EXPECT_EQ(HksCryptoHalHmacFinal(&message, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(hmactestctx);
+    HksFree(message.data);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_024
+ * @tc.name      : HksCryptoHalApiOpenssl_024
+ * @tc.desc      : Using HksCryptoHalEncryptInit -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_024, Function | SmallTest | Level0)
+{
+    int32_t ret;
+
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksUsageSpec spec = { .algType = 0xffff };
+    uint8_t buff[1] = {0};
+
+    ret = HksCryptoHalEncryptInit(&key, nullptr, nullptr);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    key = { .size = 1, .data = buff };
+    ret = HksCryptoHalEncryptInit(&key, nullptr, nullptr);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
+
+    ret = HksCryptoHalEncryptInit(&key, &spec, nullptr);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+
+    ret = HksCryptoHalEncryptInit(&key, &spec, &ctx);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+    HksFree(ctx);
+    ctx = nullptr;
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_025
+ * @tc.name      : HksCryptoHalApiOpenssl_025
+ * @tc.desc      : Using HksCryptoHalEncryptUpdate -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_025, Function | SmallTest | Level0)
+{
+    int32_t ret;
+
+    HksUsageSpec spec = { .algType = 0xffff };
+    HksBlob message = { .size = 0, .data = nullptr };
+    uint8_t buff[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)] = {0};
+    HksBlob out = { .size = 0, .data = nullptr };
+
+    ret = HksCryptoHalEncryptUpdate(&message, nullptr, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    message = { .size = 1, .data = buff };
+    ret = HksCryptoHalEncryptUpdate(&message, nullptr, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    out = { .size = 1, .data = buff };
+    ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
+    ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+    HksFree(ctx);
+    ctx = nullptr;
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_026
+ * @tc.name      : HksCryptoHalApiOpenssl_026
+ * @tc.desc      : Using HksCryptoHalEncryptFinal -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_026, Function | SmallTest | Level0)
+{
+    int32_t ret;
+
+    HksUsageSpec spec = { .algType = 0xffff };
+    HksBlob cipherText = { .size = 0, .data = nullptr };
+    HksBlob tagAead = { .size = 0, .data = nullptr };
+    uint8_t buff[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)] = {0};
+    HksBlob messageLast = { .size = 0, .data = nullptr };
+
+    ret = HksCryptoHalEncryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    messageLast = { .size = 1, .data = buff };
+    ret = HksCryptoHalEncryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ret = HksCryptoHalEncryptFinal(&messageLast, &ctx, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    cipherText = { .size = 1, .data = buff };
+    ret = HksCryptoHalEncryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    tagAead = { .size = 1, .data = buff };
+    ret = HksCryptoHalEncryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
+    ret = HksCryptoHalEncryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_027
+ * @tc.name      : HksCryptoHalApiOpenssl_027
+ * @tc.desc      : Using HksCryptoHalDecryptInit -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_027, Function | SmallTest | Level0)
+{
+    int32_t ret;
+
+    HksBlob key = { .size = 0, .data = nullptr };
+    HksUsageSpec spec = { .algType = 0xffff };
+    uint8_t buff[1] = {0};
+
+    ret = HksCryptoHalDecryptInit(&key, nullptr, nullptr);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    key = { .size = 1, .data = buff };
+    ret = HksCryptoHalDecryptInit(&key, nullptr, nullptr);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
+
+    ret = HksCryptoHalDecryptInit(&key, &spec, nullptr);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+
+    ret = HksCryptoHalDecryptInit(&key, &spec, &ctx);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+    HksFree(ctx);
+    ctx = nullptr;
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_028
+ * @tc.name      : HksCryptoHalApiOpenssl_028
+ * @tc.desc      : Using HksCryptoHalDecryptUpdate -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_028, Function | SmallTest | Level0)
+{
+    int32_t ret;
+
+    HksUsageSpec spec = { .algType = 0xffff };
+    HksBlob message = { .size = 0, .data = nullptr };
+    uint8_t buff[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)] = {0};
+    HksBlob out = { .size = 0, .data = nullptr };
+
+    ret = HksCryptoHalDecryptUpdate(&message, nullptr, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    message = { .size = 1, .data = buff };
+    ret = HksCryptoHalDecryptUpdate(&message, nullptr, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    out = { .size = 1, .data = buff };
+    ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
+    ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+    HksFree(ctx);
+    ctx = nullptr;
+}
+
+/**
+ * @tc.number    : HksCryptoHalApiOpenssl_029
+ * @tc.name      : HksCryptoHalApiOpenssl_029
+ * @tc.desc      : Using HksCryptoHalDecryptFinal -- parameter is invalid.
+ */
+HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_029, Function | SmallTest | Level0)
+{
+    int32_t ret;
+
+    HksUsageSpec spec = { .algType = 0xffff };
+    HksBlob cipherText = { .size = 0, .data = nullptr };
+    HksBlob tagAead = { .size = 0, .data = nullptr };
+    uint8_t buff[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)] = {0};
+    HksBlob messageLast = { .size = 0, .data = nullptr };
+
+    ret = HksCryptoHalDecryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    messageLast = { .size = 1, .data = buff };
+    ret = HksCryptoHalDecryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ret = HksCryptoHalDecryptFinal(&messageLast, &ctx, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    cipherText = { .size = 1, .data = buff };
+    ret = HksCryptoHalDecryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    tagAead = { .size = 1, .data = buff };
+    ret = HksCryptoHalDecryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+
+    spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
+    ret = HksCryptoHalDecryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
+    HksFree(ctx);
+    ctx = nullptr;
+}
 }  // namespace UnitTest
 }  // namespace Huks
 }  // namespace Security

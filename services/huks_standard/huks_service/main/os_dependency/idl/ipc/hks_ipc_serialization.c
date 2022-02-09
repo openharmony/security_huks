@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -708,4 +708,42 @@ int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certC
         HKS_LOG_E("malloc certChainBlob data failed");
     }
     return ret;
+}
+int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt)
+{
+    int32_t ret;
+    struct HksParam *param = NULL;
+    for (uint32_t i = 0; i < cnt; i++) {
+        ret = HksGetParam(paramSet, outParams[i].tag, &param);
+        if (ret != HKS_SUCCESS) {
+            return ret;
+        }
+
+        switch (GetTagType(outParams[i].tag)) {
+            case HKS_TAG_TYPE_INT:
+                *outParams[i].int32Param = param->int32Param;
+                break;
+            case HKS_TAG_TYPE_UINT:
+                *outParams[i].uint32Param = param->uint32Param;
+                break;
+            case HKS_TAG_TYPE_ULONG:
+                *outParams[i].uint64Param = param->uint64Param;
+                break;
+            case HKS_TAG_TYPE_BOOL:
+                *outParams[i].boolParam = param->boolParam;
+                break;
+            case HKS_TAG_TYPE_BYTES:
+                *outParams[i].blob = param->blob;
+                break;
+            default:
+                HKS_LOG_I("invalid tag type:%x", GetTagType(outParams[i].tag));
+                return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+enum HksTagType GetTagType(enum HksTag tag)
+{
+    return (enum HksTagType)((uint32_t)tag & HKS_TAG_TYPE_MASK);
 }

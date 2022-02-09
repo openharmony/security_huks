@@ -53,6 +53,7 @@ int32_t HksCheckBlobAndParamSet(const struct HksBlob *data, const struct HksPara
 int32_t HksGetDigestLen(uint32_t digest, uint32_t *digestLen);
 
 int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool *isAeMode);
+int32_t HksCheckParamSetAndBlobs(const struct HksParamSet *paramSet, int32_t num, ...);
 
 #ifdef __cplusplus
 }

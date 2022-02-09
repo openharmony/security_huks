@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,8 @@
 #include "hks_keyblob.h"
 #include "hks_type_inner.h"
 
+#include "hks_keynode.h"
+
 enum HksAuthId {
     HKS_AUTH_ID_SIGN_VERIFY_RSA = 0x1,
     HKS_AUTH_ID_SIGN_VERIFY_ECC = 0x2,
@@ -33,6 +35,8 @@ extern "C" {
 #endif
 
 int32_t HksAuth(uint32_t authId, const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet);
+
+int32_t HksThreeStageAuth(uint32_t authId, const struct HuksKeyNode *keyNode);
 
 #ifdef __cplusplus
 }

@@ -90,7 +90,7 @@ int32_t HksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramS
 
 int32_t HksAccessInitialize(void)
 {
-    return HksCoreInitialize();
+    return HksCoreModuleInit();
 }
 
 int32_t HksAccessProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,

@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_GETNRATEKEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_GENERATEKEY_MAX_ARGS = 3;
 }  // namespace
 
-struct GenerateKeyAsyncContext_t {
+struct GenerateKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -40,13 +40,13 @@ struct GenerateKeyAsyncContext_t {
     struct HksParamSet *paramSetIn = nullptr;
     struct HksParamSet *paramSetOut = nullptr;
 };
-using GenerateKeyAsyncContext = GenerateKeyAsyncContext_t *;
+using GenerateKeyAsyncContext = GenerateKeyAsyncContextT *;
 
 static GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
 {
-    GenerateKeyAsyncContext context = (GenerateKeyAsyncContext)HksMalloc(sizeof(GenerateKeyAsyncContext_t));
+    GenerateKeyAsyncContext context = (GenerateKeyAsyncContext)HksMalloc(sizeof(GenerateKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(GenerateKeyAsyncContext_t), 0, sizeof(GenerateKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(GenerateKeyAsyncContextT), 0, sizeof(GenerateKeyAsyncContextT));
     }
     return context;
 }

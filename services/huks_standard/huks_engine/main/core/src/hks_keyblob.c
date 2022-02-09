@@ -73,6 +73,7 @@ static int32_t WriteEncryptKey(struct HksBlob *key)
         HKS_LOG_E("generate encrypt key failed!");
         return ret;
     }
+
     ret = HksFileWrite(HKS_KEY_STORE_PATH, HKS_ENCRYPT_KEY_NAME, 0, key->data, key->size);
     if (ret != 0) {
         HKS_LOG_E("write encrypt key fail, ret:%x", ret);
@@ -111,6 +112,7 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
         HKS_LOG_E("get app id param failed!");
         return ret;
     }
+
     if (appIdParam->blob.size > HKS_MAX_PROCESS_NAME_LEN) {
         HKS_LOG_E("invalid app id size: %u", appIdParam->blob.size);
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -222,6 +224,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
         HKS_LOG_E("cipher keyBlob get key param failed!");
         return ret;
     }
+
     if (keyParam->blob.size <= sizeof(struct HksKeyBlobInfo)) {
         return HKS_ERROR_INVALID_KEY_INFO;
     }
@@ -230,6 +233,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     if (usageSpec == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
+
     (void)memset_s(usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     ret = BuildKeyBlobUsageSpec(aad, keyParam, isEncrypt, usageSpec);
     if (ret != HKS_SUCCESS) {
@@ -243,6 +247,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
         HksFreeUsageSpec(&usageSpec);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
+
     /* encrypt/decrypt will override the srcData, so encKey and decKey point to the same buffer */
     struct HksBlob srcKey = { keyBlobInfo->keySize, keyParam->blob.data + sizeof(*keyBlobInfo) };
     struct HksBlob encKey = srcKey;
@@ -502,6 +507,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
         HKS_LOG_E("get key param failed!");
         return ret;
     }
+
     if (keyParam->blob.size <= sizeof(struct HksKeyBlobInfo)) {
         HKS_LOG_E("invalid key size in keyBlob!");
         return HKS_ERROR_INVALID_KEY_INFO;
@@ -518,6 +524,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
         HKS_LOG_E("fail to malloc raw key");
         return HKS_ERROR_BAD_STATE;
     }
+
     (void)memcpy_s(data, keyBlobInfo->keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keyBlobInfo->keySize);
     rawKey->size = keyBlobInfo->keySize;
     rawKey->data = data;
@@ -541,6 +548,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
         HKS_LOG_E("get key param when building keyBlob failed!");
         return ret;
     }
+
     /* the aad is the whole keyBlob content without the keyParam blob part */
     struct HksBlob aad = { keyBlobParamSet->paramSetSize - keyParam->blob.size, (uint8_t *)keyBlobParamSet };
     ret = EncryptKeyBlob(&aad, keyBlobParamSet);
@@ -562,6 +570,20 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
     return HKS_SUCCESS;
 }
 
+int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, struct HksParamSet **paramSet)
+{
+    return GetAadAndParamSet(inData, aad, paramSet);
+}
+
+int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
+{
+    return DecryptKeyBlob(aad, paramSet);
+}
+
+int32_t HksEncryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
+{
+    return EncryptKeyBlob(aad, paramSet);
+}
 #endif
 
 #endif /* _CUT_AUTHENTICATE_ */

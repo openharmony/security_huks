@@ -35,6 +35,10 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     IpcIoPushBool(reply, false);
     uint32_t len = response->size;
     uint8_t *dataBuff = HksMalloc(len);
+    if (dataBuff == NULL) {
+        HKS_LOG_E("malloc fail.");
+        return;
+    }
     if (memcpy_s(dataBuff, len, response->data, len) != EOK) {
         HKS_FREE_PTR(dataBuff);
         return;

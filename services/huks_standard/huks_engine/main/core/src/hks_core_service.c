@@ -44,6 +44,48 @@
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
 
+static HksMutex *g_huksMutex;  /* global mutex using in keynode */
+
+static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
+    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageInit},
+    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageInit},
+    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageInit},
+    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageInit},
+    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageInit},
+    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageInit},
+    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageInit}
+};
+
+static struct HksCoreUpdateHandler g_hksCoreUpdateHandler[] = {
+    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageUpdate},
+    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageUpdate},
+    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageUpdate},
+    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageUpdate},
+    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageUpdate},
+    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageUpdate},
+    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageUpdate}
+};
+
+static struct HksCoreFinishHandler g_hksCoreFinishHandler[] = {
+    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageFinish},
+    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageFinish},
+    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreEncryptThreeStageFinish},
+    {HKS_KEY_PURPOSE_DECRYPT, HksCoreDecryptThreeStageFinish},
+    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageFinish},
+    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageFinish},
+    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageFinish}
+};
+
+static struct HksCoreAbortHandler g_hksCoreAbortHandler[] = {
+    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageAbort},
+    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageAbort},
+    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageAbort},
+    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageAbort},
+    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageAbort},
+    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageAbort},
+    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageAbort}
+};
+
 static int32_t GetGenType(const struct HksParamSet *paramSet, uint32_t *genType)
 {
     struct HksParam *keyGenTypeParam = NULL;
@@ -128,7 +170,6 @@ int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, const str
     }
 
     struct HksBlob tempKey = { size, buffer };
-
     struct HksKeyNode *keyNode = HksGenerateKeyNode(&tempKey);
     HKS_FREE_PTR(buffer);
     if (keyNode == NULL) {
@@ -683,22 +724,6 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return ret;
 }
 
-int32_t HksCoreInitialize(void)
-{
-    int32_t ret = HksCryptoAbilityInit();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks init crypto ability failed, ret = %d", ret);
-        return ret;
-    }
-#ifndef _HARDWARE_ROOT_KEY_
-    ret = HksRkcInit();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks rkc init failed! ret = 0x%X", ret);
-    }
-#endif
-    return ret;
-}
-
 int32_t HksCoreRefreshKeyInfo(void)
 {
 #ifndef _HARDWARE_ROOT_KEY_
@@ -782,3 +807,325 @@ int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob
     return HksCryptoHalFillRandom(random);
 }
 
+int32_t HksCoreModuleInit(void)
+{
+    int32_t ret;
+    g_huksMutex = HksMutexCreate();
+    if (g_huksMutex == NULL) {
+        HKS_LOG_E("Hks mutex init failed, null pointer!");
+        ret = HKS_FAILURE;
+        return ret;
+    }
+
+    HksMutexLock(HksCoreGetHuksMutex());
+    InitializeDoubleList(GetKeyNodeList());
+    HksMutexUnlock(HksCoreGetHuksMutex());
+    ret = HksCryptoAbilityInit();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Hks init crypto ability failed, ret = %d", ret);
+        return ret;
+    }
+#ifndef _HARDWARE_ROOT_KEY_
+    ret = HksRkcInit();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Hks rkc init failed! ret = 0x%X", ret);
+    }
+#endif
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksCoreRefresh(void)
+{
+    return HksCoreRefreshKeyInfo();
+}
+
+int32_t HksCoreImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
+    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    (void)(wrappingKeyAlias);
+    (void)(key);
+    (void)(wrappedKeyData);
+    (void)(paramSet);
+    (void)(keyOut);
+    return 0;
+}
+
+int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur, uint32_t *alg)
+{
+    uint32_t i;
+    if (paramSet == NULL) {
+        HKS_LOG_E("paramSet == NULL");
+        return HKS_FAILURE;
+    }
+
+    HKS_LOG_D("Get paramSet->paramsCnt %u", paramSet->paramsCnt);
+    for (i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag ==  HKS_TAG_PURPOSE) {
+            *pur = paramSet->params[i].uint32Param;
+        }
+
+        if (paramSet->params[i].tag ==  HKS_TAG_ALGORITHM) {
+            *alg = paramSet->params[i].uint32Param;
+        }
+
+        if (*pur != 0 && *alg != 0) {
+            HKS_LOG_E("found purpose : %u, algorithm : %u", *pur, *alg);
+            break;
+        }
+    }
+
+    if (i == paramSet->paramsCnt) {
+        HKS_LOG_E("don't found purpose or algrithm");
+        return HKS_FAILURE;
+    }
+
+    if (*alg == HKS_ALG_HMAC || *pur == HKS_KEY_PURPOSE_SIGN || *pur == HKS_KEY_PURPOSE_VERIFY) {
+        for (i = 0; i < paramSet->paramsCnt; i++) {
+            if (paramSet->params[i].tag ==  HKS_TAG_DIGEST) {
+                *alg = paramSet->params[i].uint32Param;
+                break;
+            }
+        }
+
+        if (i == paramSet->paramsCnt) {
+            HKS_LOG_E("don't found digest");
+            return HKS_FAILURE;
+        }
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle)
+{
+    HKS_LOG_D("HksCoreInit in Core start");
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+    int32_t ret;
+
+    if (key == NULL || paramSet == NULL || handle == NULL) {
+        HKS_LOG_E("key : %p, paramSet : %p, handle : %p", key, paramSet, handle);
+        return HKS_FAILURE;
+    }
+
+    struct HuksKeyNode *keyNode = HksCreateKeyNode(key, paramSet);
+    if (keyNode == NULL || handle == NULL) {
+        HKS_LOG_E("HksCoreInit generate keynode failed keyNode : %p, handle : %p", keyNode, handle);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    keyNode->totalDataSize = 0;
+    handle->size = sizeof(uint64_t);
+    (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
+
+    ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint32_t i;
+    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreInitHandler);
+    for (i = 0; i < size; i++) {
+        if (g_hksCoreInitHandler[i].pur == pur) {
+            HKS_LOG_E("Core HksCoreInit [pur] = %d, pur = %d", g_hksCoreInitHandler[i].pur, pur);
+            ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
+            break;
+        }
+    }
+
+    if (i == size) {
+        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        return HKS_FAILURE;
+    }
+
+    HKS_LOG_D("HksCoreInit in Core end");
+    return ret;
+}
+
+int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    HKS_LOG_D("HksCoreUpdate in Core start");
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+    int32_t ret;
+
+    if (handle == NULL || paramSet == NULL || inData == NULL || inData->data == NULL) {
+        HKS_LOG_E("handle : %p, paramSet : %p, inData : %p, inData->data : %p", handle, paramSet, inData, inData->data);
+        return HKS_FAILURE;
+    }
+
+    uint64_t sessionId;
+    (void)memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size);
+
+    struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
+    if (keyNode == NULL) {
+        HKS_LOG_E("HksCoreUpdate query keynode failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (inData->size > MAX_UPDATE_SIZE) {
+        HKS_LOG_E("HksCoreUpdate input data size too large.");
+        return HKS_FAILURE;
+    }
+    if ((keyNode->totalDataSize + inData->size) > MAX_TOTAL_SIZE) {
+        HKS_LOG_E("HksCoreUpdate input data total size too large.");
+        return HKS_FAILURE;
+    }
+
+    ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint32_t i;
+    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreUpdateHandler);
+    for (i = 0; i < size; i++) {
+        if (g_hksCoreUpdateHandler[i].pur == pur) {
+            ret = g_hksCoreUpdateHandler[i].handler(keyNode, paramSet, inData, outData, alg);
+            break;
+        }
+    }
+
+    if (i == size) {
+        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        return HKS_FAILURE;
+    }
+    if (ret == HKS_SUCCESS) {
+        keyNode->totalDataSize += inData->size;
+    }
+    HKS_LOG_D("HksCoreUpdate in Core end");
+    return ret;
+}
+
+int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    HKS_LOG_D("HksCoreFinish in Core start");
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+    int32_t ret;
+
+    if (handle == NULL || paramSet == NULL || inData == NULL || inData->data == NULL) {
+        HKS_LOG_E("handle : %p, paramSet : %p, inData : %p, inData->data : %p", handle, paramSet, inData, inData->data);
+        return HKS_FAILURE;
+    }
+
+    uint64_t sessionId;
+    memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size);
+
+    struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
+    if (keyNode == NULL) {
+        HKS_LOG_E("Cipher generate keynode failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint32_t i;
+    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreFinishHandler);
+    for (i = 0; i < size; i++) {
+        if (g_hksCoreFinishHandler[i].pur == pur) {
+            ret = g_hksCoreFinishHandler[i].handler(keyNode, paramSet, inData, outData, alg);
+            break;
+        }
+    }
+
+    if (i == size) {
+        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        return HKS_FAILURE;
+    }
+    if (ret == HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+    }
+    HKS_LOG_D("HksCoreFinish in Core end");
+
+    return ret;
+}
+
+int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
+{
+    HKS_LOG_D("HksCoreAbort in Core start");
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+    int32_t ret;
+
+    if (handle == NULL || paramSet == NULL) {
+        HKS_LOG_E("handle : %p, paramSet : %p", handle, paramSet);
+        return HKS_FAILURE;
+    }
+
+    uint64_t sessionId;
+    memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size);
+
+    struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
+    if (keyNode == NULL) {
+        HKS_LOG_E("Cipher generate keynode failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint32_t i;
+    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreAbortHandler);
+    for (i = 0; i<size; i++) {
+        if (g_hksCoreAbortHandler[i].pur == pur) {
+            ret = g_hksCoreAbortHandler[i].handler(keyNode, paramSet, alg);
+            break;
+        }
+    }
+
+    HksDeleteKeyNode(sessionId);
+    if (i == size) {
+        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        return HKS_FAILURE;
+    }
+    HKS_LOG_D("HksCoreAbort in Core end");
+
+    return ret;
+}
+
+int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key)
+{
+    return HksCheckKeyValidity(paramSet, key);
+}
+
+int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
+{
+    (void)(key);
+    (void)(paramSet);
+    (void)(certChain);
+    return 0;
+}
+
+int32_t HksCoreGetAbility(int funcType)
+{
+    (void)(funcType);
+    return 0;
+}
+
+int32_t HksCoreGetHardwareInfo(void)
+{
+    return 0;
+}
+
+HksMutex *HksCoreGetHuksMutex(void)
+{
+    if (g_huksMutex == NULL) {
+        HKS_LOG_E("Hks mutex init failed, reinit!");
+        g_huksMutex = HksMutexCreate();
+        if (g_huksMutex == NULL) {
+            HKS_LOG_E("Hks mutex reinit failed!");
+            return NULL;
+        }
+    }
+
+    return g_huksMutex;
+}

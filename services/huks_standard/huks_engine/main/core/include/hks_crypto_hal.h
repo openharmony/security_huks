@@ -124,6 +124,8 @@ int32_t HksCryptoHalHmacUpdate(const struct HksBlob *chunk, void *ctx);
 
 int32_t HksCryptoHalHmacFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *mac);
 
+void HksCryptoHalHmacFreeCtx(void **ctx);
+
 int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg,
     struct HksBlob *mac);
 
@@ -135,29 +137,36 @@ int32_t HksCryptoHalHashFinal(const struct HksBlob *msg, void **ctx, struct HksB
 
 int32_t HksCryptoHalHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash);
 
+void HksCryptoHalHashFreeCtx(void **ctx);
+
 int32_t HksCryptoHalEncryptInit(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, void **ctx);
 
-int32_t HksCryptoHalEncryptUpdate(const struct HksBlob *message, void *ctx, struct HksBlob *out);
+int32_t HksCryptoHalEncryptUpdate(const struct HksBlob *message, void *ctx, struct HksBlob *out,
+    const uint32_t algtype);
 
 int32_t HksCryptoHalEncryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
-    struct HksBlob *tagAead);
+    struct HksBlob *tagAead, const uint32_t algtype);
+
+void HksCryptoHalEncryptFreeCtx(void **ctx, const uint32_t algtype);
 
 int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead);
 
 int32_t HksCryptoHalDecryptInit(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, void **ctx);
 
-int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message, void *ctx, struct HksBlob *out);
+int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message, void *ctx, struct HksBlob *out,
+    const uint32_t algtype);
 
-int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText);
+int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
+    struct HksBlob *tagAead, const uint32_t algtype);
+
+void HksCryptoHalDecryptFreeCtx(void **ctx, const uint32_t algtype);
 
 int32_t HksCryptoHalDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText);
 
 int32_t HksCryptoHalBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n);
-
-void HksCryptoHalFreeCtx(void **ctx);
 
 int32_t HksCryptoHalInit(void);
 

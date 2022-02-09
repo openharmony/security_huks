@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -890,6 +890,132 @@ protected:
         HksFree(message.data);
         HksFree(cipherText.data);
     }
+    void HksCryptoHalEncryptTest(HksBlob *key, const TestCaseParams &testCaseParams, HksBlob *message,
+        HksBlob *cipherText)
+    {
+        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
+        message->size = inLen;
+        message->data = (uint8_t *)HksMalloc(inLen + HKS_PADDING_SUPPLENMENT);
+
+        for (uint32_t ii = 0; ii < inLen; ii++) {
+            message->data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
+        }
+        HksBlob tagAead = { .size = 0, .data = nullptr };
+        void* encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult)
+            << "HksCryptoHalEncryptInit failed.";
+
+        uint32_t point = 0;
+        if (inLen > HKS_UPDATE_DATA_MAX) {
+            HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            while (point < inLen - HKS_UPDATE_DATA_MAX) {
+                memcpy_s(messageUpdate.data, messageUpdate.size, &message->data[point], HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out, testCaseParams.usageSpec.algType),
+                    testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+                point = point + HKS_UPDATE_DATA_MAX;
+            }
+            HksFree(out.data);
+            HksFree(messageUpdate.data);
+
+            uint32_t lastLen = inLen - point;
+            HksBlob enMessageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            memcpy_s(enMessageLast.data, lastLen, &message->data[point], lastLen);
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, cipherText, &tagAead,
+                testCaseParams.usageSpec.algType),
+                testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+
+            HksFree(enMessageLast.data);
+        } else {
+            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+            EXPECT_EQ(HksCryptoHalEncryptUpdate(message, encryptCtx, &out, testCaseParams.usageSpec.algType),
+                testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
+            HksBlob enMessageLast = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, cipherText, &tagAead,
+                testCaseParams.usageSpec.algType),
+                testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+            HksFree(out.data);
+        }
+    }
+
+    void RunTestCaseThreeStageCommon(HksBlob *key, HksBlob *message,
+        const TestCaseParams &testCaseParams, uint32_t outLen, HksBlob *cipherText)
+    {
+        HksBlob tagAead = { .size = 0, .data = nullptr };
+        void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx), HKS_SUCCESS);
+
+        HksBlob messageLast = {
+            .size = outLen,
+            .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT)
+        };
+
+        uint32_t index = 0;
+        if (outLen > HKS_UPDATE_DATA_MAX) {
+            HksBlob messageUpdate = {
+                .size = HKS_UPDATE_DATA_MAX,
+                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
+            };
+            HksBlob out = {
+                .size = HKS_UPDATE_DATA_MAX,
+                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
+            };
+            while (index < outLen - HKS_UPDATE_DATA_MAX) {
+                memcpy_s(messageUpdate.data, messageUpdate.size, &cipherText->data[index], HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out,
+                    testCaseParams.usageSpec.algType), HKS_SUCCESS);
+                index = index + HKS_UPDATE_DATA_MAX;
+            }
+
+            HksFree(out.data);
+            HksFree(messageUpdate.data);
+
+            uint32_t lastLen = outLen - index;
+            HksBlob inscription = {
+                .size = lastLen,
+                .data = (uint8_t *)HksMalloc(lastLen)
+            };
+            memcpy_s(inscription.data, lastLen, &cipherText->data[index], lastLen);
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, &messageLast, &tagAead,
+                testCaseParams.usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalDecryptFinal failed.";
+            HksFree(inscription.data);
+        } else {
+            HksBlob out = {
+                .size = outLen,
+                .data = (uint8_t *)HksMalloc(outLen)
+            };
+            EXPECT_EQ(HksCryptoHalDecryptUpdate(cipherText, decryptCtx, &out, testCaseParams.usageSpec.algType),
+                HKS_SUCCESS) << "HksCryptoHalDecryptUpdate failed.";
+            HksBlob inscription = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, &messageLast, &tagAead,
+                testCaseParams.usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalDecryptFinal failed.";
+            HksFree(out.data);
+        }
+
+        EXPECT_EQ(messageLast.size, message->size) << "compare size failed.";
+        EXPECT_EQ(HksMemCmp(message->data, messageLast.data, messageLast.size), HKS_SUCCESS);
+        HksFree(messageLast.data);
+    }
+
+    void RunTestCaseThreeStage(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+        HksBlob message = { .size = 0, .data = nullptr };
+        uint32_t outLen = HKS_KEY_BYTES(testCaseParams.spec.keyLen);
+        HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen  + HKS_PADDING_SUPPLENMENT) };
+
+        EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+
+        HksCryptoHalEncryptTest(&key, testCaseParams, &message, &cipherText);
+
+        if (testCaseParams.encryptResult == HKS_SUCCESS) {
+            RunTestCaseThreeStageCommon(&key, &message, testCaseParams, outLen, &cipherText);
+        }
+
+        HksFree(key.data);
+        HksFree(message.data);
+        HksFree(cipherText.data);
+    }
 };
 
 void HksCryptoHalRsaCipher::SetUpTestCase(void)
@@ -916,7 +1042,7 @@ void HksCryptoHalRsaCipher::TearDown()
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_001, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_001_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_001_PARAMS);
 }
 
 /**
@@ -926,7 +1052,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_001, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_002, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_002_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_002_PARAMS);
 }
 
 /**
@@ -936,7 +1062,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_002, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_003, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_003_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_003_PARAMS);
 }
 
 /**
@@ -946,7 +1072,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_003, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_004, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_004_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_004_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -957,7 +1083,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_004, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_005, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_005_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_005_PARAMS);
 }
 
 /**
@@ -967,7 +1093,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_005, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_006, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_006_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_006_PARAMS);
 }
 #endif
 
@@ -978,7 +1104,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_006, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_007, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_007_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_007_PARAMS);
 }
 
 /**
@@ -988,7 +1114,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_007, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_008, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_008_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_008_PARAMS);
 }
 
 /**
@@ -998,7 +1124,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_008, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_009, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_009_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_009_PARAMS);
 }
 
 /**
@@ -1008,7 +1134,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_009, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_010, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_010_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_010_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -1019,7 +1145,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_010, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_011, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_011_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_011_PARAMS);
 }
 
 /**
@@ -1029,7 +1155,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_011, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_012, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_012_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_012_PARAMS);
 }
 #endif
 
@@ -1040,7 +1166,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_012, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_013, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_013_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_013_PARAMS);
 }
 
 /**
@@ -1050,7 +1176,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_013, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_014, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_014_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_014_PARAMS);
 }
 
 /**
@@ -1060,7 +1186,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_014, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_015, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_015_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_015_PARAMS);
 }
 
 /**
@@ -1070,7 +1196,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_015, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_016, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_016_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_016_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -1081,7 +1207,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_016, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_017, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_017_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_017_PARAMS);
 }
 
 /**
@@ -1091,7 +1217,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_017, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_018, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_018_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_018_PARAMS);
 }
 #endif
 
@@ -1102,7 +1228,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_018, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_019, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_019_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_019_PARAMS);
 }
 
 /**
@@ -1112,7 +1238,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_019, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_020, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_020_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_020_PARAMS);
 }
 
 /**
@@ -1122,7 +1248,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_020, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_021, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_021_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_021_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -1133,7 +1259,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_021, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_022, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_022_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_022_PARAMS);
 }
 
 /**
@@ -1143,7 +1269,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_022, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_023, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_023_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_023_PARAMS);
 }
 
 /**
@@ -1153,7 +1279,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_023, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_024, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_024_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_024_PARAMS);
 }
 #endif
 
@@ -1164,7 +1290,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_024, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_025, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_025_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_025_PARAMS);
 }
 
 /**
@@ -1174,7 +1300,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_025, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_026, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_026_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_026_PARAMS);
 }
 
 /**
@@ -1184,7 +1310,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_026, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_027, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_027_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_027_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -1195,7 +1321,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_027, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_028, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_028_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_028_PARAMS);
 }
 
 /**
@@ -1205,7 +1331,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_028, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_029, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_029_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_029_PARAMS);
 }
 #endif
 
@@ -1216,7 +1342,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_029, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_030, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -1227,7 +1353,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_030, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_031, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_031_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_031_PARAMS);
 }
 
 /**
@@ -1237,7 +1363,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_031, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_032, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_032_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_032_PARAMS);
 }
 
 /**
@@ -1247,7 +1373,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_032, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_033, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_033_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_033_PARAMS);
 }
 #endif
 
@@ -1258,7 +1384,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_033, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_034, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_034_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_034_PARAMS);
 }
 
 #ifndef CUT_RSA_4096_TEST
@@ -1269,7 +1395,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_034, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_035, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_035_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_035_PARAMS);
 }
 
 /**
@@ -1279,7 +1405,7 @@ HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_035, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalRsaCipher, HksCryptoHalRsaCipher_036, Function | SmallTest | Level1)
 {
-    RunTestCase(HKS_CRYPTO_HAL_RSA_CIPHER_036_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_RSA_CIPHER_036_PARAMS);
 }
 #endif
 }  // namespace UnitTest

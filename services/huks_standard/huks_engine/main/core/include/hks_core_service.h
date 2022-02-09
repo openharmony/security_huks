@@ -19,6 +19,10 @@
 #include "hks_crypto_hal.h"
 #include "hks_type_inner.h"
 
+#include "hks_core_service_three_stage.h"
+#include "hks_keynode.h"
+#include "hks_mutex.h"
+
 #define MAX_HASH_SIZE 64
 
 #ifdef __cplusplus
@@ -57,14 +61,77 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
 int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet, const struct HksBlob *srcData,
     struct HksBlob *mac);
 
-int32_t HksCoreInitialize(void);
-
 int32_t HksCoreRefreshKeyInfo(void);
 
 int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut);
 
 int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac);
+
+int32_t HksCoreModuleInit(void);
+
+int32_t HksCoreRefresh(void);
+
+int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
+    const struct HksBlob *keyIn, struct HksBlob *keyOut);
+
+int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *keyOut);
+
+int32_t HksCoreImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
+    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+
+int32_t HksCoreExportPublicKey(const struct HksBlob *key,  const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+
+int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle);
+
+int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData);
+
+int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData);
+
+int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
+
+int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key);
+
+int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain);
+
+int32_t HksCoreGetAbility(int funcType);
+
+int32_t HksCoreGetHardwareInfo(void);
+
+int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
+    const struct HksBlob *srcData, struct HksBlob *mac);
+
+int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut);
+
+int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random);
+
+HksMutex *HksCoreGetHuksMutex(void);
+
+struct HksCoreInitHandler {
+    enum HksKeyPurpose pur;
+    int32_t (*handler)(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+        uint32_t alg);
+};
+
+struct HksCoreUpdateHandler {
+    enum HksKeyPurpose pur;
+    int32_t (*handler)(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+        const struct HksBlob *srcData, struct HksBlob *signature, uint32_t alg);
+};
+
+struct HksCoreFinishHandler {
+    enum HksKeyPurpose pur;
+    int32_t (*handler)(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+        const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg);
+};
+
+struct HksCoreAbortHandler {
+    enum HksKeyPurpose pur;
+    int32_t (*handler)(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet, uint32_t alg);
+};
 
 #ifdef __cplusplus
 }

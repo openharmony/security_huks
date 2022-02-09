@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -62,6 +62,12 @@ enum HksMessage {
     HKS_MSG_PROVISION,
     HKS_MSG_PROVISION_VERIFY,
     HKS_MSG_EXPORT_TRUST_CERTS,
+    HKS_MSG_DELETE_USERID_KEYALIASFILE,
+    HKS_MSG_DELETE_UID_KEYALIASFILE,
+    HKS_MSG_INIT,
+    HKS_MSG_UPDATE,
+    HKS_MSG_FINISH,
+    HKS_MSG_ABORT,
     HKS_MSG_MAX, /* new cmd type must be added before HKS_MSG_MAX */
 };
 

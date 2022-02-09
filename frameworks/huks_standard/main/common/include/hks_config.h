@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,10 @@
 #define HKS_SUPPORT_ECDSA_C
 #define HKS_SUPPORT_ECDSA_SIGN_VERIFY
 
+#define HKS_SUPPORT_ECDH_GENERATE_KEY
+#define HKS_SUPPORT_ECDH_GET_PUBLIC_KEY
+#define HKS_SUPPORT_ECDSA_GENERATE_KEY
+#define HKS_SUPPORT_EDDSA_GET_PUBLIC_KEY
 /* ED25519 */
 #define HKS_SUPPORT_ED25519_C
 #define HKS_SUPPORT_ED25519_GENERATE_KEY
@@ -113,6 +117,7 @@
 
 #if defined(HKS_SUPPORT_AES_GENERATE_KEY) || defined(HKS_SUPPORT_DH_GENERATE_KEY) ||       \
     defined(HKS_SUPPORT_DSA_GENERATE_KEY) || defined(HKS_SUPPORT_ECC_GENERATE_KEY) ||      \
+    defined(HKS_SUPPORT_ECDH_GENERATE_KEY) || defined(HKS_SUPPORT_ECDSA_GENERATE_KEY) ||   \
     defined(HKS_SUPPORT_ED25519_GENERATE_KEY) || defined(HKS_SUPPORT_HMAC_GENERATE_KEY) || \
     defined(HKS_SUPPORT_RSA_GENERATE_KEY) || defined(HKS_SUPPORT_X25519_GENERATE_KEY)
 #define HKS_SUPPORT_API_GENERATE_KEY
