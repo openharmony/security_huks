@@ -139,6 +139,8 @@ config("soft_huks_config") {
     print(huks_config_file)
     cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
   }
+
+  cflags += [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_path}\"" ]
 }
 
 config("public_huks_config") {
