@@ -21,6 +21,7 @@ group("huks_sdk_test") {
       "//base/security/huks/services/huks_standard/huks_service/main/test/unittest:huks_multithread_test",
       "//base/security/huks/test/fuzz:huks_fuzz_test",
       "//base/security/huks/test/stability:huks_stability_test",
+      "//base/security/huks/unittest:huks_UT_test",
     ]
   } else {
   }

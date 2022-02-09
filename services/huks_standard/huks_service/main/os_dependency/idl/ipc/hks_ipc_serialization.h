@@ -16,6 +16,7 @@
 #ifndef HKS_IPC_SERIALIZATION_H
 #define HKS_IPC_SERIALIZATION_H
 
+#include "hks_param.h"
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
@@ -79,6 +80,10 @@ int32_t HksSignWithDeviceKeyUnpack(const struct HksBlob *srcData, uint32_t *keyI
     struct HksBlob *unsignedData, struct HksBlob *signature);
 
 int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certChainBlob);
+
+int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt);
+
+enum HksTagType GetTagType(enum HksTag tag);
 
 #ifdef __cplusplus
 }

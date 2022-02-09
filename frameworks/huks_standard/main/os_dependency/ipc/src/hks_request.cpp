@@ -17,8 +17,9 @@
 
 #include <securec.h>
 #include "iservice_registry.h"
-#include "hks_param.h"
+
 #include "hks_log.h"
+#include "hks_param.h"
 
 using namespace OHOS;
 
@@ -52,38 +53,9 @@ sptr<IRemoteObject> GetHksProxy()
     return hksProxy;
 }
 
-int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
-    struct HksBlob *outBlob, const struct HksParamSet *paramSet)
+static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob)
 {
-    if (GetHksProxy() == nullptr) {
-        HKS_LOG_E("HwKeystoreProxy is null.");
-        return HKS_ERROR_BAD_STATE;
-    }
-    enum HksSendType sendType = HKS_SEND_TYPE_SYNC;
-    struct HksParam *sendTypeParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ASYNCHRONIZED, &sendTypeParam);
-    if (ret == HKS_SUCCESS) {
-        sendType = (enum HksSendType)sendTypeParam->uint32Param;
-    }
-
-    MessageParcel data;
-    MessageParcel reply;
-    MessageOption option;
-    if (sendType == HKS_SEND_TYPE_SYNC) {
-        option = MessageOption::TF_SYNC;
-    } else {
-        option = MessageOption::TF_ASYNC;
-    }
-
-    data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
-    data.WriteUint32(inBlob->size);
-    data.WriteBuffer(inBlob->data, (size_t)inBlob->size);
-    int error = hksProxy->SendRequest(type, data, reply, option);
-    if (error != 0) {
-        return error;
-    }
-
-    ret = reply.ReadInt32();
+    int32_t ret = reply.ReadInt32();
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -104,9 +76,58 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
     if (outData == nullptr) {
         return HKS_ERROR_BAD_STATE;
     }
+
+    if (outBlob->size < outLen) {
+        HKS_LOG_E("outBlob->size smaller than outLen.outBlob.siza[%d]", outBlob->size);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
     if (memcpy_s(outBlob->data, outBlob->size, outData, outLen) != EOK) {
         return HKS_ERROR_BAD_STATE;
     }
     outBlob->size = outLen;
     return HKS_SUCCESS;
+}
+
+int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
+    struct HksBlob *outBlob, const struct HksParamSet *paramSet)
+{
+    if (GetHksProxy() == nullptr) {
+        HKS_LOG_E("HwKeystoreProxy is null.");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    enum HksSendType sendType = HKS_SEND_TYPE_SYNC;
+    struct HksParam *sendTypeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ASYNCHRONIZED, &sendTypeParam);
+    if (ret == HKS_SUCCESS) {
+        sendType = (enum HksSendType)sendTypeParam->uint32Param;
+    }
+
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    if (sendType == HKS_SEND_TYPE_SYNC) {
+        option = MessageOption::TF_SYNC;
+    } else {
+        option = MessageOption::TF_ASYNC;
+    }
+
+    data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
+
+    if (outBlob == NULL) {
+        data.WriteUint32(0);
+    } else {
+        data.WriteUint32(outBlob->size);
+    }
+
+    data.WriteUint32(inBlob->size);
+    data.WriteBuffer(inBlob->data, (size_t)inBlob->size);
+
+    int error = hksProxy->SendRequest(type, data, reply, option);
+    if (error != 0) {
+        return error;
+    }
+
+    return HksReadRequestReply(reply, outBlob);
 }

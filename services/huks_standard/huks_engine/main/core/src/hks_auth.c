@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,11 +67,47 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksKe
             HKS_LOG_E("get auth param[%x] failed!", authTag);
             return ret;
         }
+
         ret = HksGetParam(paramSet, authTag, &requestParam);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("get request param[%x] failed!", authTag);
             return ret;
         }
+
+        if (authTag != HKS_TAG_PURPOSE) {
+            ret = HksCheckParamMatch((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
+        } else {
+            ret = CheckPurpose((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
+        }
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("unmatch policy[%x], [%x] != [%x]!", authTag, requestParam->uint32Param, authParam->uint32Param);
+            return ret;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t AuthThreeStagePolicy(const struct HksAuthPolicy *policy, const struct HuksKeyNode *keyNode)
+{
+    int32_t ret;
+    uint32_t authTag;
+    struct HksParam *authParam = NULL;
+    struct HksParam *requestParam = NULL;
+
+    for (uint32_t i = 0; i < policy->policyCnt; i++) {
+        authTag = policy->policyTag[i];
+        ret = HksGetParam(keyNode->keyBlobParamSet, authTag, &authParam);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get auth param[%x] failed!", authTag);
+            return ret;
+        }
+
+        ret = HksGetParam(keyNode->runtimeParamSet, authTag, &requestParam);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get request param[%x] failed!", authTag);
+            return ret;
+        }
+
         if (authTag != HKS_TAG_PURPOSE) {
             ret = HksCheckParamMatch((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         } else {
@@ -95,4 +131,13 @@ int32_t HksAuth(uint32_t authId, const struct HksKeyNode *keyNode, const struct 
     return HKS_ERROR_BAD_STATE;
 }
 
+int32_t HksThreeStageAuth(uint32_t authId, const struct HuksKeyNode *keyNode)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_authPolicyList); i++) {
+        if (authId == g_authPolicyList[i].authId) {
+            return AuthThreeStagePolicy(&g_authPolicyList[i], keyNode);
+        }
+    }
+    return HKS_ERROR_BAD_STATE;
+}
 #endif /* _CUT_AUTHENTICATE_ */

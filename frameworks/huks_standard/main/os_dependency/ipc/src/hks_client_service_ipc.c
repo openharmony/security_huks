@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -674,5 +674,206 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob 
     } while (0);
 
     HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
+int32_t HksClientDeleteUserIDKeyAliasFile(const char *userID)
+{
+    struct HksBlob inBlob = { 0, NULL };
+    inBlob.size = strlen(userID);
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    if (inBlob.data == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    memcpy_s(inBlob.data, inBlob.size, userID, inBlob.size);
+
+    return HksSendRequest(HKS_MSG_DELETE_USERID_KEYALIASFILE, &inBlob, NULL, NULL);
+}
+
+int32_t HksClientDeleteUIDKeyAliasFile(const char *userID, const char *uid)
+{
+    int32_t ret;
+
+    struct HksParamSet *sendParamSet = NULL;
+
+    struct HksBlob *userId = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+    if (userId == NULL) {
+        HKS_LOG_E("malloc buffer failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    userId->size = strlen(userID);
+    userId->data = (uint8_t*) HksMalloc(strlen(userID));
+    if (userId->data == NULL) {
+        HKS_LOG_E("malloc buffer failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    memcpy_s(userId->data, userId->size, userID, userId->size);
+
+    struct HksBlob *uId = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+    uId->size = strlen(uid);
+    uId->data = (uint8_t*) HksMalloc(strlen(uid));
+    if (uId->data == NULL) {
+        HKS_LOG_E("malloc buffer failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    memcpy_s(uId->data, uId->size, uid, uId->size);
+
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_PARAM0_BUFFER,
+          .blob = *userId },
+        { .tag = HKS_TAG_PARAM1_BUFFER,
+          .blob = *uId },
+    };
+
+    ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamsToParamSet fail");
+        return ret;
+    }
+
+    struct HksBlob parcelBlob = {
+        .size = sendParamSet->paramSetSize,
+        .data = (uint8_t *)sendParamSet
+    };
+
+    return HksSendRequest(HKS_MSG_DELETE_UID_KEYALIASFILE, &parcelBlob, NULL, NULL);
+}
+
+int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *handle)
+{
+    struct HksParamSet *sendParamSet = NULL;
+
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_PARAM0_BUFFER,
+          .blob = *keyAlias },
+        { .tag = HKS_TAG_PARAM1_BUFFER,
+          .blob = { paramSet->paramSetSize,
+                    (uint8_t *)paramSet } },
+    };
+
+    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamsToParamSet fail");
+        return ret;
+    }
+
+    struct HksBlob parcelBlob = {
+        .size = sendParamSet->paramSetSize,
+        .data = (uint8_t *)sendParamSet
+    };
+    ret = HksSendRequest(HKS_MSG_INIT, &parcelBlob, handle, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksClientInit HksParamSet send fail");
+        HksFreeParamSet(&sendParamSet);
+        return ret;
+    }
+
+    HksFreeParamSet(&sendParamSet);
+    return ret;
+}
+
+int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    struct HksParamSet *sendParamSet = NULL;
+
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_PARAM0_BUFFER,
+          .blob = { paramSet->paramSetSize,
+                    (uint8_t *)paramSet } },
+        { .tag = HKS_TAG_PARAM1_BUFFER,
+          .blob = *handle },
+        { .tag = HKS_TAG_PARAM2_BUFFER,
+          .blob = *inData },
+    };
+
+    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamSetPack fail");
+        return ret;
+    }
+
+    struct HksBlob parcelBlob = {
+        .size = sendParamSet->paramSetSize,
+        .data = (uint8_t *)sendParamSet
+    };
+    ret = HksSendRequest(HKS_MSG_UPDATE, &parcelBlob, outData, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamSet send fail");
+        HksFreeParamSet(&sendParamSet);
+        return ret;
+    }
+
+    HksFreeParamSet(&sendParamSet);
+    return ret;
+}
+
+int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    struct HksParamSet *sendParamSet = NULL;
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_PARAM0_BUFFER,
+          .blob = { paramSet->paramSetSize,
+                    (uint8_t *)paramSet } },
+        { .tag = HKS_TAG_PARAM1_BUFFER,
+          .blob = *handle },
+        { .tag = HKS_TAG_PARAM2_BUFFER,
+          .blob = *inData },
+        { .tag = HKS_TAG_PARAM3_BUFFER,
+          .blob = *outData },
+    };
+
+    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamSetPack fail");
+        return ret;
+    }
+
+    struct HksBlob parcelBlob = {
+        .size = sendParamSet->paramSetSize,
+        .data = (uint8_t *)sendParamSet
+    };
+    ret = HksSendRequest(HKS_MSG_FINISH, &parcelBlob, outData, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamSet send fail");
+        HksFreeParamSet(&sendParamSet);
+        return ret;
+    }
+
+    HksFreeParamSet(&sendParamSet);
+    return ret;
+}
+
+int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
+{
+    struct HksParamSet *sendParamSet = NULL;
+    struct HksParam params[] = {
+        { .tag = HKS_TAG_PARAM0_BUFFER,
+          .blob = { paramSet->paramSetSize,
+                    (uint8_t *)paramSet } },
+        { .tag = HKS_TAG_PARAM1_BUFFER,
+          .blob = *handle },
+    };
+
+    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamSetPack fail");
+        return ret;
+    }
+
+    struct HksBlob parcelBlob = {
+        .size = sendParamSet->paramSetSize,
+        .data = (uint8_t *)sendParamSet
+    };
+    ret = HksSendRequest(HKS_MSG_ABORT, &parcelBlob, NULL, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksParamSet send fail");
+        HksFreeParamSet(&sendParamSet);
+        return ret;
+    }
+
+    HksFreeParamSet(&sendParamSet);
     return ret;
 }

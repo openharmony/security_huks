@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,8 +75,11 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
         HKS_LOG_E("data len is too large, len = %x", length);
         return nullptr;
     }
-
-    arrayBlob.data = (uint8_t *)HksMalloc(length);
+    if (length == 0) {
+        arrayBlob.data = (uint8_t *)HksMalloc(HKS_MAX_DATA_LEN);
+    } else {
+        arrayBlob.data = (uint8_t *)HksMalloc(length);
+    }
     if (arrayBlob.data == nullptr) {
         return nullptr;
     }
@@ -395,5 +398,31 @@ void FreeHksCertChain(HksCertChain *&certChain)
 
     HksFree(certChain);
     certChain = nullptr;
+}
+
+napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_t size)
+{
+    napi_value result = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &result));
+
+    napi_value errorCode = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, error, &errorCode));
+    NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_ERRORCODE.c_str(), errorCode));
+
+    uint64_t tempHandle = *(uint64_t*)data;
+    uint32_t handle1 = 0;
+    uint32_t handle2 = 0;
+    napi_value handlejs1;
+    napi_value handlejs2;
+
+    handle2 = tempHandle;
+    handle1 = tempHandle >> HKS_HANDLE_OFFSET32;
+
+    NAPI_CALL(env, napi_create_uint32(env, handle1, &handlejs1));
+    NAPI_CALL(env, napi_create_uint32(env, handle2, &handlejs2));
+    NAPI_CALL(env, napi_set_named_property(env, result, "handle1", handlejs1));
+    NAPI_CALL(env, napi_set_named_property(env, result, "handle2", handlejs2));
+
+    return result;
 }
 }  // namespace HuksNapi

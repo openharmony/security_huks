@@ -65,6 +65,17 @@ int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlo
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
 
+int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckBlob2AndParamSet(processName, keyAlias, paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
+}
+
 int32_t HksCheckGetKeyParamSetParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet)
 {

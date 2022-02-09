@@ -44,6 +44,6 @@ void RemoveDoubleListNode(struct DoubleList *node);
  */
 #define HKS_DLIST_ITER(st, head) \
     struct DoubleList *p = NULL; \
-    for (p = (head)->next, (st) = (typeof(st))p; p != (head); p = p->next, (st) = (typeof(st))p)
+    for (p = (head)->next, (st) = (__typeof__(st))p; p != (head); p = p->next, (st) = (__typeof__(st))p)
 
 #endif

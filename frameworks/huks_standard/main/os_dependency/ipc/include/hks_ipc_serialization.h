@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -77,6 +77,8 @@ int32_t HksUnwrapKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlia
 
 int32_t HksSignWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const struct HksParamSet *paramSet,
     const struct HksBlob *unsignedData, const struct HksBlob *signature);
+
+int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet);
 
 #ifdef __cplusplus
 }

@@ -32,6 +32,7 @@ struct TestCaseParams {
     HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
     HksKeySize keySize = HksKeySize::HKS_RSA_KEY_SIZE_512;
 
     HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
@@ -479,8 +480,41 @@ protected:
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
         HksBlob tagAead = { .size = 0, .data = nullptr };
 
-        EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
-            testCaseParams.encryptResult);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            void* context = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+            EXPECT_EQ(HksCryptoHalEncryptInit(&key, &testCaseParams.usageSpec, &context), testCaseParams.encryptResult);
+
+            uint32_t point = 0;
+            if (inLen > HKS_UPDATE_DATA_MAX) {
+                HksBlob messageUpdate = {
+                    .size = HKS_UPDATE_DATA_MAX,
+                    .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
+                };
+                HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(inLen) };
+                while (point < inLen - HKS_UPDATE_DATA_MAX) {
+                    memcpy_s(messageUpdate.data, messageUpdate.size, &message.data[point], HKS_UPDATE_DATA_MAX);
+                    EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, context, &out,
+                        testCaseParams.usageSpec.algType), HKS_SUCCESS);
+                    point = point + HKS_UPDATE_DATA_MAX;
+                }
+
+                HksFree(out.data);
+                HksFree(messageUpdate.data);
+            }
+
+            uint32_t lastLen = inLen - point;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            (void)memcpy_s(messageLast.data, lastLen, &message.data[point], lastLen);
+
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &context, &cipherText, &tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptResult);
+
+            HksFree(messageLast.data);
+        } else {
+            EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
+                testCaseParams.encryptResult);
+        }
+
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);

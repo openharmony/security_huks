@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_GET_CERTIFICATE_CHAIN_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_GET_CERTIFICATE_CHAIN_MAX_ARGS = 3;
 }  // namespace
 
-struct GetCertificateChainAsyncContext_t {
+struct GetCertificateChainAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -40,15 +40,15 @@ struct GetCertificateChainAsyncContext_t {
     struct HksBlob *keyAlias = nullptr;
     struct HksCertChain *certChain = nullptr;
 };
-using GetCertificateChainAsyncContext = GetCertificateChainAsyncContext_t *;
+using GetCertificateChainAsyncContext = GetCertificateChainAsyncContextT *;
 
 static GetCertificateChainAsyncContext CreateGetCertificateChainAsyncContext()
 {
     GetCertificateChainAsyncContext context =
-        (GetCertificateChainAsyncContext)HksMalloc(sizeof(GetCertificateChainAsyncContext_t));
+        (GetCertificateChainAsyncContext)HksMalloc(sizeof(GetCertificateChainAsyncContextT));
     if (context != nullptr) {
         (void)memset_s(
-            context, sizeof(GetCertificateChainAsyncContext_t), 0, sizeof(GetCertificateChainAsyncContext_t));
+            context, sizeof(GetCertificateChainAsyncContextT), 0, sizeof(GetCertificateChainAsyncContextT));
     }
     return context;
 }

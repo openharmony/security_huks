@@ -30,6 +30,11 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
 
+struct HksMbedtlsHmacCtx {
+    uint32_t digestAlg;
+    void    *append;
+} HksMbedtlsHmacCtx;
+
 #ifdef HKS_SUPPORT_HMAC_GENERATE_KEY
 int32_t HksMbedtlsHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
@@ -95,5 +100,146 @@ int32_t HksMbedtlsHmac(const struct HksBlob *key,
     }
 
     return ret;
+}
+
+int32_t HksMbedtlsHmacInit(void **CryptoCtx, const struct HksBlob *key, uint32_t digestAlg)
+{
+    /* input params have been checked */
+    uint32_t mbedtlsAlg;
+    int32_t ret = HksToMbedtlsDigestAlg(digestAlg, &mbedtlsAlg);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    if (mbedtls_md_info_from_type(mbedtlsAlg) == NULL) {
+        HKS_LOG_E("Mbedtls hmac engine info failed!");
+        return MBEDTLS_ERR_MD_BAD_INPUT_DATA;
+    }
+
+    mbedtls_md_context_t *hmacCtx = (mbedtls_md_context_t *)HksMalloc(sizeof(mbedtls_md_context_t));
+    if (hmacCtx == NULL) {
+        HKS_LOG_E("Mbedtls hmac init hmacCtx malloc fail!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    mbedtls_md_init(hmacCtx);
+
+    ret = mbedtls_md_setup(hmacCtx, mbedtls_md_info_from_type(mbedtlsAlg), 1);
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        HKS_LOG_E("Mbedtls hmac setup failed! mbedtls ret = 0x%X", ret);
+        mbedtls_md_free(hmacCtx);
+        if (hmacCtx != NULL) {
+            HksFree(hmacCtx);
+        }
+        return ret;
+    }
+
+    ret = mbedtls_md_hmac_starts(hmacCtx, key->data, key->size);
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
+        mbedtls_md_free(hmacCtx);
+        if (hmacCtx != NULL) {
+            HksFree(hmacCtx);
+        }
+        return ret;
+    }
+
+    struct HksMbedtlsHmacCtx *outCtx = (struct HksMbedtlsHmacCtx *)HksMalloc(sizeof(struct HksMbedtlsHmacCtx));
+    if (outCtx == NULL) {
+        HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
+        mbedtls_md_free(hmacCtx);
+        if (hmacCtx != NULL) {
+            HksFree(hmacCtx);
+        }
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    outCtx->digestAlg = digestAlg;
+    outCtx->append = (void *)hmacCtx;
+    *CryptoCtx = (void *)outCtx;
+    return HKS_SUCCESS;
+}
+
+int32_t HksMbedtlsHmacUpdate(void *CryptoCtx, const struct HksBlob *msg)
+{
+    struct HksMbedtlsHmacCtx *hctx = (struct HksMbedtlsHmacCtx *)CryptoCtx;
+    mbedtls_md_context_t *hmacCtx = (mbedtls_md_context_t *)hctx->append;
+    if (hmacCtx == NULL) {
+        HKS_LOG_E("Mbedtls hmac update hmacCtx is null!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    int32_t ret = mbedtls_md_hmac_update(hmacCtx, msg->data, msg->size);
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
+        mbedtls_md_free(hmacCtx);
+        return ret;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksMbedtlsHmacFinal(void **CryptoCtx, struct HksBlob *msg, struct HksBlob *mac)
+{
+    struct HksMbedtlsHmacCtx *hctx = (struct HksMbedtlsHmacCtx *)*CryptoCtx;
+    mbedtls_md_context_t *hmacCtx = (mbedtls_md_context_t *)hctx->append;
+    if (hmacCtx == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret;
+    if (msg->size != 0) {
+        ret = mbedtls_md_hmac_update(hmacCtx, msg->data, msg->size);
+        if (ret != HKS_MBEDTLS_SUCCESS) {
+            HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
+            mbedtls_md_free(hmacCtx);
+            return ret;
+        }
+    }
+
+    ret = mbedtls_md_hmac_finish(hmacCtx, mac->data);
+    if (ret != HKS_MBEDTLS_SUCCESS) {
+        HKS_LOG_E("Mbedtls hmac finish failed! mbedtls ret = 0x%X", ret);
+        (void)memset_s(mac->data, mac->size, 0, mac->size);
+        mbedtls_md_free(hmacCtx);
+        return ret;
+    }
+
+    ret = HksGetDigestLen(hctx->digestAlg, &(mac->size));
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Get digest len failed!");
+        mbedtls_md_free(hmacCtx);
+        return ret;
+    }
+
+    mbedtls_md_free(hmacCtx);
+    HksFree(hmacCtx);
+    hctx->append = NULL;
+    HksFree(*CryptoCtx);
+    *CryptoCtx = NULL;
+
+    return HKS_SUCCESS;
+}
+
+void HksMbedtlsHmacHalFreeCtx(void **CryptoCtx)
+{
+    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+        HKS_LOG_E("Mbedtls hmac free ctx is null");
+        return;
+    }
+
+    struct HksMbedtlsHmacCtx *hctx = (struct HksMbedtlsHmacCtx *)*CryptoCtx;
+    if (hctx->append != NULL) {
+        mbedtls_md_free((mbedtls_md_context_t *)hctx->append);
+        if (hctx->append != NULL) {
+            HksFree(hctx->append);
+            hctx->append = NULL;
+        }
+    }
+
+    if (*CryptoCtx != NULL) {
+        HksFree(hctx);
+        *CryptoCtx = NULL;
+    }
 }
 #endif /* HKS_SUPPORT_HMAC_C */

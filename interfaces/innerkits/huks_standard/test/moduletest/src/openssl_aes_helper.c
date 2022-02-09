@@ -25,6 +25,8 @@
 
 #define BIT_NUM_OF_UINT8 8
 #define HKS_AE_TAG_LEN 16
+#define OPENSSL_CTX_PADDING_NONE 0
+#define OPENSSL_CTX_PADDING_ENABLE 1
 
 int32_t GenerateAesKey(const int keyLen, struct HksBlob *randomKey)
 {
@@ -151,9 +153,9 @@ int32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
 
     int ret = 1;
     if (padding->uint32Param == HKS_PADDING_PKCS7) {
-        ret = EVP_CIPHER_CTX_set_padding(ctx, 1);
+        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_ENABLE);
     } else if (padding->uint32Param == HKS_PADDING_NONE) {
-        ret = EVP_CIPHER_CTX_set_padding(ctx, 0);
+        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_NONE);
     }
     if (ret != 1) {
         EVP_CIPHER_CTX_free(ctx);
@@ -206,9 +208,9 @@ int32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
 
     int ret = 1;
     if (padding->uint32Param == HKS_PADDING_PKCS7) {
-        ret = EVP_CIPHER_CTX_set_padding(ctx, 1);
+        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_ENABLE);
     } else if (padding->uint32Param == HKS_PADDING_NONE) {
-        ret = EVP_CIPHER_CTX_set_padding(ctx, 0);
+        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_NONE);
     }
     if (ret != 1) {
         EVP_CIPHER_CTX_free(ctx);

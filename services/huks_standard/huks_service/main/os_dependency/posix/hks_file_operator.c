@@ -334,6 +334,115 @@ int32_t HksRemoveDir(const char *dirPath)
     return HKS_SUCCESS;
 }
 
+int32_t HksDeletDirPartTwo(const char *path)
+{
+    int32_t ret;
+    char deletePath[HKS_MAX_FILE_PATH_LEN] = { 0 };
+    DIR *dir = opendir(path);
+    if (dir  == NULL) {
+        HKS_LOG_E("open dir failed");
+        return HKS_ERROR_OPEN_FILE_FAIL;
+    }
+    struct dirent *dire = readdir(dir);
+    while (dire != NULL) {
+        if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            return HKS_ERROR_INTERNAL_ERROR;
+        }
+
+        if (deletePath[strlen(deletePath) - 1] != '/') {
+            if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                return HKS_ERROR_INTERNAL_ERROR;
+            }
+        }
+
+        if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            return HKS_ERROR_INTERNAL_ERROR;
+        }
+
+        if ((strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
+            ret = remove(deletePath);
+        }
+        dire = readdir(dir);
+    }
+    closedir(dir);
+    ret = remove(path);
+    return ret;
+}
+
+int32_t HksDeletDirPartOne(const char *path)
+{
+    int32_t ret;
+    char deletePath[HKS_MAX_FILE_PATH_LEN] = { 0 };
+    DIR *dir = opendir(path);
+    if (dir  == NULL) {
+        HKS_LOG_E("open dir failed");
+        return HKS_ERROR_OPEN_FILE_FAIL;
+    }
+    struct dirent *dire = readdir(dir);
+    while (dire != NULL) {
+        if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            return HKS_ERROR_INTERNAL_ERROR;
+        }
+
+        if (deletePath[strlen(deletePath) - 1] != '/') {
+            if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                return HKS_ERROR_INTERNAL_ERROR;
+            }
+        }
+
+        if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            return HKS_ERROR_INTERNAL_ERROR;
+        }
+
+        if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
+            HksDeletDirPartTwo(deletePath);
+        } else if (dire->d_type != DT_DIR) {
+            ret = remove(deletePath);
+        }
+        dire = readdir(dir);
+    }
+    closedir(dir);
+    ret = remove(path);
+    return ret;
+}
+
+int32_t HksDeleteDir(const char *path)
+{
+    int32_t ret;
+    char deletePath[HKS_MAX_FILE_PATH_LEN] = { 0 };
+
+    DIR *dir = opendir(path);
+    if (dir  == NULL) {
+        HKS_LOG_E("open dir failed");
+        return HKS_ERROR_OPEN_FILE_FAIL;
+    }
+    struct dirent *dire = readdir(dir);
+    while (dire != NULL) {
+        if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            return HKS_ERROR_INTERNAL_ERROR;
+        }
+
+        if (deletePath[strlen(deletePath) - 1] != '/') {
+            if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                return HKS_ERROR_INTERNAL_ERROR;
+            }
+        }
+
+        if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            return HKS_ERROR_INTERNAL_ERROR;
+        }
+
+        if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
+            HksDeletDirPartOne(deletePath);
+        } else if (dire->d_type != DT_DIR) {
+            ret = remove(deletePath);
+        }
+        dire = readdir(dir);
+    }
+    closedir(dir);
+    ret = remove(path);
+    return ret;
+}
 
 uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
 {

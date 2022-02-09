@@ -630,10 +630,10 @@ static int32_t GetRootMaterial(const struct HksBlob *name, struct HksBlob *buffe
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreKeyBlob(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     enum HksStorageType storageType, const struct HksBlob *keyBlob)
 {
-    (void)processName;
+    (void)processInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return StoreRootMaterial(keyAlias, keyBlob);
     }
@@ -662,10 +662,10 @@ int32_t HksStoreKeyBlob(const struct HksBlob *processName, const struct HksBlob 
     return HksFileWrite(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME, fileOffset, g_storageImageBuffer.data, totalLen);
 }
 
-int32_t HksStoreDeleteKeyBlob(const struct HksBlob *processName,
+int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
-    (void)processName;
+    (void)processInfo;
     (void)storageType;
 
     /* 1. check key exist or not */
@@ -706,10 +706,10 @@ int32_t HksStoreDeleteKeyBlob(const struct HksBlob *processName,
         g_storageImageBuffer.data, keyInfoHead->totalLen);
 }
 
-int32_t HksStoreIsKeyBlobExist(const struct HksBlob *processName,
+int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
-    (void)processName;
+    (void)processInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return IsRootMaterialExist(keyAlias);
     }
@@ -718,10 +718,10 @@ int32_t HksStoreIsKeyBlobExist(const struct HksBlob *processName,
     return GetKeyOffsetByKeyAlias(keyAlias, &offset);
 }
 
-int32_t HksStoreGetKeyBlob(const struct HksBlob *processName,
+int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob)
 {
-    (void)processName;
+    (void)processInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return GetRootMaterial(keyAlias, keyBlob);
     }

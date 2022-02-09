@@ -535,5 +535,16 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
     return ret;
 }
 
+int32_t HksGetRawKeyMaterial(const struct HksBlob *key, struct HksBlob *rawKey)
+{
+    return GetRawKeyMaterial(key, rawKey);
+}
+
+int32_t HksTranslateKeyInfoBlobToParamSet(const struct HksBlob *key, const struct HksBlob *keyInfoBlob,
+    struct HksParamSet **paramSet)
+{
+    return TranslateKeyInfoBlobToParamSet(key, keyInfoBlob, paramSet);
+}
+
 #endif /* _STORAGE_LITE_ */
 #endif /* _CUT_AUTHENTICATE_ */

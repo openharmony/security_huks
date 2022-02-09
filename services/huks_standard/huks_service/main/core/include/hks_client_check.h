@@ -47,6 +47,9 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
 int32_t HksCheckInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const uint64_t *operationHandle);
 
+int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
+
 #ifdef __cplusplus
 }
 #endif

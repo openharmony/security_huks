@@ -16,7 +16,13 @@
 #include "hks_client_ipc.h"
 #include "hks_client_service.h"
 #include "hks_get_process_info.h"
+#include "hks_file_operator.h"
 #include "hks_log.h"
+#include "hks_mem.h"
+#include "hks_operation.h"
+
+#define HKS_PROCESS_INFO_LEN    128
+#define HKS_MAX_DIRENT_FILE_LEN 128
 
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksClientInitialize(void)
@@ -35,29 +41,73 @@ int32_t HksClientRefreshKeyInfo(void)
     return HksServiceRefreshKeyInfo(&processNameBlob);
 }
 
+
+int32_t HksClientDeleteUserIDKeyAliasFile(const char *userID)
+{
+    (void)userID;
+    return HKS_SUCCESS;
+}
+
+int32_t HksClientDeleteUIDKeyAliasFile(const char *userID, const char *uid)
+{
+    (void)userID;
+    (void)uid;
+    return HKS_SUCCESS;
+}
+
+static void SaveUserIdUIDToProcessInfo(const struct HksBlob *userData, const struct HksBlob *processData,
+    struct HksProcessInfo *processInfo)
+{
+    (void)memset_s(processInfo, sizeof(struct HksProcessInfo), 0, sizeof(struct HksProcessInfo));
+    if (userData->size > 0) {
+        processInfo->userId.size = userData->size;
+        processInfo->userId.data = userData->data;
+    }
+    processInfo->processName.size = processData->size;
+    processInfo->processName.data = processData->data;
+}
+
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut)
 {
     (void)paramSetOut;
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceGenerateKey(&processNameBlob, keyAlias, paramSetIn, NULL);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceGenerateKey(&processInfo, keyAlias, paramSetIn, NULL);
 }
 
 int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *key)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceImportKey(&processNameBlob, keyAlias, paramSet, key);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceImportKey(&processInfo, keyAlias, paramSet, key);
 }
 
 int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
@@ -65,142 +115,255 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
 {
     (void)paramSet;
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceExportPublicKey(&processNameBlob, keyAlias, key);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceExportPublicKey(&processInfo, keyAlias, key);
 }
 
 int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
     (void)paramSet;
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceDeleteKey(&processNameBlob, keyAlias);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceDeleteKey(&processInfo, keyAlias);
 }
 
 int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSetOut)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceGetKeyParamSet(&processNameBlob, keyAlias, paramSetOut);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceGetKeyParamSet(&processInfo, keyAlias, paramSetOut);
 }
 
 int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
     (void)paramSet;
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceKeyExist(&processNameBlob, keyAlias);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceKeyExist(&processInfo, keyAlias);
 }
 
 int32_t HksClientSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceSign(&processNameBlob, key, paramSet, srcData, signature);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceSign(&processInfo, key, paramSet, srcData, signature);
 }
 
 int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceVerify(&processNameBlob, key, paramSet, srcData, signature);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceVerify(&processInfo, key, paramSet, srcData, signature);
 }
 
 int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *plainText, struct HksBlob *cipherText)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceEncrypt(&processNameBlob, key, paramSet, plainText, cipherText);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceEncrypt(&processInfo, key, paramSet, plainText, cipherText);
 }
 
 int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceDecrypt(&processNameBlob, key, paramSet, cipherText, plainText);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceDecrypt(&processInfo, key, paramSet, cipherText, plainText);
 }
 
 int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceAgreeKey(&processNameBlob, paramSet, privateKey, peerPublicKey, agreedKey);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceAgreeKey(&processInfo, paramSet, privateKey, peerPublicKey, agreedKey);
 }
 
 int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *mainKey,
     struct HksBlob *derivedKey)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceDeriveKey(&processNameBlob, paramSet, mainKey, derivedKey);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceDeriveKey(&processInfo, paramSet, mainKey, derivedKey);
 }
 
 int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramSet, const struct HksBlob *srcData,
     struct HksBlob *mac)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceMac(&processNameBlob, key, paramSet, srcData, mac);
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceMac(&processInfo, key, paramSet, srcData, mac);
 }
 
 int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
     char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
     if (HksGetProcessName(&processName) != HKS_SUCCESS) {
         HKS_LOG_E("get process name failed");
         return HKS_ERROR_INTERNAL_ERROR;
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+#ifndef _CUT_AUTHENTICATE_
+#ifdef _STORAGE_LITE_
     return HksServiceGetKeyInfoList(&processNameBlob, keyInfoList, listCount);
+#else // _STORAGE_LITE_
+    return HksServiceGetKeyInfoList(&processInfo, keyInfoList, listCount);
+#endif // _STORAGE_LITE_
+#endif // _CUT_AUTHENTICATE_
 }
 
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
@@ -254,3 +417,59 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
     return HksServiceGenerateRandom(&processNameBlob, random);
 }
 
+int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *handle)
+{
+    HKS_LOG_E("hks_client_service_passthrough HksClientInit enter");
+    char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
+    if (HksGetProcessName(&processName) != HKS_SUCCESS) {
+        HKS_LOG_E("get process name failed");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+    struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    HksSaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceInit(&processInfo, keyAlias, paramSet, handle);
+}
+
+int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    HKS_LOG_E("hks_client_service_passthrough HksClientUpdate enter");
+    return HksServiceUpdate(handle, paramSet, inData, outData);
+}
+
+int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    HKS_LOG_E("hks_client_service_passthrough HksClientFinish enter");
+    char *processName = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksBlob userID = { 0, NULL };
+
+    if (HksGetProcessName(&processName) != HKS_SUCCESS) {
+        HKS_LOG_E("get process name failed");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+    struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
+    if (HksGetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetUserIDWithProcessName fail.");
+        return HKS_FAILURE;
+    }
+    HksSaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+
+    return HksServiceFinish(handle, &processInfo, paramSet, inData, outData);
+}
+
+int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
+{
+    HKS_LOG_E("hks_client_service_passthrough HksClientAbort enter");
+    return HksServiceAbort(handle, paramSet);
+}

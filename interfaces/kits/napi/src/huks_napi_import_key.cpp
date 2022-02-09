@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_IMPORT_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_IMPORT_KEY_MAX_ARGS = 3;
 }  // namespace
 
-struct ImportKeyAsyncContext_t {
+struct ImportKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -40,13 +40,13 @@ struct ImportKeyAsyncContext_t {
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob *key = nullptr;
 };
-using ImportKeyAsyncContext = ImportKeyAsyncContext_t *;
+using ImportKeyAsyncContext = ImportKeyAsyncContextT *;
 
 static ImportKeyAsyncContext CreateImportKeyAsyncContext()
 {
-    ImportKeyAsyncContext context = (ImportKeyAsyncContext)HksMalloc(sizeof(ImportKeyAsyncContext_t));
+    ImportKeyAsyncContext context = (ImportKeyAsyncContext)HksMalloc(sizeof(ImportKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(ImportKeyAsyncContext_t), 0, sizeof(ImportKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(ImportKeyAsyncContextT), 0, sizeof(ImportKeyAsyncContextT));
     }
     return context;
 }

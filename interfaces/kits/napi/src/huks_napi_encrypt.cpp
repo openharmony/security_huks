@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_ENCRYPT_MAX_ARGS = 3;
 constexpr int HKS_CIPHER_TEXT_DEFALT_PADDING = 512;
 }  // namespace
 
-struct EncryptAsyncContext_t {
+struct EncryptAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -43,13 +43,13 @@ struct EncryptAsyncContext_t {
     struct HksBlob *plainText = nullptr;
     struct HksBlob *cipherText = nullptr;
 };
-using EncryptAsyncContext = EncryptAsyncContext_t *;
+using EncryptAsyncContext = EncryptAsyncContextT *;
 
 static EncryptAsyncContext CreateEncryptAsyncContext()
 {
-    EncryptAsyncContext context = (EncryptAsyncContext)HksMalloc(sizeof(EncryptAsyncContext_t));
+    EncryptAsyncContext context = (EncryptAsyncContext)HksMalloc(sizeof(EncryptAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(EncryptAsyncContext_t), 0, sizeof(EncryptAsyncContext_t));
+        (void)memset_s(context, sizeof(EncryptAsyncContextT), 0, sizeof(EncryptAsyncContextT));
     }
     return context;
 }

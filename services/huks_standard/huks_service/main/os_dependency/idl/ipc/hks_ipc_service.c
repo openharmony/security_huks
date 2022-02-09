@@ -41,12 +41,32 @@ void HksIpcServiceProvisionVerify(const struct HksBlob *srcData, const uint8_t *
     return;
 }
 
+static int32_t HksGetProcessInfo(const uint8_t *context, struct HksBlob *processName,
+    struct HksBlob *userID, struct HksProcessInfo *processInfo)
+{
+    int32_t ret;
+    ret = HksGetProcessNameForIPC(context, processName);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+        return ret;
+    }
+    ret = HksGetUserIDWithProcessName(processName, userID);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksIpcServiceGenerateKey HksGetUserIDWithProcessName fail, ret = %d", ret);
+        return ret;
+    }
+    HksSaveUserIdUIDToProcessInfo(userID, processName, processInfo);
+    return HKS_SUCCESS;
+}
+
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob keyOut = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
     bool isNoneResponse = false;
 
@@ -67,13 +87,13 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
             keyOut.size = MAX_KEY_SIZE;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceGenerateKey(&processName, &keyAlias, inParamSet, &keyOut);
+        ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceGenerateKey fail, ret = %d", ret);
         }
@@ -88,6 +108,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
     HKS_FREE_BLOB(keyOut);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *context)
@@ -96,6 +117,8 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksParamSet *paramSet = NULL;
     struct HksBlob key = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -105,13 +128,13 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret =  HksServiceImportKey(&processName, &keyAlias, paramSet, &key);
+        ret =  HksServiceImportKey(&processInfo, &keyAlias, paramSet, &key);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceImportKey fail, ret = %d", ret);
         }
@@ -120,6 +143,7 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *context)
@@ -127,6 +151,8 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
     struct HksBlob keyAlias = { 0, NULL };
     struct HksBlob key = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -136,13 +162,13 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceExportPublicKey(&processName, &keyAlias, &key);
+        ret = HksServiceExportPublicKey(&processInfo, &keyAlias, &key);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceExportPublicKey fail, ret = %d", ret);
             break;
@@ -156,20 +182,23 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
 
     HKS_FREE_BLOB(key);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
     do {
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceDeleteKey(&processName, srcData);
+        ret = HksServiceDeleteKey(&processInfo, srcData);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksIpcServiceDeleteKey fail");
         }
@@ -178,6 +207,7 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
     HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *context)
@@ -185,6 +215,8 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -194,13 +226,13 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
             return HksSendResponse(context, ret, NULL);
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceGetKeyParamSet(&processName, &keyAlias, paramSet);
+        ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceGetKeyParamSet fail, ret = %d", ret);
             break;
@@ -215,21 +247,24 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
 
     HKS_FREE_BLOB(processName);
     HKS_FREE_PTR(paramSet);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceKeyExist(&processName, srcData);
+        ret = HksServiceKeyExist(&processInfo, srcData);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceKeyExist fail, ret = %d", ret);
         }
@@ -238,6 +273,7 @@ void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context
     HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *context)
@@ -295,6 +331,8 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
     struct HksBlob unsignedData = { 0, NULL };
     struct HksBlob signature = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -304,13 +342,13 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceSign(&processName, &keyAlias, inParamSet, &unsignedData, &signature);
+        ret = HksServiceSign(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceSign fail");
             break;
@@ -324,6 +362,7 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
 
     HKS_FREE_BLOB(signature);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 static void IpcServiceProcessInit(uint32_t cmdId, const struct HksBlob *srcData, const uint8_t *context)
@@ -331,6 +370,8 @@ static void IpcServiceProcessInit(uint32_t cmdId, const struct HksBlob *srcData,
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -340,14 +381,14 @@ static void IpcServiceProcessInit(uint32_t cmdId, const struct HksBlob *srcData,
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
         uint64_t operationHandle;
-        ret = HksServiceProcessInit(cmdId, &processName, &keyAlias, inParamSet, &operationHandle);
+        ret = HksServiceProcessInit(cmdId, &processInfo, &keyAlias, inParamSet, &operationHandle);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceProcessInit fail");
             break;
@@ -361,6 +402,7 @@ static void IpcServiceProcessInit(uint32_t cmdId, const struct HksBlob *srcData,
     }
 
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 static void IpcServiceProcessUpdate(uint32_t cmdId, const struct HksBlob *srcData, const uint8_t *context)
@@ -461,6 +503,8 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
     struct HksBlob unsignedData = { 0, NULL };
     struct HksBlob signature = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -470,13 +514,13 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceVerify(&processName, &keyAlias, inParamSet, &unsignedData, &signature);
+        ret = HksServiceVerify(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceVerify fail");
         }
@@ -485,6 +529,7 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
     HksSendResponse(context, ret, NULL);
 
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceVerifyInit(const struct HksBlob *srcData, const uint8_t *context)
@@ -509,6 +554,8 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
     struct HksBlob plainText = { 0, NULL };
     struct HksBlob cipherText = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -518,13 +565,13 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceEncrypt(&processName, &keyAlias, inParamSet, &plainText, &cipherText);
+        ret = HksServiceEncrypt(&processInfo, &keyAlias, inParamSet, &plainText, &cipherText);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceEncrypt fail");
             break;
@@ -538,6 +585,7 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
 
     HKS_FREE_BLOB(cipherText);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceEncryptInit(const struct HksBlob *srcData, const uint8_t *context)
@@ -562,6 +610,8 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
     struct HksBlob plainText = { 0, NULL };
     struct HksBlob cipherText = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -571,13 +621,13 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceDecrypt(&processName, &keyAlias, inParamSet, &cipherText, &plainText);
+        ret = HksServiceDecrypt(&processInfo, &keyAlias, inParamSet, &cipherText, &plainText);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceDecrypt fail");
             break;
@@ -591,6 +641,7 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
 
     HKS_FREE_BLOB(plainText);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceDecryptInit(const struct HksBlob *srcData, const uint8_t *context)
@@ -615,6 +666,8 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
     struct HksBlob agreedKey = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -624,13 +677,13 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceAgreeKey(&processName, inParamSet, &privateKey, &peerPublicKey, &agreedKey);
+        ret = HksServiceAgreeKey(&processInfo, inParamSet, &privateKey, &peerPublicKey, &agreedKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceAgreeKey fail, ret = %d", ret);
             break;
@@ -644,6 +697,7 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
 
     HKS_FREE_BLOB(agreedKey);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *context)
@@ -652,6 +706,8 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob derivedKey = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -661,13 +717,13 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceDeriveKey(&processName, inParamSet, &masterKey, &derivedKey);
+        ret = HksServiceDeriveKey(&processInfo, inParamSet, &masterKey, &derivedKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceDeriveKey fail, ret = %d", ret);
             break;
@@ -681,6 +737,7 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
 
     HKS_FREE_BLOB(derivedKey);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
@@ -690,6 +747,8 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
     struct HksBlob inputData = { 0, NULL };
     struct HksBlob mac = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -699,13 +758,13 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceMac(&processName, &key, inParamSet, &inputData, &mac);
+        ret = HksServiceMac(&processInfo, &key, inParamSet, &inputData, &mac);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceMac fail, ret = %d", ret);
             break;
@@ -719,6 +778,7 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
 
     HKS_FREE_BLOB(mac);
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceMacInit(const struct HksBlob *srcData, const uint8_t *context)
@@ -761,6 +821,8 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
     struct HksKeyInfo *keyInfoList = NULL;
     struct HksBlob processName = { 0, NULL };
     struct HksBlob keyInfoListBlob = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -770,14 +832,14 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
         uint32_t listCount = inputCount;
-        ret = HksServiceGetKeyInfoList(&processName, keyInfoList, &listCount);
+        ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &listCount);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceGetKeyInfoList fail, ret = %d", ret);
             break;
@@ -810,6 +872,7 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
     FreeKeyInfo(inputCount, &keyInfoList);
     HKS_FREE_BLOB(processName);
     HKS_FREE_BLOB(keyInfoListBlob);
+    HKS_FREE_BLOB(userID);
 }
 
 void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
@@ -855,6 +918,8 @@ void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob certChainBlob = { 0, NULL };
     struct HksBlob processName = { 0, NULL };
+    struct HksBlob userID = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -864,17 +929,18 @@ void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
             break;
         }
 
-        ret = HksServiceGetCertificateChain(&processName, &keyAlias, inParamSet, &certChainBlob);
+        ret = HksServiceGetCertificateChain(&processInfo, &keyAlias, inParamSet, &certChainBlob);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceGetCertificateChain fail, ret = %d", ret);
             break;
         }
+
         HksSendResponse(context, ret, &certChainBlob);
     } while (0);
 
@@ -883,6 +949,7 @@ void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8
     }
 
     HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
     HKS_FREE_BLOB(certChainBlob);
 }
 
@@ -1028,4 +1095,295 @@ void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t 
 
     HKS_FREE_BLOB(processName);
     HKS_FREE_BLOB(certChainBlob);
+}
+
+void HksIpcDeleteUserIDAliasFile(const struct HksBlob *srcData, const uint8_t *context)
+{
+    int32_t ret;
+    do {
+        ret  = HksServiceDeleteUserIDKeyAliasFile((char *)srcData->data);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcDeleteUserIDAliasFile fail, ret = %d", ret);
+            break;
+        }
+        HKS_LOG_E("HksIpcDeleteUserIDAliasFile success");
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+}
+
+void HksIpcDeleteUIDAliasFile(const struct HksBlob *paramSetBlob, const uint8_t *context)
+{
+    int32_t ret;
+    struct HksParamSet *paramSet   = NULL;
+    struct HksBlob userId          = { 0, NULL };
+    struct HksBlob uId             = { 0, NULL };
+
+    ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+    }
+
+    struct HksParamOut params[] = {
+        {
+            .tag = HKS_TAG_PARAM0_BUFFER,
+            .blob = &userId
+        },
+        {
+            .tag = HKS_TAG_PARAM1_BUFFER,
+            .blob = &uId
+        }
+    };
+    ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+    }
+
+    char userIdTmp[userId.size + 1];
+    char uIdTmp[uId.size + 1];
+    memcpy_s(userIdTmp, userId.size, userId.data, userId.size);
+    userIdTmp[userId.size] = '\0';
+    memcpy_s(uIdTmp, uId.size, uId.data, uId.size);
+    uIdTmp[uId.size] = '\0';
+
+    do {
+        ret  = HksServiceDeleteUIDKeyAliasFile(userIdTmp, uIdTmp);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksIpcDeleteUIDAliasFile fail, ret = %d", ret);
+            break;
+        }
+        HKS_LOG_E("HksIpcDeleteUIDAliasFile success");
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+}
+
+void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
+{
+    int32_t ret;
+    struct HksParamSet *inParamSet = NULL;
+    struct HksParamSet *paramSet   = NULL;
+    struct HksBlob keyAlias        = { 0, NULL };
+    struct HksBlob paramsBlob      = { 0, NULL };
+    struct HksBlob processName     = { 0, NULL };
+    struct HksBlob userID          = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+
+    do {
+        ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+        struct HksParamOut params[] = {
+            {
+                .tag = HKS_TAG_PARAM0_BUFFER,
+                .blob = &keyAlias
+            }, {
+                .tag = HKS_TAG_PARAM1_BUFFER,
+                .blob = &paramsBlob
+            },
+        };
+
+        ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
+            break;
+        }
+        HKS_LOG_E("HksGetUserIDWithProcessName userId.data = %s", userID.data);
+
+        ret = HksServiceInit(&processInfo, &keyAlias, inParamSet, outData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceInit fail, ret = %d", ret);
+            break;
+        }
+    } while (0);
+    HksSendResponse(context, ret, outData);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&inParamSet);
+    HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
+}
+
+void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
+{
+    int32_t ret;
+    struct HksParamSet *inParamSet = NULL;
+    struct HksParamSet *paramSet   = NULL;
+    struct HksBlob paramsBlob      = { 0, NULL };
+    struct HksBlob handle          = { 0, NULL };
+    struct HksBlob inData          = { 0, NULL };
+
+    do {
+        ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+
+        struct HksParamOut params[] = {
+            {
+                .tag = HKS_TAG_PARAM0_BUFFER,
+                .blob = &paramsBlob
+            }, {
+                .tag = HKS_TAG_PARAM1_BUFFER,
+                .blob = &handle
+            }, {
+                .tag = HKS_TAG_PARAM2_BUFFER,
+                .blob = &inData
+            },
+        };
+
+        ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+
+        ret = HksServiceUpdate(&handle, inParamSet, &inData, outData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceUpdate fail, ret = %d", ret);
+            break;
+        }
+    } while (0);
+    HksSendResponse(context, ret, outData);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&inParamSet);
+}
+
+static int32_t HksIpcServiceFinishParam(struct HksBlob *paramsBlob, struct HksBlob *handle,
+    struct HksBlob *inData, struct HksBlob *outDataTmp, struct HksParamSet *paramSet)
+{
+    struct HksParamOut params[] = {
+        {
+            .tag = HKS_TAG_PARAM0_BUFFER,
+            .blob = paramsBlob
+        }, {
+            .tag = HKS_TAG_PARAM1_BUFFER,
+            .blob = handle
+        }, {
+            .tag = HKS_TAG_PARAM2_BUFFER,
+            .blob = inData
+        }, {
+            .tag = HKS_TAG_PARAM3_BUFFER,
+            .blob = outDataTmp
+        },
+    };
+    int32_t ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
+    return ret;
+}
+
+void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
+{
+    (void)outData;
+    int32_t ret;
+    struct HksParamSet *inParamSet = NULL;
+    struct HksParamSet *paramSet   = NULL;
+    struct HksBlob outDataTmp      = { 0, NULL };
+    struct HksBlob paramsBlob      = { 0, NULL };
+    struct HksBlob handle          = { 0, NULL };
+    struct HksBlob inData          = { 0, NULL };
+    struct HksBlob processName     = { 0, NULL };
+    struct HksBlob userID          = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+
+    do {
+        ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+
+        ret = HksIpcServiceFinishParam(&paramsBlob, &handle, &inData, &outDataTmp, paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+
+        ret = HksGetProcessInfo(context, &processName, &userID, &processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetProcessInfo fail, ret = %d", ret);
+            break;
+        }
+
+        ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, &outDataTmp);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceFinish fail, ret = %d", ret);
+            break;
+        }
+    } while (0);
+
+    HksSendResponse(context, ret, &outDataTmp);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&inParamSet);
+    HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(userID);
+}
+
+void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
+{
+    (void)outData;
+    int32_t ret;
+    struct HksParamSet *inParamSet = NULL;
+    struct HksParamSet *paramSet   = NULL;
+    struct HksBlob handle          = { 0, NULL };
+    struct HksBlob paramsBlob      = { 0, NULL };
+
+    do {
+        ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+        struct HksParamOut params[] = {
+            {
+                .tag = HKS_TAG_PARAM0_BUFFER,
+                .blob = &paramsBlob
+            }, {
+                .tag = HKS_TAG_PARAM1_BUFFER,
+                .blob = &handle
+            },
+        };
+        ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            break;
+        }
+
+        ret = HksServiceAbort(&handle, inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceAbort fail, ret = %d", ret);
+            break;
+        }
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&inParamSet);
 }

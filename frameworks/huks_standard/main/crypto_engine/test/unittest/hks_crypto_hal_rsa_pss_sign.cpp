@@ -32,6 +32,7 @@ struct TestCaseParams {
     HksKeySpec spec = {0};
     HksUsageSpec usageSpec = {0};
     std::string hexData;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
     HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
@@ -649,19 +650,25 @@ protected:
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
 
+        struct HksBlob* pBlob = nullptr;
         uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
         struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
-        EXPECT_EQ(HksCryptoHalHash(testCaseParams.usageSpec.digest, &message, &hash), HKS_SUCCESS);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            EXPECT_EQ(HksCryptoHalHash(testCaseParams.usageSpec.digest, &message, &hash), HKS_SUCCESS);
+            pBlob = &hash;
+        } else {
+            pBlob = &message;
+        }
 
         struct HksBlob signature = { .size = 512, .data = (uint8_t *)HksMalloc(512) };
 
-        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, &hash, &signature), testCaseParams.signResult);
+        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, pBlob, &signature), testCaseParams.signResult);
 
         if (testCaseParams.signResult == HKS_SUCCESS) {
             struct HksBlob pubKey = { .size = 1044, .data = (uint8_t *)HksMalloc(1044) };
             EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
-            EXPECT_EQ(HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, &hash, &signature),
+            EXPECT_EQ(HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, pBlob, &signature),
                 testCaseParams.verifyResult);
             HksFree(pubKey.data);
         }

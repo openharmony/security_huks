@@ -38,7 +38,9 @@ ohos_static_library("libhuks_engine_core_standard_static") {
   sources = [
     "src/hks_auth.c",
     "src/hks_core_service.c",
+    "src/hks_core_service_three_stage.c",
     "src/hks_keyblob.c",
+    "src/hks_keynode.c",
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
@@ -47,4 +49,42 @@ ohos_static_library("libhuks_engine_core_standard_static") {
   ]
 
   complete_static_lib = true
+}
+
+ohos_shared_library("huks_engine_core_standard") {
+  subsystem_name = "security"
+  part_name = "huks"
+  public_configs = [ ":huks_config" ]
+  defines = [
+    "L2_STANDARD",
+    "_HARDWARE_ROOT_KEY_",
+    "_HUKS_LOG_ENABLE_",
+  ]
+  include_dirs = [
+    "//utils/native/base/include",
+    "//third_party/openssl/include/",
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+  ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+  sources = [
+    "src/hks_auth.c",
+    "src/hks_core_interfaces.c",
+    "src/hks_core_service.c",
+    "src/hks_core_service_three_stage.c",
+    "src/hks_keyblob.c",
+    "src/hks_keynode.c",
+  ]
+
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+    "//third_party/openssl:libcrypto_static",
+    "//utils/native/base:utils",
+  ]
+  public_deps = [
+    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
+  ]
 }

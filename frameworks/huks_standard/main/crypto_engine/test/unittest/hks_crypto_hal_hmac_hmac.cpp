@@ -31,6 +31,7 @@ namespace {
 struct TestCaseParams {
     HksKeySpec spec = {0};
     HksKeyDigest digest = HksKeyDigest::HKS_DIGEST_NONE;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
     HksErrorCode hmacResult = HksErrorCode::HKS_SUCCESS;
@@ -114,12 +115,23 @@ protected:
         uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
 
         HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+
         for (uint32_t ii = 0; ii < dataLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
         }
         struct HksBlob signature = { .size = 1024, .data = (uint8_t *)HksMalloc(1024) };
 
-        EXPECT_EQ(HksCryptoHalHmac(&key, testCaseParams.digest, &message, &signature), testCaseParams.hmacResult);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            uint8_t buff[1] = {0};
+            HksBlob endMessage = { .size = 0, .data = buff };
+            void *context = (void *)HksMalloc(1024 * 1024);
+
+            EXPECT_EQ(HksCryptoHalHmacInit(&key, testCaseParams.digest, &context), testCaseParams.hmacResult);
+            EXPECT_EQ(HksCryptoHalHmacUpdate(&message, context), testCaseParams.hmacResult);
+            EXPECT_EQ(HksCryptoHalHmacFinal(&endMessage, &context, &signature), testCaseParams.hmacResult);
+        } else {
+            EXPECT_EQ(HksCryptoHalHmac(&key, testCaseParams.digest, &message, &signature), testCaseParams.hmacResult);
+        }
 
         HksFree(message.data);
         HksFree(signature.data);

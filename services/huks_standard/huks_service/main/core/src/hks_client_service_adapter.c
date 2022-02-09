@@ -576,6 +576,10 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
 
     uint32_t totalSize = sizeof(struct KeyMaterialDsa) + ySize + pSize + qSize + gSize;
     uint8_t *keyBuffer = HksMalloc(totalSize);
+    if (keyBuffer == NULL) {
+        HKS_LOG_E("malloc fail.");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)keyBuffer;
     keyMaterial->keyAlg = HKS_ALG_DSA;
     keyMaterial->keySize = (ySize + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE;

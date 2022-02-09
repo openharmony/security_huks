@@ -48,6 +48,17 @@ int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
 int32_t HksOpensslRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature);
 #endif /* HKS_SUPPORT_RSA_SIGN_VERIFY */
+
+int32_t HksOpensslRsaEncryptDecryptInit(void **ctx, const struct HksBlob *key,
+    const struct HksUsageSpec *usageSpec, const bool encrypt);
+
+int32_t HksOpensslRsaEncryptDecryptUpdate(void *ctx, const struct HksBlob *message,
+    struct HksBlob *out, const bool encrypt);
+
+int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *message,
+    struct HksBlob *cipherText, struct HksBlob *tagAead, const bool encrypt);
+
+void HksOpensslRsaHalFreeCtx(void **cryptCtx);
 #endif /* HKS_SUPPORT_RSA_C */
 
 #ifdef __cplusplus
