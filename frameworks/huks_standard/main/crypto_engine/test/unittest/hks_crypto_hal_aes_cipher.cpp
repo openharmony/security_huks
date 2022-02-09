@@ -61,7 +61,14 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_001_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&tagIv,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -82,7 +89,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_002_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&tagIv,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -103,7 +112,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_003_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&tagIv,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -145,7 +156,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_005_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = nullptr,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
 #if defined(_USE_OPENSSL_)
@@ -171,7 +184,14 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_006_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&aeadParam,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+        "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -192,7 +212,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_007_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&tagIv,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -213,7 +235,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_008_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&tagIv,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -276,7 +300,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_011_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = nullptr,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
 #if defined(_USE_OPENSSL_)
@@ -302,7 +328,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_012_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&aeadParam,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -344,7 +372,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_014_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = (void *)&tagIv,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
     .encryptResult = HKS_SUCCESS,
@@ -407,7 +437,9 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_017_PARAMS = {
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
         .algParam = nullptr,
     },
-    .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
+    .hexData =
+        "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
+        "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 
     .generateKeyResult = HKS_SUCCESS,
 #if defined(_USE_OPENSSL_)
@@ -448,6 +480,215 @@ public:
     void SetUp();
     void TearDown();
 protected:
+    void RunTestEncrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *encryptMsg,
+        struct HksBlob *encryptOut, struct HksBlob *tagAead)
+    {
+        void *encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        uint32_t inLen = encryptMsg->size;
+
+        EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult);
+
+        uint32_t point = 0;
+        uint32_t outPoint = 0;
+        if (inLen > HKS_UPDATE_DATA_MAX) {
+            HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+
+            while (point < inLen - HKS_UPDATE_DATA_MAX) {
+                memcpy_s(messageUpdate.data, messageUpdate.size, (encryptMsg->data + point), HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out, testCaseParams.usageSpec.algType),
+                    testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+                memcpy_s((encryptOut->data + outPoint), out.size, out.data, out.size);
+                encryptOut->size += out.size;
+                point = point + HKS_UPDATE_DATA_MAX;
+                outPoint = outPoint + out.size;
+            }
+            HksFree(out.data);
+            HksFree(messageUpdate.data);
+
+            uint32_t lastLen = inLen - point;
+            HksBlob enMessageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            HksBlob enMessageLastOut = {
+                .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
+                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
+            };
+            memcpy_s(enMessageLast.data, lastLen, (encryptMsg->data + point), lastLen);
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+            memcpy_s((encryptOut->data + outPoint), enMessageLastOut.size, enMessageLastOut.data,
+                enMessageLastOut.size);
+            encryptOut->size += enMessageLastOut.size;
+            HksFree(enMessageLast.data);
+        } else {
+            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+            EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
+                testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
+            memcpy_s((encryptOut->data), out.size, out.data, out.size);
+            encryptOut->size = out.size;
+
+            HksBlob enMessageLast = { .size = 0, .data = nullptr };
+            HksBlob enMessageLastOut = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+            HksFree(out.data);
+        }
+    }
+
+    void RunTestGcmDecrypt(const HksUsageSpec &usageSpec, struct HksBlob *key, struct HksBlob *decryptMsg,
+        struct HksBlob *tagAead, struct HksBlob *decryptOut)
+    {
+        void* decryptCtx = (void *)HksMalloc(1024 * 1024);
+        EXPECT_EQ(HksCryptoHalDecryptInit(key, &usageSpec, &decryptCtx), HKS_SUCCESS);
+        uint32_t decrytopoint = 0;
+        uint32_t decrytooutPoint = 0;
+        uint32_t decrytoinLen = decryptMsg->size;
+
+        if (decrytoinLen > HKS_UPDATE_DATA_MAX) {
+            HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
+                memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
+                         HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out,
+                    usageSpec.algType), HKS_SUCCESS);
+                (void)memcpy_s((decryptOut->data + decrytooutPoint), out.size, out.data, out.size);
+                decryptOut->size += out.size;
+                decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
+                decrytooutPoint = decrytooutPoint + out.size;
+            }
+            HksFree(out.data);
+            HksFree(messageUpdate.data);
+
+            uint32_t lastLen = decrytoinLen - decrytopoint;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            memcpy_s(messageLast.data, lastLen, (decryptMsg->data + decrytopoint), lastLen);
+            HksBlob tmpTagAead = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, decryptOut, &tmpTagAead,
+                usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalEncryptFinal failed.";
+            HksFree(messageLast.data);
+        } else {
+            HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out,
+                usageSpec.algType), HKS_SUCCESS);
+            memcpy_s((decryptOut->data), out.size, out.data, out.size);
+            decryptOut->size = out.size;
+            HksBlob tmpTagAead = { .size = 0, .data = nullptr };
+
+            HksBlob deMessageLast = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, &tmpTagAead,
+                usageSpec.algType), HKS_SUCCESS);
+
+            HksFree(deMessageLast.data);
+            HksFree(out.data);
+        }
+    }
+
+    void RunTestDecrypt(const TestCaseParams &testCaseParams, struct HksBlob *key, struct HksBlob *decryptMsg,
+        struct HksBlob *tagAead, struct HksBlob *decryptOut)
+    {
+        void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx), HKS_SUCCESS);
+        uint32_t decrytopoint = 0;
+        uint32_t decrytooutPoint = 0;
+        uint32_t decrytoinLen = decryptMsg->size;
+        if (decrytoinLen > HKS_UPDATE_DATA_MAX) {
+            HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
+                memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
+                    HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out, testCaseParams.usageSpec.algType),
+                    HKS_SUCCESS);
+                (void)memcpy_s((decryptOut->data + decrytooutPoint), out.size, out.data, out.size);
+                decryptOut->size += out.size;
+                decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
+                decrytooutPoint = decrytooutPoint + out.size;
+            }
+            HksFree(out.data);
+            HksFree(messageUpdate.data);
+
+            uint32_t lastLen = decrytoinLen - decrytopoint;
+            HksBlob messageLast = {
+                .size = lastLen,
+                .data = (uint8_t *)HksMalloc(lastLen)
+            };
+            HksBlob messageLastOut = {
+                .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
+                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
+            };
+            (void)memcpy_s(messageLast.data, lastLen, (decryptMsg->data + decrytopoint), lastLen);
+            HksBlob tagAead = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, &messageLastOut, &tagAead,
+                testCaseParams.usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalEncryptFinal failed.";
+            memcpy_s((decryptOut->data + decrytooutPoint), messageLastOut.size, messageLastOut.data,
+                messageLastOut.size);
+            decryptOut->size += messageLastOut.size;
+
+            HksFree(messageLast.data);
+        } else {
+            HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out,
+                testCaseParams.usageSpec.algType), HKS_SUCCESS);
+            memcpy_s((decryptOut->data), out.size, out.data, out.size);
+            decryptOut->size = out.size;
+
+            HksBlob deMessageLast = { .size = 0, .data = nullptr };
+            HksBlob messageLastOut = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, &messageLastOut, tagAead,
+                testCaseParams.usageSpec.algType), HKS_SUCCESS);
+            HksFree(deMessageLast.data);
+            HksFree(out.data);
+        }
+    }
+
+    void RunTestCaseThreeStage(const TestCaseParams &testCaseParams)
+    {
+        HksBlob key = { .size = 0, .data = nullptr };
+
+        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
+        uint32_t outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
+
+        HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        for (uint32_t ii = 0; ii < inLen; ii++) {
+            message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
+        }
+        HksBlob tagAead = { .size = 16, .data = (uint8_t *)HksMalloc(16) };
+        HksBlob encryptAll = { .size = 0, .data = (uint8_t *)HksMalloc(outLen) };
+        HksBlob decryptAll = { .size = 0, .data = (uint8_t *)HksMalloc(outLen) };
+
+        EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+
+        RunTestEncrypt(&key, testCaseParams, &message, &encryptAll, &tagAead);
+
+        if (testCaseParams.encryptResult == HKS_SUCCESS) {
+            if (testCaseParams.usageSpec.mode == HKS_MODE_GCM) {
+                struct HksAeadParam aeadParamForGcm;
+                aeadParamForGcm.nonce = { .size = 16, .data = (uint8_t *)IV };
+                aeadParamForGcm.aad = { .size = 0, .data = nullptr };
+                aeadParamForGcm.tagDec = tagAead;
+                aeadParamForGcm.payloadLen = 0;
+                HksUsageSpec usageSpecForGCM = {
+                    .algType = HKS_ALG_AES,
+                    .mode = HKS_MODE_GCM,
+                    .padding = HKS_PADDING_NONE,
+                    .digest = HKS_DIGEST_NONE,
+                    .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+                    .algParam = &aeadParamForGcm,
+                };
+                RunTestGcmDecrypt(usageSpecForGCM, &key, &encryptAll, &tagAead, &decryptAll);
+            } else {
+                RunTestDecrypt(testCaseParams, &key, &encryptAll, &tagAead, &decryptAll);
+            }
+            EXPECT_EQ(message.size, decryptAll.size) << "compare size failed.";
+            EXPECT_EQ(HksMemCmp(message.data, decryptAll.data, decryptAll.size), HKS_SUCCESS) << "compare data failed.";
+        }
+
+        HksFree(encryptAll.data);
+        HksFree(decryptAll.data);
+        HksFree(key.data);
+        HksFree(tagAead.data);
+    }
+
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
         HksBlob key = { .size = 0, .data = nullptr };
@@ -522,7 +763,7 @@ void HksCryptoHalAesCipher::TearDown()
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_001, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_001_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_001_PARAMS);
 }
 
 /**
@@ -532,7 +773,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_001, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_002, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_002_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_002_PARAMS);
 }
 
 /**
@@ -542,7 +783,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_002, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_003, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_003_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_003_PARAMS);
 }
 
 /**
@@ -552,7 +793,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_003, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_004, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_004_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_004_PARAMS);
 }
 
 /**
@@ -562,7 +803,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_004, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_005, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_005_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_005_PARAMS);
 }
 
 /**
@@ -572,7 +813,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_005, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_006, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_006_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_006_PARAMS);
 }
 
 /**
@@ -582,7 +823,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_006, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_007, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_007_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_007_PARAMS);
 }
 
 /**
@@ -592,7 +833,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_007, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_008, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_008_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_008_PARAMS);
 }
 
 /**
@@ -602,7 +843,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_008, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_009, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_009_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_009_PARAMS);
 }
 
 /**
@@ -612,7 +853,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_009, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_010, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_010_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_010_PARAMS);
 }
 
 /**
@@ -622,7 +863,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_010, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_011, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_011_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_011_PARAMS);
 }
 
 /**
@@ -632,7 +873,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_011, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_012, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_012_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_012_PARAMS);
 }
 
 /**
@@ -642,7 +883,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_012, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_013, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_013_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_013_PARAMS);
 }
 
 /**
@@ -652,7 +893,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_013, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_014, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_014_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_014_PARAMS);
 }
 
 /**
@@ -662,7 +903,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_014, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_015, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_015_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_015_PARAMS);
 }
 
 /**
@@ -672,7 +913,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_015, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_016, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_016_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_016_PARAMS);
 }
 
 /**
@@ -682,7 +923,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_016, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_017, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_017_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_017_PARAMS);
 }
 
 /**
@@ -692,7 +933,7 @@ HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_017, Function | SmallTest 
  */
 HWTEST_F(HksCryptoHalAesCipher, HksCryptoHalAesCipher_018, Function | SmallTest | Level0)
 {
-    RunTestCase(HKS_CRYPTO_HAL_AES_CIPHER_018_PARAMS);
+    RunTestCaseThreeStage(HKS_CRYPTO_HAL_AES_CIPHER_018_PARAMS);
 }
 }  // namespace UnitTest
 }  // namespace Huks

@@ -671,3 +671,32 @@ int32_t HksSignWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const
     }
     return CopyUint32ToBuffer(signature->size, destData, &offset);
 }
+
+int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet)
+{
+    struct HksParamSet *newParamSet = NULL;
+
+    int32_t ret = HksInitParamSet(&newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("init param set failed");
+        return ret;
+    }
+
+    ret = HksAddParams(newParamSet, params, cnt);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("add in params failed");
+        HksFreeParamSet(&newParamSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(&newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("build paramset failed!");
+        HksFreeParamSet(&newParamSet);
+        return ret;
+    }
+
+    *outParamSet = newParamSet;
+
+    return ret;
+}

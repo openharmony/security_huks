@@ -53,6 +53,15 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key,
 int32_t HksMbedtlsGetRsaPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut);
 #endif
 
+int32_t HksMbedtlsRsaCryptInit(void **ctx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const bool encrypt);
+
+int32_t HksMbedtlsRsaCryptUpdate(void *ctx, const struct HksBlob *message, struct HksBlob *out, const bool encrypt);
+
+int32_t HksMbedtlsRsaCryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
+    struct HksBlob *tagAead, const bool encrypt);
+
+void HksMbedtlsRsaHalFreeCtx(void **cryptCtx);
 #ifdef __cplusplus
 }
 #endif

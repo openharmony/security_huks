@@ -32,6 +32,11 @@
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
 #include "hks_type_inner.h"
+#include "hks_mem.h"
+struct HksOpensslHmacCtx {
+    uint32_t digestLen;
+    void *append;
+};
 
 static int32_t HmacCheckBuffer(const struct HksBlob *key, const struct HksBlob *msg, const struct HksBlob *mac)
 {
@@ -117,6 +122,155 @@ int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const stru
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
+}
+
+int32_t HksOpensslHmacInit(void **CryptoCtx, const struct HksBlob *key, uint32_t digestAlg)
+{
+    if (HksOpensslCheckBlob(key) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid key point");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((digestAlg != HKS_DIGEST_SHA1) && (digestAlg != HKS_DIGEST_SHA224) && (digestAlg != HKS_DIGEST_SHA256) &&
+        (digestAlg != HKS_DIGEST_SHA384) && (digestAlg != HKS_DIGEST_SHA512)) {
+        HKS_LOG_E("Invalid alg(0x%x)", digestAlg);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    const EVP_MD *opensslAlg = GetOpensslAlg(digestAlg);
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("get openssl algorithm failed");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    uint32_t digestLen;
+    if (HksGetDigestLen(digestAlg, &digestLen) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid alg(0x%x)", digestAlg);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    HMAC_CTX *tmpCtx = NULL;
+    if ((tmpCtx = HMAC_CTX_new()) == NULL) {
+        HKS_LOG_E("initialize HksOpensslHmacCtx failed");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    if (!HMAC_Init_ex(tmpCtx, key->data, (int32_t)key->size, opensslAlg, NULL)) {
+        HKS_LOG_E("openssl hmac init failed.");
+        HMAC_CTX_free(tmpCtx);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    struct HksOpensslHmacCtx *outCtx = (struct HksOpensslHmacCtx *)HksMalloc(
+        sizeof(struct HksOpensslHmacCtx));
+
+    if (outCtx == NULL) {
+        HKS_LOG_E("initialize HksOpensslHmacCtx failed");
+        HMAC_CTX_free(tmpCtx);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    outCtx->digestLen = digestLen;
+    outCtx->append = (void *)tmpCtx;
+    *CryptoCtx = (void *)outCtx;
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslHmacUpdate(void *CryptoCtx, const struct HksBlob *msg)
+{
+    if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid key point");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)CryptoCtx;
+    if (hmacCtx == NULL) {
+        HKS_LOG_E("hmacCtx invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    HMAC_CTX* context = (HMAC_CTX*)hmacCtx->append;
+    if (context == NULL) {
+        HKS_LOG_E("context is null");
+        return HKS_FAILURE;
+    }
+
+    int hmacData = HMAC_Update(context, msg->data, msg->size);
+    if (!hmacData) {
+        HKS_LOG_E("hmac init failed.");
+        HMAC_CTX_free(context);
+        hmacCtx->append = NULL;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslHmacFinal(void **CryptoCtx, struct HksBlob *msg, struct HksBlob *mac)
+{
+    if ((CryptoCtx == NULL) || (*CryptoCtx == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    if (msg == NULL || HksOpensslCheckBlob(mac) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid msg or mac point");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)*CryptoCtx;
+    if (hmacCtx == NULL) {
+        HKS_LOG_E("hmacCtx invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    HMAC_CTX* context = (HMAC_CTX*)hmacCtx->append;
+    if (context == NULL) {
+        HKS_LOG_E("context is null");
+        return HKS_FAILURE;
+    }
+
+    int hmacData;
+    if (msg->size != 0) {
+        hmacData = HMAC_Update(context, msg->data, msg->size);
+        if (!hmacData) {
+            HKS_LOG_E("hmac init failed.");
+            HMAC_CTX_free(context);
+            hmacCtx->append = NULL;
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+
+    hmacData = HMAC_Final(context, mac->data, &mac->size);
+    if (!hmacData) {
+        HKS_LOG_E("hmac init failed.");
+        HMAC_CTX_free(context);
+        hmacCtx->append = NULL;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    HMAC_CTX_free(context);
+    hmacCtx->append = NULL;
+    HksFree(*CryptoCtx);
+    *CryptoCtx = NULL;
+    return HKS_SUCCESS;
+}
+
+void HksOpensslHmacHalFreeCtx(void **CryptoCtx)
+{
+    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+        HKS_LOG_E("Openssl hmac free ctx is null");
+        return;
+    }
+
+    struct HksOpensslHmacCtx *opensslHmacCtx = (struct HksOpensslHmacCtx *)*CryptoCtx;
+    if (opensslHmacCtx->append != NULL) {
+        HMAC_CTX_free((HMAC_CTX *)opensslHmacCtx->append);
+        opensslHmacCtx->append = NULL;
+    }
+
+    if (*CryptoCtx != NULL) {
+        HksFree(*CryptoCtx);
+    }
 }
 #endif /* HKS_SUPPORT_HMAC_SHA1 */
 #endif /* HKS_SUPPORT_HMAC_C */

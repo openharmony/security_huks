@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -693,3 +693,82 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksBlob *certChain, str
 #endif
 }
 
+HKS_API_EXPORT int32_t HksDeleteUserIDKeyAliasFile(const char *userID)
+{
+#ifdef HKS_SUPPORT_API_IMPORT
+    HKS_LOG_I("enter DeleteUserIDKeyAliasFile");
+    if (userID == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientDeleteUserIDKeyAliasFile(userID);
+    HKS_LOG_I("leave DeleteUserIDKeyAliasFile, result = %d", ret);
+    return ret;
+#else
+    (void)userID;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksDeleteUIDKeyAliasFile(const char *userID, const char *uid)
+{
+#ifdef HKS_SUPPORT_API_IMPORT
+    HKS_LOG_I("enter DeleteUIDKeyAliasFile");
+    if ((userID == NULL) || (uid == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientDeleteUIDKeyAliasFile(userID, uid);
+    HKS_LOG_I("leave DeleteUIDKeyAliasFile, result = %d", ret);
+    return ret;
+#else
+    (void)userID;
+    (void)uid;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+}
+
+HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *handle)
+{
+    if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) {
+        HKS_LOG_E("keyAlias : %p, paramSet : %p, handle : %p", keyAlias, paramSet, handle);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientInit(keyAlias, paramSet, handle);
+    return ret;
+}
+
+HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
+        HKS_LOG_E("handle : %p, paramSet : %p, inData: %p, outData : %p", handle, paramSet, inData, outData);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientUpdate(handle, paramSet, inData, outData);
+    return ret;
+}
+
+HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
+        HKS_LOG_E("handle: %p, paramSet: %p, inData: %p, outData: %p", handle, paramSet, inData, outData);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientFinish(handle, paramSet, inData, outData);
+    return ret;
+}
+
+HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
+{
+    if ((handle == NULL) || (paramSet == NULL)) {
+        HKS_LOG_E("paramSet: %p, handle: %p", paramSet, handle);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientAbort(handle, paramSet);
+    return ret;
+}

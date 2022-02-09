@@ -32,8 +32,12 @@ struct TestCaseParams {
     HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptInitResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptUpdateResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode decryptFinalResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_013_PARAMS = {
@@ -54,6 +58,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_013_PARAMS = {
         "a5f55b48750632202693fde21264c21dedd33",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_014_PARAMS = {
@@ -77,6 +84,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_014_PARAMS = {
         "ed82ce54c14a7c6927a229c0b619d0e909c09daab2dae24a809139496217307fb02a5d4dea9b2e0074",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_015_PARAMS = {
@@ -102,6 +112,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_015_PARAMS = {
         "d796a686cd94afdb96893f04fe276d681afe036708dcf3a8bd7516255dd8042eb9517e9584",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_016_PARAMS = {
@@ -137,6 +150,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_016_PARAMS = {
         "786a4f57f328645d20d8a3da2e301f42783f453ae93c622173d643516c8484d024d6b5d8",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_017_PARAMS = {
@@ -181,6 +197,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_017_PARAMS = {
         "e5a7f88871be506b43aa5ed24e42ffdf3174e89d3a3e7337389d3e017ee76005154afae1230993ed1dda61194ef4fb9ade757d5b27af",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_018_PARAMS = {
@@ -235,6 +254,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_018_PARAMS = {
         "70bf2e4c27a89d718536c06e449b934b41",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_019_PARAMS = {
@@ -278,6 +300,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_020_PARAMS = {
         "e2f988ee2774b280de4461f40467d2e03e86389547b5066e43f81e2da8e5cfbd9aa0c2f16fdfb618dd",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_021_PARAMS = {
@@ -303,6 +328,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_021_PARAMS = {
         "0e59760f64300ef08739e22fa7e272fa3c5ced217b6a7371b435cf9c169ecc1a1d551fc05e",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_022_PARAMS = {
@@ -338,6 +366,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_022_PARAMS = {
         "2c18dad3476d283fac34d6513e34e01f9688afe2fca84e00976fd624292aa128b6518dbd",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_023_PARAMS = {
@@ -382,6 +413,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_023_PARAMS = {
         "0c877b80522d08bb3f41a7a442894567aac96ecb929cb9c1fc5972172845b2859c094836a0b1755b3c8c50e54a51b93b4aa6958d646a",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_024_PARAMS = {
@@ -436,6 +470,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_024_PARAMS = {
         "de68a475b9453c38ee89a4ccfd895ae851",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_025_PARAMS = {
@@ -456,9 +493,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_025_PARAMS = {
         "0000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -483,6 +526,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_026_PARAMS = {
         "6f08df381814ee1552ea9b0735846e9c458653b780d6cda5a042d3eb9ec532faafd3bb47d718b23c10",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_027_PARAMS = {
@@ -508,6 +554,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_027_PARAMS = {
         "c80bd249d414c6e2c4cda407e52233ff13b527dcd127713e48d9006e62b2bc885a59586347",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_028_PARAMS = {
@@ -543,6 +592,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_028_PARAMS = {
         "7b0aa8f17a02a8fd6681bbfc62edc56991c9042d3bfc66844182a8e36a9edd35ad149668",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_029_PARAMS = {
@@ -587,6 +639,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_029_PARAMS = {
         "12208bf9626c41ed53a25090c817dd6c329c9a029e836689b13d9c8a694dd51e4db4311b5f68b56c2b1feebea8ba39e9073b371ad4b9",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_030_PARAMS = {
@@ -641,6 +696,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_030_PARAMS = {
         "848d6b6a53a3e851a1c70832cb1123e99f",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_031_PARAMS = {
@@ -661,9 +719,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_031_PARAMS = {
         "0000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -688,9 +752,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_032_PARAMS = {
         "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -717,6 +787,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_033_PARAMS = {
         "7e8871f8ef19784c21970236be43656feec81bae8577aff26937cdcf924dc8624f7e6a03fe",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_034_PARAMS = {
@@ -752,6 +825,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_034_PARAMS = {
         "b4b0fc0d0f043a1ec42599e31591be49a344cfed1a0cea16d99f45bbf296fc7a11f2c380",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_035_PARAMS = {
@@ -796,6 +872,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_035_PARAMS = {
         "6c086a173d79cb36981a814bd8a0ca770323371f085935f04417cbad6484e58332e107c5fc9bd21b8c7d12e855849c7cf2be7fac5f3f",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_036_PARAMS = {
@@ -850,6 +929,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_036_PARAMS = {
         "f24807a3f8f488216af206cf5e109b27dd",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_037_PARAMS = {
@@ -870,9 +952,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_037_PARAMS = {
         "0000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -897,9 +985,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_038_PARAMS = {
         "0000000000000000000000000000000000000000000000000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -926,9 +1020,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_039_PARAMS = {
         "7e8871f8ef19784c21970236be43656feec81bae8577aff26937cdcf924dc8624f7e6a03fe",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 };
 
@@ -965,6 +1065,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_040_PARAMS = {
         "bb384da3f37d29b44d95ef6cd8c2de66658326b73eea8785010ef4e8513ae575376f2795",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_041_PARAMS = {
@@ -1009,6 +1112,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_041_PARAMS = {
         "3e94e17865dd8a6daf89c34cb1e9d512af5331daf1fe072e8ba5f66db6006ec406c7df4d70142c706c30124a4c5d084522f404e74438",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_042_PARAMS = {
@@ -1063,6 +1169,9 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_042_PARAMS = {
         "8f6aa6489016f5a36a912f59bf27abbc12",
 
     .decryptResult = HKS_SUCCESS,
+    .decryptInitResult = HKS_SUCCESS,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_SUCCESS,
 };
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_043_PARAMS = {
@@ -1083,9 +1192,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_043_PARAMS = {
         "0000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_FAILURE,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_INVALID_ARGUMENT,
 #endif
 };
 
@@ -1110,9 +1225,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_044_PARAMS = {
         "029a1d6204ff8c804d5621f5732e2d70fd80c714568592b38bcffb875dc7cf428033121a16838f80c0",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_FAILURE,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_INVALID_ARGUMENT,
 #endif
 };
 
@@ -1139,9 +1260,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_045_PARAMS = {
         "4d3ec649a636e5968f217e524a9fc1a47eb5da4f18c8dbcdcaa3a3cefd6b4ef09eb15d805f",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_FAILURE,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_INVALID_ARGUMENT,
 #endif
 };
 
@@ -1178,9 +1305,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_046_PARAMS = {
         "afda034a173ef3523302ee1605ab6a9e50e1514d780a8791f2c9afaa4f7701017bacc665",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_FAILURE,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_INVALID_ARGUMENT,
 #endif
 };
 
@@ -1226,9 +1359,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_047_PARAMS = {
         "0c5c34d4fb4322570f29a0d35ad3870d33605e07536d80f51c6e2a2862198c01ff84ed985f109865817c4f8937dd44cdf36e9623a6cd",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_FAILURE,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_INVALID_ARGUMENT,
 #endif
 };
 
@@ -1284,9 +1423,15 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_048_PARAMS = {
         "a8f600f191e2edbaf8d21785903f47cd19",
 #if defined(_USE_OPENSSL_)
     .decryptResult = HKS_FAILURE,
+    .decryptInitResult = HKS_FAILURE,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_FAILURE,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptInitResult = HKS_ERROR_INVALID_DIGEST,
+    .decryptUpdateResult = HKS_SUCCESS,
+    .decryptFinalResult = HKS_ERROR_INVALID_ARGUMENT,
 #endif
 };
 }  // namespace
@@ -1316,8 +1461,39 @@ protected:
 
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
 
-        EXPECT_EQ(
-            HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText), testCaseParams.decryptResult);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            void* context = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+            EXPECT_EQ(HksCryptoHalDecryptInit(&key, &testCaseParams.usageSpec, &context),
+                testCaseParams.decryptInitResult);
+            uint32_t point = 0;
+            if (inLen > HKS_UPDATE_DATA_MAX) {
+                HksBlob messageUpdate = {
+                    .size = HKS_UPDATE_DATA_MAX,
+                    .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
+                };
+                HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+                while (point < inLen - HKS_UPDATE_DATA_MAX) {
+                    memcpy_s(messageUpdate.data, messageUpdate.size, &message.data[point], HKS_UPDATE_DATA_MAX);
+                    EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, context, &out,
+                        testCaseParams.usageSpec.algType), testCaseParams.decryptUpdateResult);
+                    point = point + HKS_UPDATE_DATA_MAX;
+                }
+
+                HksFree(out.data);
+                HksFree(messageUpdate.data);
+            }
+
+            uint32_t lastLen = inLen - point;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            (void)memcpy_s(messageLast.data, lastLen, &message.data[point], lastLen);
+            HksBlob tagAead = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &context, &cipherText, &tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.decryptFinalResult);
+        } else {
+            EXPECT_EQ(HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText),
+                testCaseParams.decryptResult);
+        }
+
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);

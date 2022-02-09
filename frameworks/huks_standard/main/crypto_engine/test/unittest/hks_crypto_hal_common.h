@@ -31,5 +31,7 @@ protected:
 
     const int HKS_COUNT_OF_HALF = 2;
     const uint32_t HKS_PADDING_SUPPLENMENT = 16;
+    const uint32_t HKS_UPDATE_DATA_MAX = 64;
+    const uint32_t HKS_CONTEXT_DATA_MAX = (1024 * 2);
 };
 #endif  // HKS_CRYPTO_HAL_COMMON_H

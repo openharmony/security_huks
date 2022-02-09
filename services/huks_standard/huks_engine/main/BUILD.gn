@@ -21,7 +21,7 @@ ohos_static_library("libhuks_engine_standard_static") {
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
-  public_deps = [ "//base/security/huks/services/huks_standard/huks_engine/main/core:libhuks_engine_core_standard_static" ]
+  public_deps = [ "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard" ]
 
   complete_static_lib = true
 }

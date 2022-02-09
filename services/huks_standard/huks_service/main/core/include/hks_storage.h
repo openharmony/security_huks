@@ -28,26 +28,62 @@ enum HksStorageType {
 extern "C" {
 #endif
 
-int32_t HksStoreKeyBlob(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+struct HksStoreInfo {
+    char *processPath; /* file path include process */
+    char *path; /* file path include process/key(or certchain) */
+    char *fileName; /* file name that can be recognized by the file system */
+    uint32_t size;
+};
+
+struct HksStoreFileInfo {
+    struct HksStoreInfo mainPath;
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreInfo bakPath;
+#endif
+};
+
+#ifndef _CUT_AUTHENTICATE_
+#ifdef _STORAGE_LITE_
+int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     enum HksStorageType storageType, const struct HksBlob *keyBlob);
 
-int32_t HksStoreDeleteKeyBlob(const struct HksBlob *processName, const struct HksBlob *keyAlias, uint32_t storageType);
+int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, uint32_t storageType);
+int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, uint32_t storageType);
+int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob);
+int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName,
+    const struct HksBlob *keyAlias, uint32_t storageType, uint32_t *keyBlobSize);
+int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t *keyCount);
+#else // _STORAGE_LITE_
 
-int32_t HksStoreIsKeyBlobExist(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    enum HksStorageType storageType, const struct HksBlob *keyBlob);
+
+int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     uint32_t storageType);
 
-int32_t HksStoreGetKeyBlob(const struct HksBlob *processName, const struct HksBlob *keyAlias, uint32_t storageType,
-    struct HksBlob *keyBlob);
+int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    uint32_t storageType);
 
-int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    uint32_t storageType, struct HksBlob *keyBlob);
+
+int32_t HksStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     uint32_t storageType, uint32_t *keyBlobSize);
 
-int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t *keyCount);
+int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, uint32_t *keyCount);
+#endif // _STORAGE_LITE_
+#endif // _CUT_AUTHENTICATE_
 
-int32_t HksGetKeyAliasByProcessName(const struct HksBlob *processName, struct HksKeyInfo *keyInfoList,
+int32_t HksGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount);
 
 int32_t HksStoreDestory(const struct HksBlob *processName);
+
+int32_t HksGetFileInfo(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, uint32_t storageType,
+    struct HksStoreFileInfo *fileInfo);
 
 #ifdef _STORAGE_LITE_
 

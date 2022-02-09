@@ -38,6 +38,9 @@ const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; // 1 MB
 
 using HksIpcHandlerFuncProc = void (*)(const struct HksBlob *msg, const uint8_t *context);
 
+using HksIpcThreeStageHandlerFuncProc = void (*)(const struct HksBlob *msg, struct HksBlob *outData,
+    const uint8_t *context);
+
 enum HksMessage {
     HKS_MSG_BASE = 0x3a400,
 
@@ -79,6 +82,12 @@ enum HksMessage {
     HKS_MSG_PROVISION,
     HKS_MSG_PROVISION_VERIFY,
     HKS_MSG_EXPORT_TRUST_CERTS,
+    HKS_MSG_DELETE_USERID_KEYALIASFILE,
+    HKS_MSG_DELETE_UID_KEYALIASFILE,
+    HKS_MSG_INIT,
+    HKS_MSG_UPDATE,
+    HKS_MSG_FINISH,
+    HKS_MSG_ABORT,
 
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
@@ -87,6 +96,18 @@ enum HksMessage {
 struct HksIpcEntryPoint {
     enum HksMessage msgId;
     HksIpcHandlerFuncProc handler;
+};
+
+struct HksIpcThreeStagePoint {
+    enum HksMessage msgId;
+    HksIpcThreeStageHandlerFuncProc handler;
+};
+
+static struct HksIpcThreeStagePoint g_hksIpcThreeStageHandler[] = {
+    { HKS_MSG_INIT, HksIpcServiceInit },
+    { HKS_MSG_UPDATE, HksIpcServiceUpdate },
+    { HKS_MSG_FINISH, HksIpcServiceFinish },
+    { HKS_MSG_ABORT, HksIpcServiceAbort },
 };
 
 static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
@@ -128,6 +149,8 @@ static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
     { HKS_MSG_PROVISION, HksIpcServiceProvision },
     { HKS_MSG_PROVISION_VERIFY, HksIpcServiceProvisionVerify },
     { HKS_MSG_EXPORT_TRUST_CERTS, HksIpcServiceExportTrustCerts },
+    { HKS_MSG_DELETE_USERID_KEYALIASFILE, HksIpcDeleteUserIDAliasFile},
+    { HKS_MSG_DELETE_UID_KEYALIASFILE, HksIpcDeleteUIDAliasFile},
 };
 
 HksService::HksService(int saId, bool runOnCreate = true)
@@ -188,7 +211,13 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
 
     HKS_LOG_I("OnRemoteRequest code:%d", code);
-
+    struct HksBlob outData = { 0, NULL };
+    outData.size = (uint32_t)data.ReadUint32();
+    outData.data = (uint8_t *)HksMalloc(outData.size);
+    if (outData.data == nullptr) {
+        HKS_LOG_E("Malloc HksBlob failed.");
+        return HW_SYSTEM_ERROR;
+    }
     struct HksBlob srcData = { 0, NULL };
     srcData.size = (uint32_t)data.ReadUint32();
     if (srcData.size >= MAX_MALLOC_LEN) {
@@ -217,10 +246,20 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     for (uint32_t i = 0; i < size; ++i) {
         if (code == g_hksIpcMessageHandler[i].msgId) {
             g_hksIpcMessageHandler[i].handler(&srcData, (const uint8_t *)&reply);
+            break;
+        }
+    }
+
+    size = sizeof(g_hksIpcThreeStageHandler) / sizeof(g_hksIpcThreeStageHandler[0]);
+    for (uint32_t i = 0; i < size; ++i) {
+        if (code == g_hksIpcThreeStageHandler[i].msgId) {
+            g_hksIpcThreeStageHandler[i].handler(&srcData, &outData, (const uint8_t *)&reply);
+            break;
         }
     }
 
     HKS_FREE_BLOB(srcData);
+    HKS_FREE_BLOB(outData);
     return NO_ERROR;
 }
 

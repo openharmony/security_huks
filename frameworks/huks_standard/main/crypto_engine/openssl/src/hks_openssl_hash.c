@@ -64,10 +64,12 @@ static int32_t HashCheckParam(uint32_t alg, const struct HksBlob *msg, struct Hk
         HKS_LOG_E("Unsupport HASH Type!");
         return HKS_ERROR_INVALID_DIGEST;
     }
+
     if (HksOpensslCheckBlob(hash) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid param hash!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
+
     if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid param msg!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -95,5 +97,119 @@ int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
+}
+
+int32_t HksOpensslHashInit(void **CryptoCtx, uint32_t alg)
+{
+    if (CheckDigestAlg(alg) != HKS_SUCCESS) {
+        HKS_LOG_E("Unsupport HASH Type!");
+        return HKS_ERROR_INVALID_DIGEST;
+    }
+
+    const EVP_MD *opensslAlg = GetOpensslAlg(alg);
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    EVP_MD_CTX *tmpctx = EVP_MD_CTX_new();
+    if (tmpctx == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    EVP_MD_CTX_set_flags(tmpctx, EVP_MD_CTX_FLAG_ONESHOT);
+    int32_t ret = EVP_DigestInit_ex(tmpctx, opensslAlg, NULL);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        EVP_MD_CTX_free(tmpctx);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    *CryptoCtx = (void*)tmpctx;
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslHashUpdate(void *CryptoCtx, const struct HksBlob *msg)
+{
+    if (CryptoCtx == NULL) {
+        HKS_LOG_E("Invalid param CryptoCtx!");
+        EVP_MD_CTX_free((EVP_MD_CTX*)CryptoCtx);
+        CryptoCtx = NULL;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid param msg!");
+        EVP_MD_CTX_free((EVP_MD_CTX*)CryptoCtx);
+        CryptoCtx = NULL;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    int32_t ret = EVP_DigestUpdate(CryptoCtx, msg->data, msg->size);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        EVP_MD_CTX_free((EVP_MD_CTX*)CryptoCtx);
+        CryptoCtx = NULL;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslHashFinal(void **CryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
+{
+    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+        HKS_LOG_E("Invalid param CryptoCtx!");
+        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+        *CryptoCtx = NULL;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (msg == NULL) {
+        HKS_LOG_E("Invalid param msg!");
+        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+        *CryptoCtx = NULL;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (HksOpensslCheckBlob(hash) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid param hash!");
+        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+        *CryptoCtx = NULL;
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    int32_t ret;
+    if (msg->size != 0) {
+        ret = EVP_DigestUpdate((EVP_MD_CTX*)*CryptoCtx, msg->data, msg->size);
+        if (ret != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+            *CryptoCtx = NULL;
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+
+    ret = EVP_DigestFinal_ex((EVP_MD_CTX*)*CryptoCtx, hash->data, &hash->size);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+        *CryptoCtx = NULL;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+    *CryptoCtx = NULL;
+    return HKS_SUCCESS;
+}
+
+void HksOpensslHashFreeCtx(void **CryptoCtx)
+{
+    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+        HKS_LOG_E("Openssl Hash freeCtx param error");
+        return;
+    }
+
+    if (*CryptoCtx != NULL) {
+        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
+        *CryptoCtx = NULL;
+    }
 }
 #endif

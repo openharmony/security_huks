@@ -24,6 +24,7 @@
 
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
 #define HKS_RKC_KSF_BUF_LEN 258     /* the length of keystore buffer */
+#define USER_ID_ROOT_DEFAULT          "0"
 
 /* the flag of keystore file, used to identify files as HKS keystore file, don't modify. */
 const uint8_t g_hksRkcKsfFlag[HKS_RKC_KSF_FLAG_LEN] = { 0x5F, 0x64, 0x97, 0x8D, 0x19, 0x4F, 0x89, 0xCF };
@@ -270,6 +271,18 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
     return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
 }
 
+static void SaveUserIdUIDToProcessInfo(const struct HksBlob *userData, const struct HksBlob *processData,
+    struct HksProcessInfo *processInfo)
+{
+    (void)memset_s(processInfo, sizeof(struct HksProcessInfo), 0, sizeof(struct HksProcessInfo));
+    if (userData->size > 0) {
+        processInfo->userId.size = userData->size;
+        processInfo->userId.data = userData->data;
+    }
+    processInfo->processName.size = processData->size;
+    processInfo->processName.data = processData->data;
+}
+
 int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
 {
     struct HksBlob tmpKsf;
@@ -290,8 +303,16 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
         }
         struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
+        struct HksBlob userID = { 0, NULL };
+        struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+        ret = GetUserIDWithProcessName(&processNameBlob, &userID);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("GetUserIDWithProcessName fail, ret = %d", ret);
+            break;
+        }
+        SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
 
-        ret = HksStoreGetKeyBlob(&processNameBlob, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
+        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Get ksf file failed! ret = 0x%X", ret);
             break;
@@ -549,7 +570,15 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-        ret = HksStoreKeyBlob(&processNameBlob, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
+        struct HksBlob userID = { 0, NULL };
+        struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+        ret = GetUserIDWithProcessName(&processNameBlob, &userID);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("GetUserIDWithProcessName fail, ret = %d", ret);
+            break;
+        }
+        SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+        ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Store ksf failed! ret = 0x%X", ret);
         }
@@ -575,7 +604,14 @@ bool RkcKsfExist(void)
             (uint8_t *)(g_hksRkcCfg.ksfAttr.name[i])
         };
 
-        int32_t ret = HksStoreIsKeyBlobExist(&processNameBlob, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+        struct HksBlob userID = { 0, NULL };
+        struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+        if (GetUserIDWithProcessName(&processNameBlob, &userID) != HKS_SUCCESS) {
+            HKS_LOG_E("GetUserIDWithProcessName fail.");
+            return HKS_FAILURE;
+        }
+        SaveUserIdUIDToProcessInfo(&userID, &processNameBlob, &processInfo);
+        int32_t ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
         if (ret == HKS_SUCCESS) {
             /* return true if one exists */
             return true;

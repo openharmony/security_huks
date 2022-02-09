@@ -19,6 +19,7 @@
 #include "hks_type.h"
 
 #define HKS_MAX_FILE_NAME_LEN 512
+#define HKS_MAX_FILE_PATH_LEN 64
 
 #ifdef _STORAGE_LITE_
     #define HKS_KEY_STORE_PATH            "/storage/"
@@ -35,6 +36,7 @@
 #define HKS_KEY_STORE_CERTCHAIN_PATH  "certchain"
 #define HKS_KEY_STORE_ROOT_KEY_PATH   "info"
 
+#define HKS_PROCESS_INFO_LEN    128
 #define HKS_MAX_DIRENT_FILE_LEN 128
 struct HksFileDirentInfo {
     char fileName[HKS_MAX_DIRENT_FILE_LEN]; /* point to dirent->d_name */
@@ -70,6 +72,8 @@ int32_t HksCloseDir(void *dirp);
 int32_t HksGetDirFile(void *dirp, struct HksFileDirentInfo *direntInfo);
 
 int32_t HksRemoveDir(const char *dirPath);
+
+int32_t HksDeleteDir(const char *dirPath);
 
 /* return < 0 error; > 0 realFileSize; == 0 no data */
 int32_t HksOldVersionFileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len);

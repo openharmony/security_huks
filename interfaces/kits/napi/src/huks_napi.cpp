@@ -38,6 +38,11 @@
 #include "huks_napi_verify.h"
 #include "huks_napi_wrap_key.h"
 
+#include "huks_napi_init.h"
+#include "huks_napi_update.h"
+#include "huks_napi_finish.h"
+#include "huks_napi_abort.h"
+
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
 {
@@ -463,34 +468,20 @@ using namespace HuksNapi;
 extern "C" {
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
 {
-    napi_value errorCode = CreateHksErrorCode(env);
-    napi_value keyType = CreateHksKeyType(env);
-    napi_value keyPurpose = CreateHksKeyPurpose(env);
-    napi_value keyDigest = CreateHksKeyDigest(env);
-    napi_value keyPadding = CreateHksKeyPadding(env);
-    napi_value keyCipherMode = CreateHksCipherMode(env);
-    napi_value keySize = CreateHksKeySize(env);
-    napi_value keyAlg = CreateHksKeyAlg(env);
-    napi_value keyGenerateType = CreateHksKeyGenerateType(env);
-    napi_value keyFlag = CreateHksKeyFlag(env);
-    napi_value keyStorageType = CreateHksKeyStorageType(env);
-    napi_value tagType = CreateHksTagType(env);
-    napi_value tag = CreateHksTag(env);
-
     napi_property_descriptor desc[] = {
-        DECLARE_NAPI_PROPERTY("HksErrorCode", errorCode),
-        DECLARE_NAPI_PROPERTY("HksKeyType", keyType),
-        DECLARE_NAPI_PROPERTY("HksKeyPurpose", keyPurpose),
-        DECLARE_NAPI_PROPERTY("HksKeyDigest", keyDigest),
-        DECLARE_NAPI_PROPERTY("HksKeyPadding", keyPadding),
-        DECLARE_NAPI_PROPERTY("HksCipherMode", keyCipherMode),
-        DECLARE_NAPI_PROPERTY("HksKeySize", keySize),
-        DECLARE_NAPI_PROPERTY("HksKeyAlg", keyAlg),
-        DECLARE_NAPI_PROPERTY("HksKeyGenerateType", keyGenerateType),
-        DECLARE_NAPI_PROPERTY("HksKeyFlag", keyFlag),
-        DECLARE_NAPI_PROPERTY("HksKeyStorageType", keyStorageType),
-        DECLARE_NAPI_PROPERTY("HksTagType", tagType),
-        DECLARE_NAPI_PROPERTY("HksTag", tag),
+        DECLARE_NAPI_PROPERTY("HksErrorCode", CreateHksErrorCode(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyType", CreateHksKeyType(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyPurpose", CreateHksKeyPurpose(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyDigest", CreateHksKeyDigest(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyPadding", CreateHksKeyPadding(env)),
+        DECLARE_NAPI_PROPERTY("HksCipherMode", CreateHksCipherMode(env)),
+        DECLARE_NAPI_PROPERTY("HksKeySize", CreateHksKeySize(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyAlg", CreateHksKeyAlg(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyGenerateType", CreateHksKeyGenerateType(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyFlag",  CreateHksKeyFlag(env)),
+        DECLARE_NAPI_PROPERTY("HksKeyStorageType", CreateHksKeyStorageType(env)),
+        DECLARE_NAPI_PROPERTY("HksTagType", CreateHksTagType(env)),
+        DECLARE_NAPI_PROPERTY("HksTag", CreateHksTag(env)),
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
@@ -510,6 +501,10 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("getCertificateChain", HuksNapiGetCertificateChain),
         DECLARE_NAPI_FUNCTION("wrapKey", HuksNapiWrapKey),
         DECLARE_NAPI_FUNCTION("unwrapKey", HuksNapiUnwrapKey),
+        DECLARE_NAPI_FUNCTION("init", HuksNapiInit),
+        DECLARE_NAPI_FUNCTION("update", HuksNapiUpdate),
+        DECLARE_NAPI_FUNCTION("finish", HuksNapiFinish),
+        DECLARE_NAPI_FUNCTION("abort", HuksNapiAbort),
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;

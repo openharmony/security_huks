@@ -32,6 +32,7 @@ struct TestCaseParams {
     HksKeySpec spec = {0};
     HksUsageSpec usageSpec = {0};
     std::string hexData;
+    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
     HksErrorCode signResult = HksErrorCode::HKS_SUCCESS;
@@ -859,24 +860,30 @@ protected:
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
 
+        struct HksBlob* pBlob = nullptr;
         uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
         struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
-        /* NONEwithECDSA default sha256: ec_pkey_ctrl default md nid */
-        struct HksUsageSpec usageSpec = testCaseParams.usageSpec;
-        uint32_t inputDigest = usageSpec.digest;
-        usageSpec.digest = (inputDigest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : inputDigest;
-        EXPECT_EQ(HksCryptoHalHash(usageSpec.digest, &message, &hash), HKS_SUCCESS);
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            /* NONEwithECDSA default sha256: ec_pkey_ctrl default md nid */
+            struct HksUsageSpec usageSpec = testCaseParams.usageSpec;
+            uint32_t inputDigest = usageSpec.digest;
+            usageSpec.digest = (inputDigest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : inputDigest;
+            EXPECT_EQ(HksCryptoHalHash(usageSpec.digest, &message, &hash), HKS_SUCCESS);
+            pBlob = &hash;
+        } else {
+            pBlob = &message;
+        }
 
         struct HksBlob signature = { .size = 512, .data = (uint8_t *)HksMalloc(512) };
 
-        EXPECT_EQ(HksCryptoHalSign(&key, &usageSpec, &hash, &signature), testCaseParams.signResult);
+        EXPECT_EQ(HksCryptoHalSign(&key, &testCaseParams.usageSpec, pBlob, &signature), testCaseParams.signResult);
 
         struct HksBlob pubKey = { .size = 1044, .data = (uint8_t *)HksMalloc(1044) };
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
         EXPECT_EQ(
-            HksCryptoHalVerify(&pubKey, &usageSpec, &hash, &signature), testCaseParams.verifyResult);
+            HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, pBlob, &signature), testCaseParams.verifyResult);
 
         HksFree(message.data);
         HksFree(signature.data);

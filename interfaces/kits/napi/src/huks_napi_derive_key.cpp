@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_DERIVE_KEY_MAX_ARGS = 3;
 constexpr int HKS_MAX_DERIVED_KEY_SIZE = 512;
 }  // namespace
 
-struct DeriveKeyAsyncContext_t {
+struct DeriveKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -42,13 +42,13 @@ struct DeriveKeyAsyncContext_t {
     struct HksBlob *keyAlias = nullptr;
     struct HksBlob *derivedKey = nullptr;
 };
-using DeriveKeyAsyncContext = DeriveKeyAsyncContext_t *;
+using DeriveKeyAsyncContext = DeriveKeyAsyncContextT *;
 
 static DeriveKeyAsyncContext CreateDeriveKeyAsyncContext()
 {
-    DeriveKeyAsyncContext context = (DeriveKeyAsyncContext)HksMalloc(sizeof(DeriveKeyAsyncContext_t));
+    DeriveKeyAsyncContext context = (DeriveKeyAsyncContext)HksMalloc(sizeof(DeriveKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(DeriveKeyAsyncContext_t), 0, sizeof(DeriveKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(DeriveKeyAsyncContextT), 0, sizeof(DeriveKeyAsyncContextT));
     }
     return context;
 }

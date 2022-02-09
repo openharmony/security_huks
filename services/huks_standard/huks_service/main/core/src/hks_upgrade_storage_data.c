@@ -337,7 +337,7 @@ static int32_t UpgradeSingleKeyInfo(const struct HksBlob *keyInfo)
             break;
         }
 
-        ret = HksAccessUpgradeKeyInfo(&keyAlias, keyInfo, &output);
+        ret = HksHalUpgradeKeyInfo(&keyAlias, keyInfo, &output);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access update key info faild");
             break;
@@ -438,7 +438,13 @@ int32_t HksUpgradeStorageData(void)
     do {
 #ifndef _HARDWARE_ROOT_KEY_
         /* init rkc and update key store files, if process failed, need roolback all new files */
-        ret = HksAccessInitialize();
+        ret =  HksCreateHksHalDevice();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("init rkc failed, ret = %d", ret);
+            break;
+        }
+
+        ret = HksHalModuleInit();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("init rkc failed, ret = %d", ret);
             break;
