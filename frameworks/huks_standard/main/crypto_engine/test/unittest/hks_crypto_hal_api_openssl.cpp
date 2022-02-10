@@ -598,10 +598,10 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_021, Function | SmallTes
     uint8_t buff[1] = {0};
     void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
 
-    EXPECT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, 0, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
 
     key = { .size = 1, .data = buff };
-    EXPECT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(HksCryptoHalHmacInit(&key, 0, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
 
     EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_NONE, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
 
