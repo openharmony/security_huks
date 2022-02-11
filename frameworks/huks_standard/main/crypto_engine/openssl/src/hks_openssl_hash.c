@@ -99,7 +99,7 @@ int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslHashInit(void **CryptoCtx, uint32_t alg)
+int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
 {
     if (CheckDigestAlg(alg) != HKS_SUCCESS) {
         HKS_LOG_E("Unsupport HASH Type!");
@@ -124,92 +124,88 @@ int32_t HksOpensslHashInit(void **CryptoCtx, uint32_t alg)
         EVP_MD_CTX_free(tmpctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    *CryptoCtx = (void*)tmpctx;
+    *cryptoCtx = (void*)tmpctx;
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslHashUpdate(void *CryptoCtx, const struct HksBlob *msg)
+int32_t HksOpensslHashUpdate(void **cryptoCtx, const struct HksBlob *msg)
 {
-    if (CryptoCtx == NULL) {
-        HKS_LOG_E("Invalid param CryptoCtx!");
-        EVP_MD_CTX_free((EVP_MD_CTX*)CryptoCtx);
-        CryptoCtx = NULL;
+    if (cryptoCtx == NULL) {
+        HKS_LOG_E("Invalid param cryptoCtx!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid param msg!");
-        EVP_MD_CTX_free((EVP_MD_CTX*)CryptoCtx);
-        CryptoCtx = NULL;
+        EVP_MD_CTX_free((EVP_MD_CTX *)cryptoCtx);
+        *cryptoCtx = NULL;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    int32_t ret = EVP_DigestUpdate(CryptoCtx, msg->data, msg->size);
+    int32_t ret = EVP_DigestUpdate(*cryptoCtx, msg->data, msg->size);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        EVP_MD_CTX_free((EVP_MD_CTX*)CryptoCtx);
-        CryptoCtx = NULL;
+        EVP_MD_CTX_free((EVP_MD_CTX *)cryptoCtx);
+        *cryptoCtx = NULL;
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslHashFinal(void **CryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
+int32_t HksOpensslHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
-        HKS_LOG_E("Invalid param CryptoCtx!");
-        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-        *CryptoCtx = NULL;
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
+        HKS_LOG_E("Invalid param cryptoCtx!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (msg == NULL) {
         HKS_LOG_E("Invalid param msg!");
-        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-        *CryptoCtx = NULL;
+        EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);
+        *cryptoCtx = NULL;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (HksOpensslCheckBlob(hash) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid param hash!");
-        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-        *CryptoCtx = NULL;
+        EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);
+        *cryptoCtx = NULL;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret;
     if (msg->size != 0) {
-        ret = EVP_DigestUpdate((EVP_MD_CTX*)*CryptoCtx, msg->data, msg->size);
+        ret = EVP_DigestUpdate((EVP_MD_CTX *)*cryptoCtx, msg->data, msg->size);
         if (ret != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
-            EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-            *CryptoCtx = NULL;
+            EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);
+            *cryptoCtx = NULL;
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     }
 
-    ret = EVP_DigestFinal_ex((EVP_MD_CTX*)*CryptoCtx, hash->data, &hash->size);
+    ret = EVP_DigestFinal_ex((EVP_MD_CTX *)*cryptoCtx, hash->data, &hash->size);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-        *CryptoCtx = NULL;
+        EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);
+        *cryptoCtx = NULL;
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-    *CryptoCtx = NULL;
+    EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);
+    *cryptoCtx = NULL;
     return HKS_SUCCESS;
 }
 
-void HksOpensslHashFreeCtx(void **CryptoCtx)
+void HksOpensslHashFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Openssl Hash freeCtx param error");
         return;
     }
 
-    if (*CryptoCtx != NULL) {
-        EVP_MD_CTX_free((EVP_MD_CTX*)*CryptoCtx);
-        *CryptoCtx = NULL;
+    if (*cryptoCtx != NULL) {
+        EVP_MD_CTX_free((EVP_MD_CTX *)*cryptoCtx);
+        *cryptoCtx = NULL;
     }
 }
 #endif

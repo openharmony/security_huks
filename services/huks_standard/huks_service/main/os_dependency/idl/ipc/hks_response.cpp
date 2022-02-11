@@ -30,8 +30,6 @@
 
 using namespace OHOS;
 
-#define USER_ID_ROOT_DEFAULT          "0"
-
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response)
 {
     if (context == nullptr) {
@@ -82,27 +80,35 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
         HKS_LOG_E("GetProcessName malloc failed.");
         return HKS_ERROR_MALLOC_FAIL;
     }
-
-    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %d", callingUid);
-
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
 
-
     int userId = -1;
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC userId = %d", userId);
+    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %d, userId = %d", callingUid, userId);
 
-    uint8_t *name1 = (uint8_t *)HksMalloc(sizeof(userId));
+    uint32_t size;
+    if (userId == 0) {
+        size = strlen("0");
+    } else {
+        size = sizeof(userId);
+    }
+
+    uint8_t *name1 = (uint8_t *)HksMalloc(size);
     if (name1 == NULL) {
         HKS_LOG_E("user id malloc failed.");
         HksFree(name);
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    (void)memcpy_s(name1, sizeof(userId), &userId, sizeof(userId));
-    processInfo->userId.size = sizeof(userId);
+    if (userId == 0) {
+        (void)memcpy_s(name1, size, "0", size); /* ignore \0 at the end */
+    } else {
+        (void)memcpy_s(name1, size, &userId, size);
+    }
+
+    processInfo->userId.size = size;
     processInfo->userId.data = name1;
 
     return HKS_SUCCESS;

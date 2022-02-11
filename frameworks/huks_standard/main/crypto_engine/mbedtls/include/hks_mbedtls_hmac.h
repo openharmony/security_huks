@@ -36,13 +36,13 @@ int32_t HksMbedtlsHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
 int32_t HksMbedtlsHmac(const struct HksBlob *key,
     uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac);
 
-int32_t HksMbedtlsHmacInit(void **CryptoCtx, const struct HksBlob *key, uint32_t digestAlg);
+int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t digestAlg);
 
-int32_t HksMbedtlsHmacUpdate(void *CryptoCtx, const struct HksBlob *msg);
+int32_t HksMbedtlsHmacUpdate(void *cryptoCtx, const struct HksBlob *msg);
 
-int32_t HksMbedtlsHmacFinal(void **CryptoCtx, struct HksBlob *msg, struct HksBlob *mac);
+int32_t HksMbedtlsHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlob *mac);
 
-void HksMbedtlsHmacHalFreeCtx(void **CryptoCtx);
+void HksMbedtlsHmacHalFreeCtx(void **cryptoCtx);
 #ifdef __cplusplus
 }
 #endif

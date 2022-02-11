@@ -142,7 +142,7 @@ static int32_t AesCbcNoPaddingCrypt(const struct HksBlob *key, const struct HksC
     return ret;
 }
 
-static int32_t AesCbcNoPaddingCryptInit(void **CryptoCtx, const struct HksBlob *key,
+static int32_t AesCbcNoPaddingCryptInit(void **cryptoCtx, const struct HksBlob *key,
     const struct HksUsageSpec *usageSpec, const bool encrypt)
 {
     mbedtls_aes_context *ctx = (mbedtls_aes_context *)HksMalloc(sizeof(mbedtls_aes_context));
@@ -184,15 +184,15 @@ static int32_t AesCbcNoPaddingCryptInit(void **CryptoCtx, const struct HksBlob *
     struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
     memcpy_s(outCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, iv->iv.data, HKS_AES_CBC_NOPADDING_IV_SIZE);
 
-    *CryptoCtx = (void *)outCtx;
+    *cryptoCtx = (void *)outCtx;
 
     return ret;
 }
 
-static int32_t AesCbcNoPaddingCryptUpdate(void *CryptoCtx,
+static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)CryptoCtx;
+    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_aes_context *CbcNoPaddingCtx = (mbedtls_aes_context *)aesCtx->append;
 
     if (CbcNoPaddingCtx == NULL) {
@@ -231,10 +231,10 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *CryptoCtx,
     return HKS_SUCCESS;
 }
 
-static int32_t AesCbcNoPaddingCryptFinal(void **CryptoCtx,
+static int32_t AesCbcNoPaddingCryptFinal(void **cryptoCtx,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*CryptoCtx;
+    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
     mbedtls_aes_context *ctx = (mbedtls_aes_context *)aesCtx->append;
 
     if (ctx == NULL) {
@@ -275,8 +275,8 @@ static int32_t AesCbcNoPaddingCryptFinal(void **CryptoCtx,
     aesCtx->append = NULL;
     HksFree(aesCtx->algParam);
     aesCtx->algParam = NULL;
-    HksFree(*CryptoCtx);
-    *CryptoCtx = NULL;
+    HksFree(*cryptoCtx);
+    *cryptoCtx = NULL;
 
     return HKS_SUCCESS;
 }
@@ -345,7 +345,7 @@ static int32_t AesCbcPkcs7CryptInitParam(const struct HksBlob *key, mbedtls_ciph
     return HKS_SUCCESS;
 }
 
-static int32_t AesCbcPkcs7CryptInit(void **CryptoCtx, const struct HksBlob *key,
+static int32_t AesCbcPkcs7CryptInit(void **cryptoCtx, const struct HksBlob *key,
     const struct HksUsageSpec *usageSpec, const bool encrypt)
 {
     mbedtls_cipher_context_t *cbcPkcs7ctx = (mbedtls_cipher_context_t *)HksMalloc(sizeof(mbedtls_cipher_context_t));
@@ -392,14 +392,14 @@ static int32_t AesCbcPkcs7CryptInit(void **CryptoCtx, const struct HksBlob *key,
     outCtx->append = (void *)cbcPkcs7ctx;
     outCtx->algParam = usageSpec->algParam;
 
-    *CryptoCtx = (void *)outCtx;
+    *cryptoCtx = (void *)outCtx;
 
     return ret;
 }
 
-static int32_t AesCbcPkcs7CryptUpdate(void *CryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+static int32_t AesCbcPkcs7CryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)CryptoCtx;
+    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_cipher_context_t *cbcPkcs7ctx = (mbedtls_cipher_context_t *)aesCtx->append;
 
     if (cbcPkcs7ctx == NULL) {
@@ -482,17 +482,17 @@ static int32_t AesCbcCrypt(const struct HksBlob *key, const struct HksUsageSpec 
     }
 }
 
-static int32_t AesCbcCryptInit(void **CryptoCtx, const struct HksBlob *key,
+static int32_t AesCbcCryptInit(void **cryptoCtx, const struct HksBlob *key,
     const struct HksUsageSpec *usageSpec, const bool encrypt)
 {
     switch (usageSpec->padding) {
 #ifdef HKS_SUPPORT_AES_CBC_NOPADDING
         case HKS_PADDING_NONE:
-            return AesCbcNoPaddingCryptInit(CryptoCtx, key, usageSpec, encrypt);
+            return AesCbcNoPaddingCryptInit(cryptoCtx, key, usageSpec, encrypt);
 #endif
 #ifdef HKS_SUPPORT_AES_CBC_PKCS7
         case HKS_PADDING_PKCS7:
-            return AesCbcPkcs7CryptInit(CryptoCtx, key, usageSpec, encrypt);
+            return AesCbcPkcs7CryptInit(cryptoCtx, key, usageSpec, encrypt);
 #endif
         default:
             HKS_LOG_E("Unsupport padding! mode = 0x%X", usageSpec->padding);
@@ -500,17 +500,17 @@ static int32_t AesCbcCryptInit(void **CryptoCtx, const struct HksBlob *key,
     }
 }
 
-static int32_t AesCbcCryptUpdate(void *CryptoCtx, const uint8_t padding,
+static int32_t AesCbcCryptUpdate(void *cryptoCtx, const uint8_t padding,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     switch (padding) {
 #ifdef HKS_SUPPORT_AES_CBC_NOPADDING
         case HKS_PADDING_NONE:
-            return AesCbcNoPaddingCryptUpdate(CryptoCtx, message, encrypt, cipherText);
+            return AesCbcNoPaddingCryptUpdate(cryptoCtx, message, encrypt, cipherText);
 #endif
 #ifdef HKS_SUPPORT_AES_CBC_PKCS7
         case HKS_PADDING_PKCS7:
-            return AesCbcPkcs7CryptUpdate(CryptoCtx, message, cipherText);
+            return AesCbcPkcs7CryptUpdate(cryptoCtx, message, cipherText);
 #endif
         default:
             HKS_LOG_E("Unsupport padding! mode = 0x%X", padding);
@@ -518,17 +518,17 @@ static int32_t AesCbcCryptUpdate(void *CryptoCtx, const uint8_t padding,
     }
 }
 
-static int32_t AesCbcCryptFinal(void **CryptoCtx, const uint8_t padding,
+static int32_t AesCbcCryptFinal(void **cryptoCtx, const uint8_t padding,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     switch (padding) {
 #ifdef HKS_SUPPORT_AES_CBC_NOPADDING
         case HKS_PADDING_NONE:
-            return AesCbcNoPaddingCryptFinal(CryptoCtx, message, encrypt, cipherText);
+            return AesCbcNoPaddingCryptFinal(cryptoCtx, message, encrypt, cipherText);
 #endif
 #ifdef HKS_SUPPORT_AES_CBC_PKCS7
         case HKS_PADDING_PKCS7:
-            return AesCbcPkcs7CryptFinal(CryptoCtx, message, cipherText);
+            return AesCbcPkcs7CryptFinal(cryptoCtx, message, cipherText);
 #endif
         default:
             HKS_LOG_E("Unsupport padding! mode = 0x%X", padding);

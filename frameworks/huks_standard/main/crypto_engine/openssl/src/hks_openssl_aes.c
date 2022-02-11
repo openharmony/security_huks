@@ -798,13 +798,13 @@ static int32_t OpensslAesCipherDecryptFinal(
 }
 #endif
 
-int32_t HksOpensslAesEncryptInit(void **CryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
+int32_t HksOpensslAesEncryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
 {
     int32_t ret;
     switch (usageSpec->mode) {
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
-            ret = OpensslAesAeadCryptInit(key, usageSpec, true, CryptoCtx);
+            ret = OpensslAesAeadCryptInit(key, usageSpec, true, cryptoCtx);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesAeadInit fail, ret = %d", ret);
                 return ret;
@@ -817,7 +817,7 @@ int32_t HksOpensslAesEncryptInit(void **CryptoCtx, const struct HksBlob *key, co
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherCryptInit(key, usageSpec, true, CryptoCtx);
+            ret = OpensslAesCipherCryptInit(key, usageSpec, true, cryptoCtx);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesCipherCryptInit fail, ret = %d", ret);
                 return ret;
@@ -832,16 +832,16 @@ int32_t HksOpensslAesEncryptInit(void **CryptoCtx, const struct HksBlob *key, co
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslAesEncryptUpdate(void *CryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)CryptoCtx;
+    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
     switch (mode) {
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
-            ret = OpensslAesAeadEnryptUpdate(CryptoCtx, message, cipherText);
+            ret = OpensslAesAeadEnryptUpdate(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesAeadEnryptUpdate fail, ret = %d", ret);
                 EVP_CIPHER_CTX_free((EVP_CIPHER_CTX*)contex->append);
@@ -855,7 +855,7 @@ int32_t HksOpensslAesEncryptUpdate(void *CryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherEncryptUpdate(CryptoCtx, message, cipherText);
+            ret = OpensslAesCipherEncryptUpdate(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesCipherEncryptUpdate fail, ret = %d", ret);
                 return ret;
@@ -870,17 +870,17 @@ int32_t HksOpensslAesEncryptUpdate(void *CryptoCtx, const struct HksBlob *messag
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslAesEncryptFinal(void **CryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
+int32_t HksOpensslAesEncryptFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)*CryptoCtx;
+    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)*cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
     switch (mode) {
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
-            ret = OpensslAesAeadEncryptFinalGCM(CryptoCtx, message, cipherText, tagAead);
+            ret = OpensslAesAeadEncryptFinalGCM(cryptoCtx, message, cipherText, tagAead);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesAeadEncryptFinalGCM fail, ret = %d", ret);
                 return ret;
@@ -893,7 +893,7 @@ int32_t HksOpensslAesEncryptFinal(void **CryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherEncryptFinalThree(CryptoCtx, message, cipherText);
+            ret = OpensslAesCipherEncryptFinalThree(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesCipherEncryptFinalThree fail, ret = %d", ret);
                 return ret;
@@ -908,13 +908,13 @@ int32_t HksOpensslAesEncryptFinal(void **CryptoCtx, const struct HksBlob *messag
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslAesDecryptInit(void **CryptoCtx, const struct HksBlob *key,
+int32_t HksOpensslAesDecryptInit(void **cryptoCtx, const struct HksBlob *key,
     const struct HksUsageSpec *usageSpec)
 {
     int32_t ret;
     switch (usageSpec->mode) {
         case HKS_MODE_GCM:
-            ret = OpensslAesAeadCryptInit(key, usageSpec, false, CryptoCtx);
+            ret = OpensslAesAeadCryptInit(key, usageSpec, false, cryptoCtx);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesAeadDecryptInit fail, ret = %d", ret);
                 return ret;
@@ -923,7 +923,7 @@ int32_t HksOpensslAesDecryptInit(void **CryptoCtx, const struct HksBlob *key,
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherCryptInit(key, usageSpec, false, CryptoCtx);
+            ret = OpensslAesCipherCryptInit(key, usageSpec, false, cryptoCtx);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesCipherInit fail, ret = %d", ret);
                 return ret;
@@ -937,15 +937,15 @@ int32_t HksOpensslAesDecryptInit(void **CryptoCtx, const struct HksBlob *key,
     return ret;
 }
 
-int32_t HksOpensslAesDecryptUpdate(void *CryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
+int32_t HksOpensslAesDecryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)CryptoCtx;
+    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
     switch (mode) {
         case HKS_MODE_GCM:
-            ret = OpensslAesAeadDecryptUpdate(CryptoCtx, message, plainText);
+            ret = OpensslAesAeadDecryptUpdate(cryptoCtx, message, plainText);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesAeadDecryptFinal fail, ret = %d", ret);
                 return ret;
@@ -954,7 +954,7 @@ int32_t HksOpensslAesDecryptUpdate(void *CryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherDecryptUpdate(CryptoCtx, message, plainText);
+            ret = OpensslAesCipherDecryptUpdate(cryptoCtx, message, plainText);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesCipherDecryptFinal fail, ret = %d", ret);
                 return ret;
@@ -968,17 +968,17 @@ int32_t HksOpensslAesDecryptUpdate(void *CryptoCtx, const struct HksBlob *messag
     return ret;
 }
 
-int32_t HksOpensslAesDecryptFinal(void **CryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
+int32_t HksOpensslAesDecryptFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)*CryptoCtx;
+    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)*cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
     switch (mode) {
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
-            ret = OpensslAesAeadDecryptFinalGCM(CryptoCtx, message, cipherText, tagAead);
+            ret = OpensslAesAeadDecryptFinalGCM(cryptoCtx, message, cipherText, tagAead);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesAeadDecryptFinalGCM fail, ret = %d", ret);
                 return ret;
@@ -991,7 +991,7 @@ int32_t HksOpensslAesDecryptFinal(void **CryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherDecryptFinalThree(CryptoCtx, message, cipherText);
+            ret = OpensslAesCipherDecryptFinalThree(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("OpensslAesCipherDecryptFinalThree fail, ret = %d", ret);
                 return ret;
@@ -1006,14 +1006,14 @@ int32_t HksOpensslAesDecryptFinal(void **CryptoCtx, const struct HksBlob *messag
     return HKS_SUCCESS;
 }
 
-void HksOpensslAesHalFreeCtx(void **CryptoCtx)
+void HksOpensslAesHalFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Openssl aes free ctx is null");
         return;
     }
 
-    struct HksOpensslAesCtx *opensslAesCtx = (struct HksOpensslAesCtx *)*CryptoCtx;
+    struct HksOpensslAesCtx *opensslAesCtx = (struct HksOpensslAesCtx *)*cryptoCtx;
     switch (opensslAesCtx->mode) {
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
@@ -1048,9 +1048,9 @@ void HksOpensslAesHalFreeCtx(void **CryptoCtx)
             break;
     }
 
-    if (*CryptoCtx != NULL) {
-        HksFree(*CryptoCtx);
-        *CryptoCtx = NULL;
+    if (*cryptoCtx != NULL) {
+        HksFree(*cryptoCtx);
+        *cryptoCtx = NULL;
     }
 }
 

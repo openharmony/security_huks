@@ -37,13 +37,13 @@ int32_t HksOpensslHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
     defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512)
 int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac);
 
-int32_t HksOpensslHmacInit(void **CryptoCtx, const struct HksBlob *key, uint32_t digestAlg);
+int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t digestAlg);
 
-int32_t HksOpensslHmacUpdate(void *CryptoCtx, const struct HksBlob *msg);
+int32_t HksOpensslHmacUpdate(void *cryptoCtx, const struct HksBlob *msg);
 
-int32_t HksOpensslHmacFinal(void **CryptoCtx, struct HksBlob *msg, struct HksBlob *mac);
+int32_t HksOpensslHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlob *mac);
 
-void HksOpensslHmacHalFreeCtx(void **CryptoCtx);
+void HksOpensslHmacHalFreeCtx(void **cryptoCtx);
 #endif /* HKS_SUPPORT_HMAC_SHA1 */
 #endif /* HKS_SUPPORT_HMAC_C */
 
