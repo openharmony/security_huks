@@ -21,6 +21,7 @@
 
 #include "hks_api.h"
 
+#include "hks_ability.h"
 #include "hks_client_ipc.h"
 #include "hks_local_engine.h"
 #include "hks_log.h"
@@ -82,6 +83,7 @@ HKS_API_EXPORT int32_t HksInitialize(void)
     HKS_LOG_I("leave initialize, result = %d", ret);
     return ret;
 #else
+    (void)HksCryptoAbilityInit();
     return HKS_SUCCESS;
 #endif
 }

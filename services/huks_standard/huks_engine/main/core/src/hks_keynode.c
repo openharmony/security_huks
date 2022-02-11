@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#ifndef _CUT_AUTHENTICATE_
+
 #include "hks_keynode.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -103,7 +105,6 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
     return HKS_SUCCESS;
 }
 
-#ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
@@ -210,7 +211,6 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     return keyNode;
 }
 #endif // _STORAGE_LITE_
-#endif /* _CUT_AUTHENTICATE_ */
 
 struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
 {
@@ -242,3 +242,4 @@ void HksDeleteKeyNode(uint64_t handle)
     }
     HksMutexUnlock(HksCoreGetHuksMutex());
 }
+#endif /* _CUT_AUTHENTICATE_ */
