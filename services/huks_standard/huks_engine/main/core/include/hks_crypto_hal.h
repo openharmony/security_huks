@@ -131,7 +131,7 @@ int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const st
 
 int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx);
 
-int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx);
+int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void **ctx);
 
 int32_t HksCryptoHalHashFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *hash);
 

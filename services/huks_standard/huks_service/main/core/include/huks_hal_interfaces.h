@@ -18,6 +18,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+
 #include "hks_config.h"
 #include "hks_log.h"
 
