@@ -66,27 +66,27 @@ int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const unsigned
 
 int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[64]);
 
-int32_t HksMbedtlsHashInit(void **CryptoCtx, uint32_t digestAlg)
+int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
 {
     int32_t ret;
     switch (digestAlg) {
         case HKS_DIGEST_MD5:
-            ret = HksMbedtlsHashMd5Init(CryptoCtx, digestAlg); /* 0 for MD5 */
+            ret = HksMbedtlsHashMd5Init(cryptoCtx, digestAlg); /* 0 for MD5 */
             break;
         case HKS_DIGEST_SHA1:
-            ret = HksMbedtlsHashSha1Init(CryptoCtx, digestAlg); /* 0 for SHA-1 */
+            ret = HksMbedtlsHashSha1Init(cryptoCtx, digestAlg); /* 0 for SHA-1 */
             break;
         case HKS_DIGEST_SHA224:
-            ret = HksMbedtlsHashSha256Init(CryptoCtx, 1, digestAlg); /* 0 for SHA-224 */
+            ret = HksMbedtlsHashSha256Init(cryptoCtx, 1, digestAlg); /* 0 for SHA-224 */
             break;
         case HKS_DIGEST_SHA256:
-            ret = HksMbedtlsHashSha256Init(CryptoCtx, 0, digestAlg); /* 0 for SHA-256 */
+            ret = HksMbedtlsHashSha256Init(cryptoCtx, 0, digestAlg); /* 0 for SHA-256 */
             break;
         case HKS_DIGEST_SHA384:
-            ret = HksMbedtlsHashSha512Init(CryptoCtx, 1, digestAlg); /* 1 for SHA-384 */
+            ret = HksMbedtlsHashSha512Init(cryptoCtx, 1, digestAlg); /* 1 for SHA-384 */
             break;
         case HKS_DIGEST_SHA512:
-            ret = HksMbedtlsHashSha512Init(CryptoCtx, 0, digestAlg); /* 0 for SHA-512 */
+            ret = HksMbedtlsHashSha512Init(cryptoCtx, 0, digestAlg); /* 0 for SHA-512 */
             break;
         default:
             return HKS_ERROR_INVALID_DIGEST;
@@ -100,10 +100,10 @@ int32_t HksMbedtlsHashInit(void **CryptoCtx, uint32_t digestAlg)
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsHashUpdate(void *CryptoCtx, const struct HksBlob *msg)
+int32_t HksMbedtlsHashUpdate(void **cryptoCtx, const struct HksBlob *msg)
 {
     int32_t ret;
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
 
     switch (rsaCtx->mAlg) {
         case HKS_DIGEST_MD5:
@@ -132,10 +132,10 @@ int32_t HksMbedtlsHashUpdate(void *CryptoCtx, const struct HksBlob *msg)
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsHashFinal(void **CryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
+int32_t HksMbedtlsHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
 {
     int32_t ret;
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
 
     switch (rsaCtx->mAlg) {
         case HKS_DIGEST_MD5:
@@ -566,13 +566,13 @@ int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct Hk
     return HKS_SUCCESS;
 }
 
-void HksMbedtlsMd5HashFreeCtx(void **CryptoCtx)
+void HksMbedtlsMd5HashFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Mbedtls Hash freeCtx param error");
         return;
     }
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     mbedtls_md5_free((mbedtls_md5_context *)rsaCtx->append); /* 0 for MD5 */
     if (rsaCtx->append != NULL) {
         HksFree(rsaCtx->append);
@@ -580,13 +580,13 @@ void HksMbedtlsMd5HashFreeCtx(void **CryptoCtx)
     }
 }
 
-void HksMbedtlsSHA1HashFreeCtx(void **CryptoCtx)
+void HksMbedtlsSHA1HashFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Mbedtls Hash freeCtx param error");
         return;
     }
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     mbedtls_sha1_free((mbedtls_sha1_context *)rsaCtx->append); /* 0 for MD5 */
     if (rsaCtx->append != NULL) {
         HksFree(rsaCtx->append);
@@ -594,13 +594,13 @@ void HksMbedtlsSHA1HashFreeCtx(void **CryptoCtx)
     }
 }
 
-void HksMbedtlsSha224Sha256HashFreeCtx(void **CryptoCtx)
+void HksMbedtlsSha224Sha256HashFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Mbedtls Hash freeCtx param error");
         return;
     }
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     if (rsaCtx->append != NULL) {
         mbedtls_sha256_free((mbedtls_sha256_context *)rsaCtx->append);
         if (rsaCtx->append != NULL) {
@@ -610,13 +610,13 @@ void HksMbedtlsSha224Sha256HashFreeCtx(void **CryptoCtx)
     }
 }
 
-void HksMbedtlsSha384Sha512HashFreeCtx(void **CryptoCtx)
+void HksMbedtlsSha384Sha512HashFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Mbedtls Hash freeCtx param error");
         return;
     }
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     if (rsaCtx->append != NULL) {
         mbedtls_sha512_free((mbedtls_sha512_context *)rsaCtx->append);
         if (rsaCtx->append != NULL) {
@@ -626,35 +626,35 @@ void HksMbedtlsSha384Sha512HashFreeCtx(void **CryptoCtx)
     }
 }
 
-void HksMbedtlsHashFreeCtx(void **CryptoCtx)
+void HksMbedtlsHashFreeCtx(void **cryptoCtx)
 {
-    if (CryptoCtx == NULL || *CryptoCtx == NULL) {
+    if (cryptoCtx == NULL || *cryptoCtx == NULL) {
         HKS_LOG_E("Mbedtls Hash freeCtx param error");
         return;
     }
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*CryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     switch (rsaCtx->mAlg) {
         case HKS_DIGEST_MD5:
-            HksMbedtlsMd5HashFreeCtx(CryptoCtx);
+            HksMbedtlsMd5HashFreeCtx(cryptoCtx);
             break;
         case HKS_DIGEST_SHA1:
-            HksMbedtlsSHA1HashFreeCtx(CryptoCtx);
+            HksMbedtlsSHA1HashFreeCtx(cryptoCtx);
             break;
         case HKS_DIGEST_SHA224:
         case HKS_DIGEST_SHA256:
-            HksMbedtlsSha224Sha256HashFreeCtx(CryptoCtx);
+            HksMbedtlsSha224Sha256HashFreeCtx(cryptoCtx);
             break;
         case HKS_DIGEST_SHA384:
         case HKS_DIGEST_SHA512:
-            HksMbedtlsSha384Sha512HashFreeCtx(CryptoCtx);
+            HksMbedtlsSha384Sha512HashFreeCtx(cryptoCtx);
             break;
         default:
             break;
     }
 
-    if (*CryptoCtx != NULL) {
-        HksFree(*CryptoCtx);
-        *CryptoCtx = NULL;
+    if (*cryptoCtx != NULL) {
+        HksFree(*cryptoCtx);
+        *cryptoCtx = NULL;
     }
 }
 

@@ -15,25 +15,17 @@
 
 #include "hks_get_process_info.h"
 
-#include "securec.h"
-
-#include "hks_mem.h"
-
-#define USER_ID_ROOT_DEFAULT          "0"
 static char g_processName[] = "hks_client";
+static char g_userId[] = "0";
+
 int32_t HksGetProcessName(char **processName)
 {
     *processName = g_processName;
     return HKS_SUCCESS;
 }
 
-int32_t GetUserIDWithProcessName(struct HksBlob *processName, struct HksBlob *userID)
+int32_t HksGetUserId(char **userId)
 {
-    (void)processName;
-    userID->data = (uint8_t *)malloc(sizeof(USER_ID_ROOT_DEFAULT));
-    userID->size = sizeof(USER_ID_ROOT_DEFAULT);
-    if (memcpy_s(userID->data, userID->size, USER_ID_ROOT_DEFAULT, sizeof(USER_ID_ROOT_DEFAULT)) != EOK) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    *userId = g_userId;
     return HKS_SUCCESS;
 }

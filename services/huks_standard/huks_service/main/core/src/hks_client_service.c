@@ -100,10 +100,10 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
     return ret;
 }
 
-int32_t HksServiceGetKeyInfoList(const struct HksBlob *processName, struct HksKeyInfo *keyInfoList,
+int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount)
 {
-    int32_t ret = HksCheckGetKeyInfoListParams(processName, keyInfoList, listCount);
+    int32_t ret = HksCheckGetKeyInfoListParams(&(processInfo->processName), keyInfoList, listCount);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -111,18 +111,6 @@ int32_t HksServiceGetKeyInfoList(const struct HksBlob *processName, struct HksKe
     return HksStoreGetKeyInfoList(keyInfoList, listCount);
 }
 #else
-
-void HksSaveUserIdUIDToProcessInfo(const struct HksBlob *userData, const struct HksBlob *processData,
-    struct HksProcessInfo *processInfo)
-{
-    (void)memset_s(processInfo, sizeof(struct HksProcessInfo), 0, sizeof(struct HksProcessInfo));
-    if (userData->size > 0) {
-        processInfo->userId.size = userData->size;
-        processInfo->userId.data = userData->data;
-    }
-    processInfo->processName.size = processData->size;
-    processInfo->processName.data = processData->data;
-}
 
 static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     struct HksBlob *key, int32_t mode)
@@ -1391,19 +1379,6 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
     return ret;
 }
 
-int32_t HksGetUserIDWithProcessName(struct HksBlob *processName, struct HksBlob *userID)
-{
-    (void)processName;
-    userID->data = (uint8_t *)HksMalloc(sizeof(USER_ID_ROOT_DEFAULT));
-    if (userID->data == NULL) {
-        HKS_LOG_E("malloc fail.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    userID->size = sizeof(USER_ID_ROOT_DEFAULT);
-    (void)memcpy_s(userID->data, userID->size, USER_ID_ROOT_DEFAULT, userID->size);
-    return HKS_SUCCESS;
-}
-
 int32_t HksServiceDeleteUserIDKeyAliasFile(const char *userID)
 {
     char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
@@ -1454,36 +1429,6 @@ int32_t HksServiceDeleteUIDKeyAliasFile(const char *userID, const char *uid)
     }
 
     return HksDeleteDir(userProcess);
-}
-
-int32_t StoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    struct HksBlob *outData)
-{
-    struct HksStoreFileInfo fileInfo;
-    struct HksParam *storage = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storage);
-    if (ret == HKS_SUCCESS) {
-        if (storage != NULL && storage->uint32Param == HKS_STORAGE_PERSISTENT) {
-            struct HksParam *keyAliasParam = NULL;
-            ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("get keyAliasParam failed");
-                return ret;
-            }
-            ret = HksGetFileInfo(processInfo, &keyAliasParam->blob, HKS_STORAGE_TYPE_KEY, &fileInfo);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksGetFileInfo fail, ret:%x", ret);
-                return ret;
-            }
-            ret = HksFileWrite(fileInfo.mainPath.path, fileInfo.mainPath.fileName, 0, outData->data, outData->size);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksFileWrite fail, ret:%x", ret);
-                return ret;
-            }
-        }
-    }
-
-    return HKS_SUCCESS;
 }
 
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
