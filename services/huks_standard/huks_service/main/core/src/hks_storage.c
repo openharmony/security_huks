@@ -662,14 +662,28 @@ static int32_t MakeSubPath(const char *mainPath, const char *tmpPath, char *outP
     return HKS_SUCCESS;
 }
 
-static int32_t MakeUserAndProcessNamePath(char *mainRootPath, char *userProcess,
-    const struct HksProcessInfo *processInfo)
+static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userProcess,
+    int32_t processLen, const struct HksProcessInfo *processInfo)
 {
     char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
+    char *user = (char *)HksMalloc(HKS_PROCESS_INFO_LEN);
+    if (user == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(user, HKS_PROCESS_INFO_LEN, 0, HKS_PROCESS_INFO_LEN);
 
-    if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->userId.data, processInfo->userId.size) != EOK) {
+    int32_t ret = ConstructName(&processInfo->userId, user, HKS_PROCESS_INFO_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct name failed, ret = %d.", ret);
+        HksFree(user);
+        return ret;
+    }
+
+    if (memcpy_s(userProcess, processLen, user, strlen(user)) != EOK) {
+        HksFree(user);
         return HKS_ERROR_INTERNAL_ERROR;
     }
+    HksFree(user);
 
     if (MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {
         return HKS_ERROR_INTERNAL_ERROR;
@@ -720,7 +734,8 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
         return HKS_ERROR_NULL_POINTER;
     }
 
-    if (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, sizeof(USER_ID_ROOT)) == 0) {
+    if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
+        (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, sizeof(USER_ID_ROOT)) == 0)) {
         if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
             return HKS_ERROR_INTERNAL_ERROR;
@@ -734,7 +749,8 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
             return ret;
         }
     } else {
-        if (MakeUserAndProcessNamePath(bakRootPath, userProcess, processInfo) != HKS_SUCCESS) {
+        if (MakeUserAndProcessNamePath(bakRootPath, userProcess, HKS_PROCESS_INFO_LEN,
+            processInfo) != HKS_SUCCESS) {
             return HKS_ERROR_INTERNAL_ERROR;
         }
     }
@@ -769,7 +785,8 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
         return HKS_ERROR_NULL_POINTER;
     }
 
-    if (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, sizeof(USER_ID_ROOT)) == 0) {
+    if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
+        (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, strlen(USER_ID_ROOT)) == 0)) {
         if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
             return HKS_ERROR_INTERNAL_ERROR;
@@ -783,7 +800,7 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
             return HKS_ERROR_NO_PERMISSION;
         }
     } else {
-        if (MakeUserAndProcessNamePath(mainRootPath, userProcess, processInfo) != HKS_SUCCESS) {
+        if (MakeUserAndProcessNamePath(mainRootPath, userProcess, HKS_PROCESS_INFO_LEN, processInfo) != HKS_SUCCESS) {
             return HKS_ERROR_INTERNAL_ERROR;
         }
     }

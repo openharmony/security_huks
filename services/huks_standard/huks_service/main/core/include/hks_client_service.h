@@ -83,15 +83,8 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
 int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *mac);
 
-#ifndef _CUT_AUTHENTICATE_
-#ifdef _STORAGE_LITE_
-int32_t HksServiceGetKeyInfoList(const struct HksBlob *processName, struct HksKeyInfo *keyInfoList,
-    uint32_t *listCount);
-#else // _STORAGE_LITE_
 int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount);
-#endif // _STORAGE_LITE_
-#endif // _CUT_AUTHENTICATE_
 
 int32_t HksServiceAttestKey(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain);
@@ -111,8 +104,6 @@ int32_t HksServiceDeleteUserIDKeyAliasFile(const char *userID);
 
 int32_t HksServiceDeleteUIDKeyAliasFile(const char *userID, const char *uid);
 
-int32_t HksGetUserIDWithProcessName(struct HksBlob *processName, struct HksBlob *userID);  // dummy
-
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle);
 
@@ -124,8 +115,6 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
-void HksSaveUserIdUIDToProcessInfo(const struct HksBlob *userData, const struct HksBlob *processData,
-    struct HksProcessInfo *processInfo);
 #ifdef __cplusplus
 }
 #endif

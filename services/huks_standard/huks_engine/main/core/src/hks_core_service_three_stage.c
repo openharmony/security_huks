@@ -245,7 +245,8 @@ static int32_t StoreSignVerifyMessage(const struct HksParamSet *paramSet, const 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
 
     if (algParam->uint32Param != HKS_ALG_ED25519) {
-        ret = HksCryptoHalHashUpdate(srcData, ctx);
+        ret = HksCryptoHalHashUpdate(srcData, &ctx);
+        ctxParam->uint64Param = (uint64_t)(uintptr_t)ctx;
         if (ret != HKS_SUCCESS)  {
             HKS_LOG_E("Sign HksCryptoHalHashUpdate fail ret : %d", ret);
             return ret;
@@ -351,7 +352,7 @@ static void ClearCryptoCtx(const struct HuksKeyNode *keyNode)
     return;
 }
 
-int32_t CoreSignVerifyHash(uint32_t alg, void *ctx, const struct HksBlob *inData, struct HksBlob *outData)
+int32_t CoreSignVerifyHash(uint32_t alg, void **ctx, const struct HksBlob *inData, struct HksBlob *outData)
 {
     if (alg != HKS_ALG_ED25519) {
         outData->size = MAX_HASH_SIZE;
@@ -360,13 +361,13 @@ int32_t CoreSignVerifyHash(uint32_t alg, void *ctx, const struct HksBlob *inData
             HKS_LOG_E("malloc fail.");
             return HKS_ERROR_MALLOC_FAIL;
         }
-        int32_t ret = HksCryptoHalHashFinal(inData, &ctx, outData);
+        int32_t ret = HksCryptoHalHashFinal(inData, ctx, outData);
         if (ret != HKS_SUCCESS)  {
             HKS_LOG_E("Sign HksCryptoHalHashFinal fail ret : %d", ret);
             return ret;
         }
     } else {
-        struct HksBlob *restoreData = (struct HksBlob *)ctx;
+        struct HksBlob *restoreData = (struct HksBlob *)*ctx;
         if (restoreData == NULL) {
             HKS_LOG_E("CoreSignVerifyHash ctx is null.");
             return HKS_FAILURE;
@@ -471,7 +472,7 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
 
     do {
-        ret = CoreSignVerifyHash(usageSpec.algType, ctx, inData, &signVerifyData);
+        ret = CoreSignVerifyHash(usageSpec.algType, &ctx, inData, &signVerifyData);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("SighVerifyHash failed!");
             break;

@@ -24,7 +24,7 @@ extern "C" {
 
 int32_t HksGetProcessName(char **processName);
 
-int32_t GetUserIDWithProcessName(struct HksBlob *processName, struct HksBlob *userID);
+int32_t HksGetUserId(char **userId);
 
 #ifdef __cplusplus
 }

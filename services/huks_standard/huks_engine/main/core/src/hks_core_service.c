@@ -1075,7 +1075,7 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     uint32_t i;
     uint32_t size = HKS_ARRAY_SIZE(g_hksCoreAbortHandler);
-    for (i = 0; i<size; i++) {
+    for (i = 0; i < size; i++) {
         if (g_hksCoreAbortHandler[i].pur == pur) {
             ret = g_hksCoreAbortHandler[i].handler(keyNode, paramSet, alg);
             break;
