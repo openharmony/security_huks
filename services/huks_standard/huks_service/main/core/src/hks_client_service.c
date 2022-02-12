@@ -44,7 +44,6 @@
 #define MAX_KEY_COUNT 256
 #define MAX_STORAGE_SIZE (2 * 1024 * 1024)
 
-
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
 static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
@@ -1352,32 +1351,6 @@ int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct Hks
     (void)certChain;
     return 0;
 }
-#endif
-
-int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBlob *random)
-{
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-
-    do {
-        ret = HksCheckGenerateRandomParams(processName, random);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check generate random params failed, ret = %d", ret);
-            break;
-        }
-
-        ret = AppendProcessNameTag(NULL, processName, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("append processName tag failed, ret = %d", ret);
-            break;
-        }
-
-        ret = HksHalGenerateRandom(newParamSet, random);
-    } while (0);
-
-    HksFreeParamSet(&newParamSet);
-    return ret;
-}
 
 int32_t HksServiceDeleteUserIDKeyAliasFile(const char *userID)
 {
@@ -1538,5 +1511,37 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksParamSet *
         HKS_LOG_E("HksHalFinish fail, ret = %d", ret);
         return ret;
     }
+    return ret;
+}
+#endif
+
+int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBlob *random)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+
+    do {
+        ret = HksCheckGenerateRandomParams(processName, random);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("check generate random params failed, ret = %d", ret);
+            break;
+        }
+
+        ret = AppendProcessNameTag(NULL, processName, &newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("append processName tag failed, ret = %d", ret);
+            break;
+        }
+
+        ret = HksCreateHksHalDevice();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksCreateHksHalDevice, ret = %d", ret);
+            break;
+        }
+
+        ret = HksHalGenerateRandom(newParamSet, random);
+    } while (0);
+
+    HksFreeParamSet(&newParamSet);
     return ret;
 }
