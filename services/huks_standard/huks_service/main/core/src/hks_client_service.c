@@ -1129,6 +1129,7 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     return ret;
 }
 
+#ifndef __LITEOS_M__
 int32_t HksServiceProcessInit(uint32_t msgId, const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, uint64_t *operationHandle)
 {
@@ -1224,6 +1225,7 @@ int32_t HksServiceProcessFinal(uint32_t msgId, uint64_t operationHandle, const s
 
     return ret;
 }
+#endif
 
 int32_t HksServiceSignWithDeviceKey(const struct HksBlob *processName, uint32_t keyId,
     const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature)
@@ -1379,6 +1381,7 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
     return ret;
 }
 
+#ifndef __LITEOS_M__
 int32_t HksServiceDeleteUserIDKeyAliasFile(const char *userID)
 {
     char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
@@ -1430,6 +1433,7 @@ int32_t HksServiceDeleteUIDKeyAliasFile(const char *userID, const char *uid)
 
     return HksDeleteDir(userProcess);
 }
+#endif
 
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle)
