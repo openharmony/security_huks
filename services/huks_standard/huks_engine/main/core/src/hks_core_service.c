@@ -799,13 +799,6 @@ int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
     return ret;
 }
 #endif
-#endif /* _CUT_AUTHENTICATE_ */
-
-int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
-{
-    (void)paramSet;
-    return HksCryptoHalFillRandom(random);
-}
 
 int32_t HksCoreModuleInit(void)
 {
@@ -832,7 +825,7 @@ int32_t HksCoreModuleInit(void)
     }
 #endif
 
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksCoreRefresh(void)
@@ -1129,3 +1122,11 @@ HksMutex *HksCoreGetHuksMutex(void)
 
     return g_huksMutex;
 }
+#endif /* _CUT_AUTHENTICATE_ */
+
+int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
+{
+    (void)paramSet;
+    return HksCryptoHalFillRandom(random);
+}
+

@@ -121,7 +121,9 @@ struct HksCoreIfDevice *HksCreateCoreIfDevicePtr(void)
         HKS_LOG_E("HksCreateCoreIfDevicePtr malloc g_hksCoreIfDevicePtr failed.");
         return g_hksCoreIfDevicePtr;
     }
+    (void)memset_s(g_hksCoreIfDevicePtr, sizeof(struct HksCoreIfDevice), 0, sizeof(struct HksCoreIfDevice));
 
+#ifndef _CUT_AUTHENTICATE_
     g_hksCoreIfDevicePtr->ModuleInit       = HksCoreIfModuleInit;
     g_hksCoreIfDevicePtr->Refresh          = HksCoreIfRefresh;
     g_hksCoreIfDevicePtr->GenerateKey      = HksCoreIfGenerateKey;
@@ -139,15 +141,12 @@ struct HksCoreIfDevice *HksCreateCoreIfDevicePtr(void)
 
 #ifdef _STORAGE_LITE_
     g_hksCoreIfDevicePtr->CalcMacHeader    = HksCoreIfCalcMacHeader;
-#else
-    g_hksCoreIfDevicePtr->CalcMacHeader    = NULL;
 #endif
 
 #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
     g_hksCoreIfDevicePtr->UpgradeKeyInfo   = HksCoreIfUpgradeKeyInfo;
-#else
-    g_hksCoreIfDevicePtr->UpgradeKeyInfo   = NULL;
 #endif
+#endif /* _CUT_AUTHENTICATE_ */
 
     g_hksCoreIfDevicePtr->GenerateRandom   = HksCoreGenerateRandom;
 

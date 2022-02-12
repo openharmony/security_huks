@@ -19,8 +19,6 @@
 #include "hks_type_inner.h"
 #include "hks_mem.h"
 
-#ifndef _CUT_AUTHENTICATE_
-
 struct HksHalDevice *g_hksHalDevicePtr = NULL;
 
 static int32_t CheckPtr(void *ptr)
@@ -32,6 +30,7 @@ static int32_t CheckPtr(void *ptr)
     return HKS_SUCCESS;
 }
 
+#ifndef _CUT_AUTHENTICATE_
 int32_t HksHalModuleInit(void)
 {
     if (CheckPtr((void *)g_hksHalDevicePtr->ModuleInit) == HKS_SUCCESS) {
@@ -149,38 +148,6 @@ int32_t HksHalGetHardwareInfo(void)
     return HKS_FAILURE;
 }
 
-int32_t HksHalGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
-{
-    if (CheckPtr((void *)g_hksHalDevicePtr->GenerateRandom) == HKS_SUCCESS) {
-        return g_hksHalDevicePtr->GenerateRandom(paramSet, random);
-    }
-    return HKS_FAILURE;
-}
-
-int32_t HksCreateHksHalDevice(void)
-{
-    if (g_hksHalDevicePtr != NULL) {
-        return HKS_SUCCESS;
-    }
-
-    g_hksHalDevicePtr = (struct HksHalDevice *)HksCreateCoreIfDevicePtr();
-    if (g_hksHalDevicePtr == NULL)  {
-        HKS_LOG_E("g_hksHalDevicePtr is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    return HKS_SUCCESS;
-}
-
-int32_t HksDestroyHksHalDevice(void)
-{
-    if (g_hksHalDevicePtr != NULL) {
-        HksDestoryCoreIfDevicePtr();
-        g_hksHalDevicePtr = NULL;
-    }
-    return HKS_SUCCESS;
-}
-
 int32_t HksHalProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     uint64_t *operationHandle)
 {
@@ -230,8 +197,6 @@ int32_t HksHalUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlo
     }
     return HKS_FAILURE;
 }
-
-#endif
 #endif
 
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
@@ -240,3 +205,38 @@ int32_t HksHalAttestKey(const struct HksBlob *key, const struct HksParamSet *par
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
+
+#endif /* _CUT_AUTHENTICATE_ */
+
+int32_t HksHalGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
+{
+    if (CheckPtr((void *)g_hksHalDevicePtr->GenerateRandom) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->GenerateRandom(paramSet, random);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksCreateHksHalDevice(void)
+{
+    if (g_hksHalDevicePtr != NULL) {
+        return HKS_SUCCESS;
+    }
+
+    g_hksHalDevicePtr = (struct HksHalDevice *)HksCreateCoreIfDevicePtr();
+    if (g_hksHalDevicePtr == NULL)  {
+        HKS_LOG_E("g_hksHalDevicePtr is NULL!");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksDestroyHksHalDevice(void)
+{
+    if (g_hksHalDevicePtr != NULL) {
+        HksDestoryCoreIfDevicePtr();
+        g_hksHalDevicePtr = NULL;
+    }
+    return HKS_SUCCESS;
+}
+
