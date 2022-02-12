@@ -98,10 +98,6 @@ HKS_API_EXPORT int32_t HksIsAttestReady(void);
 
 HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksBlob *certChain, struct HksParamSet *paramSetOut);
 
-HKS_API_EXPORT int32_t HksDeleteUserIDKeyAliasFile(const char *userID);
-
-HKS_API_EXPORT int32_t HksDeleteUIDKeyAliasFile(const char *userID, const char *uid);
-
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *handle);
 

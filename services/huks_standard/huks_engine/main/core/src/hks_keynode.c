@@ -16,11 +16,12 @@
 #ifndef _CUT_AUTHENTICATE_
 
 #include "hks_keynode.h"
-#include "hks_log.h"
-#include "hks_mem.h"
+
+#include "hks_core_service.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
-#include "hks_core_service.h"
+#include "hks_log.h"
+#include "hks_mem.h"
 
 static struct DoubleList g_keyNodeList =  { NULL, NULL };
 static uint64_t g_keyNodeHandle = 0;

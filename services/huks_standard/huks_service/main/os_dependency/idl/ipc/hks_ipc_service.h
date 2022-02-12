@@ -102,10 +102,6 @@ void HksIpcServiceWrapKey(const struct HksBlob *srcData, const uint8_t *context)
 
 void HksIpcServiceUnwrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcDeleteUserIDAliasFile(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcDeleteUIDAliasFile(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceInit(const struct HksBlob *paramSet, struct HksBlob *outData, const uint8_t *context);
 
 void HksIpcServiceUpdate(const struct HksBlob *paramSet, struct HksBlob *outData, const uint8_t *context);

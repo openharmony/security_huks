@@ -677,68 +677,6 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob 
     return ret;
 }
 
-int32_t HksClientDeleteUserIDKeyAliasFile(const char *userID)
-{
-    struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = strlen(userID);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(inBlob.data, inBlob.size, userID, inBlob.size);
-
-    return HksSendRequest(HKS_MSG_DELETE_USERID_KEYALIASFILE, &inBlob, NULL, NULL);
-}
-
-int32_t HksClientDeleteUIDKeyAliasFile(const char *userID, const char *uid)
-{
-    int32_t ret;
-
-    struct HksParamSet *sendParamSet = NULL;
-
-    struct HksBlob *userId = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    if (userId == NULL) {
-        HKS_LOG_E("malloc buffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    userId->size = strlen(userID);
-    userId->data = (uint8_t*) HksMalloc(strlen(userID));
-    if (userId->data == NULL) {
-        HKS_LOG_E("malloc buffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(userId->data, userId->size, userID, userId->size);
-
-    struct HksBlob *uId = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    uId->size = strlen(uid);
-    uId->data = (uint8_t*) HksMalloc(strlen(uid));
-    if (uId->data == NULL) {
-        HKS_LOG_E("malloc buffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(uId->data, uId->size, uid, uId->size);
-
-    struct HksParam params[] = {
-        { .tag = HKS_TAG_PARAM0_BUFFER,
-          .blob = *userId },
-        { .tag = HKS_TAG_PARAM1_BUFFER,
-          .blob = *uId },
-    };
-
-    ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamsToParamSet fail");
-        return ret;
-    }
-
-    struct HksBlob parcelBlob = {
-        .size = sendParamSet->paramSetSize,
-        .data = (uint8_t *)sendParamSet
-    };
-
-    return HksSendRequest(HKS_MSG_DELETE_UID_KEYALIASFILE, &parcelBlob, NULL, NULL);
-}
-
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *handle)
 {
