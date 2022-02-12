@@ -16,10 +16,7 @@
 #include "hks_client_ipc.h"
 #include "hks_client_service.h"
 #include "hks_get_process_info.h"
-#include "hks_file_operator.h"
 #include "hks_log.h"
-#include "hks_mem.h"
-#include "hks_operation.h"
 
 #define HKS_PROCESS_INFO_LEN    128
 #define HKS_MAX_DIRENT_FILE_LEN 128
@@ -39,19 +36,6 @@ int32_t HksClientRefreshKeyInfo(void)
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
     return HksServiceRefreshKeyInfo(&processNameBlob);
-}
-
-int32_t HksClientDeleteUserIDKeyAliasFile(const char *userID)
-{
-    (void)userID;
-    return HKS_SUCCESS;
-}
-
-int32_t HksClientDeleteUIDKeyAliasFile(const char *userID, const char *uid)
-{
-    (void)userID;
-    (void)uid;
-    return HKS_SUCCESS;
 }
 
 static int32_t GetProcessInfo(char **processName, char **userId)

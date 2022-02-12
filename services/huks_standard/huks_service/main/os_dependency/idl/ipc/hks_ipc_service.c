@@ -1047,67 +1047,6 @@ void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t 
     HKS_FREE_BLOB(certChainBlob);
 }
 
-void HksIpcDeleteUserIDAliasFile(const struct HksBlob *srcData, const uint8_t *context)
-{
-    int32_t ret;
-    do {
-        ret  = HksServiceDeleteUserIDKeyAliasFile((char *)srcData->data);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksIpcDeleteUserIDAliasFile fail, ret = %d", ret);
-            break;
-        }
-        HKS_LOG_E("HksIpcDeleteUserIDAliasFile success");
-    } while (0);
-
-    HksSendResponse(context, ret, NULL);
-}
-
-void HksIpcDeleteUIDAliasFile(const struct HksBlob *paramSetBlob, const uint8_t *context)
-{
-    int32_t ret;
-    struct HksParamSet *paramSet   = NULL;
-    struct HksBlob userId          = { 0, NULL };
-    struct HksBlob uId             = { 0, NULL };
-
-    ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
-    }
-
-    struct HksParamOut params[] = {
-        {
-            .tag = HKS_TAG_PARAM0_BUFFER,
-            .blob = &userId
-        },
-        {
-            .tag = HKS_TAG_PARAM1_BUFFER,
-            .blob = &uId
-        }
-    };
-    ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&paramSet);
-    }
-
-    char userIdTmp[userId.size + 1];
-    char uIdTmp[uId.size + 1];
-    memcpy_s(userIdTmp, userId.size, userId.data, userId.size);
-    userIdTmp[userId.size] = '\0';
-    memcpy_s(uIdTmp, uId.size, uId.data, uId.size);
-    uIdTmp[uId.size] = '\0';
-
-    do {
-        ret  = HksServiceDeleteUIDKeyAliasFile(userIdTmp, uIdTmp);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksIpcDeleteUIDAliasFile fail, ret = %d", ret);
-            break;
-        }
-        HKS_LOG_E("HksIpcDeleteUIDAliasFile success");
-    } while (0);
-
-    HksSendResponse(context, ret, NULL);
-}
-
 void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
 {
     int32_t ret;

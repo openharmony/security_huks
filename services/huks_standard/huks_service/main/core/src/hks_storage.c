@@ -23,7 +23,6 @@
 
 #include "hks_storage.h"
 
-#include "hks_common_check.h"
 #include "hks_file_operator.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -1445,4 +1444,92 @@ int32_t HksStoreDestory(const struct HksBlob *processName)
     HKS_FREE_PTR(name);
     return ret;
 }
+
+#ifndef __LITEOS_M__
+int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
+{
+    char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    if (userData == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+    int32_t ret = ConstructName(&processName, userData, HKS_MAX_FILE_NAME_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(userData);
+        return ret;
+    }
+
+    char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+    if (strncpy_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, userData, strlen(userData)) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "\0", strlen("\0")) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    HKS_LOG_E("delete path : %s", userProcess);
+    return HksDeleteDir(userProcess);
+}
+
+int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
+{
+    char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    if (userData == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+    int32_t ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(userData);
+        return ret;
+    }
+    char *uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    if (uidData == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+    ret = ConstructName(&processInfo.processName, uidData, HKS_MAX_FILE_NAME_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(uidData);
+        return ret;
+    }
+
+    char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+    if (strncpy_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, userData, strlen(userData)) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, uidData, strlen(uidData)) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "\0", strlen("\0")) != EOK) {
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    HKS_LOG_E("delete path : %s", userProcess);
+    return HksDeleteDir(userProcess);
+}
+#endif
 #endif /* _CUT_AUTHENTICATE_ */

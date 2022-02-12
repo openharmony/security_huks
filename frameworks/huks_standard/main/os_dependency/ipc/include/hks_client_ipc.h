@@ -78,10 +78,6 @@ int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *t
 int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
     const struct HksBlob *wrappedData, const struct HksParamSet *paramSet);
 
-int32_t HksClientDeleteUserIDKeyAliasFile(const char *userID);
-
-int32_t HksClientDeleteUIDKeyAliasFile(const char *userID, const char *uid);
-
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *handle);
 
 int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
