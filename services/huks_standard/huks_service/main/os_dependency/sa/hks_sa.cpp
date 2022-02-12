@@ -20,10 +20,11 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 
+#include "hks_client_service.h"
+#include "hks_event_observer.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_ipc_service.h"
-#include "hks_client_service.h"
 
 namespace OHOS {
 namespace Security {
@@ -82,8 +83,6 @@ enum HksMessage {
     HKS_MSG_PROVISION,
     HKS_MSG_PROVISION_VERIFY,
     HKS_MSG_EXPORT_TRUST_CERTS,
-    HKS_MSG_DELETE_USERID_KEYALIASFILE,
-    HKS_MSG_DELETE_UID_KEYALIASFILE,
     HKS_MSG_INIT,
     HKS_MSG_UPDATE,
     HKS_MSG_FINISH,
@@ -149,8 +148,6 @@ static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
     { HKS_MSG_PROVISION, HksIpcServiceProvision },
     { HKS_MSG_PROVISION_VERIFY, HksIpcServiceProvisionVerify },
     { HKS_MSG_EXPORT_TRUST_CERTS, HksIpcServiceExportTrustCerts },
-    { HKS_MSG_DELETE_USERID_KEYALIASFILE, HksIpcDeleteUserIDAliasFile},
-    { HKS_MSG_DELETE_UID_KEYALIASFILE, HksIpcDeleteUIDAliasFile},
 };
 
 HksService::HksService(int saId, bool runOnCreate = true)
@@ -191,6 +188,10 @@ bool HksService::Init()
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Init hks service failed!");
         return false;
+    }
+
+    if (!SystemEventObserver::SubscribeSystemEvent()) {
+        HKS_LOG_E("subscribe system event failed"); /* still running service */
     }
 
     HKS_LOG_I("HksService::Init success.");

@@ -695,39 +695,6 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksBlob *certChain, str
 #endif
 }
 
-HKS_API_EXPORT int32_t HksDeleteUserIDKeyAliasFile(const char *userID)
-{
-#ifdef HKS_SUPPORT_API_IMPORT
-    HKS_LOG_I("enter DeleteUserIDKeyAliasFile");
-    if (userID == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientDeleteUserIDKeyAliasFile(userID);
-    HKS_LOG_I("leave DeleteUserIDKeyAliasFile, result = %d", ret);
-    return ret;
-#else
-    (void)userID;
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
-}
-
-HKS_API_EXPORT int32_t HksDeleteUIDKeyAliasFile(const char *userID, const char *uid)
-{
-#ifdef HKS_SUPPORT_API_IMPORT
-    HKS_LOG_I("enter DeleteUIDKeyAliasFile");
-    if ((userID == NULL) || (uid == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientDeleteUIDKeyAliasFile(userID, uid);
-    HKS_LOG_I("leave DeleteUIDKeyAliasFile, result = %d", ret);
-    return ret;
-#else
-    (void)userID;
-    (void)uid;
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
-}
-
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *handle)
 {

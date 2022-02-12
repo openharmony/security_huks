@@ -14,8 +14,9 @@
  */
 
 #include "hks_core_interfaces.h"
-#include "hks_mem.h"
+
 #include "hks_core_service.h"
+#include "hks_mem.h"
 
 struct HksCoreIfDevice *g_hksCoreIfDevicePtr = NULL;
 

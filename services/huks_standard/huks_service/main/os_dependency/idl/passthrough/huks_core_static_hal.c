@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 
-#include "hks_crypto_hal.h"
 #include "huks_hal_interfaces.h"
+
 #include "hks_core_interfaces.h"
-#include "hks_type_inner.h"
+#include "hks_crypto_hal.h"
 #include "hks_mem.h"
+#include "hks_type_inner.h"
 
 struct HksHalDevice *g_hksHalDevicePtr = NULL;
 
