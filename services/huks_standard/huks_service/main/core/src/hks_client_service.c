@@ -24,7 +24,6 @@
 #include "hks_access.h"
 #include "hks_client_check.h"
 #include "hks_client_service_adapter.h"
-#include "hks_file_operator.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_operation.h"
@@ -1353,60 +1352,6 @@ int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct Hks
     (void)certChain;
     return 0;
 }
-
-#ifndef __LITEOS_M__
-int32_t HksServiceDeleteUserIDKeyAliasFile(const char *userID)
-{
-    char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-    if (strncpy_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, userID, strlen(userID)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "\0", strlen("\0")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    return HksDeleteDir(userProcess);
-}
-
-int32_t HksServiceDeleteUIDKeyAliasFile(const char *userID, const char *uid)
-{
-    char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-    if (strncpy_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, userID, strlen(userID)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, uid, strlen(uid)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "\0", strlen("\0")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    return HksDeleteDir(userProcess);
-}
-#endif
 
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle)

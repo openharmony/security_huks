@@ -85,6 +85,10 @@ int32_t HksStoreDestory(const struct HksBlob *processName);
 int32_t HksGetFileInfo(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, uint32_t storageType,
     struct HksStoreFileInfo *fileInfo);
 
+int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName);
+
+int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo);
+
 #ifdef _STORAGE_LITE_
 
 #define HKS_KEY_STORE_FILE_NAME "hks_keystore"

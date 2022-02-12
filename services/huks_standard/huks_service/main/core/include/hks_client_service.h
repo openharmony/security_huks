@@ -100,10 +100,6 @@ int32_t HksServiceUnwrapKey(const struct HksBlob *processName, const struct HksB
 
 int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct HksBlob *certChain);
 
-int32_t HksServiceDeleteUserIDKeyAliasFile(const char *userID);
-
-int32_t HksServiceDeleteUIDKeyAliasFile(const char *userID, const char *uid);
-
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle);
 

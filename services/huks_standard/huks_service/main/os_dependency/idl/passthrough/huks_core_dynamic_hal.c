@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
+#include "huks_hal_interfaces.h"
+
 #include <dlfcn.h>
+
 #include "hks_mem.h"
 #include "hks_type_inner.h"
-#include "huks_hal_interfaces.h"
 
 #ifndef _CUT_AUTHENTICATE_
 

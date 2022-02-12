@@ -22,9 +22,11 @@ ohos_static_library("libhuks_service_os_dependency_standard_static") {
   part_name = "huks"
   public_configs = [ ":huks_config" ]
   include_dirs = [
+    "//third_party/json/include",
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
   ]
+
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
@@ -34,6 +36,7 @@ ohos_static_library("libhuks_service_os_dependency_standard_static") {
     "posix/hks_file_operator.c",
     "posix/hks_mutex.c",
     "posix/hks_rwlock.c",
+    "sa/hks_event_observer.cpp",
     "sa/hks_sa.cpp",
   ]
   deps = [
@@ -43,8 +46,11 @@ ohos_static_library("libhuks_service_os_dependency_standard_static") {
   public_deps = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static" ]
 
   external_deps = [
+    "ability_base:want",
+    "ces_standard:cesfwk_innerkits",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
+    "os_account_standard:os_account_innerkits",
     "safwk:system_ability_fwk",
     "samgr_standard:samgr_proxy",
   ]
