@@ -904,13 +904,16 @@ protected:
         void* encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult)
             << "HksCryptoHalEncryptInit failed.";
-
+        if (testCaseParams.encryptResult != HKS_SUCCESS) {
+            return;
+        }
         uint32_t point = 0;
         if (inLen > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
                 memcpy_s(messageUpdate.data, messageUpdate.size, &message->data[point], HKS_UPDATE_DATA_MAX);
+                out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out, testCaseParams.usageSpec.algType),
                     testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
                 point = point + HKS_UPDATE_DATA_MAX;
@@ -962,6 +965,7 @@ protected:
             };
             while (index < outLen - HKS_UPDATE_DATA_MAX) {
                 memcpy_s(messageUpdate.data, messageUpdate.size, &cipherText->data[index], HKS_UPDATE_DATA_MAX);
+                out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out,
                     testCaseParams.usageSpec.algType), HKS_SUCCESS);
                 index = index + HKS_UPDATE_DATA_MAX;

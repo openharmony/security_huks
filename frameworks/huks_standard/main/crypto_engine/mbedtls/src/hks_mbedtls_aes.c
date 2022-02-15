@@ -273,8 +273,6 @@ static int32_t AesCbcNoPaddingCryptFinal(void **cryptoCtx,
     mbedtls_aes_free(ctx);
     HksFree(ctx);
     aesCtx->append = NULL;
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(*cryptoCtx);
     *cryptoCtx = NULL;
 
@@ -452,8 +450,6 @@ static int32_t AesCbcPkcs7CryptFinal(void **cryptoCtx, const struct HksBlob *mes
     mbedtls_cipher_free(cbcPkcs7ctx);
     HksFree(cbcPkcs7ctx);
     aesCtx->append = NULL;
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(*cryptoCtx);
     *cryptoCtx = NULL;
 
@@ -684,8 +680,6 @@ static int32_t AesEncryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
     mbedtls_gcm_free(gcmCtx);
     HksFree(gcmCtx);
     aesCtx->append = NULL;
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(*cryptoCtx);
     *cryptoCtx = NULL;
     return HKS_SUCCESS;
@@ -844,8 +838,6 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
         HksFree(gcmCtx);
         aesCtx->append = NULL;
     }
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(*cryptoCtx);
     *cryptoCtx = NULL;
 
@@ -999,8 +991,6 @@ static int32_t AesEncryptCcmFinal(void **cryptoCtx, struct HksBlob *message,
         HksFree(ccmCtx);
         aesCtx->append = NULL;
     }
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(aesCtx->ccmMessageTotal.data);
     aesCtx->ccmMessageTotal.data = NULL;
     HksFree(aesCtx->nonce);
@@ -1195,8 +1185,6 @@ static int32_t AesDecryptCcmFinal(void **cryptoCtx, const struct HksBlob *messag
         cipherText->size = aesCtx->ccmMessageTotal.size;
     }
     mbedtls_ccm_free(ccmCtx);
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(aesCtx->ccmMessageTotal.data);
     aesCtx->ccmMessageTotal.data = NULL;
     if (ccmCtx != NULL) {
@@ -1392,8 +1380,6 @@ static int32_t AesCtrCryptFinal(void **cryptoCtx, const struct HksBlob *message,
         HksFree(ctrCtx);
         aesCtx->append = NULL;
     }
-    HksFree(aesCtx->algParam);
-    aesCtx->algParam = NULL;
     HksFree(*cryptoCtx);
     *cryptoCtx = NULL;
     return HKS_SUCCESS;
@@ -1565,18 +1551,25 @@ static mbedtls_cipher_context_t *GetAesEcbNoPaddingCtx(void *cryptoCtx, const st
         return NULL;
     }
 
-    size_t blockSize = mbedtls_cipher_get_block_size(ecbNoPadingctx);
-    if (message == NULL || message->size == 0 || blockSize == 0 || (message->size % blockSize != 0)) {
-        HKS_LOG_E("The size of message is invalid.");
+    if (message == NULL)) {
+        HKS_LOG_E("The message is null.");
         return NULL;
     }
 
-    int32_t ret = AesEcbNoPaddingData(ecbNoPadingctx, blockSize, message, cipherText, olenTotal);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AesEcbNoPaddingData failed");
-        return NULL;
-    }
+    if (message->size != 0) {
+        size_t blockSize = mbedtls_cipher_get_block_size(ecbNoPadingctx);
+        HKS_LOG_E("Ecb No padding update!message.size[%d] blockSize[%d]", message->size, blockSize);
+        if (blockSize == 0 || (message->size % blockSize != 0)) {
+            HKS_LOG_E("The size of message is invalid.");
+            return NULL;
+        }
 
+        int32_t ret = AesEcbNoPaddingData(ecbNoPadingctx, blockSize, message, cipherText, olenTotal);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("AesEcbNoPaddingData failed");
+            return NULL;
+        }
+    }
     return ecbNoPadingctx;
 }
 
@@ -1971,7 +1964,7 @@ int32_t HksMbedtlsAesDecryptFinal(void **cryptoCtx, const struct HksBlob *messag
     }
 }
 
-int32_t HksMbedtlsAesCryptoInit(void** cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+int32_t HksMbedtlsAesCryptoInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const bool encrypt)
 {
     if (encrypt) {
@@ -1991,7 +1984,7 @@ int32_t HksMbedtlsAesCryptoUpdate(void *cryptoCtx, const struct HksBlob *message
     }
 }
 
-int32_t HksMbedtlsAesCryptoFinal(void** cryptoCtx, const struct HksBlob *message,
+int32_t HksMbedtlsAesCryptoFinal(void **cryptoCtx, const struct HksBlob *message,
     struct HksBlob *cipherText, struct HksBlob *tagAead, const bool encrypt)
 {
     if (encrypt) {
