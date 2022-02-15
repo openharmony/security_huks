@@ -6,7 +6,7 @@
 
 ## Introduction<a name="section11660541593"></a>
 
-Harmony Universal KeyStore \(HUKS\) provides applications with key library capabilities, such as key management and cryptographic operations on keys. HUKS also provides APIs for applications to import or generate keys.
+OpenHarmony Universal KeyStore \(HUKS\) provides applications with key library capabilities, such as key management and cryptographic operations on keys. HUKS also provides APIs for applications to import or generate keys.
 
 HUKS consists of the following modules:
 
