@@ -506,13 +506,8 @@ int32_t HksCryptoHalEncryptUpdate(const struct HksBlob *message, void *ctx, stru
 int32_t HksCryptoHalEncryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const uint32_t algtype)
 {
-    if ((message == NULL) || (message->data == NULL)) {
+    if (message == NULL) {
         HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (CheckBlob(cipherText) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param outdata!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -607,12 +602,8 @@ int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message, void *ctx, stru
 int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const uint32_t algtype)
 {
-    if ((message == NULL) || (message->data == NULL)) {
+    if (message == NULL) {
         HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (CheckBlob(cipherText) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param outdata!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

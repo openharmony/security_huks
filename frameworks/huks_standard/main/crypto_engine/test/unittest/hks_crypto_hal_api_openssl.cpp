@@ -638,41 +638,6 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_022, Function | SmallTes
     EXPECT_EQ(HksCryptoHalHmacUpdate(&message, NULL), HKS_ERROR_INVALID_ARGUMENT);
 }
 
-/**
- * @tc.number    : HksCryptoHalApiOpenssl_023
- * @tc.name      : HksCryptoHalApiOpenssl_023
- * @tc.desc      : Using HksCryptoHalHmacFinal -- parameter is invalid.
- */
-HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_023, Function | SmallTest | Level0)
-{
-    HksBlob key = { .size = 0, .data = nullptr };
-    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
-    EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
-    const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
-
-    HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
-    for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
-    }
-
-    HksBlob messageLast = { .size = 0, .data = nullptr };
-    uint8_t buff[1] = {0};
-    HksBlob signature = { .size = 1, .data = buff };
-    void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
-    EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA1, &hmactestctx), HKS_SUCCESS);
-    EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_SUCCESS);
-    EXPECT_EQ(HksCryptoHalHmacFinal(&messageLast, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
-
-    EXPECT_EQ(HksCryptoHalHmacFinal(&message, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
-
-    signature = { .size = 0, .data = nullptr };
-    hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
-    EXPECT_EQ(HksCryptoHalHmacFinal(&message, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
-    HksFree(message.data);
-}
 
 /**
  * @tc.number    : HksCryptoHalApiOpenssl_024

@@ -381,11 +381,6 @@ int32_t HksCryptoHalEncryptFinal(const struct HksBlob *message, void **ctx, stru
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if (CheckBlob(cipherText) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param cipherText!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
     if (ctx == NULL || *ctx == NULL) {
         HKS_LOG_E("Invalid param ctx!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -476,11 +471,6 @@ int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, stru
 {
     if (message == NULL) {
         HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (CheckBlob(cipherText) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param cipherText!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
