@@ -914,6 +914,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
 
     ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
         return ret;
     }
 
@@ -928,6 +929,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     }
 
     if (i == size) {
+        HksDeleteKeyNode(keyNode->handle);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
     }
@@ -959,16 +961,19 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     if (inData->size > MAX_UPDATE_SIZE) {
+        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("HksCoreUpdate input data size too large.");
         return HKS_FAILURE;
     }
     if ((keyNode->totalDataSize + inData->size) > MAX_TOTAL_SIZE) {
+        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("HksCoreUpdate input data total size too large.");
         return HKS_FAILURE;
     }
 
     ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
         return ret;
     }
 
@@ -982,6 +987,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     if (i == size) {
+        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
     }
@@ -1016,6 +1022,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
 
     ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
         return ret;
     }
 
@@ -1029,6 +1036,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     if (i == size) {
+        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
     }
@@ -1063,6 +1071,7 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
         return ret;
     }
 
@@ -1075,11 +1084,13 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
         }
     }
 
-    HksDeleteKeyNode(sessionId);
     if (i == size) {
+        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
     }
+
+    HksDeleteKeyNode(sessionId);
     HKS_LOG_D("HksCoreAbort in Core end");
 
     return ret;
