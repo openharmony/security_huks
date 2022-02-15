@@ -6,7 +6,7 @@
 
 ## 简介<a name="section11660541593"></a>
 
-HUKS（Harmony Universal KeyStore，鸿蒙通用密钥库系统）向应用提供密钥库能力，包括密钥管理及密钥的密码学操作等功能。HUKS所管理的密钥可以由应用导入或者由应用调用HUKS接口生成。
+HUKS（OpenHarmony Universal KeyStore，OpenHarmony通用密钥库系统）向应用提供密钥库能力，包括密钥管理及密钥的密码学操作等功能。HUKS所管理的密钥可以由应用导入或者由应用调用HUKS接口生成。
 
 HUKS模块可以分为如下三大部分：
 
