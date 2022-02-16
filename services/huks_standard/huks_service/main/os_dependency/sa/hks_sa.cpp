@@ -21,7 +21,9 @@
 #include "system_ability_definition.h"
 
 #include "hks_client_service.h"
+#ifdef SUPPORT_COMMON_EVENT
 #include "hks_event_observer.h"
+#endif
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_ipc_service.h"
@@ -190,9 +192,11 @@ bool HksService::Init()
         return false;
     }
 
+#ifdef SUPPORT_COMMON_EVENT
     if (!SystemEventObserver::SubscribeSystemEvent()) {
         HKS_LOG_E("subscribe system event failed"); /* still running service */
     }
+#endif
 
     HKS_LOG_I("HksService::Init success.");
     return true;
