@@ -26,7 +26,9 @@
 #include "hks_mem.h"
 #include "hks_type_inner.h"
 
+#ifdef SUPPORT_ACCOUNT_API
 #include "os_account_manager.h"
+#endif
 
 using namespace OHOS;
 
@@ -84,9 +86,11 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
 
-    int userId = -1;
+    int userId = 0;
+#ifdef SUPPORT_ACCOUNT_API
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %d, userId = %d", callingUid, userId);
+#endif
 
     uint32_t size;
     if (userId == 0) {
