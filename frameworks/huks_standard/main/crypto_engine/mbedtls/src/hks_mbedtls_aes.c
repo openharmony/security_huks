@@ -35,6 +35,7 @@
 #include "hks_mem.h"
 
 #define HKS_AES_CBC_NOPADDING_IV_SIZE 16
+#define HKS_AES_CBC_DATA_BLOB_SIZE 16
 #define HKS_AES_CCM_DATA_SIZE_MAX (1 * 1024 * 1024) // 1M
 
 struct HksMbedtlsAesCtx {
@@ -50,10 +51,6 @@ struct HksMbedtlsAesCtx {
     uint8_t *aad;
     uint32_t aadSize;
 } HksMbedtlsAesCtx;
-
-#define HKS_AES_CBC_NOPADDING_IV_SIZE 16
-#define HKS_AES_CBC_DATA_BLOB_SIZE 16
-#define HKS_AES_CCM_DATA_SIZE_MAX (1 * 1024 * 1024) // 1M
 
 #ifdef HKS_SUPPORT_AES_GENERATE_KEY
 int32_t HksMbedtlsAesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
@@ -1551,7 +1548,7 @@ static mbedtls_cipher_context_t *GetAesEcbNoPaddingCtx(void *cryptoCtx, const st
         return NULL;
     }
 
-    if (message == NULL)) {
+    if (message == NULL) {
         HKS_LOG_E("The message is null.");
         return NULL;
     }

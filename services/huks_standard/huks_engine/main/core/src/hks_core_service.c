@@ -44,7 +44,7 @@
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
 
-static HksMutex *g_huksMutex;  /* global mutex using in keynode */
+static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
 
 static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
     {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageInit},

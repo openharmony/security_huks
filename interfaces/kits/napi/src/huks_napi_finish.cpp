@@ -173,7 +173,7 @@ static bool ParseFinishOutParam(napi_env env, napi_value *argv, FinishAsyncCtxPt
         }
     } else {
         context->outData->size = context->inData->size + DATA_SIZE_64KB;
-        context->outData->data = (uint8_t*)malloc(context->outData->size + DATA_SIZE_64KB);
+        context->outData->data = (uint8_t *)HksMalloc(context->outData->size + DATA_SIZE_64KB);
         if (context->outData->data == nullptr) {
             HKS_LOG_E("could not alloc memory");
             return false;
