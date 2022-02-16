@@ -457,7 +457,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_025_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .encryptInitResult = HKS_SUCCESS,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_FAILURE,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
@@ -662,7 +662,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_031_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .encryptInitResult = HKS_SUCCESS,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_FAILURE,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
@@ -694,7 +694,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_032_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .encryptInitResult = HKS_SUCCESS,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_FAILURE,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
@@ -874,7 +874,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_037_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .encryptInitResult = HKS_SUCCESS,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_FAILURE,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
@@ -906,7 +906,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_038_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .encryptInitResult = HKS_SUCCESS,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_FAILURE,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
@@ -940,7 +940,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_039_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .encryptInitResult = HKS_SUCCESS,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_FAILURE,
+    .encryptFinalResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
@@ -1099,7 +1099,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_043_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
     .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 };
 
@@ -1131,7 +1131,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_044_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
     .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 };
 
@@ -1165,7 +1165,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_045_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
     .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 };
 
@@ -1206,7 +1206,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_046_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
     .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 };
 
@@ -1254,7 +1254,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_047_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
     .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 };
 
@@ -1309,7 +1309,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_048_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
     .encryptInitResult = HKS_ERROR_INVALID_DIGEST,
     .encryptUpdateResult = HKS_SUCCESS,
-    .encryptFinalResult = HKS_ERROR_INVALID_DIGEST,
+    .encryptFinalResult = HKS_FAILURE,
 #endif
 };
 }  // namespace
@@ -1328,6 +1328,10 @@ protected:
         void* encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx),
             testCaseParams.encryptInitResult);
+        if (testCaseParams.encryptInitResult != HKS_SUCCESS) {
+            return;
+        }
+
         uint32_t point = 0;
         if (inLen > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = {
@@ -1336,7 +1340,7 @@ protected:
             };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, &encryptMsg->data[point], HKS_UPDATE_DATA_MAX);
+                memcpy_s(messageUpdate.data, messageUpdate.size, encryptMsg->data + point, HKS_UPDATE_DATA_MAX);
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out,
                     testCaseParams.usageSpec.algType), testCaseParams.encryptUpdateResult);
@@ -1345,15 +1349,24 @@ protected:
 
             HksFree(out.data);
             HksFree(messageUpdate.data);
+
+            uint32_t lastLen = inLen - point;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            (void)memcpy_s(messageLast.data, lastLen, encryptMsg->data + point, lastLen);
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &encryptCtx, encryptOut, tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptFinalResult);
+        } else {
+            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+            EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
+                testCaseParams.encryptUpdateResult) << "HksCryptoHalEncryptUpdate failed.";
+
+            HksBlob enMessageLast = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, encryptOut, tagAead,
+                testCaseParams.usageSpec.algType),
+                testCaseParams.encryptFinalResult) << "HksCryptoHalEncryptFinal failed.";
+
+            HksFree(out.data);
         }
-
-        uint32_t lastLen = inLen - point;
-        HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-        (void)memcpy_s(messageLast.data, lastLen, &encryptMsg->data[point], lastLen);
-        EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &encryptCtx, encryptOut, tagAead,
-            testCaseParams.usageSpec.algType), testCaseParams.encryptFinalResult);
-
-        HksFree(messageLast.data);
     }
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
@@ -1374,7 +1387,9 @@ protected:
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
         HksBlob tagAead = { .size = 0, .data = nullptr };
 
-        if (testCaseParams.runStage != HksStageType::HKS_STAGE_THREE) {
+        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
+            RunTestRsaOaepEncrypt(&key, testCaseParams, &message, &cipherText, &tagAead);
+        } else {
             EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText,
                 &tagAead), testCaseParams.encryptResult);
         }

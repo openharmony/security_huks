@@ -475,26 +475,36 @@ protected:
             };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(inLen) };
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, &encryptMsg->data[point], HKS_UPDATE_DATA_MAX);
+                memcpy_s(messageUpdate.data, messageUpdate.size, encryptMsg->data + point, HKS_UPDATE_DATA_MAX);
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out,
                     testCaseParams.usageSpec.algType), HKS_SUCCESS);
                 point = point + HKS_UPDATE_DATA_MAX;
             }
-
             HksFree(out.data);
             HksFree(messageUpdate.data);
+
+            uint32_t lastLen = inLen - point;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            (void)memcpy_s(messageLast.data, lastLen, encryptMsg->data + point, lastLen);
+
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &encryptCtx, encryptOut, tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptResult);
+
+            HksFree(messageLast.data);
+        } else {
+            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+            EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
+                testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
+
+            HksBlob enMessageLast = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, encryptOut, tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
+
+            HksFree(out.data);
         }
-
-        uint32_t lastLen = inLen - point;
-        HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-        (void)memcpy_s(messageLast.data, lastLen, &encryptMsg->data[point], lastLen);
-
-        EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &encryptCtx, encryptOut, tagAead,
-            testCaseParams.usageSpec.algType), testCaseParams.encryptResult);
-
-        HksFree(messageLast.data);
     }
+
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
