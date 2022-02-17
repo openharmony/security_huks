@@ -40,8 +40,8 @@
 
 #include "huks_napi_abort.h"
 #include "huks_napi_finish.h"
-#include "huks_napi_update.h"
 #include "huks_napi_init.h"
+#include "huks_napi_update.h"
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)

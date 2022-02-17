@@ -494,19 +494,30 @@ protected:
                     testCaseParams.decryptResult);
                 point = point + HKS_UPDATE_DATA_MAX;
             }
-
             HksFree(out.data);
             HksFree(messageUpdate.data);
+
+            uint32_t lastLen = inLen - point;
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
+            memcpy_s(messageLast.data, lastLen, decryptMsg->data + point, lastLen);
+            HksBlob tagAead = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, decryptOut, &tagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
+
+            HksFree(messageLast.data);
+        } else {
+            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+            EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out, testCaseParams.usageSpec.algType),
+                testCaseParams.decryptResult);
+
+            HksBlob tmpTagAead = { .size = 0, .data = nullptr };
+            HksBlob deMessageLast = { .size = 0, .data = nullptr };
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, &tmpTagAead,
+                testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
+
+            HksFree(deMessageLast.data);
+            HksFree(out.data);
         }
-
-        uint32_t lastLen = inLen - point;
-        HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-        memcpy_s(messageLast.data, lastLen, decryptMsg->data + point, lastLen);
-        HksBlob tagAead = { .size = 0, .data = nullptr };
-        EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, decryptOut, &tagAead,
-            testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
-
-        HksFree(messageLast.data);
     }
 
     void RunTestCase(const TestCaseParams &testCaseParams)

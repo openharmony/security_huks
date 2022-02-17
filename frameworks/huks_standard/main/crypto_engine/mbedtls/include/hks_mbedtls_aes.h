@@ -40,13 +40,13 @@ int32_t HksMbedtlsAesEncrypt(const struct HksBlob *key, const struct HksUsageSpe
 int32_t HksMbedtlsAesDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText);
 
-int32_t HksMbedtlsAesCryptoInit(void** cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+int32_t HksMbedtlsAesCryptoInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const bool encrypt);
 
-int32_t HksMbedtlsAesCryptoUpdate(void* cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
+int32_t HksMbedtlsAesCryptoUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
     const bool encrypt);
 
-int32_t HksMbedtlsAesCryptoFinal(void** cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
+int32_t HksMbedtlsAesCryptoFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const bool encrypt);
 
 void HksMbedtlsAesHalFreeCtx(void **cryptoCtx);

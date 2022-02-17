@@ -184,16 +184,3 @@ int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool 
     *isAeMode = (modeParam->uint32Param == HKS_MODE_CCM) || (modeParam->uint32Param == HKS_MODE_GCM);
     return HKS_SUCCESS;
 }
-
-int32_t HksCheckParamSetAndBlobs(const struct HksParamSet *paramSet, int32_t num, ...)
-{
-    va_list argptr;
-    va_start(argptr, num);
-    for (int i = 0; i < num; ++i) {
-        if (CheckBlob(va_arg(argptr, struct HksBlob*)) != HKS_SUCCESS) {
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-    }
-    va_end(argptr);
-    return HksCheckParamSetValidity(paramSet);
-}

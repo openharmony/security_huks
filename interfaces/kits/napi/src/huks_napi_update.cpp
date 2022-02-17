@@ -191,7 +191,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         return nullptr;
     }
     context->outData->size = context->inData->size + DATA_SIZE_64KB;
-    context->outData->data = (uint8_t*)malloc(context->outData->size + DATA_SIZE_64KB);
+    context->outData->data = (uint8_t *)HksMalloc(context->outData->size + DATA_SIZE_64KB);
 
     if (++index < argc) {
         context->callback = GetCallback(env, argv[index]);

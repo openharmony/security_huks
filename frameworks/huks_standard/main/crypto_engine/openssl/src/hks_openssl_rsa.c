@@ -665,7 +665,9 @@ static EVP_PKEY *InitRsaEvpKey(const struct HksBlob *key, bool signing)
 
 static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
 {
-    const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
+    uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
+
+    const EVP_MD *opensslAlg = GetOpensslAlg(digest);
     if (opensslAlg == NULL) {
         HKS_LOG_E("get openssl algorithm fail");
         return NULL;
