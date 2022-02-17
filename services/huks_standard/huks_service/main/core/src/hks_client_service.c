@@ -1236,19 +1236,19 @@ int32_t HksServiceSignWithDeviceKey(const struct HksBlob *processName, uint32_t 
     return 0;
 }
 
-int32_t HksServiceAttestKey(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
-    int32_t ret = HksCheckAttestKeyParams(processName, keyAlias, paramSet, certChain);
+    int32_t ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E(check attest key param fail);
+        HKS_LOG_E("check attest key param fail");
         return ret;
     }
 
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    ret = GetKeyAndNewParamSet(processName, keyAlias, paramSet, &keyFromFile, &newParamSet);
+    ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("GetKeyAndNewParamSet failed, ret = %d.", ret);
         return ret;
@@ -1261,17 +1261,17 @@ int32_t HksServiceAttestKey(const struct HksBlob *processName, const struct HksB
             break;
         }
 
-        ret = HksStoreKeyBlob(processName, keyAlias, HKS_STORAGE_TYPE_CERTCHAIN, certChain);
+        ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_CERTCHAIN, certChain);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("store attest cert chain failed");
         }
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
-    HksFreeParamSet(&newParamSet)
+    HksFreeParamSet(&newParamSet);
     return ret;
 #else
-    (void)processName;
+    (void)processInfo;
     (void)keyAlias;
     (void)paramSet;
     (void)certChain;

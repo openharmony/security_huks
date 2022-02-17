@@ -65,50 +65,71 @@ static int32_t RsaCheckKeyMaterial(const struct HksBlob *key)
     return HKS_SUCCESS;
 }
 
+int32_t InitRsaKeyBuf(const struct KeyMaterialRsa *keyMaterial, struct HksBlob *bufBlob)
+{
+    uint32_t maxSize = 0;
+    if (keyMaterial->nSize >= keyMaterial->eSize) {
+        maxSize = keyMaterial->nSize;
+    } else {
+        maxSize = keyMaterial->eSize;
+    }
+
+    if (maxSize < keyMaterial->dSize) {
+        maxSize = keyMaterial->dSize;
+    }
+
+    bufBlob->data = HksMalloc(maxSize);
+    if (bufBlob->data == NULL) {
+        HKS_LOG_E("HksMalloc failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    bufBlob->size = maxSize;
+    return HKS_SUCCESS;
+}
+
 static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExponent)
 {
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
-    uint8_t *buff = HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
-    if (buff == NULL) {
+    struct HksBlob bufBlob = { 0, NULL };
+    int32_t ret = InitRsaKeyBuf(keyMaterial, &bufBlob);
+    if (ret != HKS_SUCCESS) {
         return NULL;
     }
 
     bool copyFail = false;
-
     uint32_t offset = sizeof(*keyMaterial);
-    if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + offset, keyMaterial->nSize) != EOK) {
+    if (memcpy_s(bufBlob.data, bufBlob.size, key->data + offset, keyMaterial->nSize) != EOK) {
         copyFail = true;
     }
-    BIGNUM *n = BN_bin2bn(buff, keyMaterial->nSize, NULL);
+    BIGNUM *n = BN_bin2bn(bufBlob.data, keyMaterial->nSize, NULL);
     offset += keyMaterial->nSize;
-    if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + offset, keyMaterial->eSize) != EOK) {
+    if (memcpy_s(bufBlob.data, bufBlob.size, key->data + offset, keyMaterial->eSize) != EOK) {
         copyFail = true;
     }
-    BIGNUM *e = BN_bin2bn(buff, keyMaterial->eSize, NULL);
+    BIGNUM *e = BN_bin2bn(bufBlob.data, keyMaterial->eSize, NULL);
     offset += keyMaterial->eSize;
     BIGNUM *d = NULL;
     if (needPrivateExponent) {
-        if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + offset, keyMaterial->dSize) != EOK) {
+        if (memcpy_s(bufBlob.data, bufBlob.size, key->data + offset, keyMaterial->dSize) != EOK) {
             copyFail = true;
         }
-        d = BN_bin2bn(buff, keyMaterial->dSize, NULL);
+        d = BN_bin2bn(bufBlob.data, keyMaterial->dSize, NULL);
     }
     if (copyFail) {
         SELF_FREE_PTR(n, BN_free);
         SELF_FREE_PTR(e, BN_free);
         SELF_FREE_PTR(d, BN_free);
-        (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
-        HksFree(buff);
+        (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
+        HksFree(bufBlob.data);
         return NULL;
     }
-
     RSA *rsa = RSA_new();
     if (rsa != NULL) {
         int32_t ret = RSA_set0_key(rsa, n, e, d);
         if (ret != HKS_OPENSSL_SUCCESS) {
             RSA_free(rsa);
-            (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
-            HksFree(buff);
+            (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
+            HksFree(bufBlob.data);
             return NULL;
         }
     } else {
@@ -117,8 +138,8 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
         SELF_FREE_PTR(d, BN_free);
     }
 
-    (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
-    HksFree(buff);
+    (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
+    HksFree(bufBlob.data);
     return rsa;
 }
 

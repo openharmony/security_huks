@@ -130,6 +130,7 @@ int32_t HksHalGetKeyProperties(const struct HksParamSet *paramSet, const struct 
     return HKS_FAILURE;
 }
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
 int32_t HksHalAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
     if (CheckPtr((void *)g_hksHalDevicePtr->AttestKey) == HKS_SUCCESS) {
@@ -137,6 +138,7 @@ int32_t HksHalAttestKey(const struct HksBlob *key, const  struct HksParamSet *pa
     }
     return HKS_FAILURE;
 }
+#endif
 
 int32_t HksHalGetAbility(int funcType)
 {
@@ -264,11 +266,4 @@ int32_t HksHalUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlo
 }
 
 #endif
-#endif
-
-#ifdef HKS_SUPPORT_API_ATTEST_KEY
-int32_t HksHalAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-    return HKS_ERROR_NOT_SUPPORTED;
-}
 #endif

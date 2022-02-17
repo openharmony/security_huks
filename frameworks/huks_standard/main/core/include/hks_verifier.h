@@ -13,22 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef HKS_RESPONSE_H
-#define HKS_RESPONSE_H
+#ifndef HKS_VERIFIER_H
+#define HKS_VERIFIER_H
 
 #include "hks_type_inner.h"
+
+#define HKS_DEFAULT_CERT_CHAIN_CNT 4
+#define MAX_CN_LEN 256
+#define ATTESTION_CHALLENGE_MAX_SIZE 512
+
+enum HksCertFormat {
+    HKS_CERT_PEM,
+    HKS_CERT_DER,
+};
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response);
-
-int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processName);
-
-int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo);
-
-int32_t Apl3Check();
+int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut);
 
 #ifdef __cplusplus
 }

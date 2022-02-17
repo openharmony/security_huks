@@ -31,6 +31,19 @@
 #define MAX_KEY_SIZE         2048
 #define SIZE_OF_CHALLENGE    16
 
+static enum HksTag g_idList[] = {
+    HKS_TAG_ATTESTATION_ID_BRAND,
+    HKS_TAG_ATTESTATION_ID_DEVICE,
+    HKS_TAG_ATTESTATION_ID_PRODUCT,
+    HKS_TAG_ATTESTATION_ID_SERIAL,
+    HKS_TAG_ATTESTATION_ID_IMEI,
+    HKS_TAG_ATTESTATION_ID_MEID,
+    HKS_TAG_ATTESTATION_ID_MANUFACTURER,
+    HKS_TAG_ATTESTATION_ID_MODEL,
+    HKS_TAG_ATTESTATION_ID_SOCID,
+    HKS_TAG_ATTESTATION_ID_UDID,
+};
+
 void HksIpcServiceProvision(const struct HksBlob *srcData, const uint8_t *context)
 {
     return;
@@ -827,12 +840,24 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
     HKS_FREE_BLOB(processInfo.userId);
 }
 
+int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
+{
+    for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
+        for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
+            if (paramSet->params[j].tag == g_idList[i]) {
+                return Apl3Check();
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+
 void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob certChainBlob = { 0, NULL };
-    struct HksBlob processName = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     int32_t ret;
 
     do {
@@ -842,13 +867,17 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
             break;
         }
-
-        ret = HksServiceAttestKey(&processName, &keyAlias, inParamSet, &certChainBlob);
+        ret = HksAttestAccessControl(inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAttestAccessControl fail, ret = %d", ret);
+            break;
+        }
+        ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceAttestKey fail, ret = %d", ret);
             break;
@@ -860,7 +889,7 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
         HksSendResponse(context, ret, NULL);
     }
 
-    HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(certChainBlob);
 }
 
