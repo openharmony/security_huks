@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#include "hks_core_service_three_stage.h"
-
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
 #include "hks_config.h"
 #endif
+
+#include "hks_core_service_three_stage.h"
 
 #include "hks_auth.h"
 #include "hks_check_paramset.h"
@@ -213,17 +213,17 @@ static int32_t GetHksInnerKeyFormat(const struct HksParamSet *paramSet, const st
 
 static void FreeSignVerifyData(void *ctx)
 {
-    struct HksBlob *restoreDate = (struct HksBlob *)ctx;
+    struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
-    if (restoreDate == NULL) {
+    if (restoreData == NULL) {
         HKS_LOG_E("FreeSignVerifyData ctx is null");
         return;
     }
-    if (restoreDate->data != NULL) {
-        HksFree((void *)restoreDate->data);
-        restoreDate->data = NULL;
+    if (restoreData->data != NULL) {
+        HksFree((void *)restoreData->data);
+        restoreData->data = NULL;
     }
-    HksFree((void *)restoreDate);
+    HksFree((void *)restoreData);
     return;
 }
 
@@ -252,29 +252,29 @@ static int32_t StoreSignVerifyMessage(const struct HksParamSet *paramSet, const 
             return ret;
         }
     } else {
-        struct HksBlob *restoreDate = (struct HksBlob *)ctx;
-        struct HksBlob *newDate = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-        if (newDate == NULL) {
+        struct HksBlob *restoreData = (struct HksBlob *)ctx;
+        struct HksBlob *newData = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+        if (newData == NULL) {
             HKS_LOG_E("StoreSignVerifyMessage malloc fail.");
             return HKS_ERROR_MALLOC_FAIL;
         }
-        newDate->size = restoreDate->size + srcData->size;
-        newDate->data = (uint8_t *)HksMalloc(newDate->size);
-        if (newDate->data == NULL) {
+        newData->size = restoreData->size + srcData->size;
+        newData->data = (uint8_t *)HksMalloc(newData->size);
+        if (newData->data == NULL) {
             HKS_LOG_E("StoreSignVerifyMessage malloc fail.");
             return HKS_ERROR_MALLOC_FAIL;
         }
 
-        if (restoreDate->data != NULL) {
-            (void)memcpy_s(newDate->data, restoreDate->size, restoreDate->data, restoreDate->size);
+        if (restoreData->data != NULL) {
+            (void)memcpy_s(newData->data, restoreData->size, restoreData->data, restoreData->size);
         }
-        (void)memcpy_s(newDate->data + restoreDate->size, srcData->size, srcData->data, srcData->size);
-        if (restoreDate->data != NULL) {
-            HksFree((void *)restoreDate->data);
+        (void)memcpy_s(newData->data + restoreData->size, srcData->size, srcData->data, srcData->size);
+        if (restoreData->data != NULL) {
+            HksFree((void *)restoreData->data);
         }
-        HksFree((void *)restoreDate);
+        HksFree((void *)restoreData);
 
-        ctxParam->uint64Param = (uint64_t)(uintptr_t)newDate;
+        ctxParam->uint64Param = (uint64_t)(uintptr_t)newData;
     }
     return HKS_SUCCESS;
 }
@@ -352,6 +352,29 @@ static void ClearCryptoCtx(const struct HuksKeyNode *keyNode)
     return;
 }
 
+static void FreeSignVerify(const struct HuksKeyNode *keyNode)
+{
+    void *ctx = GetCryptoCtx(keyNode);
+    if (ctx == NULL) {
+        return;
+    }
+
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("append cipher get alg param failed!");
+        return;
+    }
+
+    if (algParam->uint32Param != HKS_ALG_ED25519) {
+        HksCryptoHalHashFreeCtx(&ctx);
+    } else {
+        FreeSignVerifyData((void *)ctx);
+    }
+
+    ClearCryptoCtx(keyNode);
+}
+
 int32_t CoreSignVerifyHash(uint32_t alg, void **ctx, const struct HksBlob *inData, struct HksBlob *outData)
 {
     if (alg != HKS_ALG_ED25519) {
@@ -404,19 +427,20 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
             return ret;
         }
     } else {
-        struct HksBlob *signVerifyDate = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-        if (signVerifyDate == NULL) {
+        struct HksBlob *signVerifyData = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+        if (signVerifyData == NULL) {
             HKS_LOG_E("HksCoreSignVerifyThreeStageInit malloc fail.");
             return HKS_ERROR_MALLOC_FAIL;
         }
-        signVerifyDate->size = 0;
-        signVerifyDate->data = NULL;
-        ctx = (void *)signVerifyDate;
+        signVerifyData->size = 0;
+        signVerifyData->data = NULL;
+        ctx = (void *)signVerifyData;
     }
 
     ret = SetCryptoCtx(keyNode, ctx);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Set hks crypto ctx fail");
+        FreeSignVerify(keyNode);
         return ret;
     }
 
@@ -446,9 +470,7 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
     ret = StoreSignVerifyMessage(keyNode->runtimeParamSet, srcData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCoreSignVerifyThreeStageUpdate hash failed!");
-        if (algParam->uint32Param != HKS_ALG_ED25519) {
-            ClearCryptoCtx(keyNode);
-        }
+        FreeSignVerify(keyNode);
         return ret;
     }
 
@@ -513,24 +535,7 @@ int32_t HksCoreSignVerifyThreeStageAbort(const struct HuksKeyNode *keyNode, cons
     (void)paramSet;
     (void)alg;
 
-    void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        return HKS_SUCCESS;
-    }
-
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append cipher get alg param failed!");
-        return ret;
-    }
-
-    if (algParam->uint32Param != HKS_ALG_ED25519) {
-        HksCryptoHalHashFreeCtx(&ctx);
-    } else {
-        FreeSignVerifyData((void *)ctx);
-    }
-    ClearCryptoCtx(keyNode);
+    FreeSignVerify(keyNode);
 
     return HKS_SUCCESS;
 }

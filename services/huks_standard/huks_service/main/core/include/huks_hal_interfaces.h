@@ -64,6 +64,7 @@ struct HksHalDevice {
 
     int32_t (*GenerateRandom)(const struct HksParamSet *paramSet, struct HksBlob *random);
 };
+
 int32_t HksHalModuleInit(void);
 
 int32_t HksHalRefresh(void);
