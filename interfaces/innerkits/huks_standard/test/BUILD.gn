@@ -25,7 +25,8 @@ ohos_unittest("hukssdk_test") {
     "unittest/src/hks_curve25519_test.cpp",
     "unittest/src/hks_delete_test.cpp",
     "unittest/src/hks_derive_test.cpp",
-    "unittest/src/hks_device_sec_test.cpp",
+
+    #"unittest/src/hks_device_sec_test.cpp",
     "unittest/src/hks_exist_test.cpp",
     "unittest/src/hks_generate_key_test.cpp",
     "unittest/src/hks_generate_random_test.cpp",

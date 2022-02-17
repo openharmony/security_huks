@@ -30,6 +30,4 @@ int HksOthersTest006(void);
 
 int HksOthersTest007(void);
 
-int HksOthersTest008(void);
-
 #endif

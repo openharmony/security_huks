@@ -70,6 +70,9 @@ ohos_shared_library("huks_engine_core_standard") {
     "-Werror",
   ]
   sources = [
+    "src/hks_asn1.c",
+    "src/hks_attest.c",
+    "src/hks_attest_utils.c",
     "src/hks_auth.c",
     "src/hks_core_interfaces.c",
     "src/hks_core_service.c",

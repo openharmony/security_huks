@@ -20,6 +20,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 
 #include "hks_log.h"
@@ -116,4 +117,43 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->userId.data = name1;
 
     return HKS_SUCCESS;
+}
+
+int32_t Apl3Check()
+{
+    OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    HKS_LOG_I("AccessTokenID is %llx!", tokenId);
+    OHOS::Security::AccessToken::ATokenTypeEnum tokenType =
+    OHOS::Security::AccessToken::AccessTokenKit::GetTokenType(tokenId);
+    if (tokenType == OHOS::Security::AccessToken::TOKEN_HAP) {
+        OHOS::Security::AccessToken::HapTokenInfo findInfo;
+        if (OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(tokenId, findInfo) != 0) {
+            HKS_LOG_E("GetHapTokenInfo failed!");
+            return HKS_FAILURE;
+        }
+        if (findInfo.apl == OHOS::Security::AccessToken::APL_SYSTEM_CORE) {
+            HKS_LOG_I("check APL3 success!");
+            return HKS_SUCCESS;
+        } else {
+            HKS_LOG_E("check APL3 failed!");
+            return HKS_FAILURE;
+        }
+    }
+
+    if (tokenType == OHOS::Security::AccessToken::TOKEN_NATIVE) {
+        OHOS::Security::AccessToken::NativeTokenInfo findInfo;
+        if (OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, findInfo) != 0) {
+            HKS_LOG_E("GetNativeTokenInfo failed!");
+            return HKS_FAILURE;
+        }
+        if (findInfo.apl == OHOS::Security::AccessToken::APL_SYSTEM_CORE) {
+            HKS_LOG_I("check APL3 success!");
+            return HKS_SUCCESS;
+        } else {
+            HKS_LOG_E("check APL3 failed!");
+            return HKS_FAILURE;
+        }
+    }
+    HKS_LOG_E("GetTokenTypeFlag type wrong!");
+    return HKS_FAILURE;
 }
