@@ -441,10 +441,10 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
             ret = ConstructParamSetOut(g_oidParams[i].tag, claimData, claimSize, paramSetOut);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("ConstructParamSetOut fail");
-                HksFree(claimData);
+                HKS_FREE_PTR(claimData);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
-            HksFree(claimData);
+            HKS_FREE_PTR(claimData);
             return HKS_SUCCESS;
         }
     }
@@ -473,20 +473,10 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
             return HKS_ERROR_INVALID_ARGUMENT;
         }
 
-        struct HksBlob tmpBlob = { valueLength, NULL };
-        tmpBlob.data = (uint8_t *)HksMalloc(valueLength);
-        if (tmpBlob.data == NULL) {
-            HKS_LOG_E("malloc fail");
-            HKS_FREE_PTR(value);
-            return HKS_ERROR_MALLOC_FAIL;
-        }
-        (void)memcpy_s(tmpBlob.data, valueLength, value, valueLength);
-
         ret = GetClaimDataParamSet(value, valueLength, paramSetOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("GetClaimDataParamSet failed");
             HKS_FREE_PTR(value);
-            HKS_FREE_BLOB(tmpBlob);
             return ret;
         }
         HKS_FREE_PTR(value);
@@ -611,7 +601,7 @@ int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct 
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("VerifyAttestationCertChain failed");
     }
-    
+
     FreeCertChainInfo(&certsInfo, certChain->certsCount);
     return ret;
 }
