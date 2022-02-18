@@ -22,6 +22,7 @@
 #include "hks_core_service.h"
 
 #include "hks_ability.h"
+#include "hks_attest.h"
 #include "hks_auth.h"
 #include "hks_check_paramset.h"
 #include "hks_cmd_id.h"
@@ -1103,10 +1104,14 @@ int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct
 
 int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
-    (void)(key);
-    (void)(paramSet);
-    (void)(certChain);
-    return 0;
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+    return HksSoftAttestKey(key, paramSet, certChain);
+#else
+    (void)key;
+    (void)paramSet;
+    (void)certChain;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 int32_t HksCoreGetAbility(int funcType)
