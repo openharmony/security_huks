@@ -591,7 +591,7 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
         if (ret != HKS_SUCCESS) {
             break;
         }
-    }while (0);
+    } while (0);
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE_PTR(rawKey.data);

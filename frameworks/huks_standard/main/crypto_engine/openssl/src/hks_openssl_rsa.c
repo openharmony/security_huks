@@ -509,11 +509,30 @@ int32_t HksOpensslRsaEncryptDecryptInit(void **ctx, const struct HksBlob *key, c
     return HKS_SUCCESS;
 }
 
+static void HksOpensslRsaCryptFreeData(void *ctx)
+{
+    struct HksOpensslRsaCtx *rsaCtx = (struct HksOpensslRsaCtx *)ctx;
+    EVP_PKEY_CTX *context = (EVP_PKEY_CTX *)rsaCtx->append;
+
+    EVP_PKEY_CTX_free(context);
+    rsaCtx->append = NULL;
+
+    if (rsaCtx->rsaMessageTotal.data != NULL) {
+        HksFree(rsaCtx->rsaMessageTotal.data);
+        rsaCtx->rsaMessageTotal.data = NULL;
+    }
+}
+
 int32_t HksOpensslRsaEncryptDecryptUpdate(void *ctx, const struct HksBlob *message, struct HksBlob *out,
     const bool encrypt)
 {
     out->size = 0;
-    return HksOpensslRsaEncryptDecrypt(ctx, message);
+    int32_t ret = HksOpensslRsaEncryptDecrypt(ctx, message);
+    if (ret != HKS_SUCCESS) {
+        HksOpensslRsaCryptFreeData(ctx);
+        HKS_LOG_E("Rsa crypt Update fail");
+    }
+    return ret;
 }
 
 static int32_t HksOpensslRsaEncryptDecryptLen(EVP_PKEY_CTX *context, struct HksBlob *message,
@@ -563,8 +582,7 @@ int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *messa
         ret = HksOpensslRsaEncryptDecrypt((void *)*ctx, message);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Last message operation fail! error code =%d", ret);
-            EVP_PKEY_CTX_free(context);
-            rsaCtx->append = NULL;
+            HksOpensslRsaCryptFreeData(*ctx);
             return ret;
         }
     }
@@ -574,8 +592,7 @@ int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *messa
     ret = HksOpensslRsaEncryptDecryptLen(context, &totalMessage, encrypt, cipherText->size, &outLen);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksOpensslRsaEncryptDecryptLen fail");
-        EVP_PKEY_CTX_free(context);
-        rsaCtx->append = NULL;
+        HksOpensslRsaCryptFreeData(*ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -588,8 +605,7 @@ int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *messa
 
     if (ret != HKS_OPENSSL_SUCCESS) {
         HKS_LOG_E("EVP_PKEY fail, error code = %lu", ret);
-        EVP_PKEY_CTX_free(context);
-        rsaCtx->append = NULL;
+        HksOpensslRsaCryptFreeData(*ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 

@@ -1451,6 +1451,9 @@ protected:
         EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx),
             testCaseParams.decryptInitResult);
         if (testCaseParams.decryptInitResult != HKS_SUCCESS) {
+            if (!decryptCtx) {
+                HksFree(decryptCtx);
+            }
             return;
         }
         uint32_t point = 0;
@@ -1490,6 +1493,9 @@ protected:
 
             HksFree(deMessageLast.data);
             HksFree(out.data);
+        }
+        if (!decryptCtx) {
+            HksFree(decryptCtx);
         }
     }
 
