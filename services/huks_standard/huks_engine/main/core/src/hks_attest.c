@@ -512,7 +512,7 @@ static void ParseAttestCert(const struct HksBlob *devCert, struct HksAttestCert 
     ret += HksAsn1ExtractTag(&val, &skip, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &cert->signAlg, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &cert->signature, &val, ASN_1_TAG_TYPE_BIT_STR);
-    
+
     ret += IsValidAttestCert(cert);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("invalid dev cert.\n");
@@ -1071,11 +1071,6 @@ static int32_t BuildAttestMsgClaims(struct HksBlob *out, const struct HksParamSe
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get challenge param failed!");
         return ret;
-    }
-    if ((challenge->blob.size < HKS_ATTEST_CHALLENGE_MIN_SIZE) ||
-        (challenge->blob.size > HKS_ATTEST_CHALLENGE_MAX_SIZE)) {
-        HKS_LOG_E("invalid challenge size %x!", challenge->blob.size);
-        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     struct HksAsn1Blob challengeBlob = { ASN_1_TAG_TYPE_OCT_STR, challenge->blob.size, challenge->blob.data };
