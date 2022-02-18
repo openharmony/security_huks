@@ -19,7 +19,6 @@
 #include "hks_type.h"
 
 #define HKS_MAX_FILE_NAME_LEN 512
-#define HKS_MAX_FILE_PATH_LEN 64
 
 #ifdef _STORAGE_LITE_
     #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
