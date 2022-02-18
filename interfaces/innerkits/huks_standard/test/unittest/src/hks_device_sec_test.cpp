@@ -17,6 +17,7 @@
 
 #include "hks_device_sec_test.h"
 
+#include <ctype.h>
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
@@ -54,50 +55,146 @@ void HksDeviceSecTest::TearDown()
 {
 }
 
-char g_secInfoData[] = "hi_security_level_info";
-char g_challengeData[] = "hi_security_level_info";
-const int g_size = 128;
+struct HksTestCertChain {
+    bool certChainExist;
+    bool certCountValid;
+    bool certDataExist;
+    uint32_t certDataSize;
+};
+const static char g_secInfoData[] = "hi_security_level_info";
+const static char g_challengeData[] = "hi_challenge_data";
+const static char g_versionData[] = "hi_os_version_data";
+const static char g_udidData[] = "hi_udid_data";
+const static char g_snData[] = "hi_sn_data";
+const static uint32_t g_size = DEFAULT_PARAM_SET_OUT_SIZE;
 
-static int32_t IdAttestTest()
+const static struct HksBlob secInfo = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
+const static struct HksBlob challenge = { sizeof(g_challengeData), (uint8_t *)g_challengeData };
+const static struct HksBlob version = { sizeof(g_versionData), (uint8_t *)g_versionData };
+const static struct HksBlob udid = { sizeof(g_udidData), (uint8_t *)g_udidData };
+const static struct HksBlob sn = { sizeof(g_snData), (uint8_t *)g_snData };
+
+static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const struct HksTestCertChain *certChainParam)
 {
-    HKS_TEST_LOG_E("id attest test start");
-    struct HksBlob challenge = { sizeof(g_challengeData), (uint8_t *)g_challengeData };
-    uint8_t *cert = (uint8_t *)HksTestMalloc(g_size);
-    if (cert == NULL) {
+    if (!certChainParam->certChainExist) {
+        return 0;
+    }
+    *certChain = (struct HksCertChain *)HksTestMalloc(sizeof(struct HksCertChain));
+    if (*certChain == NULL) {
+        HKS_TEST_LOG_E("malloc fail");
         return HKS_ERROR_MALLOC_FAIL;
     }
-    const struct HksBlob keyAlias = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
-    struct HksBlob certChainBlob = { g_size, cert };
-    struct HksCertChain certChain = { &certChainBlob, 1 }; // 1 is the cert count
-    int32_t ret = HKS_ERROR_MALLOC_FAIL;
-    struct HksParamSet *paramSet = nullptr;
-    do {
-        ret = HksInitParamSet(&paramSet);
-        if (ret != HKS_SUCCESS) {
-            break;
+    if (!certChainParam->certCountValid) {
+        (*certChain)->certsCount = 0;
+        return 0;
+    }
+    (*certChain)->certsCount = CERT_COUNT;
+    if (!certChainParam->certDataExist) {
+        (*certChain)->certs = NULL;
+        return 0;
+    }
+    (*certChain)->certs = (struct HksBlob *)HksTestMalloc(sizeof(struct HksBlob) * ((*certChain)->certsCount));
+    for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
+        (*certChain)->certs[i].size = certChainParam->certDataSize;
+        (*certChain)->certs[i].data = (uint8_t *)HksTestMalloc((*certChain)->certs[i].size);
+        if ((*certChain)->certs[i].data == NULL) {
+            HKS_TEST_LOG_E("malloc fail");
+            return HKS_ERROR_MALLOC_FAIL;
         }
-        struct HksParam tmpParam[] = {
-            { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = challenge },
-        };
-        ret = HksAddParams(paramSet, tmpParam, sizeof(tmpParam) / sizeof(tmpParam[0]));
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
-        ret = HksBuildParamSet(&paramSet);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
-        ret = HksAttestKey(&keyAlias, paramSet, &certChain);
-    } while (0);
+        memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
+    }
+    return 0;
+}
 
-    HKS_TEST_LOG_E("id attest test result is %x", ret);
-    printf("cert chain is %s\n", (char *)certChainBlob.data);
+static int32_t TestGenerateKey(const struct HksBlob *keyAlias)
+{
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
+        { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+    };
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksAddParams failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksGenerateKey(keyAlias, paramSet, NULL);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksGenerateKey failed");
+    }
     HksFreeParamSet(&paramSet);
-    HksTestFree(cert);
     return ret;
 }
 
-static void FreeBuf(uint8_t *a, uint8_t *b, uint8_t *c)
+static int32_t testKeyAttest(struct HksCertChain *certChain)
+{
+    HKS_TEST_LOG_E("testKeyAttest start");
+    char alias[] = "testKey";
+    struct HksBlob keyAlias = { sizeof(alias), (uint8_t *)alias };
+    int32_t ret = TestGenerateKey(&keyAlias);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("TestGenerateKey failed");
+    }
+
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = secInfo },
+        { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = challenge },
+        { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = version },
+        { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = udid },
+        { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = sn },
+        { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias },
+    };
+    struct HksParamSet *paramSet = NULL;
+    ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksAddParams failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksAttestKey(&keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksAttestKey failed");
+    }
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+static void FreeBuf(uint8_t *a, uint8_t *b, uint8_t *c, uint8_t *d, uint8_t *e)
 {
     if (a != nullptr) {
         HksTestFree(a);
@@ -108,21 +205,26 @@ static void FreeBuf(uint8_t *a, uint8_t *b, uint8_t *c)
     if (c != nullptr) {
         HksTestFree(c);
     }
+    if (d != nullptr) {
+        HksTestFree(d);
+    }
+    if (e != nullptr) {
+        HksTestFree(e);
+    }
 }
-static int32_t ValidateCertChainTest()
+static int32_t ValidateCertChainTest(struct HksCertChain *certChain)
 {
     HKS_TEST_LOG_E("validate cert chain test start");
     uint8_t *challengeData = (uint8_t *)HksTestMalloc(g_size);
-    uint8_t *sec = (uint8_t *)HksTestMalloc(g_size);
-    uint8_t *cert = (uint8_t *)HksTestMalloc(g_size);
-    if (challengeData == nullptr || sec == nullptr || cert == nullptr) {
-        FreeBuf(challengeData, sec, cert);
+    uint8_t *secInfoData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *versionData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *snData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *udidData = (uint8_t *)HksTestMalloc(g_size);
+    if (challengeData == nullptr || secInfoData == nullptr || versionData == nullptr
+        || snData == nullptr || udidData == nullptr) {
+        FreeBuf(challengeData, secInfoData, versionData, snData, udidData);
         return HKS_ERROR_MALLOC_FAIL;
     }
-
-    struct HksBlob challenge = { g_size, challengeData };
-    struct HksBlob secInfo = { g_size, sec };
-    struct HksBlob certChain = { g_size, cert };
     int32_t ret = HKS_ERROR_MALLOC_FAIL;
     struct HksParamSet *paramSet = nullptr;
     do {
@@ -131,8 +233,11 @@ static int32_t ValidateCertChainTest()
             break;
         }
         struct HksParam tmpParam[] = {
-            { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = challenge },
-            { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = secInfo},
+            { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = { g_size, secInfoData } },
+            { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = { g_size, challengeData } },
+            { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = { g_size, versionData } },
+            { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = { g_size, udidData } },
+            { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = { g_size, snData } },
         };
         ret = HksAddParams(paramSet, tmpParam, sizeof(tmpParam) / sizeof(tmpParam[0]));
         if (ret != HKS_SUCCESS) {
@@ -142,49 +247,27 @@ static int32_t ValidateCertChainTest()
         if (ret != HKS_SUCCESS) {
             break;
         }
-        ret = HksValidateCertChain(&certChain, paramSet);
-        HKS_TEST_LOG_E("validate cert chain result is %x", ret);
-        printf("challenge is %s\n", (char *)paramSet->params[0].blob.data);
-        printf("sec info is %s\n", (char *)paramSet->params[1].blob.data);
+        ret = HksValidateCertChain(certChain, paramSet);
+        HKS_TEST_LOG_I("validate cert chain result is %x", ret);
+        HKS_TEST_LOG_I("secinfo is %s\n", (char *)paramSet->params[0].blob.data);
+        HKS_TEST_LOG_I("challenge is %s\n", (char *)paramSet->params[CERT_COUNT - 3].blob.data);
+        HKS_TEST_LOG_I("version is %s\n", (char *)paramSet->params[CERT_COUNT - 2].blob.data);
+        HKS_TEST_LOG_I("udid is %s\n", (char *)paramSet->params[CERT_COUNT - 1].blob.data);
+        HKS_TEST_LOG_I("sn is %s\n", (char *)paramSet->params[CERT_COUNT].blob.data);
     } while (0);
-    FreeBuf(challengeData, sec, cert);
+    FreeBuf(challengeData, secInfoData, versionData, snData, udidData);
     HksFreeParamSet(&paramSet);
     return ret;
 }
-/**
- * @tc.name: HksDeleteTest.HksDeleteTest001
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
+
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
 {
-    HKS_TEST_LOG_E("import id test start");
-    struct HksBlob secInfo = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
-    int32_t ret = HksImportId(HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, &secInfo);
-    HKS_TEST_LOG_E("import id test result is %x", ret);
+    HksCertChain *certChain = NULL;
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    int32_t ret = ConstructDataToCertChain(&certChain, &certParam);
+    ret = testKeyAttest(certChain);
     ASSERT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: HksDeleteTest.HksDeleteTest001
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
-{
-    int32_t ret = IdAttestTest();
-
-    ASSERT_TRUE(ret == 0);
-}
-
-/**
- * @tc.name: HksDeleteTest.HksDeleteTest001
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
-{
-    int32_t ret = ValidateCertChainTest();
+    ret = ValidateCertChainTest(certChain);
     ASSERT_TRUE(ret == 0);
 }
 }

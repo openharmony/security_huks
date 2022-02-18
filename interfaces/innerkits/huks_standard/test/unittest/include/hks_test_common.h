@@ -29,6 +29,7 @@
         goto err; \
     }
 
+#define CERT_COUNT 4
 #define HKS_SLICE_MAX_LEN  64 * 1024
 
 #define DEFAULT_TEST_CASE_ID 0xFFFFFFFF

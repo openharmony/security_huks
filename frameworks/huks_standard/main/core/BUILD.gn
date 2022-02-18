@@ -21,17 +21,26 @@ ohos_static_library("libhuks_core_standard_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-  include_dirs = [ "//utils/native/base/include" ]
+  include_dirs = [
+    "//utils/native/base/include",
+    "//third_party/openssl/include/",
+  ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
-  sources = [ "./src/hks_local_engine.c" ]
+  sources = [
+    "./src/hks_local_engine.c",
+    "./src/hks_verifier.c",
+  ]
   cflags = [
     "-Wall",
     "-Werror",
   ]
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "//third_party/openssl:libcrypto_static",
+  ]
   complete_static_lib = true
 }

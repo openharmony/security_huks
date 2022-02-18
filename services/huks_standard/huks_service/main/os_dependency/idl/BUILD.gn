@@ -43,7 +43,10 @@ ohos_static_library("libhuks_service_idl_standard_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     "//utils/native/base:utils",
   ]
-  external_deps = [ "ipc:ipc_core" ]
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "ipc:ipc_core",
+  ]
   if (support_jsapi) {
     external_deps += [ "os_account_standard:os_account_innerkits" ]
     defines += [ "SUPPORT_ACCOUNT_API" ]

@@ -60,6 +60,10 @@ int32_t HksAccessExportPublicKey(const struct HksBlob *key, const struct HksPara
 int32_t HksAccessAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey);
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+int32_t HksAccessAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain);
+#endif
+
 int32_t HksAccessDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
     struct HksBlob *derivedKey);
 

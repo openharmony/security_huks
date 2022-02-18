@@ -16,6 +16,12 @@
 #ifndef HKS_CLIENT_CHECK_H
 #define HKS_CLIENT_CHECK_H
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
@@ -46,6 +52,16 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
 
 int32_t HksCheckInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const uint64_t *operationHandle);
+
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+int32_t HksCheckAttestKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain);
+#endif
+
+#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
+int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain);
+#endif
 
 int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet);
