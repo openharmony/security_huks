@@ -456,6 +456,7 @@ int32_t HksMbedtlsRsaCryptInit(void **ctx, const struct HksBlob *key, const stru
     mbedtls_entropy_context *entropy = NULL;
     ret = HksMbedtlsRsaInitCtx(&ctrDrbg, &entropy, context, usageSpec);
     if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("InitCtx fail, ret = %d", ret);
         HksFree(context);
         return ret;
     }
@@ -490,55 +491,99 @@ int32_t HksMbedtlsRsaCryptInit(void **ctx, const struct HksBlob *key, const stru
     return HKS_SUCCESS;
 }
 
+static void HksMbedtlsRsaCryptFree(mbedtls_rsa_context *context, struct HksMbedtlslRsaCtx *rsaCtx)
+{
+    if (rsaCtx->append != NULL) {
+        mbedtls_rsa_free(context);
+        rsaCtx->append = NULL;
+    }
+
+    if (rsaCtx->mCtrDrbg != NULL) {
+        mbedtls_ctr_drbg_free(rsaCtx->mCtrDrbg);
+        HksFree(rsaCtx->mCtrDrbg);
+        rsaCtx->mCtrDrbg = NULL;
+    }
+
+    if (rsaCtx->mEntropy != NULL) {
+        mbedtls_entropy_free(rsaCtx->mEntropy);
+        HksFree(rsaCtx->mEntropy);
+        rsaCtx->mEntropy = NULL;
+    }
+
+    if (rsaCtx->rsaMessageTotal.data != NULL) {
+        HksFree(rsaCtx->rsaMessageTotal.data);
+        rsaCtx->rsaMessageTotal.data = NULL;
+    }
+
+    if (rsaCtx->mKey.data != NULL) {
+        HksFree(rsaCtx->mKey.data);
+        rsaCtx->mKey.data = NULL;
+    }
+}
+
 int32_t HksMbedtlsRsaCryptUpdate(void *ctx, const struct HksBlob *message, struct HksBlob *out, const bool encrypt)
 {
     out->size = 0;
     int32_t ret = HksMbedtlsRsaEncryptDecrypt(ctx, message);
+
+    struct HksMbedtlslRsaCtx *rsaCtx = (struct HksMbedtlslRsaCtx *)ctx;
+    mbedtls_rsa_context *context = (mbedtls_rsa_context *)(rsaCtx->append);
+
+    if (ret != HKS_SUCCESS) {
+        HksMbedtlsRsaCryptFree(context, rsaCtx);
+    }
     return ret;
 }
 
-static void HksMbedtlsRsaCryptFinalFree(mbedtls_rsa_context *context, struct HksMbedtlslRsaCtx *rsaCtx)
+static int32_t HksMbedtlsRsaCryptFinalCheckParam(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    mbedtls_rsa_free(context);
-    mbedtls_ctr_drbg_free(rsaCtx->mCtrDrbg);
-    mbedtls_entropy_free(rsaCtx->mEntropy);
-    HksFree(rsaCtx->mCtrDrbg);
-    rsaCtx->mCtrDrbg = NULL;
-    HksFree(rsaCtx->mEntropy);
-    rsaCtx->mEntropy = NULL;
-    HksFree(rsaCtx->rsaMessageTotal.data);
-    rsaCtx->rsaMessageTotal.data = NULL;
-    HksFree(rsaCtx->mKey.data);
-    rsaCtx->mKey.data = NULL;
-}
-
-int32_t HksMbedtlsRsaCryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
-    struct HksBlob *tagAead, const bool encrypt)
-{
-    if (ctx == NULL || message == NULL || cipherText == NULL) {
-        HKS_LOG_E("invalid argument");
+    if (ctx == NULL) {
+        HKS_LOG_E("invalid argument ctx");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    int32_t ret;
+
     struct HksMbedtlslRsaCtx *rsaCtx = (struct HksMbedtlslRsaCtx *)*ctx;
     if (rsaCtx == NULL || rsaCtx->append == NULL) {
         HKS_LOG_E("rsaCtx or rsaMessageTotal invalid");
         return HKS_FAILURE;
     }
+
     mbedtls_rsa_context *context = (mbedtls_rsa_context *)rsaCtx->append;
     if (context == NULL) {
         HKS_LOG_E("context is null");
         return HKS_FAILURE;
     }
+
+    if (message == NULL || cipherText == NULL) {
+        HKS_LOG_E("invalid argument message or cipherText");
+        HksMbedtlsRsaCryptFree(context, rsaCtx);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksMbedtlsRsaCryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
+    struct HksBlob *tagAead, const bool encrypt)
+{
+    int32_t ret = HksMbedtlsRsaCryptFinalCheckParam(ctx, message, cipherText);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    struct HksMbedtlslRsaCtx *rsaCtx = (struct HksMbedtlslRsaCtx *)*ctx;
+    mbedtls_rsa_context *context = (mbedtls_rsa_context *)rsaCtx->append;
+
     size_t outlen;
     if (message->size != 0) {
         ret = HksMbedtlsRsaEncryptDecrypt((void *)*ctx, message);
         if (ret != HKS_SUCCESS) {
+            HksMbedtlsRsaCryptFree(context, rsaCtx);
             return ret;
         }
     }
     ret = RsaKeyMaterialToCtx(&rsaCtx->mKey, !encrypt, context); /* encrypt don't need private exponent (d) */
     if (ret != HKS_SUCCESS) {
+        HksMbedtlsRsaCryptFree(context, rsaCtx);
         HKS_LOG_E("rsaKey material to ctx fail");
         return ret;
     }
@@ -553,14 +598,12 @@ int32_t HksMbedtlsRsaCryptFinal(void **ctx, const struct HksBlob *message, struc
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Mbedtls rsa crypt failed! mbedtls ret = 0x%X", ret);
         (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
+        HksMbedtlsRsaCryptFree(context, rsaCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     cipherText->size = (uint32_t)outlen;
-    HksMbedtlsRsaCryptFinalFree(context, rsaCtx);
-    HksFree(rsaCtx->append);
-    rsaCtx->append = NULL;
-    HksFree(*ctx);
-    *ctx = NULL;
+
+    HksMbedtlsRsaHalFreeCtx(ctx);
     return ret;
 }
 #endif /* HKS_SUPPORT_RSA_CRYPT */

@@ -478,6 +478,9 @@ protected:
         void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
         EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx), testCaseParams.decryptResult);
         if (testCaseParams.decryptResult != HKS_SUCCESS) {
+            if (!decryptCtx) {
+                HksFree(decryptCtx);
+            }
             return;
         }
         uint32_t point = 0;
@@ -515,8 +518,10 @@ protected:
             EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, &tmpTagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
 
-            HksFree(deMessageLast.data);
             HksFree(out.data);
+        }
+        if (!decryptCtx) {
+            HksFree(decryptCtx);
         }
     }
 
