@@ -239,7 +239,19 @@ int32_t HksIsDirExist(const char *path)
 
 int32_t HksMakeDir(const char *path)
 {
-    return mkdir(path, S_IRWXU);
+    int result = mkdir(path, S_IRWXU);
+    if (result == 0) {
+        return HKS_SUCCESS;
+    } else {
+        switch (errno) {
+            case EEXIST:
+                return HKS_ERROR_ALREADY_EXISTS;
+                break;
+            default:
+                return HKS_ERROR_MAKE_DIR_FAIL;
+                break;
+        }
+    }
 }
 
 void *HksOpenDir(const char *path)
