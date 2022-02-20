@@ -905,6 +905,9 @@ protected:
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult)
             << "HksCryptoHalEncryptInit failed.";
         if (testCaseParams.encryptResult != HKS_SUCCESS) {
+            if (!encryptCtx) {
+                HksFree(encryptCtx);
+            }
             return;
         }
         uint32_t point = 0;
@@ -939,22 +942,20 @@ protected:
                 testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
             HksFree(out.data);
         }
+        if (!encryptCtx) {
+            HksFree(encryptCtx);
+        }
     }
 
     void RunTestCaseThreeStageCommon(HksBlob *key, HksBlob *message,
-        const TestCaseParams &testCaseParams, uint32_t outLen, HksBlob *cipherText)
+        const TestCaseParams &testCaseParams, HksBlob *messageLast, HksBlob *cipherText)
     {
         HksBlob tagAead = { .size = 0, .data = nullptr };
         void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
         EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx), HKS_SUCCESS);
 
-        HksBlob messageLast = {
-            .size = outLen,
-            .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT)
-        };
-
         uint32_t index = 0;
-        if (outLen > HKS_UPDATE_DATA_MAX) {
+        if (messageLast->size > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = {
                 .size = HKS_UPDATE_DATA_MAX,
                 .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
@@ -963,7 +964,7 @@ protected:
                 .size = HKS_UPDATE_DATA_MAX,
                 .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
             };
-            while (index < outLen - HKS_UPDATE_DATA_MAX) {
+            while (index < messageLast->size - HKS_UPDATE_DATA_MAX) {
                 memcpy_s(messageUpdate.data, messageUpdate.size, &cipherText->data[index], HKS_UPDATE_DATA_MAX);
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out,
@@ -974,31 +975,33 @@ protected:
             HksFree(out.data);
             HksFree(messageUpdate.data);
 
-            uint32_t lastLen = outLen - index;
+            uint32_t lastLen = messageLast->size - index;
             HksBlob inscription = {
                 .size = lastLen,
                 .data = (uint8_t *)HksMalloc(lastLen)
             };
             memcpy_s(inscription.data, lastLen, &cipherText->data[index], lastLen);
-            EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, &messageLast, &tagAead,
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, messageLast, &tagAead,
                 testCaseParams.usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalDecryptFinal failed.";
             HksFree(inscription.data);
         } else {
             HksBlob out = {
-                .size = outLen,
-                .data = (uint8_t *)HksMalloc(outLen)
+                .size = messageLast->size,
+                .data = (uint8_t *)HksMalloc(messageLast->size)
             };
             EXPECT_EQ(HksCryptoHalDecryptUpdate(cipherText, decryptCtx, &out, testCaseParams.usageSpec.algType),
                 HKS_SUCCESS) << "HksCryptoHalDecryptUpdate failed.";
             HksBlob inscription = { .size = 0, .data = nullptr };
-            EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, &messageLast, &tagAead,
+            EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, messageLast, &tagAead,
                 testCaseParams.usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalDecryptFinal failed.";
             HksFree(out.data);
         }
+        if (!decryptCtx) {
+            HksFree(decryptCtx);
+        }
 
-        EXPECT_EQ(messageLast.size, message->size) << "compare size failed.";
-        EXPECT_EQ(HksMemCmp(message->data, messageLast.data, messageLast.size), HKS_SUCCESS);
-        HksFree(messageLast.data);
+        EXPECT_EQ(messageLast->size, message->size) << "compare size failed.";
+        EXPECT_EQ(HksMemCmp(message->data, messageLast->data, messageLast->size), HKS_SUCCESS);
     }
 
     void RunTestCaseThreeStage(const TestCaseParams &testCaseParams)
@@ -1007,18 +1010,23 @@ protected:
         HksBlob message = { .size = 0, .data = nullptr };
         uint32_t outLen = HKS_KEY_BYTES(testCaseParams.spec.keyLen);
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen  + HKS_PADDING_SUPPLENMENT) };
+        HksBlob plainText = {
+            .size = outLen,
+            .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT)
+        };
 
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
 
         HksCryptoHalEncryptTest(&key, testCaseParams, &message, &cipherText);
 
         if (testCaseParams.encryptResult == HKS_SUCCESS) {
-            RunTestCaseThreeStageCommon(&key, &message, testCaseParams, outLen, &cipherText);
+            RunTestCaseThreeStageCommon(&key, &message, testCaseParams, &plainText, &cipherText);
         }
 
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);
+        HksFree(plainText.data);
     }
 };
 

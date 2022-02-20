@@ -1329,6 +1329,9 @@ protected:
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx),
             testCaseParams.encryptInitResult);
         if (testCaseParams.encryptInitResult != HKS_SUCCESS) {
+            if (testCaseParams.encryptInitResult != HKS_ERROR_INVALID_DIGEST) {
+                HksCryptoHalEncryptFreeCtx(&encryptCtx, testCaseParams.usageSpec.algType);
+            }
             return;
         }
 
@@ -1366,6 +1369,9 @@ protected:
                 testCaseParams.encryptFinalResult) << "HksCryptoHalEncryptFinal failed.";
 
             HksFree(out.data);
+        }
+        if (!encryptCtx) {
+            HksFree(encryptCtx);
         }
     }
     void RunTestCase(const TestCaseParams &testCaseParams)

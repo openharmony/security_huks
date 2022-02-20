@@ -465,6 +465,9 @@ protected:
         void* encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult);
         if (testCaseParams.encryptResult != HKS_SUCCESS) {
+            if (!encryptCtx) {
+                HksFree(encryptCtx);
+            }
             return;
         }
         uint32_t point = 0;
@@ -502,6 +505,9 @@ protected:
                 testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
 
             HksFree(out.data);
+        }
+        if (!encryptCtx) {
+            HksFree(encryptCtx);
         }
     }
 
