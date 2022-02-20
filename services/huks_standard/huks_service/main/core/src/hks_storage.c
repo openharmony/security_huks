@@ -262,12 +262,17 @@ static int32_t MakeDirIfNotExist(const char *path)
     int32_t ret = HksIsDirExist(path);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("dir not exist, path = %s", path);
-        if (HksMakeDir(path) != HKS_SUCCESS) {
-            HKS_LOG_E("make dir failed");
-            return HKS_ERROR_MAKE_DIR_FAIL;
+        ret = HksMakeDir(path);
+        if (ret != HKS_SUCCESS) {
+            if (ret == HKS_ERROR_ALREADY_EXISTS) {
+                ret = HKS_SUCCESS;
+            } else {
+                HKS_LOG_E("make dir failed");
+                ret = HKS_ERROR_MAKE_DIR_FAIL;
+            }
         }
     }
-    return HKS_SUCCESS;
+    return ret;
 }
 
 #ifdef HKS_SUPPORT_THREAD
