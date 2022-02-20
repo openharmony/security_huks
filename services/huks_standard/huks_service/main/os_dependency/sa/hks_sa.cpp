@@ -158,27 +158,6 @@ static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
     { HKS_MSG_EXPORT_TRUST_CERTS, HksIpcServiceExportTrustCerts },
 };
 
-HksService::HksService(int saId, bool runOnCreate = true)
-    : SystemAbility(saId, runOnCreate), registerToService_(false), runningState_(STATE_NOT_START)
-{
-    HKS_LOG_D("HksService");
-}
-
-HksService::~HksService()
-{
-    HKS_LOG_D("~HksService");
-}
-
-sptr<HksService> HksService::GetInstance()
-{
-    std::lock_guard<std::mutex> autoLock(instanceLock);
-    if (instance == nullptr) {
-        instance = new (std::nothrow) HksService(SA_ID_KEYSTORE_SERVICE, true);
-    }
-
-    return instance;
-}
-
 #ifdef SUPPORT_COMMON_EVENT
 static void SubscribEvent()
 {
@@ -206,6 +185,64 @@ static void HksSubscribeSystemEvent()
     HKS_LOG_I("create thread success");
 }
 #endif
+
+static inline bool IsInvalidLength(uint32_t length)
+{
+    return (length == 0) || (length > MAX_MALLOC_LEN);
+}
+
+static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
+{
+    uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
+    for (uint32_t i = 0; i < size; ++i) {
+        if (code == g_hksIpcMessageHandler[i].msgId) {
+            g_hksIpcMessageHandler[i].handler((const struct HksBlob *)&srcData, (const uint8_t *)&reply);
+            return NO_ERROR;
+        }
+    }
+
+    size = sizeof(g_hksIpcThreeStageHandler) / sizeof(g_hksIpcThreeStageHandler[0]);
+    for (uint32_t i = 0; i < size; ++i) {
+        if (code == g_hksIpcThreeStageHandler[i].msgId) {
+            struct HksBlob outData = { 0, nullptr };
+            outData.size = outSize;
+            if (IsInvalidLength(outData.size)) {
+                HKS_LOG_E("outData size is invalid, size:%u", outData.size);
+                return HW_SYSTEM_ERROR;
+            }
+            outData.data = (uint8_t *)HksMalloc(outData.size);
+            if (outData.data == nullptr) {
+                HKS_LOG_E("Malloc outData failed.");
+                return HW_SYSTEM_ERROR;
+            }
+            g_hksIpcThreeStageHandler[i].handler((const struct HksBlob *)&srcData, &outData, (const uint8_t *)&reply);
+            HKS_FREE_BLOB(outData);
+            break;
+        }
+    }
+    return NO_ERROR;
+}
+
+HksService::HksService(int saId, bool runOnCreate = true)
+    : SystemAbility(saId, runOnCreate), registerToService_(false), runningState_(STATE_NOT_START)
+{
+    HKS_LOG_D("HksService");
+}
+
+HksService::~HksService()
+{
+    HKS_LOG_D("~HksService");
+}
+
+sptr<HksService> HksService::GetInstance()
+{
+    std::lock_guard<std::mutex> autoLock(instanceLock);
+    if (instance == nullptr) {
+        instance = new (std::nothrow) HksService(SA_ID_KEYSTORE_SERVICE, true);
+    }
+
+    return instance;
+}
 
 bool HksService::Init()
 {
@@ -248,23 +285,18 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
 
     HKS_LOG_I("OnRemoteRequest code:%d", code);
-    struct HksBlob outData = { 0, NULL };
-    outData.size = (uint32_t)data.ReadUint32();
-    outData.data = (uint8_t *)HksMalloc(outData.size);
-    if (outData.data == nullptr) {
-        HKS_LOG_E("Malloc HksBlob failed.");
-        return HW_SYSTEM_ERROR;
-    }
-    struct HksBlob srcData = { 0, NULL };
+    uint32_t outSize = (uint32_t)data.ReadUint32();
+
+    struct HksBlob srcData = { 0, nullptr };
     srcData.size = (uint32_t)data.ReadUint32();
-    if (srcData.size >= MAX_MALLOC_LEN) {
-        HKS_LOG_E("HksBlob size is too large!");
+    if (IsInvalidLength(srcData.size)) {
+        HKS_LOG_E("srcData size is invalid, size:%u", srcData.size);
         return HW_SYSTEM_ERROR;
     }
 
     srcData.data = (uint8_t *)HksMalloc(srcData.size);
     if (srcData.data == nullptr) {
-        HKS_LOG_E("Malloc HksBlob failed.");
+        HKS_LOG_E("Malloc srcData failed.");
         return HW_SYSTEM_ERROR;
     }
 
@@ -279,24 +311,11 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return HKS_ERROR_BAD_STATE;
     }
 
-    uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
-    for (uint32_t i = 0; i < size; ++i) {
-        if (code == g_hksIpcMessageHandler[i].msgId) {
-            g_hksIpcMessageHandler[i].handler(&srcData, (const uint8_t *)&reply);
-            break;
-        }
-    }
-
-    size = sizeof(g_hksIpcThreeStageHandler) / sizeof(g_hksIpcThreeStageHandler[0]);
-    for (uint32_t i = 0; i < size; ++i) {
-        if (code == g_hksIpcThreeStageHandler[i].msgId) {
-            g_hksIpcThreeStageHandler[i].handler(&srcData, &outData, (const uint8_t *)&reply);
-            break;
-        }
+    if (ProcessMessage(code, outSize, srcData, reply) != NO_ERROR) {
+        HKS_LOG_E("process message!");
     }
 
     HKS_FREE_BLOB(srcData);
-    HKS_FREE_BLOB(outData);
     return NO_ERROR;
 }
 
