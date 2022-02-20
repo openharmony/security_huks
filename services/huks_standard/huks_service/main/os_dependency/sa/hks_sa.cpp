@@ -21,12 +21,16 @@
 #include "system_ability_definition.h"
 
 #include "hks_client_service.h"
-#ifdef SUPPORT_COMMON_EVENT
-#include "hks_event_observer.h"
-#endif
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_ipc_service.h"
+
+#ifdef SUPPORT_COMMON_EVENT
+#include <pthread.h>
+#include <unistd.h>
+
+#include "hks_event_observer.h"
+#endif
 
 namespace OHOS {
 namespace Security {
@@ -37,7 +41,9 @@ std::mutex HksService::instanceLock;
 sptr<HksService> HksService::instance;
 const uint32_t UID_ROOT = 0;
 const uint32_t UID_SYSTEM = 1000;
-const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; // 1 MB
+const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
+const uint32_t MAX_DELAY_TIMES = 100;
+const uint32_t DELAY_INTERVAL = 200000; /* delay 200ms waiting for system event */
 
 using HksIpcHandlerFuncProc = void (*)(const struct HksBlob *msg, const uint8_t *context);
 
@@ -173,6 +179,34 @@ sptr<HksService> HksService::GetInstance()
     return instance;
 }
 
+#ifdef SUPPORT_COMMON_EVENT
+static void SubscribEvent()
+{
+    for (uint32_t i = 0; i < MAX_DELAY_TIMES; ++i) {
+        if (SystemEventObserver::SubscribeSystemEvent()) {
+            HKS_LOG_I("subscribe system event success, i = %u", i);
+            return;
+        } else {
+            HKS_LOG_E("subscribe system event failed %u times", i);
+            usleep(DELAY_INTERVAL);
+        }
+    }
+    HKS_LOG_E("subscribe system event failed");
+    return;
+}
+
+static void HksSubscribeSystemEvent()
+{
+    pthread_t subscribeThread;
+    if ((pthread_create(&subscribeThread, nullptr, (void *(*)(void *))SubscribEvent, nullptr)) == -1) {
+        HKS_LOG_E("create thread failed");
+        return;
+    }
+
+    HKS_LOG_I("create thread success");
+}
+#endif
+
 bool HksService::Init()
 {
     HKS_LOG_I("HksService::Init Ready to init");
@@ -193,9 +227,7 @@ bool HksService::Init()
     }
 
 #ifdef SUPPORT_COMMON_EVENT
-    if (!SystemEventObserver::SubscribeSystemEvent()) {
-        HKS_LOG_E("subscribe system event failed"); /* still running service */
-    }
+    HksSubscribeSystemEvent();
 #endif
 
     HKS_LOG_I("HksService::Init success.");
