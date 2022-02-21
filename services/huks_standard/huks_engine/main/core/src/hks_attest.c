@@ -369,8 +369,8 @@ static void AddYears(uint8_t *end, const uint8_t *start, uint32_t years)
     uint32_t tens = start[0] - '0';
     uint32_t units = start[1] - '0';
     units += years;
-    tens += units / 10;
-    units %= 10;
+    tens += units / 10; /* 10 is base */
+    units %= 10; /* 10 is base */
     end[0] = tens + '0';
     end[1] = units + '0';
 }
@@ -392,8 +392,8 @@ static void SetAttestCertValid(struct ValidPeriod *valid)
     HKS_LOG_I("set active dateTime to default : %llu\n", activeDateTime);
 
     struct DataTime notBefore = {0};
-    uint64_t tmpSec = (activeDateTime >> 10);
-    tmpSec = tmpSec + ((3 * tmpSec) >> 7) + ((9 * tmpSec) >> 14);
+    uint64_t tmpSec = (activeDateTime >> 10); /* 10 is uesed for uint64 dividing 1000 in 32 bit system. */
+    tmpSec = tmpSec + ((3 * tmpSec) >> 7) + ((9 * tmpSec) >> 14); /* 3/7/9/14 are same with 10 */
     tmpSec = tmpSec + (uint32_t)(activeDateTime - tmpSec * SECOND_TO_MILLI) / SECOND_TO_MILLI;
     GenerateSysDateTime((uint32_t)tmpSec, &notBefore);
     HKS_LOG_I("notBefore:%u%u%u %u:%u:%uZ\n", notBefore.year, notBefore.month, notBefore.day, notBefore.hour,
@@ -401,7 +401,7 @@ static void SetAttestCertValid(struct ValidPeriod *valid)
     GetTimeStampTee(valid->start, &notBefore);
 
     HKS_LOG_I("set expired date to default.\n");
-    AddYears(valid->end, valid->start, 10);
+    AddYears(valid->end, valid->start, 10); /* default set to 10 years after current time */
 }
 
 static int32_t IsValidTlv(const struct HksAsn1Obj obj)
@@ -566,7 +566,7 @@ static void EncodeValidity(const struct ValidPeriod *validity, struct HksBlob *o
 static uint8_t EncodeKeyUsageBits(const uint32_t usage, uint8_t *bits)
 {
     uint8_t v = 0;
-    uint8_t unused = 8;
+    uint8_t unused = 8; /* one byte haa 8 bits, so init to 8 */
     if (IsSignPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x80;
         unused = 7;
@@ -696,22 +696,23 @@ static int32_t EncodeTbs(const struct HksAttestTbsSpec *tbs, struct HksBlob *out
     return HksAsn1WriteFinal(out, &seq);
 }
 
+static void GetSignatureByAlg(uint32_t signAlg, struct HksAsn1Blob *sigature)
+{
+    if (signAlg == HKS_ALG_RSA) {
+        sigature->size = g_rsaSha256Oid.size;
+        sigature->data = g_rsaSha256Oid.data;
+    } else {
+        sigature->size = g_ecdsaSha256Oid.size;
+        sigature->data = g_ecdsaSha256Oid.data;
+    }
+}
 static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestSpec *attestSpec,
     struct HksBlob *tbs, uint32_t signAlg)
 {
     struct HksAttestTbsSpec draftTbs = {0};
     ParseAttestTbs(template, &draftTbs);
-    struct HksAsn1Blob sigature = { 0, 0, NULL };
-
-    if (signAlg == HKS_ALG_RSA) {
-        sigature.type = ASN_1_TAG_TYPE_SEQ;
-        sigature.size = g_rsaSha256Oid.size;
-        sigature.data = g_rsaSha256Oid.data;
-    } else {
-        sigature.type = ASN_1_TAG_TYPE_SEQ;
-        sigature.size = g_ecdsaSha256Oid.size;
-        sigature.data = g_ecdsaSha256Oid.data;
-    }
+    struct HksAsn1Blob sigature = { ASN_1_TAG_TYPE_SEQ, 0, NULL };
+    GetSignatureByAlg(signAlg, &sigature);
     draftTbs.signature.value = sigature;
 
     uint8_t validityBuf[VALIDITY_BUF_SIZE] = {0};
@@ -741,17 +742,23 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
     struct HksAsn1Blob insertSpki = { ASN_1_TAG_TYPE_RAW, spkiBlob.size, spkiBlob.data };
     draftTbs.spki.value = insertSpki;
 
-    uint8_t extBuf[EXT_MAX_SIZE] = {0};
-    struct HksBlob extension = { sizeof(extBuf), extBuf };
+    uint8_t *extBuf = HksMalloc(EXT_MAX_SIZE + attestSpec->claims.size);
+    if (extBuf == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    struct HksBlob extension = { EXT_MAX_SIZE + attestSpec->claims.size, extBuf };
     ret = CreateAttestExtension(attestSpec, &extension);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("create extensions failed!");
+        HksFree(extBuf);
         return ret;
     }
 
     struct HksAsn1Blob extBlob = { ASN_1_TAG_TYPE_CTX_SPEC3, extension.size, extension.data };
     draftTbs.extensions.value = extBlob;
-    return EncodeTbs(&draftTbs, tbs);
+    ret = EncodeTbs(&draftTbs, tbs);
+    HksFree(extBuf);
+    return ret;
 }
 
 static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *material)
@@ -1395,12 +1402,13 @@ static int32_t CreateHwAttestCert(const struct HksAttestSpec *attestSpec, struct
         template.size = sizeof(g_attestTbs);
     }
 
-    uint8_t *attest = HksMalloc(HKS_ATTEST_CERT_SIZE);
+    uint8_t *attest = HksMalloc(HKS_ATTEST_CERT_SIZE + attestSpec->claims.size);
+    HKS_LOG_E("mattestSpec->claims.size is %d!", attestSpec->claims.size);
     if (attest == NULL) {
         HKS_LOG_E("malloc attest cert failed!");
         return HKS_ERROR_MALLOC_FAIL;
     }
-    struct HksBlob attestCert = { HKS_ATTEST_CERT_SIZE, attest };
+    struct HksBlob attestCert = { HKS_ATTEST_CERT_SIZE + attestSpec->claims.size, attest };
     int32_t ret = CreateAttestCert(&attestCert, &template, attestSpec, signAlg);
     if (ret != HKS_SUCCESS) {
         HksFree(attest);
