@@ -545,7 +545,7 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     int32_t ret = HksCheckIpcCertificateChain(keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCheckIpcCertificateChain fail");
-        return ret;
+        return HKS_ERROR_NOT_SUPPORTED;
     }
 
     uint32_t certBufSize = sizeof(certChain->certsCount);
