@@ -427,7 +427,7 @@ const TestCaseParams HUKS_AES_DECRYPT_MT_01800_PARAMS = {
 
 class HksAesDecryptMt : public testing::Test {
 protected:
-    uint32_t ReadValueByTag(std::vector<HksParam> params, uint32_t needTag)
+    uint32_t ReadValueByTag(std::vector<HksParam> params, uint32_t needTag) const
     {
         for (auto testParams : params) {
             if (testParams.tag == needTag) {

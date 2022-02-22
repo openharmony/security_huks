@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_DELETE_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_DELETE_KEY_MAX_ARGS = 3;
 }  // namespace
 
-struct DeleteKeyAsyncContext_t {
+struct DeleteKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -39,13 +39,13 @@ struct DeleteKeyAsyncContext_t {
     struct HksBlob *keyAlias = nullptr;
     struct HksParamSet *paramSet = nullptr;
 };
-using DeleteKeyAsyncContext = DeleteKeyAsyncContext_t *;
+using DeleteKeyAsyncContext = DeleteKeyAsyncContextT *;
 
 static DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
 {
-    DeleteKeyAsyncContext context = (DeleteKeyAsyncContext)HksMalloc(sizeof(DeleteKeyAsyncContext_t));
+    DeleteKeyAsyncContext context = (DeleteKeyAsyncContext)HksMalloc(sizeof(DeleteKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(DeleteKeyAsyncContext_t), 0, sizeof(DeleteKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(DeleteKeyAsyncContextT), 0, sizeof(DeleteKeyAsyncContextT));
     }
     return context;
 }

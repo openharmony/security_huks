@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_AGREE_KEY_MAX_ARGS = 3;
 constexpr int HKS_MAX_MAC_SIZE = 512;
 }  // namespace
 
-struct MacAsyncContext_t {
+struct MacAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -43,13 +43,13 @@ struct MacAsyncContext_t {
     struct HksBlob *srcData = nullptr;
     struct HksBlob *mac = nullptr;
 };
-using MacAsyncContext = MacAsyncContext_t *;
+using MacAsyncContext = MacAsyncContextT *;
 
 static MacAsyncContext CreateMacAsyncContext()
 {
-    MacAsyncContext context = (MacAsyncContext)HksMalloc(sizeof(MacAsyncContext_t));
+    MacAsyncContext context = (MacAsyncContext)HksMalloc(sizeof(MacAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(MacAsyncContext_t), 0, sizeof(MacAsyncContext_t));
+        (void)memset_s(context, sizeof(MacAsyncContextT), 0, sizeof(MacAsyncContextT));
     }
     return context;
 }

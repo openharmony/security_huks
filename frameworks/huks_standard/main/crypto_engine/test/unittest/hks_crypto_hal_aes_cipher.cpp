@@ -39,8 +39,8 @@ struct TestCaseParams {
 };
 
 const uint8_t IV[16] = {0};
-const HksCipherParam tagIv = { .iv = { .size = 16, .data = (uint8_t *)IV } };
-const HksAeadParam aeadParam = {
+const HksCipherParam TAG_IV = { .iv = { .size = 16, .data = (uint8_t *)IV } };
+const HksAeadParam AEAD_PARAM = {
     .nonce = { .size = 16, .data = (uint8_t *)IV },
     .aad = { .size = 0, .data = nullptr },
     .tagLenEnc = 16,
@@ -59,7 +59,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_001_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -87,7 +87,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_002_PARAMS = {
         .padding = HKS_PADDING_PKCS7,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -110,7 +110,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_003_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -182,7 +182,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_006_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&aeadParam,
+        .algParam = (void *)&AEAD_PARAM,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -210,7 +210,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_007_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -233,7 +233,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_008_PARAMS = {
         .padding = HKS_PADDING_PKCS7,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -256,7 +256,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_009_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
 
@@ -326,7 +326,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_012_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&aeadParam,
+        .algParam = (void *)&AEAD_PARAM,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -349,7 +349,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_013_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
 
@@ -370,7 +370,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_014_PARAMS = {
         .padding = HKS_PADDING_PKCS7,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData =
         "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff0000000000000000000000000000000000000000000000"
@@ -393,7 +393,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_015_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&tagIv,
+        .algParam = (void *)&TAG_IV,
     },
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
 
@@ -463,7 +463,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_018_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = (void *)&aeadParam,
+        .algParam = (void *)&AEAD_PARAM,
     },
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
 
@@ -727,7 +727,7 @@ protected:
         HksFree(tagAead.data);
     }
 
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         HksBlob key = { .size = 0, .data = nullptr };
 

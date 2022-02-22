@@ -51,8 +51,7 @@ ohos_unittest("crypto_engine_unit_test") {
     "hks_crypto_hal_rsa_key.cpp",
     "hks_crypto_hal_rsa_oaep_decrypt.cpp",
     "hks_crypto_hal_rsa_oaep_encrypt.cpp",
-    "hks_crypto_hal_rsa_pkcs1_sign.cpp",
-    "hks_crypto_hal_rsa_pss_sign.cpp",
+    "hks_crypto_hal_rsa_sign.cpp",
   ]
   if (use_crypto_lib == "openssl") {
     sources += [ "hks_crypto_hal_api_openssl.cpp" ]

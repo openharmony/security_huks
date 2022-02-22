@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_ATTEST_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_ATTEST_KEY_MAX_ARGS = 3;
 }  // namespace
 
-struct AttestKeyAsyncContext_t {
+struct AttestKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -40,13 +40,13 @@ struct AttestKeyAsyncContext_t {
     struct HksParamSet *paramSet = nullptr;
     struct HksCertChain *certChain = nullptr;
 };
-using AttestKeyAsyncContext = AttestKeyAsyncContext_t *;
+using AttestKeyAsyncContext = AttestKeyAsyncContextT *;
 
 static AttestKeyAsyncContext CreateAttestKeyAsyncContext()
 {
-    AttestKeyAsyncContext context = (AttestKeyAsyncContext)HksMalloc(sizeof(AttestKeyAsyncContext_t));
+    AttestKeyAsyncContext context = (AttestKeyAsyncContext)HksMalloc(sizeof(AttestKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(AttestKeyAsyncContext_t), 0, sizeof(AttestKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(AttestKeyAsyncContextT), 0, sizeof(AttestKeyAsyncContextT));
     }
     return context;
 }

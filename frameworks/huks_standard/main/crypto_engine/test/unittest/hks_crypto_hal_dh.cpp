@@ -59,7 +59,7 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         HksBlob key = { 0, NULL };
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);

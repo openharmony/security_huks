@@ -76,7 +76,7 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    void RunTestCase(const HksUsageSpec &hksUsageSpec)
+    void RunTestCase(const HksUsageSpec &hksUsageSpec) const
     {
         HksKeySpec spec = {
             .algType = HKS_ALG_DSA,

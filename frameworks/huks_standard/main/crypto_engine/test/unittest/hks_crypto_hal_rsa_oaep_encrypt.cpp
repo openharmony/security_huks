@@ -1322,7 +1322,7 @@ public:
     void TearDown();
 protected:
     void RunTestRsaOaepEncrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *encryptMsg,
-        struct HksBlob *encryptOut, struct HksBlob *tagAead)
+        struct HksBlob *encryptOut, struct HksBlob *tagAead) const
     {
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         void* encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
@@ -1374,7 +1374,7 @@ protected:
             HksFree(encryptCtx);
         }
     }
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
