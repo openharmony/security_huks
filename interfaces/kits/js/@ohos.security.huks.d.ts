@@ -102,7 +102,7 @@ declare namespace huks {
      * @param options Indicates the properties of the update operation.
      */
     function update(handle: number, token?: Uint8Array, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
-    function update(handle: number, token?: Uint8Array, options: HuksOptions,) : Promise<HuksResult>;
+    function update(handle: number, token?: Uint8Array, options: HuksOptions) : Promise<HuksResult>;
 
     /**
      * Finish Operation.
@@ -122,7 +122,7 @@ declare namespace huks {
      * @param options Indicates the properties of the abort operation.
      */
     function abort(handle: number, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
-    function abort(handle: number, options: HuksOptions) : Promise(HuksResult>;
+    function abort(handle: number, options: HuksOptions) : Promise<HuksResult>;
 
     /**
      * Get the sdk version.
