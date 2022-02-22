@@ -42,8 +42,10 @@ sptr<HksService> HksService::instance;
 const uint32_t UID_ROOT = 0;
 const uint32_t UID_SYSTEM = 1000;
 const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
+#ifdef SUPPORT_COMMON_EVENT
 const uint32_t MAX_DELAY_TIMES = 100;
 const uint32_t DELAY_INTERVAL = 200000; /* delay 200ms waiting for system event */
+#endif
 
 using HksIpcHandlerFuncProc = void (*)(const struct HksBlob *msg, const uint8_t *context);
 
