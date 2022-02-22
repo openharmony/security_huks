@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_UNWRAP_KEY_MAX_ARGS = 4;
 constexpr int HKS_MAX_WRAPPED_DATA_SIZE = 2048;
 }  // namespace
 
-struct WrapKeyAsyncContext_t {
+struct WrapKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -43,13 +43,13 @@ struct WrapKeyAsyncContext_t {
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob *wrappedData = nullptr;
 };
-using WrapKeyAsyncContext = WrapKeyAsyncContext_t *;
+using WrapKeyAsyncContext = WrapKeyAsyncContextT *;
 
 static WrapKeyAsyncContext CreateWrapKeyAsyncContext()
 {
-    WrapKeyAsyncContext context = (WrapKeyAsyncContext)HksMalloc(sizeof(WrapKeyAsyncContext_t));
+    WrapKeyAsyncContext context = (WrapKeyAsyncContext)HksMalloc(sizeof(WrapKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(WrapKeyAsyncContext_t), 0, sizeof(WrapKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(WrapKeyAsyncContextT), 0, sizeof(WrapKeyAsyncContextT));
     }
     return context;
 }

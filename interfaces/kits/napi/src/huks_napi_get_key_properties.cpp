@@ -153,6 +153,7 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
             context->paramSetOut = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE);
             if (context->paramSetOut) {
                 context->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
+                context->paramSetOut->paramsCnt = 0;
             }
 
             context->result = HksGetKeyParamSet(context->keyAlias, context->paramSetIn, context->paramSetOut);

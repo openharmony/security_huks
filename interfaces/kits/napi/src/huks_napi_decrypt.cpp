@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_DECRYPT_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_DECRYPT_MAX_ARGS = 3;
 }  // namespace
 
-struct DecryptAsyncContext_t {
+struct DecryptAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -41,13 +41,13 @@ struct DecryptAsyncContext_t {
     struct HksBlob *cipherText = nullptr;
     struct HksBlob *plainText = nullptr;
 };
-using DecryptAsyncContext = DecryptAsyncContext_t *;
+using DecryptAsyncContext = DecryptAsyncContextT *;
 
 static DecryptAsyncContext CreateDecryptAsyncContext()
 {
-    DecryptAsyncContext context = (DecryptAsyncContext)HksMalloc(sizeof(DecryptAsyncContext_t));
+    DecryptAsyncContext context = (DecryptAsyncContext)HksMalloc(sizeof(DecryptAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(DecryptAsyncContext_t), 0, sizeof(DecryptAsyncContext_t));
+        (void)memset_s(context, sizeof(DecryptAsyncContextT), 0, sizeof(DecryptAsyncContextT));
     }
     return context;
 }

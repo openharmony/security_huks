@@ -337,7 +337,7 @@ public:
     void TearDown();
 protected:
     void RunTestEncrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *encryptMsg,
-        struct HksBlob *encryptOut, struct HksBlob *tagAead)
+        struct HksBlob *encryptOut, struct HksBlob *tagAead) const
     {
         void *encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
         uint32_t inLen = encryptMsg->size;
@@ -384,7 +384,7 @@ protected:
         }
     }
 
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };

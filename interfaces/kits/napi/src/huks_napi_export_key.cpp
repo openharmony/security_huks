@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_EXPORT_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_EXPORT_KEY_MAX_ARGS = 3;
 }  // namespace
 
-struct ExportKeyAsyncContext_t {
+struct ExportKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -40,13 +40,13 @@ struct ExportKeyAsyncContext_t {
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob *key = nullptr;
 };
-using ExportKeyAsyncContext = ExportKeyAsyncContext_t *;
+using ExportKeyAsyncContext = ExportKeyAsyncContextT *;
 
 static ExportKeyAsyncContext CreateExportKeyAsyncContext()
 {
-    ExportKeyAsyncContext context = (ExportKeyAsyncContext)HksMalloc(sizeof(ExportKeyAsyncContext_t));
+    ExportKeyAsyncContext context = (ExportKeyAsyncContext)HksMalloc(sizeof(ExportKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(ExportKeyAsyncContext_t), 0, sizeof(ExportKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(ExportKeyAsyncContextT), 0, sizeof(ExportKeyAsyncContextT));
     }
     return context;
 }
