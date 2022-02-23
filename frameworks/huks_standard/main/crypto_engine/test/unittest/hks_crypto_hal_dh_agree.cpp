@@ -75,7 +75,7 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         HksBlob alise = { .size = 0, .data = nullptr };
         HksBlob bob = { .size = 0, .data = nullptr };

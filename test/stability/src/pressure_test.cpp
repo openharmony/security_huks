@@ -64,11 +64,11 @@ static const struct HksParam PARAMS_FOR_DECRYPT[] = {
 class PressureTest : public testing::Test {
 public:
     int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, const struct HksParamSet *paramSetIn,
-        struct HksBlob *priKey, struct HksBlob *pubKey);
+        struct HksBlob *priKey, struct HksBlob *pubKey) const;
 };
 
 int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId,
-    const struct HksParamSet *paramSetIn, struct HksBlob *priKey, struct HksBlob *pubKey)
+    const struct HksParamSet *paramSetIn, struct HksBlob *priKey, struct HksBlob *pubKey) const
 {
     struct HksParamSet *paramOutSet = nullptr;
     HksInitParamSet(&paramOutSet);

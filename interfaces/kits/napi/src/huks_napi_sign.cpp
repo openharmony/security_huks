@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_SIGN_MAX_ARGS = 3;
 constexpr int HKS_MAX_SIGNATURE_SIZE = 512;
 }  // namespace
 
-struct SignAsyncContext_t {
+struct SignAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -43,13 +43,13 @@ struct SignAsyncContext_t {
     struct HksBlob *srcData = nullptr;
     struct HksBlob *signature = nullptr;
 };
-using SignAsyncContext = SignAsyncContext_t *;
+using SignAsyncContext = SignAsyncContextT *;
 
 static SignAsyncContext CreateSignAsyncContext()
 {
-    SignAsyncContext context = (SignAsyncContext)HksMalloc(sizeof(SignAsyncContext_t));
+    SignAsyncContext context = (SignAsyncContext)HksMalloc(sizeof(SignAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(SignAsyncContext_t), 0, sizeof(SignAsyncContext_t));
+        (void)memset_s(context, sizeof(SignAsyncContextT), 0, sizeof(SignAsyncContextT));
     }
     return context;
 }

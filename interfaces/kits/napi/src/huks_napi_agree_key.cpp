@@ -32,7 +32,7 @@ constexpr int HUKS_NAPI_AGREE_KEY_MAX_ARGS = 3;
 constexpr int HKS_MAX_AGREED_KEY_SIZE = 512;
 }  // namespace
 
-struct AgreeKeyAsyncContext_t {
+struct AgreeKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -43,13 +43,13 @@ struct AgreeKeyAsyncContext_t {
     struct HksBlob *peerPublicKey = nullptr;
     struct HksBlob *agreedKey = nullptr;
 };
-using AgreeKeyAsyncContext = AgreeKeyAsyncContext_t *;
+using AgreeKeyAsyncContext = AgreeKeyAsyncContextT *;
 
 static AgreeKeyAsyncContext CreateAgreeKeyAsyncContext()
 {
-    AgreeKeyAsyncContext context = (AgreeKeyAsyncContext)HksMalloc(sizeof(AgreeKeyAsyncContext_t));
+    AgreeKeyAsyncContext context = (AgreeKeyAsyncContext)HksMalloc(sizeof(AgreeKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(AgreeKeyAsyncContext_t), 0, sizeof(AgreeKeyAsyncContext_t));
+        (void)memset_s(context, sizeof(AgreeKeyAsyncContextT), 0, sizeof(AgreeKeyAsyncContextT));
     }
     return context;
 }
