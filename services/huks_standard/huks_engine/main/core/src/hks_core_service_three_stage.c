@@ -261,6 +261,7 @@ static int32_t StoreSignVerifyMessage(const struct HksParamSet *paramSet, const 
         newData->size = restoreData->size + srcData->size;
         newData->data = (uint8_t *)HksMalloc(newData->size);
         if (newData->data == NULL) {
+            HksFree((void *)newData);
             HKS_LOG_E("StoreSignVerifyMessage malloc fail.");
             return HKS_ERROR_MALLOC_FAIL;
         }
@@ -742,6 +743,28 @@ int32_t HksCoreDecryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
     return HKS_SUCCESS;
 }
 
+static int32_t GetRawkey(const struct HuksKeyNode *keyNode, struct HksBlob *rawKey)
+{
+    if (GetCryptoCtx(keyNode) != NULL) {
+        HKS_LOG_E("avoid running into this function multiple times!");
+        return HKS_FAILURE;
+    }
+
+    int32_t ret = HksThreeStageAuth(HKS_AUTH_ID_DERIVE, keyNode);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("derive auth failed!");
+        return ret;
+    }
+
+    ret = HksGetRawKey(keyNode->keyBlobParamSet, rawKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Derive get raw key failed!");
+        return ret;
+    }
+
+    return ret;
+}
+
 int32_t HksCoreDeriveThreeStageInit(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     uint32_t alg)
 {
@@ -763,20 +786,8 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
     struct HksBlob rawKey = { 0, NULL };
 
     do {
-        if (GetCryptoCtx(keyNode) != NULL) {
-            HKS_LOG_E("avoid running into this function multiple times!");
-            return HKS_FAILURE;
-        }
-
-        ret = HksThreeStageAuth(HKS_AUTH_ID_DERIVE, keyNode);
+        ret = GetRawkey(keyNode, &rawKey);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("derive auth failed!");
-            return ret;
-        }
-
-        ret = HksGetRawKey(keyNode->keyBlobParamSet, &rawKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Derive get raw key failed!");
             return ret;
         }
 
@@ -788,6 +799,8 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         srcDataTemp->size = rawKey.size;
         srcDataTemp->data = (uint8_t *)HksMalloc(rawKey.size);
         if (srcDataTemp->data == NULL) {
+            HKS_FREE_PTR(srcDataTemp);
+            ret = HKS_ERROR_MALLOC_FAIL;
             HKS_LOG_E("malloc srcDataTemp->data failed.");
             break;
         }
@@ -798,11 +811,16 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         HksFillKeyDerivationParam(paramSet, &derParam);
         ret = HksCryptoHalDeriveKey(&rawKey, &derivationSpec, srcDataTemp);
         if (ret != HKS_SUCCESS) {
+            HKS_FREE_PTR(srcDataTemp->data);
+            HKS_FREE_PTR(srcDataTemp);
             HKS_LOG_E("HksCryptoHalDeriveKey fail");
             break;
         }
 
         if (SetCryptoCtx(keyNode, (void *)srcDataTemp) != HKS_SUCCESS) {
+            HKS_FREE_PTR(srcDataTemp->data);
+            HKS_FREE_PTR(srcDataTemp);
+            ret = HKS_FAILURE;
             break;
         }
     } while (0);
@@ -810,7 +828,7 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE_PTR(rawKey.data);
 
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
@@ -854,8 +872,7 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
 
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
-    HksFree(restoreData);
-
+    HKS_FREE_PTR(restoreData);
     return HKS_SUCCESS;
 }
 
@@ -878,8 +895,7 @@ int32_t HksCoreDeriveThreeStageAbort(const struct HuksKeyNode *keyNode, const st
 
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
-    HksFree(restoreData);
-
+    HKS_FREE_PTR(restoreData);
     return HKS_SUCCESS;
 }
 
@@ -905,7 +921,7 @@ static int32_t HksCoreAgreeBuildData(struct HksBlob *signature, struct HksBlob *
     (*agreeTemp)->data = (uint8_t *)HksMalloc(signature->size);
     if ((*agreeTemp)->data == NULL) {
         HKS_LOG_E("malloc agreeTemp->data failed.");
-        HksFree(*agreeTemp);
+        HKS_FREE_PTR(*agreeTemp);
         return HKS_FAILURE;
     }
     return HKS_SUCCESS;
@@ -913,8 +929,10 @@ static int32_t HksCoreAgreeBuildData(struct HksBlob *signature, struct HksBlob *
 
 static void HksCoreAgreeFreeData(struct HksBlob **agreeTemp)
 {
-    HksFree((*agreeTemp)->data);
-    HksFree(*agreeTemp);
+    if (*agreeTemp != NULL) {
+        HKS_FREE_PTR((*agreeTemp)->data);
+        HKS_FREE_PTR(*agreeTemp);
+    }
 }
 
 int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
@@ -1015,8 +1033,7 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
 
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
-    HksFree(restoreData);
-
+    HKS_FREE_PTR(restoreData);
     return HKS_SUCCESS;
 }
 
@@ -1038,8 +1055,7 @@ int32_t HksCoreAgreeThreeStageAbort(const struct HuksKeyNode *keyNode, const str
 
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
-    HksFree(restoreData);
-
+    HKS_FREE_PTR(restoreData);
     return HKS_SUCCESS;
 }
 
@@ -1065,6 +1081,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
 
         ret = SetCryptoCtx(keyNode, ctx);
         if (ret != HKS_SUCCESS) {
+            HksCoreMacThreeStageAbort(keyNode, paramSet, alg);
             HKS_LOG_E("Set hks crypto ctx fail");
             break;
         }
@@ -1091,6 +1108,7 @@ int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const stru
 
     ret = HksCryptoHalHmacUpdate(srcData, ctx);
     if (ret != HKS_SUCCESS) {
+        ClearCryptoCtx(keyNode);
         HKS_LOG_E("hmac update failed! ret : %d", ret);
         return ret;
     }
@@ -1112,6 +1130,7 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
 
     ret = HksCryptoHalHmacFinal(inData, &ctx, outData);
     if (ret != HKS_SUCCESS) {
+        ClearCryptoCtx(keyNode);
         HKS_LOG_E("hmac final failed! ret : %d", ret);
         return ret;
     }
