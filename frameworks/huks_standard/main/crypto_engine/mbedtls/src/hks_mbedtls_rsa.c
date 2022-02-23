@@ -493,31 +493,34 @@ int32_t HksMbedtlsRsaCryptInit(void **ctx, const struct HksBlob *key, const stru
 
 static void HksMbedtlsRsaCryptFree(mbedtls_rsa_context *context, struct HksMbedtlslRsaCtx *rsaCtx)
 {
-    if (rsaCtx->append != NULL) {
-        mbedtls_rsa_free(context);
-        rsaCtx->append = NULL;
-    }
+    if (rsaCtx != NULL) {
+        if (rsaCtx->append != NULL) {
+            mbedtls_rsa_free(context);
+            rsaCtx->append = NULL;
+        }
 
-    if (rsaCtx->mCtrDrbg != NULL) {
-        mbedtls_ctr_drbg_free(rsaCtx->mCtrDrbg);
-        HksFree(rsaCtx->mCtrDrbg);
-        rsaCtx->mCtrDrbg = NULL;
-    }
+        if (rsaCtx->mCtrDrbg != NULL) {
+            mbedtls_ctr_drbg_free(rsaCtx->mCtrDrbg);
+            HksFree(rsaCtx->mCtrDrbg);
+            rsaCtx->mCtrDrbg = NULL;
+        }
 
-    if (rsaCtx->mEntropy != NULL) {
-        mbedtls_entropy_free(rsaCtx->mEntropy);
-        HksFree(rsaCtx->mEntropy);
-        rsaCtx->mEntropy = NULL;
-    }
+        if (rsaCtx->mEntropy != NULL) {
+            mbedtls_entropy_free(rsaCtx->mEntropy);
+            HksFree(rsaCtx->mEntropy);
+            rsaCtx->mEntropy = NULL;
+        }
 
-    if (rsaCtx->rsaMessageTotal.data != NULL) {
-        HksFree(rsaCtx->rsaMessageTotal.data);
-        rsaCtx->rsaMessageTotal.data = NULL;
-    }
+        if (rsaCtx->rsaMessageTotal.data != NULL) {
+            HksFree(rsaCtx->rsaMessageTotal.data);
+            rsaCtx->rsaMessageTotal.data = NULL;
+        }
 
-    if (rsaCtx->mKey.data != NULL) {
-        HksFree(rsaCtx->mKey.data);
-        rsaCtx->mKey.data = NULL;
+        if (rsaCtx->mKey.data != NULL) {
+            HksFree(rsaCtx->mKey.data);
+            rsaCtx->mKey.data = NULL;
+        }
+        HKS_FREE_PTR(rsaCtx);
     }
 }
 
@@ -543,7 +546,7 @@ static int32_t HksMbedtlsRsaCryptFinalCheckParam(void **ctx, const struct HksBlo
     }
 
     struct HksMbedtlslRsaCtx *rsaCtx = (struct HksMbedtlslRsaCtx *)*ctx;
-    if (rsaCtx == NULL || rsaCtx->append == NULL) {
+    if (rsaCtx == NULL) {
         HKS_LOG_E("rsaCtx or rsaMessageTotal invalid");
         return HKS_FAILURE;
     }
@@ -551,6 +554,8 @@ static int32_t HksMbedtlsRsaCryptFinalCheckParam(void **ctx, const struct HksBlo
     mbedtls_rsa_context *context = (mbedtls_rsa_context *)rsaCtx->append;
     if (context == NULL) {
         HKS_LOG_E("context is null");
+        HksFree(rsaCtx);
+        *ctx = NULL;
         return HKS_FAILURE;
     }
 

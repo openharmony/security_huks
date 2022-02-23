@@ -198,9 +198,10 @@ int32_t HksOpensslHmacUpdate(void *cryptoCtx, const struct HksBlob *msg)
 
     int hmacData = HMAC_Update(context, msg->data, msg->size);
     if (!hmacData) {
-        HKS_LOG_E("hmac init failed.");
+        HKS_LOG_E("hmac update failed.");
         HMAC_CTX_free(context);
         hmacCtx->append = NULL;
+        HKS_FREE_PTR(cryptoCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
@@ -233,25 +234,20 @@ int32_t HksOpensslHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlo
     if (msg->size != 0) {
         hmacData = HMAC_Update(context, msg->data, msg->size);
         if (!hmacData) {
-            HKS_LOG_E("hmac init failed.");
-            HMAC_CTX_free(context);
-            hmacCtx->append = NULL;
+            HKS_LOG_E("hmac final update failed.");
+            HksOpensslHmacHalFreeCtx(cryptoCtx);
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     }
 
     hmacData = HMAC_Final(context, mac->data, &mac->size);
     if (!hmacData) {
-        HKS_LOG_E("hmac init failed.");
-        HMAC_CTX_free(context);
-        hmacCtx->append = NULL;
+        HKS_LOG_E("hmac final failed.");
+        HksOpensslHmacHalFreeCtx(cryptoCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    HMAC_CTX_free(context);
-    hmacCtx->append = NULL;
-    HksFree(*cryptoCtx);
-    *cryptoCtx = NULL;
+    HksOpensslHmacHalFreeCtx(cryptoCtx);
     return HKS_SUCCESS;
 }
 
