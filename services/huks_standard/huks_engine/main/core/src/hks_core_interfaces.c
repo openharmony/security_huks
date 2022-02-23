@@ -16,6 +16,7 @@
 #include "hks_core_interfaces.h"
 
 #include "hks_core_service.h"
+#include "hks_log.h"
 #include "hks_mem.h"
 
 struct HksCoreIfDevice *g_hksCoreIfDevicePtr = NULL;
@@ -100,6 +101,48 @@ int32_t HksCoreIfGenerateRandom(const struct HksParamSet *paramSet, struct HksBl
     return HksCoreGenerateRandom(paramSet, random);
 }
 
+int32_t HksCoreIfSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *signature)
+{
+    return HksCoreSign(key, paramSet, srcData, signature);
+}
+
+int32_t HksCoreIfVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, const struct HksBlob *signature)
+{
+    return HksCoreVerify(key, paramSet, srcData, signature);
+}
+
+int32_t HksCoreIfEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *plainText, struct HksBlob *cipherText)
+{
+    return HksCoreEncrypt(key, paramSet, plainText, cipherText);
+}
+
+int32_t HksCoreIfDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *cipherText, struct HksBlob *plainText)
+{
+    return HksCoreDecrypt(key, paramSet, cipherText, plainText);
+}
+
+int32_t HksCoreIfAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
+    const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
+{
+    return HksCoreAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
+}
+
+int32_t HksCoreIfDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
+    struct HksBlob *derivedKey)
+{
+    return HksCoreDeriveKey(paramSet, kdfKey, derivedKey);
+}
+
+int32_t HksCoreIfMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *mac)
+{
+    return HksCoreMac(key, paramSet, srcData, mac);
+}
+
 #ifdef _STORAGE_LITE_
 int32_t HksCoreIfCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac)
@@ -139,7 +182,13 @@ struct HksCoreIfDevice *HksCreateCoreIfDevicePtr(void)
     g_hksCoreIfDevicePtr->AttestKey        = HksCoreIfAttestKey;
     g_hksCoreIfDevicePtr->GetAbility       = HksCoreIfGetAbility;
     g_hksCoreIfDevicePtr->GetHardwareInfo  = HksCoreIfGetHardwareInfo;
-
+    g_hksCoreIfDevicePtr->Sign             = HksCoreIfSign;
+    g_hksCoreIfDevicePtr->Verify           = HksCoreIfVerify;
+    g_hksCoreIfDevicePtr->Encrypt          = HksCoreIfEncrypt;
+    g_hksCoreIfDevicePtr->Decrypt          = HksCoreIfDecrypt;
+    g_hksCoreIfDevicePtr->AgreeKey         = HksCoreIfAgreeKey;
+    g_hksCoreIfDevicePtr->DeriveKey        = HksCoreIfDeriveKey;
+    g_hksCoreIfDevicePtr->Mac              = HksCoreIfMac;
 #ifdef _STORAGE_LITE_
     g_hksCoreIfDevicePtr->CalcMacHeader    = HksCoreIfCalcMacHeader;
 #endif

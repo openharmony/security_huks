@@ -16,12 +16,8 @@
 #ifndef HUKS_CORE_INTERFACES
 #define HUKS_CORE_INTERFACES
 
-#include <stdint.h>
-#include <stdio.h>
-
-#include "hks_access.h"
-#include "hks_config.h"
-#include "hks_log.h"
+#include "hks_param.h"
+#include "hks_type_inner.h"
 
 struct HksCoreIfDevice {
     int32_t (*ModuleInit)(void);
@@ -64,6 +60,27 @@ struct HksCoreIfDevice {
     struct HksBlob *keyOut);
 
     int32_t (*GenerateRandom)(const struct HksParamSet *paramSet, struct HksBlob *random);
+
+    int32_t (*Sign)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *signature);
+
+    int32_t (*Verify)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        const struct HksBlob *srcData, const struct HksBlob *signature);
+
+    int32_t (*Encrypt)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        const struct HksBlob *plainText, struct HksBlob *cipherText);
+
+    int32_t (*Decrypt)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        const struct HksBlob *cipherText, struct HksBlob *plainText);
+
+    int32_t (*AgreeKey)(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
+        const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey);
+
+    int32_t (*DeriveKey)(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
+        struct HksBlob *derivedKey);
+
+    int32_t (*Mac)(const struct HksBlob *key, const struct HksParamSet *paramSet,
+        const struct HksBlob *srcData, struct HksBlob *mac);
 };
 
 struct HksCoreIfDevice* HksCreateCoreIfDevicePtr(void);

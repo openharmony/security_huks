@@ -25,13 +25,14 @@
 
 #include "hks_upgrade_storage_data.h"
 
-#include "hks_access.h"
 #include "hks_crypto_hal.h"
 #include "hks_file_operator.h"
 #include "hks_get_process_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_storage.h"
+
+#include "huks_hal_interfaces.h"
 
 #define HKS_SEALING_NONCE_SIZE 16
 #define HKS_HEADER_HASH_SIZE 64
@@ -438,12 +439,6 @@ int32_t HksUpgradeStorageData(void)
     do {
 #ifndef _HARDWARE_ROOT_KEY_
         /* init rkc and update key store files, if process failed, need roolback all new files */
-        ret =  HksCreateHksHalDevice();
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("init rkc failed, ret = %d", ret);
-            break;
-        }
-
         ret = HksHalModuleInit();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("init rkc failed, ret = %d", ret);

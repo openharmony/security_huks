@@ -61,8 +61,6 @@ if (huks_use_mbedtls == true) {
   ]
 }
 
-huks_access_sources = [ "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/hks_passthrough_access.c" ]
-
 if (huks_use_lite_storage == true) {
   huks_storage_source = [
     "../../../services/huks_standard/huks_service/main/core/src/hks_storage_adapter.c",
@@ -161,7 +159,6 @@ if (ohos_kernel_type == "liteos_m") {
 
     sources = huks_sources
     sources += huks_storage_source
-    sources += huks_access_sources
     sources += [ "hks_tmp_client.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
@@ -200,7 +197,6 @@ if (ohos_kernel_type == "liteos_m") {
     configs += [ ":get_dev_udid_config" ]
     sources = huks_sources
     sources += huks_storage_source
-    sources += huks_access_sources
     sources += [
       "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c",
     ]
