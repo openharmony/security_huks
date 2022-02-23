@@ -521,6 +521,8 @@ static void HksOpensslRsaCryptFreeData(void *ctx)
         HksFree(rsaCtx->rsaMessageTotal.data);
         rsaCtx->rsaMessageTotal.data = NULL;
     }
+
+    HKS_FREE_PTR(ctx);
 }
 
 int32_t HksOpensslRsaEncryptDecryptUpdate(void *ctx, const struct HksBlob *message, struct HksBlob *out,
@@ -574,6 +576,8 @@ int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *messa
     EVP_PKEY_CTX *context = (EVP_PKEY_CTX *)rsaCtx->append;
     if (context == NULL) {
         HKS_LOG_E("context is null");
+        HksFree(rsaCtx);
+        *ctx = NULL;
         return HKS_ERROR_NULL_POINTER;
     }
 
