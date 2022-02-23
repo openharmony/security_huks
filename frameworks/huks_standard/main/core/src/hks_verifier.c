@@ -372,7 +372,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
     return obj;
 }
 
-static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t *data, uint32_t *len)
+static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t **data, uint32_t *len)
 {
     int32_t ret = HKS_ERROR_VERIFICATION_FAILED;
     ASN1_OBJECT *obj = GetObjByOid(NID_undef, KEY_DESCRIPTION_OID, "KeyDescription", "KEY DESCRIPTION OID");
@@ -399,7 +399,7 @@ static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t
         goto EXIT;
     }
 
-    ret = ExtractTlvData(octetStr->data, octetStr->length, data, len);
+    ret = ExtractTlvDataAndHeadSize(octetStr->data, octetStr->length, data, len, NULL);
 
 EXIT:
     ASN1_OBJECT_free(obj);
@@ -505,19 +505,18 @@ static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksPa
         *version, paramSetOut);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("fill attest extend paramSet fail");
-        HKS_FREE_PTR(version);
-        return ret;
     }
+
     HKS_FREE_PTR(version);
-    return HKS_SUCCESS;
+    return ret;
 }
 
 static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksParamSet *paramSetOut)
 {
-    uint8_t keyDescription[KD_MAX_SIZE] = {0};
-    uint32_t keyDescLen = KD_MAX_SIZE;
+    uint8_t *keyDescription = NULL;
+    uint32_t keyDescLen;
 
-    int32_t ret = GetKeyDescriptionSeqValue(&certs[0], keyDescription, &keyDescLen);
+    int32_t ret = GetKeyDescriptionSeqValue(&certs[0], &keyDescription, &keyDescLen);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("GetKeyDescriptionSeqValue failed");
         return ret;
@@ -527,6 +526,8 @@ static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksPar
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("fill attest extend info fail");
     }
+
+    HKS_FREE_PTR(keyDescription);
     return ret;
 }
 
