@@ -502,7 +502,7 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         HksBlob key = { .size = 0, .data = nullptr };
 

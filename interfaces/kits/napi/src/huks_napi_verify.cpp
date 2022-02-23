@@ -30,7 +30,7 @@ constexpr int HUKS_NAPI_VERIFY_MIN_ARGS = 3;
 constexpr int HUKS_NAPI_VERIFY_MAX_ARGS = 4;
 }  // namespace
 
-struct VerifyAsyncContext_t {
+struct VerifyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -41,13 +41,13 @@ struct VerifyAsyncContext_t {
     struct HksBlob *srcData = nullptr;
     struct HksBlob *signature = nullptr;
 };
-using VerifyAsyncContext = VerifyAsyncContext_t *;
+using VerifyAsyncContext = VerifyAsyncContextT *;
 
 static VerifyAsyncContext CreateVerifyAsyncContext()
 {
-    VerifyAsyncContext context = (VerifyAsyncContext)HksMalloc(sizeof(VerifyAsyncContext_t));
+    VerifyAsyncContext context = (VerifyAsyncContext)HksMalloc(sizeof(VerifyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(VerifyAsyncContext_t), 0, sizeof(VerifyAsyncContext_t));
+        (void)memset_s(context, sizeof(VerifyAsyncContextT), 0, sizeof(VerifyAsyncContextT));
     }
     return context;
 }

@@ -472,7 +472,7 @@ public:
     void TearDown();
 protected:
     void RunTestRsaDecrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *decryptMsg,
-        struct HksBlob *decryptOut)
+        struct HksBlob *decryptOut) const
         {
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
@@ -525,7 +525,7 @@ protected:
         }
     }
 
-    void RunTestCase(const TestCaseParams &testCaseParams)
+    void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
