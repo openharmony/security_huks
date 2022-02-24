@@ -23,6 +23,10 @@ ohos_static_library("libhuks_service_core_standard_static") {
   part_name = "huks"
   public_configs = [ ":huks_config" ]
   include_dirs = [
+    "//base/security/huks/utils/crypto_adapter",
+    "//base/security/huks/utils/file_operator",
+    "//base/security/huks/utils/list",
+    "//base/security/huks/utils/mutex",
     "//utils/native/base/include",
     "//third_party/openssl/include/",
   ]
@@ -34,9 +38,6 @@ ohos_static_library("libhuks_service_core_standard_static") {
   sources = [
     "src/hks_client_check.c",
     "src/hks_client_service.c",
-    "src/hks_client_service_adapter.c",
-    "src/hks_double_list.c",
-    "src/hks_operation.c",
     "src/hks_storage.c",
     "src/hks_storage_file_lock.c",
   ]
@@ -51,6 +52,10 @@ ohos_static_library("libhuks_service_core_standard_static") {
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+    "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
+    "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+    "//base/security/huks/utils/list:libhuks_utils_list_static",
+    "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     "//third_party/openssl:libcrypto_static",
     "//utils/native/base:utils",
   ]
