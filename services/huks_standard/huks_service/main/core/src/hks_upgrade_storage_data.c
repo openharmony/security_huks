@@ -32,7 +32,7 @@
 #include "hks_mem.h"
 #include "hks_storage.h"
 
-#include "huks_hal_interfaces.h"
+#include "huks_hdi_interfaces.h"
 
 #define HKS_SEALING_NONCE_SIZE 16
 #define HKS_HEADER_HASH_SIZE 64
@@ -338,7 +338,7 @@ static int32_t UpgradeSingleKeyInfo(const struct HksBlob *keyInfo)
             break;
         }
 
-        ret = HksHalUpgradeKeyInfo(&keyAlias, keyInfo, &output);
+        ret = HuksHdiUpgradeKeyInfo(&keyAlias, keyInfo, &output);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access update key info faild");
             break;
@@ -439,7 +439,7 @@ int32_t HksUpgradeStorageData(void)
     do {
 #ifndef _HARDWARE_ROOT_KEY_
         /* init rkc and update key store files, if process failed, need roolback all new files */
-        ret = HksHalModuleInit();
+        ret = HuksHdiModuleInit();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("init rkc failed, ret = %d", ret);
             break;
