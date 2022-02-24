@@ -21,7 +21,6 @@
 
 #include "hks_client_service.h"
 
-#include "hks_access.h"
 #include "hks_client_check.h"
 #include "hks_client_service_adapter.h"
 #include "hks_log.h"
@@ -698,7 +697,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
             break;
         }
 
-        ret = HksAccessSign(&keyFromFile, newParamSet, srcData, signature);
+        ret = HksHalSign(&keyFromFile, newParamSet, srcData, signature);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -726,7 +725,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
             break;
         }
 
-        ret = HksAccessVerify(&keyFromFile, newParamSet, srcData, signature);
+        ret = HksHalVerify(&keyFromFile, newParamSet, srcData, signature);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -754,7 +753,7 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
             break;
         }
 
-        ret = HksAccessEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
+        ret = HksHalEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -782,7 +781,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
             break;
         }
 
-        ret = HksAccessDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
+        ret = HksHalDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1000,7 +999,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
             break;
         }
 
-        ret = HksAccessAgreeKey(newParamSet, &keyFromFile, &publicKey, agreedKey);
+        ret = HksHalAgreeKey(newParamSet, &keyFromFile, &publicKey, agreedKey);
         HKS_FREE_BLOB(publicKey);
     } while (0);
 
@@ -1029,7 +1028,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
             break;
         }
 
-        ret = HksAccessDeriveKey(newParamSet, &keyFromFile, derivedKey);
+        ret = HksHalDeriveKey(newParamSet, &keyFromFile, derivedKey);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1057,7 +1056,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
             break;
         }
 
-        ret = HksAccessMac(&keyFromFile, newParamSet, srcData, mac);
+        ret = HksHalMac(&keyFromFile, newParamSet, srcData, mac);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1076,12 +1075,6 @@ int32_t HksServiceInitialize(void)
         return ret;
     }
 #endif
-
-    ret = HksCreateHksHalDevice();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks core service initialize failed! ret = %d", ret);
-        return ret;
-    }
 
     ret = HksHalModuleInit();
     if (ret != HKS_SUCCESS) {
@@ -1373,12 +1366,6 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
             break;
         }
 
-        ret = HksCreateHksHalDevice();
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksCreateHksHalDevice, ret = %d", ret);
-            break;
-        }
-
         ret = HksHalInit(&keyFromFile, newParamSet, handle);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksHalInit fail, ret = %d", ret);
@@ -1394,13 +1381,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    int32_t ret = HksCreateHksHalDevice();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCreateHksHalDevice, ret = %d", ret);
-        return ret;
-    }
-
-    ret = HksHalUpdate(handle, paramSet, inData, outData);
+    int32_t ret = HksHalUpdate(handle, paramSet, inData, outData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksHalUpdate fail, ret = %d", ret);
         return ret;
@@ -1415,12 +1396,6 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 
     int32_t ret;
     do {
-        ret = HksCreateHksHalDevice();
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksCreateHksHalDevice, ret = %d", ret);
-            break;
-        }
-
         ret = AppendProcessNameTag(paramSet, &processInfo->processName, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append tag processName failed, ret = %d", ret);
@@ -1449,13 +1424,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
-    int32_t ret = HksCreateHksHalDevice();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCreateHksHalDevice, ret = %d", ret);
-        return ret;
-    }
-
-    ret = HksHalAbort(handle, paramSet);
+    int32_t ret = HksHalAbort(handle, paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksHalFinish fail, ret = %d", ret);
         return ret;
@@ -1479,12 +1448,6 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
         ret = AppendProcessNameTag(NULL, processName, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append processName tag failed, ret = %d", ret);
-            break;
-        }
-
-        ret = HksCreateHksHalDevice();
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksCreateHksHalDevice, ret = %d", ret);
             break;
         }
 
