@@ -25,7 +25,7 @@
 #include "hks_param.h"
 #include "hks_storage_adapter.h"
 
-#include "huks_hal_interfaces.h"
+#include "huks_hdi_interfaces.h"
 
 #define HKS_FILE_OFFSET_BASE 0
 #define MAX_STORAGE_SIZE 5120
@@ -99,7 +99,7 @@ static int32_t CalcHeaderMac(const struct HksBlob *salt, const uint8_t *buf,
             break;
         }
 
-        ret = HksHalCalcHeaderMac(paramSet, salt, &srcData, mac);
+        ret = HuksHdiCalcHeaderMac(paramSet, salt, &srcData, mac);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access calc header mac failed, ret = %d.", ret);
         }
@@ -120,7 +120,7 @@ static int32_t InitImageBuffer(void)
     keyInfoHead->sealingAlg = HKS_STORAGE_RESERVED_SEALING_ALG;
 
     struct HksBlob salt = { HKS_DERIVE_DEFAULT_SALT_LEN, keyInfoHead->salt };
-    int32_t ret = HksHalGenerateRandom(NULL, &salt);
+    int32_t ret = HuksHdiGenerateRandom(NULL, &salt);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("generate random failed, ret = %d", ret);
         return ret;

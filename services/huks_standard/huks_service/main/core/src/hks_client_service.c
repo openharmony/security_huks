@@ -35,7 +35,7 @@
 #include "hks_upgrade_storage_data.h"
 #endif
 
-#include "huks_hal_interfaces.h"
+#include "huks_hdi_interfaces.h"
 
 #define USER_ID_ROOT_DEFAULT          "0"
 
@@ -659,7 +659,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
             break;
         }
 
-        ret = HksHalGenerateKey(keyAlias, newParamSet, &keyIn, &output);
+        ret = HuksHdiGenerateKey(keyAlias, newParamSet, &keyIn, &output);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level generate key failed, ret = %d", ret);
             break;
@@ -697,7 +697,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
             break;
         }
 
-        ret = HksHalSign(&keyFromFile, newParamSet, srcData, signature);
+        ret = HuksHdiSign(&keyFromFile, newParamSet, srcData, signature);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -725,7 +725,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
             break;
         }
 
-        ret = HksHalVerify(&keyFromFile, newParamSet, srcData, signature);
+        ret = HuksHdiVerify(&keyFromFile, newParamSet, srcData, signature);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -753,7 +753,7 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
             break;
         }
 
-        ret = HksHalEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
+        ret = HuksHdiEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -781,7 +781,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
             break;
         }
 
-        ret = HksHalDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
+        ret = HuksHdiDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -844,7 +844,7 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
             break;
         }
 
-        ret = HksHalGetKeyProperties(newParamSet, &keyFromFile);
+        ret = HuksHdiGetKeyProperties(newParamSet, &keyFromFile);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level check key validity failed, ret = %d", ret);
             break;
@@ -902,7 +902,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
         }
 
         struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
-        ret = HksHalImportKey(keyAlias, &publicKey, newParamSet, &keyOut);
+        ret = HuksHdiImportKey(keyAlias, &publicKey, newParamSet, &keyOut);
         (void)memset_s(publicKey.data, publicKey.size, 0, publicKey.size);
         HKS_FREE_BLOB(publicKey);
         if (ret != HKS_SUCCESS) {
@@ -946,7 +946,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
         }
 
         struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
-        ret = HksHalExportPublicKey(&keyFromFile, newParamSet, &publicKey);
+        ret = HuksHdiExportPublicKey(&keyFromFile, newParamSet, &publicKey);
         if (ret == HKS_SUCCESS) {
             struct HksBlob x509Key = { 0, NULL };
             ret = TranslateToX509PublicKey(&publicKey, &x509Key);
@@ -999,7 +999,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
             break;
         }
 
-        ret = HksHalAgreeKey(newParamSet, &keyFromFile, &publicKey, agreedKey);
+        ret = HuksHdiAgreeKey(newParamSet, &keyFromFile, &publicKey, agreedKey);
         HKS_FREE_BLOB(publicKey);
     } while (0);
 
@@ -1028,7 +1028,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
             break;
         }
 
-        ret = HksHalDeriveKey(newParamSet, &keyFromFile, derivedKey);
+        ret = HuksHdiDeriveKey(newParamSet, &keyFromFile, derivedKey);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1056,7 +1056,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
             break;
         }
 
-        ret = HksHalMac(&keyFromFile, newParamSet, srcData, mac);
+        ret = HuksHdiMac(&keyFromFile, newParamSet, srcData, mac);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1076,7 +1076,7 @@ int32_t HksServiceInitialize(void)
     }
 #endif
 
-    ret = HksHalModuleInit();
+    ret = HuksHdiModuleInit();
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("hks core service initialize failed! ret = %d", ret);
         return ret;
@@ -1103,7 +1103,7 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
 #endif
 
 #ifndef _HARDWARE_ROOT_KEY_
-    ret = HksHalRefresh();
+    ret = HuksHdiRefresh();
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Hks core service refresh info failed! ret = 0x%X", ret);
         return ret;
@@ -1140,9 +1140,9 @@ int32_t HksServiceProcessInit(uint32_t msgId, const struct HksProcessInfo *proce
             break;
         }
 
-        ret = HksHalProcessInit(msgId, &keyFromFile, newParamSet, operationHandle);
+        ret = HuksHdiProcessInit(msgId, &keyFromFile, newParamSet, operationHandle);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksHalProcessInit fail");
+            HKS_LOG_E("HuksHdiProcessInit fail");
             break;
         }
 
@@ -1172,9 +1172,9 @@ int32_t HksServiceProcessUpdate(uint32_t msgId, uint64_t operationHandle, const 
             break;
         }
 
-        ret = HksHalProcessMultiUpdate(msgId, operationHandle, inData, outData);
+        ret = HuksHdiProcessMultiUpdate(msgId, operationHandle, inData, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksHalProcessMultiUpdate fail");
+            HKS_LOG_E("HuksHdiProcessMultiUpdate fail");
             DeleteOperation(operationHandle);
         }
     } while (0);
@@ -1206,9 +1206,9 @@ int32_t HksServiceProcessFinal(uint32_t msgId, uint64_t operationHandle, const s
             break;
         }
 
-        ret = HksHalProcessFinal(msgId, operationHandle, inData, outData);
+        ret = HuksHdiProcessFinal(msgId, operationHandle, inData, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksHalProcessFinal fail");
+            HKS_LOG_E("HuksHdiProcessFinal fail");
         }
 
         DeleteOperation(operationHandle);
@@ -1248,9 +1248,9 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     }
 
     do {
-        ret = HksHalAttestKey(&keyFromFile, newParamSet, certChain);
+        ret = HuksHdiAttestKey(&keyFromFile, newParamSet, certChain);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksHalAttestKey fail, ret = %d.", ret);
+            HKS_LOG_E("HuksHdiAttestKey fail, ret = %d.", ret);
             break;
         }
 
@@ -1366,9 +1366,9 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
             break;
         }
 
-        ret = HksHalInit(&keyFromFile, newParamSet, handle);
+        ret = HuksHdiInit(&keyFromFile, newParamSet, handle);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksHalInit fail, ret = %d", ret);
+            HKS_LOG_E("HuksHdiInit fail, ret = %d", ret);
             break;
         }
     } while (0);
@@ -1381,9 +1381,9 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    int32_t ret = HksHalUpdate(handle, paramSet, inData, outData);
+    int32_t ret = HuksHdiUpdate(handle, paramSet, inData, outData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksHalUpdate fail, ret = %d", ret);
+        HKS_LOG_E("HuksHdiUpdate fail, ret = %d", ret);
         return ret;
     }
     return ret;
@@ -1402,9 +1402,9 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             break;
         }
 
-        ret = HksHalFinish(handle, newParamSet, inData, outData);
+        ret = HuksHdiFinish(handle, newParamSet, inData, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksHalFinish fail, ret = %d", ret);
+            HKS_LOG_E("HuksHdiFinish fail, ret = %d", ret);
             break;
         }
 
@@ -1424,9 +1424,9 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
-    int32_t ret = HksHalAbort(handle, paramSet);
+    int32_t ret = HuksHdiAbort(handle, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksHalFinish fail, ret = %d", ret);
+        HKS_LOG_E("HuksHdiFinish fail, ret = %d", ret);
         return ret;
     }
     return ret;
@@ -1451,7 +1451,7 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
             break;
         }
 
-        ret = HksHalGenerateRandom(newParamSet, random);
+        ret = HuksHdiGenerateRandom(newParamSet, random);
     } while (0);
 
     HksFreeParamSet(&newParamSet);
