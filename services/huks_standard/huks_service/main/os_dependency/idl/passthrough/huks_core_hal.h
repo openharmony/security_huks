@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_CORE_INTERFACES_H
-#define HUKS_CORE_INTERFACES_H
+#ifndef HUKS_CORE_HAL_H
+#define HUKS_CORE_HAL_H
 
 #include "hks_param.h"
 #include "hks_type_inner.h"
 
-struct HksCoreIfDevice {
+struct HksHalDevice {
     int32_t (*ModuleInit)(void);
 
     int32_t (*Refresh)(void);
@@ -73,8 +73,8 @@ struct HksCoreIfDevice {
     int32_t (*Mac)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
 };
 
-struct HksCoreIfDevice* HksCreateCoreIfDevicePtr(void);
+int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice);
 
-void HksDestoryCoreIfDevicePtr(void);
+int32_t HksDestroyHuksHdiDevice(struct HksHalDevice **halDevice);
 
 #endif

@@ -98,6 +98,7 @@ config("soft_huks_config") {
     "//utils/native/lite/memory/include/",
     "//utils/native/lite/include/",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
   ]
 
   defines = [ "_FORTIFY_SOURCE = 2" ]
@@ -161,6 +162,7 @@ if (ohos_kernel_type == "liteos_m") {
     sources += huks_storage_source
     sources += [ "hks_tmp_client.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_hdi_interfaces.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_double_list.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c" ]
@@ -202,6 +204,7 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_hdi_interfaces.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_double_list.c" ]
     sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c" ]
