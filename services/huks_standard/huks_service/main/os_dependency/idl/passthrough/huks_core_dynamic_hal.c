@@ -13,14 +13,19 @@
  * limitations under the License.
  */
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "huks_hal_interfaces.h"
 
 #include <dlfcn.h>
 
+#include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type_inner.h"
-
-#ifndef _CUT_AUTHENTICATE_
 
 typedef struct HksHalDevice *(*HalCreateHandle)(void);
 typedef void (*HalDestroyHandle)(void);
@@ -37,8 +42,12 @@ static int32_t CheckPtr(void *ptr)
     return HKS_SUCCESS;
 }
 
+#ifndef _CUT_AUTHENTICATE_
 int32_t HksHalModuleInit(void)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->ModuleInit) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->ModuleInit();
     }
@@ -47,6 +56,9 @@ int32_t HksHalModuleInit(void)
 
 int32_t HksHalRefresh(void)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->Refresh) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->Refresh();
     }
@@ -56,6 +68,9 @@ int32_t HksHalRefresh(void)
 int32_t HksHalGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->GenerateKey) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->GenerateKey(keyAlias, paramSetIn, keyIn, keyOut);
     }
@@ -65,6 +80,9 @@ int32_t HksHalGenerateKey(const struct HksBlob *keyAlias, const struct HksParamS
 int32_t HksHalImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *keyOut)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->ImportKey) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->ImportKey(keyAlias, key, paramSet, keyOut);
     }
@@ -74,6 +92,9 @@ int32_t HksHalImportKey(const struct HksBlob *keyAlias, const struct HksBlob *ke
 int32_t HksHalImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->ImportWrappedKey) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->ImportWrappedKey(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut);
     }
@@ -82,6 +103,9 @@ int32_t HksHalImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const str
 
 int32_t HksHalExportPublicKey(const struct HksBlob *key,  const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->ExportPublicKey) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->ExportPublicKey(key, paramSet, keyOut);
     }
@@ -90,6 +114,9 @@ int32_t HksHalExportPublicKey(const struct HksBlob *key,  const struct HksParamS
 
 int32_t HksHalInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->Init) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->Init(key, paramSet, handle);
     }
@@ -99,6 +126,9 @@ int32_t HksHalInit(const struct  HksBlob *key, const struct HksParamSet *paramSe
 int32_t HksHalUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->Update) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->Update(handle, paramSet, inData, outData);
     }
@@ -108,6 +138,9 @@ int32_t HksHalUpdate(const struct HksBlob *handle, const struct HksParamSet *par
 int32_t HksHalFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->Finish) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->Finish(handle, paramSet, inData, outData);
     }
@@ -116,6 +149,9 @@ int32_t HksHalFinish(const struct HksBlob *handle, const struct HksParamSet *par
 
 int32_t HksHalAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->Abort) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->Abort(handle, paramSet);
     }
@@ -124,24 +160,20 @@ int32_t HksHalAbort(const struct HksBlob *handle, const struct HksParamSet *para
 
 int32_t HksHalGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->GetKeyProperties) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->GetKeyProperties(paramSet, key);
     }
     return HKS_FAILURE;
 }
 
-#ifdef HKS_SUPPORT_API_ATTEST_KEY
-int32_t HksHalAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-    if (CheckPtr((void *)g_hksHalDevicePtr->AttestKey) == HKS_SUCCESS) {
-        return g_hksHalDevicePtr->AttestKey(key, paramSet, certChain);
-    }
-    return HKS_FAILURE;
-}
-#endif
-
 int32_t HksHalGetAbility(int funcType)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->GetAbility) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->GetAbility(funcType);
     }
@@ -150,14 +182,176 @@ int32_t HksHalGetAbility(int funcType)
 
 int32_t HksHalGetHardwareInfo(void)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->GetHardwareInfo) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->GetHardwareInfo();
     }
     return HKS_FAILURE;
 }
 
+int32_t HksHalProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
+    uint64_t *operationHandle)
+{
+    (void)msgId;
+    (void)key;
+    (void)paramSet;
+    (void)operationHandle;
+    return 0;
+}
+
+int32_t HksHalProcessMultiUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    (void)msgId;
+    (void)operationHandle;
+    (void)inData;
+    (void)outData;
+    return 0;
+}
+
+int32_t HksHalProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    (void)msgId;
+    (void)operationHandle;
+    (void)inData;
+    (void)outData;
+    return 0;
+}
+
+int32_t HksHalSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *signature)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->Sign) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->Sign(key, paramSet, srcData, signature);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksHalVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, const struct HksBlob *signature)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->Verify) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->Verify(key, paramSet, srcData, signature);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksHalEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *plainText, struct HksBlob *cipherText)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->Encrypt) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->Encrypt(key, paramSet, plainText, cipherText);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksHalDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *cipherText, struct HksBlob *plainText)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->Decrypt) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->Decrypt(key, paramSet, cipherText, plainText);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksHalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
+    const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->AgreeKey) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->AgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksHalDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
+    struct HksBlob *derivedKey)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->DeriveKey) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->DeriveKey(paramSet, kdfKey, derivedKey);
+    }
+    return HKS_FAILURE;
+}
+
+int32_t HksHalMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *mac)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->Mac) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->Mac(key, paramSet, srcData, mac);
+    }
+    return HKS_FAILURE;
+}
+
+#ifdef _STORAGE_LITE_
+int32_t HksHalCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
+    const struct HksBlob *srcData, struct HksBlob *mac)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->CalcMacHeader) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->CalcMacHeader(paramSet, salt, srcData, mac);
+    }
+    return HKS_FAILURE;
+}
+#endif
+
+#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
+int32_t HksHalUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->UpgradeKeyInfo) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->UpgradeKeyInfo(keyAlias, keyInfo, keyOut);
+    }
+    return HKS_FAILURE;
+}
+#endif
+
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+int32_t HksHalAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain)
+{
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (CheckPtr((void *)g_hksHalDevicePtr->AttestKey) == HKS_SUCCESS) {
+        return g_hksHalDevicePtr->AttestKey(key, paramSet, certChain);
+    }
+    return HKS_FAILURE;
+}
+#endif
+
+#endif /* _CUT_AUTHENTICATE_ */
+
 int32_t HksHalGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
 {
+    if (HksCreateHksHalDevice() != HKS_SUCCESS) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (CheckPtr((void *)g_hksHalDevicePtr->GenerateRandom) == HKS_SUCCESS) {
         return g_hksHalDevicePtr->GenerateRandom(paramSet, random);
     }
@@ -170,7 +364,7 @@ int32_t HksCreateHksHalDevice(void)
         return HKS_SUCCESS;
     }
 
-    g_halDeviceHandle = dlopen ("libhuks_engine_core_standard.z.so", RTLD_NOW);
+    g_halDeviceHandle = dlopen("libhuks_engine_core_standard.z.so", RTLD_NOW);
     if (g_halDeviceHandle == NULL) {
         HKS_LOG_E("dlopen failed, %s!", dlerror());
         return HKS_FAILURE;
@@ -214,56 +408,3 @@ int32_t HksDestroyHksHalDevice(void)
     HKS_LOG_E("g_hksHalDevicePtr is NULL!");
     return HKS_ERROR_NULL_POINTER;
 }
-
-int32_t HksHalProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
-    uint64_t *operationHandle)
-{
-    (void)msgId;
-    (void)key;
-    (void)paramSet;
-    (void)operationHandle;
-    return 0;
-}
-
-int32_t HksHalProcessMultiUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData)
-{
-    (void)msgId;
-    (void)operationHandle;
-    (void)inData;
-    (void)outData;
-    return 0;
-}
-
-int32_t HksHalProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData)
-{
-    (void)msgId;
-    (void)operationHandle;
-    (void)inData;
-    (void)outData;
-    return 0;
-}
-
-#ifdef _STORAGE_LITE_
-int32_t HksHalCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
-    const struct HksBlob *srcData, struct HksBlob *mac)
-{
-    if (CheckPtr((void *)g_hksHalDevicePtr->CalcMacHeader) == HKS_SUCCESS) {
-        return g_hksHalDevicePtr->CalcMacHeader(paramSet, salt, srcData, mac);
-    }
-    return HKS_FAILURE;
-}
-#endif
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HksHalUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut)
-{
-    if (CheckPtr((void *)g_hksHalDevicePtr->UpgradeKeyInfo) == HKS_SUCCESS) {
-        return g_hksHalDevicePtr->UpgradeKeyInfo(keyAlias, keyInfo, keyOut);
-    }
-    return HKS_FAILURE;
-}
-
-#endif
-#endif

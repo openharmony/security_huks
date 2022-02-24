@@ -41,7 +41,20 @@ int32_t HksHalAttestKey(const struct HksBlob *key, const  struct HksParamSet *pa
     struct HksBlob *certChain);
 int32_t HksHalGetAbility(int funcType);
 int32_t HksHalGetHardwareInfo(); // -1失败，0：REE，1：TEE,2:SE
-
+int32_t HksHalSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *signature);
+int32_t HksHalVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, const struct HksBlob *signature);
+int32_t HksHalEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *plainText, struct HksBlob *cipherText);
+int32_t HksHalDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *cipherText, struct HksBlob *plainText);
+int32_t HksHalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
+    const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey);
+int32_t HksHalDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
+    struct HksBlob *derivedKey);
+int32_t HksHalMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *srcData, struct HksBlob *mac);
 #ifdef __cplusplus
 }
 #endif
