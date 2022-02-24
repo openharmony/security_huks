@@ -26,12 +26,10 @@
 #include "hks_core_service.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
-#include "hks_file_operator.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_storage.h"
 #include "hks_type_inner.h"
 #include "sys/time.h"
 

@@ -11,31 +11,38 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
-  include_dirs = [ "service" ]
+  include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_engine_os_dependency_standard_static") {
+ohos_static_library("libhuks_utils_list_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
   include_dirs = [
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//utils/native/base/include",
-    "//utils/system/safwk/native/include",
   ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
-  sources = []
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+  sources = [
+    "hks_double_list.c",
+    "hks_operation.c",
   ]
-  public_deps = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static" ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+    "//utils/native/base:utils",
+  ]
 
   complete_static_lib = true
 }
