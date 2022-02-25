@@ -581,10 +581,14 @@ HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
 #endif
 }
 
+/*
+ * Currently, the device certificate and device key are implemented using stubs.
+ * By default, the device key exists.
+*/
 HKS_API_EXPORT int32_t HcmIsDeviceKeyExist(const struct HksParamSet *paramSet)
 {
     (void)paramSet;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_SUCCESS;
 }
 
 HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)

@@ -69,6 +69,13 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
         return ret;
     }
 
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+        HKS_LOG_E("build paramSet fail");
+        return ret;
+    }
+
     *outParamSet = paramSet;
     return HKS_SUCCESS;
 }
@@ -99,7 +106,11 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
             return ret;
         }
 
-        (void)memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle), opHandle.data, opHandle.size);
+        if (memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle),
+            opHandle.data, opHandle.size) != EOK) {
+            HKS_LOG_E("memcpy handle failed");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
     }
 
     *handle = g_keyNodeHandle++;
@@ -237,6 +248,7 @@ void HksDeleteKeyNode(uint64_t handle)
             HksFreeParamSet(&keyNode->keyBlobParamSet);
             FreeKeyNodeParamSet(&keyNode->runtimeParamSet);
             HksFree((void *)keyNode);
+            keyNode = NULL;
             HksMutexUnlock(HksCoreGetHuksMutex());
             return;
         }
