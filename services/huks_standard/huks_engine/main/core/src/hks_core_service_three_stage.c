@@ -441,7 +441,11 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
     ret = SetCryptoCtx(keyNode, ctx);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Set hks crypto ctx fail");
-        FreeSignVerify(keyNode);
+        if (algParam->uint32Param != HKS_ALG_ED25519) {
+            HksCryptoHalHashFreeCtx(&ctx);
+        } else {
+            FreeSignVerifyData((void *)ctx);
+        }
         return ret;
     }
 
@@ -541,6 +545,15 @@ int32_t HksCoreSignVerifyThreeStageAbort(const struct HuksKeyNode *keyNode, cons
     return HKS_SUCCESS;
 }
 
+static void FreeCryptoCtx(void **ctx, const uint32_t purpose, const uint32_t algtype)
+{
+    if (purpose == HKS_KEY_PURPOSE_ENCRYPT) {
+        HksCryptoHalEncryptFreeCtx(ctx, algtype);
+    } else {
+        HksCryptoHalDecryptFreeCtx(ctx, algtype);
+    }
+}
+
 int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     uint32_t alg)
 {
@@ -574,8 +587,7 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
 
         ret = HksGetRawKey(keyNode->keyBlobParamSet, &rawKey);
         if (ret != HKS_SUCCESS) {
-            HksFree(usageSpec);
-            return ret;
+            break;
         }
 
         void *ctx = NULL;
@@ -590,13 +602,16 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
 
         ret = SetCryptoCtx(keyNode, ctx);
         if (ret != HKS_SUCCESS) {
+            FreeCryptoCtx(&ctx, purposeParam->uint32Param, usageSpec->algType);
             break;
         }
     } while (0);
 
-    (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+    if (rawKey.data != NULL) {
+        (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+    }
     HKS_FREE_PTR(rawKey.data);
-    HksFree(usageSpec);
+    HksFreeUsageSpec(&usageSpec);
 
     return ret;
 }
@@ -1081,13 +1096,15 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
 
         ret = SetCryptoCtx(keyNode, ctx);
         if (ret != HKS_SUCCESS) {
-            HksCoreMacThreeStageAbort(keyNode, paramSet, alg);
+            HksCryptoHalHmacFreeCtx(&ctx);
             HKS_LOG_E("Set hks crypto ctx fail");
             break;
         }
     } while (0);
 
-    (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+    if (rawKey.data != NULL) {
+        (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+    }
     HKS_FREE_PTR(rawKey.data);
 
     return HKS_SUCCESS;
