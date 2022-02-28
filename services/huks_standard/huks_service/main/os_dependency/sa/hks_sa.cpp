@@ -207,15 +207,17 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
     for (uint32_t i = 0; i < size; ++i) {
         if (code == g_hksIpcThreeStageHandler[i].msgId) {
             struct HksBlob outData = { 0, nullptr };
-            outData.size = outSize;
-            if (IsInvalidLength(outData.size)) {
-                HKS_LOG_E("outData size is invalid, size:%u", outData.size);
-                return HW_SYSTEM_ERROR;
-            }
-            outData.data = (uint8_t *)HksMalloc(outData.size);
-            if (outData.data == nullptr) {
-                HKS_LOG_E("Malloc outData failed.");
-                return HW_SYSTEM_ERROR;
+            if (outSize != 0) {
+                outData.size = outSize;
+                if (outData.size > MAX_MALLOC_LEN) {
+                    HKS_LOG_E("outData size is invalid, size:%u", outData.size);
+                    return HW_SYSTEM_ERROR;
+                }
+                outData.data = (uint8_t *)HksMalloc(outData.size);
+                if (outData.data == nullptr) {
+                    HKS_LOG_E("Malloc outData failed.");
+                    return HW_SYSTEM_ERROR;
+                }
             }
             g_hksIpcThreeStageHandler[i].handler((const struct HksBlob *)&srcData, &outData, (const uint8_t *)&reply);
             HKS_FREE_BLOB(outData);
@@ -315,6 +317,8 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     if (ProcessMessage(code, outSize, srcData, reply) != NO_ERROR) {
         HKS_LOG_E("process message!");
+        HKS_FREE_BLOB(srcData);
+        return HKS_ERROR_BAD_STATE;
     }
 
     HKS_FREE_BLOB(srcData);
