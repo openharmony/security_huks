@@ -11,31 +11,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
-ohos_prebuilt_etc("huks_service.rc") {
-  source = "huks_service.cfg"
-  relative_install_dir = "init"
-  subsystem_name = "security"
-  part_name = "huks"
+config("huks_config") {
+  include_dirs = [ "include" ]
 }
 
-ohos_shared_library("huks_service") {
+ohos_static_library("libhuks_utils_client_service_adapter_static") {
   subsystem_name = "security"
   part_name = "huks"
+  public_configs = [ ":huks_config" ]
+  include_dirs = [
+    "//utils/native/base/include",
+    "//third_party/openssl/include/",
+  ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
+  sources = [ "hks_client_service_adapter.c" ]
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
   deps = [
-    ":huks_service.rc",
-    "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+    "//third_party/openssl:libcrypto_static",
+    "//utils/native/base:utils",
   ]
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
-    "safwk:system_ability_fwk",
-    "samgr_standard:samgr_proxy",
-  ]
+
+  complete_static_lib = true
 }
