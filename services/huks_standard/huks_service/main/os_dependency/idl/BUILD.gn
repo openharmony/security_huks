@@ -22,7 +22,6 @@ ohos_static_library("libhuks_service_idl_standard_static") {
   part_name = "huks"
   public_configs = [ ":huks_config" ]
   include_dirs = [
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
     "//third_party/json/include",
     "//utils/native/base/include",
@@ -36,7 +35,6 @@ ohos_static_library("libhuks_service_idl_standard_static") {
     "ipc/hks_ipc_serialization.c",
     "ipc/hks_ipc_service.c",
     "ipc/hks_response.cpp",
-    "passthrough/hks_passthrough_access.c",
     "passthrough/huks_core_dynamic_hal.c",
     "passthrough/huks_hdi_interfaces.c",
   ]
