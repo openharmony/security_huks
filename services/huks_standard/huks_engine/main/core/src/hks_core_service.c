@@ -929,7 +929,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         }
     }
 
-    if (i == size) {
+    if (i == size || ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
@@ -953,7 +953,10 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     uint64_t sessionId;
-    (void)memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size);
+    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size) != EOK) {
+        HKS_LOG_E("memcpy handle value fail");
+        return HKS_FAILURE;
+    }
 
     struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
     if (keyNode == NULL) {

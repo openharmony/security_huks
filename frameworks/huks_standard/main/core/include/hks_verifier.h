@@ -19,8 +19,6 @@
 #include "hks_type_inner.h"
 
 #define HKS_DEFAULT_CERT_CHAIN_CNT 4
-#define MAX_CN_LEN 256
-#define ATTESTION_CHALLENGE_MAX_SIZE 512
 
 enum HksCertFormat {
     HKS_CERT_PEM,
