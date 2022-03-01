@@ -24,14 +24,13 @@
 #include <dlfcn.h>
 
 #include "hks_log.h"
-#include "hks_mem.h"
 
-typedef struct HksHalDevice *(*HalCreateHandle)(void);
-typedef void (*HalDestroyHandle)(void);
+typedef struct HuksHdi *(*HalCreateHandle)(void);
+typedef void (*HalDestroyHandle)(struct HuksHdi *);
 
 void *g_halDeviceHandle = NULL;
 
-int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice)
+int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if (halDevice == NULL) {
         HKS_LOG_E("invalid input halDevice");
@@ -46,7 +45,7 @@ int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice)
         return HKS_FAILURE;
     }
 
-    HalCreateHandle devicePtr = (HalCreateHandle)dlsym(g_halDeviceHandle, "HksCreateCoreIfDevicePtr");
+    HalCreateHandle devicePtr = (HalCreateHandle)dlsym(g_halDeviceHandle, "HuksCreateHdiDevicePtr");
     if (devicePtr == NULL) {
         HKS_LOG_E("dlsym failed, %s!", dlerror());
         dlclose(g_halDeviceHandle);
@@ -63,7 +62,7 @@ int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice)
     return HKS_SUCCESS;
 }
 
-int32_t HksDestroyHuksHdiDevice(struct HksHalDevice **halDevice)
+int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if ((halDevice == NULL) || (*halDevice == NULL)) {
         return HKS_SUCCESS;
@@ -74,11 +73,10 @@ int32_t HksDestroyHuksHdiDevice(struct HksHalDevice **halDevice)
         return HKS_ERROR_NULL_POINTER;
     }
 
-    HalDestroyHandle halDestroyHandle = (HalDestroyHandle)dlsym(g_halDeviceHandle, "HksDestoryCoreIfDevicePtr");
-    (*halDestroyHandle)();
+    HalDestroyHandle halDestroyHandle = (HalDestroyHandle)dlsym(g_halDeviceHandle, "HuksDestoryHdiDevicePtr");
+    (*halDestroyHandle)(*halDevice);
+    *halDevice = NULL;
 
     dlclose(g_halDeviceHandle);
-
-    HKS_FREE_PTR(*halDevice);
     return HKS_SUCCESS;
 }

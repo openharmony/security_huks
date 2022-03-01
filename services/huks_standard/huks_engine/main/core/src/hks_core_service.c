@@ -1117,7 +1117,7 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
 #endif
 }
 
-int32_t HksCoreGetAbility(int funcType)
+int32_t HksCoreGetAbility(int32_t funcType)
 {
     (void)(funcType);
     return 0;
