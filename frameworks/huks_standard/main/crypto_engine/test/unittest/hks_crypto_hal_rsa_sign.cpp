@@ -1217,6 +1217,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_059_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
 #if defined(_USE_MBEDTLS_)
     .signResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .verifyResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_OPENSSL_)
     .signResult = HKS_SUCCESS,
@@ -1342,6 +1343,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_065_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
 #if defined(_USE_MBEDTLS_)
     .signResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
+    .verifyResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_OPENSSL_)
     .signResult = HKS_SUCCESS,
