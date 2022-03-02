@@ -19,13 +19,11 @@
 #include "hks_config.h"
 #endif
 
-#include "huks_core_hal.h"
-
 #include "hks_core_interfaces.h"
 
 #include "hks_log.h"
 
-int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice)
+int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if (halDevice == NULL) {
         HKS_LOG_E("invalid input halDevice");
@@ -34,7 +32,7 @@ int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice)
         return HKS_SUCCESS;
     }
 
-    *halDevice = (struct HksHalDevice *)HksCreateCoreIfDevicePtr();
+    *halDevice = HuksCreateHdiDevicePtr();
     if (*halDevice == NULL)  {
         HKS_LOG_E("g_hksHalDevicePtr is NULL!");
         return HKS_ERROR_NULL_POINTER;
@@ -43,12 +41,12 @@ int32_t HksCreateHuksHdiDevice(struct HksHalDevice **halDevice)
     return HKS_SUCCESS;
 }
 
-int32_t HksDestroyHuksHdiDevice(struct HksHalDevice **halDevice)
+int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if ((halDevice == NULL) || (*halDevice == NULL)) {
         return HKS_SUCCESS;
     }
-    HksDestoryCoreIfDevicePtr();
+    HuksDestoryHdiDevicePtr(*halDevice);
     *halDevice = NULL;
     return HKS_SUCCESS;
 }

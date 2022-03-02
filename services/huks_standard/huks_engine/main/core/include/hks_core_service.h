@@ -97,7 +97,7 @@ int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct
 
 int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain);
 
-int32_t HksCoreGetAbility(int funcType);
+int32_t HksCoreGetAbility(int32_t funcType);
 
 int32_t HksCoreGetHardwareInfo(void);
 
