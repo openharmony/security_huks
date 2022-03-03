@@ -22,7 +22,6 @@
 #include "hks_client_service.h"
 
 #include "hks_client_check.h"
-#include "hks_client_service_adapter.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_operation.h"
@@ -405,40 +404,6 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
     return ret;
 }
 
-static int32_t GetHksInnerKeyFormat(const struct HksParamSet *paramSet, const struct HksBlob *key,
-    struct HksBlob *outKey)
-{
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get alg param failed");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
-
-    switch (algParam->uint32Param) {
-#ifdef HKS_SUPPORT_AES_C
-        case HKS_ALG_AES:
-            return TranslateToInnerAesFormat(key, outKey);
-#endif
-#if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
-        case HKS_ALG_ED25519:
-        case HKS_ALG_X25519:
-            return TranslateToInnerCurve25519Format(algParam->uint32Param, key, outKey);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C)
-        case HKS_ALG_RSA:
-        case HKS_ALG_ECC:
-        case HKS_ALG_ECDH:
-        case HKS_ALG_DSA:
-        case HKS_ALG_DH:
-            return TranslateFromX509PublicKey(key, outKey);
-#endif
-        default:
-            return HKS_ERROR_INVALID_ALGORITHM;
-    }
-}
-
 #ifdef HKS_SUPPORT_ED25519_TO_X25519
 static int32_t GetAgreeStoreKey(uint32_t keyAliasTag, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksBlob *key)
@@ -456,6 +421,38 @@ static int32_t GetAgreeStoreKey(uint32_t keyAliasTag, const struct HksProcessInf
     }
 
     return GetKeyData(processInfo, &(keyAliasParam->blob), key, HKS_STORAGE_TYPE_KEY);
+}
+
+static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct HksBlob *key,
+    struct HksBlob *publicKey)
+{
+    if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
+        HKS_LOG_E("Invalid curve25519 public key size! key size = 0x%X", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t totalSize = sizeof(struct HksPubKeyInfo) + key->size;
+    uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
+    if (buffer == NULL) {
+        HKS_LOG_E("malloc failed! %u", totalSize);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(buffer, totalSize, 0, totalSize);
+
+    struct HksPubKeyInfo *curve25519Key = (struct HksPubKeyInfo *)buffer;
+    curve25519Key->keyAlg = alg;
+    curve25519Key->keySize = HKS_CURVE25519_KEY_SIZE_256;
+    curve25519Key->nOrXSize = key->size; /* curve25519 public key */
+
+    uint32_t offset = sizeof(struct HksPubKeyInfo);
+    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
+        HKS_LOG_E("copy pub key failed!");
+        HKS_FREE_PTR(buffer);
+        return HKS_ERROR_BAD_STATE;
+    }
+    publicKey->data = buffer;
+    publicKey->size = totalSize;
+    return HKS_SUCCESS;
 }
 
 static int32_t GetAgreePublicKey(const uint32_t alg, const struct HksProcessInfo *processInfo,
@@ -862,13 +859,13 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
 }
 
 int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, const struct HksBlob *x509Key)
+    const struct HksParamSet *paramSet, const struct HksBlob *key)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
 
     do {
-        ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSet, x509Key);
+        ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSet, key);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("check import key params failed, ret = %d", ret);
             break;
@@ -886,25 +883,14 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
             break;
         }
 
-        struct HksBlob publicKey = { 0, NULL };
-        ret = GetHksInnerKeyFormat(newParamSet, x509Key, &publicKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get public key from x509 format failed, ret = %d", ret);
-            break;
-        }
-
         uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
         if (keyOutBuffer == NULL) {
             ret = HKS_ERROR_MALLOC_FAIL;
-            (void)memset_s(publicKey.data, publicKey.size, 0, publicKey.size);
-            HKS_FREE_BLOB(publicKey);
             break;
         }
 
         struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
-        ret = HuksAccessImportKey(keyAlias, &publicKey, newParamSet, &keyOut);
-        (void)memset_s(publicKey.data, publicKey.size, 0, publicKey.size);
-        HKS_FREE_BLOB(publicKey);
+        ret = HuksAccessImportKey(keyAlias, key, newParamSet, &keyOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level import public key failed, ret = %d", ret);
             HKS_FREE_PTR(keyOutBuffer);
@@ -939,32 +925,7 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
             break;
         }
 
-        uint8_t *buffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-        if (buffer == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-
-        struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
-        ret = HuksAccessExportPublicKey(&keyFromFile, newParamSet, &publicKey);
-        if (ret == HKS_SUCCESS) {
-            struct HksBlob x509Key = { 0, NULL };
-            ret = TranslateToX509PublicKey(&publicKey, &x509Key);
-            if (ret != HKS_SUCCESS) {
-                HKS_FREE_PTR(buffer);
-                break;
-            }
-
-            if (memcpy_s(key->data, key->size, x509Key.data, x509Key.size) != EOK) {
-                ret = HKS_ERROR_BAD_STATE;
-                HKS_LOG_E("memcpy failed");
-            } else {
-                key->size = x509Key.size;
-            }
-
-            HKS_FREE_BLOB(x509Key);
-        }
-        HKS_FREE_PTR(buffer);
+        ret = HuksAccessExportPublicKey(&keyFromFile, newParamSet, key);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -992,15 +953,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
             break;
         }
 
-        struct HksBlob publicKey = { 0, NULL };
-        ret = GetHksInnerKeyFormat(newParamSet, peerPublicKey, &publicKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get public key from x509 format failed, ret = %d.", ret);
-            break;
-        }
-
-        ret = HuksAccessAgreeKey(newParamSet, &keyFromFile, &publicKey, agreedKey);
-        HKS_FREE_BLOB(publicKey);
+        ret = HuksAccessAgreeKey(newParamSet, &keyFromFile, peerPublicKey, agreedKey);
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
