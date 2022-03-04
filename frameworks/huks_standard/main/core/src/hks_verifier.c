@@ -308,7 +308,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
 }
 
 static int32_t ExtractTlvDataAndHeadSize(const uint8_t *in, uint32_t inLen,
-    uint8_t**out, uint32_t *outLen, uint32_t *size)
+    uint8_t **out, uint32_t *outLen, uint32_t *size)
 {
     uint32_t headOffset = 0;
     int32_t ret = ExtractTlvLength(in, inLen, &headOffset, outLen);
