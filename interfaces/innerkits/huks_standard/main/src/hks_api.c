@@ -698,7 +698,7 @@ HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksP
     struct HksBlob *handle)
 {
     if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) {
-        HKS_LOG_E("keyAlias : %p, paramSet : %p, handle : %p", keyAlias, paramSet, handle);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -710,7 +710,7 @@ HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksP
     const struct HksBlob *inData, struct HksBlob *outData)
 {
     if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
-        HKS_LOG_E("handle : %p, paramSet : %p, inData: %p, outData : %p", handle, paramSet, inData, outData);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -722,7 +722,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
     const struct HksBlob *inData, struct HksBlob *outData)
 {
     if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
-        HKS_LOG_E("handle: %p, paramSet: %p, inData: %p, outData: %p", handle, paramSet, inData, outData);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -733,7 +733,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
 HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
     if ((handle == NULL) || (paramSet == NULL)) {
-        HKS_LOG_E("paramSet: %p, handle: %p", paramSet, handle);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 

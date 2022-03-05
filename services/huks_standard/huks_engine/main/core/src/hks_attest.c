@@ -384,8 +384,8 @@ static void SetAttestCertValid(struct ValidPeriod *valid)
         return;
     }
 
-    uint64_t curTimeValue = curTime.tv_sec;
-    curTimeValue = curTimeValue * SECOND_TO_MILLI + curTime.tv_usec / SECOND_TO_MILLI;
+    uint64_t curTimeValue = (uint64_t)curTime.tv_sec;
+    curTimeValue = curTimeValue * SECOND_TO_MILLI + ((uint64_t)curTime.tv_usec) / SECOND_TO_MILLI;
     activeDateTime = curTimeValue;
     HKS_LOG_I("set active dateTime to default : %llu\n", activeDateTime);
 

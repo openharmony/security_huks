@@ -874,21 +874,29 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
         }
     }
 
-    if (needStore) {
-        ret = HksBuildKeyBlob(NULL, HKS_KEY_FLAG_DERIVE_KEY, restoreData, paramSet, outData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksBuildKeyBlob failed! ret: %d", ret);
-            return ret;
+    do {
+        if (needStore) {
+            ret = HksBuildKeyBlob(NULL, HKS_KEY_FLAG_DERIVE_KEY, restoreData, paramSet, outData);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("HksBuildKeyBlob failed! ret: %d", ret);
+                break;
+            }
+        } else {
+            if (outData->size < restoreData->size) {
+                HKS_LOG_E("outData size is too small, size : %u", outData->size);
+                ret = HKS_ERROR_BUFFER_TOO_SMALL;
+                break;
+            }
+            outData->size = restoreData->size;
+            (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
+            ret = HKS_SUCCESS;
         }
-    } else {
-        outData->size = restoreData->size;
-        (void)memcpy_s(outData->data, outData->size, restoreData->data, restoreData->size);
-    }
+    } while (0);
 
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
     HKS_FREE_PTR(restoreData);
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksCoreDeriveThreeStageAbort(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
@@ -1035,21 +1043,29 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
         }
     }
 
-    if (needStore) {
-        ret = HksBuildKeyBlob(NULL, HKS_KEY_FLAG_AGREE_KEY, restoreData, paramSet, outData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksBuildKeyBlob failed! ret: %d", ret);
-            return ret;
+    do {
+        if (needStore) {
+            ret = HksBuildKeyBlob(NULL, HKS_KEY_FLAG_AGREE_KEY, restoreData, paramSet, outData);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("HksBuildKeyBlob failed! ret: %d", ret);
+                break;
+            }
+        } else {
+            if (outData->size < restoreData->size) {
+                HKS_LOG_E("outData size is too small, size : %u", outData->size);
+                ret = HKS_ERROR_BUFFER_TOO_SMALL;
+                break;
+            }
+            outData->size = restoreData->size;
+            (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
+            ret =  HKS_SUCCESS;
         }
-    } else {
-        outData->size = restoreData->size;
-        (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
-    }
+    } while (0);
 
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
     HKS_FREE_PTR(restoreData);
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksCoreAgreeThreeStageAbort(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet, uint32_t alg)

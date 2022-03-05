@@ -826,7 +826,7 @@ static void SaveProcessInfo(uint8_t *processData, int32_t dataLen,
     const struct HksBlob userData, struct HksProcessInfo *processInfo)
 {
     processInfo->processName.data = processData;
-    processInfo->processName.size = dataLen;
+    processInfo->processName.size = (uint32_t)dataLen;
     (void)memcpy_s(&processInfo->userId, sizeof(processInfo->userId), &userData, sizeof(processInfo->userId));
 }
 
