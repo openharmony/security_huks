@@ -349,7 +349,7 @@ static int32_t OpensslAesAeadEnryptUpdate(void *cryptoCtx, const struct HksBlob 
     struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
 
-    int outLen = 0;
+    int32_t outLen = 0;
 
     if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
@@ -358,7 +358,7 @@ static int32_t OpensslAesAeadEnryptUpdate(void *cryptoCtx, const struct HksBlob 
         HKS_FREE_PTR(aesCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    cipherText->size = outLen;
+    cipherText->size = (uint32_t)outLen;
 
     return HKS_SUCCESS;
 }
@@ -368,7 +368,7 @@ static int32_t OpensslAesAeadDecryptUpdate(void *cryptoCtx,
 {
     struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-    int outLen = 0;
+    int32_t outLen = 0;
 
     if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
@@ -378,7 +378,7 @@ static int32_t OpensslAesAeadDecryptUpdate(void *cryptoCtx,
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    plainText->size = outLen;
+    plainText->size = (uint32_t)outLen;
 
     return HKS_SUCCESS;
 }
@@ -397,7 +397,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
 
     int32_t ret = HKS_SUCCESS;
     do {
-        int outLen = 0;
+        int32_t outLen = 0;
         if (message->size != 0) {
             if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data,
                 message->size) != HKS_OPENSSL_SUCCESS) {
@@ -406,7 +406,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
-            cipherText->size = outLen;
+            cipherText->size = (uint32_t)outLen;
         }
 
         if (EVP_EncryptFinal_ex(ctx, cipherText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
@@ -415,7 +415,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
-        cipherText->size += outLen;
+        cipherText->size += (uint32_t)outLen;
         if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, HKS_AE_TAG_LEN, tagAead->data) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -445,7 +445,7 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
 
     int32_t ret = HKS_SUCCESS;
     do {
-        int outLen = 0;
+        int32_t outLen = 0;
         if (message->size != 0) {
             if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) !=
                 HKS_OPENSSL_SUCCESS) {
@@ -454,7 +454,7 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
-            plainText->size = outLen;
+            plainText->size = (uint32_t)outLen;
         }
 
         if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tagAead->size, tagAead->data) !=
@@ -471,7 +471,7 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
-        plainText->size += outLen;
+        plainText->size += (uint32_t)outLen;
     } while (0);
 
     EVP_CIPHER_CTX_free(ctx);
@@ -542,14 +542,14 @@ static int32_t OpensslAesCipherInit(
 static int32_t OpensslAesCipherEncryptFinal(
     EVP_CIPHER_CTX *ctx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    int outLen = 0;
+    int32_t outLen = 0;
 
     if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_CIPHER_CTX_free(ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    cipherText->size = outLen;
+    cipherText->size = (uint32_t)outLen;
 
     if (EVP_EncryptFinal_ex(ctx, cipherText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
@@ -649,20 +649,18 @@ static int32_t OpensslAesCipherEncryptUpdate(
 
     if (ctx == NULL) {
         HksFree(aesCtx);
-        cryptoCtx = NULL;
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int outLen = 0;
+    int32_t outLen = 0;
     if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_CIPHER_CTX_free(ctx);
         aesCtx->append = NULL;
         HksFree(aesCtx);
-        cryptoCtx = NULL;
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    cipherText->size = outLen;
+    cipherText->size = (uint32_t)outLen;
 
     return HKS_SUCCESS;
 }
@@ -681,7 +679,7 @@ static int32_t OpensslAesCipherEncryptFinalThree(
 
     int32_t ret = HKS_SUCCESS;
     do {
-        int outLen = 0;
+        int32_t outLen = 0;
         if (message->size != 0) {
             if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data,
                 message->size) != HKS_OPENSSL_SUCCESS) {
@@ -689,7 +687,7 @@ static int32_t OpensslAesCipherEncryptFinalThree(
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
-            cipherText->size = outLen;
+            cipherText->size = (uint32_t)outLen;
         }
 
         if (EVP_EncryptFinal_ex(ctx, (cipherText->data + outLen), &outLen) != HKS_OPENSSL_SUCCESS) {
@@ -697,7 +695,7 @@ static int32_t OpensslAesCipherEncryptFinalThree(
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
-        cipherText->size += outLen;
+        cipherText->size += (uint32_t)outLen;
     } while (0);
 
     EVP_CIPHER_CTX_free(ctx);
@@ -719,7 +717,7 @@ static int32_t OpensslAesCipherDecryptUpdate(
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int outLen = 0;
+    int32_t outLen = 0;
     if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         EVP_CIPHER_CTX_free(ctx);
@@ -727,7 +725,7 @@ static int32_t OpensslAesCipherDecryptUpdate(
         HKS_FREE_PTR(cryptoCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    plainText->size = outLen;
+    plainText->size = (uint32_t)outLen;
 
     return HKS_SUCCESS;
 }
@@ -743,14 +741,14 @@ static int32_t OpensslAesCipherDecryptFinalThree(
 
     int32_t ret = HKS_SUCCESS;
     do {
-        int outLen = 0;
+        int32_t outLen = 0;
         if (message->size != 0) {
             if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
                 HksLogOpensslError();
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
-            plainText->size = outLen;
+            plainText->size = (uint32_t)outLen;
         }
 
         if (EVP_DecryptFinal_ex(ctx, plainText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
@@ -758,7 +756,7 @@ static int32_t OpensslAesCipherDecryptFinalThree(
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
-        plainText->size += outLen;
+        plainText->size += (uint32_t)outLen;
     } while (0);
 
     EVP_CIPHER_CTX_free(ctx);
@@ -770,7 +768,7 @@ static int32_t OpensslAesCipherDecryptFinalThree(
 static int32_t OpensslAesCipherDecryptFinal(
     EVP_CIPHER_CTX *ctx, const struct HksBlob *message, struct HksBlob *plainText)
 {
-    int outLen = 0;
+    int32_t outLen = 0;
 
     if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
@@ -784,7 +782,7 @@ static int32_t OpensslAesCipherDecryptFinal(
         EVP_CIPHER_CTX_free(ctx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    plainText->size += outLen;
+    plainText->size += (uint32_t)outLen;
 
     EVP_CIPHER_CTX_free(ctx);
     return HKS_SUCCESS;

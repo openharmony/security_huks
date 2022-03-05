@@ -88,7 +88,8 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
     const BIGNUM *pubKey = NULL;
     const BIGNUM *privKey = NULL;
     DH_get0_key(dh, &pubKey, &privKey);
-    const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + BN_num_bytes(pubKey) + BN_num_bytes(privKey);
+    const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + (uint32_t)BN_num_bytes(pubKey)
+        + (uint32_t)BN_num_bytes(privKey);
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
     if (rawMaterial == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
