@@ -62,7 +62,7 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
         },
     };
 
-    ret = HksAddParams(paramSet, params, HKS_OPERATION_PARAM_CNT);
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(params[0]));
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         HKS_LOG_E("add runtime params fail");
