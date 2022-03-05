@@ -122,7 +122,7 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             if (result == nullptr) {
                 HKS_LOG_E("get uint8 array fail.");
             } else {
-                HKS_LOG_D("tag %x, len %x, data %d", param.tag, param.blob.size, param.blob.data);
+                HKS_LOG_D("tag %x, len %x", param.tag, param.blob.size);
             }
             break;
         default:
