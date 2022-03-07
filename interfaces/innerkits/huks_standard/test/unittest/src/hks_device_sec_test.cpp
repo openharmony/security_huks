@@ -17,7 +17,6 @@
 
 #include "hks_device_sec_test.h"
 
-#include <ctype.h>
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
