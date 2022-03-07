@@ -72,16 +72,8 @@ int32_t HksCoreModuleInit(void);
 
 int32_t HksCoreRefresh(void);
 
-int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *keyIn, struct HksBlob *keyOut);
-
-int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *keyOut);
-
 int32_t HksCoreImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut);
-
-int32_t HksCoreExportPublicKey(const struct HksBlob *key,  const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
 int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle);
 
@@ -100,13 +92,6 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
 int32_t HksCoreGetAbility(int32_t funcType);
 
 int32_t HksCoreGetHardwareInfo(void);
-
-int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
-    const struct HksBlob *srcData, struct HksBlob *mac);
-
-int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut);
-
-int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random);
 
 HksMutex *HksCoreGetHuksMutex(void);
 

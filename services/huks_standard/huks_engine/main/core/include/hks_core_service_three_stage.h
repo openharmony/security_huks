@@ -29,10 +29,6 @@
 extern "C" {
 #endif
 
-
-int32_t HksCoreGenerateKeyThreeStage(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyIn, struct HksBlob *keyOut);
-
 int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     uint32_t alg);
 
@@ -95,41 +91,6 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
 
 int32_t HksCoreMacThreeStageAbort(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     uint32_t alg);
-
-int32_t HksCoreEncryptThreeStage(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *plainText, struct HksBlob *cipherText);
-
-int32_t HksCoreDecryptThreeStage(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *cipherText, struct HksBlob *plainText);
-
-int32_t HksCheckKeyValidityThreeStage(const struct HksParamSet *paramSet, const struct HksBlob *key);
-
-int32_t HksCoreGenerateRandomThreeStage(const struct HksParamSet *paramSet, struct HksBlob *random);
-
-int32_t HksCoreImportKeyThreeStage(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, struct HksBlob *keyOut);
-
-int32_t HksCoreExportPublicKeyThreeStage(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *keyOut);
-
-int32_t HksCoreAgreeKeyThreeStage(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
-    const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey);
-
-int32_t HksCoreDeriveKeyThreeStage(const struct HksParamSet *paramSet, const struct HksBlob *mainKey,
-    struct HksBlob *derivedKey);
-
-int32_t HksCoreMacThreeStage(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *mac);
-
-int32_t HksCoreInitializeThreeStage(void);
-
-int32_t HksCoreRefreshKeyInfoThreeStage(void);
-
-int32_t HksCoreUpgradeKeyInfoThreeStage(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo,
-    struct HksBlob *keyOut);
-
-int32_t HksCoreCalcMacHeaderThreeStage(const struct HksParamSet *paramSet, const struct HksBlob *salt,
-    const struct HksBlob *srcData, struct HksBlob *mac);
 
 #ifdef __cplusplus
 }

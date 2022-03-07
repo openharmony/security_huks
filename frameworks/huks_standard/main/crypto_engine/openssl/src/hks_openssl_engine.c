@@ -213,6 +213,7 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
 int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
 {
     (void)message;
+    (void)mainKey;
     return 0;
 }
 

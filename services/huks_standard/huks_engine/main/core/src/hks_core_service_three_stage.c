@@ -94,7 +94,7 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
     return HKS_SUCCESS;
 }
 
-static int32_t CheckAesCipherGCMCCM(bool isEncrypt, const struct HksBlob *inData,
+static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
     const struct HksBlob *outData)
 {
     if (isEncrypt) {
@@ -152,7 +152,7 @@ static int32_t CheckAesCipherData(bool isEncrypt, uint32_t padding, uint32_t mod
     if ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB)) {
         ret = CheckAesCipherOther(isEncrypt, padding, inData, outData);
     } else if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {
-        ret = CheckAesCipherGCMCCM(isEncrypt, inData, outData);
+        ret = CheckAesCipherAead(isEncrypt, inData, outData);
     }
 
     return ret;
@@ -574,8 +574,8 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
             break;
         }
 
-        uint8_t tmpData[32];
-        struct HksBlob tmpInData = {32, tmpData};
+        uint8_t tmpData[32]; /* 32 bits are unused */
+        struct HksBlob tmpInData = {32, tmpData}; /* 32 bits are unused */
         if (purposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) {
             ret = HksBuildCipherUsageSpec(paramSet, true, &tmpInData, &usageSpec);
         } else {
@@ -1188,57 +1188,4 @@ int32_t HksCoreMacThreeStageAbort(const struct HuksKeyNode *keyNode, const struc
     return HKS_SUCCESS;
 }
 
-#ifdef _STORAGE_LITE_
-static int32_t GetMacKey(const struct HksBlob *salt, struct HksBlob *macKey)
-{
-    uint8_t keyBuf[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)] = {0};
-    struct HksBlob mk = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), keyBuf };
-
-    int32_t ret = HksCryptoHalGetMainKey(NULL, &mk);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get kek failed, ret = %d", ret);
-        return ret;
-    }
-
-    struct HksKeyDerivationParam derParam = {
-        .salt = *salt,
-        .iterations = HKS_KEY_BLOB_DERIVE_CNT,
-        .digestAlg = HKS_DIGEST_SHA256,
-    };
-    struct HksKeySpec derivationSpec = { HKS_ALG_PBKDF2, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), &derParam };
-    ret = HksCryptoHalDeriveKey(&mk, &derivationSpec, macKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyblob derive key failed!");
-    }
-
-    (void)memset_s(mk.data, mk.size, 0, mk.size);
-    return ret;
-}
-
-int32_t HksCoreCalcMacHeaderThreeStage(const struct HksParamSet *paramSet, const struct HksBlob *salt,
-    const struct HksBlob *srcData, struct HksBlob *mac)
-{
-    /* 1. get mac key by derive from salt */
-    uint8_t keyBuf[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)] = {0};
-    struct HksBlob macKey = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), keyBuf };
-    int32_t ret = GetMacKey(salt, &macKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get mac key failed, ret = %d", ret);
-        return ret;
-    }
-
-    struct HksParam *digestParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("calc mac header get HKS_TAG_DIGEST param failed, ret = %d", ret);
-        (void)memset_s(macKey.data, macKey.size, 0, macKey.size);
-        return ret;
-    }
-
-    /* 2. do mac */
-    ret = HksCryptoHalHmac(&macKey, digestParam->uint32Param, srcData, mac);
-    (void)memset_s(macKey.data, macKey.size, 0, macKey.size);
-    return ret;
-}
-#endif
 #endif /* _CUT_AUTHENTICATE_ */
