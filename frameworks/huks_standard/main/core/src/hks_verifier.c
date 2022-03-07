@@ -549,7 +549,7 @@ static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksPar
         return ret;
     }
 
-    ret =FillAttestExtendInfo(keyDescription, keyDescLen, paramSetOut);
+    ret = FillAttestExtendInfo(keyDescription, keyDescLen, paramSetOut);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("fill attest extend info fail");
     }
