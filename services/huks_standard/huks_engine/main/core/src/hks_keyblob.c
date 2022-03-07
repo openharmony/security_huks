@@ -579,11 +579,6 @@ int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSe
 {
     return DecryptKeyBlob(aad, paramSet);
 }
-
-int32_t HksEncryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
-{
-    return EncryptKeyBlob(aad, paramSet);
-}
 #endif
 
 #endif /* _CUT_AUTHENTICATE_ */

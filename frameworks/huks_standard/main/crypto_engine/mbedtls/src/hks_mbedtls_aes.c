@@ -985,6 +985,8 @@ static int32_t AesEncryptCcmInit(void **cryptoCtx, const struct HksUsageSpec *us
 static int32_t AesEncryptCcmUpdate(void *cryptoCtx, const struct HksBlob *message,
     struct HksBlob *cipherText, struct HksBlob *tagAead)
 {
+    (void)cipherText;
+    (void)tagAead;
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
     mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)aesCtx->append;
 
@@ -1201,6 +1203,7 @@ static int32_t AesDecryptCcmInit(void **cryptoCtx, const struct HksBlob *key, co
 static int32_t AesDecryptCcmUpdate(void *cryptoCtx,
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
+    (void)cipherText;
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
     mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)aesCtx->append;
 
