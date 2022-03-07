@@ -461,7 +461,8 @@ void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2)
     HksFree(blob2->data);
 }
 
-void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct HksBlob *blob3, struct HksBlob *blob4)
+void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
+    struct HksBlob *blob3, struct HksBlob *blob4)
 {
     HksFree(blob1->data);
     HksFree(blob2->data);
