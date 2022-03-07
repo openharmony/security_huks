@@ -46,7 +46,8 @@ void HksEd25519SignVerifyTest::TearDown()
 {
 }
 
-void HksTestFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2, struct HksParamSet *paramSet3)
+void HksTestFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
+    struct HksParamSet *paramSet3)
 {
     HksFreeParamSet(&paramSet1);
     HksFreeParamSet(&paramSet2);
