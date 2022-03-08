@@ -562,6 +562,7 @@ static int32_t HksOpensslRsaEncryptDecryptLen(EVP_PKEY_CTX *context, struct HksB
 int32_t HksOpensslRsaEncryptDecryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const bool encrypt)
 {
+    (void)tagAead;
     if (ctx == NULL || message == NULL || cipherText == NULL) {
         HKS_LOG_E("invalid argument");
         return HKS_ERROR_INVALID_ARGUMENT;

@@ -567,15 +567,15 @@ static uint8_t EncodeKeyUsageBits(const uint32_t usage, uint8_t *bits)
     uint8_t unused = 8; /* one byte haa 8 bits, so init to 8 */
     if (IsSignPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x80;
-        unused = 7;
+        unused = 7; /* 7 bits are unused */
     }
     if (IsCipherPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x20;
-        unused = 5;
+        unused = 5; /* 5 bits are unused */
     }
     if (IsAgreementPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x08;
-        unused = 3;
+        unused = 3; /* 3 bits are unused */
     }
     *bits = v;
     return unused;
@@ -836,7 +836,7 @@ int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
     }
 
     uint32_t keySize = HKS_RSA_KEY_SIZE_2048;
-    uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * 3;
+    uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * 3; /* 3 bits are unused */
     uint8_t *material = (uint8_t *)HksMalloc(materialLen);
     if (material == NULL) {
         HKS_LOG_E("malloc key materail fail!");
