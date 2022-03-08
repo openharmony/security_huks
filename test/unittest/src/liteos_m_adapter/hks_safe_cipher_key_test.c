@@ -74,7 +74,7 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
 
     /* 2. traverse imageBuffer to search for keyAlias */
     uint32_t offset = sizeof(*keyInfoHead);
-    for (uint16_t i = 0; i < keyCount; ++i) {
+    for (uint32_t i = 0; i < keyCount; ++i) {
         uint8_t *tmpBuf = storageBuf.data + offset;
         struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)tmpBuf;
         if (keyInfo->aliasSize == keyAlias->size) {

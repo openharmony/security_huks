@@ -378,7 +378,7 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
 
     /* 2. traverse imageBuffer to search for keyAlias */
     uint32_t offset = sizeof(*keyInfoHead);
-    for (uint16_t i = 0; i < keyCount; ++i) {
+    for (uint32_t i = 0; i < keyCount; ++i) {
         if ((totalLen < offset) || ((totalLen - offset) < sizeof(struct HksStoreKeyInfo))) {
             HKS_LOG_E("invalid keyinfo size.");
             return HKS_ERROR_INVALID_KEY_FILE;
@@ -569,7 +569,7 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
 
     /* 5. replace header */
     if (memcpy_s(g_storageImageBuffer.data, sizeof(newkeyInfoHead), &newkeyInfoHead, sizeof(newkeyInfoHead)) != EOK) {
-        HKS_LOG_E("repalce header memcpy failed");
+        HKS_LOG_E("replace header memcpy failed");
         return HKS_ERROR_BAD_STATE;
     }
     return HKS_SUCCESS;
@@ -899,7 +899,7 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreDestory(const struct HksBlob *processName)
+int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     (void)processName;
     int32_t ret = HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME);

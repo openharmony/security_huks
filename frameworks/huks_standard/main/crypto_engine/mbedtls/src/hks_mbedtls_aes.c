@@ -177,7 +177,7 @@ static int32_t AesCbcNoPaddingCryptInit(void **cryptoCtx, const struct HksBlob *
     outCtx->mode = usageSpec->mode;
     outCtx->padding = usageSpec->padding;
     struct HksCipherParam *iv = (struct HksCipherParam *)(usageSpec->algParam);
-    memcpy_s(outCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, iv->iv.data, HKS_AES_CBC_NOPADDING_IV_SIZE);
+    (void)memcpy_s(outCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, iv->iv.data, HKS_AES_CBC_NOPADDING_IV_SIZE);
 
     *cryptoCtx = (void *)outCtx;
 
@@ -201,7 +201,7 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
 
     int32_t ret = HKS_SUCCESS;
     do {
-        if (message != NULL && message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
+        if (message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
             HKS_LOG_E("AesCbcNoPaddingCryptUpdate data size invalid!");
             ret = HKS_FAILURE;
             break;
@@ -257,7 +257,7 @@ static int32_t AesCbcNoPaddingCryptFinal(void **cryptoCtx,
 
     int32_t ret = HKS_SUCCESS;
     do {
-        if (message != NULL && message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
+        if (message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
             HKS_LOG_E("AesCbcNoPaddingCryptFinal data size invalid!");
             ret = HKS_FAILURE;
             break;

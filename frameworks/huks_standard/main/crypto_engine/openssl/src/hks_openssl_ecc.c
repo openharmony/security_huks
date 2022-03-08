@@ -115,7 +115,7 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keySize, 
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     /*
-     * ECC key data internel struct:
+     * ECC key data internal struct:
      * struct KeyMaterialEcc + pubX_data + pubY_data + pri_data
      */
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)rawMaterial;

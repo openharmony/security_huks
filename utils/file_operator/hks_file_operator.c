@@ -358,16 +358,19 @@ int32_t HksDeletDirPartTwo(const char *path)
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
         if (deletePath[strlen(deletePath) - 1] != '/') {
             if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                closedir(dir);
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
 
         if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
@@ -393,16 +396,19 @@ int32_t HksDeletDirPartOne(const char *path)
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
         if (deletePath[strlen(deletePath) - 1] != '/') {
             if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                closedir(dir);
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
 
         if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
@@ -431,16 +437,19 @@ int32_t HksDeleteDir(const char *path)
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
         if (deletePath[strlen(deletePath) - 1] != '/') {
             if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                closedir(dir);
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
 
         if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 

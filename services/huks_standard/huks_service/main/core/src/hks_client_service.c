@@ -1047,7 +1047,7 @@ int32_t HksServiceInitialize(void)
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
 {
-    int32_t ret = HksStoreDestory(processName);
+    int32_t ret = HksStoreDestroy(processName);
     HKS_LOG_I("destroy storage files ret = 0x%X", ret); /* only recode log */
 
 #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA

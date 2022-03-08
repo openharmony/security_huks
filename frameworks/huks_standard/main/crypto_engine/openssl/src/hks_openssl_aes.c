@@ -459,7 +459,7 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
 
         if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tagAead->size, tagAead->data) !=
             HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("EVP_CIPHER_CTX_ctrl faild, tagAead->size->%d", tagAead->size);
+            HKS_LOG_E("EVP_CIPHER_CTX_ctrl failed, tagAead->size->%d", tagAead->size);
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
