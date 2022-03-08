@@ -80,7 +80,7 @@ int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, ui
 int32_t HksGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount);
 
-int32_t HksStoreDestory(const struct HksBlob *processName);
+int32_t HksStoreDestroy(const struct HksBlob *processName);
 
 int32_t HksGetFileInfo(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, uint32_t storageType,
     struct HksStoreFileInfo *fileInfo);

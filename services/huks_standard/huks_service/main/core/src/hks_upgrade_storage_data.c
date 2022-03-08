@@ -154,7 +154,7 @@ static int32_t RollBackNewVersionFiles(void)
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
 
-    ret = HksStoreDestory(&processNameBlob);
+    ret = HksStoreDestroy(&processNameBlob);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_D("destroy new files failed");
     }
