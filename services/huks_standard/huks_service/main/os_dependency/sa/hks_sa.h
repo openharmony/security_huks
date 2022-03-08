@@ -35,11 +35,10 @@ enum ResponseCode {
 };
 
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
-const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
 
 class IHksService : public IRemoteBroker {
 public:
-    DECLARE_INTERFACE_DESCRIPTOR(SA_KEYSTORE_SERVICE_DESCRIPTOR);
+    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hks.service");
 };
 
 class HksService : public SystemAbility, public IRemoteStub<IHksService> {
