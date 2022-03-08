@@ -570,6 +570,7 @@ static int32_t HksMbedtlsRsaCryptFinalCheckParam(void **ctx, const struct HksBlo
 int32_t HksMbedtlsRsaCryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const bool encrypt)
 {
+    (void)tagAead;
     int32_t ret = HksMbedtlsRsaCryptFinalCheckParam(ctx, message, cipherText);
     if (ret != HKS_SUCCESS) {
         return ret;
