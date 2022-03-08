@@ -924,186 +924,6 @@ static int32_t AesEncryptCcm(const struct HksBlob *key, const struct HksUsageSpe
     return ret;
 }
 
-static int32_t AesEncryptCcmInit(void **cryptoCtx, const struct HksUsageSpec *usageSpec, const struct HksBlob *key)
-{
-    mbedtls_ccm_context *ctx = (mbedtls_ccm_context *)HksMalloc(sizeof(mbedtls_ccm_context));
-    if (ctx == NULL) {
-        HKS_LOG_E("ccm ctx malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    mbedtls_ccm_init(ctx);
-
-    int32_t ret = mbedtls_ccm_setkey(ctx, MBEDTLS_CIPHER_ID_AES, key->data, key->size * HKS_BITS_PER_BYTE);
-    if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls aes ccm set key failed! mbedtls ret = 0x%X", ret);
-        mbedtls_ccm_free(ctx);
-        HksFree(ctx);
-        return ret;
-    }
-
-    struct HksMbedtlsAesCtx *outCtx = (struct HksMbedtlsAesCtx *)HksMalloc(sizeof(struct HksMbedtlsAesCtx));
-    if (outCtx == NULL) {
-        HKS_LOG_E("outCtx malloc fail");
-        mbedtls_ccm_free(ctx);
-        HksFree(ctx);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
-    outCtx->nonce = (uint8_t *)HksMalloc(aeadParam->nonce.size);
-    if (outCtx->nonce == NULL) {
-        HKS_LOG_E("outCtx malloc fail");
-        mbedtls_ccm_free(ctx);
-        HksFree(ctx);
-        HksFree(outCtx);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(outCtx->nonce, aeadParam->nonce.size, aeadParam->nonce.data, aeadParam->nonce.size);
-    outCtx->nonceSize = aeadParam->nonce.size;
-
-    outCtx->aad = (uint8_t *)HksMalloc(aeadParam->aad.size);
-    if (outCtx->aad == NULL) {
-        HKS_LOG_E("outCtx malloc fail");
-        mbedtls_ccm_free(ctx);
-        HksFree(ctx);
-        HksFree(outCtx->nonce);
-        HksFree(outCtx);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(outCtx->aad, aeadParam->aad.size, aeadParam->aad.data, aeadParam->aad.size);
-    outCtx->aadSize = aeadParam->aad.size;
-    outCtx->mode = usageSpec->mode;
-    outCtx->append = (void *)ctx;
-    outCtx->ccmMessageTotal.data = NULL;
-    outCtx->ccmMessageTotal.size = 0;
-    *cryptoCtx = (void *)outCtx;
-
-    return ret;
-}
-
-static int32_t AesEncryptCcmUpdate(void *cryptoCtx, const struct HksBlob *message,
-    struct HksBlob *cipherText, struct HksBlob *tagAead)
-{
-    (void)cipherText;
-    (void)tagAead;
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
-    mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)aesCtx->append;
-
-    int32_t ret = AesCcmCryptMessageDeal(cryptoCtx, message);
-    if (ret != HKS_SUCCESS) {
-        mbedtls_ccm_free(ccmCtx);
-        HksFree(aesCtx->ccmMessageTotal.data);
-        aesCtx->ccmMessageTotal.data = NULL;
-        if (ccmCtx != NULL) {
-            HksFree(ccmCtx);
-            aesCtx->append = NULL;
-        }
-        HksFree(aesCtx->nonce);
-        aesCtx->nonce = NULL;
-        HksFree(aesCtx->aad);
-        aesCtx->aad = NULL;
-        HksFree(cryptoCtx);
-        cryptoCtx = NULL;
-    }
-    return ret;
-}
-
-static int32_t AesEncryptCcmFinal(void **cryptoCtx, struct HksBlob *message,
-    struct HksBlob *cipherText, struct HksBlob *tagAead)
-{
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
-
-    int32_t ret;
-    mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)aesCtx->append;
-    do {
-        if (message->size != 0) {
-            ret = AesCcmCryptMessageDeal(*cryptoCtx, message);
-            if (ret != HKS_MBEDTLS_SUCCESS) {
-                HKS_LOG_E("message deal fail");
-                ret = HKS_FAILURE;
-                break;
-            }
-        }
-
-        ret = mbedtls_ccm_encrypt_and_tag(ccmCtx,
-            aesCtx->ccmMessageTotal.size,
-            aesCtx->nonce,
-            aesCtx->nonceSize,
-            aesCtx->aad,
-            aesCtx->aadSize,
-            aesCtx->ccmMessageTotal.data,
-            cipherText->data,
-            tagAead->data,
-            tagAead->size);
-        if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls aes ccm encrypt failed! mbedtls ret = 0x%X", ret);
-            (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-            (void)memset_s(tagAead->data, tagAead->size, 0, tagAead->size);
-            break;
-        }
-        cipherText->size = aesCtx->ccmMessageTotal.size;
-    } while (0);
-
-    mbedtls_ccm_free(ccmCtx);
-    if (ccmCtx != NULL) {
-        HksFree(ccmCtx);
-        aesCtx->append = NULL;
-    }
-    HksFree(aesCtx->ccmMessageTotal.data);
-    aesCtx->ccmMessageTotal.data = NULL;
-    HksFree(aesCtx->nonce);
-    aesCtx->nonce = NULL;
-    HksFree(aesCtx->aad);
-    aesCtx->aad = NULL;
-    HksFree(*cryptoCtx);
-    *cryptoCtx = NULL;
-    return ret;
-}
-
-static int32_t AesCcmCryptMessageDeal(void *cryptoCtx, const HksBlob *message)
-{
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
-    struct HksBlob totalMessage = (struct HksBlob)rsaCtx->rsaMessageTotal;
-
-    if (message->size == 0 || (message->size) > DATA_SIZE_MAX || (totalMessage.size) > DATA_SIZE_MAX) {
-        HKS_LOG_E("invalid size");
-        return HKS_FAILURE;
-    }
-
-    uint64_t len = totalMessage.size + message->size;
-    if (len > DATA_SIZE_MAX) {
-        HKS_LOG_E("invalid size");
-        return HKS_FAILURE;
-    }
-
-    uint8_t *newTotalMessageData = (uint8_t *)HksMalloc(len);
-    if (newTotalMessageData == NULL) {
-        HKS_LOG_E("initialize newTotalMessageData failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    errno_t ret = memcpy_s(newTotalMessageData, totalMessage.size, totalMessage.data, totalMessage.size);
-    if (ret != EOK) {
-        HKS_LOG_E("memcpy_s fail, error code = %d", ret);
-        HksFree(newTotalMessageData);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    ret = memcpy_s((newTotalMessageData + totalMessage.size), message->size, message->data, message->size);
-    if (ret != EOK) {
-        HKS_LOG_E("memcpy_s fail, error code = %d", ret);
-        HksFree(newTotalMessageData);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    HksFree(totalMessage.data);
-
-    totalMessage.data = newTotalMessageData;
-    totalMessage.size = len;
-
-    return HKS_SUCCESS;
-}
-
 static int32_t AesDecryptCcm(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
@@ -1138,142 +958,6 @@ static int32_t AesDecryptCcm(const struct HksBlob *key, const struct HksUsageSpe
     } while (0);
 
     mbedtls_ccm_free(&ctx);
-    return ret;
-}
-
-static int32_t AesDecryptCcmInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
-{
-    mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)HksMalloc(sizeof(mbedtls_ccm_context));
-    if (ccmCtx == NULL) {
-        HKS_LOG_E("ccm ctx malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    mbedtls_ccm_init(ccmCtx);
-
-    int32_t ret = mbedtls_ccm_setkey(ccmCtx, MBEDTLS_CIPHER_ID_AES, key->data, key->size * HKS_BITS_PER_BYTE);
-    if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls aes ccm set key failed! mbedtls ret = 0x%X", ret);
-    }
-
-    struct HksMbedtlsAesCtx *outCtx = (struct HksMbedtlsAesCtx *)HksMalloc(sizeof(struct HksMbedtlsAesCtx));
-    if (outCtx == NULL) {
-        HKS_LOG_E("outCtx malloc fail");
-        mbedtls_ccm_free(ccmCtx);
-        HksFree(ccmCtx);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    const struct HksAeadParam *aeadParam = (struct HksAeadParam *)(usageSpec->algParam);
-    outCtx->nonce = (uint8_t *)HksMalloc(aeadParam->nonce.size);
-    if (outCtx->nonce == NULL) {
-        HKS_LOG_E("outCtx malloc fail");
-        mbedtls_ccm_free(ccmCtx);
-        HksFree(ccmCtx);
-        HksFree(outCtx);
-        outCtx = NULL;
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(outCtx->nonce, aeadParam->nonce.size, aeadParam->nonce.data, aeadParam->nonce.size);
-    outCtx->nonceSize = aeadParam->nonce.size;
-
-    outCtx->aad = (uint8_t *)HksMalloc(aeadParam->aad.size);
-    if (outCtx->aad == NULL) {
-        HKS_LOG_E("outCtx malloc fail");
-        mbedtls_ccm_free(ccmCtx);
-        HksFree(ccmCtx);
-        HksFree(outCtx->nonce);
-        outCtx->nonce = NULL;
-        HksFree(outCtx);
-        outCtx = NULL;
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    memcpy_s(outCtx->aad, aeadParam->aad.size, aeadParam->aad.data, aeadParam->aad.size);
-    outCtx->aadSize = aeadParam->aad.size;
-
-    outCtx->mode = usageSpec->mode;
-    outCtx->append = (void *)ccmCtx;
-    outCtx->ccmMessageTotal.data = NULL;
-    outCtx->ccmMessageTotal.size = 0;
-    *cryptoCtx = (void *)outCtx;
-
-    return ret;
-}
-
-static int32_t AesDecryptCcmUpdate(void *cryptoCtx,
-    const struct HksBlob *message, struct HksBlob *cipherText)
-{
-    (void)cipherText;
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
-    mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)aesCtx->append;
-
-    int32_t ret = AesCcmCryptMessageDeal(cryptoCtx, message);
-    if (ret != HKS_SUCCESS) {
-        mbedtls_ccm_free(ccmCtx);
-        HksFree(aesCtx->ccmMessageTotal.data);
-        aesCtx->ccmMessageTotal.data = NULL;
-        if (ccmCtx != NULL) {
-            HksFree(ccmCtx);
-            aesCtx->append = NULL;
-        }
-        HksFree(aesCtx->nonce);
-        aesCtx->nonce = NULL;
-        HksFree(aesCtx->aad);
-        aesCtx->aad = NULL;
-        HksFree(cryptoCtx);
-        cryptoCtx = NULL;
-    }
-    return ret;
-}
-
-static int32_t AesDecryptCcmFinal(void **cryptoCtx, const struct HksBlob *message,
-    struct HksBlob *cipherText, struct HksBlob *tagAead)
-{
-    struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)*cryptoCtx;
-
-    int32_t ret = HKS_SUCCESS;
-    mbedtls_ccm_context *ccmCtx = (mbedtls_ccm_context *)aesCtx->append;
-    do {
-        if (message->size != 0) {
-            ret = AesCcmCryptMessageDeal(*cryptoCtx, message);
-            if (ret != HKS_MBEDTLS_SUCCESS) {
-                HKS_LOG_E("message deal fail");
-                ret = HKS_FAILURE;
-                break;
-            }
-        }
-
-        ret = mbedtls_ccm_auth_decrypt(ccmCtx,
-            aesCtx->ccmMessageTotal.size,
-            aesCtx->nonce,
-            aesCtx->nonceSize,
-            aesCtx->aad,
-            aesCtx->aadSize,
-            aesCtx->ccmMessageTotal.data,
-            cipherText->data,
-            tagAead->data,
-            tagAead->size);
-        if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls aes ccm encrypt failed! mbedtls ret = 0x%X", ret);
-            (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-            break;
-        }
-        cipherText->size = aesCtx->ccmMessageTotal.size;
-    } while (0);
-
-    mbedtls_ccm_free(ccmCtx);
-    HksFree(aesCtx->ccmMessageTotal.data);
-    aesCtx->ccmMessageTotal.data = NULL;
-    if (ccmCtx != NULL) {
-        HksFree(ccmCtx);
-        aesCtx->append = NULL;
-    }
-    HksFree(aesCtx->nonce);
-    aesCtx->nonce = NULL;
-    HksFree(aesCtx->aad);
-    aesCtx->aad = NULL;
-    HksFree(*cryptoCtx);
-    *cryptoCtx = NULL;
     return ret;
 }
 #endif /* HKS_SUPPORT_AES_CCM */
@@ -1849,7 +1533,7 @@ int32_t HksMbedtlsAesEncryptInit(void** cryptoCtx, const struct HksBlob *key, co
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            return AesEncryptCcmInit(cryptoCtx, usageSpec, key);
+            return HKS_ERROR_INVALID_ARGUMENT;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
         case HKS_MODE_CTR:
@@ -1885,7 +1569,7 @@ int32_t HksMbedtlsAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            return AesEncryptCcmUpdate(cryptoCtx, message, cipherText);
+            return HKS_ERROR_INVALID_ARGUMENT;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
         case HKS_MODE_CTR:
@@ -1917,7 +1601,7 @@ int32_t HksMbedtlsAesEncryptFinal(void** cryptoCtx, const struct HksBlob *messag
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            return AesEncryptCcmFinal(cryptoCtx, message, cipherText, tagAead);
+            return HKS_ERROR_INVALID_ARGUMENT;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
         case HKS_MODE_CTR:
@@ -1986,7 +1670,7 @@ int32_t HksMbedtlsAesDecryptInit(void **cryptoCtx, const struct HksBlob *key, co
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            return AesDecryptCcmInit(cryptoCtx, key, usageSpec);
+            return HKS_ERROR_INVALID_ARGUMENT;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
         case HKS_MODE_CTR:
@@ -2016,7 +1700,7 @@ int32_t HksMbedtlsAesDecryptUpdate(void *cryptoCtx, const struct HksBlob *messag
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            return AesDecryptCcmUpdate(cryptoCtx, message, cipherText);
+            return HKS_ERROR_INVALID_ARGUMENT;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
         case HKS_MODE_CTR:
@@ -2048,7 +1732,7 @@ int32_t HksMbedtlsAesDecryptFinal(void **cryptoCtx, const struct HksBlob *messag
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            return AesDecryptCcmFinal(cryptoCtx, message, cipherText, tagAead);
+            return HKS_ERROR_INVALID_ARGUMENT;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
         case HKS_MODE_CTR:
@@ -2143,38 +1827,6 @@ void HksMbedtlsAesHalModegcmFreeCtx(void **cryptCtx)
 }
 #endif
 
-#ifdef HKS_SUPPORT_AES_CCM
-void HksMbedtlsAesHalModeccmFreeCtx(void **cryptCtx)
-{
-    if (cryptCtx == NULL || *cryptCtx == NULL) {
-        HKS_LOG_E("FreeCtx cryptCtx param is null");
-        return;
-    }
-
-    struct HksMbedtlsAesCtx *mbedtlsAesCtx = (struct HksMbedtlsAesCtx *)*cryptCtx;
-    if (mbedtlsAesCtx->ccmMessageTotal.data != NULL) {
-        HksFree(mbedtlsAesCtx->ccmMessageTotal.data);
-        mbedtlsAesCtx->ccmMessageTotal.data = NULL;
-    }
-
-    if (mbedtlsAesCtx->append != NULL) {
-        mbedtls_ccm_free((mbedtls_ccm_context *)mbedtlsAesCtx->append);
-        if (mbedtlsAesCtx->append != NULL) {
-            HksFree(mbedtlsAesCtx->append);
-            mbedtlsAesCtx->append = NULL;
-        }
-    }
-    if (mbedtlsAesCtx->nonce != NULL) {
-        HksFree(mbedtlsAesCtx->nonce);
-        mbedtlsAesCtx->nonce = NULL;
-    }
-    if (mbedtlsAesCtx->aad != NULL) {
-        HksFree(mbedtlsAesCtx->aad);
-        mbedtlsAesCtx->aad = NULL;
-    }
-}
-#endif
-
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
 void HksMbedtlsAesHalModectrFreeCtx(void **cryptCtx)
 {
@@ -2236,7 +1888,6 @@ void HksMbedtlsAesHalFreeCtx(void **cryptCtx)
 #endif
 #ifdef HKS_SUPPORT_AES_CCM
         case HKS_MODE_CCM:
-            HksMbedtlsAesHalModeccmFreeCtx(cryptCtx);
             break;
 #endif
 #ifdef HKS_SUPPORT_AES_CTR_NOPADDING
