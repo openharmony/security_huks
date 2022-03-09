@@ -43,21 +43,21 @@ static char *RsaMallocPrivateKey(const unsigned char *key, size_t *keyLen)
 
     (void)memset_s(privateKey, keyFinalLen, 0, keyFinalLen);
     ret = memcpy_s(privateKey, keyFinalLen, start, startLen);
-    if (ret) {
+    if (ret != EOK) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
         free(privateKey);
         return NULL;
     }
 
     ret = memcpy_s(privateKey + startLen, keyFinalLen - startLen, key, *keyLen);
-    if (ret) {
+    if (ret != EOK) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
         free(privateKey);
         return NULL;
     }
 
     ret = memcpy_s(privateKey + startLen + *keyLen, keyFinalLen - startLen - *keyLen, end, endLen);
-    if (ret) {
+    if (ret != EOK) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
         (void)memset_s(privateKey, keyFinalLen, 0, keyFinalLen);
         free(privateKey);
@@ -354,7 +354,7 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
     size_t plainLen = 0;
     int32_t totalPlainLen = 0;
 
-    if ((rsaLen <= 0) || (cipher->length <= 0)) {
+    if ((rsaLen == 0) || (cipher->length == 0)) {
         return ERROR_CODE_GENERAL;
     }
 

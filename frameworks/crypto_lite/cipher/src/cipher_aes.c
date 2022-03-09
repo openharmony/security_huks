@@ -203,7 +203,7 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
             return ERROR_CODE_GENERAL;
         }
         (void)memset_s(data->text, data->textLen + 1, 0, data->textLen + 1);
-        if (memcpy_s(data->text, data->textLen + 1, text, strlen(text))) {
+        if (memcpy_s(data->text, data->textLen + 1, text, strlen(text)) != EOK) {
             goto ERROR;
         }
         data->textLen = PaddingPkcs5(data->text, strlen(text));

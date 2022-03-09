@@ -119,7 +119,7 @@ static napi_value GetHandleValue(napi_env env, napi_value object, AbortAsyncCont
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    memcpy_s(context->handle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
+    (void)memcpy_s(context->handle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
 
     return GetInt32(env, 0);
 }

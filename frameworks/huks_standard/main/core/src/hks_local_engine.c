@@ -33,7 +33,6 @@ static void HksLocalCryptoAbilityInit(void)
     int32_t ret = HksCryptoAbilityInit();
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Hks local init crypto ability failed, ret = %d", ret);
-        return;
     }
 }
 
