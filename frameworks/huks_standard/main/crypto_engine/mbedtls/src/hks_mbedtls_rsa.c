@@ -115,7 +115,7 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
     }
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
-    /* RSA key data internel struct: struct KeyMaterialRsa + nData + eData + dData */
+    /* RSA key data internal struct: struct KeyMaterialRsa + nData + eData + dData */
     struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)rawMaterial;
     keyMaterial->keyAlg = HKS_ALG_RSA;
     keyMaterial->keySize = keySize;

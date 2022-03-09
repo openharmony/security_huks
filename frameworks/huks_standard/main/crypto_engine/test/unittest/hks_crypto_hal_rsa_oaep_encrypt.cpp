@@ -1343,7 +1343,8 @@ protected:
             };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, encryptMsg->data + point, HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
+                    encryptMsg->data + point, HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out,
                     testCaseParams.usageSpec.algType), testCaseParams.encryptUpdateResult);

@@ -842,7 +842,7 @@ protected:
             ASSERT_NE(privateKey.data, nullptr);
             (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
-            const char *hexData = "00112233445566778899aabbccddeeff";
+            const char *hexData = "00112233445566778899aabbccddeeff"; // as plainText data input
 
             HksBlob plainText = { .size = (uint32_t)strlen(hexData), .data = (uint8_t *)hexData };
 

@@ -915,7 +915,8 @@ protected:
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, &message->data[point], HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
+                    &message->data[point], HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out, testCaseParams.usageSpec.algType),
                     testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
@@ -926,7 +927,7 @@ protected:
 
             uint32_t lastLen = inLen - point;
             HksBlob enMessageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-            memcpy_s(enMessageLast.data, lastLen, &message->data[point], lastLen);
+            (void)memcpy_s(enMessageLast.data, lastLen, &message->data[point], lastLen);
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, cipherText, &tagAead,
                 testCaseParams.usageSpec.algType),
                 testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
@@ -965,7 +966,8 @@ protected:
                 .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
             };
             while (index < messageLast->size - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, &cipherText->data[index], HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
+                    &cipherText->data[index], HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out,
                     testCaseParams.usageSpec.algType), HKS_SUCCESS);
@@ -980,7 +982,7 @@ protected:
                 .size = lastLen,
                 .data = (uint8_t *)HksMalloc(lastLen)
             };
-            memcpy_s(inscription.data, lastLen, &cipherText->data[index], lastLen);
+            (void)memcpy_s(inscription.data, lastLen, &cipherText->data[index], lastLen);
             EXPECT_EQ(HksCryptoHalDecryptFinal(&inscription, &decryptCtx, messageLast, &tagAead,
                 testCaseParams.usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalDecryptFinal failed.";
             HksFree(inscription.data);

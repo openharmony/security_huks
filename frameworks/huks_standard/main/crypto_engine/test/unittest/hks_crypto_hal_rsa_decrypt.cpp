@@ -491,7 +491,8 @@ protected:
             };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, decryptMsg->data + point, HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
+                    decryptMsg->data + point, HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 out.size = HKS_UPDATE_DATA_MAX;
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out, testCaseParams.usageSpec.algType),
                     testCaseParams.decryptResult);
@@ -502,7 +503,7 @@ protected:
 
             uint32_t lastLen = inLen - point;
             HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-            memcpy_s(messageLast.data, lastLen, decryptMsg->data + point, lastLen);
+            (void)memcpy_s(messageLast.data, lastLen, decryptMsg->data + point, lastLen);
             HksBlob tagAead = { .size = 0, .data = nullptr };
             EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, decryptOut, &tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult);

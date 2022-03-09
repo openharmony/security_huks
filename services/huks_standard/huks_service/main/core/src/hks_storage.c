@@ -1176,10 +1176,12 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
 
 static void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCount)
 {
-    for (uint32_t i = 0; i < keyCount; ++i) {
-        HKS_FREE_PTR((*fileNameList)[i].fileName);
+    if (fileNameList != NULL && *fileNameList != NULL) {
+        for (uint32_t i = 0; i < keyCount; ++i) {
+            HKS_FREE_PTR((*fileNameList)[i].fileName);
+        }
+        HKS_FREE_PTR(*fileNameList);
     }
-    HKS_FREE_PTR(*fileNameList);
 }
 
 static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t keyCount)
@@ -1339,37 +1341,37 @@ int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, ui
     return ret;
 }
 
-static int32_t DestoryType(const char *storePath, const char *typePath, uint32_t bakFlag)
+static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t bakFlag)
 {
-    char *destoryPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (destoryPath == NULL) {
+    char *destroyPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    if (destroyPath == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memset_s(destoryPath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+    (void)memset_s(destroyPath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-    int32_t ret = GetPath(storePath, typePath, destoryPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
+    int32_t ret = GetPath(storePath, typePath, destroyPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get Path failed! ret = 0x%X", ret);
-        HKS_FREE_PTR(destoryPath);
+        HKS_FREE_PTR(destroyPath);
         return ret;
     }
 
-    ret = HksIsDirExist(destoryPath);
+    ret = HksIsDirExist(destroyPath);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(destoryPath);
+        HKS_FREE_PTR(destroyPath);
         return HKS_SUCCESS;
     }
 
-    ret = HksRemoveDir(destoryPath);
+    ret = HksRemoveDir(destroyPath);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Destory dir failed! ret = 0x%X", ret);
+        HKS_LOG_E("Destroy dir failed! ret = 0x%X", ret);
     }
 
-    HKS_FREE_PTR(destoryPath);
+    HKS_FREE_PTR(destroyPath);
     return ret;
 }
 
-static int32_t StoreDestory(const char *processNameEncoded, uint32_t bakFlag)
+static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
 {
     int32_t ret;
     char *rootPath = NULL;
@@ -1396,26 +1398,26 @@ static int32_t StoreDestory(const char *processNameEncoded, uint32_t bakFlag)
         return ret;
     }
 
-    ret = DestoryType(storePath, HKS_KEY_STORE_ROOT_KEY_PATH, bakFlag);
+    ret = DestroyType(storePath, HKS_KEY_STORE_ROOT_KEY_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destory info dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy info dir failed! ret = 0x%X", ret); /* continue delete */
     }
 
-    ret = DestoryType(storePath, HKS_KEY_STORE_KEY_PATH, bakFlag);
+    ret = DestroyType(storePath, HKS_KEY_STORE_KEY_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destory key dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy key dir failed! ret = 0x%X", ret); /* continue delete */
     }
 
-    ret = DestoryType(storePath, HKS_KEY_STORE_CERTCHAIN_PATH, bakFlag);
+    ret = DestroyType(storePath, HKS_KEY_STORE_CERTCHAIN_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destory certchain dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy certchain dir failed! ret = 0x%X", ret); /* continue delete */
     }
 
     HKS_FREE_PTR(storePath);
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreDestory(const struct HksBlob *processName)
+int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     if (name == NULL) {
@@ -1431,16 +1433,16 @@ int32_t HksStoreDestory(const struct HksBlob *processName)
             break;
         }
 
-        ret = StoreDestory(name, HKS_STORAGE_BAK_FLAG_FLASE);
+        ret = StoreDestroy(name, HKS_STORAGE_BAK_FLAG_FLASE);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hks destory dir failed! ret = 0x%X.", ret);
+            HKS_LOG_E("Hks destroy dir failed! ret = 0x%X.", ret);
             break;
         }
 
 #ifdef SUPPORT_STORAGE_BACKUP
-        ret = StoreDestory(name, HKS_STORAGE_BAK_FLAG_TRUE);
+        ret = StoreDestroy(name, HKS_STORAGE_BAK_FLAG_TRUE);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hks destory back dir failed! ret = 0x%X.", ret);
+            HKS_LOG_E("Hks destroy back dir failed! ret = 0x%X.", ret);
             break;
         }
 #endif
