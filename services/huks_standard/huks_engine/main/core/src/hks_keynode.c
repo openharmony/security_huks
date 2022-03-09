@@ -23,7 +23,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 
-static struct DoubleList g_keyNodeList =  { NULL, NULL };
+static struct DoubleList g_keyNodeList = { NULL, NULL };
 static uint64_t g_keyNodeHandle = 0;
 
 struct DoubleList *GetKeyNodeList(void)
