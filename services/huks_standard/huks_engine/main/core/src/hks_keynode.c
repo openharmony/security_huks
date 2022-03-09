@@ -106,8 +106,7 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
             return ret;
         }
 
-        if (memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle),
-            opHandle.data, opHandle.size) != EOK) {
+        if (memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle), opHandle.data, opHandle.size) != EOK) {
             HKS_LOG_E("memcpy handle failed");
             return HKS_ERROR_INVALID_ARGUMENT;
         }

@@ -136,8 +136,45 @@ static napi_value GetHandleValue(napi_env env, napi_value object, UpdateAsyncCon
     }
     context->handle->size = sizeof(uint64_t);
     context->handle->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
+    if (context->handle->data == nullptr) {
+        HKS_FREE_PTR(context->handle);
+        HKS_LOG_E("malloc memory failed");
+        return nullptr;
+    }
     (void)memcpy_s(context->handle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
     return GetInt32(env, 0);
+}
+
+static int32_t FillContextInDataAndOutData(napi_env env, napi_value data, UpdateAsyncContext context)
+{
+    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->outData == nullptr || context->inData == nullptr) {
+        HKS_LOG_E("malloc memory failed");
+        HKS_FREE_PTR(context->inData);
+        HKS_FREE_PTR(context->outData);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    napi_value result = GetUint8Array(env, data, *(context->inData));
+    if (result == nullptr) {
+        HKS_LOG_E("could not get indata");
+        HKS_FREE_PTR(context->inData);
+        HKS_FREE_PTR(context->outData);
+        return HKS_FAILURE;
+    }
+
+    context->outData->size = context->inData->size + DATA_SIZE_64KB;
+    context->outData->data = (uint8_t *)HksMalloc(context->outData->size + DATA_SIZE_64KB);
+    if (context->outData->data == nullptr) {
+        HKS_LOG_E("malloc memory failed");
+        HKS_FREE_PTR(context->inData->data);
+        HKS_FREE_PTR(context->inData);
+        HKS_FREE_PTR(context->outData);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    return HKS_SUCCESS;
 }
 
 static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, UpdateAsyncContext context)
@@ -179,19 +216,11 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         return nullptr;
     }
 
-    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->inData == nullptr) {
-        HKS_LOG_E("could not alloc memory");
+    int32_t ret = FillContextInDataAndOutData(env, inData, context);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("fill data failed");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->inData);
-    if (result == nullptr) {
-        HKS_LOG_E("could not get indata");
-        return nullptr;
-    }
-    context->outData->size = context->inData->size + DATA_SIZE_64KB;
-    context->outData->data = (uint8_t *)HksMalloc(context->outData->size + DATA_SIZE_64KB);
 
     if (++index < argc) {
         context->callback = GetCallback(env, argv[index]);

@@ -124,7 +124,6 @@ static int32_t SetIv(const char *ivBuf, int32_t ivBufLen, AesCryptContext *ctx)
         return ERROR_CODE_GENERAL;
     }
 
-    (void)memset_s(ctx->iv.ivBuf, ctx->iv.ivLen, 0, ctx->iv.ivLen);
     int32_t ret = memcpy_s(ctx->iv.ivBuf, ctx->iv.ivLen, ivBuf + ctx->iv.ivOffset, ctx->iv.ivLen);
     if (ret) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed, ret:%{public}d.", ret);
