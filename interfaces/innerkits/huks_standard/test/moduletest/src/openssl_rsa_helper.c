@@ -75,7 +75,7 @@ EVP_PKEY *GenerateRsaKey(const uint32_t keySize)
         BN_free(bne);
         return NULL;
     }
-    
+
     if (RSA_generate_key_ex(rsa, keySize, bne, NULL) != 1) {
         RSA_free(rsa);
         BN_free(bne);

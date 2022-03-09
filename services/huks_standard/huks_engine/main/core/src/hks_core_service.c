@@ -48,43 +48,43 @@
 static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
 
 static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageInit},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageInit},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageInit},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageInit},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageInit},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageInit},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageInit}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageInit },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageInit },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageInit },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageInit },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageInit },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageInit },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageInit }
 };
 
 static struct HksCoreUpdateHandler g_hksCoreUpdateHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageUpdate},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageUpdate},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageUpdate},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageUpdate},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageUpdate},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageUpdate},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageUpdate}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageUpdate },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageUpdate },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageUpdate },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageUpdate },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageUpdate },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageUpdate },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageUpdate }
 };
 
 static struct HksCoreFinishHandler g_hksCoreFinishHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageFinish},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageFinish},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreEncryptThreeStageFinish},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreDecryptThreeStageFinish},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageFinish},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageFinish},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageFinish}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageFinish },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageFinish },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreEncryptThreeStageFinish },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreDecryptThreeStageFinish },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageFinish },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageFinish },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageFinish }
 };
 
 static struct HksCoreAbortHandler g_hksCoreAbortHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageAbort},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageAbort},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageAbort},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageAbort},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageAbort},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageAbort},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageAbort}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageAbort },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageAbort },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageAbort },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageAbort },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageAbort },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageAbort },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageAbort }
 };
 
 static int32_t GetGenType(const struct HksParamSet *paramSet, uint32_t *genType)
