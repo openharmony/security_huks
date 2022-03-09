@@ -287,6 +287,10 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     // this is the temporary version which comments the descriptor check
     std::u16string descriptor = HksService::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (descriptor != remoteDescriptor) {
+        HKS_LOG_E("descriptor is diff.");
+        return HW_SYSTEM_ERROR;
+    }
 
     HKS_LOG_I("OnRemoteRequest code:%d", code);
     uint32_t outSize = (uint32_t)data.ReadUint32();
