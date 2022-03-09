@@ -387,6 +387,7 @@ int32_t CoreSignVerifyHash(uint32_t alg, void **ctx, const struct HksBlob *inDat
         }
         int32_t ret = HksCryptoHalHashFinal(inData, ctx, outData);
         if (ret != HKS_SUCCESS)  {
+            HKS_FREE_PTR(outData->data);
             HKS_LOG_E("Sign HksCryptoHalHashFinal fail ret : %d", ret);
             return ret;
         }
@@ -893,6 +894,9 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
         }
     } while (0);
 
+    if (restoreData->data != NULL) {
+        (void)memset_s(restoreData->data, restoreData->size, 0, restoreData->size);
+    }
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
     HKS_FREE_PTR(restoreData);
@@ -916,6 +920,9 @@ int32_t HksCoreDeriveThreeStageAbort(const struct HuksKeyNode *keyNode, const st
         return HKS_FAILURE;
     }
 
+    if (restoreData->data != NULL) {
+        (void)memset_s(restoreData->data, restoreData->size, 0, restoreData->size);
+    }
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
     HKS_FREE_PTR(restoreData);
@@ -1006,11 +1013,15 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
         ret = SetCryptoCtx(keyNode, (void *)agreeTemp);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Set hks crypto ctx fail");
+            (void)memset_s(agreeTemp->data, agreeTemp->size, 0, agreeTemp->size);
             HksCoreAgreeFreeData(&agreeTemp);
             break;
         }
     } while (0);
 
+    if (rawKey.data != NULL) {
+        (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+    }
     HKS_FREE_PTR(rawKey.data);
     HKS_FREE_PTR(publicKey.data);
     return ret;
@@ -1062,6 +1073,10 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
         }
     } while (0);
 
+    if (restoreData->data != NULL) {
+        (void)memset_s(restoreData->data, restoreData->size, 0, restoreData->size);
+    }
+
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
     HKS_FREE_PTR(restoreData);
@@ -1084,6 +1099,9 @@ int32_t HksCoreAgreeThreeStageAbort(const struct HuksKeyNode *keyNode, const str
         return HKS_FAILURE;
     }
 
+    if (restoreData->data != NULL) {
+        (void)memset_s(restoreData->data, restoreData->size, 0, restoreData->size);
+    }
     ClearCryptoCtx(keyNode);
     HKS_FREE_BLOB(*restoreData);
     HKS_FREE_PTR(restoreData);
@@ -1095,9 +1113,10 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
 {
     (void)paramSet;
     struct HksBlob rawKey = { 0, NULL };
+    int32_t ret;
 
     do {
-        int32_t ret = HksGetRawKey(keyNode->keyBlobParamSet, &rawKey);
+        ret = HksGetRawKey(keyNode->keyBlobParamSet, &rawKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Derive get raw key failed!");
             return ret;
@@ -1123,7 +1142,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
     }
     HKS_FREE_PTR(rawKey.data);
 
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
