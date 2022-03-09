@@ -52,7 +52,7 @@ static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
     { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageInit },
     { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageInit },
     { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageInit },
-    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageInit},
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageInit },
     { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageInit },
     { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageInit }
 };
