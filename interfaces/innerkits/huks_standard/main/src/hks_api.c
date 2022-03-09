@@ -714,8 +714,7 @@ HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksP
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret = HksClientUpdate(handle, paramSet, inData, outData);
-    return ret;
+    return HksClientUpdate(handle, paramSet, inData, outData);
 }
 
 HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
@@ -726,8 +725,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret = HksClientFinish(handle, paramSet, inData, outData);
-    return ret;
+    return HksClientFinish(handle, paramSet, inData, outData);
 }
 
 HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
@@ -737,6 +735,5 @@ HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksPa
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret = HksClientAbort(handle, paramSet);
-    return ret;
+    return HksClientAbort(handle, paramSet);
 }

@@ -350,7 +350,6 @@ static void ClearCryptoCtx(const struct HuksKeyNode *keyNode)
     }
 
     ctxParam->uint64Param = (uint64_t)(uintptr_t)NULL;
-    return;
 }
 
 static void FreeSignVerify(const struct HuksKeyNode *keyNode)
