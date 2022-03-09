@@ -349,7 +349,7 @@ int32_t HksRemoveDir(const char *dirPath)
 int32_t HksDeletDirPartTwo(const char *path)
 {
     int32_t ret;
-    char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
+    char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
     DIR *dir = opendir(path);
     if (dir  == NULL) {
         HKS_LOG_E("open dir failed");
@@ -387,7 +387,7 @@ int32_t HksDeletDirPartTwo(const char *path)
 int32_t HksDeletDirPartOne(const char *path)
 {
     int32_t ret;
-    char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
+    char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
     DIR *dir = opendir(path);
     if (dir  == NULL) {
         HKS_LOG_E("open dir failed");

@@ -43,7 +43,7 @@ struct HksMbedtlsAesCtx {
     uint32_t mode;
     uint32_t padding;
     uint8_t *append;
-    struct HksBlob  ccmMessageTotal;
+    struct HksBlob ccmMessageTotal;
     uint8_t iv[HKS_AES_CBC_NOPADDING_IV_SIZE];
     uint8_t *nonce;
     uint32_t nonceSize;

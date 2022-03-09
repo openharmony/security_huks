@@ -161,9 +161,9 @@ static int32_t CheckAesCipherData(bool isEncrypt, uint32_t padding, uint32_t mod
 static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSet,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
-    struct HksUsageSpec usageSpec = { 0 };
+    struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
-    struct HksKeySpec cihperSpec = { 0 };
+    struct HksKeySpec cihperSpec = {0};
     HksFillKeySpec(paramSet, &cihperSpec);
     uint32_t alg = usageSpec.algType;
 
@@ -575,7 +575,7 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
         }
 
         uint8_t tmpData[32]; /* 32 bits are unused */
-        struct HksBlob tmpInData = {32, tmpData}; /* 32 bits are unused */
+        struct HksBlob tmpInData = { 32, tmpData }; /* 32 bits are unused */
         if (purposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) {
             ret = HksBuildCipherUsageSpec(paramSet, true, &tmpInData, &usageSpec);
         } else {
