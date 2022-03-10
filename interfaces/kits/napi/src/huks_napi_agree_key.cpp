@@ -218,7 +218,6 @@ static napi_value AgreeKeyAsyncWork(napi_env env, AgreeKeyAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiAgreeKey(napi_env env, napi_callback_info info)

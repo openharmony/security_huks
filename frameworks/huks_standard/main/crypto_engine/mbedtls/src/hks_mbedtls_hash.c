@@ -46,24 +46,28 @@ int32_t HksMbedtlsHashMd5Init(void **ctx, uint32_t alg);
 
 int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 16 is the output length that mbedtls need */
 int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[16]);
 
 int32_t HksMbedtlsHashSha1Init(void **ctx, uint32_t alg);
 
 int32_t HksMbedtlsHashSha1Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 20 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[20]);
 
 int32_t HksMbedtlsHashSha256Init(void **ctx, int is224, uint32_t alg);
 
 int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 32 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[32]);
 
 int32_t HksMbedtlsHashSha512Init(void **ctx, int is384, uint32_t alg);
 
 int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 64 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[64]);
 
 int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
@@ -231,6 +235,7 @@ int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsigned ch
     return HKS_SUCCESS;
 }
 
+/* 16 is the output length that mbedtls need */
 int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[16])
 {
     int32_t ret;
@@ -323,6 +328,7 @@ int32_t HksMbedtlsHashSha1Update(struct HksMbedtlsHashCtx *ctx, const unsigned c
     return HKS_SUCCESS;
 }
 
+/* 20 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[20])
 {
     mbedtls_sha1_context *context = (mbedtls_sha1_context*)ctx->append;
@@ -426,6 +432,7 @@ int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const unsigned
     return HKS_SUCCESS;
 }
 
+/* 32 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[32])
 {
     mbedtls_sha256_context *context = (mbedtls_sha256_context*)ctx->append;
@@ -530,6 +537,7 @@ int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const unsigned
     return HKS_SUCCESS;
 }
 
+/* 64 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[64])
 {
     mbedtls_sha512_context *context = (mbedtls_sha512_context *)ctx->append;

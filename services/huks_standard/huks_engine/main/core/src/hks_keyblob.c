@@ -266,7 +266,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
         ret = HksCryptoHalDecrypt(&derivedKey, usageSpec, &encKey, &srcKey);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher key[%x] failed!", isEncrypt);
+        HKS_LOG_E("cipher key[0x%x] failed!", isEncrypt);
     }
 
     (void)memset_s(derivedKey.data, derivedKey.size, 0, derivedKey.size);

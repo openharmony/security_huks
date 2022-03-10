@@ -213,7 +213,6 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiAbort(napi_env env, napi_callback_info info)

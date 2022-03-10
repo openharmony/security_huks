@@ -196,5 +196,6 @@ static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *in
 int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
     const struct HksParamSet *paramSet)
 {
+    (void)paramSet;
     return HksSendRequestSync(type, inBlob, outBlob);
 }
