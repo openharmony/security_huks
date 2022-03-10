@@ -1208,7 +1208,7 @@ static int32_t InsertIdOrSecInfoByOid(enum HksTag tagOne, enum HksTag tagTwo,
 
 static int32_t BuildAttestDeviceClaims(struct HksBlob *out, const struct HksParamSet *paramSet)
 {
-    int32_t ret;
+    int32_t ret = HKS_SUCCESS;
     for (uint32_t i = 0; i < sizeof(g_idAttestList) / sizeof(g_idAttestList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             ret = InsertIdOrSecInfoByOid(paramSet->params[j].tag, g_idAttestList[i], out, paramSet);
