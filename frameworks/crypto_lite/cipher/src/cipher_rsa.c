@@ -222,7 +222,6 @@ static int32_t RsaEncryptBase64Encode(int32_t cipherTotalLen, char *cipherText, 
         return ERROR_CODE_GENERAL;
     }
 
-    (void)memset_s(tempBuf, cipherTotalLen, 0, cipherTotalLen);
     int32_t ret = memcpy_s(tempBuf, cipherTotalLen, cipherText, cipherTotalLen);
     if (ret) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy fail.");
