@@ -480,7 +480,7 @@ int32_t HksMbedtlsRsaCryptInit(void **ctx, const struct HksBlob *key, const stru
         HksFree(outCtx);
         return HKS_ERROR_MALLOC_FAIL;
     }
-    memcpy_s(outCtx->mKey.data, outCtx->mKey.size, key->data, key->size);
+    (void)memcpy_s(outCtx->mKey.data, key->size, key->data, key->size);
     outCtx->rsaMessageTotal.data = NULL;
     outCtx->rsaMessageTotal.size = 0;
     outCtx->mCtrDrbg = ctrDrbg;

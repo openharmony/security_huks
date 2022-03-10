@@ -43,7 +43,6 @@ struct HksMbedtlsAesCtx {
     uint32_t mode;
     uint32_t padding;
     uint8_t *append;
-    struct HksBlob ccmMessageTotal;
     uint8_t iv[HKS_AES_CBC_NOPADDING_IV_SIZE];
     uint8_t *nonce;
     uint32_t nonceSize;
@@ -229,7 +228,7 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
         }
 
         cipherText->size = message->size;
-        memcpy_s(aesCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, tmpIv, HKS_AES_CBC_NOPADDING_IV_SIZE);
+        (void)memcpy_s(aesCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, tmpIv, HKS_AES_CBC_NOPADDING_IV_SIZE);
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -1283,7 +1282,7 @@ static int32_t AesEcbNoPaddingData(mbedtls_cipher_context_t *ecbNoPadingctx, siz
 
     if (message->size <= blockSize) {
         (void)memset_s(tmpMessage, blockSize, 0, blockSize);
-        memcpy_s(tmpMessage, blockSize, message->data, message->size);
+        (void)memcpy_s(tmpMessage, message->size, message->data, message->size);
         ret = mbedtls_cipher_update(ecbNoPadingctx, tmpMessage, blockSize, cipherText->data, olenTotal);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls ecb no padding update failed ret = 0x%X", ret);
@@ -1295,7 +1294,7 @@ static int32_t AesEcbNoPaddingData(mbedtls_cipher_context_t *ecbNoPadingctx, siz
         while (point < message->size) {
             (void)memset_s(tmpMessage, blockSize, 0, blockSize);
             uint32_t tmpSize = (message->size - point) >= blockSize ? blockSize : (message->size - point);
-            memcpy_s(tmpMessage, blockSize, message->data + point, tmpSize);
+            (void)memcpy_s(tmpMessage, blockSize, message->data + point, tmpSize);
             size_t olen;
             ret = mbedtls_cipher_update(ecbNoPadingctx, tmpMessage, tmpSize, cipherText->data + point, &olen);
             if (ret != HKS_MBEDTLS_SUCCESS) {
