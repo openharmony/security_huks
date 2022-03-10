@@ -67,7 +67,7 @@ static int32_t RsaCheckKeyMaterial(const struct HksBlob *key)
 
 int32_t InitRsaKeyBuf(const struct KeyMaterialRsa *keyMaterial, struct HksBlob *bufBlob)
 {
-    uint32_t maxSize = 0;
+    uint32_t maxSize;
     if (keyMaterial->nSize >= keyMaterial->eSize) {
         maxSize = keyMaterial->nSize;
     } else {
