@@ -221,7 +221,7 @@ static int32_t VerifyAttestationCertChain(struct HksCertInfo *certs, uint32_t ce
 {
     int32_t ret = TranslateToX509Format(certs, certNum);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify attestation cert chain verify cert chain failed");
+        HKS_LOG_E("translate to x509 format failed");
         return ret;
     }
 
