@@ -914,7 +914,6 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         return HKS_ERROR_BAD_STATE;
     }
 
-    keyNode->totalDataSize = 0;
     handle->size = sizeof(uint64_t);
     (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
 
@@ -968,17 +967,6 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         return HKS_ERROR_BAD_STATE;
     }
 
-    if (inData->size > MAX_UPDATE_SIZE) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreUpdate input data size too large.");
-        return HKS_FAILURE;
-    }
-    if ((keyNode->totalDataSize + inData->size) > MAX_TOTAL_SIZE) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreUpdate input data total size too large.");
-        return HKS_FAILURE;
-    }
-
     int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
@@ -994,13 +982,10 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         }
     }
 
-    if (i == size) {
+    if (i == size || ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
-    }
-    if (ret == HKS_SUCCESS) {
-        keyNode->totalDataSize += inData->size;
     }
     return ret;
 }
@@ -1046,15 +1031,10 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     if (i == size) {
-        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
-        return HKS_FAILURE;
     }
-    if (ret == HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-    }
+    HksDeleteKeyNode(sessionId);
     HKS_LOG_D("HksCoreFinish in Core end");
-
     return ret;
 }
 
@@ -1078,8 +1058,8 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
     if (keyNode == NULL) {
-        HKS_LOG_E("Cipher generate keynode failed");
-        return HKS_ERROR_BAD_STATE;
+        HKS_LOG_E("abort get key node failed");
+        return HKS_SUCCESS;
     }
 
     ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);

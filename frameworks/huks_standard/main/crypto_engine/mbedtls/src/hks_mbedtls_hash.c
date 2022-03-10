@@ -104,10 +104,10 @@ int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsHashUpdate(void **cryptoCtx, const struct HksBlob *msg)
+int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
     int32_t ret;
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)cryptoCtx;
 
     switch (rsaCtx->mAlg) {
         case HKS_DIGEST_MD5:
@@ -228,7 +228,6 @@ int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsigned ch
     ret = mbedtls_md5_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls Hash Md5 update fail");
-        mbedtls_md5_free(context);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -314,14 +313,12 @@ int32_t HksMbedtlsHashSha1Update(struct HksMbedtlsHashCtx *ctx, const unsigned c
 
     if (ilen == 0 || input == NULL) {
         HKS_LOG_E("Mbedtls Hash sha1 input param error");
-        mbedtls_sha1_free(context);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret = mbedtls_sha1_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls Hash sha1 update fail");
-        mbedtls_sha1_free(context);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -418,13 +415,11 @@ int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const unsigned
     }
 
     if (ilen == 0 || input == NULL) {
-        mbedtls_sha256_free(context);
         return HKS_FAILURE;
     }
 
     int32_t ret = mbedtls_sha256_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        mbedtls_sha256_free(context);
         HKS_LOG_E("Mbedtls Hash sha256 update fail");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
@@ -523,14 +518,12 @@ int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const unsigned
 
     if (ilen == 0 || input == NULL) {
         HKS_LOG_E("Mbedtls Hash sha512 input param error");
-        mbedtls_sha512_free(context);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret = mbedtls_sha512_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls Hash sha512 update fail");
-        mbedtls_sha512_free(context);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 

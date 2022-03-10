@@ -128,7 +128,7 @@ int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslHashUpdate(void **cryptoCtx, const struct HksBlob *msg)
+int32_t HksOpensslHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
     if (cryptoCtx == NULL) {
         HKS_LOG_E("Invalid param cryptoCtx!");
@@ -137,16 +137,12 @@ int32_t HksOpensslHashUpdate(void **cryptoCtx, const struct HksBlob *msg)
 
     if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid param msg!");
-        EVP_MD_CTX_free((EVP_MD_CTX *)cryptoCtx);
-        *cryptoCtx = NULL;
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    int32_t ret = EVP_DigestUpdate(*cryptoCtx, msg->data, msg->size);
+    int32_t ret = EVP_DigestUpdate(cryptoCtx, msg->data, msg->size);
     if (ret != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        EVP_MD_CTX_free((EVP_MD_CTX *)cryptoCtx);
-        *cryptoCtx = NULL;
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
