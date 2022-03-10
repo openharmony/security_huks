@@ -19,6 +19,7 @@
 #include "hks_config.h"
 #endif
 
+#include "huks_core_hal.h"
 #include "hks_core_interfaces.h"
 
 #include "hks_log.h"
