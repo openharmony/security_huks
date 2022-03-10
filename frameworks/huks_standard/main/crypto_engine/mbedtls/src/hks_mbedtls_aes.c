@@ -199,7 +199,7 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret;
     do {
         if (message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
             HKS_LOG_E("AesCbcNoPaddingCryptUpdate data size invalid!");
@@ -450,7 +450,7 @@ static int32_t AesCbcPkcs7CryptFinal(void **cryptoCtx, const struct HksBlob *mes
     }
 
     size_t finish_olen;
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret;
     do {
         if (message->size != 0) {
             ret = mbedtls_cipher_update(cbcPkcs7ctx, message->data, message->size, cipherText->data,
@@ -688,7 +688,7 @@ static int32_t AesEncryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret;
     do {
         if (message->size != 0) {
             ret = mbedtls_gcm_update(gcmCtx, message->size, message->data, cipherText->data);
@@ -839,7 +839,7 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
         return HKS_FAILURE;
     }
 
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret;
     do {
         if (message->size != 0) {
             ret = mbedtls_gcm_update(gcmCtx, message->size, message->data, cipherText->data);
@@ -1123,7 +1123,7 @@ static int32_t AesCtrCryptFinal(void **cryptoCtx, const struct HksBlob *message,
         return HKS_FAILURE;
     }
 
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret;
     do {
         size_t olen = (size_t)cipherText->size;
         if (message->size != 0) {
