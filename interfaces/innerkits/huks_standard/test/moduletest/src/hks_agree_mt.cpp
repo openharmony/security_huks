@@ -23,8 +23,8 @@
 #include "hks_config.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "openssl_ecc_helper.h"
 #include "openssl_dh_helper.h"
+#include "openssl_ecc_helper.h"
 
 using namespace testing::ext;
 namespace OHOS {
