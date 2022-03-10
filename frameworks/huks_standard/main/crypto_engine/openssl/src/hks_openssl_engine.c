@@ -311,7 +311,7 @@ int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx)
     return func(ctx, alg);
 }
 
-int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void **ctx)
+int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx)
 {
     if (CheckBlob(msg) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid params!");
