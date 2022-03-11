@@ -75,9 +75,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
     if (rawMaterial == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    if (memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen) != EOK) {
-        return HKS_ERROR_INVALID_OPERATION;
-    }
+    (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)rawMaterial;
     keyMaterial->keyAlg = HKS_ALG_DH;
