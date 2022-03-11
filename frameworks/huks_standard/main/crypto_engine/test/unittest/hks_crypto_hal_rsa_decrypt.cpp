@@ -32,7 +32,6 @@ struct TestCaseParams {
     HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
-    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
 
     HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
@@ -471,61 +470,6 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    void RunTestRsaDecrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *decryptMsg,
-        struct HksBlob *decryptOut) const
-        {
-        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
-        void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
-        EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx), testCaseParams.decryptResult);
-        if (testCaseParams.decryptResult != HKS_SUCCESS) {
-            if (!decryptCtx) {
-                HksFree(decryptCtx);
-            }
-            return;
-        }
-        uint32_t point = 0;
-        if (inLen > HKS_UPDATE_DATA_MAX) {
-            HksBlob messageUpdate = {
-                .size = HKS_UPDATE_DATA_MAX,
-                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
-            };
-            HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
-            while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
-                    decryptMsg->data + point, HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
-                out.size = HKS_UPDATE_DATA_MAX;
-                EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out, testCaseParams.usageSpec.algType),
-                    testCaseParams.decryptResult);
-                point = point + HKS_UPDATE_DATA_MAX;
-            }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
-
-            uint32_t lastLen = inLen - point;
-            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-            (void)memcpy_s(messageLast.data, lastLen, decryptMsg->data + point, lastLen);
-            HksBlob tagAead = { .size = 0, .data = nullptr };
-            EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, decryptOut, &tagAead,
-                testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
-
-            HksFree(messageLast.data);
-        } else {
-            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
-            EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out, testCaseParams.usageSpec.algType),
-                testCaseParams.decryptResult);
-
-            HksBlob tmpTagAead = { .size = 0, .data = nullptr };
-            HksBlob deMessageLast = { .size = 0, .data = nullptr };
-            EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, &tmpTagAead,
-                testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
-
-            HksFree(out.data);
-        }
-        if (!decryptCtx) {
-            HksFree(decryptCtx);
-        }
-    }
-
     void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
@@ -544,13 +488,8 @@ protected:
 
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
 
-        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
-            RunTestRsaDecrypt(&key, testCaseParams, &message, &cipherText);
-        } else {
-            EXPECT_EQ(HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText),
-                testCaseParams.decryptResult);
-        }
-
+        EXPECT_EQ(
+            HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText), testCaseParams.decryptResult);
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);

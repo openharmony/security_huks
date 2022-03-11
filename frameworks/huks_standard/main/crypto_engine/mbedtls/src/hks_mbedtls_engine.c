@@ -143,9 +143,9 @@ int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx)
     return func(ctx, alg);
 }
 
-int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void **ctx)
+int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx)
 {
-    if (CheckBlob(msg) != HKS_SUCCESS || ctx == NULL || *ctx == NULL) {
+    if (CheckBlob(msg) != HKS_SUCCESS || ctx == NULL) {
         HKS_LOG_E("Crypt Hal Hash msg or ctx is NULL");
         return HKS_ERROR_INVALID_ARGUMENT;
     }

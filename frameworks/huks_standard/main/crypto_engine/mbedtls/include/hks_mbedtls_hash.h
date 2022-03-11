@@ -32,7 +32,7 @@ int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
 
 int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg);
 
-int32_t HksMbedtlsHashUpdate(void **cryptoCtx, const struct HksBlob *msg);
+int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg);
 
 int32_t HksMbedtlsHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash);
 

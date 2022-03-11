@@ -145,7 +145,7 @@ typedef int32_t (*Hash)(uint32_t, const struct HksBlob *, struct HksBlob *);
 
 typedef int32_t (*HashInit)(void **, uint32_t);
 
-typedef int32_t (*HashUpdate)(void **, const struct HksBlob *);
+typedef int32_t (*HashUpdate)(void *, const struct HksBlob *);
 
 typedef int32_t (*HashFinal)(void **, const struct HksBlob *, struct HksBlob *);
 
@@ -207,7 +207,7 @@ int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const st
 
 int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx);
 
-int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void **ctx);
+int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx);
 
 int32_t HksCryptoHalHashFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *hash);
 
