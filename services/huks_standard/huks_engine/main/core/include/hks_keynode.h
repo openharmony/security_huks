@@ -29,7 +29,6 @@ struct HuksKeyNode {
     struct DoubleList listHead;
     struct HksParamSet *keyBlobParamSet;
     struct HksParamSet *runtimeParamSet;
-    uint32_t totalDataSize;
     uint64_t handle;
 };
 

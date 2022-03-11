@@ -26,7 +26,7 @@ int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
 
 int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg);
 
-int32_t HksOpensslHashUpdate(void **cryptoCtx, const struct HksBlob *msg);
+int32_t HksOpensslHashUpdate(void *cryptoCtx, const struct HksBlob *msg);
 
 int32_t HksOpensslHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash);
 
