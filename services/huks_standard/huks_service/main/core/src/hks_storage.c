@@ -114,7 +114,7 @@ static int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint3
     uint32_t count = 0;
 
     for (uint32_t i = 0; i < blob->size; ++i) {
-        if (count >= nameLen) {
+        if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
             return HKS_ERROR_INSUFFICIENT_DATA;
         }
 
