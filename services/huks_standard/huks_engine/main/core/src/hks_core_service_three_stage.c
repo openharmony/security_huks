@@ -1213,6 +1213,10 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
         HKS_LOG_E("get ctx from keyNode failed!");
         return HKS_ERROR_BAD_STATE;
     }
+    if (ctxParam->uint64Param != 0) {
+        HKS_LOG_E("avoid running into this function multiple times!");
+        return HKS_FAILURE;
+    }
 
     struct HksBlob rawKey = { 0, NULL };
     struct HksBlob publicKey = { 0, NULL };
