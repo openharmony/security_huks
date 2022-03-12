@@ -172,7 +172,7 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
     }
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
-    /* ECC key data internel struct: struct KeyMaterialEcc + pubXData + pubYData + priData */
+    /* ECC key data internal struct: struct KeyMaterialEcc + pubXData + pubYData + priData */
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)rawMaterial;
     keyMaterial->keyAlg = HKS_ALG_ECC;
     keyMaterial->keySize = keySize;

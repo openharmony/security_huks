@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -118,7 +118,7 @@ extern "C" {
 
 static inline uint32_t GetYearIndex(uint32_t year)
 {
-    if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0))) {
+    if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0))) { /* 4/100/400 check whether it is a leap year */
         return 1;
     } else {
         return 0;
@@ -127,7 +127,7 @@ static inline uint32_t GetYearIndex(uint32_t year)
 
 static inline uint32_t GetLeapDays(uint32_t year)
 {
-    return ((year / 4) - (year / 100) + (year / 400));
+    return ((year / 4) - (year / 100) + (year / 400)); /* 4/100/400 check whether it is a leap year */
 }
 
 static inline bool IsSignPurpose(enum HksKeyPurpose purpose)

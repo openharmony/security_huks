@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -128,9 +128,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac setup failed! mbedtls ret = 0x%X", ret);
         mbedtls_md_free(hmacCtx);
-        if (hmacCtx != NULL) {
-            HksFree(hmacCtx);
-        }
+        HKS_FREE_PTR(hmacCtx);
         return ret;
     }
 
@@ -138,9 +136,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
         mbedtls_md_free(hmacCtx);
-        if (hmacCtx != NULL) {
-            HksFree(hmacCtx);
-        }
+        HKS_FREE_PTR(hmacCtx);
         return ret;
     }
 
@@ -148,9 +144,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
     if (outCtx == NULL) {
         HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
         mbedtls_md_free(hmacCtx);
-        if (hmacCtx != NULL) {
-            HksFree(hmacCtx);
-        }
+        HKS_FREE_PTR(hmacCtx);
         return HKS_ERROR_MALLOC_FAIL;
     }
 
@@ -172,7 +166,6 @@ int32_t HksMbedtlsHmacUpdate(void *cryptoCtx, const struct HksBlob *msg)
     int32_t ret = mbedtls_md_hmac_update(hmacCtx, msg->data, msg->size);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
-        mbedtls_md_free(hmacCtx);
         return ret;
     }
 
@@ -184,6 +177,7 @@ int32_t HksMbedtlsHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlo
     struct HksMbedtlsHmacCtx *hctx = (struct HksMbedtlsHmacCtx *)*cryptoCtx;
     mbedtls_md_context_t *hmacCtx = (mbedtls_md_context_t *)hctx->append;
     if (hmacCtx == NULL) {
+        HKS_FREE_PTR(*cryptoCtx);
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -192,7 +186,7 @@ int32_t HksMbedtlsHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlo
         ret = mbedtls_md_hmac_update(hmacCtx, msg->data, msg->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls hmac start failed! mbedtls ret = 0x%X", ret);
-            mbedtls_md_free(hmacCtx);
+            HksMbedtlsHmacHalFreeCtx(cryptoCtx);
             return ret;
         }
     }
@@ -201,23 +195,18 @@ int32_t HksMbedtlsHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlo
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac finish failed! mbedtls ret = 0x%X", ret);
         (void)memset_s(mac->data, mac->size, 0, mac->size);
-        mbedtls_md_free(hmacCtx);
+        HksMbedtlsHmacHalFreeCtx(cryptoCtx);
         return ret;
     }
 
     ret = HksGetDigestLen(hctx->digestAlg, &(mac->size));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get digest len failed!");
-        mbedtls_md_free(hmacCtx);
+        HksMbedtlsHmacHalFreeCtx(cryptoCtx);
         return ret;
     }
 
-    mbedtls_md_free(hmacCtx);
-    HksFree(hmacCtx);
-    hctx->append = NULL;
-    HksFree(*cryptoCtx);
-    *cryptoCtx = NULL;
-
+    HksMbedtlsHmacHalFreeCtx(cryptoCtx);
     return HKS_SUCCESS;
 }
 
@@ -231,15 +220,8 @@ void HksMbedtlsHmacHalFreeCtx(void **cryptoCtx)
     struct HksMbedtlsHmacCtx *hctx = (struct HksMbedtlsHmacCtx *)*cryptoCtx;
     if (hctx->append != NULL) {
         mbedtls_md_free((mbedtls_md_context_t *)hctx->append);
-        if (hctx->append != NULL) {
-            HksFree(hctx->append);
-            hctx->append = NULL;
-        }
+        HKS_FREE_PTR(hctx->append);
     }
-
-    if (*cryptoCtx != NULL) {
-        HksFree(hctx);
-        *cryptoCtx = NULL;
-    }
+    HKS_FREE_PTR(*cryptoCtx);
 }
 #endif /* HKS_SUPPORT_HMAC_C */

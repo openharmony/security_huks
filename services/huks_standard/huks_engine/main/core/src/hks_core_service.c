@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,43 +48,43 @@
 static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
 
 static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageInit},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageInit},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageInit},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageInit},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageInit},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageInit},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageInit}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageInit },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageInit },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageInit },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageInit },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageInit },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageInit },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageInit }
 };
 
 static struct HksCoreUpdateHandler g_hksCoreUpdateHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageUpdate},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageUpdate},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageUpdate},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageUpdate},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageUpdate},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageUpdate},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageUpdate}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageUpdate },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageUpdate },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageUpdate },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageUpdate },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageUpdate },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageUpdate },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageUpdate }
 };
 
 static struct HksCoreFinishHandler g_hksCoreFinishHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageFinish},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageFinish},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreEncryptThreeStageFinish},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreDecryptThreeStageFinish},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageFinish},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageFinish},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageFinish}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageFinish },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageFinish },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreEncryptThreeStageFinish },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreDecryptThreeStageFinish },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageFinish },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageFinish },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageFinish }
 };
 
 static struct HksCoreAbortHandler g_hksCoreAbortHandler[] = {
-    {HKS_KEY_PURPOSE_SIGN,    HksCoreSignVerifyThreeStageAbort},
-    {HKS_KEY_PURPOSE_VERIFY,  HksCoreSignVerifyThreeStageAbort},
-    {HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageAbort},
-    {HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageAbort},
-    {HKS_KEY_PURPOSE_DERIVE,  HksCoreDeriveThreeStageAbort},
-    {HKS_KEY_PURPOSE_AGREE,   HksCoreAgreeThreeStageAbort},
-    {HKS_KEY_PURPOSE_MAC,     HksCoreMacThreeStageAbort}
+    { HKS_KEY_PURPOSE_SIGN, HksCoreSignVerifyThreeStageAbort },
+    { HKS_KEY_PURPOSE_VERIFY, HksCoreSignVerifyThreeStageAbort },
+    { HKS_KEY_PURPOSE_ENCRYPT, HksCoreCryptoThreeStageAbort },
+    { HKS_KEY_PURPOSE_DECRYPT, HksCoreCryptoThreeStageAbort },
+    { HKS_KEY_PURPOSE_DERIVE, HksCoreDeriveThreeStageAbort },
+    { HKS_KEY_PURPOSE_AGREE, HksCoreAgreeThreeStageAbort },
+    { HKS_KEY_PURPOSE_MAC, HksCoreMacThreeStageAbort }
 };
 
 static int32_t GetGenType(const struct HksParamSet *paramSet, uint32_t *genType)
@@ -899,17 +899,21 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     int32_t ret;
 
     if (key == NULL || paramSet == NULL || handle == NULL) {
-        HKS_LOG_E("key : %p, paramSet : %p, handle : %p", key, paramSet, handle);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
+    }
+
+    if (handle->size < sizeof(uint64_t)) {
+        HKS_LOG_E("handle size is too small, size : %u", handle->size);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     struct HuksKeyNode *keyNode = HksCreateKeyNode(key, paramSet);
     if (keyNode == NULL || handle == NULL) {
-        HKS_LOG_E("HksCoreInit generate keynode failed keyNode : %p, handle : %p", keyNode, handle);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_BAD_STATE;
     }
 
-    keyNode->totalDataSize = 0;
     handle->size = sizeof(uint64_t);
     (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
 
@@ -945,10 +949,9 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     HKS_LOG_D("HksCoreUpdate in Core start");
     uint32_t pur = 0;
     uint32_t alg = 0;
-    int32_t ret;
 
     if (handle == NULL || paramSet == NULL || inData == NULL || inData->data == NULL) {
-        HKS_LOG_E("handle : %p, paramSet : %p, inData : %p, inData->data : %p", handle, paramSet, inData, inData->data);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
 
@@ -964,18 +967,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         return HKS_ERROR_BAD_STATE;
     }
 
-    if (inData->size > MAX_UPDATE_SIZE) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreUpdate input data size too large.");
-        return HKS_FAILURE;
-    }
-    if ((keyNode->totalDataSize + inData->size) > MAX_TOTAL_SIZE) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreUpdate input data total size too large.");
-        return HKS_FAILURE;
-    }
-
-    ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
         return ret;
@@ -990,15 +982,11 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         }
     }
 
-    if (i == size) {
+    if (i == size || ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
     }
-    if (ret == HKS_SUCCESS) {
-        keyNode->totalDataSize += inData->size;
-    }
-    HKS_LOG_D("HksCoreUpdate in Core end");
     return ret;
 }
 
@@ -1011,12 +999,15 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     int32_t ret;
 
     if (handle == NULL || paramSet == NULL || inData == NULL || inData->data == NULL) {
-        HKS_LOG_E("handle : %p, paramSet : %p, inData : %p, inData->data : %p", handle, paramSet, inData, inData->data);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
 
     uint64_t sessionId;
-    memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size);
+    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size)) {
+        HKS_LOG_E("memcpy handle fail");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
     if (keyNode == NULL) {
@@ -1040,15 +1031,10 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     if (i == size) {
-        HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
-        return HKS_FAILURE;
     }
-    if (ret == HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-    }
+    HksDeleteKeyNode(sessionId);
     HKS_LOG_D("HksCoreFinish in Core end");
-
     return ret;
 }
 
@@ -1060,17 +1046,20 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
     int32_t ret;
 
     if (handle == NULL || paramSet == NULL) {
-        HKS_LOG_E("handle : %p, paramSet : %p", handle, paramSet);
+        HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
 
     uint64_t sessionId;
-    memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size);
+    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size)) {
+        HKS_LOG_E("memcpy handle fail");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
     if (keyNode == NULL) {
-        HKS_LOG_E("Cipher generate keynode failed");
-        return HKS_ERROR_BAD_STATE;
+        HKS_LOG_E("abort get key node failed");
+        return HKS_SUCCESS;
     }
 
     ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
@@ -1117,7 +1106,7 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
 #endif
 }
 
-int32_t HksCoreGetAbility(int funcType)
+int32_t HksCoreGetAbility(int32_t funcType)
 {
     (void)(funcType);
     return 0;

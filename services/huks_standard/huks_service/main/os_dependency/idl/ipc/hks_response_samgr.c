@@ -66,6 +66,7 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
     }
 
     if (memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid)) != EOK) {
+        HKS_FREE_PTR(name);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     };
     processName->size = sizeof(callingUid);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -55,15 +55,13 @@ int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, 
 
 int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet);
 
-int32_t HksEncryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet);
-
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
 int32_t HksGetRawKeyMaterial(const struct HksBlob *key, struct HksBlob *rawKey);
 
 int32_t HksTranslateKeyInfoBlobToParamSet(const struct HksBlob *key, const struct HksBlob *keyInfoBlob,
     struct HksParamSet **paramSet);
-#endif // _STORAGE_LITE_
+#endif /* _STORAGE_LITE_ */
 #endif /* _CUT_AUTHENTICATE_ */
 
 #ifdef __cplusplus

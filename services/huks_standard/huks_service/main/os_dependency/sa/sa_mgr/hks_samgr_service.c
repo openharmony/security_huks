@@ -35,7 +35,7 @@ static BOOL Initialize(Service *service, Identity identity)
 
 static BOOL MessageHandle(Service *service, Request *request)
 {
-    (void) service;
+    (void)service;
     if (request == NULL) {
         return false;
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -145,7 +145,7 @@ typedef int32_t (*Hash)(uint32_t, const struct HksBlob *, struct HksBlob *);
 
 typedef int32_t (*HashInit)(void **, uint32_t);
 
-typedef int32_t (*HashUpdate)(void **, const struct HksBlob *);
+typedef int32_t (*HashUpdate)(void *, const struct HksBlob *);
 
 typedef int32_t (*HashFinal)(void **, const struct HksBlob *, struct HksBlob *);
 
@@ -207,7 +207,7 @@ int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const st
 
 int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx);
 
-int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void **ctx);
+int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx);
 
 int32_t HksCryptoHalHashFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *hash);
 

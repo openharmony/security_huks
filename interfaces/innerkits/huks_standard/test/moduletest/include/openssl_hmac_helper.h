@@ -29,7 +29,7 @@ extern "C" {
 #define HMAC_SUCCESS 0
 #define OUT_PARAMSET_SIZE 2048
 
-int32_t HmacGenerateKey(int key_len, struct HksBlob *key);
+int32_t HmacGenerateKey(int keyLen, struct HksBlob *key);
 
 int32_t HmacHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac);
 

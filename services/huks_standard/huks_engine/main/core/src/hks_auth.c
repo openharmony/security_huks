@@ -64,13 +64,13 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksKe
         authTag = policy->policyTag[i];
         ret = HksGetParam(keyNode->paramSet, authTag, &authParam);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get auth param[%x] failed!", authTag);
+            HKS_LOG_E("get auth param[0x%x] failed!", authTag);
             return ret;
         }
 
         ret = HksGetParam(paramSet, authTag, &requestParam);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get request param[%x] failed!", authTag);
+            HKS_LOG_E("get request param[0x%x] failed!", authTag);
             return ret;
         }
 
@@ -80,7 +80,8 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksKe
             ret = CheckPurpose((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         }
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("unmatch policy[%x], [%x] != [%x]!", authTag, requestParam->uint32Param, authParam->uint32Param);
+            HKS_LOG_E("unmatch policy[0x%x], [0x%x] != [0x%x]!", authTag, requestParam->uint32Param,
+                authParam->uint32Param);
             return ret;
         }
     }
@@ -98,13 +99,13 @@ static int32_t AuthThreeStagePolicy(const struct HksAuthPolicy *policy, const st
         authTag = policy->policyTag[i];
         ret = HksGetParam(keyNode->keyBlobParamSet, authTag, &authParam);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get auth param[%x] failed!", authTag);
+            HKS_LOG_E("get auth param[0x%x] failed!", authTag);
             return ret;
         }
 
         ret = HksGetParam(keyNode->runtimeParamSet, authTag, &requestParam);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get request param[%x] failed!", authTag);
+            HKS_LOG_E("get request param[0x%x] failed!", authTag);
             return ret;
         }
 
@@ -114,7 +115,8 @@ static int32_t AuthThreeStagePolicy(const struct HksAuthPolicy *policy, const st
             ret = CheckPurpose((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         }
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("unmatch policy[%x], [%x] != [%x]!", authTag, requestParam->uint32Param, authParam->uint32Param);
+            HKS_LOG_E("unmatch policy[0x%x], [0x%x] != [0x%x]!", authTag, requestParam->uint32Param,
+                authParam->uint32Param);
             return ret;
         }
     }

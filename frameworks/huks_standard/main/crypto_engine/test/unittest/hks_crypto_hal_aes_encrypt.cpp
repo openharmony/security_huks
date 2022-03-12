@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -352,7 +352,8 @@ protected:
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
 
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, (encryptMsg->data + point), HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
+                    (encryptMsg->data + point), HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out, testCaseParams.usageSpec.algType),
                     testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
                 point = point + HKS_UPDATE_DATA_MAX;
@@ -366,7 +367,7 @@ protected:
                 .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
                 .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
             };
-            memcpy_s(enMessageLast.data, lastLen, (encryptMsg->data + point), lastLen);
+            (void)memcpy_s(enMessageLast.data, lastLen, (encryptMsg->data + point), lastLen);
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
 

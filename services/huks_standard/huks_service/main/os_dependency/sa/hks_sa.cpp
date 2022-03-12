@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -287,6 +287,10 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     // this is the temporary version which comments the descriptor check
     std::u16string descriptor = HksService::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (descriptor != remoteDescriptor) {
+        HKS_LOG_E("descriptor is diff.");
+        return HW_SYSTEM_ERROR;
+    }
 
     HKS_LOG_I("OnRemoteRequest code:%d", code);
     uint32_t outSize = (uint32_t)data.ReadUint32();
