@@ -586,6 +586,11 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
 int32_t HksCoreExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     (void)paramSet;
+    if (CheckBlob(key) != HKS_SUCCESS || CheckBlob(keyOut) != HKS_SUCCESS) {
+        HKS_LOG_E("input param invalid");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
     if (keyNode == NULL) {
         HKS_LOG_E("SignVerify generate keynode failed");
