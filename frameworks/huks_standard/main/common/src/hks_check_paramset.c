@@ -767,7 +767,7 @@ static int32_t CheckMacOutput(
     uint32_t digestLen;
     ret = HksGetDigestLen(digest, &digestLen);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get digest lenght failed, ret = %d", ret);
+        HKS_LOG_E("get digest length failed, ret = %d", ret);
         return ret;
     }
 

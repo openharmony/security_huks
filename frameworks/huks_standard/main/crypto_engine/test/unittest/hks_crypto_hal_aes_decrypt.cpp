@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -366,8 +366,8 @@ protected:
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
             while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
-                    HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
+                    HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out,
                     testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
                 decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
@@ -409,8 +409,8 @@ protected:
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
             while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
-                    HKS_UPDATE_DATA_MAX);
+                EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
+                    HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out, usageSpec->algType), HKS_SUCCESS);
                 decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
             }

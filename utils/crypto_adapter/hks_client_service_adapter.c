@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -50,7 +50,7 @@ static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 
     /* tmp will be modified in i2d_PUBKEY */
     uint8_t *tmp = key;
-    if (i2d_PUBKEY(pkey, &tmp) != length) {
+    if ((uint32_t)i2d_PUBKEY(pkey, &tmp) != length) {
         HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
         HksFree(key);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -470,7 +470,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
 
     struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
     pubKeyInfo->keyAlg = HKS_ALG_RSA;
-    pubKeyInfo->keySize = RSA_size(rsa) * HKS_BITS_PER_BYTE;
+    pubKeyInfo->keySize = ((uint32_t)RSA_size(rsa)) * HKS_BITS_PER_BYTE;
     pubKeyInfo->nOrXSize = nSize;
     pubKeyInfo->eOrYSize = eSize;
     pubKeyInfo->placeHolder = 0;
@@ -614,7 +614,7 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
     }
 
     const BIGNUM *pubKey = DH_get0_pub_key(dh);
-    uint32_t pubKeySize = BN_num_bytes(pubKey);
+    uint32_t pubKeySize = (uint32_t)BN_num_bytes(pubKey);
 
     uint32_t totalSize = sizeof(struct KeyMaterialDh) + pubKeySize;
     uint8_t *keyBuffer = HksMalloc(totalSize);
@@ -624,7 +624,7 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
     }
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)keyBuffer;
     keyMaterial->keyAlg = HKS_ALG_DH;
-    keyMaterial->keySize = DH_bits(dh);
+    keyMaterial->keySize = (uint32_t)DH_bits(dh);
     keyMaterial->pubKeySize = pubKeySize;
     keyMaterial->priKeySize = 0;
     keyMaterial->reserved = 0;

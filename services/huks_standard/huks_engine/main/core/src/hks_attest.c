@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,7 +40,7 @@
 #define ID_HUKS_PRODUCT_SIZE    (ID_HUKS_BASE_SIZE + 1)
 
 #define ID_HUKS_PKI             ID_HUKS_PRODUCT, 0x82, 0x78
-#define ID_HUKS_PKI_SIZE        (ID_HUKS_PRODUCT_SIZE +2)
+#define ID_HUKS_PKI_SIZE        (ID_HUKS_PRODUCT_SIZE + 2)
 
 #define ID_HUKS_PKI_CERT_EXT        ID_HUKS_PKI, 0x01
 #define ID_HUKS_PKI_CERT_EXT_SIZE   (ID_HUKS_PKI_SIZE + 1)
@@ -51,20 +51,20 @@
 #define ID_HUKS_PKI_ATTESTATION         ID_HUKS_PKI_CERT_EXT, 0x02
 #define ID_HUKS_PKI_ATTESTATION_SIZE        (ID_HUKS_PKI_CERT_EXT_SIZE + 1)
 
-#define ID_HUKS_ATTESTATION_BASE        ID_HUKS_PKI,    0x02
+#define ID_HUKS_ATTESTATION_BASE        ID_HUKS_PKI, 0x02
 #define ID_HUKS_ATTESTATION_BASE_SIZE       (ID_HUKS_PKI_SIZE + 1)
 
-#define ID_KEY_PROPERTIES           ID_HUKS_ATTESTATION_BASE,   0x01
+#define ID_KEY_PROPERTIES           ID_HUKS_ATTESTATION_BASE, 0x01
 #define ID_KEY_PROPERTIES_SIZE      (ID_HUKS_ATTESTATION_BASE_SIZE + 1)
 
-#define ID_SYSTEM_PROPERTIES        ID_HUKS_ATTESTATION_BASE,   0x02
+#define ID_SYSTEM_PROPERTIES        ID_HUKS_ATTESTATION_BASE, 0x02
 #define ID_SYSTEM_PROPERTIES_SIZE       (ID_HUKS_ATTESTATION_BASE_SIZE + 1)
 
 #define ID_SYSTEM_PROPERTIY_OS      ID_SYSTEM_PROPERTIES, 0x02
-#define ID_SYSTEM_PROPERTIY_OS_SIZE         (ID_SYSTEM_PROPERTIES_SIZE +1)
+#define ID_SYSTEM_PROPERTIY_OS_SIZE         (ID_SYSTEM_PROPERTIES_SIZE + 1)
 
-#define ID_SYSTEM_PROPERTIY_OS_VERSION      ID_SYSTEM_PROPERTIY_OS,  0x04
-#define ID_SYSTEM_PROPERTIY_OS_VERSION_SIZE     (ID_SYSTEM_PROPERTIES_SIZE  +1)
+#define ID_SYSTEM_PROPERTIY_OS_VERSION      ID_SYSTEM_PROPERTIY_OS, 0x04
+#define ID_SYSTEM_PROPERTIY_OS_VERSION_SIZE     (ID_SYSTEM_PROPERTIES_SIZE + 1)
 DECLARE_TAG(hksOsVersion, ID_SYSTEM_PROPERTIY_OS_VERSION)
 DECLARE_OID(hksOsVersion)
 
@@ -384,8 +384,8 @@ static void SetAttestCertValid(struct ValidPeriod *valid)
         return;
     }
 
-    uint64_t curTimeValue = curTime.tv_sec;
-    curTimeValue = curTimeValue * SECOND_TO_MILLI + curTime.tv_usec / SECOND_TO_MILLI;
+    uint64_t curTimeValue = (uint64_t)curTime.tv_sec;
+    curTimeValue = curTimeValue * SECOND_TO_MILLI + ((uint64_t)curTime.tv_usec) / SECOND_TO_MILLI;
     activeDateTime = curTimeValue;
     HKS_LOG_I("set active dateTime to default : %llu\n", activeDateTime);
 
@@ -567,15 +567,15 @@ static uint8_t EncodeKeyUsageBits(const uint32_t usage, uint8_t *bits)
     uint8_t unused = 8; /* one byte haa 8 bits, so init to 8 */
     if (IsSignPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x80;
-        unused = 7;
+        unused = 7; /* 7 bits are unused */
     }
     if (IsCipherPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x20;
-        unused = 5;
+        unused = 5; /* 5 bits are unused */
     }
     if (IsAgreementPurpose((enum HksKeyPurpose)usage)) {
         v |= 0x08;
-        unused = 3;
+        unused = 3; /* 3 bits are unused */
     }
     *bits = v;
     return unused;
@@ -836,7 +836,7 @@ int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
     }
 
     uint32_t keySize = HKS_RSA_KEY_SIZE_2048;
-    uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * 3;
+    uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * 3; /* 3 bits are unused */
     uint8_t *material = (uint8_t *)HksMalloc(materialLen);
     if (material == NULL) {
         HKS_LOG_E("malloc key materail fail!");

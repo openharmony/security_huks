@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -266,7 +266,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
         ret = HksCryptoHalDecrypt(&derivedKey, usageSpec, &encKey, &srcKey);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher key[%x] failed!", isEncrypt);
+        HKS_LOG_E("cipher key[0x%x] failed!", isEncrypt);
     }
 
     (void)memset_s(derivedKey.data, derivedKey.size, 0, derivedKey.size);
@@ -578,11 +578,6 @@ int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, 
 int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
 {
     return DecryptKeyBlob(aad, paramSet);
-}
-
-int32_t HksEncryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
-{
-    return EncryptKeyBlob(aad, paramSet);
 }
 #endif
 

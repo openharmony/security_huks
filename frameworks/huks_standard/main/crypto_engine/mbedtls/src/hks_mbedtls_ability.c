@@ -123,14 +123,6 @@ static void RegisterAbilityEncrypt(void)
 {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_CRYPT)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT(HKS_ALG_RSA), HksMbedtlsRsaEncrypt);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(HKS_ALG_RSA),
-        HksMbedtlsRsaCryptInit);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(HKS_ALG_RSA),
-        HksMbedtlsRsaCryptUpdate);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(HKS_ALG_RSA),
-        HksMbedtlsRsaCryptFinal);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_RSA),
-        HksMbedtlsRsaHalFreeCtx);
 #endif
 #ifdef HKS_SUPPORT_AES_C
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT(HKS_ALG_AES), HksMbedtlsAesEncrypt);
@@ -149,14 +141,6 @@ static void RegisterAbilityDecrypt(void)
 {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_CRYPT)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT(HKS_ALG_RSA), HksMbedtlsRsaDecrypt);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(HKS_ALG_RSA),
-        HksMbedtlsRsaCryptInit);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(HKS_ALG_RSA),
-        HksMbedtlsRsaCryptUpdate);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(HKS_ALG_RSA),
-        HksMbedtlsRsaCryptFinal);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_RSA),
-        HksMbedtlsRsaHalFreeCtx);
 #endif
 #ifdef HKS_SUPPORT_AES_C
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT(HKS_ALG_AES), HksMbedtlsAesDecrypt);

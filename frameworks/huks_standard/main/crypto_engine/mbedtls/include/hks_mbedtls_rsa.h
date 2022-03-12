@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,15 +53,6 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key,
 int32_t HksMbedtlsGetRsaPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut);
 #endif
 
-int32_t HksMbedtlsRsaCryptInit(void **ctx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const bool encrypt);
-
-int32_t HksMbedtlsRsaCryptUpdate(void *ctx, const struct HksBlob *message, struct HksBlob *out, const bool encrypt);
-
-int32_t HksMbedtlsRsaCryptFinal(void **ctx, const struct HksBlob *message, struct HksBlob *cipherText,
-    struct HksBlob *tagAead, const bool encrypt);
-
-void HksMbedtlsRsaHalFreeCtx(void **cryptCtx);
 #ifdef __cplusplus
 }
 #endif

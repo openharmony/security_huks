@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -143,9 +143,9 @@ int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx)
     return func(ctx, alg);
 }
 
-int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void **ctx)
+int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx)
 {
-    if (CheckBlob(msg) != HKS_SUCCESS || ctx == NULL || *ctx == NULL) {
+    if (CheckBlob(msg) != HKS_SUCCESS || ctx == NULL) {
         HKS_LOG_E("Crypt Hal Hash msg or ctx is NULL");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
