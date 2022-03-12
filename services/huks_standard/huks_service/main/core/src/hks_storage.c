@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -114,7 +114,7 @@ static int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint3
     uint32_t count = 0;
 
     for (uint32_t i = 0; i < blob->size; ++i) {
-        if (count >= nameLen) {
+        if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
             return HKS_ERROR_INSUFFICIENT_DATA;
         }
 
@@ -826,7 +826,7 @@ static void SaveProcessInfo(uint8_t *processData, int32_t dataLen,
     const struct HksBlob userData, struct HksProcessInfo *processInfo)
 {
     processInfo->processName.data = processData;
-    processInfo->processName.size = dataLen;
+    processInfo->processName.size = (uint32_t)dataLen;
     (void)memcpy_s(&processInfo->userId, sizeof(processInfo->userId), &userData, sizeof(processInfo->userId));
 }
 
@@ -1176,10 +1176,12 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
 
 static void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCount)
 {
-    for (uint32_t i = 0; i < keyCount; ++i) {
-        HKS_FREE_PTR((*fileNameList)[i].fileName);
+    if (fileNameList != NULL && *fileNameList != NULL) {
+        for (uint32_t i = 0; i < keyCount; ++i) {
+            HKS_FREE_PTR((*fileNameList)[i].fileName);
+        }
+        HKS_FREE_PTR(*fileNameList);
     }
-    HKS_FREE_PTR(*fileNameList);
 }
 
 static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t keyCount)
@@ -1339,37 +1341,37 @@ int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, ui
     return ret;
 }
 
-static int32_t DestoryType(const char *storePath, const char *typePath, uint32_t bakFlag)
+static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t bakFlag)
 {
-    char *destoryPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (destoryPath == NULL) {
+    char *destroyPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    if (destroyPath == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memset_s(destoryPath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+    (void)memset_s(destroyPath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-    int32_t ret = GetPath(storePath, typePath, destoryPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
+    int32_t ret = GetPath(storePath, typePath, destroyPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get Path failed! ret = 0x%X", ret);
-        HKS_FREE_PTR(destoryPath);
+        HKS_FREE_PTR(destroyPath);
         return ret;
     }
 
-    ret = HksIsDirExist(destoryPath);
+    ret = HksIsDirExist(destroyPath);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(destoryPath);
+        HKS_FREE_PTR(destroyPath);
         return HKS_SUCCESS;
     }
 
-    ret = HksRemoveDir(destoryPath);
+    ret = HksRemoveDir(destroyPath);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Destory dir failed! ret = 0x%X", ret);
+        HKS_LOG_E("Destroy dir failed! ret = 0x%X", ret);
     }
 
-    HKS_FREE_PTR(destoryPath);
+    HKS_FREE_PTR(destroyPath);
     return ret;
 }
 
-static int32_t StoreDestory(const char *processNameEncoded, uint32_t bakFlag)
+static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
 {
     int32_t ret;
     char *rootPath = NULL;
@@ -1396,26 +1398,26 @@ static int32_t StoreDestory(const char *processNameEncoded, uint32_t bakFlag)
         return ret;
     }
 
-    ret = DestoryType(storePath, HKS_KEY_STORE_ROOT_KEY_PATH, bakFlag);
+    ret = DestroyType(storePath, HKS_KEY_STORE_ROOT_KEY_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destory info dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy info dir failed! ret = 0x%X", ret); /* continue delete */
     }
 
-    ret = DestoryType(storePath, HKS_KEY_STORE_KEY_PATH, bakFlag);
+    ret = DestroyType(storePath, HKS_KEY_STORE_KEY_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destory key dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy key dir failed! ret = 0x%X", ret); /* continue delete */
     }
 
-    ret = DestoryType(storePath, HKS_KEY_STORE_CERTCHAIN_PATH, bakFlag);
+    ret = DestroyType(storePath, HKS_KEY_STORE_CERTCHAIN_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destory certchain dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy certchain dir failed! ret = 0x%X", ret); /* continue delete */
     }
 
     HKS_FREE_PTR(storePath);
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreDestory(const struct HksBlob *processName)
+int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     if (name == NULL) {
@@ -1431,16 +1433,16 @@ int32_t HksStoreDestory(const struct HksBlob *processName)
             break;
         }
 
-        ret = StoreDestory(name, HKS_STORAGE_BAK_FLAG_FLASE);
+        ret = StoreDestroy(name, HKS_STORAGE_BAK_FLAG_FLASE);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hks destory dir failed! ret = 0x%X.", ret);
+            HKS_LOG_E("Hks destroy dir failed! ret = 0x%X.", ret);
             break;
         }
 
 #ifdef SUPPORT_STORAGE_BACKUP
-        ret = StoreDestory(name, HKS_STORAGE_BAK_FLAG_TRUE);
+        ret = StoreDestroy(name, HKS_STORAGE_BAK_FLAG_TRUE);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hks destory back dir failed! ret = 0x%X.", ret);
+            HKS_LOG_E("Hks destroy back dir failed! ret = 0x%X.", ret);
             break;
         }
 #endif
@@ -1451,90 +1453,145 @@ int32_t HksStoreDestory(const struct HksBlob *processName)
 }
 
 #ifndef __LITEOS_M__
+static int32_t ConstructUserIdPath(const char *userId, char *userIdPath, uint32_t pathLen)
+{
+    if (strncpy_s(userIdPath, pathLen, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
+        HKS_LOG_E("copy key store path failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userIdPath, pathLen, "/", strlen("/")) != EOK) {
+        HKS_LOG_E("catecnate character / failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userIdPath, pathLen, userId, strlen(userId)) != EOK) {
+        HKS_LOG_E("catecnate userId failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(userIdPath, pathLen, "\0", strlen("\0")) != EOK) {
+        HKS_LOG_E("catecnate character 0 at the end failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t ConstructUidPath(const char *userId, const char *uid, char *uidPath, uint32_t pathLen)
+{
+    if (strncpy_s(uidPath, pathLen, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
+        HKS_LOG_E("copy key store path failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(uidPath, pathLen, "/", strlen("/")) != EOK) {
+        HKS_LOG_E("catecnate character / 1 failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(uidPath, pathLen, userId, strlen(userId)) != EOK) {
+        HKS_LOG_E("catecnate userId failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(uidPath, pathLen, "/", strlen("/")) != EOK) {
+        HKS_LOG_E("catecnate character / 2 failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(uidPath, pathLen, uid, strlen(uid)) != EOK) {
+        HKS_LOG_E("catecnate uid failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    if (strncat_s(uidPath, pathLen, "\0", strlen("\0")) != EOK) {
+        HKS_LOG_E("catecnate character 0 at the end failed.");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     if (userData == NULL) {
+        HKS_LOG_E("malloc user data failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+
     int32_t ret = ConstructName(&processName, userData, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_FREE_PTR(userData);
+        HKS_LOG_E("construct user id name failed, ret = %d", ret);
         return ret;
     }
 
     char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-    if (strncpy_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
+    ret = ConstructUserIdPath(userData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(userData);
+        HKS_LOG_E("catecnate UserIdPath failed");
+        return ret;
     }
 
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    HKS_LOG_I("delete path: %s", userProcess);
 
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, userData, strlen(userData)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "\0", strlen("\0")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    HKS_LOG_E("delete path : %s", userProcess);
-    return HksDeleteDir(userProcess);
+    ret = HksDeleteDir(userProcess);
+    HKS_FREE_PTR(userData);
+    return ret;
 }
 
 int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     if (userData == NULL) {
+        HKS_LOG_E("malloc user data failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+
     int32_t ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_FREE_PTR(userData);
+        HKS_LOG_E("construct user id name failed, ret = %d", ret);
         return ret;
     }
+
     char *uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     if (uidData == NULL) {
+        HKS_FREE_PTR(userData);
+        HKS_LOG_E("malloc user data failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+
     ret = ConstructName(&processInfo.processName, uidData, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(userData);
         HKS_FREE_PTR(uidData);
+        HKS_LOG_E("construct uid name failed, ret = %d", ret);
         return ret;
     }
 
     char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-    if (strncpy_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
+    ret = ConstructUidPath(userData, uidData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(userData);
+        HKS_FREE_PTR(uidData);
+        HKS_LOG_E("catecnate uidPath failed");
+        return ret;
     }
 
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    HKS_LOG_I("delete path : %s", userProcess);
 
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, userData, strlen(userData)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "/", strlen("/")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, uidData, strlen(uidData)) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    if (strncat_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "\0", strlen("\0")) != EOK) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-
-    HKS_LOG_E("delete path : %s", userProcess);
-    return HksDeleteDir(userProcess);
+    ret = HksDeleteDir(userProcess);
+    HKS_FREE_PTR(userData);
+    HKS_FREE_PTR(uidData);
+    return ret;
 }
 #endif
 #endif /* _CUT_AUTHENTICATE_ */
+

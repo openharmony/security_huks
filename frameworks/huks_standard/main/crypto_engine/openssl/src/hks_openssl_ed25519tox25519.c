@@ -252,6 +252,7 @@ static int32_t CheckEd25519PubkeyPart(const struct Curve25519Structure *curve255
     }
     return HKS_SUCCESS;
 }
+
 static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, struct Curve25519Var *var,
     uint8_t flag, BN_CTX *ctx)
 {

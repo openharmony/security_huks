@@ -32,7 +32,7 @@
 #include "hks_mem.h"
 #include "hks_storage.h"
 
-#include "huks_hdi_interfaces.h"
+#include "huks_access.h"
 
 #define HKS_SEALING_NONCE_SIZE 16
 #define HKS_HEADER_HASH_SIZE 64
@@ -154,7 +154,7 @@ static int32_t RollBackNewVersionFiles(void)
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
 
-    ret = HksStoreDestory(&processNameBlob);
+    ret = HksStoreDestroy(&processNameBlob);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_D("destroy new files failed");
     }
@@ -338,7 +338,7 @@ static int32_t UpgradeSingleKeyInfo(const struct HksBlob *keyInfo)
             break;
         }
 
-        ret = HuksHdiUpgradeKeyInfo(&keyAlias, keyInfo, &output);
+        ret = HuksAccessUpgradeKeyInfo(&keyAlias, keyInfo, &output);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access update key info faild");
             break;
@@ -439,7 +439,7 @@ int32_t HksUpgradeStorageData(void)
     do {
 #ifndef _HARDWARE_ROOT_KEY_
         /* init rkc and update key store files, if process failed, need roolback all new files */
-        ret = HuksHdiModuleInit();
+        ret = HuksAccessModuleInit();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("init rkc failed, ret = %d", ret);
             break;

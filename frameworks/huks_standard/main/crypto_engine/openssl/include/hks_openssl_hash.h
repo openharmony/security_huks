@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,7 @@ int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
 
 int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg);
 
-int32_t HksOpensslHashUpdate(void **cryptoCtx, const struct HksBlob *msg);
+int32_t HksOpensslHashUpdate(void *cryptoCtx, const struct HksBlob *msg);
 
 int32_t HksOpensslHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash);
 

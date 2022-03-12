@@ -673,7 +673,7 @@ static char *CloneNewStr(const char *srcStr, const uint32_t strLenMax)
 static int32_t RkcInitKsfAttr(const struct HksRkcKsfAttr *ksfAttr)
 {
     /* clone keystore filename from parameter. */
-    for (uint32_t i = 0; i < ksfAttr->num; ++i) {
+    for (uint8_t i = 0; i < ksfAttr->num; ++i) {
         char *fileName = CloneNewStr(ksfAttr->name[i], HKS_RKC_KSF_NAME_LEN_MAX);
         if (fileName == NULL) {
             /* the memory will be freed by hksRkcDestroy() */

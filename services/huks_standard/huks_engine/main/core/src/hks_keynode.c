@@ -23,7 +23,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 
-static struct DoubleList g_keyNodeList =  { NULL, NULL };
+static struct DoubleList g_keyNodeList = { NULL, NULL };
 static uint64_t g_keyNodeHandle = 0;
 
 struct DoubleList *GetKeyNodeList(void)
@@ -62,7 +62,7 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
         },
     };
 
-    ret = HksAddParams(paramSet, params, HKS_OPERATION_PARAM_CNT);
+    ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(params[0]));
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         HKS_LOG_E("add runtime params fail");
@@ -78,16 +78,6 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 
     *outParamSet = paramSet;
     return HKS_SUCCESS;
-}
-
-static void FreeKeyNodeParamSet(struct HksParamSet **paramSet)
-{
-    if ((paramSet == NULL) || (*paramSet == NULL)) {
-        HKS_LOG_E("invalid keyNode get ctx param failed");
-        return;
-    }
-
-    HksFreeParamSet(paramSet);
 }
 
 static int32_t GenerateKeyNodeHandle(uint64_t *handle)
@@ -106,8 +96,7 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
             return ret;
         }
 
-        if (memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle),
-            opHandle.data, opHandle.size) != EOK) {
+        if (memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle), opHandle.data, opHandle.size) != EOK) {
             HKS_LOG_E("memcpy handle failed");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -238,6 +227,102 @@ struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
     return NULL;
 }
 
+static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
+{
+    if ((paramSet == NULL) || (*paramSet == NULL)) {
+        HKS_LOG_E("invalid keyblob paramset");
+        return;
+    }
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(*paramSet, HKS_TAG_KEY, &keyParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key param failed!");
+        HksFreeParamSet(paramSet);
+        return;
+    }
+    (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
+    HksFreeParamSet(paramSet);
+}
+
+static void FreeCachedData(void **ctx)
+{
+    struct HksBlob *cachedData = (struct HksBlob *)*ctx;
+    if (cachedData == NULL) {
+        return;
+    }
+    if (cachedData->data != NULL) {
+        (void)memset_s(cachedData->data, cachedData->size, 0, cachedData->size);
+        HKS_FREE_PTR(cachedData->data);
+    }
+    HKS_FREE_PTR(*ctx);
+}
+
+static void FreeCtx(uint32_t purpose, uint32_t alg, void **ctx)
+{
+    switch (purpose) {
+        case HKS_KEY_PURPOSE_AGREE:
+        case HKS_KEY_PURPOSE_DERIVE:
+            FreeCachedData(ctx);
+            break;
+        case HKS_KEY_PURPOSE_SIGN:
+        case HKS_KEY_PURPOSE_VERIFY:
+            if (alg != HKS_ALG_ED25519) {
+                HksCryptoHalHashFreeCtx(ctx);
+            } else {
+                FreeCachedData(ctx);
+            }
+            break;
+        case HKS_KEY_PURPOSE_ENCRYPT:
+        case HKS_KEY_PURPOSE_DECRYPT:
+            if (alg != HKS_ALG_RSA) {
+                HksCryptoHalEncryptFreeCtx(ctx, alg);
+            } else {
+                FreeCachedData(ctx);
+            }
+            break;
+        case HKS_KEY_PURPOSE_MAC:
+            HksCryptoHalHmacFreeCtx(ctx);
+            break;
+        default:
+            return;
+    }
+}
+
+static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
+{
+    if ((paramSet == NULL) || (*paramSet == NULL)) {
+        HKS_LOG_E("invalid keyblob paramset");
+        return;
+    }
+
+    struct HksParam *ctxParam = NULL;
+    int32_t ret = HksGetParam(*paramSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(paramSet);
+        HKS_LOG_E("get ctx from keyNode failed!");
+        return;
+    }
+
+    if (ctxParam->uint64Param != 0) {
+        void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+        struct HksParam *param1 = NULL;
+        ret = HksGetParam(*paramSet, HKS_TAG_PURPOSE, &param1);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+        struct HksParam *param2 = NULL;
+        ret = HksGetParam(*paramSet, HKS_TAG_ALGORITHM, &param2);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+        FreeCtx(param1->uint32Param, param2->uint32Param, &ctx);
+        ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    }
+    HksFreeParamSet(paramSet);
+}
+
 void HksDeleteKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
@@ -245,10 +330,9 @@ void HksDeleteKeyNode(uint64_t handle)
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if ((keyNode != NULL) && (keyNode->handle == handle)) {
             RemoveDoubleListNode(&keyNode->listHead);
-            HksFreeParamSet(&keyNode->keyBlobParamSet);
-            FreeKeyNodeParamSet(&keyNode->runtimeParamSet);
-            HksFree((void *)keyNode);
-            keyNode = NULL;
+            FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
+            FreeRuntimeParamSet(&keyNode->runtimeParamSet);
+            HKS_FREE_PTR(keyNode);
             HksMutexUnlock(HksCoreGetHuksMutex());
             return;
         }

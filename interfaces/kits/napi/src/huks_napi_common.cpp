@@ -122,11 +122,11 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             if (result == nullptr) {
                 HKS_LOG_E("get uint8 array fail.");
             } else {
-                HKS_LOG_D("tag %x, len %x, data %d", param.tag, param.blob.size, param.blob.data);
+                HKS_LOG_D("tag 0x%x, len 0x%x", param.tag, param.blob.size);
             }
             break;
         default:
-            HKS_LOG_E("invalid tag value %x", param.tag);
+            HKS_LOG_E("invalid tag value 0x%x", param.tag);
             break;
     }
 
@@ -402,6 +402,11 @@ void FreeHksCertChain(HksCertChain *&certChain)
 
 napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_t size)
 {
+    if (data == nullptr) {
+        HKS_LOG_E("data: invalid pointer");
+        return nullptr;
+    }
+
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
 
@@ -409,7 +414,7 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_
     NAPI_CALL(env, napi_create_int32(env, error, &errorCode));
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_ERRORCODE.c_str(), errorCode));
 
-    uint64_t tempHandle = *(uint64_t*)data;
+    uint64_t tempHandle = *(uint64_t *)data;
     uint32_t handle1 = 0;
     uint32_t handle2 = 0;
     napi_value handlejs1;

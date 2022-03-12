@@ -158,7 +158,7 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
         HksFree(outDataFinish.data);
         return HKS_FAILURE;
     }
-    memcpy_s(cur, outDataFinish.size, outDataFinish.data, outDataFinish.size);
+    (void)memcpy_s(cur, outDataFinish.size, outDataFinish.data, outDataFinish.size);
     outData->size += outDataFinish.size;
     HksFree(outDataFinish.data);
 

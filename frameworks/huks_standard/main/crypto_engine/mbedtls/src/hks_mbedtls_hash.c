@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,24 +46,28 @@ int32_t HksMbedtlsHashMd5Init(void **ctx, uint32_t alg);
 
 int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 16 is the output length that mbedtls need */
 int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[16]);
 
 int32_t HksMbedtlsHashSha1Init(void **ctx, uint32_t alg);
 
 int32_t HksMbedtlsHashSha1Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 20 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[20]);
 
 int32_t HksMbedtlsHashSha256Init(void **ctx, int is224, uint32_t alg);
 
 int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 32 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[32]);
 
 int32_t HksMbedtlsHashSha512Init(void **ctx, int is384, uint32_t alg);
 
 int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen);
 
+/* 64 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[64]);
 
 int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
@@ -100,10 +104,10 @@ int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
     return HKS_SUCCESS;
 }
 
-int32_t HksMbedtlsHashUpdate(void **cryptoCtx, const struct HksBlob *msg)
+int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
     int32_t ret;
-    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
+    struct HksMbedtlsHashCtx *rsaCtx = (struct HksMbedtlsHashCtx *)cryptoCtx;
 
     switch (rsaCtx->mAlg) {
         case HKS_DIGEST_MD5:
@@ -224,13 +228,13 @@ int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsigned ch
     ret = mbedtls_md5_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls Hash Md5 update fail");
-        mbedtls_md5_free(context);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     return HKS_SUCCESS;
 }
 
+/* 16 is the output length that mbedtls need */
 int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[16])
 {
     int32_t ret;
@@ -309,20 +313,19 @@ int32_t HksMbedtlsHashSha1Update(struct HksMbedtlsHashCtx *ctx, const unsigned c
 
     if (ilen == 0 || input == NULL) {
         HKS_LOG_E("Mbedtls Hash sha1 input param error");
-        mbedtls_sha1_free(context);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret = mbedtls_sha1_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls Hash sha1 update fail");
-        mbedtls_sha1_free(context);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     return HKS_SUCCESS;
 }
 
+/* 20 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[20])
 {
     mbedtls_sha1_context *context = (mbedtls_sha1_context*)ctx->append;
@@ -412,13 +415,11 @@ int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const unsigned
     }
 
     if (ilen == 0 || input == NULL) {
-        mbedtls_sha256_free(context);
         return HKS_FAILURE;
     }
 
     int32_t ret = mbedtls_sha256_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        mbedtls_sha256_free(context);
         HKS_LOG_E("Mbedtls Hash sha256 update fail");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
@@ -426,6 +427,7 @@ int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const unsigned
     return HKS_SUCCESS;
 }
 
+/* 32 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[32])
 {
     mbedtls_sha256_context *context = (mbedtls_sha256_context*)ctx->append;
@@ -516,20 +518,19 @@ int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const unsigned
 
     if (ilen == 0 || input == NULL) {
         HKS_LOG_E("Mbedtls Hash sha512 input param error");
-        mbedtls_sha512_free(context);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret = mbedtls_sha512_update_ret(context, input, ilen);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls Hash sha512 update fail");
-        mbedtls_sha512_free(context);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     return HKS_SUCCESS;
 }
 
+/* 64 is the output length that mbedtls need */
 int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, unsigned char output[64])
 {
     mbedtls_sha512_context *context = (mbedtls_sha512_context *)ctx->append;

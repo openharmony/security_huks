@@ -16,65 +16,19 @@
 #ifndef HUKS_CORE_INTERFACES_H
 #define HUKS_CORE_INTERFACES_H
 
-#include "hks_param.h"
 #include "hks_type_inner.h"
+#include "huks_hdi.h"
 
-struct HksCoreIfDevice {
-    int32_t (*ModuleInit)(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    int32_t (*Refresh)(void);
+struct HuksHdi *HuksCreateHdiDevicePtr(void);
 
-    int32_t (*GenerateKey)(const struct HksBlob *, const struct HksParamSet *,
-        const struct HksBlob *, struct HksBlob *);
+void HuksDestoryHdiDevicePtr(struct HuksHdi *hdiDevicePtr);
 
-    int32_t (*ImportKey)(const struct HksBlob *, const struct HksBlob *, const struct HksParamSet *, struct HksBlob *);
-
-    int32_t (*ImportWrappedKey)(const struct HksBlob *, const struct HksBlob *,
-        const struct HksBlob *, const struct HksParamSet *, struct HksBlob *);
-
-    int32_t (*ExportPublicKey)(const struct HksBlob *, const struct HksParamSet *, struct HksBlob *);
-
-    int32_t (*Init)(const struct HksBlob *, const struct HksParamSet *, struct HksBlob *);
-
-    int32_t (*Update)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*Finish)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*Abort)(const struct HksBlob *, const struct HksParamSet *);
-
-    int32_t (*GetKeyProperties)(const struct HksParamSet *, const struct HksBlob *);
-
-    int32_t (*AttestKey)(const struct HksBlob *, const struct HksParamSet *, struct HksBlob *);
-
-    int32_t (*GetAbility)(int);
-
-    int32_t (*GetHardwareInfo)(void);
-
-    int32_t (*CalcMacHeader)(const struct HksParamSet *, const struct HksBlob *,
-        const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*UpgradeKeyInfo)(const struct HksBlob *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*GenerateRandom)(const struct HksParamSet *, struct HksBlob *);
-
-    int32_t (*Sign)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*Verify)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *,
-        const struct HksBlob *);
-
-    int32_t (*Encrypt)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*Decrypt)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*AgreeKey)(const struct HksParamSet *, const struct HksBlob *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*DeriveKey)(const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-
-    int32_t (*Mac)(const struct HksBlob *, const struct HksParamSet *, const struct HksBlob *, struct HksBlob *);
-};
-
-struct HksCoreIfDevice* HksCreateCoreIfDevicePtr(void);
-
-void HksDestoryCoreIfDevicePtr(void);
+#ifdef __cplusplus
+}
+#endif
 
 #endif
