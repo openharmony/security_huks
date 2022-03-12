@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,23 +60,54 @@ do { \
     (ptr)++; \
 } while (0)
 
-static uint8_t g_challengeOid[] = { 0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02,
-    0x82, 0x78, 0x02, 0x01, 0x04 };
-static uint8_t g_udidOid[] = { 0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82,
-    0x78, 0x02, 0x02, 0x04, 0x0a };
-static uint8_t g_snOid[] = { 0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82,
-    0x78, 0x02, 0x02, 0x04, 0x03 };
-static uint8_t g_secInfoOid[] = { 0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02,
-    0x82, 0x78, 0x02, 0x02, 0x02, 0x05 };
-static uint8_t g_versionInfoOid[] = { 0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b,
-    0x02, 0x82, 0x78, 0x02, 0x02, 0x02, 0x04 };
+static uint8_t g_challengeOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x04
+};
+static uint8_t g_udidOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x04, 0x0a
+};
+static uint8_t g_snOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x04, 0x03
+};
+static uint8_t g_secInfoOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x02, 0x05
+};
+static uint8_t g_versionInfoOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x02, 0x04
+};
 
 static const struct HksParam g_oidParams[] = {
-    { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = { sizeof(g_challengeOid), g_challengeOid } },
-    { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = { sizeof(g_udidOid), g_udidOid } },
-    { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = { sizeof(g_snOid), g_snOid } },
-    { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = { sizeof(g_secInfoOid), g_secInfoOid } },
-    { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = { sizeof(g_versionInfoOid), g_versionInfoOid } },
+    {
+        .tag = HKS_TAG_ATTESTATION_CHALLENGE,
+        .blob = {
+            .size = sizeof(g_challengeOid),
+            .data = g_challengeOid
+        }
+    }, {
+        .tag = HKS_TAG_ATTESTATION_ID_UDID,
+        .blob = {
+            .size = sizeof(g_udidOid),
+            .data = g_udidOid
+        }
+    }, {
+        .tag = HKS_TAG_ATTESTATION_ID_SERIAL,
+        .blob = {
+            .size = sizeof(g_snOid),
+            .data = g_snOid
+        }
+    }, {
+        .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO,
+        .blob = {
+            .size = sizeof(g_secInfoOid),
+            .data = g_secInfoOid
+        }
+    }, {
+        .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO,
+        .blob = {
+            .size = sizeof(g_versionInfoOid),
+            .data = g_versionInfoOid
+        }
+    },
 };
 
 static int32_t CopyBlobBuffer(const uint8_t *buffer, uint32_t len, struct HksBlob *blob)
@@ -190,7 +221,7 @@ static int32_t VerifyAttestationCertChain(struct HksCertInfo *certs, uint32_t ce
 {
     int32_t ret = TranslateToX509Format(certs, certNum);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify attestation cert chain verify cert chain failed");
+        HKS_LOG_E("translate to x509 format failed");
         return ret;
     }
 
@@ -308,7 +339,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
 }
 
 static int32_t ExtractTlvDataAndHeadSize(const uint8_t *in, uint32_t inLen,
-    uint8_t**out, uint32_t *outLen, uint32_t *size)
+    uint8_t **out, uint32_t *outLen, uint32_t *size)
 {
     uint32_t headOffset = 0;
     int32_t ret = ExtractTlvLength(in, inLen, &headOffset, outLen);
@@ -518,7 +549,7 @@ static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksPar
         return ret;
     }
 
-    ret =FillAttestExtendInfo(keyDescription, keyDescLen, paramSetOut);
+    ret = FillAttestExtendInfo(keyDescription, keyDescLen, paramSetOut);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("fill attest extend info fail");
     }

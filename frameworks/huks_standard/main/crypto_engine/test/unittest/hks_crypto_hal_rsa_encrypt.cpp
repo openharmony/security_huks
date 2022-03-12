@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,7 +32,6 @@ struct TestCaseParams {
     HksUsageSpec usageSpec = {0};
     std::string keyData;
     std::string hexData;
-    HksStageType runStage = HksStageType::HKS_STAGE_THREE;
     HksKeySize keySize = HksKeySize::HKS_RSA_KEY_SIZE_512;
 
     HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
@@ -458,59 +457,6 @@ public:
     void SetUp();
     void TearDown();
 protected:
-    void RunTestRsaEncrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *encryptMsg,
-        struct HksBlob *encryptOut, struct HksBlob *tagAead) const
-    {
-        uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
-        void* encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
-        EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult);
-        if (testCaseParams.encryptResult != HKS_SUCCESS) {
-            if (!encryptCtx) {
-                HksFree(encryptCtx);
-            }
-            return;
-        }
-        uint32_t point = 0;
-        if (inLen > HKS_UPDATE_DATA_MAX) {
-            HksBlob messageUpdate = {
-                .size = HKS_UPDATE_DATA_MAX,
-                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX)
-            };
-            HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(inLen) };
-            while (point < inLen - HKS_UPDATE_DATA_MAX) {
-                memcpy_s(messageUpdate.data, messageUpdate.size, encryptMsg->data + point, HKS_UPDATE_DATA_MAX);
-                out.size = HKS_UPDATE_DATA_MAX;
-                EXPECT_EQ(HksCryptoHalEncryptUpdate(&messageUpdate, encryptCtx, &out,
-                    testCaseParams.usageSpec.algType), HKS_SUCCESS);
-                point = point + HKS_UPDATE_DATA_MAX;
-            }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
-
-            uint32_t lastLen = inLen - point;
-            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-            (void)memcpy_s(messageLast.data, lastLen, encryptMsg->data + point, lastLen);
-
-            EXPECT_EQ(HksCryptoHalEncryptFinal(&messageLast, &encryptCtx, encryptOut, tagAead,
-                testCaseParams.usageSpec.algType), testCaseParams.encryptResult);
-
-            HksFree(messageLast.data);
-        } else {
-            HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
-            EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
-                testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
-
-            HksBlob enMessageLast = { .size = 0, .data = nullptr };
-            EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, encryptOut, tagAead,
-                testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
-
-            HksFree(out.data);
-        }
-        if (!encryptCtx) {
-            HksFree(encryptCtx);
-        }
-    }
-
     void RunTestCase(const TestCaseParams &testCaseParams) const
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
@@ -533,13 +479,8 @@ protected:
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
         HksBlob tagAead = { .size = 0, .data = nullptr };
 
-        if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
-            RunTestRsaEncrypt(&key, testCaseParams, &message, &cipherText, &tagAead);
-        } else {
-            EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
-                testCaseParams.encryptResult);
-        }
-
+        EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
+            testCaseParams.encryptResult);
         HksFree(key.data);
         HksFree(message.data);
         HksFree(cipherText.data);

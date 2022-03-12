@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -199,9 +199,6 @@ int32_t HksOpensslHmacUpdate(void *cryptoCtx, const struct HksBlob *msg)
     int hmacData = HMAC_Update(context, msg->data, msg->size);
     if (!hmacData) {
         HKS_LOG_E("hmac update failed.");
-        HMAC_CTX_free(context);
-        hmacCtx->append = NULL;
-        HKS_FREE_PTR(cryptoCtx);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
@@ -213,21 +210,24 @@ int32_t HksOpensslHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlo
         return HKS_ERROR_NULL_POINTER;
     }
 
-    if (msg == NULL || HksOpensslCheckBlob(mac) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid msg or mac point");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
     struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)*cryptoCtx;
     if (hmacCtx == NULL) {
         HKS_LOG_E("hmacCtx invalid");
+        HKS_FREE_PTR(*cryptoCtx);
         return HKS_ERROR_NULL_POINTER;
     }
 
     HMAC_CTX *context = (HMAC_CTX *)hmacCtx->append;
     if (context == NULL) {
         HKS_LOG_E("context is null");
+        HKS_FREE_PTR(*cryptoCtx);
         return HKS_FAILURE;
+    }
+
+    if (msg == NULL || HksOpensslCheckBlob(mac) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid msg or mac point");
+        HksOpensslHmacHalFreeCtx(cryptoCtx);
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int hmacData;
@@ -264,9 +264,7 @@ void HksOpensslHmacHalFreeCtx(void **cryptoCtx)
         opensslHmacCtx->append = NULL;
     }
 
-    if (*cryptoCtx != NULL) {
-        HksFree(*cryptoCtx);
-    }
+    HKS_FREE_PTR(*cryptoCtx);
 }
 #endif /* HKS_SUPPORT_HMAC_SHA1 */
 #endif /* HKS_SUPPORT_HMAC_C */

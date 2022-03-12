@@ -17,7 +17,6 @@
 
 #include "hks_device_sec_test.h"
 
-#include <ctype.h>
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
@@ -61,20 +60,21 @@ struct HksTestCertChain {
     bool certDataExist;
     uint32_t certDataSize;
 };
-const static char g_secInfoData[] = "hi_security_level_info";
-const static char g_challengeData[] = "hi_challenge_data";
-const static char g_versionData[] = "hi_os_version_data";
-const static char g_udidData[] = "hi_udid_data";
-const static char g_snData[] = "hi_sn_data";
-const static uint32_t g_size = DEFAULT_PARAM_SET_OUT_SIZE;
+static char g_secInfoData[] = "hi_security_level_info";
+static char g_challengeData[] = "hi_challenge_data";
+static char g_versionData[] = "hi_os_version_data";
+static char g_udidData[] = "hi_udid_data";
+static char g_snData[] = "hi_sn_data";
+static uint32_t g_size = DEFAULT_PARAM_SET_OUT_SIZE;
 
-const static struct HksBlob secInfo = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
-const static struct HksBlob challenge = { sizeof(g_challengeData), (uint8_t *)g_challengeData };
-const static struct HksBlob version = { sizeof(g_versionData), (uint8_t *)g_versionData };
-const static struct HksBlob udid = { sizeof(g_udidData), (uint8_t *)g_udidData };
-const static struct HksBlob sn = { sizeof(g_snData), (uint8_t *)g_snData };
+static struct HksBlob g_secInfo = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
+static struct HksBlob g_challenge = { sizeof(g_challengeData), (uint8_t *)g_challengeData };
+static struct HksBlob g_version = { sizeof(g_versionData), (uint8_t *)g_versionData };
+static struct HksBlob g_udid = { sizeof(g_udidData), (uint8_t *)g_udidData };
+static struct HksBlob g_sn = { sizeof(g_snData), (uint8_t *)g_snData };
 
-static int32_t ConstructDataToCertChain(struct HksCertChain **certChain, const struct HksTestCertChain *certChainParam)
+static int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
+    const struct HksTestCertChain *certChainParam)
 {
     if (!certChainParam->certChainExist) {
         return 0;
@@ -147,7 +147,7 @@ static int32_t TestGenerateKey(const struct HksBlob *keyAlias)
     return ret;
 }
 
-static int32_t testKeyAttest(struct HksCertChain *certChain)
+static int32_t TestKeyAttest(struct HksCertChain *certChain)
 {
     HKS_TEST_LOG_E("testKeyAttest start");
     char alias[] = "testKey";
@@ -158,11 +158,11 @@ static int32_t testKeyAttest(struct HksCertChain *certChain)
     }
 
     struct HksParam tmpParams[] = {
-        { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = secInfo },
-        { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = challenge },
-        { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = version },
-        { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = udid },
-        { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = sn },
+        { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
+        { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
+        { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
+        { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = g_udid },
+        { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = g_sn },
         { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias },
     };
     struct HksParamSet *paramSet = NULL;
@@ -265,7 +265,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     int32_t ret = ConstructDataToCertChain(&certChain, &certParam);
-    ret = testKeyAttest(certChain);
+    ret = TestKeyAttest(certChain);
     ASSERT_TRUE(ret == 0);
     ret = ValidateCertChainTest(certChain);
     ASSERT_TRUE(ret == 0);

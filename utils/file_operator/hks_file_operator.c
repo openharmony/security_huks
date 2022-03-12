@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -349,7 +349,7 @@ int32_t HksRemoveDir(const char *dirPath)
 int32_t HksDeletDirPartTwo(const char *path)
 {
     int32_t ret;
-    char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
+    char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
     DIR *dir = opendir(path);
     if (dir  == NULL) {
         HKS_LOG_E("open dir failed");
@@ -358,16 +358,19 @@ int32_t HksDeletDirPartTwo(const char *path)
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
         if (deletePath[strlen(deletePath) - 1] != '/') {
             if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                closedir(dir);
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
 
         if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
@@ -384,7 +387,7 @@ int32_t HksDeletDirPartTwo(const char *path)
 int32_t HksDeletDirPartOne(const char *path)
 {
     int32_t ret;
-    char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
+    char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
     DIR *dir = opendir(path);
     if (dir  == NULL) {
         HKS_LOG_E("open dir failed");
@@ -393,16 +396,19 @@ int32_t HksDeletDirPartOne(const char *path)
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
         if (deletePath[strlen(deletePath) - 1] != '/') {
             if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                closedir(dir);
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
 
         if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
@@ -431,16 +437,19 @@ int32_t HksDeleteDir(const char *path)
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 
         if (deletePath[strlen(deletePath) - 1] != '/') {
             if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
+                closedir(dir);
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
 
         if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
+            closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
 

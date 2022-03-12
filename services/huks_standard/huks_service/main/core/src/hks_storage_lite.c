@@ -25,7 +25,7 @@
 #include "hks_param.h"
 #include "hks_storage_adapter.h"
 
-#include "huks_hdi_interfaces.h"
+#include "huks_access.h"
 
 #define HKS_FILE_OFFSET_BASE 0
 #define MAX_STORAGE_SIZE 5120
@@ -99,7 +99,7 @@ static int32_t CalcHeaderMac(const struct HksBlob *salt, const uint8_t *buf,
             break;
         }
 
-        ret = HuksHdiCalcHeaderMac(paramSet, salt, &srcData, mac);
+        ret = HuksAccessCalcHeaderMac(paramSet, salt, &srcData, mac);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access calc header mac failed, ret = %d.", ret);
         }
@@ -120,7 +120,7 @@ static int32_t InitImageBuffer(void)
     keyInfoHead->sealingAlg = HKS_STORAGE_RESERVED_SEALING_ALG;
 
     struct HksBlob salt = { HKS_DERIVE_DEFAULT_SALT_LEN, keyInfoHead->salt };
-    int32_t ret = HuksHdiGenerateRandom(NULL, &salt);
+    int32_t ret = HuksAccessGenerateRandom(NULL, &salt);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("generate random failed, ret = %d", ret);
         return ret;
@@ -378,7 +378,7 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
 
     /* 2. traverse imageBuffer to search for keyAlias */
     uint32_t offset = sizeof(*keyInfoHead);
-    for (uint16_t i = 0; i < keyCount; ++i) {
+    for (uint32_t i = 0; i < keyCount; ++i) {
         if ((totalLen < offset) || ((totalLen - offset) < sizeof(struct HksStoreKeyInfo))) {
             HKS_LOG_E("invalid keyinfo size.");
             return HKS_ERROR_INVALID_KEY_FILE;
@@ -569,7 +569,7 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
 
     /* 5. replace header */
     if (memcpy_s(g_storageImageBuffer.data, sizeof(newkeyInfoHead), &newkeyInfoHead, sizeof(newkeyInfoHead)) != EOK) {
-        HKS_LOG_E("repalce header memcpy failed");
+        HKS_LOG_E("replace header memcpy failed");
         return HKS_ERROR_BAD_STATE;
     }
     return HKS_SUCCESS;
@@ -899,7 +899,7 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreDestory(const struct HksBlob *processName)
+int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     (void)processName;
     int32_t ret = HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME);

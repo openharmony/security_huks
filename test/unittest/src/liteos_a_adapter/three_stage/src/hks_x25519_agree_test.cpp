@@ -402,7 +402,8 @@ void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2)
     HksTestFree(blob2->data);
 }
 
-void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct HksBlob *blob3, struct HksBlob *blob4)
+void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
+    struct HksBlob *blob3, struct HksBlob *blob4)
 {
     HksTestFree(blob1->data);
     HksTestFree(blob2->data);

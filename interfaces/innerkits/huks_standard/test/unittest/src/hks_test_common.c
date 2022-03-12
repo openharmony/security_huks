@@ -670,7 +670,7 @@ int32_t GenerateLocalX25519Key(struct HksBlob **privateKey, struct HksBlob **pub
     ret = HksGenerateKey(NULL, paramSet, paramSetOut);
     HKS_TEST_ASSERT(ret == 0);
 
-    if ((publicKey != NULL) && ((*publicKey) != NULL) &&
+    if ((publicKey != NULL) && ((*publicKey) != NULL) && (localPublicKeyParams != NULL) &&
         (localPublicKeyParams->blobDataExist) &&
         (localPublicKeyParams->blobDataSize == (HKS_CURVE25519_KEY_SIZE_256 / HKS_TEST_COMMON_8))) {
         ret = memcpy_s((*publicKey)->data, (*publicKey)->size,
@@ -678,7 +678,7 @@ int32_t GenerateLocalX25519Key(struct HksBlob **privateKey, struct HksBlob **pub
         HKS_TEST_ASSERT(ret == 0);
     }
 
-    if ((privateKey != NULL) && ((*privateKey) != NULL) &&
+    if ((privateKey != NULL) && ((*privateKey) != NULL) && (localPrivateKeyParams != NULL) &&
         (localPrivateKeyParams->blobDataExist) &&
         (localPrivateKeyParams->blobDataSize == (HKS_CURVE25519_KEY_SIZE_256 / HKS_TEST_COMMON_8))) {
         ret = memcpy_s((*privateKey)->data, (*privateKey)->size,

@@ -41,14 +41,14 @@ static int32_t ComputeHash(const char *data, uint32_t len, struct HksBlob *hash)
 int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
 {
 #ifdef GET_DEV_UDID_ENABLE
-    char devUdidString[HKS_HARDWARE_UDID_STRING_LEN] = { 0 };
+    char devUdidString[HKS_HARDWARE_UDID_STRING_LEN] = {0};
     int32_t ret = GetDevUdid(devUdidString, sizeof(devUdidString));
     if (ret != 0) {
         HKS_LOG_E("Get dev udid error, ret = 0x%x", ret);
         return HKS_ERROR_NO_PERMISSION;
     }
 
-    uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = { 0 };
+    uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = {0};
     struct HksBlob hashData = { HKS_HARDWARE_UDID_LEN, devUdid };
     ret = ComputeHash(devUdidString, sizeof(devUdidString), &hashData);
     if (ret != HKS_SUCCESS) {

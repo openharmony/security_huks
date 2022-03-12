@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -230,7 +230,7 @@ enum HksErrorCode {
     HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL = -101,
     HKS_ERROR_CHECK_GET_PADDING_FAIL = -102,
     HKS_ERROR_CHECK_GET_PURPOSE_FAIL = -103,
-    HKS_ERROR_CHECK_GET_DIGEST_FAIL =  -104,
+    HKS_ERROR_CHECK_GET_DIGEST_FAIL = -104,
     HKS_ERROR_CHECK_GET_MODE_FAIL = -105,
     HKS_ERROR_CHECK_GET_NONCE_FAIL = -106,
     HKS_ERROR_CHECK_GET_AAD_FAIL = -107,

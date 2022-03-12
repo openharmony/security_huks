@@ -571,7 +571,7 @@ static int32_t CheckPurposeValid(uint32_t alg, uint32_t inputPurpose)
 {
     uint32_t invalidPurpose = 0;
 
-    uint32_t result = GetInvalidPurpose(alg, &invalidPurpose);
+    int32_t result = GetInvalidPurpose(alg, &invalidPurpose);
     if (result != HKS_SUCCESS) {
         return result;
     }
