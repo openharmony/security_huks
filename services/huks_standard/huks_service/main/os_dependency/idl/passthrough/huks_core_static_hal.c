@@ -28,6 +28,7 @@ int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if (halDevice == NULL) {
         HKS_LOG_E("invalid input halDevice");
+        return HKS_ERROR_NULL_POINTER;
     }
     if (*halDevice != NULL) {
         return HKS_SUCCESS;
