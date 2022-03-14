@@ -278,6 +278,10 @@ static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *hea
     }
 
     *headSize = buf - in;
+    if (*headSize > inLen) {
+        HKS_LOG_E("the data is too small, extract failed");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
     /* Check that tag length can fit into buffer */
     if (length > (inLen - *headSize)) {
         HKS_LOG_E("data buffer is not big enough to hold %u bytes.", length);
@@ -325,6 +329,10 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     }
 
     uint32_t headSize = buf - in;
+    if (headSize > inLen) {
+        HKS_LOG_E("the data is too small, extract failed");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
     /* Check that tag length can fit into buffer */
     if (length > (inLen - headSize)) {
         HKS_LOG_E("data buffer is not big enough to hold %u bytes.", length);
@@ -348,18 +356,19 @@ static int32_t ExtractTlvDataAndHeadSize(const uint8_t *in, uint32_t inLen,
         return ret;
     }
 
-    if (*out == NULL) {
-        *out = (uint8_t *)HksMalloc(*outLen);
-        if (*out == NULL) {
-            HKS_LOG_E("malloc fail!");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
-    }
     if (size != NULL) {
         *size = headOffset;
     }
+
+    *out = (uint8_t *)HksMalloc(*outLen);
+    if (*out == NULL) {
+        HKS_LOG_E("malloc fail!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
     ret = ExtractTlvData(in, inLen, *out, outLen);
     if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(*out);
         HKS_LOG_E("ExtractTlvData fail!");
     }
     return ret;
@@ -426,7 +435,19 @@ static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t
         goto EXIT;
     }
 
+    // gain the Extension data of attest cert
     ret = ExtractTlvDataAndHeadSize(octetStr->data, octetStr->length, data, len, NULL);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("gain the extension data failed");
+        goto EXIT;
+    }
+
+    if (*len >= MAX_ATTEST_EXTENSION_BUF_LEN) {
+        (void)memset_s(*data, *len, 0, *len);
+        HKS_FREE_PTR(*data);
+        HKS_LOG_E("the length of extension data is too long");
+        ret = HKS_FAILURE;
+    }
 
 EXIT:
     ASN1_OBJECT_free(obj);
@@ -457,12 +478,23 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
         uint32_t claimSize = 0;
         uint32_t headSize = 0;
 
+        if ((offset > len) || ((len - offset) < g_oidParams[i].blob.size)) {
+            HKS_LOG_E("input param invalid, fail");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+
         if (HksMemCmp(g_oidParams[i].blob.data, data + offset, g_oidParams[i].blob.size) == 0) {
             offset += g_oidParams[i].blob.size;
             int32_t ret = ExtractTlvDataAndHeadSize(data + offset, len - offset, &claimData, &claimSize, &headSize);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("get cliam count fail");
                 return HKS_ERROR_INVALID_ARGUMENT;
+            }
+
+            if (claimSize >= MAX_ATTEST_CLAIM_BUF_LEN) {
+                HKS_LOG_E("the length of claim is too long");
+                HKS_FREE_PTR(claimData);
+                return HKS_FAILURE;
             }
 
             ret = ConstructParamSetOut(g_oidParams[i].tag, claimData, claimSize, paramSetOut);
@@ -475,6 +507,7 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
             return HKS_SUCCESS;
         }
     }
+
     return HKS_SUCCESS;
 }
 
@@ -500,9 +533,15 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
             return HKS_ERROR_INVALID_ARGUMENT;
         }
 
+        if (valueLength >= MAX_ATTEST_CLAIM_BUF_LEN) {
+            HKS_LOG_E("the length of claim is too long");
+            HKS_FREE_PTR(value);
+            return HKS_FAILURE;
+        }
+
         ret = GetClaimDataParamSet(value, valueLength, paramSetOut);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("GetClaimDataParamSet failed");
+            HKS_LOG_E("GetClaimDataParamSet failed, ret = %d", ret);
             HKS_FREE_PTR(value);
             return ret;
         }
@@ -515,7 +554,7 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
 
 static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksParamSet *paramSetOut)
 {
-    if ((data == NULL) || (length < ASN_1_MIN_HEADER_LEN)) {
+    if ((data == NULL) || (length < ASN_1_MIN_HEADER_LEN) || (length <= TLV_VERSION_NEED_SIZE)) {
         HKS_LOG_E("invalid argument data");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -554,6 +593,7 @@ static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksPar
         HKS_LOG_E("fill attest extend info fail");
     }
 
+    (void)memset_s(keyDescription, keyDescLen, 0, keyDescLen);
     HKS_FREE_PTR(keyDescription);
     return ret;
 }
@@ -621,13 +661,13 @@ int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct 
     ret = VerifyAttestationCertChain(certsInfo, certChain->certsCount);
     if (ret != HKS_SUCCESS) {
         FreeCertChainInfo(&certsInfo, certChain->certsCount);
-        HKS_LOG_E("VerifyAttestationCertChain failed");
+        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %d", ret);
         return ret;
     }
 
     ret = GetParamSetOutInfo(certsInfo, paramSetOut);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("VerifyAttestationCertChain failed");
+        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %d", ret);
     }
 
     FreeCertChainInfo(&certsInfo, certChain->certsCount);

@@ -488,7 +488,6 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     uint8_t *publicKey = (uint8_t *)HksMalloc(publicKeySize);
     if (publicKey == NULL) {
         HKS_LOG_E("malloc key failed.");
-        HKS_FREE_PTR(publicKey);
         return HKS_ERROR_MALLOC_FAIL;
     }
 
@@ -616,9 +615,10 @@ int32_t HksSetKeyToMaterial(uint32_t alg, bool isPubKey, const struct HksBlob *k
         case HKS_ALG_ECDH:
         case HKS_ALG_DH:
             keyMaterial->size = key->size;
-            keyMaterial->data = HksMalloc(keyMaterial->size);
+            keyMaterial->data = (uint8_t *)HksMalloc(keyMaterial->size);
             if (keyMaterial->data != NULL) {
                 if (memcpy_s(keyMaterial->data, keyMaterial->size, key->data, key->size) != EOK) {
+                    HKS_FREE_PTR(keyMaterial->data);
                     return HKS_ERROR_INVALID_OPERATION;
                 }
                 return HKS_SUCCESS;
