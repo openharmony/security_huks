@@ -484,6 +484,7 @@ protected:
         struct HksBlob *encryptOut, struct HksBlob *tagAead)
     {
         void *encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        EXPECT_EQ(encryptCtx == nullptr, false) << "encryptCtx malloc failed.";
         uint32_t inLen = encryptMsg->size;
 
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult);
@@ -496,6 +497,7 @@ protected:
         if (inLen > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
+            EXPECT_EQ(messageUpdate.data == nullptr || out.data == nullptr, false) << "malloc failed.";
 
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
                 EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
@@ -512,11 +514,10 @@ protected:
             HksFree(messageUpdate.data);
 
             uint32_t lastLen = inLen - point;
+            uint32_t lastOutLen = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT;
             HksBlob enMessageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-            HksBlob enMessageLastOut = {
-                .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
-                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
-            };
+            HksBlob enMessageLastOut = { .size = lastOutLen, .data = (uint8_t *)HksMalloc(lastOutLen) };
+            EXPECT_EQ(enMessageLast.data == nullptr || enMessageLastOut.data == nullptr, false) << "msg malloc failed.";
             (void)memcpy_s(enMessageLast.data, lastLen, (encryptMsg->data + point), lastLen);
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
@@ -526,6 +527,7 @@ protected:
             HksFree(enMessageLast.data);
         } else {
             HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+            EXPECT_EQ(out.data == nullptr, false) << "out malloc failed.";
             EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
                 testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
             (void)memcpy_s((encryptOut->data), out.size, out.data, out.size);
@@ -543,6 +545,7 @@ protected:
         struct HksBlob *tagAead, struct HksBlob *decryptOut)
     {
         void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        EXPECT_EQ(decryptCtx == nullptr, false) << "decryptCtx malloc failed.";
         EXPECT_EQ(HksCryptoHalDecryptInit(key, &testCaseParams.usageSpec, &decryptCtx), testCaseParams.decryptResult);
         uint32_t decrytopoint = 0;
         uint32_t decrytooutPoint = 0;
@@ -550,6 +553,7 @@ protected:
         if (decrytoinLen > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(messageUpdate.data == nullptr || out.data == nullptr, false) << "malloc failed.";
             while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
                 EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
                     HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
@@ -564,14 +568,13 @@ protected:
             HksFree(messageUpdate.data);
 
             uint32_t lastLen = decrytoinLen - decrytopoint;
-            HksBlob messageLast = {
-                .size = lastLen,
-                .data = (uint8_t *)HksMalloc(lastLen)
-            };
+            HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
             HksBlob messageLastOut = {
                 .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
                 .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
             };
+            EXPECT_EQ(messageLast.data == nullptr || messageLastOut.data == nullptr, false) << "message malloc failed.";
+
             (void)memcpy_s(messageLast.data, lastLen, (decryptMsg->data + decrytopoint), lastLen);
             EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, &messageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult) << "HksCryptoHalEncryptFinal failed.";
@@ -582,6 +585,7 @@ protected:
             HksFree(messageLast.data);
         } else {
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(out.data == nullptr, false) << "out malloc failed.";
             EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
             (void)memcpy_s((decryptOut->data), out.size, out.data, out.size);
@@ -605,12 +609,16 @@ protected:
         uint32_t outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        EXPECT_EQ(message.data == nullptr, false) << "message malloc failed.";
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
+
         HksBlob tagAead = { .size = 16, .data = (uint8_t *)HksMalloc(16) };
         HksBlob encryptAll = { .size = 0, .data = (uint8_t *)HksMalloc(outLen) };
         HksBlob decryptAll = { .size = 0, .data = (uint8_t *)HksMalloc(outLen) };
+        EXPECT_EQ(tagAead.data == nullptr || encryptAll.data == nullptr ||
+            decryptAll.data == nullptr, false) << "malloc failed.";
 
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
 
@@ -632,6 +640,7 @@ protected:
         struct HksBlob *tagAead, struct HksBlob *decryptOut)
     {
         void* decryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+        EXPECT_EQ(decryptCtx == nullptr, false) << "decryptCtx malloc failed.";
         EXPECT_EQ(HksCryptoHalDecryptInit(key, &usageSpec, &decryptCtx), HKS_SUCCESS);
         uint32_t decrytopoint = 0;
         uint32_t decrytooutPoint = 0;
@@ -640,6 +649,7 @@ protected:
         if (decrytoinLen > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(messageUpdate.data == nullptr || out.data == nullptr, false) << "malloc failed.";
             while (decrytopoint < decrytoinLen - HKS_UPDATE_DATA_MAX) {
                 EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size, (decryptMsg->data + decrytopoint),
                     HKS_UPDATE_DATA_MAX), EOK) << "memcpy fail";
@@ -654,11 +664,10 @@ protected:
             HksFree(messageUpdate.data);
 
             uint32_t lastLen = decrytoinLen - decrytopoint;
+            uint32_t lastOutLen = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT;
             HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
-            HksBlob messageLastOut = {
-                .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
-                .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
-            };
+            HksBlob messageLastOut = { .size = lastOutLen, .data = (uint8_t *)HksMalloc(lastOutLen) };
+            EXPECT_EQ(messageLast.data == nullptr || messageLastOut.data == nullptr, false) << "message malloc failed.";
             (void)memcpy_s(messageLast.data, lastLen, (decryptMsg->data + decrytopoint), lastLen);
             EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, &messageLastOut, tagAead,
                 usageSpec.algType), HKS_SUCCESS) << "HksCryptoHalEncryptFinal failed.";
@@ -670,6 +679,8 @@ protected:
             HksFree(messageLastOut.data);
         } else {
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
+            EXPECT_EQ(out.data == nullptr, false) << "out malloc failed.";
+
             EXPECT_EQ(HksCryptoHalDecryptUpdate(decryptMsg, decryptCtx, &out,
                 usageSpec.algType), HKS_SUCCESS);
             (void)memcpy_s((decryptOut->data), out.size, out.data, out.size);
@@ -692,13 +703,17 @@ protected:
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
 
-        HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };\
+        EXPECT_EQ(message.data == nullptr, false) << "message malloc failed.";
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
         HksBlob tagAead = { .size = 16, .data = (uint8_t *)HksMalloc(16) };
         HksBlob encryptAll = { .size = 0, .data = (uint8_t *)HksMalloc(outLen) };
         HksBlob decryptAll = { .size = 0, .data = (uint8_t *)HksMalloc(outLen) };
+        EXPECT_EQ(tagAead.data == nullptr, false) << "tagAead malloc failed.";
+        EXPECT_EQ(encryptAll.data == nullptr, false) << "encryptAll malloc failed.";
+        EXPECT_EQ(decryptAll.data == nullptr, false) << "decryptAll malloc failed.";
 
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
 
@@ -736,12 +751,16 @@ protected:
         uint32_t outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        EXPECT_EQ(message.data == nullptr, false) << "message malloc failed.";
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
         }
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
         HksBlob plaintext = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
         HksBlob tagAead = { .size = 16, .data = (uint8_t *)HksMalloc(16) };
+        EXPECT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
+        EXPECT_EQ(plaintext.data == nullptr, false) << "plaintext malloc failed.";
+        EXPECT_EQ(tagAead.data == nullptr, false) << "tagAead malloc failed.";
 
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
         EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),

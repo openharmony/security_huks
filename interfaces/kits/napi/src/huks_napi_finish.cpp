@@ -131,6 +131,11 @@ static napi_value GetHandleValue(napi_env env, napi_value object, FinishAsyncCtx
     }
     context->handle->size = sizeof(uint64_t);
     context->handle->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
+    if (context->handle->data == nullptr) {
+        HKS_FREE_PTR(context->handle);
+        HKS_LOG_E("malloc failed");
+        return nullptr;
+    }
     (void)memcpy_s(context->handle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
 
     return GetInt32(env, 0);

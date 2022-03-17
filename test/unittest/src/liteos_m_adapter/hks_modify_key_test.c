@@ -305,6 +305,7 @@ int32_t __attribute__((weak)) HksStoreKeyBlob(const struct HksBlob *processName,
     (void)keyAlias;
     (void)storageType;
     (void)keyBlob;
+    return HKS_SUCCESS;
 }
 
 /**
