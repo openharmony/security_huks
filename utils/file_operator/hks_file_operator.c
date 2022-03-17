@@ -188,7 +188,7 @@ static int32_t FileRemove(const char *fileName)
     }
 
     if ((unlink(fileName) != 0) && (errno != ENOENT)) {
-        HKS_LOG_E("remove file fail: filename = %s, errno = 0x%x", fileName, errno);
+        HKS_LOG_E("failed to remove file: filename = %s, errno = 0x%x", fileName, errno);
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 

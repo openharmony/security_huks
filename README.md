@@ -28,8 +28,18 @@ base/security/huks/
 │   └── innerkits
 │       └── huks_standard
 │       └── huks_lite
-└── services
-    └── huks_standard
+├── services
+│   └── huks_standard
+│
+├── test
+│
+├── unittest
+│
+└── utils
+   └── crypto_adapter
+   └── file_operator
+   └── list
+   └── mutex
 ```
 
 ## Repositories Involved<a name="section1371113476307"></a>
