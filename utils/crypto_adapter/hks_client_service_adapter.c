@@ -42,7 +42,7 @@ static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    uint8_t *key = HksMalloc(length);
+    uint8_t *key = (uint8_t *)HksMalloc(length);
     if (key == NULL) {
         HKS_LOG_E("malloc key fail");
         return HKS_ERROR_MALLOC_FAIL;
@@ -462,7 +462,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
 
     /* n and e in RSA algorithm is small, will never overflow. */
     uint32_t totalSize = nSize + eSize + sizeof(struct HksPubKeyInfo);
-    uint8_t *keyBuffer = HksMalloc(totalSize);
+    uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
     if (keyBuffer == NULL) {
         HKS_LOG_E("X509PublicKeyToRsa keyBuffer failed");
         return HKS_ERROR_MALLOC_FAIL;
@@ -515,7 +515,7 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
 
         /* x and y in ECC algorithm is small, will never overflow. */
         uint32_t totalSize = xSize + ySize + sizeof(struct HksPubKeyInfo);
-        uint8_t *keyBuffer = HksMalloc(totalSize);
+        uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
         if (keyBuffer == NULL) {
             HKS_LOG_E("X509PublicKeyToRsa keyBuffer failed");
             break;
@@ -575,11 +575,19 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
     uint32_t gSize = (uint32_t)BN_num_bytes(g);
 
     uint32_t totalSize = sizeof(struct KeyMaterialDsa) + ySize + pSize + qSize + gSize;
-    uint8_t *keyBuffer = HksMalloc(totalSize);
+    uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
     if (keyBuffer == NULL) {
         HKS_LOG_E("malloc fail.");
         return HKS_ERROR_MALLOC_FAIL;
     }
+
+    if ((ySize > UINT32_MAX - HKS_BITS_PER_BYTE) ||
+        ((ySize + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE > UINT32_MAX / (HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE))) {
+        HKS_FREE_PTR(keyBuffer);
+        HKS_LOG_E("the size is too long, failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)keyBuffer;
     keyMaterial->keyAlg = HKS_ALG_DSA;
     keyMaterial->keySize = (ySize + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE;
@@ -615,9 +623,13 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
 
     const BIGNUM *pubKey = DH_get0_pub_key(dh);
     uint32_t pubKeySize = (uint32_t)BN_num_bytes(pubKey);
+    if (pubKeySize > UINT32_MAX - sizeof(struct KeyMaterialDh)) {
+        HKS_LOG_E("the size is too long, failed");
+        return HKS_ERROR_BAD_STATE;
+    }
 
     uint32_t totalSize = sizeof(struct KeyMaterialDh) + pubKeySize;
-    uint8_t *keyBuffer = HksMalloc(totalSize);
+    uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
     if (keyBuffer == NULL) {
         HKS_LOG_E("alloc keyBuffer failed");
         return HKS_ERROR_MALLOC_FAIL;

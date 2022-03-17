@@ -332,7 +332,7 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
 
 static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
 {
-    /* now offset is 0, but we maybe extend hi1131 file interfaces in the future */
+    /* now offset is 0, but we may extend hi1131 file interfaces */
     if (offset != 0) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
