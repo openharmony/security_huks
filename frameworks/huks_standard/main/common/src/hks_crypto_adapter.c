@@ -372,7 +372,8 @@ static int32_t FormatCurve25519Key(const struct HksBlob *keyIn, struct HksParamS
     return BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
 }
 
-int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *keyMaterial, struct HksBlob *keyOut)
+int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *keyMaterial,
+    struct HksBlob *keyOut)
 {
     int32_t ret = CheckCurve25519KeySize(keyMaterial);
     if (ret != HKS_SUCCESS) {
@@ -644,7 +645,8 @@ int32_t HksGetKeyFromMaterial(uint32_t alg, bool isPubKey, const struct HksBlob 
     }
 }
 
-int32_t HksFormatKeyFromMaterial(uint32_t alg, const struct HksBlob *keyMaterial, struct HksParamSet *paramSetOut)
+int32_t HksFormatKeyFromMaterial(uint32_t alg, const struct HksBlob *keyMaterial,
+    struct HksParamSet *paramSetOut)
 {
     switch (alg) {
         case HKS_ALG_X25519:

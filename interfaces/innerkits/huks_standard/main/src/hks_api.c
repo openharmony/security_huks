@@ -312,6 +312,7 @@ HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, str
 #else
     (void)paramSet;
     (void)random;
+    return HKS_ERROR_NOT_SUPPORTED;
 #endif
 }
 
