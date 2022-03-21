@@ -176,7 +176,7 @@ static int32_t FileRemove(const char *fileName)
     int32_t ret = IsFileExist(fileName);
     if (ret != HKS_SUCCESS) {
         return HKS_SUCCESS; /* if file not exist, return ok */
-    };
+    }
 
     struct stat tmp;
     if (stat(fileName, &tmp) != 0) {

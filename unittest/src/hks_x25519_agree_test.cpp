@@ -63,7 +63,7 @@ static struct HksBlob g_keyAliasFinal2001 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_final"
 };
 #ifdef _USE_MBEDTLS_
-static struct HksParam g_genParams001 [] = {
+static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -76,7 +76,7 @@ static struct HksParam g_genParams001 [] = {
     }
 };
 #else
-static struct HksParam g_genParams001 [] = {
+static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -89,7 +89,7 @@ static struct HksParam g_genParams001 [] = {
     }
 };
 #endif // _USE_MBEDTLS_
-static struct HksParam g_agreeParams01Init001 [] = {
+static struct HksParam g_agreeParams01Init001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -101,7 +101,7 @@ static struct HksParam g_agreeParams01Init001 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_agreeParams01Finish001 [] = {
+static struct HksParam g_agreeParams01Finish001[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -129,7 +129,7 @@ static struct HksParam g_agreeParams01Finish001 [] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
-static struct HksParam g_agreeParams02Init001 [] = {
+static struct HksParam g_agreeParams02Init001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -141,7 +141,7 @@ static struct HksParam g_agreeParams02Init001 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_agreeParams02Finish001 [] = {
+static struct HksParam g_agreeParams02Finish001[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -179,7 +179,7 @@ static struct HksBlob g_keyAlias02002 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_2"
 };
 #ifdef _USE_MBEDTLS_
-static struct HksParam g_genParams002 [] = {
+static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -192,7 +192,7 @@ static struct HksParam g_genParams002 [] = {
     }
 };
 #else
-static struct HksParam g_genParams002 [] = {
+static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -205,7 +205,7 @@ static struct HksParam g_genParams002 [] = {
     }
 };
 #endif // _USE_MBEDTLS_
-static struct HksParam g_agreeParams01Init002 [] = {
+static struct HksParam g_agreeParams01Init002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -217,13 +217,13 @@ static struct HksParam g_agreeParams01Init002 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_agreeParams01Finish002 [] = {
+static struct HksParam g_agreeParams01Finish002[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-static struct HksParam g_agreeParams02Init002 [] = {
+static struct HksParam g_agreeParams02Init002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -235,7 +235,7 @@ static struct HksParam g_agreeParams02Init002 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_agreeParams02Finish002 [] = {
+static struct HksParam g_agreeParams02Finish002[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
@@ -251,7 +251,7 @@ static struct HksBlob g_keyAlias02003 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest003_2"
 };
 #ifdef _USE_MBEDTLS_
-static struct HksParam g_genParams003 [] = {
+static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -264,7 +264,7 @@ static struct HksParam g_genParams003 [] = {
     }
 };
 #else
-static struct HksParam g_genParams003 [] = {
+static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -277,7 +277,7 @@ static struct HksParam g_genParams003 [] = {
     }
 };
 #endif // _USE_MBEDTLS_
-static struct HksParam g_agreeParams01Init003 [] = {
+static struct HksParam g_agreeParams01Init003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -289,7 +289,7 @@ static struct HksParam g_agreeParams01Init003 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_agreeParams02Init003 [] = {
+static struct HksParam g_agreeParams02Init003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -324,7 +324,7 @@ static struct HksParam g_genParams004[] = {
     }
 };
 #else
-static struct HksParam g_genParams004 [] = {
+static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -337,7 +337,7 @@ static struct HksParam g_genParams004 [] = {
     }
 };
 #endif // _USE_MBEDTLS_
-static struct HksParam g_agreeParams01Init004 [] = {
+static struct HksParam g_agreeParams01Init004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -349,7 +349,7 @@ static struct HksParam g_agreeParams01Init004 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_agreeParams02Init004 [] = {
+static struct HksParam g_agreeParams02Init004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
