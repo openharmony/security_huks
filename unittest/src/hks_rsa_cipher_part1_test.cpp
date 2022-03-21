@@ -48,7 +48,7 @@ void HksRsaCipherPart1Test::TearDown()
 }
 
 #ifdef _USE_OPENSSL_
-static struct HksParam g_genParams001 [] = {
+static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -69,7 +69,7 @@ static struct HksParam g_genParams001 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams001 [] = {
+static struct HksParam g_encryptParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -90,7 +90,7 @@ static struct HksParam g_encryptParams001 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams001 [] = {
+static struct HksParam g_decryptParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -113,7 +113,7 @@ static struct HksParam g_decryptParams001 [] = {
 };
 #endif
 
-static struct HksParam g_genParams002 [] = {
+static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -134,7 +134,7 @@ static struct HksParam g_genParams002 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams002 [] = {
+static struct HksParam g_encryptParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -155,7 +155,7 @@ static struct HksParam g_encryptParams002 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams002 [] = {
+static struct HksParam g_decryptParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -177,7 +177,7 @@ static struct HksParam g_decryptParams002 [] = {
     }
 };
 
-static struct HksParam g_genParams003 [] = {
+static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -198,7 +198,7 @@ static struct HksParam g_genParams003 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams003 [] = {
+static struct HksParam g_encryptParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -219,7 +219,7 @@ static struct HksParam g_encryptParams003 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams003 [] = {
+static struct HksParam g_decryptParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -241,7 +241,7 @@ static struct HksParam g_decryptParams003 [] = {
     }
 };
 
-static struct HksParam g_genParams004 [] = {
+static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -262,7 +262,7 @@ static struct HksParam g_genParams004 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams004 [] = {
+static struct HksParam g_encryptParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -283,7 +283,7 @@ static struct HksParam g_encryptParams004 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams004 [] = {
+static struct HksParam g_decryptParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -305,7 +305,7 @@ static struct HksParam g_decryptParams004 [] = {
     }
 };
 
-static struct HksParam g_genParams005 [] = {
+static struct HksParam g_genParams005[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -326,7 +326,7 @@ static struct HksParam g_genParams005 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams005 [] = {
+static struct HksParam g_encryptParams005[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -347,7 +347,7 @@ static struct HksParam g_encryptParams005 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams005 [] = {
+static struct HksParam g_decryptParams005[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -369,7 +369,7 @@ static struct HksParam g_decryptParams005 [] = {
     }
 };
 
-static struct HksParam g_genParams006 [] = {
+static struct HksParam g_genParams006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -390,7 +390,7 @@ static struct HksParam g_genParams006 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams006 [] = {
+static struct HksParam g_encryptParams006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -411,7 +411,7 @@ static struct HksParam g_encryptParams006 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams006 [] = {
+static struct HksParam g_decryptParams006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -433,7 +433,7 @@ static struct HksParam g_decryptParams006 [] = {
     }
 };
 
-static struct HksParam g_genParams007 [] = {
+static struct HksParam g_genParams007[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -454,7 +454,7 @@ static struct HksParam g_genParams007 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams007 [] = {
+static struct HksParam g_encryptParams007[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -475,7 +475,7 @@ static struct HksParam g_encryptParams007 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams007 [] = {
+static struct HksParam g_decryptParams007[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -498,7 +498,7 @@ static struct HksParam g_decryptParams007 [] = {
 };
 
 #ifdef _USE_OPENSSL_
-static struct HksParam g_genParams008 [] = {
+static struct HksParam g_genParams008[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -519,7 +519,7 @@ static struct HksParam g_genParams008 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams008 [] = {
+static struct HksParam g_encryptParams008[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -540,7 +540,7 @@ static struct HksParam g_encryptParams008 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams008 [] = {
+static struct HksParam g_decryptParams008[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -563,7 +563,7 @@ static struct HksParam g_decryptParams008 [] = {
 };
 #endif
 
-static struct HksParam g_genParams009 [] = {
+static struct HksParam g_genParams009[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -584,7 +584,7 @@ static struct HksParam g_genParams009 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams009 [] = {
+static struct HksParam g_encryptParams009[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -605,7 +605,7 @@ static struct HksParam g_encryptParams009 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams009 [] = {
+static struct HksParam g_decryptParams009[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -627,7 +627,7 @@ static struct HksParam g_decryptParams009 [] = {
     }
 };
 
-static struct HksParam g_genParams010 [] = {
+static struct HksParam g_genParams010[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -648,7 +648,7 @@ static struct HksParam g_genParams010 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams010 [] = {
+static struct HksParam g_encryptParams010[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -669,7 +669,7 @@ static struct HksParam g_encryptParams010 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams010 [] = {
+static struct HksParam g_decryptParams010[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA

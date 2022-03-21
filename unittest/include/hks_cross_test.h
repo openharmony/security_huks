@@ -20,7 +20,7 @@
 #include "hks_test_common.h"
 #include "hks_cross_test_common.h"
 namespace Unittest::CrossTest {
-static struct HksParam g_aesGenParams [] = {
+static struct HksParam g_aesGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -38,7 +38,7 @@ static struct HksParam g_aesGenParams [] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
-static struct HksParam g_aesEncryParams [] = {
+static struct HksParam g_aesEncryParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -65,7 +65,7 @@ static struct HksParam g_aesEncryParams [] = {
         }
     }
 };
-static struct HksParam g_aesDecryParams [] = {
+static struct HksParam g_aesDecryParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -93,7 +93,7 @@ static struct HksParam g_aesDecryParams [] = {
     }
 };
 
-static struct HksParam g_rsaGenParams [] = {
+static struct HksParam g_rsaGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -114,7 +114,7 @@ static struct HksParam g_rsaGenParams [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_rsaEncryParams [] = {
+static struct HksParam g_rsaEncryParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -135,7 +135,7 @@ static struct HksParam g_rsaEncryParams [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_rsaDecryParams [] = {
+static struct HksParam g_rsaDecryParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -157,7 +157,7 @@ static struct HksParam g_rsaDecryParams [] = {
     }
 };
 
-static struct HksParam g_dsaSVGenParams [] = {
+static struct HksParam g_dsaSVGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DSA
@@ -172,7 +172,7 @@ static struct HksParam g_dsaSVGenParams [] = {
         .uint32Param = HKS_DIGEST_SHA1
     }
 };
-static struct HksParam g_dsaSVSignParams [] = {
+static struct HksParam g_dsaSVSignParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DSA
@@ -184,7 +184,7 @@ static struct HksParam g_dsaSVSignParams [] = {
         .uint32Param = HKS_DIGEST_SHA1
     }
 };
-static struct HksParam g_dsaSVVerParams [] = {
+static struct HksParam g_dsaSVVerParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DSA
@@ -200,7 +200,7 @@ static struct HksParam g_dsaSVVerParams [] = {
     }
 };
 
-static struct HksParam g_eccSVGenParams [] = {
+static struct HksParam g_eccSVGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ECC
@@ -215,7 +215,7 @@ static struct HksParam g_eccSVGenParams [] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
-static struct HksParam g_eccSVSignParams [] = {
+static struct HksParam g_eccSVSignParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ECC
@@ -230,7 +230,7 @@ static struct HksParam g_eccSVSignParams [] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
-static struct HksParam g_eccSVVerParams [] = {
+static struct HksParam g_eccSVVerParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ECC
@@ -246,7 +246,7 @@ static struct HksParam g_eccSVVerParams [] = {
     }
 };
 
-static struct HksParam g_ed25519SVGenParams [] = {
+static struct HksParam g_ed25519SVGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -261,7 +261,7 @@ static struct HksParam g_ed25519SVGenParams [] = {
         .uint32Param = HKS_DIGEST_SHA1
     }
 };
-static struct HksParam g_ed25519SVSignParams [] = {
+static struct HksParam g_ed25519SVSignParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -276,7 +276,7 @@ static struct HksParam g_ed25519SVSignParams [] = {
         .uint32Param = HKS_DIGEST_SHA1
     }
 };
-static struct HksParam g_ed25519SVVerParams [] = {
+static struct HksParam g_ed25519SVVerParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -292,7 +292,7 @@ static struct HksParam g_ed25519SVVerParams [] = {
     }
 };
 
-static struct HksParam g_rsaSVGenParams [] = {
+static struct HksParam g_rsaSVGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -311,7 +311,7 @@ static struct HksParam g_rsaSVGenParams [] = {
     }
 };
 
-static struct HksParam g_rsaSVSignParams [] = {
+static struct HksParam g_rsaSVSignParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -330,7 +330,7 @@ static struct HksParam g_rsaSVSignParams [] = {
     }
 };
 
-static struct HksParam g_rsaSVVerParams [] = {
+static struct HksParam g_rsaSVVerParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -349,7 +349,7 @@ static struct HksParam g_rsaSVVerParams [] = {
     }
 };
 
-static struct HksParam g_hmacGenParams [] = {
+static struct HksParam g_hmacGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -364,7 +364,7 @@ static struct HksParam g_hmacGenParams [] = {
         .uint32Param = Unittest::CrossTest::CROSS_COMMON_SIZE
     }
 };
-static struct HksParam g_hmacParams [] = {
+static struct HksParam g_hmacParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -397,7 +397,7 @@ static struct HksParam g_dhGenParams[] = {
         .uint32Param = HKS_DH_KEY_SIZE_2048
     }
 };
-static struct HksParam g_dhInitParams01 [] = {
+static struct HksParam g_dhInitParams01[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -409,13 +409,13 @@ static struct HksParam g_dhInitParams01 [] = {
         .uint32Param = HKS_DH_KEY_SIZE_2048
     }
 };
-static struct HksParam g_dhFinishParams01 [] = {
+static struct HksParam g_dhFinishParams01[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-static struct HksParam g_dhInitParams02 [] = {
+static struct HksParam g_dhInitParams02[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -427,7 +427,7 @@ static struct HksParam g_dhInitParams02 [] = {
         .uint32Param = HKS_DH_KEY_SIZE_2048
     }
 };
-static struct HksParam g_dhFinishParams02 [] = {
+static struct HksParam g_dhFinishParams02[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP

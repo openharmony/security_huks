@@ -48,7 +48,7 @@ void HksRsaCipherPart5Test::TearDown()
 {
 }
 
-static struct HksParam g_genParams041 [] = {
+static struct HksParam g_genParams041[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -69,7 +69,7 @@ static struct HksParam g_genParams041 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams041 [] = {
+static struct HksParam g_encryptParams041[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -90,7 +90,7 @@ static struct HksParam g_encryptParams041 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams041 [] = {
+static struct HksParam g_decryptParams041[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -112,7 +112,7 @@ static struct HksParam g_decryptParams041 [] = {
     }
 };
 
-static struct HksParam g_genParams042 [] = {
+static struct HksParam g_genParams042[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -133,7 +133,7 @@ static struct HksParam g_genParams042 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_encryptParams042 [] = {
+static struct HksParam g_encryptParams042[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -154,7 +154,7 @@ static struct HksParam g_encryptParams042 [] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
-static struct HksParam g_decryptParams042 [] = {
+static struct HksParam g_decryptParams042[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
