@@ -26,10 +26,16 @@ base/security/huks/
 │   └── crypto_lite                   # 加解密实现
 ├── interfaces                        # 接口API代码
 │   └── innerkits
-│       └── huks_standard
-│       └── huks_lite
-└── services
-    └── huks_standard
+│   └── kits
+├── services
+│   └── huks_standard
+├── test
+├── unittest
+└── utils
+   └── crypto_adapter
+   └── file_operator
+   └── list
+   └── mutex
 ```
 
 ## 相关仓<a name="section1371113476307"></a>
