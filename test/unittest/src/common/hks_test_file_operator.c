@@ -14,7 +14,6 @@
  */
 
 #include "hks_test_file_operator.h"
-#include "hks_test_log.h"
 
 #ifndef __LITEOS_M__
 #include <dirent.h>

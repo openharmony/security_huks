@@ -48,11 +48,11 @@ __declspec(dllimport) int32_t hks_register_get_hardware_udid_callback(
     hks_get_hardware_udid_callback callback);
 #endif
 #else
-__attribute__ ((visibility("default"))) int32_t hks_register_get_hardware_udid_callback(
+__attribute__((visibility("default"))) int32_t hks_register_get_hardware_udid_callback(
     hks_get_hardware_udid_callback callback);
 #endif
 #else
-__attribute__ ((visibility("default"))) int32_t hks_register_get_hardware_udid_callback(
+__attribute__((visibility("default"))) int32_t hks_register_get_hardware_udid_callback(
     hks_get_hardware_udid_callback callback);
 #endif
 

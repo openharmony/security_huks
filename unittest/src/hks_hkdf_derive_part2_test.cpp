@@ -47,13 +47,13 @@ void HksHkdfDerivePart2Test::TearDown()
 {
 }
 
-static struct HksParam g_hkdfStorageParams [] = {
+static struct HksParam g_hkdfStorageParams[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-static struct HksParam g_genParams010 [] = {
+static struct HksParam g_genParams010[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -68,7 +68,7 @@ static struct HksParam g_genParams010 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfParams010 [] = {
+static struct HksParam g_hkdfParams010[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -83,7 +83,7 @@ static struct HksParam g_hkdfParams010 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_genParams011 [] = {
+static struct HksParam g_genParams011[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -98,7 +98,7 @@ static struct HksParam g_genParams011 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfParams011 [] = {
+static struct HksParam g_hkdfParams011[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -113,7 +113,7 @@ static struct HksParam g_hkdfParams011 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
     }
 };
-static struct HksParam g_genParams012 [] = {
+static struct HksParam g_genParams012[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -128,7 +128,7 @@ static struct HksParam g_genParams012 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfParams012 [] = {
+static struct HksParam g_hkdfParams012[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -143,7 +143,7 @@ static struct HksParam g_hkdfParams012 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_genParams013 [] = {
+static struct HksParam g_genParams013[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -158,7 +158,7 @@ static struct HksParam g_genParams013 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_192
     }
 };
-static struct HksParam g_hkdfParams013 [] = {
+static struct HksParam g_hkdfParams013[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -173,7 +173,7 @@ static struct HksParam g_hkdfParams013 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_genParams014 [] = {
+static struct HksParam g_genParams014[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -188,7 +188,7 @@ static struct HksParam g_genParams014 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_192
     }
 };
-static struct HksParam g_hkdfParams014 [] = {
+static struct HksParam g_hkdfParams014[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -203,7 +203,7 @@ static struct HksParam g_hkdfParams014 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
     }
 };
-static struct HksParam g_genParams015 [] = {
+static struct HksParam g_genParams015[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -218,7 +218,7 @@ static struct HksParam g_genParams015 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_192
     }
 };
-static struct HksParam g_hkdfParams015 [] = {
+static struct HksParam g_hkdfParams015[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -233,7 +233,7 @@ static struct HksParam g_hkdfParams015 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_genParams016 [] = {
+static struct HksParam g_genParams016[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -248,7 +248,7 @@ static struct HksParam g_genParams016 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams016 [] = {
+static struct HksParam g_hkdfParams016[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -263,7 +263,7 @@ static struct HksParam g_hkdfParams016 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_genParams017 [] = {
+static struct HksParam g_genParams017[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -278,7 +278,7 @@ static struct HksParam g_genParams017 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams017 [] = {
+static struct HksParam g_hkdfParams017[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -293,7 +293,7 @@ static struct HksParam g_hkdfParams017 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
     }
 };
-static struct HksParam g_genParams018 [] = {
+static struct HksParam g_genParams018[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -308,7 +308,7 @@ static struct HksParam g_genParams018 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams018 [] = {
+static struct HksParam g_hkdfParams018[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -323,7 +323,7 @@ static struct HksParam g_hkdfParams018 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_genParams019 [] = {
+static struct HksParam g_genParams019[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -338,7 +338,7 @@ static struct HksParam g_genParams019 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams019 [] = {
+static struct HksParam g_hkdfParams019[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -353,7 +353,7 @@ static struct HksParam g_hkdfParams019 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_genParams020 [] = {
+static struct HksParam g_genParams020[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -368,7 +368,7 @@ static struct HksParam g_genParams020 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams020 [] = {
+static struct HksParam g_hkdfParams020[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DSA

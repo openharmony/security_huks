@@ -48,7 +48,7 @@ void HksAesCipherPart3Test::TearDown()
 {
 }
 
-static struct HksParam g_genParams015 [] = {
+static struct HksParam g_genParams015[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -66,7 +66,7 @@ static struct HksParam g_genParams015 [] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
-static struct HksParam g_encryptParams015 [] = {
+static struct HksParam g_encryptParams015[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -93,7 +93,7 @@ static struct HksParam g_encryptParams015 [] = {
         }
     }
 };
-static struct HksParam g_decryptParams015 [] = {
+static struct HksParam g_decryptParams015[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -121,7 +121,7 @@ static struct HksParam g_decryptParams015 [] = {
     }
 };
 
-static struct HksParam g_genParams016 [] = {
+static struct HksParam g_genParams016[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -139,7 +139,7 @@ static struct HksParam g_genParams016 [] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
-static struct HksParam g_encryptParams016 [] = {
+static struct HksParam g_encryptParams016[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -166,7 +166,7 @@ static struct HksParam g_encryptParams016 [] = {
         }
     }
 };
-static struct HksParam g_decryptParams016 [] = {
+static struct HksParam g_decryptParams016[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -194,7 +194,7 @@ static struct HksParam g_decryptParams016 [] = {
     }
 };
 
-static struct HksParam g_genParams018 [] = {
+static struct HksParam g_genParams018[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -212,7 +212,7 @@ static struct HksParam g_genParams018 [] = {
         .uint32Param = HKS_MODE_GCM
     }
 };
-static struct HksParam g_encryptParams018 [] = {
+static struct HksParam g_encryptParams018[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -251,7 +251,7 @@ static struct HksParam g_encryptParams018 [] = {
         }
     }
 };
-static struct HksParam g_decryptParams018 [] = {
+static struct HksParam g_decryptParams018[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES

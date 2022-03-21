@@ -473,7 +473,7 @@ int32_t X509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey)
     if (EcKeyToPublicKey(ecKey, publicKey) != ECC_SUCCESS) {
         EVP_PKEY_free(pkey);
         return ECC_FAILED;
-    };
+    }
 
     EVP_PKEY_free(pkey);
     return ECC_SUCCESS;
