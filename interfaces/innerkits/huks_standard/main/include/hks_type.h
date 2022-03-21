@@ -37,8 +37,8 @@ extern "C" {
 #define HKS_SDK_VERSION "2.0.0.4"
 
 /*
- * Align to quadruple
- * Ensure that it will not overflow after adding 3 before calling this function.
+ * Align to 4-tuple
+ * Before calling this function, ensure that the size does not overflow after 3 is added.
  */
 #define ALIGN_SIZE(size) ((((uint32_t)(size) + 3) >> 2) << 2)
 #define DEFAULT_ALIGN_MASK_SIZE 3
