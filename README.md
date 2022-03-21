@@ -26,15 +26,11 @@ base/security/huks/
 |   └── crypto_lite                  # Encryption and decryption implementation
 ├── interfaces                       # APIs
 │   └── innerkits
-│       └── huks_standard
-│       └── huks_lite
+│   └── kits
 ├── services
 │   └── huks_standard
-│
 ├── test
-│
 ├── unittest
-│
 └── utils
    └── crypto_adapter
    └── file_operator
