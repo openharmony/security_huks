@@ -54,7 +54,7 @@ static WrapKeyAsyncContext CreateWrapKeyAsyncContext()
     return context;
 }
 
-static void DeleteWrapKeyAsyncContext(napi_env env, WrapKeyAsyncContext context)
+static void DeleteWrapKeyAsyncContext(napi_env env, WrapKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -90,6 +90,7 @@ static void DeleteWrapKeyAsyncContext(napi_env env, WrapKeyAsyncContext context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value WrapKeyParseParams(napi_env env, napi_callback_info info, WrapKeyAsyncContext context)

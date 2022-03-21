@@ -54,7 +54,7 @@ static EncryptAsyncContext CreateEncryptAsyncContext()
     return context;
 }
 
-static void DeleteEncryptAsyncContext(napi_env env, EncryptAsyncContext context)
+static void DeleteEncryptAsyncContext(napi_env env, EncryptAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -93,6 +93,7 @@ static void DeleteEncryptAsyncContext(napi_env env, EncryptAsyncContext context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value EncryptParseParams(napi_env env, napi_callback_info info, EncryptAsyncContext context)
@@ -140,8 +141,9 @@ static napi_value EncryptParseParams(napi_env env, napi_callback_info info, Encr
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->plainText);
-    if (result == nullptr) {
+    (void)memset_s(context->plainText, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->plainText) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }

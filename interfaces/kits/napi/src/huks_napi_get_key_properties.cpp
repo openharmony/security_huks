@@ -54,7 +54,7 @@ static GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext()
     return context;
 }
 
-static void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsyncContext context)
+static void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -83,6 +83,7 @@ static void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsy
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value GetKeyPropertiesParseParams(
@@ -151,7 +152,7 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
             GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
 
             context->paramSetOut = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE);
-            if (context->paramSetOut) {
+            if (context->paramSetOut != nullptr) {
                 context->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
                 context->paramSetOut->paramsCnt = 0;
             }

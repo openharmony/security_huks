@@ -51,7 +51,7 @@ static ImportKeyAsyncContext CreateImportKeyAsyncContext()
     return context;
 }
 
-static void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext context)
+static void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -83,6 +83,7 @@ static void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext cont
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value ImportKeyParseParams(napi_env env, napi_callback_info info, ImportKeyAsyncContext context)
@@ -130,8 +131,9 @@ static napi_value ImportKeyParseParams(napi_env env, napi_callback_info info, Im
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->key);
-    if (result == nullptr) {
+    (void)memset_s(context->key, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->key) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }

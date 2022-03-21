@@ -50,7 +50,7 @@ static AbortAsyncContext CreateAbortAsyncContext()
     return context;
 }
 
-static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext context)
+static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -75,6 +75,7 @@ static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value GetHandleValue(napi_env env, napi_value object, AbortAsyncContext context)
@@ -138,7 +139,11 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
 
     size_t index = 0;
 
-    GetHandleValue(env, argv[index], context);
+    napi_value result = GetHandleValue(env, argv[index], context);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get handle value");
+        return nullptr;
+    }
 
     index++;
     napi_value properties = nullptr;
@@ -149,7 +154,7 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
         HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
-    napi_value result = ParseHksParamSet(env, properties, context->paramSet);
+    result = ParseHksParamSet(env, properties, context->paramSet);
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;

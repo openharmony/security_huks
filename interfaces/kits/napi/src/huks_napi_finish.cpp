@@ -52,7 +52,7 @@ static FinishAsyncCtxPtr CreateFinishAsyncContext()
     return context;
 }
 
-static void DeleteFinishAsyncContext(napi_env env, FinishAsyncCtxPtr context)
+static void DeleteFinishAsyncContext(napi_env env, FinishAsyncCtxPtr &context)
 {
     if (context == nullptr) {
         return;
@@ -91,6 +91,7 @@ static void DeleteFinishAsyncContext(napi_env env, FinishAsyncCtxPtr context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value GetHandleValue(napi_env env, napi_value object, FinishAsyncCtxPtr context)
@@ -132,7 +133,6 @@ static napi_value GetHandleValue(napi_env env, napi_value object, FinishAsyncCtx
     context->handle->size = sizeof(uint64_t);
     context->handle->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
     if (context->handle->data == nullptr) {
-        HKS_FREE_PTR(context->handle);
         HKS_LOG_E("malloc failed");
         return nullptr;
     }
@@ -201,7 +201,11 @@ static napi_value ParseFinishParams(napi_env env, napi_callback_info info, Finis
     }
 
     size_t index = 0;
-    GetHandleValue(env, argv[index], context);
+    napi_value result = GetHandleValue(env, argv[index], context);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get handle value");
+        return nullptr;
+    }
 
     index++;
     napi_value properties = nullptr;
@@ -212,7 +216,7 @@ static napi_value ParseFinishParams(napi_env env, napi_callback_info info, Finis
         HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
-    napi_value result = ParseHksParamSet(env, properties, context->paramSet);
+    result = ParseHksParamSet(env, properties, context->paramSet);
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
@@ -227,15 +231,14 @@ static napi_value ParseFinishParams(napi_env env, napi_callback_info info, Finis
     context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
     if (context->inData == nullptr) {
         HKS_LOG_E("could not alloc memory");
-        HksFree(context->outData);
         return nullptr;
     }
+    (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
 
     if (ParseFinishInParam(env, argv, context, index) == false ||
         ParseFinishOutParam(env, argv, context, index) == false) {
         HKS_LOG_E("ParseFinishInParam failed");
-        HksFree(context->outData);
-        HksFree(context->inData);
         return nullptr;
     }
 

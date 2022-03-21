@@ -53,7 +53,7 @@ static DeriveKeyAsyncContext CreateDeriveKeyAsyncContext()
     return context;
 }
 
-static void DeleteDeriveKeyAsyncContext(napi_env env, DeriveKeyAsyncContext context)
+static void DeleteDeriveKeyAsyncContext(napi_env env, DeriveKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -85,6 +85,7 @@ static void DeleteDeriveKeyAsyncContext(napi_env env, DeriveKeyAsyncContext cont
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value DeriveKeyParseParams(napi_env env, napi_callback_info info, DeriveKeyAsyncContext context)
