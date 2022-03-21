@@ -54,7 +54,7 @@ static MacAsyncContext CreateMacAsyncContext()
     return context;
 }
 
-static void DeleteMacAsyncContext(napi_env env, MacAsyncContext context)
+static void DeleteMacAsyncContext(napi_env env, MacAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -93,6 +93,7 @@ static void DeleteMacAsyncContext(napi_env env, MacAsyncContext context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value MacParseParams(napi_env env, napi_callback_info info, MacAsyncContext context)
@@ -141,8 +142,9 @@ static napi_value MacParseParams(napi_env env, napi_callback_info info, MacAsync
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->srcData);
-    if (result == nullptr) {
+    (void)memset_s(context->srcData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->srcData) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }

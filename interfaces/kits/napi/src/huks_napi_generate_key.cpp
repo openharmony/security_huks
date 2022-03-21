@@ -51,7 +51,7 @@ static GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
     return context;
 }
 
-static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext context)
+static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -80,6 +80,7 @@ static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext 
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, GenerateKeyAsyncContext context)

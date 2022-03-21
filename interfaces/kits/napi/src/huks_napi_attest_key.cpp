@@ -51,7 +51,7 @@ static AttestKeyAsyncContext CreateAttestKeyAsyncContext()
     return context;
 }
 
-static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext context)
+static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -80,6 +80,7 @@ static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext cont
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, AttestKeyAsyncContext context)

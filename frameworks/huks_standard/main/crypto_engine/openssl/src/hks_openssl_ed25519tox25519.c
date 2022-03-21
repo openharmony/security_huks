@@ -162,6 +162,11 @@ static int32_t CovertData(struct Curve25519Structure *curve25519, uint8_t *pubke
 static int32_t Curve25519Initialize(struct Curve25519Structure *curve25519,
     const uint8_t *source, uint32_t sourceLen, bool isBigEndian)
 {
+    if (sourceLen != P_BYTES) {
+        HKS_LOG_E("invalid param input");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     int32_t ret;
     uint8_t pubKey[P_BYTES] = {0};
     if (memcpy_s(pubKey, P_BYTES - 1, source, sourceLen - 1) != EOK) { // the 0-30 bit assignment
