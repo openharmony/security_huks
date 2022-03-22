@@ -685,10 +685,13 @@ HKS_API_EXPORT int32_t HcmIsDeviceKeyExist(const struct HksParamSet *paramSet)
 HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
 {
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
+    HKS_LOG_I("enter validate cert chain");
     if ((paramSetOut == NULL) || (certChain == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    return HksClientValidateCertChain(certChain, paramSetOut);
+    int32_t ret = HksClientValidateCertChain(certChain, paramSetOut);
+    HKS_LOG_I("leave validate cert chain, result = %d", ret);
+    return ret;
 #endif
     (void)certChain;
     (void)paramSetOut;
@@ -698,43 +701,55 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *handle)
 {
+    HKS_LOG_I("enter init operation");
     if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
     int32_t ret = HksClientInit(keyAlias, paramSet, handle);
+    HKS_LOG_I("leave init operation, result = %d", ret);
     return ret;
 }
 
 HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
+    HKS_LOG_I("enter update operation");
     if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
-    return HksClientUpdate(handle, paramSet, inData, outData);
+    int32_t ret = HksClientUpdate(handle, paramSet, inData, outData);
+    HKS_LOG_I("leave update operation, result = %d", ret);
+    return ret;
 }
 
 HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
+    HKS_LOG_I("enter finish operation");
     if ((handle == NULL) || (paramSet == NULL) || (inData == NULL) || (outData == NULL)) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
-    return HksClientFinish(handle, paramSet, inData, outData);
+    int32_t ret = HksClientFinish(handle, paramSet, inData, outData);
+    HKS_LOG_I("leave finish operation, result = %d", ret);
+    return ret;
 }
 
 HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
+    HKS_LOG_I("enter abort operation");
     if ((handle == NULL) || (paramSet == NULL)) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
-    return HksClientAbort(handle, paramSet);
+    int32_t ret = HksClientAbort(handle, paramSet);
+    HKS_LOG_I("leave abrot operation, result = %d", ret);
+    return ret;
 }
+
