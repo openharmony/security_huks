@@ -50,7 +50,7 @@ static IsKeyExistAsyncContext CreateIsKeyExistAsyncContext()
     return context;
 }
 
-static void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext context)
+static void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -75,6 +75,7 @@ static void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext co
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value IsKeyExistParseParams(napi_env env, napi_callback_info info, IsKeyExistAsyncContext context)

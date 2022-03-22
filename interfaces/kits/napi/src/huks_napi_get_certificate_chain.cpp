@@ -53,7 +53,7 @@ static GetCertificateChainAsyncContext CreateGetCertificateChainAsyncContext()
     return context;
 }
 
-static void DeleteGetCertificateChainAsyncContext(napi_env env, GetCertificateChainAsyncContext context)
+static void DeleteGetCertificateChainAsyncContext(napi_env env, GetCertificateChainAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -82,6 +82,7 @@ static void DeleteGetCertificateChainAsyncContext(napi_env env, GetCertificateCh
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value GetCertificateChainParseParams(
