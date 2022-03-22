@@ -261,7 +261,7 @@ static int32_t AddAeTag(struct HksParamSet *paramSet, struct HksBlob *inText, bo
 
         struct HksParam aeParam;
         aeParam.tag = HKS_TAG_AE_TAG;
-        aeParam.blob.data = inText->data + inText->size;
+        aeParam.blob.data = inText->data + inText->size - HKS_AE_TAG_LEN;
         aeParam.blob.size = HKS_AE_TAG_LEN;
         ret = HksAddParams(paramSet, &aeParam, 1);
         if (ret != HKS_SUCCESS) {
