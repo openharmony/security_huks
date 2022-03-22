@@ -54,7 +54,7 @@ static SignAsyncContext CreateSignAsyncContext()
     return context;
 }
 
-static void DeleteSignAsyncContext(napi_env env, SignAsyncContext context)
+static void DeleteSignAsyncContext(napi_env env, SignAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -93,6 +93,7 @@ static void DeleteSignAsyncContext(napi_env env, SignAsyncContext context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value SignParseParams(napi_env env, napi_callback_info info, SignAsyncContext context)
@@ -140,8 +141,9 @@ static napi_value SignParseParams(napi_env env, napi_callback_info info, SignAsy
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->srcData);
-    if (result == nullptr) {
+    (void)memset_s(context->srcData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->srcData) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }

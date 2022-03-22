@@ -52,7 +52,7 @@ static UnwrapKeyAsyncContext CreateUnwrapKeyAsyncContext()
     return context;
 }
 
-static void DeleteUnwrapKeyAsyncContext(napi_env env, UnwrapKeyAsyncContext context)
+static void DeleteUnwrapKeyAsyncContext(napi_env env, UnwrapKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -88,6 +88,7 @@ static void DeleteUnwrapKeyAsyncContext(napi_env env, UnwrapKeyAsyncContext cont
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value UnwrapKeyParseOptions(napi_env env, napi_value options, UnwrapKeyAsyncContext context)
@@ -118,8 +119,9 @@ static napi_value UnwrapKeyParseOptions(napi_env env, napi_value options, Unwrap
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->wrappedData);
-    if (result == nullptr) {
+    (void)memset_s(context->wrappedData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->wrappedData) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }
