@@ -61,14 +61,14 @@ static int32_t CompareTwoKey(const struct HksBlob *keyAliasOne, const struct Hks
 {
     uint32_t sizeOne = HksTestFileSize(g_storePath, (char *)keyAliasOne->data);
     uint8_t *bufOne = (uint8_t *)HksTestMalloc(sizeOne);
-    if (bufOne == NULL) {
+    if (bufOne == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
     uint32_t sizeRead = HksTestFileRead(g_storePath, (char *)keyAliasOne->data, 0, bufOne, sizeOne);
 
     uint32_t sizeTwo = HksTestFileSize(g_storePath, (char *)keyAliasTwo->data);
     uint8_t *bufTwo = (uint8_t *)HksTestMalloc(sizeTwo);
-    if (bufTwo == NULL) {
+    if (bufTwo == nullptr) {
         HksTestFree(bufOne);
         return HKS_ERROR_MALLOC_FAIL;
     }
