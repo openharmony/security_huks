@@ -62,7 +62,7 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     uint8_t *name = (uint8_t *)HksMalloc(sizeof(callingUid));
-    if (name == NULL) {
+    if (name == nullptr) {
         HKS_LOG_E("GetProcessName malloc failed.");
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -82,7 +82,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     uint8_t *name = (uint8_t *)HksMalloc(sizeof(callingUid));
-    if (name == NULL) {
+    if (name == nullptr) {
         HKS_LOG_E("GetProcessName malloc failed.");
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -104,7 +104,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     }
 
     uint8_t *name1 = (uint8_t *)HksMalloc(size);
-    if (name1 == NULL) {
+    if (name1 == nullptr) {
         HKS_LOG_E("user id malloc failed.");
         HksFree(name);
         return HKS_ERROR_MALLOC_FAIL;

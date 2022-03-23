@@ -80,7 +80,7 @@ static int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
         return 0;
     }
     *certChain = (struct HksCertChain *)HksTestMalloc(sizeof(struct HksCertChain));
-    if (*certChain == NULL) {
+    if (*certChain == nullptr) {
         HKS_TEST_LOG_E("malloc fail");
         return HKS_ERROR_MALLOC_FAIL;
     }

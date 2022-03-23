@@ -115,7 +115,7 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
 
     data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
 
-    if (outBlob == NULL) {
+    if (outBlob == nullptr) {
         data.WriteUint32(0);
     } else {
         data.WriteUint32(outBlob->size);

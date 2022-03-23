@@ -236,8 +236,8 @@ static napi_value ParseFinishParams(napi_env env, napi_callback_info info, Finis
     (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
     (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
 
-    if (ParseFinishInParam(env, argv, context, index) == false ||
-        ParseFinishOutParam(env, argv, context, index) == false) {
+    if (!ParseFinishInParam(env, argv, context, index) ||
+        !ParseFinishOutParam(env, argv, context, index)) {
         HKS_LOG_E("ParseFinishInParam failed");
         return nullptr;
     }
