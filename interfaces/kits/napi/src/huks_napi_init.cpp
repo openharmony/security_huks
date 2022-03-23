@@ -55,7 +55,7 @@ static InitAsyncCtxPtr CreateInitAsyncContext()
     return context;
 }
 
-static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr context)
+static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context)
 {
     if (context == nullptr) {
         return;
@@ -87,6 +87,7 @@ static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value ParseInitParams(napi_env env, napi_callback_info info, InitAsyncCtxPtr context)

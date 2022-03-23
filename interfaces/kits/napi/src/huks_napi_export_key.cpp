@@ -51,7 +51,7 @@ static ExportKeyAsyncContext CreateExportKeyAsyncContext()
     return context;
 }
 
-static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext context)
+static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -83,6 +83,7 @@ static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext cont
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value ExportKeyParseParams(napi_env env, napi_callback_info info, ExportKeyAsyncContext context)

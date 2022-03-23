@@ -176,7 +176,7 @@ static int32_t FileRemove(const char *fileName)
     int32_t ret = IsFileExist(fileName);
     if (ret != HKS_SUCCESS) {
         return HKS_SUCCESS; /* if file not exist, return ok */
-    };
+    }
 
     struct stat tmp;
     if (stat(fileName, &tmp) != 0) {
@@ -188,7 +188,7 @@ static int32_t FileRemove(const char *fileName)
     }
 
     if ((unlink(fileName) != 0) && (errno != ENOENT)) {
-        HKS_LOG_E("remove file fail: filename = %s, errno = 0x%x", fileName, errno);
+        HKS_LOG_E("failed to remove file: filename = %s, errno = 0x%x", fileName, errno);
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 

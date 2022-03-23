@@ -52,7 +52,7 @@ static VerifyAsyncContext CreateVerifyAsyncContext()
     return context;
 }
 
-static void DeleteVerifyAsyncContext(napi_env env, VerifyAsyncContext context)
+static void DeleteVerifyAsyncContext(napi_env env, VerifyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -91,6 +91,7 @@ static void DeleteVerifyAsyncContext(napi_env env, VerifyAsyncContext context)
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value VerifyParseOptions(napi_env env, napi_value options, VerifyAsyncContext context)
@@ -121,8 +122,9 @@ static napi_value VerifyParseOptions(napi_env env, napi_value options, VerifyAsy
     if (context->srcData == nullptr) {
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->srcData);
-    if (result == nullptr) {
+    (void)memset_s(context->srcData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->srcData) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }
@@ -161,8 +163,9 @@ static napi_value VerifyParseParams(napi_env env, napi_callback_info info, Verif
     if (context->signature == nullptr) {
         return nullptr;
     }
-    result = GetUint8Array(env, argv[index], *context->signature);
-    if (result == nullptr) {
+    (void)memset_s(context->signature, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, argv[index], *context->signature) == nullptr) {
         HKS_LOG_E("could not get signature");
         return nullptr;
     }

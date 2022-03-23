@@ -54,7 +54,7 @@ static AgreeKeyAsyncContext CreateAgreeKeyAsyncContext()
     return context;
 }
 
-static void DeleteAgreeKeyAsyncContext(napi_env env, AgreeKeyAsyncContext context)
+static void DeleteAgreeKeyAsyncContext(napi_env env, AgreeKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -93,6 +93,7 @@ static void DeleteAgreeKeyAsyncContext(napi_env env, AgreeKeyAsyncContext contex
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value AgreeKeyParseParams(napi_env env, napi_callback_info info, AgreeKeyAsyncContext context)
@@ -141,8 +142,9 @@ static napi_value AgreeKeyParseParams(napi_env env, napi_callback_info info, Agr
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    result = GetUint8Array(env, inData, *context->peerPublicKey);
-    if (result == nullptr) {
+    (void)memset_s(context->peerPublicKey, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *context->peerPublicKey) == nullptr) {
         HKS_LOG_E("could not get indata");
         return nullptr;
     }

@@ -390,6 +390,12 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
         return HKS_ERROR_MALLOC_FAIL;
     }
 
+    if (mbedtls_mpi_size(&(pubKey->grp.P)) > UINT32_MAX / HKS_BITS_PER_BYTE) {
+        HKS_FREE_PTR(keyBuffer);
+        HKS_LOG_E("invalid param, the size is :%u", mbedtls_mpi_size(&(pubKey->grp.P)));
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
     pubKeyInfo->keyAlg = HKS_ALG_ECC;
     pubKeyInfo->keySize = mbedtls_mpi_size(&(pubKey->grp.P)) * HKS_BITS_PER_BYTE;
