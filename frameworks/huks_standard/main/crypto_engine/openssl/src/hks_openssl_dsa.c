@@ -52,7 +52,7 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     }
 
     BIGNUM *x = NULL;
-    if (needPrivateExponent == true) {
+    if (needPrivateExponent) {
         if (keyMaterial->xSize == 0) {
             HksFree(buff);
             return HKS_FAILURE;
