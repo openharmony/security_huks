@@ -1274,6 +1274,7 @@ static int32_t ReadCertOrKey(const uint8_t *inData, uint32_t size, struct HksBlo
     }
     if (memcpy_s(data, size, inData, size) != EOK) {
         HKS_LOG_E("memcpy cert or key failed");
+        HKS_FREE_PTR(data);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     out->size = size;
@@ -1367,6 +1368,7 @@ static int32_t BuildAttestSpec(const struct HksKeyNode *keyNode, const struct Hk
     HksFillUsageSpec(keyNode->paramSet, &attestSpec->usageSpec);
     int32_t ret = CheckAttestUsageSpec(&attestSpec->usageSpec);
     if (ret != HKS_SUCCESS) {
+        FreeAttestSpec(&attestSpec);
         return ret;
     }
 
