@@ -279,6 +279,11 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
         EVP_PKEY_free(pkey);
         return DSA_FAILED;
     }
+    if ((ySize > UINT32_MAX - HKS_BITS_PER_BYTE) ||
+        ((ySize + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE > UINT32_MAX / (HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE))) {
+        EVP_PKEY_free(pkey);
+        return DSA_FAILED;
+    }
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)publicKey->data;
     keyMaterial->keyAlg = HKS_ALG_DSA;
     keyMaterial->keySize = (ySize + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE;
