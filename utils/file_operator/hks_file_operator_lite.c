@@ -259,7 +259,7 @@ int32_t HksRemoveDir(const char *dirPath)
         return HKS_FAILURE;
     }
 
-    if (S_ISDIR(fileStat.st_mode) == false) {
+    if (!S_ISDIR(fileStat.st_mode)) {
         HKS_LOG_E("path is not dir");
         return HKS_FAILURE;
     }

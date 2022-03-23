@@ -119,7 +119,7 @@ LITE_TEST_CASE(HksGenerateKeyTest, HksGenerateKeyTest001, Level1)
     TEST_ASSERT_TRUE(ret == g_testGenKeyParams[index].expectResult);
 
     if ((ret == HKS_SUCCESS) &&
-        !(g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag == true) &&
+        !(g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag) &&
         (g_testGenKeyParams[index].paramSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
         HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
     }
