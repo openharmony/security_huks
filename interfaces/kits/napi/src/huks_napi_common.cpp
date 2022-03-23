@@ -23,7 +23,7 @@
 
 namespace HuksNapi {
 namespace {
-constexpr int HKS_MAX_DATA_LEN = 0x40000000;
+constexpr int HKS_MAX_DATA_LEN = 0x6400000; // The maximum length is 100M
 constexpr size_t ASYNCCALLBACK_ARGC = 2;
 }  // namespace
 
@@ -76,7 +76,9 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
         return nullptr;
     }
     if (length == 0) {
-        arrayBlob.data = (uint8_t *)HksMalloc(HKS_MAX_DATA_LEN);
+        HKS_LOG_I("the created memory length just 1 Byte");
+        // the created memory length just 1 Byte
+        arrayBlob.data = (uint8_t *)HksMalloc(1);
     } else {
         arrayBlob.data = (uint8_t *)HksMalloc(length);
     }
@@ -392,6 +394,7 @@ void FreeHksCertChain(HksCertChain *&certChain)
         for (uint32_t i = 0; i < certChain->certsCount; i++) {
             if (certChain->certs[i].data != nullptr) {
                 HksFree(certChain->certs[i].data);
+                certChain->certs[i].data = nullptr;
             }
         }
     }

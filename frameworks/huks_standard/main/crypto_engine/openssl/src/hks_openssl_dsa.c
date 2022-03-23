@@ -46,7 +46,7 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
 {
     int ret;
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
-    uint8_t *buff = HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
+    uint8_t *buff = (uint8_t *)HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
     if (buff == NULL) {
         return HKS_FAILURE;
     }
