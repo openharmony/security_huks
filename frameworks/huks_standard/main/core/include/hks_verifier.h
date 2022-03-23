@@ -19,6 +19,8 @@
 #include "hks_type_inner.h"
 
 #define HKS_DEFAULT_CERT_CHAIN_CNT 4
+#define MAX_ATTEST_EXTENSION_BUF_LEN 10240 // The value needs to be confirmed
+#define MAX_ATTEST_CLAIM_BUF_LEN 10240 // The value needs to be confirmed
 
 enum HksCertFormat {
     HKS_CERT_PEM,

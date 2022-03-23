@@ -139,7 +139,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         }
         ctx.len = keyLen;
 
-        uint8_t *output = HksMalloc(keyLen);
+        uint8_t *output = (uint8_t *)HksMalloc(keyLen);
         if (output == NULL) {
             break;
         }

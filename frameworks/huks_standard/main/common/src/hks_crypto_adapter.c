@@ -372,7 +372,8 @@ static int32_t FormatCurve25519Key(const struct HksBlob *keyIn, struct HksParamS
     return BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
 }
 
-int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *keyMaterial, struct HksBlob *keyOut)
+int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *keyMaterial,
+    struct HksBlob *keyOut)
 {
     int32_t ret = CheckCurve25519KeySize(keyMaterial);
     if (ret != HKS_SUCCESS) {
@@ -488,7 +489,6 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     uint8_t *publicKey = (uint8_t *)HksMalloc(publicKeySize);
     if (publicKey == NULL) {
         HKS_LOG_E("malloc key failed.");
-        HKS_FREE_PTR(publicKey);
         return HKS_ERROR_MALLOC_FAIL;
     }
 
@@ -616,9 +616,10 @@ int32_t HksSetKeyToMaterial(uint32_t alg, bool isPubKey, const struct HksBlob *k
         case HKS_ALG_ECDH:
         case HKS_ALG_DH:
             keyMaterial->size = key->size;
-            keyMaterial->data = HksMalloc(keyMaterial->size);
+            keyMaterial->data = (uint8_t *)HksMalloc(keyMaterial->size);
             if (keyMaterial->data != NULL) {
                 if (memcpy_s(keyMaterial->data, keyMaterial->size, key->data, key->size) != EOK) {
+                    HKS_FREE_PTR(keyMaterial->data);
                     return HKS_ERROR_INVALID_OPERATION;
                 }
                 return HKS_SUCCESS;
@@ -644,7 +645,8 @@ int32_t HksGetKeyFromMaterial(uint32_t alg, bool isPubKey, const struct HksBlob 
     }
 }
 
-int32_t HksFormatKeyFromMaterial(uint32_t alg, const struct HksBlob *keyMaterial, struct HksParamSet *paramSetOut)
+int32_t HksFormatKeyFromMaterial(uint32_t alg, const struct HksBlob *keyMaterial,
+    struct HksParamSet *paramSetOut)
 {
     switch (alg) {
         case HKS_ALG_X25519:

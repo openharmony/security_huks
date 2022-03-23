@@ -20,12 +20,15 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type_inner.h"
+
+#ifdef SUPPORT_ACCESS_TOCKEN
+#include "accesstoken_kit.h"
+#endif
 
 #ifdef SUPPORT_ACCOUNT_API
 #include "os_account_manager.h"
@@ -119,6 +122,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     return HKS_SUCCESS;
 }
 
+#ifdef SUPPORT_ACCESS_TOCKEN
 int32_t Apl3Check()
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
@@ -157,3 +161,4 @@ int32_t Apl3Check()
     HKS_LOG_E("GetTokenTypeFlag type wrong!");
     return HKS_FAILURE;
 }
+#endif
