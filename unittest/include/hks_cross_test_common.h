@@ -90,7 +90,7 @@ static struct HksParam g_ecdhGenParams[] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
-static struct HksParam g_ecdhInitParams01 [] = {
+static struct HksParam g_ecdhInitParams01[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ECDH
@@ -102,13 +102,13 @@ static struct HksParam g_ecdhInitParams01 [] = {
         .uint32Param = HKS_ECC_KEY_SIZE_224
     }
 };
-static struct HksParam g_ecdhFinishParams01 [] = {
+static struct HksParam g_ecdhFinishParams01[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-static struct HksParam g_ecdhInitParams02 [] = {
+static struct HksParam g_ecdhInitParams02[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ECDH
@@ -120,7 +120,7 @@ static struct HksParam g_ecdhInitParams02 [] = {
         .uint32Param = HKS_ECC_KEY_SIZE_224
     }
 };
-static struct HksParam g_ecdhFinishParams02 [] = {
+static struct HksParam g_ecdhFinishParams02[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
@@ -136,7 +136,7 @@ static struct HksBlob g_x25519KeyAlias02 = {
     (uint8_t *)"HksCrossTestX25519Agree001_02"
 };
 #ifdef _USE_MBEDTLS_
-static struct HksParam g_x25519GenParams [] = {
+static struct HksParam g_x25519GenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -149,7 +149,7 @@ static struct HksParam g_x25519GenParams [] = {
     }
 };
 #else
-static struct HksParam g_x25519GenParams [] = {
+static struct HksParam g_x25519GenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
@@ -162,7 +162,7 @@ static struct HksParam g_x25519GenParams [] = {
     }
 };
 #endif // _USE_MBEDTLS_
-static struct HksParam g_x25519InitParams01 [] = {
+static struct HksParam g_x25519InitParams01[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -174,13 +174,13 @@ static struct HksParam g_x25519InitParams01 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_x25519FinishParams01 [] = {
+static struct HksParam g_x25519FinishParams01[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-static struct HksParam g_x25519InitParams02 [] = {
+static struct HksParam g_x25519InitParams02[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_X25519
@@ -192,7 +192,7 @@ static struct HksParam g_x25519InitParams02 [] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-static struct HksParam g_x25519FinishParams02 [] = {
+static struct HksParam g_x25519FinishParams02[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
@@ -203,7 +203,7 @@ static struct HksBlob g_hkdfKeyAliasFinal = {
     strlen("HksCrossTestHkdfDerive001_finish"),
     (uint8_t *)"HksCrossTestHkdfDerive001_finish"
 };
-static struct HksParam g_hkdfGenParams [] = {
+static struct HksParam g_hkdfGenParams[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -218,7 +218,7 @@ static struct HksParam g_hkdfGenParams [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfInitParams [] = {
+static struct HksParam g_hkdfInitParams[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -233,7 +233,7 @@ static struct HksParam g_hkdfInitParams [] = {
         .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_hkdfFinishParams [] = {
+static struct HksParam g_hkdfFinishParams[] = {
     {
         .tag =  HKS_TAG_KEY_ALIAS,
         .blob = g_hkdfKeyAliasFinal
@@ -256,7 +256,7 @@ static struct HksBlob g_pbkdf2KeyAliasFinal = {
     strlen("HksCrossTestHkdfDerive001_finish"),
     (uint8_t *)"HksCrossTestHkdfDerive001_finish"
 };
-static struct HksParam g_pbkdf2GenParams [] = {
+static struct HksParam g_pbkdf2GenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -271,7 +271,7 @@ static struct HksParam g_pbkdf2GenParams [] = {
         .uint32Param = COMMON_KEY_SIZE
     }
 };
-static struct HksParam g_pbkdf2InitParams [] = {
+static struct HksParam g_pbkdf2InitParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_PBKDF2
@@ -298,7 +298,7 @@ static struct HksParam g_pbkdf2InitParams [] = {
         .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_pbkdf2FinishParams [] = {
+static struct HksParam g_pbkdf2FinishParams[] = {
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_pbkdf2KeyAliasFinal

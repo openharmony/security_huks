@@ -46,7 +46,7 @@ void HksHmacTest::TearDown()
 {
 }
 
-static struct HksParam g_genParams001 [] = {
+static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -61,7 +61,7 @@ static struct HksParam g_genParams001 [] = {
         .uint32Param = Unittest::Hmac::COMMON_SIZE
     }
 };
-static struct HksParam g_hmacParams001 [] = {
+static struct HksParam g_hmacParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -74,7 +74,7 @@ static struct HksParam g_hmacParams001 [] = {
     }
 };
 
-static struct HksParam g_genParams002 [] = {
+static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -89,7 +89,7 @@ static struct HksParam g_genParams002 [] = {
         .uint32Param = Unittest::Hmac::COMMON_SIZE
     }
 };
-static struct HksParam g_hmacParams002 [] = {
+static struct HksParam g_hmacParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -102,7 +102,7 @@ static struct HksParam g_hmacParams002 [] = {
     }
 };
 
-static struct HksParam g_genParams003 [] = {
+static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -117,7 +117,7 @@ static struct HksParam g_genParams003 [] = {
         .uint32Param = Unittest::Hmac::COMMON_SIZE
     }
 };
-static struct HksParam g_hmacParams003 [] = {
+static struct HksParam g_hmacParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -130,7 +130,7 @@ static struct HksParam g_hmacParams003 [] = {
     }
 };
 
-static struct HksParam g_genParams004 [] = {
+static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -145,7 +145,7 @@ static struct HksParam g_genParams004 [] = {
         .uint32Param = Unittest::Hmac::COMMON_SIZE
     }
 };
-static struct HksParam g_hmacParams004 [] = {
+static struct HksParam g_hmacParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -158,7 +158,7 @@ static struct HksParam g_hmacParams004 [] = {
     }
 };
 
-static struct HksParam g_genParams005 [] = {
+static struct HksParam g_genParams005[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -173,7 +173,7 @@ static struct HksParam g_genParams005 [] = {
         .uint32Param = Unittest::Hmac::COMMON_SIZE
     }
 };
-static struct HksParam g_hmacParams005 [] = {
+static struct HksParam g_hmacParams005[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC

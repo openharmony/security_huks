@@ -265,6 +265,10 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
 
 int32_t DhHksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
 {
+    if (CheckBlob(key) != HKS_SUCCESS || CheckBlob(x509Key) != HKS_SUCCESS) {
+        return DH_FAILED;
+    }
+
     DH *dh = InitDhStruct(key, true);
     if (dh == NULL) {
         return DH_FAILED;

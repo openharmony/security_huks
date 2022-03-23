@@ -66,7 +66,7 @@ static struct HksParam g_genParams006[] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams01Init006 [] = {
+static struct HksParam g_agreeParams01Init006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -78,13 +78,13 @@ static struct HksParam g_agreeParams01Init006 [] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams01Finish006 [] = {
+static struct HksParam g_agreeParams01Finish006[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-static struct HksParam g_agreeParams02Init006 [] = {
+static struct HksParam g_agreeParams02Init006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -96,7 +96,7 @@ static struct HksParam g_agreeParams02Init006 [] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams02Finish006 [] = {
+static struct HksParam g_agreeParams02Finish006[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
@@ -123,7 +123,7 @@ static struct HksParam g_genParams007[] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams01Init007 [] = {
+static struct HksParam g_agreeParams01Init007[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -135,7 +135,7 @@ static struct HksParam g_agreeParams01Init007 [] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams02Init007 [] = {
+static struct HksParam g_agreeParams02Init007[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -168,7 +168,7 @@ static struct HksParam g_genParams008[] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams01Init008 [] = {
+static struct HksParam g_agreeParams01Init008[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH
@@ -180,7 +180,7 @@ static struct HksParam g_agreeParams01Init008 [] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-static struct HksParam g_agreeParams02Init008 [] = {
+static struct HksParam g_agreeParams02Init008[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_DH

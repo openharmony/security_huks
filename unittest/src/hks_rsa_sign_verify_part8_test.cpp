@@ -47,7 +47,7 @@ void HksRsaSignVerifyPart8Test::TearDown()
 {
 }
 
-static struct HksParam g_genParamsTest071 [] = {
+static struct HksParam g_genParamsTest071[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -65,7 +65,7 @@ static struct HksParam g_genParamsTest071 [] = {
         .uint32Param = HKS_DIGEST_SHA384
     },
 };
-static struct HksParam g_signParamsTest071 [] = {
+static struct HksParam g_signParamsTest071[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -83,7 +83,7 @@ static struct HksParam g_signParamsTest071 [] = {
         .uint32Param = HKS_DIGEST_SHA384
     }
 };
-static struct HksParam g_verifyParamsTest071 [] = {
+static struct HksParam g_verifyParamsTest071[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -101,7 +101,7 @@ static struct HksParam g_verifyParamsTest071 [] = {
         .uint32Param = HKS_DIGEST_SHA384
     }
 };
-static struct HksParam g_genParamsTest072 [] = {
+static struct HksParam g_genParamsTest072[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -119,7 +119,7 @@ static struct HksParam g_genParamsTest072 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     },
 };
-static struct HksParam g_signParamsTest072 [] = {
+static struct HksParam g_signParamsTest072[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -137,7 +137,7 @@ static struct HksParam g_signParamsTest072 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
-static struct HksParam g_verifyParamsTest072 [] = {
+static struct HksParam g_verifyParamsTest072[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -155,7 +155,7 @@ static struct HksParam g_verifyParamsTest072 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
-static struct HksParam g_genParamsTest073 [] = {
+static struct HksParam g_genParamsTest073[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -173,7 +173,7 @@ static struct HksParam g_genParamsTest073 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     },
 };
-static struct HksParam g_signParamsTest073 [] = {
+static struct HksParam g_signParamsTest073[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -191,7 +191,7 @@ static struct HksParam g_signParamsTest073 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
-static struct HksParam g_verifyParamsTest073 [] = {
+static struct HksParam g_verifyParamsTest073[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -209,7 +209,7 @@ static struct HksParam g_verifyParamsTest073 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
-static struct HksParam g_genParamsTest074 [] = {
+static struct HksParam g_genParamsTest074[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -227,7 +227,7 @@ static struct HksParam g_genParamsTest074 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     },
 };
-static struct HksParam g_signParamsTest074 [] = {
+static struct HksParam g_signParamsTest074[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -246,7 +246,7 @@ static struct HksParam g_signParamsTest074 [] = {
     }
 };
 
-static struct HksParam g_genParamsTest075 [] = {
+static struct HksParam g_genParamsTest075[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -264,7 +264,7 @@ static struct HksParam g_genParamsTest075 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     },
 };
-static struct HksParam g_signParamsTest075 [] = {
+static struct HksParam g_signParamsTest075[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
