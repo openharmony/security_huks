@@ -795,7 +795,7 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
             cipherText->size = message->size;
         }
 
-        unsigned char check_tag[16];
+        uint8_t check_tag[16];
         ret =  mbedtls_gcm_finish(gcmCtx, check_tag, tagAead->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls aes gcm decrypt failed! mbedtls ret = 0x%X", ret);
@@ -803,7 +803,7 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
             break;
         }
 
-        int diff;
+        uint8_t diff;
         size_t i;
         /* Check tag in "constant-time" */
         for (diff = 0, i = 0; i < tagAead->size; i++) {
@@ -1224,7 +1224,11 @@ static int32_t AesEcbNoPaddingData(mbedtls_cipher_context_t *ecbNoPadingctx, siz
         while (point < message->size) {
             (void)memset_s(tmpMessage, blockSize, 0, blockSize);
             uint32_t tmpSize = (message->size - point) >= blockSize ? blockSize : (message->size - point);
-            (void)memcpy_s(tmpMessage, blockSize, message->data + point, tmpSize);
+            if (memcpy_s(tmpMessage, blockSize, message->data + point, tmpSize)) {
+                HKS_LOG_E("copy data failed");
+                HksFree(tmpMessage);
+                return HKS_ERROR_BAD_STATE;
+            }
             size_t olen;
             ret = mbedtls_cipher_update(ecbNoPadingctx, tmpMessage, tmpSize, cipherText->data + point, &olen);
             if (ret != HKS_MBEDTLS_SUCCESS) {

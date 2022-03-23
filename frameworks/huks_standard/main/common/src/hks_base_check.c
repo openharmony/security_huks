@@ -1367,6 +1367,10 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
     switch (alg) {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
         case HKS_ALG_RSA:
+            if (HksCheckValue(keySize, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize)) != HKS_SUCCESS) {
+                HKS_LOG_E("check key size: key size value %u not expected", keySize);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
             return CheckRsaSignature(cmdId, keySize, signature);
 #endif
 #if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_SIGN_VERIFY)
@@ -1375,6 +1379,10 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
 #endif
 #ifdef HKS_SUPPORT_ECC_C
         case HKS_ALG_ECC:
+            if (HksCheckValue(keySize, g_eccKeySize, HKS_ARRAY_SIZE(g_eccKeySize)) != HKS_SUCCESS) {
+                HKS_LOG_E("check key size: key size value %u not expected", keySize);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
             return CheckEccSignature(cmdId, keySize, signature);
 #endif
 #ifdef HKS_SUPPORT_ED25519_C

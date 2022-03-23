@@ -225,6 +225,11 @@ int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *ma
 
 int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
+    if (CheckBlob(keyIn) != HKS_SUCCESS || CheckBlob(keyOut) != HKS_SUCCESS) {
+        HKS_LOG_E("Invalid params!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     /* KeyMaterialRsa, KeyMaterialEcc, KeyMaterial25519's size are same */
     if (keyIn->size < sizeof(struct KeyMaterialRsa)) {
         HKS_LOG_E("Crypt Hal getPubKey keyIn size is more smaller. size[%d]", keyIn->size);

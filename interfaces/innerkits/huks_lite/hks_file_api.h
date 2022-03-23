@@ -75,11 +75,11 @@ __declspec(dllimport) int32_t hks_register_file_callbacks(
     struct hks_file_callbacks *callbacks);
 #endif
 #else
-__attribute__ ((visibility("default"))) int32_t hks_register_file_callbacks(
+__attribute__((visibility("default"))) int32_t hks_register_file_callbacks(
     struct hks_file_callbacks *callbacks);
 #endif
 #else
-__attribute__ ((visibility("default"))) int32_t hks_register_file_callbacks(
+__attribute__((visibility("default"))) int32_t hks_register_file_callbacks(
     struct hks_file_callbacks *callbacks);
 #endif
 

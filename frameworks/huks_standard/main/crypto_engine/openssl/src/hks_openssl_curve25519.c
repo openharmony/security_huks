@@ -202,14 +202,14 @@ int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct 
 {
     (void)spec;
     uint32_t priSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
-    uint8_t *priData = HksMalloc(priSize);
+    uint8_t *priData = (uint8_t *)HksMalloc(priSize);
     struct HksBlob nKey = { priSize, priData };
     uint32_t pubSize = CURVE25519_KEY_LEN;
-    uint8_t *pubData = HksMalloc(pubSize);
+    uint8_t *pubData = (uint8_t *)HksMalloc(pubSize);
     struct HksBlob pKey = { pubSize, pubData };
     struct HksBlob pubKeyData = {0};
     uint32_t pubKmSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
-    uint8_t *pubKmData = HksMalloc(pubKmSize);
+    uint8_t *pubKmData = (uint8_t *)HksMalloc(pubKmSize);
     struct HksBlob pubKm = { pubKmSize, pubKmData };
     if (priData == NULL || pubData == NULL || pubKmData == NULL) {
         FreeEd25519KeyData(priData, pubData, pubKmData);

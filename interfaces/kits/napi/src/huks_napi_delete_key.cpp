@@ -50,7 +50,7 @@ static DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
     return context;
 }
 
-static void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext context)
+static void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -75,6 +75,7 @@ static void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext cont
     }
 
     HksFree(context);
+    context = nullptr;
 }
 
 static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, DeleteKeyAsyncContext context)
