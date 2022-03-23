@@ -84,7 +84,7 @@ static const struct HksTestCipherParams g_testCipherParams[] = {
             false, 0,
             true, HKS_PADDING_NONE,
             true, HKS_MODE_GCM,
-            false, 0 
+            false, 0
         },
         { false, 0 },
         {
