@@ -64,6 +64,8 @@ int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, co
     HksBuildParamSet(&paramOutSet);
 
     if (HksGenerateKey(authId, paramSetIn, paramOutSet) != HKS_SUCCESS) {
+        HksFree(localData);
+        HksFreeParamSet(&paramOutSet);
         return HKS_FAILURE;
     }
 
