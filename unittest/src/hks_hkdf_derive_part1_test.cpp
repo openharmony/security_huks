@@ -46,7 +46,7 @@ void HksHkdfDerivePart1Test::SetUp()
 void HksHkdfDerivePart1Test::TearDown()
 {
 }
-static struct HksParam g_genParams001 [] = {
+static struct HksParam g_genParams001[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -61,7 +61,7 @@ static struct HksParam g_genParams001 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfParams001 [] = {
+static struct HksParam g_hkdfParams001[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -76,7 +76,7 @@ static struct HksParam g_hkdfParams001 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_hkdfFinishParams001 [] = {
+static struct HksParam g_hkdfFinishParams001[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -100,7 +100,7 @@ static struct HksParam g_hkdfFinishParams001 [] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
-static struct HksParam g_genParams002 [] = {
+static struct HksParam g_genParams002[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -115,7 +115,7 @@ static struct HksParam g_genParams002 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfParams002 [] = {
+static struct HksParam g_hkdfParams002[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -130,7 +130,7 @@ static struct HksParam g_hkdfParams002 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
     }
 };
-static struct HksParam g_hkdfFinishParams002 [] = {
+static struct HksParam g_hkdfFinishParams002[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -154,7 +154,7 @@ static struct HksParam g_hkdfFinishParams002 [] = {
         .uint32Param = HKS_DIGEST_SHA384
     }
 };
-static struct HksParam g_genParams003 [] = {
+static struct HksParam g_genParams003[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -169,7 +169,7 @@ static struct HksParam g_genParams003 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_128
     }
 };
-static struct HksParam g_hkdfParams003 [] = {
+static struct HksParam g_hkdfParams003[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -184,7 +184,7 @@ static struct HksParam g_hkdfParams003 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_hkdfFinishParams003 [] = {
+static struct HksParam g_hkdfFinishParams003[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -208,7 +208,7 @@ static struct HksParam g_hkdfFinishParams003 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
-static struct HksParam g_genParams004 [] = {
+static struct HksParam g_genParams004[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -223,7 +223,7 @@ static struct HksParam g_genParams004 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_192
     }
 };
-static struct HksParam g_hkdfParams004 [] = {
+static struct HksParam g_hkdfParams004[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -238,7 +238,7 @@ static struct HksParam g_hkdfParams004 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_hkdfFinishParams004 [] = {
+static struct HksParam g_hkdfFinishParams004[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -262,7 +262,7 @@ static struct HksParam g_hkdfFinishParams004 [] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
-static struct HksParam g_genParams005 [] = {
+static struct HksParam g_genParams005[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -277,7 +277,7 @@ static struct HksParam g_genParams005 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_192
     }
 };
-static struct HksParam g_hkdfParams005 [] = {
+static struct HksParam g_hkdfParams005[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -292,7 +292,7 @@ static struct HksParam g_hkdfParams005 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
     }
 };
-static struct HksParam g_hkdfFinishParams005 [] = {
+static struct HksParam g_hkdfFinishParams005[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -316,7 +316,7 @@ static struct HksParam g_hkdfFinishParams005 [] = {
         .uint32Param = HKS_DIGEST_SHA384
     }
 };
-static struct HksParam g_genParams006 [] = {
+static struct HksParam g_genParams006[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -331,7 +331,7 @@ static struct HksParam g_genParams006 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_192
     }
 };
-static struct HksParam g_hkdfParams006 [] = {
+static struct HksParam g_hkdfParams006[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -346,7 +346,7 @@ static struct HksParam g_hkdfParams006 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_hkdfFinishParams006 [] = {
+static struct HksParam g_hkdfFinishParams006[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -370,7 +370,7 @@ static struct HksParam g_hkdfFinishParams006 [] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
-static struct HksParam g_genParams007 [] = {
+static struct HksParam g_genParams007[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -385,7 +385,7 @@ static struct HksParam g_genParams007 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams007 [] = {
+static struct HksParam g_hkdfParams007[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -400,7 +400,7 @@ static struct HksParam g_hkdfParams007 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
     }
 };
-static struct HksParam g_hkdfFinishParams007 [] = {
+static struct HksParam g_hkdfFinishParams007[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -424,7 +424,7 @@ static struct HksParam g_hkdfFinishParams007 [] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
-static struct HksParam g_genParams008 [] = {
+static struct HksParam g_genParams008[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -439,7 +439,7 @@ static struct HksParam g_genParams008 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams008 [] = {
+static struct HksParam g_hkdfParams008[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -454,7 +454,7 @@ static struct HksParam g_hkdfParams008 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
     }
 };
-static struct HksParam g_hkdfFinishParams008 [] = {
+static struct HksParam g_hkdfFinishParams008[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -478,7 +478,7 @@ static struct HksParam g_hkdfFinishParams008 [] = {
         .uint32Param = HKS_DIGEST_SHA384
     }
 };
-static struct HksParam g_genParams009 [] = {
+static struct HksParam g_genParams009[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -493,7 +493,7 @@ static struct HksParam g_genParams009 [] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
-static struct HksParam g_hkdfParams009 [] = {
+static struct HksParam g_hkdfParams009[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -508,7 +508,7 @@ static struct HksParam g_hkdfParams009 [] = {
         .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
     }
 };
-static struct HksParam g_hkdfFinishParams009 [] = {
+static struct HksParam g_hkdfFinishParams009[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
@@ -602,7 +602,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest002"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest002"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -640,7 +640,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest003"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest003"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -678,7 +678,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest004"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest004"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -716,7 +716,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest005"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest005"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -754,7 +754,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest006"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest006"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -792,7 +792,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest007"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest007"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -830,7 +830,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive008, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest008"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest008"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -868,7 +868,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive009, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest009"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest009"};
-    ret =HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);

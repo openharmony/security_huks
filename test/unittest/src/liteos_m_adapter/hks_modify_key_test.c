@@ -277,7 +277,7 @@ int32_t BaseTestCipherProcess(const struct HksBlob *keyAlias, uint32_t index)
         if (ret == g_testCipherParams[index].expectResult) {
             if (plainData->size != decryptedData->size) {
                 break;
-            };
+            }
             ret = memcmp(plainData->data, decryptedData->data, plainData->size);
         }
     } while (0);
@@ -305,6 +305,7 @@ int32_t __attribute__((weak)) HksStoreKeyBlob(const struct HksBlob *processName,
     (void)keyAlias;
     (void)storageType;
     (void)keyBlob;
+    return HKS_SUCCESS;
 }
 
 /**
