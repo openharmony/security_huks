@@ -606,7 +606,7 @@ static int32_t HksCurvePskCheckPoint(const mbedtls_mpi *edwardsY, const uint8_t 
         /* if y >= p, return error */
         ret = mbedtls_mpi_cmp_mpi(edwardsY, &(curvePara->mpiP));
         if (ret >= 0) {
-            HKS_LOG_E("edwardsY is greater than or equal to p", ret);
+            HKS_LOG_E("edwardsY is greater than or equal to p, ret is %d", ret);
             ret = HKS_ERROR_INVALID_PUBLIC_KEY;
             break;
         }
