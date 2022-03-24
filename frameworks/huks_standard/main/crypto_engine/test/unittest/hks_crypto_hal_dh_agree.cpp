@@ -37,6 +37,8 @@ struct TestCaseParams {
     HksErrorCode agreeResult = HksErrorCode::HKS_SUCCESS;
 };
 
+const uint32_t ALISE_KEY_SIZE = 4096;
+const uint32_t BOB_KEY_SIZE = 4096;
 const TestCaseParams HKS_CRYPTO_HAL_DH_AGREE_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_DH,
@@ -83,14 +85,18 @@ protected:
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &alise), HKS_SUCCESS);
         EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &bob), HKS_SUCCESS);
 
-        struct HksBlob pubKeyAlise = { .size = 4096, .data = (uint8_t *)HksMalloc(4096) };
-        struct HksBlob pubKeyBob = { .size = 4096, .data = (uint8_t *)HksMalloc(4096) };
+        struct HksBlob pubKeyAlise = { .size = ALISE_KEY_SIZE, .data = (uint8_t *)HksMalloc(ALISE_KEY_SIZE) };
+        ASSERT_NE(pubKeyAlise.data, nullptr);
+        struct HksBlob pubKeyBob = { .size = BOB_KEY_SIZE, .data = (uint8_t *)HksMalloc(BOB_KEY_SIZE) };
+        ASSERT_NE(pubKeyBob.data, nullptr);
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&alise, &pubKeyAlise), HKS_SUCCESS);
         EXPECT_EQ(HksCryptoHalGetPubKey(&bob, &pubKeyBob), HKS_SUCCESS);
 
-        struct HksBlob agreeKeyAlise = { .size = 4096, .data = (uint8_t *)HksMalloc(4096) };
-        struct HksBlob agreeKeyBob = { .size = 4096, .data = (uint8_t *)HksMalloc(4096) };
+        struct HksBlob agreeKeyAlise = { .size = ALISE_KEY_SIZE, .data = (uint8_t *)HksMalloc(ALISE_KEY_SIZE) };
+        ASSERT_NE(agreeKeyAlise.data, nullptr);
+        struct HksBlob agreeKeyBob = { .size = BOB_KEY_SIZE, .data = (uint8_t *)HksMalloc(BOB_KEY_SIZE) };
+        ASSERT_NE(agreeKeyBob.data, nullptr);
 
         EXPECT_EQ(HksCryptoHalAgreeKey(&alise, &pubKeyBob, &testCaseParams.spec, &agreeKeyAlise), HKS_SUCCESS);
         EXPECT_EQ(HksCryptoHalAgreeKey(&bob, &pubKeyAlise, &testCaseParams.spec, &agreeKeyBob), HKS_SUCCESS);

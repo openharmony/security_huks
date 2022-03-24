@@ -27,6 +27,8 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 namespace UnitTest {
+const uint32_t IV_SIZE = 20;
+const uint32_t ERROR_KEY_SIZE = 2000;
 class HksCryptoHalApiMbedtls : public HksCryptoHalCommon, public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -262,7 +264,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_009, Function | SmallTes
     int32_t ret;
 
     uint8_t buff[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)] = {0};
-    uint8_t iv[20] = {0};
+    uint8_t iv[IV_SIZE] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksCipherParam cipherParam = { .iv = { .size = sizeof(iv), .data = iv } };
     HksUsageSpec spec = { .algType = HKS_ALG_AES, .mode = HKS_MODE_CBC, .padding = HKS_PADDING_NONE };
@@ -284,7 +286,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_010, Function | SmallTes
     int32_t ret;
 
     uint8_t buff[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)] = {0};
-    uint8_t iv[20] = {0};
+    uint8_t iv[IV_SIZE] = {0};
     HksBlob key;
     HksCipherParam cipherParam = { .iv = { .size = sizeof(iv), .data = iv } };
     HksUsageSpec spec = { .algType = HKS_ALG_RSA, .mode = HKS_MODE_ECB, .padding = HKS_PADDING_NONE };
@@ -296,6 +298,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_010, Function | SmallTes
                       HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096) +
                       (HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096) + HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096));
     key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
+    ASSERT_NE(key.data, nullptr);
     KeyMaterialRsa *keyMaterial = (KeyMaterialRsa *)key.data;
     keyMaterial->keyAlg = HKS_ALG_RSA;
     keyMaterial->keySize = HKS_RSA_KEY_SIZE_4096;
@@ -308,7 +311,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_010, Function | SmallTes
 
     key.size -= HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
     keyMaterial->dSize = HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096);
-    keyMaterial->keySize = 2000;
+    keyMaterial->keySize = ERROR_KEY_SIZE;
     ret = HksCryptoHalDecrypt(&key, &spec, &message, &cipherText);
     EXPECT_EQ(HKS_ERROR_INVALID_KEY_SIZE, ret);
 
@@ -341,8 +344,9 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_011, Function | SmallTes
 
     uint32_t keyOutLen = sizeof(KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize;
     HksBlob keyOut = { .size = sizeof(KeyMaterialRsa), .data = (uint8_t *)HksMalloc(keyOutLen) };
+    ASSERT_NE(keyOut.data, nullptr);
 
-    keyMaterial->keySize = 2000;
+    keyMaterial->keySize = ERROR_KEY_SIZE;
     ret = HksCryptoHalGetPubKey(&key, &keyOut);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_SIZE);
 
@@ -395,6 +399,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_013, Function | SmallTes
 
     uint32_t keyOutLen = sizeof(KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
     HksBlob keyOut = { .size = sizeof(KeyMaterialEcc), .data = (uint8_t *)HksMalloc(keyOutLen) };
+    ASSERT_NE(keyOut.data, nullptr);
 
     ret = HksCryptoHalGetPubKey(&key, &keyOut);
     ASSERT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
@@ -459,6 +464,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_015, Function | SmallTes
 
     uint32_t keyOutLen = sizeof(KeyMaterialDh) + keyMaterial->pubKeySize;
     HksBlob keyOut = { .size = sizeof(KeyMaterialDh), .data = (uint8_t *)HksMalloc(keyOutLen) };
+    ASSERT_NE(keyOut.data, nullptr);
 
     ret = HksCryptoHalGetPubKey(&key, &keyOut);
     ASSERT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
@@ -492,6 +498,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_016, Function | SmallTes
 
     uint32_t keyOutLen = HKS_KEY_BYTES(spec.keyLen);
     HksBlob sharedKey = { .size = keyOutLen, .data = (uint8_t *)HksMalloc(keyOutLen) };
+    ASSERT_NE(sharedKey.data, nullptr);
 
     keyMaterial->keySize -= 1;
     ret = HksCryptoHalAgreeKey(&key, &key, &spec, &sharedKey);
@@ -515,6 +522,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_017, Function | SmallTes
     HksBlob key = { .size = 0, .data = nullptr };
     uint8_t buff[1] = {0};
     void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
 
     ASSERT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
 
@@ -537,6 +545,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_018, Function | SmallTes
     HksBlob message = { .size = 0, .data = nullptr };
     uint8_t buff[1] = {0};
     void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
 
     ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
     HksFree(hmactestctx);
@@ -546,6 +555,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_018, Function | SmallTes
     ASSERT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
 
     hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
     ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, &hmactestctx), HKS_SUCCESS);
     ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
     HksFree(hmactestctx);
@@ -565,16 +575,18 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_019, Function | SmallTes
     HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
     ASSERT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
     const char *hexData = "00112233445566778899aabbccddeeff";
-    uint32_t dataLen = strlen(hexData) / 2;
+    uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
 
     HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+    ASSERT_NE(message.data, nullptr);
     for (uint32_t ii = 0; ii < dataLen; ii++) {
-        message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+        message.data[ii] = ReadHex((const uint8_t *)&hexData[HKS_COUNT_OF_HALF * ii]);
     }
 
     uint8_t buff[1] = {0};
     HksBlob signature = { .size = 1, .data = buff };
     void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
     ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA1, &hmactestctx), HKS_SUCCESS);
     ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_SUCCESS);
     ASSERT_EQ(HksCryptoHalHmacFinal(NULL, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);

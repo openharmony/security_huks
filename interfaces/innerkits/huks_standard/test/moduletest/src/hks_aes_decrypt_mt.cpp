@@ -440,6 +440,7 @@ protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
         struct HksBlob authId = { .size = AUTHID_KEY_SIZE, .data = (uint8_t *)HksMalloc(AUTHID_KEY_SIZE) };
+        ASSERT_NE(authId.data, nullptr);
 
         struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
@@ -464,6 +465,7 @@ protected:
         ASSERT_NE(plainTextDecrypt.data, nullptr);
         if (blockMode == HKS_MODE_GCM) {
             HksBlob tagAead = { .size = AAD_SIZE, .data = (uint8_t *)HksMalloc(AAD_SIZE) };
+            ASSERT_NE(tagAead.data, nullptr);
             EXPECT_EQ(
                 AesGcmEncrypt(paramInSet, &plainText, &cipherText, &authId, &tagAead), testCaseParams.encryptResult);
             cipherText.size += AAD_SIZE;

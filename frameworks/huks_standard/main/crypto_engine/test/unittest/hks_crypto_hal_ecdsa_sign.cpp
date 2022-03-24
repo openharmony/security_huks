@@ -38,6 +38,8 @@ struct TestCaseParams {
     HksErrorCode verifyResult = HksErrorCode::HKS_SUCCESS;
 };
 
+const uint32_t SIGNATURE_SIZE = 521;
+const uint32_t MAX_PUB_KEY_SIZE = 218;
 const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -512,8 +514,9 @@ protected:
         uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
 
         HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+        ASSERT_NE(message.data, nullptr);
         for (uint32_t ii = 0; ii < dataLen; ii++) {
-            message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+            message.data[ii] = ReadHex((const uint8_t *)&hexData[HKS_COUNT_OF_HALF * ii]);
         }
 
         struct HksBlob* pBlob = nullptr;
@@ -530,11 +533,13 @@ protected:
             pBlob = &message;
         }
 
-        struct HksBlob signature = { .size = 521, .data = (uint8_t *)HksMalloc(521) };
+        struct HksBlob signature = { .size = SIGNATURE_SIZE, .data = (uint8_t *)HksMalloc(SIGNATURE_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
 
         EXPECT_EQ(HksCryptoHalSign(&key, &usageSpecTmp, pBlob, &signature), testCaseParams.signResult);
 
-        struct HksBlob pubKey = { .size = 218, .data = (uint8_t *)HksMalloc(218) };
+        struct HksBlob pubKey = { .size = MAX_PUB_KEY_SIZE, .data = (uint8_t *)HksMalloc(MAX_PUB_KEY_SIZE) };
+        ASSERT_NE(pubKey.data, nullptr);
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 

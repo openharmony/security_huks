@@ -27,6 +27,7 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 namespace UnitTest {
+const uint32_t HMAC_KEY_SIZE = 256;
 class HksCryptoHalHmacKey : public HksCryptoHalCommon, public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -63,7 +64,7 @@ HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Le
 
     HksKeySpec spec = {
         .algType = HKS_ALG_HMAC,
-        .keyLen = 256,
+        .keyLen = HMAC_KEY_SIZE,
         .algParam = nullptr,
     };
 

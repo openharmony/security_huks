@@ -187,6 +187,7 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_005, Function | SmallTest | Leve
 
     uint32_t keyOutLen = sizeof(KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
     HksBlob keyOut = { .size = keyOutLen, .data = (uint8_t *)HksMalloc(keyOutLen) };
+    ASSERT_NE(keyOut.data, nullptr);
 
     ret = HksCryptoHalGetPubKey(&key, &keyOut);
     ASSERT_EQ(ret, HKS_SUCCESS);

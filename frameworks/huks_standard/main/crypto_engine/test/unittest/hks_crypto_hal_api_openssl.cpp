@@ -27,6 +27,7 @@ namespace OHOS {
 namespace Security {
 namespace Huks {
 namespace UnitTest {
+const uint32_t KEY_LEN_256 = 256;
 class HksCryptoHalApiOpenssl : public HksCryptoHalCommon, public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -402,10 +403,10 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTes
 {
     HksKeySpec spec = {
         .algType = HKS_ALG_DSA,
-        .keyLen = 256,
+        .keyLen = KEY_LEN_256,
     };
 
-    uint8_t buff[HKS_KEY_BYTES(256)] = {0};
+    uint8_t buff[HKS_KEY_BYTES(KEY_LEN_256)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksUsageSpec signSpec = { .algType = HKS_ALG_DSA };
     HksBlob message = { .size = 1, .data = buff };
@@ -425,7 +426,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTes
  */
 HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTest | Level0)
 {
-    uint8_t buff[HKS_KEY_BYTES(256)] = {0};
+    uint8_t buff[HKS_KEY_BYTES(KEY_LEN_256)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksUsageSpec signSpec = { .algType = HKS_ALG_DSA };
     HksBlob message = { .size = 1, .data = buff };
@@ -462,7 +463,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_016, Function | SmallTes
         .keyLen = HKS_ECC_KEY_SIZE_256,
     };
 
-    uint8_t buff[HKS_KEY_BYTES(256)] = {0};
+    uint8_t buff[HKS_KEY_BYTES(KEY_LEN_256)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksUsageSpec signSpec = { .algType = HKS_ALG_ECC };
     HksBlob message = { .size = 1, .data = buff };
@@ -597,6 +598,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_021, Function | SmallTes
     HksBlob key = { .size = 0, .data = nullptr };
     uint8_t buff[1] = {0};
     void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
 
     EXPECT_EQ(HksCryptoHalHmacInit(&key, 0, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
 
@@ -621,15 +623,17 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_022, Function | SmallTes
     HksBlob message = { .size = 0, .data = nullptr };
     uint8_t buff[1] = {0};
     void *hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
 
     EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
     HksFree(hmactestctx);
 
     key = { .size = 0, .data = nullptr };
-    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
+    HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = KEY_LEN_256, .algParam = nullptr};
     EXPECT_EQ(HksCryptoHalGenerateKey(&spec, &key), HKS_SUCCESS);
 
     hmactestctx = HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(hmactestctx, nullptr);
     EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, &hmactestctx), HKS_SUCCESS);
     EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
     HksFree(hmactestctx);
@@ -665,6 +669,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_024, Function | SmallTes
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(ctx, nullptr);
 
     ret = HksCryptoHalEncryptInit(&key, &spec, &ctx);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
@@ -694,6 +699,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_025, Function | SmallTes
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(ctx, nullptr);
     ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
@@ -731,6 +737,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_026, Function | SmallTes
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(ctx, nullptr);
     ret = HksCryptoHalEncryptFinal(&messageLast, &ctx, &cipherText, &tagAead, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
@@ -773,6 +780,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_027, Function | SmallTes
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(ctx, nullptr);
 
     ret = HksCryptoHalDecryptInit(&key, &spec, &ctx);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
@@ -802,6 +810,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_028, Function | SmallTes
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(ctx, nullptr);
     ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
@@ -839,6 +848,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_029, Function | SmallTes
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
+    ASSERT_NE(ctx, nullptr);
     ret = HksCryptoHalDecryptFinal(&messageLast, &ctx, &cipherText, &tagAead, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 

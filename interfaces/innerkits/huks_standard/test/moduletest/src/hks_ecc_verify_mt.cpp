@@ -823,6 +823,7 @@ protected:
     void RunTestCase(const TestCaseParams &testCaseParams)
     {
         struct HksBlob authId = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
+        ASSERT_NE(authId.data, nullptr);
 
         struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
@@ -834,6 +835,7 @@ protected:
         uint32_t storage = ReadValueByTag(testCaseParams.params, HKS_TAG_KEY_STORAGE_FLAG);
 
         struct HksBlob pubKey = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
+        ASSERT_NE(pubKey.data, nullptr);
 
         uint32_t keySize = ReadValueByTag(testCaseParams.params, HKS_TAG_KEY_SIZE);
         EXPECT_EQ(EccGenerateKey(keySize, &authId), testCaseParams.generateKeyResult);
@@ -844,6 +846,7 @@ protected:
             .data = (uint8_t *)&testCaseParams.hexData[0],
         };
         HksBlob signature = { .size = ECC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(ECC_MESSAGE_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
 
         EXPECT_EQ(EcdsaSign(&authId, digest, &message, &signature), testCaseParams.signResult);
 
@@ -851,6 +854,7 @@ protected:
             EXPECT_EQ(HksVerify(&pubKey, paramInSet, &message, &signature), testCaseParams.verifyResult);
         } else if (storage == HKS_STORAGE_PERSISTENT) {
             HksBlob x509Key = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
+            ASSERT_NE(x509Key.data, nullptr);
             EXPECT_EQ(HksBlobToX509(&pubKey, &x509Key), ECC_SUCCESS);
             struct HksBlob pubId = { (uint32_t)strlen(PUB_KEY), (uint8_t *)PUB_KEY };
             EXPECT_EQ(HksImportKey(&pubId, paramInSet, &x509Key), HKS_SUCCESS);

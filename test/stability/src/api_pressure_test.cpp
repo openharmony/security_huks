@@ -498,6 +498,7 @@ void ApiPressureTest::GetSdkVersionTest()
             .size = MAX_SDK_VERSION_SIZE,
             .data = (uint8_t *)HksMalloc(MAX_SDK_VERSION_SIZE)
         };
+        ASSERT_NE(sdkVersion.data, nullptr);
 
         EXPECT_EQ(HksGetSdkVersion(&sdkVersion), HKS_SUCCESS);
 
@@ -553,6 +554,7 @@ void ApiPressureTest::GenerateKeyTest()
 void ApiPressureTest::ImportKeyTest(const struct HksBlob *authId, const struct HksParamSet *paramInSet)
 {
     struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
     HksExportPublicKey(authId, paramInSet, &pubKey);
     do {
         if (!GetThreadState()) {
@@ -571,6 +573,7 @@ void ApiPressureTest::ExportPublicKeyTest(const struct HksBlob *authId, const st
             break;
         }
         struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(pubKey.data, nullptr);
 
         EXPECT_EQ(HksExportPublicKey(authId, paramInSet, &pubKey), HKS_SUCCESS);
 
@@ -614,6 +617,7 @@ void ApiPressureTest::GetKeyParamSetTest(const struct HksBlob *authId, const str
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = KEY_PARAMSET_SIZE, .data = (uint8_t *)HksMalloc(KEY_PARAMSET_SIZE) }
         };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramOutSet, &localKey, 1);
         HksBuildParamSet(&paramOutSet);
         if (!GetThreadState()) {
@@ -638,6 +642,7 @@ void ApiPressureTest::KeyExistTest(const struct HksBlob *authId, const struct Hk
 void ApiPressureTest::GenerateRandomTest()
 {
     struct HksBlob authId = { .size = RANDOM_KEY_SIZE, .data = (uint8_t *)HksMalloc(RANDOM_KEY_SIZE) };
+    ASSERT_NE(authId.data, nullptr);
     struct HksParamSet *paramInSet = nullptr;
     HksInitParamSet(&paramInSet);
     struct HksParam tmpParams[] = {
@@ -666,6 +671,7 @@ void ApiPressureTest::SignTest(
             break;
         }
         HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(signature.data, nullptr);
         EXPECT_EQ(HksSign(authId, paramInSet, message, &signature), HKS_SUCCESS);
         HksFree(signature.data);
     } while (1);
@@ -693,6 +699,7 @@ void ApiPressureTest::EncryptTest(const struct HksBlob *authId, const struct Hks
             break;
         }
         HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        ASSERT_NE(cipherText.data, nullptr);
         EXPECT_EQ(HksEncrypt(authId, paramInSet, &plainText, &cipherText), HKS_SUCCESS);
         HksFree(cipherText.data);
     } while (1);
@@ -706,6 +713,7 @@ void ApiPressureTest::DecryptTest(const struct HksBlob *authId, const struct Hks
             break;
         }
         HksBlob plainTextDecrypt = { .size = *inLen, .data = (uint8_t *)HksMalloc(*inLen) };
+        ASSERT_NE(plainTextDecrypt.data, nullptr);
         EXPECT_EQ(HksDecrypt(authId, paramInSet, cipherText, &plainTextDecrypt), HKS_SUCCESS);
         HksFree(plainTextDecrypt.data);
     } while (1);
@@ -714,6 +722,7 @@ void ApiPressureTest::DecryptTest(const struct HksBlob *authId, const struct Hks
 void ApiPressureTest::AgreeKeyTest(const struct HksBlob *authId)
 {
     struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
     HksExportPublicKey(authId, NULL, &pubKey);
     struct HksParamSet *paramInSet = nullptr;
     HksInitParamSet(&paramInSet);
@@ -732,6 +741,7 @@ void ApiPressureTest::AgreeKeyTest(const struct HksBlob *authId)
             break;
         }
         HksBlob agreeKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(agreeKey.data, nullptr);
         EXPECT_EQ(HksAgreeKey(paramInSet, authId, &pubKey, &agreeKey), HKS_SUCCESS);
         HksFree(agreeKey.data);
     } while (1);
@@ -746,6 +756,7 @@ void ApiPressureTest::DeriveKeyTest(const struct HksBlob *authId, const struct H
             break;
         }
         HksBlob derivedKey = { .size = DERIVE_KEY_SIZE, .data = (uint8_t *)HksMalloc(DERIVE_KEY_SIZE) };
+        ASSERT_NE(derivedKey.data, nullptr);
         EXPECT_EQ(HksDeriveKey(paramInSet, authId, &derivedKey), HKS_SUCCESS);
         HksFree(derivedKey.data);
     } while (1);
@@ -761,6 +772,7 @@ void ApiPressureTest::MacTest(const struct HksBlob *authId, const struct HksPara
             break;
         }
         HksBlob macMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
+        ASSERT_NE(macMessage.data, nullptr);
         EXPECT_EQ(HksMac(authId, paramInSet, &message, &macMessage), HKS_SUCCESS);
         HksFree(macMessage.data);
     } while (1);
@@ -781,6 +793,7 @@ void ApiPressureTest::HashTest()
             break;
         }
         HksBlob shaMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
+        ASSERT_NE(shaMessage.data, nullptr);
         EXPECT_EQ(HksHash(paramInSet, &message, &shaMessage), HKS_SUCCESS);
         HksFree(shaMessage.data);
     } while (1);
@@ -820,8 +833,10 @@ void ApiPressureTest::CipherScene(uint32_t ii)
         }
         HksBlob plainText = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob cipherText = { .size = CIPHER_SIZE, .data = (uint8_t *)HksMalloc(CIPHER_SIZE) };
+        ASSERT_NE(cipherText.data, nullptr);
         HksEncrypt(&authId, paramInSet, &plainText, &cipherText);
         HksBlob plainTextDecrypt = { .size = CIPHER_SIZE, .data = (uint8_t *)HksMalloc(CIPHER_SIZE) };
+        ASSERT_NE(plainTextDecrypt.data, nullptr);
         EXPECT_EQ(HksDecrypt(&authId, paramInSet, &cipherText, &plainTextDecrypt), HKS_SUCCESS);
         HksFree(plainTextDecrypt.data);
         HksFree(cipherText.data);
@@ -853,6 +868,7 @@ void ApiPressureTest::SignScene(uint32_t ii)
         uint32_t dataLen = strlen(hexData);
         HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob signature = { .size = CIPHER_SIZE, .data = (uint8_t *)HksMalloc(CIPHER_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
         HksSign(&authId, paramInSet, &message, &signature);
         EXPECT_EQ(HksVerify(&authId, paramInSet, &message, &signature), HKS_SUCCESS);
         HksFree(signature.data);
@@ -885,8 +901,10 @@ void ApiPressureTest::AgreeScene(uint32_t ii)
         HksBuildParamSet(&agreeKeyParam);
         HksGenerateKey(&authId, generateKeyParam, NULL);
         struct HksBlob pubKey = { .size = TEST_KEY_SIZE, .data = (uint8_t *)HksMalloc(TEST_KEY_SIZE) };
+        ASSERT_NE(pubKey.data, nullptr);
         HksExportPublicKey(&authId, generateKeyParam, &pubKey);
         HksBlob agreeKey = { .size = TEST_KEY_SIZE, .data = (uint8_t *)HksMalloc(TEST_KEY_SIZE) };
+        ASSERT_NE(agreeKey.data, nullptr);
         EXPECT_EQ(HksAgreeKey(agreeKeyParam, &authId, &pubKey, &agreeKey), HKS_SUCCESS);
         HksFree(agreeKey.data);
         HksFree(pubKey.data);
@@ -1214,6 +1232,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01200, TestSize.Level1)
     uint32_t dataLen = strlen(hexData);
     HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
     HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(signature.data, nullptr);
     HksSign(&authId, paramInSet, &message, &signature);
     SetThreadState(true);
     for (uint32_t ii = 0; ii < THREADS_NUM; ii++) {
@@ -1302,6 +1321,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01400, TestSize.Level1)
     HksBlob plainText = { .size = dataLen, .data = (uint8_t *)hexData };
     uint32_t inLen = dataLen + COMPLEMENT_LEN;
     HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+    ASSERT_NE(cipherText.data, nullptr);
     HksEncrypt(&authId, paramInSet, &plainText, &cipherText);
     SetThreadState(true);
     for (uint32_t ii = 0; ii < THREADS_NUM; ii++) {
