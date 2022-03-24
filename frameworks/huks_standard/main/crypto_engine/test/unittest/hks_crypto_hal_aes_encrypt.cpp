@@ -37,12 +37,14 @@ struct TestCaseParams {
     HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
-uint8_t IV[16] = {0};
-HksCipherParam tagIv = { .iv = { .size = 16, .data = IV } };
-HksAeadParam aeadParam = {
-    .nonce = { .size = 16, .data = IV },
+const uint32_t IV_SIZE = 16;
+const uint32_t AEAD_SIZE = 16;
+uint8_t IV[IV_SIZE] = {0};
+HksCipherParam TAG_IV = { .iv = { .size = IV_SIZE, .data = IV } };
+HksAeadParam AEAD_PARAM = {
+    .nonce = { .size = IV_SIZE, .data = IV },
     .aad = { .size = 0, .data = nullptr },
-    .tagLenEnc = 16,
+    .tagLenEnc = IV_SIZE,
     .payloadLen = 0,
 };
 
@@ -53,7 +55,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_001_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "933c213c1f8c844ffcc03f5f7e146a88",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -68,7 +70,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_002_PARAMS = {
         .padding = HKS_PADDING_PKCS7,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "933c213c1f8c844ffcc03f5f7e146a88",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -83,7 +85,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_003_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "933c213c1f8c844ffcc03f5f7e146a88",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -132,7 +134,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_006_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &aeadParam,
+        .algParam = &AEAD_PARAM,
     },
     .keyData = "933c213c1f8c844ffcc03f5f7e146a88",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -147,7 +149,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_007_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "7be3cb2c4c900fb318e9c89f828baf9b91783f47c6e8d088",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -162,7 +164,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_008_PARAMS = {
         .padding = HKS_PADDING_PKCS7,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "7be3cb2c4c900fb318e9c89f828baf9b91783f47c6e8d088",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -177,7 +179,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_009_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "7be3cb2c4c900fb318e9c89f828baf9b91783f47c6e8d088",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -226,7 +228,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_012_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &aeadParam,
+        .algParam = &AEAD_PARAM,
     },
     .keyData = "7be3cb2c4c900fb318e9c89f828baf9b91783f47c6e8d088",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -241,7 +243,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_013_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "57095bd2ba60c34eaafaa77d694eb809af366810fba500ea660a5048b14b212f",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -256,7 +258,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_014_PARAMS = {
         .padding = HKS_PADDING_PKCS7,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "57095bd2ba60c34eaafaa77d694eb809af366810fba500ea660a5048b14b212f",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -271,7 +273,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_015_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &tagIv,
+        .algParam = &TAG_IV,
     },
     .keyData = "57095bd2ba60c34eaafaa77d694eb809af366810fba500ea660a5048b14b212f",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -320,7 +322,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_018_PARAMS = {
         .padding = HKS_PADDING_NONE,
         .digest = HKS_DIGEST_NONE,
         .purpose = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
-        .algParam = &aeadParam,
+        .algParam = &AEAD_PARAM,
     },
     .keyData = "57095bd2ba60c34eaafaa77d694eb809af366810fba500ea660a5048b14b212f",
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
@@ -340,7 +342,7 @@ protected:
         struct HksBlob *encryptOut, struct HksBlob *tagAead) const
     {
         void *encryptCtx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
-        EXPECT_EQ(encryptCtx == nullptr, false) << "encryptCtx malloc failed.";
+        ASSERT_EQ(encryptCtx == nullptr, false) << "encryptCtx malloc failed.";
         uint32_t inLen = encryptMsg->size;
 
         EXPECT_EQ(HksCryptoHalEncryptInit(key, &testCaseParams.usageSpec, &encryptCtx), testCaseParams.encryptResult);
@@ -351,8 +353,8 @@ protected:
         if (inLen > HKS_UPDATE_DATA_MAX) {
             HksBlob messageUpdate = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
             HksBlob out = { .size = HKS_UPDATE_DATA_MAX, .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX) };
-            EXPECT_EQ(messageUpdate.data == nullptr, false) << "messageUpdate malloc failed.";
-            EXPECT_EQ(out.data == nullptr, false) << "out malloc failed.";
+            ASSERT_EQ(messageUpdate.data == nullptr, false) << "messageUpdate malloc failed.";
+            ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
 
             while (point < inLen - HKS_UPDATE_DATA_MAX) {
                 EXPECT_EQ(memcpy_s(messageUpdate.data, messageUpdate.size,
@@ -370,8 +372,8 @@ protected:
                 .size = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT,
                 .data = (uint8_t *)HksMalloc(HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT)
             };
-            EXPECT_EQ(enMessageLast.data == nullptr, false) << "enMessageLast malloc failed.";
-            EXPECT_EQ(enMessageLastOut.data == nullptr, false) << "enMessageLastOut malloc failed.";
+            ASSERT_EQ(enMessageLast.data == nullptr, false) << "enMessageLast malloc failed.";
+            ASSERT_EQ(enMessageLastOut.data == nullptr, false) << "enMessageLastOut malloc failed.";
             (void)memcpy_s(enMessageLast.data, lastLen, (encryptMsg->data + point), lastLen);
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
@@ -380,7 +382,7 @@ protected:
             HksFree(enMessageLastOut.data);
         } else {
             HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
-            EXPECT_EQ(out.data == nullptr, false) << "out malloc failed.";
+            ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
             EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
                 testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
             HksFree(out.data);
@@ -395,9 +397,9 @@ protected:
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
-        EXPECT_EQ(key.data == nullptr, false) << "key malloc failed.";
+        ASSERT_EQ(key.data == nullptr, false) << "key malloc failed.";
         for (uint32_t ii = 0; ii < keyLen; ii++) {
-            key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[2 * ii]);
+            key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[HKS_COUNT_OF_HALF * ii]);
         }
 
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
@@ -406,14 +408,14 @@ protected:
             outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
         }
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
-        EXPECT_EQ(message.data == nullptr, false) << "message malloc failed.";
+        ASSERT_EQ(message.data == nullptr, false) << "message malloc failed.";
         for (uint32_t ii = 0; ii < inLen; ii++) {
-            message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[2 * ii]);
+            message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[HKS_COUNT_OF_HALF * ii]);
         }
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
-        HksBlob tagAead = { .size = 16, .data = (uint8_t *)HksMalloc(16) };
-        EXPECT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
-        EXPECT_EQ(tagAead.data == nullptr, false) << "tagAead malloc failed.";
+        HksBlob tagAead = { .size = AEAD_SIZE, .data = (uint8_t *)HksMalloc(AEAD_SIZE) };
+        ASSERT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
+        ASSERT_EQ(tagAead.data == nullptr, false) << "tagAead malloc failed.";
 
         if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
             RunTestEncrypt(&key, testCaseParams, &message, &cipherText, &tagAead);

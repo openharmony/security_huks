@@ -185,6 +185,7 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
     ASSERT_NE(opensslRsaKeyInfo.data, nullptr);
 
     struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    ASSERT_NE(x509Key.data, nullptr);
 
     EVP_PKEY *pkey = GenerateRsaKey(testCaseParams.keySize);
     ASSERT_NE(pkey, nullptr);
@@ -517,6 +518,7 @@ void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCa
     ASSERT_NE(opensslRsaKeyInfo.data, nullptr);
 
     struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    ASSERT_NE(x509Key.data, nullptr);
 
     EVP_PKEY *pkey = GenerateRsaKey(testCaseParams.keySize);
     ASSERT_NE(pkey, nullptr);

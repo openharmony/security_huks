@@ -37,10 +37,12 @@ struct TestCaseParams {
     HksErrorCode hmacResult = HksErrorCode::HKS_SUCCESS;
 };
 
+const uint32_t HMAC_KEY_SIZE = 256;
+const uint32_t SIGNATURE_SIZE = 1024;
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
-        .keyLen = 256,
+        .keyLen = HMAC_KEY_SIZE,
         .algParam = nullptr,
     },
     .digest = HKS_DIGEST_SHA1,
@@ -52,7 +54,7 @@ const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_001_PARAMS = {
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_002_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
-        .keyLen = 256,
+        .keyLen = HMAC_KEY_SIZE,
         .algParam = nullptr,
     },
     .digest = HKS_DIGEST_SHA224,
@@ -64,7 +66,7 @@ const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_002_PARAMS = {
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_003_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
-        .keyLen = 256,
+        .keyLen = HMAC_KEY_SIZE,
         .algParam = nullptr,
     },
     .digest = HKS_DIGEST_SHA256,
@@ -76,7 +78,7 @@ const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_003_PARAMS = {
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_004_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
-        .keyLen = 256,
+        .keyLen = HMAC_KEY_SIZE,
         .algParam = nullptr,
     },
     .digest = HKS_DIGEST_SHA384,
@@ -88,7 +90,7 @@ const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_004_PARAMS = {
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_005_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
-        .keyLen = 256,
+        .keyLen = HMAC_KEY_SIZE,
         .algParam = nullptr,
     },
     .digest = HKS_DIGEST_SHA512,
@@ -115,16 +117,19 @@ protected:
         uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
 
         HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+        ASSERT_NE(message.data, nullptr);
 
         for (uint32_t ii = 0; ii < dataLen; ii++) {
-            message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+            message.data[ii] = ReadHex((const uint8_t *)&hexData[HKS_COUNT_OF_HALF * ii]);
         }
-        struct HksBlob signature = { .size = 1024, .data = (uint8_t *)HksMalloc(1024) };
+        struct HksBlob signature = { .size = SIGNATURE_SIZE, .data = (uint8_t *)HksMalloc(SIGNATURE_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
 
         if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {
             uint8_t buff[1] = {0};
             HksBlob endMessage = { .size = 0, .data = buff };
             void *context = (void *)HksMalloc(1024 * 1024);
+            ASSERT_NE(context, nullptr);
 
             EXPECT_EQ(HksCryptoHalHmacInit(&key, testCaseParams.digest, &context), testCaseParams.hmacResult);
             EXPECT_EQ(HksCryptoHalHmacUpdate(&message, context), testCaseParams.hmacResult);

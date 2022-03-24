@@ -76,6 +76,9 @@ int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBl
         .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
         .blob = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) }
     };
+    if (localKey.blob.data == nullptr) {
+        return HKS_FAILURE;
+    }
     HksAddParams(paramOutSet, &localKey, 1);
     HksBuildParamSet(&paramOutSet);
 
@@ -110,6 +113,7 @@ HWTEST_F(PressureTest, PressureTest00100, TestSize.Level1)
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         struct HksBlob sdkVersion = { .size = MAX_SDK_VERSION_SIZE,
             .data = (uint8_t *)HksMalloc(MAX_SDK_VERSION_SIZE) };
+        ASSERT_NE(sdkVersion.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksGetSdkVersion(&sdkVersion);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -226,6 +230,7 @@ HWTEST_F(PressureTest, PressureTest00500, TestSize.Level1)
     HksGenerateKey(&authId, paramInSet, NULL);
 
     struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
     HksExportPublicKey(&authId, paramInSet, &pubKey);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
@@ -273,6 +278,7 @@ HWTEST_F(PressureTest, PressureTest00600, TestSize.Level1)
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(pubKey.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksExportPublicKey(&authId, paramInSet, &pubKey);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -359,6 +365,7 @@ HWTEST_F(PressureTest, PressureTest00800, TestSize.Level1)
         HksInitParamSet(&paramOutSet);
         struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = KEY_PARAMSET_SIZE, .data = (uint8_t *)HksMalloc(KEY_PARAMSET_SIZE) } };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramOutSet, &localKey, 1);
 
         HksBuildParamSet(&paramOutSet);
@@ -427,6 +434,7 @@ HWTEST_F(PressureTest, PressureTest01000, TestSize.Level1)
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         struct HksBlob authId = { .size = TEST_KEY_SIZE, .data = (uint8_t *)HksMalloc(TEST_KEY_SIZE) };
+        ASSERT_NE(authId.data, nullptr);
         struct HksParamSet *paramInSet = nullptr;
         HksInitParamSet(&paramInSet);
 
@@ -485,6 +493,7 @@ HWTEST_F(PressureTest, PressureTest01100, TestSize.Level1)
         uint32_t dataLen = strlen(hexData);
         HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(signature.data, nullptr);
 
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksSign(&authId, paramInSet, &message, &signature);
@@ -530,6 +539,7 @@ HWTEST_F(PressureTest, PressureTest01200, TestSize.Level1)
     uint32_t dataLen = strlen(hexData);
     HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
     HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(signature.data, nullptr);
 
     HksSign(&authId, paramInSet, &message, &signature);
 
@@ -588,6 +598,7 @@ HWTEST_F(PressureTest, PressureTest01300, TestSize.Level1)
 
         uint32_t inLen = dataLen + COMPLEMENT_LEN;
         HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        ASSERT_NE(cipherText.data, nullptr);
 
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksEncrypt(&authId, paramInSet, &plainText, &cipherText);
@@ -642,11 +653,13 @@ HWTEST_F(PressureTest, PressureTest01400, TestSize.Level1)
 
     uint32_t inLen = dataLen + COMPLEMENT_LEN;
     HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+    ASSERT_NE(cipherText.data, nullptr);
 
     HksEncrypt(&authId, paramInSet, &plainText, &cipherText);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob plainTextDecrypt = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        ASSERT_NE(plainTextDecrypt.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksDecrypt(&authId, paramInSet, &cipherText, &plainTextDecrypt);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -700,10 +713,12 @@ HWTEST_F(PressureTest, PressureTest01500, TestSize.Level1)
     HksGenerateKey(&authId, paramInSetForKey, NULL);
 
     struct HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
     HksExportPublicKey(&authId, paramInSetForKey, &pubKey);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob agreeKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(agreeKey.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksAgreeKey(paramInSet, &authId, &pubKey, &agreeKey);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -765,6 +780,7 @@ HWTEST_F(PressureTest, PressureTest01600, TestSize.Level1)
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob derivedKey = { .size = DERIVED_KEY_SIZE, .data = (uint8_t *)HksMalloc(DERIVED_KEY_SIZE) };
+        ASSERT_NE(derivedKey.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksDeriveKey(paramInSetHkdf, &authId, &derivedKey);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -812,6 +828,7 @@ HWTEST_F(PressureTest, PressureTest01700, TestSize.Level1)
         uint32_t dataLen = strlen(hexData);
         HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob macMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
+        ASSERT_NE(macMessage.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksMac(&authId, paramInSet, &message, &macMessage);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -846,6 +863,7 @@ HWTEST_F(PressureTest, PressureTest01800, TestSize.Level1)
         uint32_t dataLen = strlen(hexData);
         HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob shaMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
+        ASSERT_NE(shaMessage.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksHash(paramInSet, &message, &shaMessage);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -889,6 +907,7 @@ HWTEST_F(PressureTest, PressureTest01900, TestSize.Level1)
         HksInitParamSet(&paramOutSet);
         struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) } };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramOutSet, &localKey, 1);
 
         HksBuildParamSet(&paramOutSet);
@@ -932,7 +951,9 @@ HWTEST_F(PressureTest, PressureTest02000, TestSize.Level1)
     HksBuildParamSet(&paramInSet);
 
     HksBlob priKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(priKey.data, nullptr);
     HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
 
     PressureTest::LocalHksGenerate(HKS_ECC_KEY_SIZE_224, &authId, paramInSet, &priKey, &pubKey);
 
@@ -941,6 +962,7 @@ HWTEST_F(PressureTest, PressureTest02000, TestSize.Level1)
         uint32_t dataLen = strlen(hexData);
         HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(signature.data, nullptr);
 
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksSign(&priKey, paramInSet, &message, &signature);
@@ -983,7 +1005,9 @@ HWTEST_F(PressureTest, PressureTest02100, TestSize.Level1)
     HksBuildParamSet(&paramInSet);
 
     HksBlob priKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(priKey.data, nullptr);
     HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
 
     PressureTest::LocalHksGenerate(HKS_ECC_KEY_SIZE_224, &authId, paramInSet, &priKey, &pubKey);
 
@@ -991,6 +1015,7 @@ HWTEST_F(PressureTest, PressureTest02100, TestSize.Level1)
     uint32_t dataLen = strlen(hexData);
     HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
     HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(signature.data, nullptr);
 
     HksSign(&priKey, paramInSet, &message, &signature);
 
@@ -1033,6 +1058,7 @@ HWTEST_F(PressureTest, PressureTest02200, TestSize.Level1)
     HksInitParamSet(&paramOutSet);
     struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
         .blob = { .size = HKS_AES_KEY_SIZE_128, .data = (uint8_t *)HksMalloc(HKS_AES_KEY_SIZE_128) } };
+    ASSERT_NE(localKey.blob.data, nullptr);
     HksAddParams(paramOutSet, &localKey, 1);
     HksBuildParamSet(&paramOutSet);
 
@@ -1041,6 +1067,7 @@ HWTEST_F(PressureTest, PressureTest02200, TestSize.Level1)
     HksParam *paramOut = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &paramOut);
     HksBlob authKey = { .size = paramOut->blob.size, .data = (uint8_t *)HksMalloc(paramOut->blob.size) };
+    ASSERT_NE(authKey.data, nullptr);
     (void)memcpy_s(authKey.data, paramOut->blob.size, paramOut->blob.data, paramOut->blob.size);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
@@ -1050,6 +1077,7 @@ HWTEST_F(PressureTest, PressureTest02200, TestSize.Level1)
 
         uint32_t inLen = dataLen + COMPLEMENT_LEN;
         HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        ASSERT_NE(cipherText.data, nullptr);
 
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksEncrypt(&authKey, paramInSet, &plainText, &cipherText);
@@ -1090,6 +1118,7 @@ HWTEST_F(PressureTest, PressureTest02300, TestSize.Level1)
     HksInitParamSet(&paramOutSet);
     struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
         .blob = { .size = HKS_AES_KEY_SIZE_128, .data = (uint8_t *)HksMalloc(HKS_AES_KEY_SIZE_128) } };
+    ASSERT_NE(localKey.blob.data, nullptr);
     HksAddParams(paramOutSet, &localKey, 1);
     HksBuildParamSet(&paramOutSet);
 
@@ -1098,6 +1127,7 @@ HWTEST_F(PressureTest, PressureTest02300, TestSize.Level1)
     HksParam *paramOut = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &paramOut);
     HksBlob authKey = { .size = paramOut->blob.size, .data = (uint8_t *)HksMalloc(paramOut->blob.size) };
+    ASSERT_NE(authKey.data, nullptr);
     (void)memcpy_s(authKey.data, paramOut->blob.size, paramOut->blob.data, paramOut->blob.size);
 
     const char *hexData = "0123456789abcdef";
@@ -1106,11 +1136,13 @@ HWTEST_F(PressureTest, PressureTest02300, TestSize.Level1)
 
     uint32_t inLen = dataLen + COMPLEMENT_LEN;
     HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+    ASSERT_NE(cipherText.data, nullptr);
 
     HksEncrypt(&authKey, paramInSet, &plainText, &cipherText);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob plainTextDecrypt = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        ASSERT_NE(plainTextDecrypt.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksDecrypt(&authKey, paramInSet, &cipherText, &plainTextDecrypt);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -1164,12 +1196,15 @@ HWTEST_F(PressureTest, PressureTest02400, TestSize.Level1)
     HksBuildParamSet(&paramInSet);
 
     HksBlob priKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(priKey.data, nullptr);
     HksBlob pubKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+    ASSERT_NE(pubKey.data, nullptr);
 
     PressureTest::LocalHksGenerate(HKS_ECC_KEY_SIZE_224, &authId, paramInSetForKey, &priKey, &pubKey);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob agreeKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
+        ASSERT_NE(agreeKey.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksAgreeKey(paramInSet, &priKey, &pubKey, &agreeKey);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -1194,6 +1229,7 @@ HWTEST_F(PressureTest, PressureTest02500, TestSize.Level1)
 {
     double programTimes = 0;
     struct HksBlob authId = { .size = TEST_KEY_SIZE, .data = (uint8_t *)HksMalloc(TEST_KEY_SIZE) };
+    ASSERT_NE(authId.data, nullptr);
 
     struct HksParamSet *paramInSet = nullptr;
     HksInitParamSet(&paramInSet);
@@ -1214,6 +1250,7 @@ HWTEST_F(PressureTest, PressureTest02500, TestSize.Level1)
     HksGenerateRandom(paramInSet, &authId);
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
         HksBlob derivedKey = { .size = DERIVED_KEY_SIZE, .data = (uint8_t *)HksMalloc(DERIVED_KEY_SIZE) };
+        ASSERT_NE(derivedKey.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksDeriveKey(paramInSet, &authId, &derivedKey);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
@@ -1257,6 +1294,7 @@ HWTEST_F(PressureTest, PressureTest02600, TestSize.Level1)
     HksInitParamSet(&paramOutSet);
     struct HksParam localKey = { .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
         .blob = { .size = HKS_AES_KEY_SIZE_128, .data = (uint8_t *)HksMalloc(HKS_AES_KEY_SIZE_128) } };
+    ASSERT_NE(localKey.blob.data, nullptr);
     HksAddParams(paramOutSet, &localKey, 1);
     HksBuildParamSet(&paramOutSet);
 
@@ -1265,6 +1303,7 @@ HWTEST_F(PressureTest, PressureTest02600, TestSize.Level1)
     HksParam *paramOut = nullptr;
     HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &paramOut);
     HksBlob authKey = { .size = paramOut->blob.size, .data = (uint8_t *)HksMalloc(paramOut->blob.size) };
+    ASSERT_NE(authKey.data, nullptr);
     (void)memcpy_s(authKey.data, paramOut->blob.size, paramOut->blob.data, paramOut->blob.size);
 
     for (uint32_t ii = 0; ii < TEST_FREQUENCY; ii++) {
@@ -1272,6 +1311,7 @@ HWTEST_F(PressureTest, PressureTest02600, TestSize.Level1)
         uint32_t dataLen = strlen(hexData);
         HksBlob message = { .size = dataLen, .data = (uint8_t *)hexData };
         HksBlob macMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
+        ASSERT_NE(macMessage.data, nullptr);
         auto start = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         int32_t ret = HksMac(&authKey, paramInSet, &message, &macMessage);
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());

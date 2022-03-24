@@ -631,6 +631,7 @@ protected:
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
         };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -693,6 +694,7 @@ protected:
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
         };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -755,6 +757,7 @@ protected:
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
         };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -812,6 +815,7 @@ protected:
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
         };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramSetOut, &localKey, 1);
 
         HksBuildParamSet(&paramSetOut);
@@ -886,6 +890,7 @@ protected:
         ASSERT_NE(opensslDsaKeyInfo.data, nullptr);
 
         struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+        ASSERT_NE(x509Key.data, nullptr);
 
         EVP_PKEY *pkey = GenerateDsaKey(KEY_SIZE_1024);
         ASSERT_NE(pkey, nullptr);

@@ -513,15 +513,20 @@ protected:
 #endif
         uint32_t keySize = ReadValueByTag(testCaseParams.agreeKeyParams, HKS_TAG_KEY_SIZE);
         struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(alise.data, nullptr);
         struct HksBlob bob = { (uint32_t)strlen(BOB_KEY), (uint8_t *)BOB_KEY };
 
         HksBlob pubKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(pubKeyAlise.data, nullptr);
         HksBlob pubKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(pubKeyBob.data, nullptr);
 
         EXPECT_EQ(HksGenerateKey(&bob, generateKeyParams, NULL), testCaseParams.generateKeyResult);
 
         HksBlob x509KeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(x509KeyAlise.data, nullptr);
         HksBlob x509KeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(x509KeyBob.data, nullptr);
         EXPECT_EQ(HksExportPublicKey(&bob, generateKeyParams, &x509KeyBob), HKS_SUCCESS);
 #ifdef HKS_SUPPORT_DH_C
         if (algorithm == HKS_ALG_ECDH) {
@@ -562,12 +567,16 @@ protected:
         HksBuildParamSet(&agreeKeyParams);
         uint32_t keySize = ReadValueByTag(testCaseParams.agreeKeyParams, HKS_TAG_KEY_SIZE);
         HksBlob pubKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(pubKeyAlise.data, nullptr);
         HksBlob pubKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(pubKeyBob.data, nullptr);
         if (scenario == 0) {
             struct HksBlob alise = { (uint32_t)strlen(ALISE_KEY), (uint8_t *)ALISE_KEY };
             struct HksBlob bob = { (uint32_t)strlen(BOB_KEY), (uint8_t *)BOB_KEY };
             HksBlob priKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(priKeyAlise.data, nullptr);
             HksBlob priKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(priKeyBob.data, nullptr);
             EXPECT_EQ(LocalHksGenerate(keySize, &alise, generateKeyParams, &priKeyAlise, &pubKeyAlise),
                 testCaseParams.generateKeyResult);
             EXPECT_EQ(LocalHksGenerate(keySize, &bob, generateKeyParams, &priKeyBob, &pubKeyBob),
@@ -578,7 +587,9 @@ protected:
             HksFree(priKeyBob.data);
         } else if (scenario == 1) {
             struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(alise.data, nullptr);
             struct HksBlob bob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(bob.data, nullptr);
             EXPECT_EQ(EccGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
             EXPECT_EQ(EccGenerateKey(keySize, &bob), testCaseParams.generateKeyResult);
             EXPECT_EQ(GetEccPubKey(&alise, &pubKeyAlise), ECC_SUCCESS);
@@ -604,7 +615,9 @@ protected:
         uint32_t storage = ReadValueByTag(testCaseParams.agreeKeyParams, HKS_TAG_KEY_STORAGE_FLAG);
 
         HksBlob agreeKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(agreeKeyAlise.data, nullptr);
         HksBlob agreeKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(agreeKeyBob.data, nullptr);
 
         if (storage == HKS_STORAGE_TEMP) {
             LocalAgreeScenario(testCaseParams, generateKeyParams, &agreeKeyAlise, &agreeKeyBob, scenario);
@@ -620,6 +633,47 @@ protected:
     }
 
 #ifdef HKS_SUPPORT_DH_C
+    void DhLocalAgreeScenario(const TestCaseParams &testCaseParams, const struct HksParamSet *paramInSet,
+        struct HksBlob *agreeKeyAlise, struct HksBlob *agreeKeyBob, int32_t scenario)
+    {
+        uint32_t keySize = ReadValueByTag(testCaseParams.agreeKeyParams, HKS_TAG_KEY_SIZE);
+        HksBlob pubKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(pubKeyAlise.data, nullptr);
+        HksBlob pubKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(pubKeyBob.data, nullptr);
+        if (scenario == 0) {
+            struct HksBlob alise = { (uint32_t)strlen(ALISE_KEY), (uint8_t *)ALISE_KEY };
+            struct HksBlob bob = { (uint32_t)strlen(BOB_KEY), (uint8_t *)BOB_KEY };
+            HksBlob priKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(priKeyAlise.data, nullptr);
+            HksBlob priKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(priKeyBob.data, nullptr);
+            EXPECT_EQ(LocalHksGenerate(keySize, &alise, paramInSet, &priKeyAlise, &pubKeyAlise),
+                testCaseParams.generateKeyResult);
+            EXPECT_EQ(LocalHksGenerate(keySize, &bob, paramInSet, &priKeyBob, &pubKeyBob),
+                testCaseParams.generateKeyResult);
+            EXPECT_EQ(DhAgreeKey(keySize, &priKeyAlise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
+            EXPECT_EQ(DhAgreeKey(keySize, &priKeyBob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
+            HksFree(priKeyAlise.data);
+            HksFree(priKeyBob.data);
+        } else if (scenario == 1) {
+            struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(alise.data, nullptr);
+            struct HksBlob bob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+            ASSERT_NE(bob.data, nullptr);
+            EXPECT_EQ(DhGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
+            EXPECT_EQ(DhGenerateKey(keySize, &bob), testCaseParams.generateKeyResult);
+            EXPECT_EQ(DhGetDhPubKey(&alise, &pubKeyAlise), DH_SUCCESS);
+            EXPECT_EQ(DhGetDhPubKey(&bob, &pubKeyBob), DH_SUCCESS);
+            EXPECT_EQ(HksAgreeKey(paramInSet, &alise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
+            EXPECT_EQ(HksAgreeKey(paramInSet, &bob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
+            HksFree(alise.data);
+            HksFree(bob.data);
+        }
+        HksFree(pubKeyAlise.data);
+        HksFree(pubKeyBob.data);
+    }
+
     void DhRunTestCase(const TestCaseParams &testCaseParams, int32_t scenario)
     {
         struct HksParamSet *paramInSet = NULL;
@@ -627,42 +681,15 @@ protected:
         HksAddParams(paramInSet, testCaseParams.agreeKeyParams.data(), testCaseParams.agreeKeyParams.size());
         HksBuildParamSet(&paramInSet);
 
-        uint32_t keySize = ReadValueByTag(testCaseParams.agreeKeyParams, HKS_TAG_KEY_SIZE);
         uint32_t storage = ReadValueByTag(testCaseParams.agreeKeyParams, HKS_TAG_KEY_STORAGE_FLAG);
 
         HksBlob agreeKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(agreeKeyAlise.data, nullptr);
         HksBlob agreeKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
+        ASSERT_NE(agreeKeyBob.data, nullptr);
 
         if (storage == HKS_STORAGE_TEMP) {
-            HksBlob pubKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-            HksBlob pubKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-            if (scenario == 0) {
-                struct HksBlob alise = { (uint32_t)strlen(ALISE_KEY), (uint8_t *)ALISE_KEY };
-                struct HksBlob bob = { (uint32_t)strlen(BOB_KEY), (uint8_t *)BOB_KEY };
-                HksBlob priKeyAlise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-                HksBlob priKeyBob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-                EXPECT_EQ(LocalHksGenerate(keySize, &alise, paramInSet, &priKeyAlise, &pubKeyAlise),
-                    testCaseParams.generateKeyResult);
-                EXPECT_EQ(LocalHksGenerate(keySize, &bob, paramInSet, &priKeyBob, &pubKeyBob),
-                    testCaseParams.generateKeyResult);
-                EXPECT_EQ(DhAgreeKey(keySize, &priKeyAlise, &pubKeyBob, &agreeKeyAlise), testCaseParams.agreeResult);
-                EXPECT_EQ(DhAgreeKey(keySize, &priKeyBob, &pubKeyAlise, &agreeKeyBob), testCaseParams.agreeResult);
-                HksFree(priKeyAlise.data);
-                HksFree(priKeyBob.data);
-            } else if (scenario == 1) {
-                struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-                struct HksBlob bob = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
-                EXPECT_EQ(DhGenerateKey(keySize, &alise), testCaseParams.generateKeyResult);
-                EXPECT_EQ(DhGenerateKey(keySize, &bob), testCaseParams.generateKeyResult);
-                EXPECT_EQ(DhGetDhPubKey(&alise, &pubKeyAlise), DH_SUCCESS);
-                EXPECT_EQ(DhGetDhPubKey(&bob, &pubKeyBob), DH_SUCCESS);
-                EXPECT_EQ(HksAgreeKey(paramInSet, &alise, &pubKeyBob, &agreeKeyAlise), testCaseParams.agreeResult);
-                EXPECT_EQ(HksAgreeKey(paramInSet, &bob, &pubKeyAlise, &agreeKeyBob), testCaseParams.agreeResult);
-                HksFree(alise.data);
-                HksFree(bob.data);
-            }
-            HksFree(pubKeyAlise.data);
-            HksFree(pubKeyBob.data);
+            DhLocalAgreeScenario(testCaseParams, paramInSet, &agreeKeyAlise, &agreeKeyBob, scenario);
         } else if (storage == HKS_STORAGE_PERSISTENT) {
             ServiceAgreeScenario(testCaseParams, paramInSet, &agreeKeyAlise, &agreeKeyBob);
         }

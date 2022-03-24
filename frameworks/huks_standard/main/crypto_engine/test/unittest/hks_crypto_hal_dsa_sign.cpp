@@ -28,6 +28,9 @@ namespace Security {
 namespace Huks {
 namespace UnitTest {
 namespace {
+const uint32_t DSA_SIZE_256 = 256;
+const uint32_t SIGNATURE_SIZE = 1024;
+const uint32_t PUB_KEY_SIZE = 1024;
 const HksUsageSpec HKS_CRYPTO_HAL_DSA_SIGN_001_SPEC = {
     .algType = HKS_ALG_DSA,
     .mode = HKS_MODE_ECB,
@@ -80,7 +83,7 @@ protected:
     {
         HksKeySpec spec = {
             .algType = HKS_ALG_DSA,
-            .keyLen = 256,
+            .keyLen = DSA_SIZE_256,
             .algParam = nullptr,
         };
 
@@ -98,19 +101,22 @@ protected:
         uint32_t dataLen = strlen(hexData) / HKS_COUNT_OF_HALF;
 
         HksBlob message = { .size = dataLen, .data = (uint8_t *)HksMalloc(dataLen) };
+        ASSERT_NE(message.data, nullptr);
         for (uint32_t ii = 0; ii < dataLen; ii++) {
-            message.data[ii] = ReadHex((const uint8_t *)&hexData[2 * ii]);
+            message.data[ii] = ReadHex((const uint8_t *)&hexData[HKS_COUNT_OF_HALF * ii]);
         }
 
         uint8_t hashData[HKS_HMAC_DIGEST_SHA512_LEN] = {0};
         struct HksBlob hash = { HKS_HMAC_DIGEST_SHA512_LEN, hashData };
         EXPECT_EQ(HksCryptoHalHash(hksUsageSpec.digest, &message, &hash), HKS_SUCCESS);
 
-        struct HksBlob signature = { .size = 1024, .data = (uint8_t *)HksMalloc(1024) };
+        struct HksBlob signature = { .size = SIGNATURE_SIZE, .data = (uint8_t *)HksMalloc(SIGNATURE_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
 
         EXPECT_EQ(HksCryptoHalSign(&key, &hksUsageSpec, &hash, &signature), HKS_SUCCESS);
 
-        struct HksBlob pubKey = { .size = 1024, .data = (uint8_t *)HksMalloc(1024) };
+        struct HksBlob pubKey = { .size = PUB_KEY_SIZE, .data = (uint8_t *)HksMalloc(PUB_KEY_SIZE) };
+        ASSERT_NE(pubKey.data, nullptr);
 
         EXPECT_EQ(HksCryptoHalGetPubKey(&key, &pubKey), HKS_SUCCESS);
 
