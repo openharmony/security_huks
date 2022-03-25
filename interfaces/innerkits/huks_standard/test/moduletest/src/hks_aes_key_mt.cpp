@@ -445,6 +445,7 @@ protected:
             .size = symmetricParam->blob.size,
             .data = (uint8_t *)HksMalloc(symmetricParam->blob.size)
         };
+        ASSERT_NE(symmetricKey.data, nullptr);
         (void)memcpy_s(
             symmetricKey.data, symmetricParam->blob.size, symmetricParam->blob.data, symmetricParam->blob.size);
 
@@ -460,6 +461,7 @@ protected:
         ASSERT_NE(plainTextDecrypt.data, nullptr);
         if (blockMode == HKS_MODE_GCM) {
             HksBlob tagAead = { .size = AAD_SIZE, .data = (uint8_t *)HksMalloc(AAD_SIZE) };
+            ASSERT_NE(tagAead.data, nullptr);
             EXPECT_EQ(AesGcmEncrypt(paramInSet, &plainText, &cipherText, &symmetricKey, &tagAead),
                 testCaseParams.encryptResult);
             EXPECT_EQ(AesGcmDecrypt(paramInSet, &cipherText, &plainTextDecrypt, &symmetricKey, &tagAead),

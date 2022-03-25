@@ -278,6 +278,53 @@ protected:
         return 0;
     }
 
+    void LocalHmacScenario(int32_t scenario, struct HksBlob *authId, const TestCaseParams &testCaseParams,
+        struct HksBlob *macForHuks, struct HksBlob *message)
+    {
+        struct HksParamSet *paramInSet = nullptr;
+        HksInitParamSet(&paramInSet);
+        HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
+        HksBuildParamSet(&paramInSet);
+        uint32_t digest = ReadValueByTag(testCaseParams.params, HKS_TAG_DIGEST);
+
+        struct HksParamSet *paramOutSet = nullptr;
+        HksInitParamSet(&paramOutSet);
+        struct HksParam localKey = {
+            .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
+            .blob = { .size = HMAC_KEY_SIZE, .data = (uint8_t *)HksMalloc(HMAC_KEY_SIZE) }
+        };
+        ASSERT_NE(localKey.blob.data, nullptr);
+        HksAddParams(paramOutSet, &localKey, 1);
+        HksBuildParamSet(&paramOutSet);
+        if (scenario == 0) {
+            EXPECT_EQ(HksGenerateKey(authId, paramInSet, paramOutSet), testCaseParams.generateKeyResult);
+        } else if (scenario == 1) {
+            EXPECT_EQ(HmacGenerateKey(HMAC_KEY_SIZE, authId), testCaseParams.generateKeyResult);
+        }
+
+        HksParam *outParam = nullptr;
+        HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &outParam);
+        HksBlob key = { .size = outParam->blob.size, .data = (uint8_t *)HksMalloc(outParam->blob.size) };
+        ASSERT_NE(key.data, nullptr);
+        (void)memcpy_s(key.data, outParam->blob.size, outParam->blob.data, outParam->blob.size);
+        HksBlob macMessage = { .size = HMAC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(HMAC_MESSAGE_SIZE) };
+        ASSERT_NE(macMessage.data, nullptr);
+
+            EXPECT_EQ(HmacHmac(&key, digest, message, &macMessage), testCaseParams.hmacResult);
+            EXPECT_EQ(HksMac(&key, paramInSet, message, macForHuks), testCaseParams.hmacResult);
+
+        EXPECT_EQ(macMessage.size, macForHuks->size);
+        EXPECT_EQ(HksMemCmp(macMessage.data, macForHuks->data, macForHuks->size), HKS_SUCCESS);
+        if (scenario == 1) {
+            HksFree(authId->data);
+        }
+        HksFreeParamSet(&paramInSet);
+        HksFreeParamSet(&paramOutSet);
+        HksFree(localKey.blob.data);
+        HksFree(macMessage.data);
+        HksFree(key.data);
+    }
+
     void RunTestCase(const TestCaseParams &testCaseParams, int32_t scenario)
     {
         struct HksBlob authId = { (uint32_t)strlen(HMAC_KEY), (uint8_t *)HMAC_KEY };
@@ -287,7 +334,6 @@ protected:
         HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
         HksBuildParamSet(&paramInSet);
 
-        uint32_t digest = ReadValueByTag(testCaseParams.params, HKS_TAG_DIGEST);
         uint32_t storage = ReadValueByTag(testCaseParams.params, HKS_TAG_KEY_STORAGE_FLAG);
 
         HksBlob message = {
@@ -295,40 +341,10 @@ protected:
             .data = (uint8_t *)&testCaseParams.hexData[0],
         };
         HksBlob macForHuks = { .size = HMAC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(HMAC_MESSAGE_SIZE) };
+        ASSERT_NE(macForHuks.data, nullptr);
 
         if (storage == HKS_STORAGE_TEMP) {
-            struct HksParamSet *paramOutSet = nullptr;
-            HksInitParamSet(&paramOutSet);
-            struct HksParam localKey = {
-                .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-                .blob = { .size = HMAC_KEY_SIZE, .data = (uint8_t *)HksMalloc(HMAC_KEY_SIZE) }
-            };
-            HksAddParams(paramOutSet, &localKey, 1);
-            HksBuildParamSet(&paramOutSet);
-            if (scenario == 0) {
-                EXPECT_EQ(HksGenerateKey(&authId, paramInSet, paramOutSet), testCaseParams.generateKeyResult);
-            } else if (scenario == 1) {
-                EXPECT_EQ(HmacGenerateKey(HMAC_KEY_SIZE, &authId), testCaseParams.generateKeyResult);
-            }
-
-            HksParam *outParam = nullptr;
-            HksGetParam(paramOutSet, HKS_TAG_SYMMETRIC_KEY_DATA, &outParam);
-            HksBlob key = { .size = outParam->blob.size, .data = (uint8_t *)HksMalloc(outParam->blob.size) };
-            (void)memcpy_s(key.data, outParam->blob.size, outParam->blob.data, outParam->blob.size);
-            HksBlob macMessage = { .size = HMAC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(HMAC_MESSAGE_SIZE) };
-
-            EXPECT_EQ(HmacHmac(&key, digest, &message, &macMessage), testCaseParams.hmacResult);
-            EXPECT_EQ(HksMac(&key, paramInSet, &message, &macForHuks), testCaseParams.hmacResult);
-
-            EXPECT_EQ(macMessage.size, macForHuks.size);
-            EXPECT_EQ(HksMemCmp(macMessage.data, macForHuks.data, macForHuks.size), HKS_SUCCESS);
-            if (scenario == 1) {
-                HksFree(authId.data);
-            }
-            HksFreeParamSet(&paramOutSet);
-            HksFree(localKey.blob.data);
-            HksFree(macMessage.data);
-            HksFree(key.data);
+            LocalHmacScenario(scenario, &authId, testCaseParams, &macForHuks, &message);
         } else if (storage == HKS_STORAGE_PERSISTENT) {
             EXPECT_EQ(HksGenerateKey(&authId, paramInSet, NULL), testCaseParams.generateKeyResult);
             EXPECT_EQ(HksMac(&authId, paramInSet, &message, &macForHuks), testCaseParams.hmacResult);
