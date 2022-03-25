@@ -459,6 +459,7 @@ protected:
                 .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_521)
             }
         };
+        ASSERT_NE(localKey.blob.data, nullptr);
         HksAddParams(paramOutSet, &localKey, 1);
 
         HksBuildParamSet(&paramOutSet);
@@ -467,11 +468,13 @@ protected:
         HksParam *priParam = nullptr;
         HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priParam);
         HksBlob priKey = { .size = priParam->blob.size, .data = (uint8_t *)HksMalloc(priParam->blob.size) };
+        ASSERT_NE(priKey.data, nullptr);
         (void)memcpy_s(priKey.data, priParam->blob.size, priParam->blob.data, priParam->blob.size);
 
         HksParam *pubParam = nullptr;
         HksGetParam(paramOutSet, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubParam);
         HksBlob pubKey = { .size = pubParam->blob.size, .data = (uint8_t *)HksMalloc(pubParam->blob.size) };
+        ASSERT_NE(pubKey.data, nullptr);
         (void)memcpy_s(pubKey.data, pubParam->blob.size, pubParam->blob.data, pubParam->blob.size);
 
         HksBlob message = {
@@ -479,6 +482,7 @@ protected:
             .data = (uint8_t *)&testCaseParams.hexData[0],
         };
         HksBlob signature = { .size = ECC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(ECC_MESSAGE_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
 
         EXPECT_EQ(EcdsaSign(&priKey, digest, &message, &signature), testCaseParams.signResult);
         EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);

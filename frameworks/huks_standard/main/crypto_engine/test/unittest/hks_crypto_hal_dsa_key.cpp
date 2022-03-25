@@ -35,6 +35,8 @@ public:
     void TearDown();
 };
 
+const uint32_t DSA_SIZE_256 = 256;
+const uint32_t DSA_SIZE_512 = 512;
 void HksCryptoHalDsaKey::SetUpTestCase(void)
 {
 }
@@ -63,7 +65,7 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_001, Function | SmallTest | Leve
 
     HksKeySpec spec = {
         .algType = HKS_ALG_DSA,
-        .keyLen = 256,
+        .keyLen = DSA_SIZE_256,
         .algParam = nullptr,
     };
 
@@ -97,7 +99,7 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_002, Function | SmallTest | Leve
 
     HksKeySpec spec = {
         .algType = HKS_ALG_DSA,
-        .keyLen = 512,
+        .keyLen = DSA_SIZE_512,
     };
 
     HksBlob key = { .size = 0, .data = NULL };
@@ -117,6 +119,7 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_002, Function | SmallTest | Leve
     uint32_t keyOutLen =
         sizeof(KeyMaterialDsa) + keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize;
     HksBlob keyOut = { .size = keyOutLen, .data = (uint8_t *)HksMalloc(keyOutLen) };
+    ASSERT_NE(keyOut.data, nullptr);
 
     ret = HksCryptoHalGetPubKey(&key, &keyOut);
 #ifdef _USE_OPENSSL_

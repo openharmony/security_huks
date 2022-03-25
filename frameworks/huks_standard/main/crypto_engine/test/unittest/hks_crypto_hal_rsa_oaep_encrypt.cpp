@@ -1147,22 +1147,22 @@ protected:
     {
         uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
         HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
-        EXPECT_EQ(key.data == nullptr, false) << "key malloc failed.";
+        ASSERT_EQ(key.data == nullptr, false) << "key malloc failed.";
         for (uint32_t ii = 0; ii < keyLen; ii++) {
-            key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[2 * ii]);
+            key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[HKS_COUNT_OF_HALF * ii]);
         }
 
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
         uint32_t outLen = HKS_KEY_BYTES(testCaseParams.keySize);
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
-        EXPECT_EQ(message.data == nullptr, false) << "message malloc failed.";
+        ASSERT_EQ(message.data == nullptr, false) << "message malloc failed.";
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[HKS_COUNT_OF_HALF * ii]);
         }
 
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
-        EXPECT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
+        ASSERT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
         HksBlob tagAead = { .size = 0, .data = nullptr };
 
         EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),

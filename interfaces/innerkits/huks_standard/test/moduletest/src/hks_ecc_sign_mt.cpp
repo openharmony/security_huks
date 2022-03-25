@@ -835,10 +835,13 @@ protected:
         uint32_t storage = ReadValueByTag(testCaseParams.params, HKS_TAG_KEY_STORAGE_FLAG);
         if (storage == HKS_STORAGE_TEMP) {
             authId = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
+            ASSERT_NE(authId.data, nullptr);
         }
 
         struct HksBlob pubKey = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
+        ASSERT_NE(pubKey.data, nullptr);
         HksBlob x509Key = { .size = ECC_KEY_SIZE, .data = (uint8_t *)HksMalloc(ECC_KEY_SIZE) };
+        ASSERT_NE(x509Key.data, nullptr);
 
         if (storage == HKS_STORAGE_TEMP) {
             uint32_t keySize = ReadValueByTag(testCaseParams.params, HKS_TAG_KEY_SIZE);
@@ -855,6 +858,7 @@ protected:
             .data = (uint8_t *)&testCaseParams.hexData[0],
         };
         HksBlob signature = { .size = ECC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(ECC_MESSAGE_SIZE) };
+        ASSERT_NE(signature.data, nullptr);
 
         EXPECT_EQ(HksSign(&authId, paramInSet, &message, &signature), testCaseParams.signResult);
         EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);
