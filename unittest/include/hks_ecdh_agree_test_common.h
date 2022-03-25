@@ -37,5 +37,5 @@ void HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet 
 void HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2);
 void HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
     struct HksBlob *blob3, struct HksBlob *blob4);
-}
+} // namespace Unittest::EcdhAgree
 #endif // HKS_ECDH_AGREE_TEST_COMMON_H

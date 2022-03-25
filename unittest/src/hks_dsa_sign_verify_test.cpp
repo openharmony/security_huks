@@ -718,4 +718,4 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest008, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
 }
-} // namespace
+} // namespace Unittest::DsaSignVerify

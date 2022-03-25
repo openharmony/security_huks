@@ -59,5 +59,5 @@ int32_t HksRsaCipherTestEncryptAbnormal(const struct HksBlob *keyAlias, const st
     const struct HksBlob *inData, struct HksBlob *cipherText);
 int32_t HksRsaCipherTestDecrypt(const struct HksBlob *keyAlias, const struct HksParamSet *decryptParamSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText, const struct HksBlob *inData);
-}
+} // namespace Unittest::RsaCipher 
 #endif // HKS_RSA_COMMON_TEST_COMMON_H
