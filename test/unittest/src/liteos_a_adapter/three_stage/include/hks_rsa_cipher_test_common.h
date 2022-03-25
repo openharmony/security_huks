@@ -51,5 +51,5 @@ static const std::string g_inData_512 = "RSA_512_ttttttttttttttttttttttttttttttt
 
 int32_t HksRsaCipherTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, const struct HksBlob *inData);
-}
+} // namespace Unittest::RsaCipher
 #endif // HKS_RSA_COMMON_TEST_COMMON_H

@@ -67,8 +67,8 @@ private:
     static std::mutex instanceLock;
     static sptr<HksService> instance;
 };
-} // Hks
-} // Security
-} // OHOS
+} // namespace Hks
+} // namespace Security
+} // namespace OHOS
 
 #endif // HKS_SA_H

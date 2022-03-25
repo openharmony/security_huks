@@ -29,5 +29,5 @@ static const uint32_t DERIVE_KEY_SIZE_64 = 64;
 
 int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias, const struct HksParamSet *genParamSet,
     struct HksParamSet *DeriveParamSet, struct HksParamSet *DeriveFinalParamsSet);
-}
+} // namespace Unittest::HkdfDerive 
 #endif // HKS_HKDF_DERIVE_TEST_COMMON_H
