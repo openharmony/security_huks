@@ -290,5 +290,5 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest004, TestSize.Level0)
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
-}
+} // namespace Unittest::Ed25519
 }

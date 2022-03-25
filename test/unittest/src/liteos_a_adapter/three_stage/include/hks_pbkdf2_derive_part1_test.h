@@ -33,5 +33,5 @@ int HksPbkdf2Derive007(void);
 int HksPbkdf2Derive008(void);
 
 int HksPbkdf2Derive009(void);
-}
+} // namespace Unittest::Pbkdf2Derive
 #endif // HKS_PBKDF2_DERIVE_PART1_TEST_H

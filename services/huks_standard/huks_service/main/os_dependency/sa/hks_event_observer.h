@@ -41,8 +41,8 @@ public:
 private:
     static std::shared_ptr<SystemEventSubscriber> systemEventSubscriber_;
 };
-} // Hks
-} // Security
-} // OHOS
+} // namespace Hks
+} // namespace Security
+} // namespace OHOS
 
 #endif  // HKS_EVENT_OBSERVER_H
