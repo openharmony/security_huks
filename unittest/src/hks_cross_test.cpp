@@ -812,4 +812,4 @@ HWTEST_F(HksCrossTest, HksCrossTestHmac001, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
-} // namespace
+} // namespace Unittest::CrossTest

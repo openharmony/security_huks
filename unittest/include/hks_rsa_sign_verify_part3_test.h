@@ -35,5 +35,5 @@ int HksRsaSignVerifyPart3Test028(void);
 int HksRsaSignVerifyPart3Test029(void);
 
 int HksRsaSignVerifyPart3Test030(void);
-}
+} // namespace Unittest::RsaSignVerify 
 #endif // HKS_RSA_SIGN_VERIFY_PART3_TEST_H

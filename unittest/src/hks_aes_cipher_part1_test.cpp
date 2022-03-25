@@ -859,4 +859,4 @@ HWTEST_F(HksAesCipherPart1Test, HksAesCipherPart1Test007, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 #endif
-}
+} // namespace Unittest::AesCipher

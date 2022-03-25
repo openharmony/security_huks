@@ -29,5 +29,5 @@ int HksAesCipherPart2Test012(void);
 int HksAesCipherPart2Test013(void);
 
 int HksAesCipherPart2Test014(void);
-}
+} // namespace Unittest::AesCipher
 #endif // HKS_AES_CIPHER_PART2_TEST_H

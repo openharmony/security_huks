@@ -31,5 +31,5 @@ int HksEccSignVerifyTest014(void);
 int HksEccSignVerifyTest015(void);
 
 int HksEccSignVerifyTest016(void);
-}
+} // namespace Unittest::EccSifnVerify
 #endif // HKS_ECC_SIGN_VERIFY_PART2_TEST_H
