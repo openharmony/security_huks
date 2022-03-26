@@ -219,7 +219,6 @@ static napi_value MacAsyncWork(napi_env env, MacAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiMac(napi_env env, napi_callback_info info)

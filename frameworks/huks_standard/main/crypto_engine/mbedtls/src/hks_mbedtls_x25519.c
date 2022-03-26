@@ -336,6 +336,7 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
     mbedtls_entropy_context entropy;
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
+        mbedtls_ecdh_free(&ctx);
         return ret;
     }
 

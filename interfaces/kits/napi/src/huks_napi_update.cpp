@@ -281,7 +281,6 @@ static napi_value UpdateAsyncWork(napi_env env, UpdateAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiUpdate(napi_env env, napi_callback_info info)

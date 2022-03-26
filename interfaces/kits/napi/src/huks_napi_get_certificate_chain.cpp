@@ -194,7 +194,6 @@ static napi_value GetCertificateChainAsyncWork(napi_env env, GetCertificateChain
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiGetCertificateChain(napi_env env, napi_callback_info info)

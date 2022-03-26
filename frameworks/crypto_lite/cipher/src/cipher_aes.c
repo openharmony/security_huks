@@ -150,7 +150,7 @@ static int32_t InitAesCryptContext(const char *key, const AesIvMode *iv, AesCryp
     ctx->mode = CIPHER_AES_CBC;
     ctx->iv.ivOffset = iv->ivOffset;
 
-    if ((iv->ivLen >= 0) && (iv->ivLen != AES_BLOCK_SIZE)) {
+    if ((iv->ivLen < 0) || (iv->ivLen != AES_BLOCK_SIZE)) {
         HILOG_ERROR(HILOG_MODULE_HIVIEW, "ivLen:%{public}d error, need be %{public}d Bytes.",
             iv->ivLen, AES_BLOCK_SIZE);
         return ERROR_CODE_GENERAL;

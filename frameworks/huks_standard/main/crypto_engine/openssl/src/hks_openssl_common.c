@@ -53,7 +53,12 @@ int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 
 int32_t HksOpensslFillRandom(struct HksBlob *randomData)
 {
-    RAND_bytes(randomData->data, randomData->size);
+    int ret = RAND_bytes(randomData->data, randomData->size);
+    if (ret <= 0) {
+        HKS_LOG_E("generate random failed, ret = 0x%x", ret);
+        return HKS_FAILURE;
+    }
+
     if (randomData->size == 1) {
         return HKS_SUCCESS;
     }

@@ -34,7 +34,7 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     }
     IpcIoPushBool(reply, false);
     uint32_t len = response->size;
-    uint8_t *dataBuff = HksMalloc(len);
+    uint8_t *dataBuff = (uint8_t *)HksMalloc(len);
     if (dataBuff == NULL) {
         HKS_LOG_E("malloc fail.");
         return;

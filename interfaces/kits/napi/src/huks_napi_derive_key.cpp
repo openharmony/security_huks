@@ -192,7 +192,6 @@ static napi_value DeriveKeyAsyncWork(napi_env env, DeriveKeyAsyncContext context
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiDeriveKey(napi_env env, napi_callback_info info)
