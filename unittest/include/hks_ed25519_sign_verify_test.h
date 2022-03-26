@@ -175,5 +175,5 @@ static struct HksParam g_signParamsTest004[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-} // namespace Unittest::Ed25519 
+} // namespace Unittest::Ed25519
 #endif // HKS_ED25519_SIGN_VERIFY_TEST_H
