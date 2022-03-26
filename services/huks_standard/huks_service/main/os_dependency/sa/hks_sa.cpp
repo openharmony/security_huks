@@ -253,7 +253,12 @@ bool HksService::Init()
     HKS_LOG_I("HksService::Init Ready to init");
 
     if (!registerToService_) {
-        if (!Publish(HksService::GetInstance())) {
+        sptr<HksService> ptrInstance = HksService::GetInstance();
+        if (ptrInstance == nullptr) {
+            HKS_LOG_E("HksService::Init GetInstance Failed");
+            return false;
+        }
+        if (!Publish(ptrInstance)) {
             HKS_LOG_E("HksService::Init Publish Failed");
             return false;
         }

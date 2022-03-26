@@ -208,7 +208,6 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiInit(napi_env env, napi_callback_info info)

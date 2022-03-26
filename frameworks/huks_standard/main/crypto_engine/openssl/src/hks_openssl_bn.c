@@ -34,6 +34,12 @@ static void BnFreeParams(struct HksBnExpModParams *bnParams)
     BN_free(bnParams->bnE);
     BN_free(bnParams->bnN);
     BN_CTX_free(bnParams->ctx);
+
+    bnParams->bnX = NULL;
+    bnParams->bnA = NULL;
+    bnParams->bnE = NULL;
+    bnParams->bnN = NULL;
+    bnParams->ctx = NULL;
 }
 
 static int32_t BnBuildParams(

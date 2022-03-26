@@ -216,7 +216,6 @@ static napi_value DecryptAsyncWork(napi_env env, DecryptAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiDecrypt(napi_env env, napi_callback_info info)

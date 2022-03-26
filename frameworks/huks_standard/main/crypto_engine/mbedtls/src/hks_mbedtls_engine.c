@@ -67,10 +67,6 @@ int32_t HksCryptoHalHmacInit(const struct HksBlob *key, uint32_t digestAlg, void
         HKS_LOG_E("Crypt Hal Hmac init msg is NULL");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (ctx == NULL) {
-        HKS_LOG_E("Crypt Hal Hmac init ctx is NULL");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
 
     HmacInit func = (HmacInit)GetAbility(HKS_CRYPTO_ABILITY_HMAC_INIT);
     if (func == NULL) {
@@ -97,7 +93,7 @@ int32_t HksCryptoHalHmacUpdate(const struct HksBlob *chunk, void *ctx)
 
 int32_t HksCryptoHalHmacFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *mac)
 {
-    if (msg == NULL || ctx == NULL || CheckBlob(mac) != HKS_SUCCESS) {
+    if (msg == NULL || ctx == NULL || *ctx == NULL || CheckBlob(mac) != HKS_SUCCESS) {
         HKS_LOG_E("Crypt Hal Hmac final msg or mac is NULL");
         return HKS_ERROR_INVALID_ARGUMENT;
     }

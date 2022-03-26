@@ -231,7 +231,6 @@ static napi_value VerifyAsyncWork(napi_env env, VerifyAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiVerify(napi_env env, napi_callback_info info)
