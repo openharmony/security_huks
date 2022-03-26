@@ -37,5 +37,5 @@ int HksHKDFDerive018(void);
 int HksHKDFDerive019(void);
 
 int HksHKDFDerive020(void);
-}
+} // namespace Unittest::HkdfDerive
 #endif // HKS_HKDF_DERIVE_PART2_TEST_H

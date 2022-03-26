@@ -28,5 +28,5 @@ int32_t HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
 int32_t HksRSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
-}
+} // namespace Unittest::RsaSignVerify
 #endif // HKS_RSA_SIGN_VERIFY_TEST_COMMON_H

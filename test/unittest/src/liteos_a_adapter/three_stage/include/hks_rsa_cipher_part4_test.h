@@ -35,5 +35,5 @@ int HksRsaCipherPart4Test038(void);
 int HksRsaCipherPart4Test039(void);
 
 int HksRsaCipherPart4Test040(void);
-}
+} // namespace Unittest::RsaCipher
 #endif // HKS_RSA_CIPHER_PART4_TEST_H

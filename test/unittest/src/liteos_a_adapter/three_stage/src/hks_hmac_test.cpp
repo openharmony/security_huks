@@ -222,4 +222,4 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
-} // namespace
+} // nnamespace Unittest::Hmac
