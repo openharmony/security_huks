@@ -433,5 +433,5 @@ static struct HksParam g_dhFinishParams02[] = {
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-}
+} // namespace Unittest::CrossTest
 #endif // HKS_CROSS_TEST_H

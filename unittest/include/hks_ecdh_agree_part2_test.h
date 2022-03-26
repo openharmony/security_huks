@@ -25,5 +25,5 @@ int HksEcdhAgree008(void);
 int HksEcdhAgree009(void);
 
 int HksEcdhAgree010(void);
-}
+} // namespace Unittest::EcdhAgree
 #endif // HKS_ECDH_AGREE_PART2_TEST_H
