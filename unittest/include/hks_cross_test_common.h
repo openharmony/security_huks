@@ -316,5 +316,5 @@ static struct HksParam g_pbkdf2FinishParams[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
-}
+} // namespace Unittest::CrossTest
 #endif // HKS_CROSS_TEST_COMMON_H

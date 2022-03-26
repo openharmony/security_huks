@@ -678,4 +678,4 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest016, TestSize.Level0)
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
-}
+} // namespace Unittest::EccSifnVerify

@@ -579,4 +579,4 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree0010, TestSize.Level0)
     HksDeleteKey(&g_keyAlias02010, genParamSet);
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
 }
-}
+} // namespace Unittest::EcdhAgree

@@ -863,4 +863,4 @@ HWTEST_F(HksEcdhAgreePart1Test, HksEcdhAgree005, TestSize.Level0)
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
-}
+} // namespace Unittest::EcdhAgree

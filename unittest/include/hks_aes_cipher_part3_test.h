@@ -35,5 +35,5 @@ int HksAesCipherPart3Test022(void);
 int HksAesCipherPart3Test023(void);
 
 int HksAesCipherPart3Test024(void);
-}
+} // namespace Unittest::AesCipher
 #endif // HKS_AES_CIPHER_PART3_TEST_H

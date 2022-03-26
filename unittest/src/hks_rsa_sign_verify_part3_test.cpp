@@ -952,4 +952,4 @@ HWTEST_F(HksRsaSignVerifyPart3Test, HksRsaSignVerifyPart3Test030, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
-}
+} // namespace Unittest::RsaSignVerify

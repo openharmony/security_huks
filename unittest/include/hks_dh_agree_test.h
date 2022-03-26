@@ -473,5 +473,5 @@ static struct HksParam g_agreeParams02Finish005[] = {
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
-}
+} // namespace Unittest::DhAgree
 #endif // HKS_DH_AGREE_TEST_H

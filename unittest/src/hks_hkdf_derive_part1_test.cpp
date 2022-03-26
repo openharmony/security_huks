@@ -875,4 +875,4 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive009, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
-}
+} // namespace Unittest::HkdfDerive
