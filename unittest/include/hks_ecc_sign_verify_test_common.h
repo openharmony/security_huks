@@ -28,5 +28,5 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
 int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData, bool isSign);
-} // namespace Unittest::EccSifnVerify 
+} // namespace Unittest::EccSifnVerify
 #endif // HKS_ECC_SIGN_VERIFY_TEST_COMMON_H
