@@ -587,5 +587,5 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree004, TestSize.Level0)
     HksX25519AgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
     HksDeleteKey(&g_keyAlias01004, genParamSet);
     HksDeleteKey(&g_keyAlias02004, genParamSet);
-}
+} // namespace Unittest::X25519Agree
 } // namespace const uint32_t keySize

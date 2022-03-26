@@ -1011,4 +1011,4 @@ HWTEST_F(HksRsaCipherPart4Test, HksRsaCipherPart4Test040, TestSize.Level1)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
-}
+} // namespace Unittest::RsaCipher

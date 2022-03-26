@@ -353,6 +353,6 @@ void HksService::OnStop()
     runningState_ = STATE_NOT_START;
     registerToService_ = false;
 }
-} // Hks
-} // Security
-} // OHOS
+} // namespace Hks
+} // namespace Security
+} // namespace OHOS
