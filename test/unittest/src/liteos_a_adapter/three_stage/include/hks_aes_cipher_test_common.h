@@ -40,5 +40,5 @@ int32_t HksAESCipherTestCaseCcm(const struct HksBlob *keyAlias, struct HksParamS
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
 int32_t HksAesCipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
-} // namespace Unittest::AesCipher 
+} // namespace Unittest::AesCipher
 #endif // HKS_AES_CIPHER_TEST_COMMON_H
