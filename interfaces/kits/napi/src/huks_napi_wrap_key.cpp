@@ -205,7 +205,6 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiWrapKey(napi_env env, napi_callback_info info)

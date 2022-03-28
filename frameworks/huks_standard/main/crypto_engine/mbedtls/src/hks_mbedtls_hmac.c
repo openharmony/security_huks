@@ -97,6 +97,7 @@ int32_t HksMbedtlsHmac(const struct HksBlob *key,
     ret = HksGetDigestLen(digestAlg, &(mac->size));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get digest len failed!");
+        (void)memset_s(mac->data, mac->size, 0, mac->size);
     }
 
     return ret;

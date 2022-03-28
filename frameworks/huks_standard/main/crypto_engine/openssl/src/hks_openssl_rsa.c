@@ -72,7 +72,7 @@ int32_t InitRsaKeyBuf(const struct KeyMaterialRsa *keyMaterial, struct HksBlob *
         maxSize = keyMaterial->dSize;
     }
 
-    bufBlob->data = HksMalloc(maxSize);
+    bufBlob->data = (uint8_t *)HksMalloc(maxSize);
     if (bufBlob->data == NULL) {
         HKS_LOG_E("HksMalloc failed!");
         return HKS_ERROR_MALLOC_FAIL;
@@ -109,24 +109,25 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
         }
         d = BN_bin2bn(bufBlob.data, keyMaterial->dSize, NULL);
     }
-    if (copyFail) {
-        SELF_FREE_PTR(n, BN_free);
-        SELF_FREE_PTR(e, BN_free);
-        SELF_FREE_PTR(d, BN_free);
-        (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
-        HksFree(bufBlob.data);
-        return NULL;
-    }
-    RSA *rsa = RSA_new();
-    if (rsa != NULL) {
-        int32_t ret = RSA_set0_key(rsa, n, e, d);
-        if (ret != HKS_OPENSSL_SUCCESS) {
-            RSA_free(rsa);
-            (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
-            HksFree(bufBlob.data);
-            return NULL;
+
+    RSA *rsa = NULL;
+    do {
+        if (copyFail) {
+            break;
         }
-    } else {
+
+        rsa = RSA_new();
+        if (rsa != NULL) {
+            int32_t ret = RSA_set0_key(rsa, n, e, d);
+            if (ret != HKS_OPENSSL_SUCCESS) {
+                RSA_free(rsa);
+                rsa = NULL;
+                break;
+            }
+        }
+    } while (0);
+
+    if (rsa == NULL) {
         SELF_FREE_PTR(n, BN_free);
         SELF_FREE_PTR(e, BN_free);
         SELF_FREE_PTR(d, BN_free);

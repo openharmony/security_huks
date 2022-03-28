@@ -137,7 +137,6 @@ int32_t AesEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
     if (AesInit(&ctx, &ciper, paramSetIn) != HKS_SUCCESS) {
-        EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
 
@@ -192,7 +191,6 @@ int32_t AesDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob *i
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
     if (AesInit(&ctx, &ciper, paramSetIn) != HKS_SUCCESS) {
-        EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
 
@@ -247,7 +245,6 @@ int32_t AesGcmEncrypt(const struct HksParamSet *paramSetIn, const struct HksBlob
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
     if (AesInit(&ctx, &ciper, paramSetIn) != HKS_SUCCESS) {
-        EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
 
@@ -303,7 +300,6 @@ int32_t AesGcmDecrypt(const struct HksParamSet *paramSetIn, const struct HksBlob
     const EVP_CIPHER *ciper = NULL;
     EVP_CIPHER_CTX *ctx = NULL;
     if (AesInit(&ctx, &ciper, paramSetIn) != HKS_SUCCESS) {
-        EVP_CIPHER_CTX_free(ctx);
         return HKS_FAILURE;
     }
 

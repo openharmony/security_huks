@@ -131,6 +131,7 @@ static int32_t ImportX25519EvpKey(EVP_PKEY **ours, EVP_PKEY **theirs, const stru
         HKS_LOG_E("invalid public key");
         HksLogOpensslError();
         EVP_PKEY_free(*ours);
+        *ours = NULL;
         return HKS_ERROR_BAD_STATE;
     }
 

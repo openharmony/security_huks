@@ -462,7 +462,7 @@ static int32_t RkcCalculateMaterial(const struct HksBlob *random1, const struct 
         hashSrc.data[0] = 0x02;
         ret = HksCryptoHalHash(HKS_DIGEST_SHA256, &hashSrc, &hashResult2);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hash rkMaterial1 failed!");
+            HKS_LOG_E("Hash rkMaterial2 failed!");
         }
     } while (0);
 
