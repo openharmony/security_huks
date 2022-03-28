@@ -189,14 +189,17 @@ static void FreeLocalBigVar(struct Curve25519Var *var)
 {
     if (var->a != NULL) {
         BN_free(var->a);
+        var->a = NULL;
     }
 
     if (var->b != NULL) {
         BN_free(var->b);
+        var->b = NULL;
     }
 
     if (var->c != NULL) {
         BN_free(var->c);
+        var->c = NULL;
     }
 }
 

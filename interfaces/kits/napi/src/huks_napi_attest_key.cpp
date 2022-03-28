@@ -191,7 +191,6 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiAttestKey(napi_env env, napi_callback_info info)

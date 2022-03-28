@@ -301,7 +301,6 @@ static napi_value FinishAsyncWork(napi_env env, FinishAsyncCtxPtr context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiFinish(napi_env env, napi_callback_info info)

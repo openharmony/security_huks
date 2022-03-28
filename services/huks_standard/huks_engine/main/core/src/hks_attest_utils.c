@@ -119,15 +119,18 @@ static int32_t GetEcPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *i
     uint8_t *p = key->data;
     if (memcpy_s(p, spkiHeaderLen, spkiHeader, spkiHeaderLen) != EOK) {
         HKS_LOG_E("copy ecc header fail\n");
+        return HKS_FAILURE;
     }
     p += spkiHeaderLen;
     uint8_t *publicKey = (uint8_t *)(info + 1);
     if (memcpy_s(p, totalSize - spkiHeaderLen, publicKey, info->nOrXSize) != EOK) {
         HKS_LOG_E("copy x value fail\n");
+        return HKS_FAILURE;
     }
     p += info->nOrXSize;
     if (memcpy_s(p, totalSize - spkiHeaderLen - info->nOrXSize, publicKey + info->nOrXSize, info->eOrYSize) != EOK) {
         HKS_LOG_E("copy y value fail\n");
+        return HKS_FAILURE;
     }
     return HKS_SUCCESS;
 }

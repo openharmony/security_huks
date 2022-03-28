@@ -218,7 +218,6 @@ static napi_value SignAsyncWork(napi_env env, SignAsyncContext context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiSign(napi_env env, napi_callback_info info)
