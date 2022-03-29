@@ -374,8 +374,9 @@ static int32_t CheckEccXySize(const uint32_t xSize, const uint32_t ySize)
 
 static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *eccPublicKey)
 {
-    uint32_t xSize = mbedtls_mpi_size(&(pubKey->Q.X));
-    uint32_t ySize = mbedtls_mpi_size(&(pubKey->Q.Y));
+    /* When converting from X509 to internal format, the first byte needs to be filled with 0 */
+    uint32_t xSize = mbedtls_mpi_size(&(pubKey->grp.P));
+    uint32_t ySize = mbedtls_mpi_size(&(pubKey->grp.P));
 
     int32_t ret = CheckEccXySize(xSize, ySize);
     if (ret != HKS_SUCCESS) {
