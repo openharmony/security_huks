@@ -413,13 +413,13 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
             break;
         }
 
-        uint32_t xSize = (uint32_t)BN_num_bytes(x);
-        uint32_t ySize = (uint32_t)BN_num_bytes(y);
-        if (xSize <= 0 || ySize <= 0) {
+        uint32_t keyLen = (uint32_t)EC_GROUP_order_bits(EC_KEY_get0_group(ecKey));
+        uint32_t xSize = HKS_KEY_BYTES(keyLen);
+        uint32_t ySize = HKS_KEY_BYTES(keyLen);
+        if ((keyLen == 0) || (keyLen > HKS_ECC_KEY_SIZE_521)) {
             break;
         }
 
-        /* x and y in ECC algorithm is small, will never overflow. */
         uint32_t totalSize = xSize + ySize + sizeof(struct HksPubKeyInfo);
         uint8_t *keyBuffer = HksMalloc(totalSize);
         if (keyBuffer == NULL) {
@@ -428,11 +428,11 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
 
         struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
         pubKeyInfo->keyAlg = HKS_ALG_ECC;
-        pubKeyInfo->keySize = (uint32_t)EC_GROUP_order_bits(EC_KEY_get0_group(ecKey));
+        pubKeyInfo->keySize = keyLen;
         pubKeyInfo->nOrXSize = xSize;
         pubKeyInfo->eOrYSize = ySize;
-        if (BN_bn2bin(x, keyBuffer + sizeof(struct HksPubKeyInfo)) == 0 ||
-            BN_bn2bin(y, keyBuffer + sizeof(struct HksPubKeyInfo) + xSize) == 0) {
+        if (BN_bn2binpad(x, keyBuffer + sizeof(struct HksPubKeyInfo), xSize) == 0 ||
+            BN_bn2binpad(y, keyBuffer + sizeof(struct HksPubKeyInfo) + xSize, ySize) == 0) {
             HKS_FREE_PTR(keyBuffer);
             break;
         }
