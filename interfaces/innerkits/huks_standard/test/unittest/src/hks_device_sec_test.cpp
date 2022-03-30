@@ -73,6 +73,36 @@ static struct HksBlob g_version = { sizeof(g_versionData), (uint8_t *)g_versionD
 static struct HksBlob g_udid = { sizeof(g_udidData), (uint8_t *)g_udidData };
 static struct HksBlob g_sn = { sizeof(g_snData), (uint8_t *)g_snData };
 
+static void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
+{
+    if (certChain == NULL || *certChain == NULL) {
+        return;
+    }
+
+    if ((*certChain)->certs == NULL) {
+        HksTestFree(*certChain);
+        *certChain = NULL;
+        return;
+    }
+
+    for (uint32_t j = 0; j < pos; j++) {
+        if ((*certChain)->certs[j].data != NULL) {
+            HksTestFree((*certChain)->certs[j].data);
+            (*certChain)->certs[j].data = NULL;
+        }
+    }
+
+    if ((*certChain)->certs != NULL) {
+        HksTestFree((*certChain)->certs);
+        (*certChain)->certs = NULL;
+    }
+
+    if (*certChain != NULL) {
+        HksTestFree(*certChain);
+        *certChain = NULL;
+    }
+}
+
 static int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     const struct HksTestCertChain *certChainParam)
 {
@@ -94,11 +124,16 @@ static int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
         return 0;
     }
     (*certChain)->certs = (struct HksBlob *)HksTestMalloc(sizeof(struct HksBlob) * ((*certChain)->certsCount));
+    if ((*certChain)->certs == NULL) {
+        HksTestFree(*certChain);
+        *certChain = NULL;
+    }
     for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
         (*certChain)->certs[i].size = certChainParam->certDataSize;
         (*certChain)->certs[i].data = (uint8_t *)HksTestMalloc((*certChain)->certs[i].size);
         if ((*certChain)->certs[i].data == NULL) {
             HKS_TEST_LOG_E("malloc fail");
+            FreeCertChain(certChain, i);
             return HKS_ERROR_MALLOC_FAIL;
         }
         memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
@@ -268,6 +303,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
     ret = TestKeyAttest(certChain);
     ASSERT_TRUE(ret == 0);
     ret = ValidateCertChainTest(certChain);
+    FreeCertChain(&certChain, certChain->certsCount);
     ASSERT_TRUE(ret == 0);
 }
 }
