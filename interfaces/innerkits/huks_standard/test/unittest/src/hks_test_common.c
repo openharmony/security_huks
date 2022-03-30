@@ -623,6 +623,8 @@ int32_t TestConstructBlobOut(struct HksBlob **blob,
         (*blob)->data = (uint8_t *)HksTestMalloc(realBlobDataSize);
         if ((*blob)->data == NULL) {
             HKS_TEST_LOG_E("malloc fail");
+            HksTestFree(*blob);
+            *blob = NULL;
             return HKS_ERROR_MALLOC_FAIL;
         }
         (void)memset_s((*blob)->data, realBlobDataSize, 0, realBlobDataSize);
