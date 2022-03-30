@@ -107,6 +107,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     if (name1 == nullptr) {
         HKS_LOG_E("user id malloc failed.");
         HksFree(name);
+        processInfo->userId.data = nullptr;
         return HKS_ERROR_MALLOC_FAIL;
     }
 

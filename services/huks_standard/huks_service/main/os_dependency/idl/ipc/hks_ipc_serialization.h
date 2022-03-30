@@ -36,14 +36,6 @@ int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *
 int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSet);
 
-int32_t HksInitUnpack(const struct HksBlob *srcData, struct HksBlob *key, struct HksParamSet **paramSet);
-
-int32_t HksUpdateUnpack(const struct HksBlob *srcData, uint64_t *handle, struct HksBlob *inputData,
-    struct HksBlob *outputData);
-
-int32_t HksFinalUnpack(const struct HksBlob *srcData, uint64_t *handle, struct HksBlob *inputData,
-    struct HksBlob *rsvData, struct HksBlob *outputData);
-
 int32_t HksSignUnpack(const struct HksBlob *srcData, struct HksBlob *key, struct HksParamSet **paramSet,
     struct HksBlob *unsignedData, struct HksBlob *signature);
 
@@ -75,9 +67,6 @@ int32_t HksWrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias
 
 int32_t HksUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksBlob *targetKeyAlias, struct HksBlob *wrappedData, struct HksParamSet **paramSet);
-
-int32_t HksSignWithDeviceKeyUnpack(const struct HksBlob *srcData, uint32_t *keyId, struct HksParamSet **paramSet,
-    struct HksBlob *unsignedData, struct HksBlob *signature);
 
 int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certChainBlob);
 

@@ -38,14 +38,6 @@ int32_t HksExportPublicKeyPack(struct HksBlob *destData, const struct HksBlob *k
 
 int32_t HksGetKeyParamSetPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *keyOut);
 
-int32_t HksInitPack(struct HksBlob *destData, const struct HksBlob *key, const struct HksParamSet *paramSet);
-
-int32_t HksUpdatePack(struct HksBlob *destData, uint64_t handle, const struct HksBlob *inputData,
-    const struct HksBlob *outputData);
-
-int32_t HksFinalPack(struct HksBlob *destData, uint64_t handle, const struct HksBlob *inputData,
-    const struct HksBlob *rsvData, const struct HksBlob *outputData);
-
 int32_t HksOnceParamPack(struct HksBlob *destData, const struct HksBlob *key, const struct HksParamSet *paramSet,
     uint32_t *offset);
 
