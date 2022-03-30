@@ -55,7 +55,7 @@ ohos_static_library("libhuks_mbedtls_standard_static") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//third_party/mbedtls",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
   ]
   cflags = [
     "-DHILOG_ENABLE",

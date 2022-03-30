@@ -84,7 +84,7 @@ ohos_moduletest("huks_mt_test") {
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
-    "//third_party/openssl:libcrypto_static",
+    "//third_party/openssl:libcrypto_shared",
     "//utils/native/base:utils",
   ]
 }
