@@ -1073,115 +1073,6 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     return ret;
 }
 
-#ifndef __LITEOS_M__
-int32_t HksServiceProcessInit(uint32_t msgId, const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, uint64_t *operationHandle)
-{
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-    struct HksBlob keyFromFile = { 0, NULL };
-
-    do {
-        ret = HksCheckInitParams(&processInfo->processName, keyAlias, paramSet, operationHandle);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
-
-        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("GetKeyAndNewParamSet, ret = %d", ret);
-            break;
-        }
-
-        ret = HuksAccessProcessInit(msgId, &keyFromFile, newParamSet, operationHandle);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HuksAccessProcessInit fail");
-            break;
-        }
-
-        ret = CreateOperation(&processInfo->processName, *operationHandle, true);
-    } while (0);
-
-    HKS_FREE_BLOB(keyFromFile);
-    HksFreeParamSet(&newParamSet);
-    return ret;
-}
-
-int32_t HksServiceProcessUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData)
-{
-    int32_t ret;
-
-    do {
-        ret = CheckBlob(inData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("CheckBlob failed");
-            break;
-        }
-
-        if (QueryOperation(operationHandle) == NULL) {
-            HKS_LOG_E("operationHandle is not exist");
-            ret = HKS_ERROR_REQUEST_OVERFLOWS;
-            break;
-        }
-
-        ret = HuksAccessProcessMultiUpdate(msgId, operationHandle, inData, outData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HuksAccessProcessMultiUpdate fail");
-            DeleteOperation(operationHandle);
-        }
-    } while (0);
-
-    return ret;
-}
-
-int32_t HksServiceProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData)
-{
-    int32_t ret;
-
-    do {
-        ret = CheckBlob(inData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("CheckBlob inData failed");
-            break;
-        }
-
-        ret = CheckBlob(outData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("CheckBlob outData failed");
-            break;
-        }
-
-        if (QueryOperation(operationHandle) == NULL) {
-            HKS_LOG_E("operationHandle is not exist");
-            ret = HKS_ERROR_REQUEST_OVERFLOWS;
-            break;
-        }
-
-        ret = HuksAccessProcessFinal(msgId, operationHandle, inData, outData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HuksAccessProcessFinal fail");
-        }
-
-        DeleteOperation(operationHandle);
-    } while (0);
-
-    return ret;
-}
-#endif
-
-int32_t HksServiceSignWithDeviceKey(const struct HksBlob *processName, uint32_t keyId,
-    const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature)
-{
-    (void)processName;
-    (void)keyId;
-    (void)paramSet;
-    (void)srcData;
-    (void)signature;
-    return 0;
-}
-
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
@@ -1331,9 +1222,11 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
     return ret;
 }
 
-int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData)
+int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
+    (void)processInfo;
+
     int32_t ret = HuksAccessUpdate(handle, paramSet, inData, outData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HuksAccessUpdate fail, ret = %d", ret);
@@ -1375,11 +1268,13 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     return ret;
 }
 
-int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
+int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet)
 {
+    (void)processInfo;
     int32_t ret = HuksAccessAbort(handle, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HuksAccessFinish fail, ret = %d", ret);
+        HKS_LOG_E("HuksAccessAbort fail, ret = %d", ret);
         return ret;
     }
     return ret;

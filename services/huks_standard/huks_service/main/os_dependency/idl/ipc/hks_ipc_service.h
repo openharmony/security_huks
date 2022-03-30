@@ -42,47 +42,17 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
 
 void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceSignInit(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceSignUpdate(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceSignFinal(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceVerifyInit(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceVerifyUpdate(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceVerifyFinal(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceEncryptInit(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceEncryptUpdate(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceEncryptFinal(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceDecryptInit(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceDecryptUpdate(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceDecryptFinal(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceMacInit(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceMacUpdate(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceMacFinal(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *context);
 
@@ -93,8 +63,6 @@ void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8
 void HksIpcServiceWrapKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceUnwrapKey(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceSignWithDeviceKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t *context);
 

@@ -92,20 +92,6 @@ static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlo
     return HKS_SUCCESS;
 }
 
-static int32_t GetUint64FromBuffer(uint64_t *value, const struct HksBlob *srcBlob, uint32_t *srcOffset)
-{
-    if ((*srcOffset > srcBlob->size) || (srcBlob->size - *srcOffset < sizeof(uint64_t))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    if (memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(uint64_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
-    }
-
-    *srcOffset += sizeof(*value);
-    return HKS_SUCCESS;
-}
-
 int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, uint32_t *srcOffset)
 {
     if ((*srcOffset > srcBlob->size) || ((srcBlob->size - *srcOffset) < sizeof(uint32_t))) {
@@ -284,77 +270,6 @@ int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *k
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("malloc paramSet failed");
     }
-    return ret;
-}
-
-int32_t HksInitUnpack(const struct HksBlob *srcData, struct HksBlob *key, struct HksParamSet **paramSet)
-{
-    uint32_t offset = 0;
-    int32_t ret = GetKeyAndParamSetFromBuffer(srcData, key, paramSet, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetKeyAndParamSetFromBuffer failed");
-    }
-
-    return ret;
-}
-
-int32_t HksUpdateUnpack(const struct HksBlob *srcData, uint64_t *handle, struct HksBlob *inputData,
-    struct HksBlob *outputData)
-{
-    uint32_t offset = 0;
-    int32_t ret = GetBlobFromBuffer(inputData, srcData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyAlias failed");
-        return ret;
-    }
-
-    ret = GetUint64FromBuffer(handle, srcData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get handle failed");
-        return ret;
-    }
-
-    if (outputData != NULL) {
-        ret = MallocBlobFromBuffer(srcData, outputData, &offset);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("malloc outputData data failed");
-        }
-    }
-
-    return ret;
-}
-
-int32_t HksFinalUnpack(const struct HksBlob *srcData, uint64_t *handle, struct HksBlob *inputData,
-    struct HksBlob *rsvData, struct HksBlob *outputData)
-{
-    uint32_t offset = 0;
-    int32_t ret = GetBlobFromBuffer(inputData, srcData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get inputData failed");
-        return ret;
-    }
-
-    ret = GetUint64FromBuffer(handle, srcData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get handle failed");
-        return ret;
-    }
-
-    if (rsvData != NULL) {
-        ret = GetBlobFromBuffer(rsvData, srcData, &offset);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get rsvData failed");
-            return ret;
-        }
-    }
-
-    if (outputData != NULL) {
-        ret = MallocBlobFromBuffer(srcData, outputData, &offset);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("malloc outputData data failed");
-        }
-    }
-
     return ret;
 }
 
@@ -658,48 +573,6 @@ int32_t HksUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAli
     return GetBlobFromBuffer(wrappedData, srcData, &offset);
 }
 
-static int32_t SignVerifyWithDeviceKeyUnpack(const struct HksBlob *srcData, uint32_t *keyId,
-    struct HksParamSet **paramSet,
-    struct HksBlob *unsignedData, uint32_t *offset)
-{
-    int32_t ret = GetUint32FromBuffer(keyId, srcData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyId failed");
-        return ret;
-    }
-
-    ret = GetParamSetFromBuffer(paramSet, srcData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get paramSet failed");
-        return ret;
-    }
-
-    ret = GetBlobFromBuffer(unsignedData, srcData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get unsignedData failed");
-    }
-
-    return ret;
-}
-
-int32_t HksSignWithDeviceKeyUnpack(const struct HksBlob *srcData, uint32_t *keyId, struct HksParamSet **paramSet,
-    struct HksBlob *unsignedData, struct HksBlob *signature)
-{
-    uint32_t offset = 0;
-    int32_t ret = SignVerifyWithDeviceKeyUnpack(srcData, keyId, paramSet, unsignedData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("SignVerifyWithDeviceKeyUnpack failed");
-        return ret;
-    }
-
-    ret = MallocBlobFromBuffer(srcData, signature, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("malloc signature data failed");
-    }
-
-    return ret;
-}
-
 int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certChainBlob)
 {
     uint32_t offset = 0;
@@ -709,6 +582,7 @@ int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certC
     }
     return ret;
 }
+
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt)
 {
     int32_t ret;
