@@ -31,7 +31,7 @@ namespace Security {
 namespace Huks {
 namespace FuzzTest {
 namespace {
-constexpr uint32_t HUKS_FUZZ_TEST_HOURS = 12;
+constexpr uint32_t HUKS_FUZZ_TEST_HOURS = 1;
 constexpr auto HUKS_FUZZ_TEST_TIME = std::chrono::hours(HUKS_FUZZ_TEST_HOURS);
 constexpr uint32_t MAX_PARAM_COUNT_IN_PARAM_SET = 32;
 constexpr uint32_t MAX_RANDOM_BYTES = 32;
