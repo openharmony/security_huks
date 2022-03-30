@@ -63,15 +63,6 @@ int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct Hk
 
 int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random);
 
-int32_t HuksAccessProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
-    uint64_t *operationHandle);
-
-int32_t HuksAccessProcessMultiUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData);
-
-int32_t HuksAccessProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData);
-
 int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac);
 

@@ -34,20 +34,6 @@ int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint3
     return HKS_SUCCESS;
 }
 
-static int32_t CopyUint64ToBuffer(uint64_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
-{
-    if ((*destOffset > destBlob->size) || ((destBlob->size - *destOffset) < sizeof(value))) {
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value, sizeof(value)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
-    }
-    *destOffset += sizeof(value);
-
-    return HKS_SUCCESS;
-}
-
 static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
     if ((*destOffset > destBlob->size) ||
@@ -187,73 +173,6 @@ int32_t HksGetKeyParamSetPack(struct HksBlob *destData, const struct HksBlob *ke
         return ret;
     }
     return CopyUint32ToBuffer(keyOut->size, destData, &offset);
-}
-
-int32_t HksInitPack(struct HksBlob *destData, const struct HksBlob *key, const struct HksParamSet *paramSet)
-{
-    uint32_t offset = 0;
-    int32_t ret = CopyBlobToBuffer(key, destData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy key failed");
-        return ret;
-    }
-
-    return CopyParamSetToBuffer(paramSet, destData, &offset);
-}
-
-int32_t HksUpdatePack(struct HksBlob *destData, uint64_t handle, const struct HksBlob *inputData,
-    const struct HksBlob *outputData)
-{
-    uint32_t offset = 0;
-    int32_t ret = CopyBlobToBuffer(inputData, destData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy keyAlias failed");
-        return ret;
-    }
-
-    ret = CopyUint64ToBuffer(handle, destData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy handle failed");
-        return ret;
-    }
-
-    /* 0 is a valid output size */
-    if ((outputData != NULL) && (outputData->size > 0)) {
-        ret = CopyUint32ToBuffer(outputData->size, destData, &offset);
-    }
-    return ret;
-}
-
-int32_t HksFinalPack(struct HksBlob *destData, uint64_t handle, const struct HksBlob *inputData,
-    const struct HksBlob *rsvData, const struct HksBlob *outputData)
-{
-    uint32_t offset = 0;
-    int32_t ret = CopyBlobToBuffer(inputData, destData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy inputData failed");
-        return ret;
-    }
-
-    ret = CopyUint64ToBuffer(handle, destData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy handle failed");
-        return ret;
-    }
-
-    /* rsvData can be null */
-    if (rsvData != NULL) {
-        ret = CopyBlobToBuffer(rsvData, destData, &offset);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("copy rsvData failed");
-            return ret;
-        }
-    }
-
-    /* outputData can be null */
-    if (outputData != NULL) {
-        ret = CopyUint32ToBuffer(outputData->size, destData, &offset);
-    }
-    return ret;
 }
 
 int32_t HksOnceParamPack(struct HksBlob *destData, const struct HksBlob *key, const struct HksParamSet *paramSet,

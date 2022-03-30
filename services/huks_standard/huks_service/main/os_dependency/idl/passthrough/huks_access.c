@@ -191,36 +191,6 @@ int32_t HuksAccessGetHardwareInfo(void)
     return g_hksHalDevicePtr->HuksHdiGetHardwareInfo();
 }
 
-int32_t HuksAccessProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
-    uint64_t *operationHandle)
-{
-    (void)msgId;
-    (void)key;
-    (void)paramSet;
-    (void)operationHandle;
-    return 0;
-}
-
-int32_t HuksAccessProcessMultiUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData)
-{
-    (void)msgId;
-    (void)operationHandle;
-    (void)inData;
-    (void)outData;
-    return 0;
-}
-
-int32_t HuksAccessProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData)
-{
-    (void)msgId;
-    (void)operationHandle;
-    (void)inData;
-    (void)outData;
-    return 0;
-}
-
 int32_t HuksAccessSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
