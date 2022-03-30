@@ -35,15 +35,6 @@ int32_t HksServiceProvisionVerify(const struct HksBlob *srcData, const struct Hk
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut);
 
-int32_t HksServiceProcessInit(uint32_t msgId, const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, uint64_t *operationHandle);
-
-int32_t HksServiceProcessUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData);
-
-int32_t HksServiceProcessFinal(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
-    struct HksBlob *outData);
-
 int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature);
 
@@ -59,9 +50,6 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
 int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias);
 
 int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias);
-
-int32_t HksServiceSignWithDeviceKey(const struct HksBlob *processName, uint32_t keyId,
-    const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature);
 
 int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     struct HksParamSet *paramSet);
@@ -103,13 +91,14 @@ int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct Hks
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle);
 
-int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData);
+int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
 int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
+int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }

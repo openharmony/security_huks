@@ -347,7 +347,18 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
 int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    return HksServiceUpdate(handle, paramSet, inData, outData);
+    char *processName = NULL;
+    char *userId = NULL;
+    if (GetProcessInfo(&processName, &userId) != HKS_SUCCESS) {
+        HKS_LOG_E("get process info failed");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName }
+    };
+    return HksServiceUpdate(handle, &processInfo, paramSet, inData, outData);
 }
 
 int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
@@ -369,7 +380,18 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
 
 int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
-    return HksServiceAbort(handle, paramSet);
+    char *processName = NULL;
+    char *userId = NULL;
+    if (GetProcessInfo(&processName, &userId) != HKS_SUCCESS) {
+        HKS_LOG_E("get process info failed");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName }
+    };
+    return HksServiceAbort(handle, &processInfo, paramSet);
 }
 #endif
 
