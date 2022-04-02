@@ -17,7 +17,9 @@
 
 #include <gtest/gtest.h>
 
-int32_t Unittest::CrossTest::HksCrossTestGenerateKey(const struct HksBlob *keyAlias, struct HksParam *genParams,
+using namespace testing::ext;
+namespace Unittest::CrossTest {
+int32_t HksCrossTestGenerateKey(const struct HksBlob *keyAlias, struct HksParam *genParams,
     const uint32_t paramCnt, struct HksParamSet *genParamSet)
 {
     if (InitParamSet(&genParamSet, genParams, paramCnt) != HKS_SUCCESS) {
@@ -26,18 +28,18 @@ int32_t Unittest::CrossTest::HksCrossTestGenerateKey(const struct HksBlob *keyAl
     return HksGenerateKey(keyAlias, genParamSet, nullptr);
 }
 
-int32_t Unittest::CrossTest::HksCrossTestImportKey(const struct HksBlob *keyAlias, struct HksParamSet *firstParamSet,
+int32_t HksCrossTestImportKey(const struct HksBlob *keyAlias, struct HksParamSet *firstParamSet,
     struct HksParamSet *secondParamSet, struct HksBlob *newKeyAlias)
 {
-    uint8_t tmpPublicKey[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob publicKey = { Unittest::CrossTest::CROSS_COMMON_SIZE, (uint8_t *)tmpPublicKey };
+    uint8_t tmpPublicKey[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob publicKey = { CROSS_COMMON_SIZE, (uint8_t *)tmpPublicKey };
     if (HksExportPublicKey(keyAlias, firstParamSet, &publicKey) != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
     return HksImportKey(newKeyAlias, secondParamSet, &publicKey);
 }
 
-int32_t Unittest::CrossTest::HksCrossTestAesEncrypt(const struct HksBlob *keyAlias,
+int32_t HksCrossTestAesEncrypt(const struct HksBlob *keyAlias,
     const struct HksParamSet *encryptParamSet, const struct HksBlob *inData, struct HksBlob *cipherText)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
@@ -62,7 +64,7 @@ int32_t Unittest::CrossTest::HksCrossTestAesEncrypt(const struct HksBlob *keyAli
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestAesDecrypt(const struct HksBlob *keyAlias,
+int32_t HksCrossTestAesDecrypt(const struct HksBlob *keyAlias,
     const struct HksParamSet *decryptParamSet, const struct HksBlob *cipherTest, struct HksBlob *plainText)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
@@ -87,7 +89,7 @@ int32_t Unittest::CrossTest::HksCrossTestAesDecrypt(const struct HksBlob *keyAli
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestRsaEncrypt(const struct HksBlob *keyAlias,
+int32_t HksCrossTestRsaEncrypt(const struct HksBlob *keyAlias,
     const struct HksParamSet *encryptParamSet, const struct HksBlob *inData, struct HksBlob *cipherText)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
@@ -112,7 +114,7 @@ int32_t Unittest::CrossTest::HksCrossTestRsaEncrypt(const struct HksBlob *keyAli
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestRsaDecrypt(const struct HksBlob *keyAlias,
+int32_t HksCrossTestRsaDecrypt(const struct HksBlob *keyAlias,
     const struct HksParamSet *decryptParamSet, const struct HksBlob *cipherTest, struct HksBlob *plainText)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
@@ -137,7 +139,7 @@ int32_t Unittest::CrossTest::HksCrossTestRsaDecrypt(const struct HksBlob *keyAli
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestSignVerify(const struct HksBlob *keyAlias,
+int32_t HksCrossTestSignVerify(const struct HksBlob *keyAlias,
     const struct HksParamSet *signVerifyParamSet, const struct HksBlob *inData, struct HksBlob *signedData)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
@@ -157,15 +159,15 @@ int32_t Unittest::CrossTest::HksCrossTestSignVerify(const struct HksBlob *keyAli
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestHmac(const struct HksBlob *keyAlias, const struct HksParamSet* hmacParamSet)
+int32_t HksCrossTestHmac(const struct HksBlob *keyAlias, const struct HksParamSet* hmacParamSet)
 {
     struct HksBlob inData = {
-        Unittest::CrossTest::g_inData.length(),
-        (uint8_t *)Unittest::CrossTest::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
 
-    uint8_t tmpMac[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob mac = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpMac };
+    uint8_t tmpMac[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob mac = { CROSS_COMMON_SIZE, tmpMac };
     int32_t ret = HksMac(keyAlias, hmacParamSet, &inData, &mac);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksMac failed.");
@@ -180,8 +182,8 @@ int32_t Unittest::CrossTest::HksCrossTestHmac(const struct HksBlob *keyAlias, co
         return HKS_FAILURE;
     }
 
-    uint8_t out[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outData = { Unittest::CrossTest::CROSS_COMMON_SIZE, out };
+    uint8_t out[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outData = { CROSS_COMMON_SIZE, out };
     ret = TestUpdateFinish(&handleHMAC, hmacParamSet, &inData, &outData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("TestUpdateFinish failed.");
@@ -197,7 +199,7 @@ int32_t Unittest::CrossTest::HksCrossTestHmac(const struct HksBlob *keyAlias, co
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestAgreeGenerate(const struct HksBlob *keyAlias01,
+int32_t HksCrossTestAgreeGenerate(const struct HksBlob *keyAlias01,
     const struct HksBlob *keyAlias02, struct HksParamSet *genParamSet, const struct HksParam *genParams,
     const uint32_t genParamsCnt)
 {
@@ -222,7 +224,7 @@ int32_t Unittest::CrossTest::HksCrossTestAgreeGenerate(const struct HksBlob *key
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestAgreeExport(const struct HksBlob *keyAlias01, const struct HksBlob *keyAlias02,
+int32_t HksCrossTestAgreeExport(const struct HksBlob *keyAlias01, const struct HksBlob *keyAlias02,
     struct HksBlob *publicKey01, struct HksBlob *publicKey02, const struct HksParamSet *genParamSet)
 {
     int32_t ret = HksExportPublicKey(keyAlias01, genParamSet, publicKey01);
@@ -240,7 +242,7 @@ int32_t Unittest::CrossTest::HksCrossTestAgreeExport(const struct HksBlob *keyAl
     return HKS_SUCCESS;
 }
 
-void Unittest::CrossTest::HksCrossTestAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
+void HksCrossTestAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
     struct HksParamSet *paramSet3, struct HksParamSet *paramSet4, struct HksParamSet *paramSet5)
 {
     HksFreeParamSet(&paramSet1);
@@ -250,18 +252,18 @@ void Unittest::CrossTest::HksCrossTestAgreeFreeParamSet(struct HksParamSet *para
     HksFreeParamSet(&paramSet5);
 }
 
-void Unittest::CrossTest::HksCrossTestAgreeDeleteKey(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2)
+void HksCrossTestAgreeDeleteKey(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2)
 {
     HksDeleteKey(keyAlias1, nullptr);
     HksDeleteKey(keyAlias2, nullptr);
 }
 
-int32_t Unittest::CrossTest::HksCrossTestAgree(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
+int32_t HksCrossTestAgree(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
     const struct HksParamSet *initParamSet, const struct HksParamSet *finishParamSet, struct HksBlob *outData)
 {
     struct HksBlob inData = {
-        Unittest::CrossTest::g_inData.length(),
-        (uint8_t *)Unittest::CrossTest::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
@@ -272,8 +274,8 @@ int32_t Unittest::CrossTest::HksCrossTestAgree(const struct HksBlob *keyAlias, c
         return HKS_FAILURE;
     }
 
-    uint8_t outDataU[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outDataUpdate = { Unittest::CrossTest::CROSS_COMMON_SIZE, outDataU };
+    uint8_t outDataU[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outDataUpdate = { CROSS_COMMON_SIZE, outDataU };
     ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksUpdate failed.");
@@ -288,12 +290,12 @@ int32_t Unittest::CrossTest::HksCrossTestAgree(const struct HksBlob *keyAlias, c
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::CrossTest::HksCrossTestDerive(const struct HksBlob *keyAlias, const struct HksParamSet *genParamSet,
+int32_t HksCrossTestDerive(const struct HksBlob *keyAlias, const struct HksParamSet *genParamSet,
     struct HksParamSet *initParamSet, struct HksParamSet *finishParamSet)
 {
     struct HksBlob inData = {
-        Unittest::CrossTest::g_inData.length(),
-        (uint8_t *)Unittest::CrossTest::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
 
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
@@ -310,16 +312,16 @@ int32_t Unittest::CrossTest::HksCrossTestDerive(const struct HksBlob *keyAlias, 
         return HKS_FAILURE;
     }
 
-    uint8_t tmpOut[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outDataU = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut };
+    uint8_t tmpOut[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outDataU = { CROSS_COMMON_SIZE, tmpOut };
     ret = HksUpdate(&handleDerive, initParamSet, &inData, &outDataU);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksUpdate failed.");
         return HKS_FAILURE;
     }
 
-    uint8_t outDataD[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outData = { Unittest::CrossTest::CROSS_COMMON_SIZE, outDataD };
+    uint8_t outDataD[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outData = { CROSS_COMMON_SIZE, outDataD };
     ret = HksFinish(&handleDerive, finishParamSet, &inData, &outData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksFinish failed.");
@@ -341,4 +343,5 @@ int32_t Unittest::CrossTest::HksCrossTestDerive(const struct HksBlob *keyAlias, 
     }
 
     return HKS_SUCCESS;
+}
 }

@@ -41,6 +41,7 @@ void HksPbkdf2DerivePart1Test::TearDownTestCase(void)
 
 void HksPbkdf2DerivePart1Test::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksPbkdf2DerivePart1Test::TearDown()
@@ -88,7 +89,7 @@ static struct HksParam g_pbkdf2Params001[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
 static struct HksParam g_pbkdf2FinishParams001[] = {
@@ -106,7 +107,7 @@ static struct HksParam g_pbkdf2FinishParams001[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -151,7 +152,7 @@ static struct HksParam g_pbkdf2Params002[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
 static struct HksParam g_pbkdf2FinishParams002[] = {
@@ -169,7 +170,7 @@ static struct HksParam g_pbkdf2FinishParams002[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -214,7 +215,7 @@ static struct HksParam g_pbkdf2Params003[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
 static struct HksParam g_pbkdf2FinishParams003[] = {
@@ -232,7 +233,7 @@ static struct HksParam g_pbkdf2FinishParams003[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -277,7 +278,7 @@ static struct HksParam g_pbkdf2Params004[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
 static struct HksParam g_pbkdf2FinishParams004[] = {
@@ -295,7 +296,7 @@ static struct HksParam g_pbkdf2FinishParams004[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -340,7 +341,7 @@ static struct HksParam g_pbkdf2Params005[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
 static struct HksParam g_pbkdf2FinishParams005[] = {
@@ -358,7 +359,7 @@ static struct HksParam g_pbkdf2FinishParams005[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -402,7 +403,7 @@ static struct HksParam g_pbkdf2Params006[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
 static struct HksParam g_pbkdf2FinishParams006[] = {
@@ -420,7 +421,7 @@ static struct HksParam g_pbkdf2FinishParams006[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -465,7 +466,7 @@ static struct HksParam g_pbkdf2Params007[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
 static struct HksParam g_pbkdf2FinishParams007[] = {
@@ -483,7 +484,7 @@ static struct HksParam g_pbkdf2FinishParams007[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -528,7 +529,7 @@ static struct HksParam g_pbkdf2Params008[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
 static struct HksParam g_pbkdf2FinishParams008[] = {
@@ -546,7 +547,7 @@ static struct HksParam g_pbkdf2FinishParams008[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -591,7 +592,7 @@ static struct HksParam g_pbkdf2Params009[] = {
         }
     }, {
         .tag = HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
 static struct HksParam g_pbkdf2FinishParams009[] = {
@@ -609,7 +610,7 @@ static struct HksParam g_pbkdf2FinishParams009[] = {
         .uint32Param = HKS_ALG_AES
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::Pbkdf2Derive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE

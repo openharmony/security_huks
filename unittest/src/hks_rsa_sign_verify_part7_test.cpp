@@ -41,6 +41,7 @@ void HksRsaSignVerifyPart7Test::TearDownTestCase(void)
 
 void HksRsaSignVerifyPart7Test::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksRsaSignVerifyPart7Test::TearDown()

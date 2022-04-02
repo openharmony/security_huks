@@ -41,6 +41,7 @@ void HksAesCipherPart3Test::TearDownTestCase(void)
 
 void HksAesCipherPart3Test::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksAesCipherPart3Test::TearDown()
@@ -87,8 +88,8 @@ static struct HksParam g_encryptParams015[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -114,8 +115,8 @@ static struct HksParam g_decryptParams015[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -160,8 +161,8 @@ static struct HksParam g_encryptParams016[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -187,110 +188,11 @@ static struct HksParam g_decryptParams016[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
-
-#if defined(_USE_OPENSSL_) && defined(_USE_MBEDTLS_)
-static struct HksParam g_genParams017[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CCM
-    }
-};
-static struct HksParam g_encryptParams017[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CCM
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = Unittest::AesCipher::AAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AAD
-        }
-    }, {
-        .tag = HKS_TAG_NONCE,
-        .blob = {
-            .size = Unittest::AesCipher::NONCE_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::NONCE
-        }
-    }, {
-        .tag = HKS_TAG_AE_TAG,
-        .blob = {
-            .size = Unittest::AesCipher::AEAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AEAD
-        }
-    }
-};
-static struct HksParam g_decryptParams017[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CCM
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = Unittest::AesCipher::AAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AAD
-        }
-    }, {
-        .tag = HKS_TAG_NONCE,
-        .blob = {
-            .size = Unittest::AesCipher::NONCE_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::NONCE
-        }
-    }, {
-        .tag = HKS_TAG_AE_TAG,
-        .blob = {
-            .size = Unittest::AesCipher::AEAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AEAD
-        }
-    }
-};
-#endif
 
 static struct HksParam g_genParams018[] = {
     {
@@ -332,20 +234,20 @@ static struct HksParam g_encryptParams018[] = {
     }, {
         .tag = HKS_TAG_ASSOCIATED_DATA,
         .blob = {
-            .size = Unittest::AesCipher::AAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AAD
+            .size = AAD_SIZE,
+            .data = (uint8_t *)AAD
         }
     }, {
         .tag = HKS_TAG_NONCE,
         .blob = {
-            .size = Unittest::AesCipher::NONCE_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::NONCE
+            .size = NONCE_SIZE,
+            .data = (uint8_t *)NONCE
         }
     }, {
         .tag = HKS_TAG_AE_TAG,
         .blob = {
-            .size = Unittest::AesCipher::AEAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AEAD
+            .size = AEAD_SIZE,
+            .data = (uint8_t *)AEAD
         }
     }
 };
@@ -371,23 +273,25 @@ static struct HksParam g_decryptParams018[] = {
     }, {
         .tag = HKS_TAG_ASSOCIATED_DATA,
         .blob = {
-            .size = Unittest::AesCipher::AAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AAD
+            .size = AAD_SIZE,
+            .data = (uint8_t *)AAD
         }
     }, {
         .tag = HKS_TAG_NONCE,
         .blob = {
-            .size = Unittest::AesCipher::NONCE_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::NONCE
+            .size = NONCE_SIZE,
+            .data = (uint8_t *)NONCE
         }
     }, {
         .tag = HKS_TAG_AE_TAG,
         .blob = {
-            .size = Unittest::AesCipher::AEAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AEAD
+            .size = AEAD_SIZE,
+            .data = (uint8_t *)AEAD
         }
     }
 };
+
+#ifdef L2_STANDARD
 static struct HksParam g_decrypt1Params018[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -410,14 +314,14 @@ static struct HksParam g_decrypt1Params018[] = {
     }, {
         .tag = HKS_TAG_ASSOCIATED_DATA,
         .blob = {
-            .size = Unittest::AesCipher::AAD_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::AAD
+            .size = AAD_SIZE,
+            .data = (uint8_t *)AAD
         }
     }, {
         .tag = HKS_TAG_NONCE,
         .blob = {
-            .size = Unittest::AesCipher::NONCE_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::NONCE
+            .size = NONCE_SIZE,
+            .data = (uint8_t *)NONCE
         }
     }
 };
@@ -462,8 +366,8 @@ static struct HksParam g_encryptParams019[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -489,8 +393,8 @@ static struct HksParam g_decryptParams019[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -535,8 +439,8 @@ static struct HksParam g_encryptParams020[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -562,8 +466,8 @@ static struct HksParam g_decryptParams020[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -609,8 +513,8 @@ static struct HksParam g_encryptParams021[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
@@ -636,11 +540,12 @@ static struct HksParam g_decryptParams021[] = {
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
-            .size = Unittest::AesCipher::IV_SIZE,
-            .data = (uint8_t *)Unittest::AesCipher::IV
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
         }
     }
 };
+#endif
 #endif
 
 /**
@@ -703,38 +608,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test016, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
-#if defined(_USE_OPENSSL_) && defined(_USE_MBEDTLS_)
-/**
- * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test017
- * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-CCM pad-NONE size-256.
- * @tc.type: FUNC
- */
-HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test017, TestSize.Level0)
-{
-    char tmpKeyAlias[] = "HksAESCipherKeyAliasTest017";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-
-    struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams017, sizeof(g_genParams017)/sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-
-    struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams017, sizeof(g_encryptParams017)/sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
-
-    struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams017, sizeof(g_decryptParams017)/sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
-
-    ret = HksAESCipherTestCaseCcm(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&encryptParamSet);
-    HksFreeParamSet(&decryptParamSet);
-}
-#endif
-
+#ifdef L2_STANDARD
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test018
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE size-256.
@@ -761,7 +635,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test018, TestSize.Level0)
     ret = InitParamSet(&decrypt1ParamSet, g_decrypt1Params018, sizeof(g_decrypt1Params018)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAesCipherTestCaseGcm(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, decrypt1ParamSet);
+    ret = HksAesCipherTestCaseGcm2(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, decrypt1ParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -859,6 +733,38 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test021, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 #endif
+#else
+/**
+ * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test018
+ * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE size-256.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test018, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksAESCipherKeyAliasTest018";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams018, sizeof(g_genParams018)/sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams018, sizeof(g_encryptParams018)/sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams018, sizeof(g_decryptParams018)/sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksAesCipherTestCaseGcm1(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+#endif
+
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test022
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-CBC pad-PKCS7 size-256. Decrypt-Abort
@@ -868,13 +774,16 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESDecryptKeyAliasTest022";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::AesCipher::g_inData.length(),
-                              (uint8_t *)Unittest::AesCipher::g_inData.c_str() };
-    int32_t ret = HKS_FAILURE;
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams019, sizeof(g_genParams019)/sizeof(HksParam));
+#ifdef L2_STANDARD
+    int32_t ret = InitParamSet(&genParamSet, g_genParams019, sizeof(g_genParams019)/sizeof(HksParam));
+#else
+    int32_t ret = InitParamSet(&genParamSet, g_genParams018, sizeof(g_genParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -882,7 +791,11 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
 
     /* 2. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&encryptParamSet, g_encryptParams019, sizeof(g_encryptParams019)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&encryptParamSet, g_encryptParams018, sizeof(g_encryptParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
@@ -890,14 +803,18 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
     ret = HksInit(&keyAlias, encryptParamSet, &handleEncrypt);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update & Finish
-    uint8_t cipher[Unittest::AesCipher::AES_COMMON_SIZE] = {0};
-    struct HksBlob cipherText = { Unittest::AesCipher::AES_COMMON_SIZE, cipher };
+    uint8_t cipher[AES_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { AES_COMMON_SIZE, cipher };
     ret = TestUpdateLoopFinish(&handleEncrypt, encryptParamSet, &inData, &cipherText);
     EXPECT_NE(HksMemCmp(inData.data, cipherText.data, inData.size), HKS_SUCCESS) << "cipherText equals inData";
 
     /* 3. Decrypt Three Stage */
     struct HksParamSet *decryptParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&decryptParamSet, g_decryptParams019, sizeof(g_decryptParams019)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&decryptParamSet, g_decryptParams018, sizeof(g_decryptParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
@@ -929,13 +846,17 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test023, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest023";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::AesCipher::g_inData.length(),
-                              (uint8_t *)Unittest::AesCipher::g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&genParamSet, g_genParams019, sizeof(g_genParams019)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&genParamSet, g_genParams018, sizeof(g_genParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -943,7 +864,11 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test023, TestSize.Level0)
 
     /* 2. Encrypt Three Stage (Abort) */
     struct HksParamSet *encryptParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&encryptParamSet, g_encryptParams019, sizeof(g_encryptParams019)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&encryptParamSet, g_encryptParams018, sizeof(g_encryptParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
@@ -978,7 +903,11 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test024, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&genParamSet, g_genParams019, sizeof(g_genParams019)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&genParamSet, g_genParams018, sizeof(g_genParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -986,7 +915,11 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test024, TestSize.Level0)
 
     /* 2. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&encryptParamSet, g_encryptParams019, sizeof(g_encryptParams019)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&encryptParamSet, g_encryptParams018, sizeof(g_encryptParams018)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};

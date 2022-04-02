@@ -17,7 +17,7 @@
 #define HKS_PBKDF2_DERIVE_TEST_COMMON_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::Pbkdf2Derive {
 static const std::string g_inData = "Hks_PBKDF2_Derive_Test_000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

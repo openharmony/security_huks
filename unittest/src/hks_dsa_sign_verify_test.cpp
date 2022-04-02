@@ -55,7 +55,7 @@ static struct HksParam g_genParamsTest001[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
@@ -82,7 +82,7 @@ static struct HksParam g_verifyParamsTest001[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
@@ -98,7 +98,7 @@ static struct HksParam g_genParamsTest002[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA224
@@ -125,7 +125,7 @@ static struct HksParam g_verifyParamsTest002[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA224
@@ -140,7 +140,7 @@ static struct HksParam g_genParamsTest003[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA256
@@ -167,7 +167,7 @@ static struct HksParam g_verifyParamsTest003[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA256
@@ -183,7 +183,7 @@ static struct HksParam g_genParamsTest004[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA384
@@ -210,7 +210,7 @@ static struct HksParam g_verifyParamsTest004[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA384
@@ -225,7 +225,7 @@ static struct HksParam g_genParamsTest005[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA512
@@ -252,7 +252,7 @@ static struct HksParam g_verifyParamsTest005[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA512
@@ -267,7 +267,7 @@ static struct HksParam g_genParamsTest006[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
@@ -294,7 +294,7 @@ static struct HksParam g_verifyParamsTest006[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
@@ -310,7 +310,7 @@ static struct HksParam g_genParamsTest007[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
@@ -337,7 +337,7 @@ static struct HksParam g_genParamsTest008[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::DsaSignVerify::DSA_COMMON_SIZE
+        .uint32Param = DSA_COMMON_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
@@ -374,8 +374,8 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     }
 
     if (isSign) {
-        uint8_t tmpOut[Unittest::DsaSignVerify::DSA_COMMON_SIZE] = {0};
-        struct HksBlob outData1 = { Unittest::DsaSignVerify::DSA_COMMON_SIZE, tmpOut };
+        uint8_t tmpOut[DSA_COMMON_SIZE] = {0};
+        struct HksBlob outData1 = { DSA_COMMON_SIZE, tmpOut };
         ret = HksSign(keyAlias, paramSet, inData, &outData1);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
     } else {
@@ -390,8 +390,8 @@ int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
 {
     struct HksBlob inData = {
-        Unittest::DsaSignVerify::g_inData.length(),
-        (uint8_t *)Unittest::DsaSignVerify::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
     int32_t ret = HKS_FAILURE;
 
@@ -401,14 +401,14 @@ int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
-    uint8_t outDataS[Unittest::DsaSignVerify::DSA_COMMON_SIZE] = {0};
-    struct HksBlob outDataSign = { Unittest::DsaSignVerify::DSA_COMMON_SIZE, outDataS };
+    uint8_t outDataS[DSA_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { DSA_COMMON_SIZE, outDataS };
     ret = HksTestSignVerify(&keyAlias, signParamSet, &inData, &outDataSign, true);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Sign failed.";
 
     /* 3. Export Public Key */
-    uint8_t pubKey[Unittest::DsaSignVerify::DSA_COMMON_SIZE] = {0};
-    struct HksBlob publicKey = { Unittest::DsaSignVerify::DSA_COMMON_SIZE, pubKey };
+    uint8_t pubKey[DSA_COMMON_SIZE] = {0};
+    struct HksBlob publicKey = { DSA_COMMON_SIZE, pubKey };
     ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
@@ -641,8 +641,8 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest007, TestSize.Level0)
 {
     const char *keyAliasString = "HksDSASignVerifyKeyAliasTest007";
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
-    struct HksBlob inData = { Unittest::DsaSignVerify::g_inData.length(),
-                              (uint8_t *)Unittest::DsaSignVerify::g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */

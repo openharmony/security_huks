@@ -41,6 +41,7 @@ void HksHkdfDerivePart1Test::TearDownTestCase(void)
 
 void HksHkdfDerivePart1Test::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksHkdfDerivePart1Test::TearDown()
@@ -73,7 +74,7 @@ static struct HksParam g_hkdfParams001[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
 static struct HksParam g_hkdfFinishParams001[] = {
@@ -91,7 +92,7 @@ static struct HksParam g_hkdfFinishParams001[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -127,7 +128,7 @@ static struct HksParam g_hkdfParams002[] = {
         .uint32Param = HKS_DIGEST_SHA384
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
 static struct HksParam g_hkdfFinishParams002[] = {
@@ -145,7 +146,7 @@ static struct HksParam g_hkdfFinishParams002[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -181,7 +182,7 @@ static struct HksParam g_hkdfParams003[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
 static struct HksParam g_hkdfFinishParams003[] = {
@@ -199,7 +200,7 @@ static struct HksParam g_hkdfFinishParams003[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -235,7 +236,7 @@ static struct HksParam g_hkdfParams004[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
 static struct HksParam g_hkdfFinishParams004[] = {
@@ -253,7 +254,7 @@ static struct HksParam g_hkdfFinishParams004[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -289,7 +290,7 @@ static struct HksParam g_hkdfParams005[] = {
         .uint32Param = HKS_DIGEST_SHA384
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
 static struct HksParam g_hkdfFinishParams005[] = {
@@ -307,7 +308,7 @@ static struct HksParam g_hkdfFinishParams005[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -343,7 +344,7 @@ static struct HksParam g_hkdfParams006[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
 static struct HksParam g_hkdfFinishParams006[] = {
@@ -361,7 +362,7 @@ static struct HksParam g_hkdfFinishParams006[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -397,7 +398,7 @@ static struct HksParam g_hkdfParams007[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
 static struct HksParam g_hkdfFinishParams007[] = {
@@ -415,7 +416,7 @@ static struct HksParam g_hkdfFinishParams007[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_32
+        .uint32Param = DERIVE_KEY_SIZE_32
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -451,7 +452,7 @@ static struct HksParam g_hkdfParams008[] = {
         .uint32Param = HKS_DIGEST_SHA384
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
 static struct HksParam g_hkdfFinishParams008[] = {
@@ -469,7 +470,7 @@ static struct HksParam g_hkdfFinishParams008[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_48
+        .uint32Param = DERIVE_KEY_SIZE_48
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -505,7 +506,7 @@ static struct HksParam g_hkdfParams009[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
 static struct HksParam g_hkdfFinishParams009[] = {
@@ -523,7 +524,7 @@ static struct HksParam g_hkdfFinishParams009[] = {
         .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = Unittest::HkdfDerive::DERIVE_KEY_SIZE_64
+        .uint32Param = DERIVE_KEY_SIZE_64
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
