@@ -17,12 +17,14 @@
 
 #include <gtest/gtest.h>
 
-int32_t Unittest::HkdfDerive::HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias,
+using namespace testing::ext;
+namespace Unittest::HkdfDerive {
+int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {
     struct HksBlob inData = {
-        Unittest::HkdfDerive::g_inData.length(),
-        (uint8_t *)Unittest::HkdfDerive::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
     int32_t ret = HKS_FAILURE;
 
@@ -38,25 +40,25 @@ int32_t Unittest::HkdfDerive::HksHkdfDeriveTestNormalCase(const struct HksBlob k
     ret = HksInit(&keyAlias, deriveParamSet, &handleDerive);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
-    uint8_t tmpOut[Unittest::HkdfDerive::COMMON_SIZE] = {0};
-    struct HksBlob outData = { Unittest::HkdfDerive::COMMON_SIZE, tmpOut };
+    uint8_t tmpOut[COMMON_SIZE] = {0};
+    struct HksBlob outData = { COMMON_SIZE, tmpOut };
     ret = HksUpdate(&handleDerive, deriveParamSet, &inData, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    uint8_t outDataD[Unittest::HkdfDerive::COMMON_SIZE] = {0};
-    struct HksBlob outDataDerive = { Unittest::HkdfDerive::COMMON_SIZE, outDataD };
+    uint8_t outDataD[COMMON_SIZE] = {0};
+    struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
     ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     return ret;
 }
-
-int32_t Unittest::HkdfDerive::HksHkdfDeriveTestCmpCase(const struct HksBlob keyAlias,
+#ifdef L2_STANDARD
+int32_t HksHkdfDeriveTestCmpCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {
     struct HksBlob inData = {
-        Unittest::HkdfDerive::g_inData.length(),
-        (uint8_t *)Unittest::HkdfDerive::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
     int32_t ret = HKS_FAILURE;
 
@@ -72,18 +74,18 @@ int32_t Unittest::HkdfDerive::HksHkdfDeriveTestCmpCase(const struct HksBlob keyA
     ret = HksInit(&keyAlias, deriveParamSet, &handleDerive);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
-    uint8_t tmpOut[Unittest::HkdfDerive::COMMON_SIZE] = {0};
-    struct HksBlob outData = { Unittest::HkdfDerive::COMMON_SIZE, tmpOut };
+    uint8_t tmpOut[COMMON_SIZE] = {0};
+    struct HksBlob outData = { COMMON_SIZE, tmpOut };
     ret = HksUpdate(&handleDerive, deriveParamSet, &inData, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    uint8_t outDataD[Unittest::HkdfDerive::COMMON_SIZE] = {0};
-    struct HksBlob outDataDerive = { Unittest::HkdfDerive::COMMON_SIZE, outDataD };
+    uint8_t outDataD[COMMON_SIZE] = {0};
+    struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
     ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
-    uint8_t tmpDerive[Unittest::HkdfDerive::COMMON_SIZE] = {0};
-    struct HksBlob derivedKey = { Unittest::HkdfDerive::COMMON_SIZE, tmpDerive };
+    uint8_t tmpDerive[COMMON_SIZE] = {0};
+    struct HksBlob derivedKey = { COMMON_SIZE, tmpDerive };
     ret = HksDeriveKey(deriveParamSet, &keyAlias, &derivedKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeriveKey failed.";
 
@@ -91,4 +93,6 @@ int32_t Unittest::HkdfDerive::HksHkdfDeriveTestCmpCase(const struct HksBlob keyA
     EXPECT_EQ(ret, HKS_SUCCESS) << "outDataDerive not equals derivedKey.";
 
     return ret;
+}
+#endif
 }

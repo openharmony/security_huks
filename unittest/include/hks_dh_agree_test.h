@@ -17,7 +17,8 @@
 #define HKS_DH_AGREE_TEST_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
+
 namespace Unittest::DhAgree {
 static const std::string g_inData = "Hks_DH_Agree_Test_00000000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

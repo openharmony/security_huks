@@ -40,6 +40,7 @@ void HksX25519AgreeTest::TearDownTestCase(void)
 
 void HksX25519AgreeTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksX25519AgreeTest::TearDown()
@@ -62,6 +63,8 @@ static struct HksBlob g_keyAliasFinal2001 = {
     strlen("HksX25519AgreeKeyAliasTest002_final"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_final"
 };
+
+#ifdef L2_STANDARD
 #ifdef _USE_MBEDTLS_
 static struct HksParam g_genParams001[] = {
     {
@@ -80,6 +83,20 @@ static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
+#endif // _USE_MBEDTLS_
+#else
+static struct HksParam g_genParams001[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_X25519
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_AGREE
@@ -178,7 +195,9 @@ static struct HksBlob g_keyAlias02002 = {
     strlen("HksX25519AgreeKeyAliasTest002_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_2"
 };
-#ifdef _USE_MBEDTLS_
+
+#ifdef L2_STANDARD
+#if defined(_USE_MBEDTLS_)
 static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -196,6 +215,20 @@ static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
+#endif // _USE_MBEDTLS_
+#else
+static struct HksParam g_genParams002[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_X25519
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_AGREE
@@ -250,7 +283,9 @@ static struct HksBlob g_keyAlias02003 = {
     strlen("HksX25519AgreeKeyAliasTest003_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest003_2"
 };
-#ifdef _USE_MBEDTLS_
+
+#ifdef L2_STANDARD
+#if defined(_USE_MBEDTLS_)
 static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -268,6 +303,20 @@ static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
+#endif // _USE_MBEDTLS_
+#else
+static struct HksParam g_genParams003[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_X25519
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_AGREE
@@ -310,7 +359,9 @@ static struct HksBlob g_keyAlias02004 = {
     strlen("HksX25519AgreeKeyAliasTest004_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest004_2"
 };
-#ifdef _USE_MBEDTLS_
+
+#ifdef L2_STANDARD
+#if defined(_USE_MBEDTLS_)
 static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -328,6 +379,20 @@ static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_ED25519
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
+    }
+};
+#endif // _USE_MBEDTLS_
+#else
+static struct HksParam g_genParams004[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_X25519
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_AGREE
@@ -366,8 +431,8 @@ int32_t HksX25519AgreeFinish(const struct HksBlob *keyAlias, const struct HksBlo
     const struct HksParamSet *initParamSet, const struct HksParamSet *finishParamSet, struct HksBlob *outData)
 {
     struct HksBlob inData = {
-        Unittest::X25519Agree::g_inData.length(),
-        (uint8_t *)Unittest::X25519Agree::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
@@ -378,8 +443,8 @@ int32_t HksX25519AgreeFinish(const struct HksBlob *keyAlias, const struct HksBlo
         return HKS_FAILURE;
     }
 
-    uint8_t outDataU[Unittest::X25519Agree::X25519_COMMON_SIZE] = {0};
-    struct HksBlob outDataUpdate = { Unittest::X25519Agree::X25519_COMMON_SIZE, outDataU };
+    uint8_t outDataU[X25519_COMMON_SIZE] = {0};
+    struct HksBlob outDataUpdate = { X25519_COMMON_SIZE, outDataU };
     ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     if (ret != HKS_SUCCESS) {
@@ -405,8 +470,8 @@ int32_t HksX25519AgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob
         return HKS_FAILURE;
     }
 
-    uint8_t outDataU[Unittest::X25519Agree::X25519_COMMON_SIZE] = {0};
-    struct HksBlob outDataUpdate = { Unittest::X25519Agree::X25519_COMMON_SIZE, outDataU };
+    uint8_t outDataU[X25519_COMMON_SIZE] = {0};
+    struct HksBlob outDataUpdate = { X25519_COMMON_SIZE, outDataU };
     ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     if (ret != HKS_SUCCESS) {
@@ -461,8 +526,7 @@ void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2)
     HksFree(blob2->data);
 }
 
-void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
-    struct HksBlob *blob3, struct HksBlob *blob4)
+void HksX25519AgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct HksBlob *blob3, struct HksBlob *blob4)
 {
     HksFree(blob1->data);
     HksFree(blob2->data);
@@ -505,8 +569,8 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree001, TestSize.Level0)
     ret = HksX25519AgreeExport(&g_keyAlias01001, &g_keyAlias02001, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
 
-    struct HksBlob outData01 = { .size = Unittest::X25519Agree::X25519_COMMON_SIZE, .data = nullptr };
-    struct HksBlob outData02 = { .size = Unittest::X25519Agree::X25519_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData01 = { .size = X25519_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = X25519_COMMON_SIZE, .data = nullptr };
     EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksX25519AgreeFinish(&g_keyAlias01001, &publicKey02, initParamSet01, finishParamSet01, &outData01);
@@ -558,8 +622,8 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree002, TestSize.Level0)
     ret = HksX25519AgreeExport(&g_keyAlias01002, &g_keyAlias02002, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
 
-    struct HksBlob outData01 = { .size = Unittest::X25519Agree::X25519_COMMON_SIZE, .data = nullptr };
-    struct HksBlob outData02 = { .size = Unittest::X25519Agree::X25519_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData01 = { .size = X25519_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = X25519_COMMON_SIZE, .data = nullptr };
     EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksX25519AgreeFinish(&g_keyAlias01002, &publicKey02, initParamSet01, finishParamSet01, &outData01);

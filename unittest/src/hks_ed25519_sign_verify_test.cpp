@@ -40,14 +40,14 @@ void HksEd25519SignVerifyTest::TearDownTestCase(void)
 
 void HksEd25519SignVerifyTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksEd25519SignVerifyTest::TearDown()
 {
 }
 
-void HksTestFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
-    struct HksParamSet *paramSet3)
+void HksTestFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2, struct HksParamSet *paramSet3)
 {
     HksFreeParamSet(&paramSet1);
     HksFreeParamSet(&paramSet2);
@@ -72,8 +72,8 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     }
 
     if (isSign) {
-        uint8_t tmpOut[Unittest::Ed25519::ED25519_COMMON_SIZE] = {0};
-        struct HksBlob outData1 = { Unittest::Ed25519::ED25519_COMMON_SIZE, tmpOut };
+        uint8_t tmpOut[ED25519_COMMON_SIZE] = {0};
+        struct HksBlob outData1 = { ED25519_COMMON_SIZE, tmpOut };
         ret = HksSign(keyAlias, paramSet, inData, &outData1);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
     } else {
@@ -97,14 +97,14 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest001, TestSize.Level0)
     struct HksParamSet *verifyParamSet = nullptr;
     int32_t ret = HKS_FAILURE;
 
-    ret = InitParamSet(&genParamSet, Unittest::Ed25519::g_genParamsTest001,
-        sizeof(Unittest::Ed25519::g_genParamsTest001)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParamsTest001,
+        sizeof(g_genParamsTest001)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&signParamSet, Unittest::Ed25519::g_signParamsTest001,
-        sizeof(Unittest::Ed25519::g_signParamsTest001)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_signParamsTest001,
+        sizeof(g_signParamsTest001)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&verifyParamSet, Unittest::Ed25519::g_verifyParamsTest001,
-        sizeof(Unittest::Ed25519::g_verifyParamsTest001)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest001,
+        sizeof(g_verifyParamsTest001)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
@@ -114,8 +114,8 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
-    uint8_t outDataS[Unittest::Ed25519::ED25519_COMMON_SIZE] = {0};
-    struct HksBlob outDataSign = { Unittest::Ed25519::ED25519_COMMON_SIZE, outDataS };
+    uint8_t outDataS[ED25519_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { ED25519_COMMON_SIZE, outDataS };
     ret = HksTestSignVerify(&keyAlias, signParamSet, &g_inData, &outDataSign, true);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Sign failed.";
 
@@ -155,14 +155,14 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest002, TestSize.Level0)
     struct HksParamSet *verifyParamSet = nullptr;
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
-    int32_t ret = InitParamSet(&genParamSet, Unittest::Ed25519::g_genParamsTest002,
-        sizeof(Unittest::Ed25519::g_genParamsTest002)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParamsTest002,
+        sizeof(g_genParamsTest002)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&signParamSet, Unittest::Ed25519::g_signParamsTest002,
-        sizeof(Unittest::Ed25519::g_signParamsTest002)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_signParamsTest002,
+        sizeof(g_signParamsTest002)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&verifyParamSet, Unittest::Ed25519::g_verifyParamsTest002,
-        sizeof(Unittest::Ed25519::g_verifyParamsTest002)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest002,
+        sizeof(g_verifyParamsTest002)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 1. Generate Key */
@@ -177,12 +177,12 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest002, TestSize.Level0)
     ret = HksInit(&keyAlias, signParamSet, &handleSign);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
-    ret = HksTestUpdate(&handleSign, signParamSet, &Unittest::Ed25519::g_inData);
+    ret = HksTestUpdate(&handleSign, signParamSet, &g_inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    uint8_t outDataS[Unittest::Ed25519::ED25519_COMMON_SIZE] = {0};
-    struct HksBlob outDataSign = { Unittest::Ed25519::ED25519_COMMON_SIZE, outDataS };
-    ret = HksFinish(&handleSign, signParamSet, &Unittest::Ed25519::g_inData, &outDataSign);
+    uint8_t outDataS[ED25519_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { ED25519_COMMON_SIZE, outDataS };
+    ret = HksFinish(&handleSign, signParamSet, &g_inData, &outDataSign);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     /* 3. Export Public Key */
@@ -204,7 +204,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest002, TestSize.Level0)
     ret = HksInit(&newKeyAlias, verifyParamSet, &handleVerify);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
-    ret = HksTestUpdate(&handleVerify, verifyParamSet, &Unittest::Ed25519::g_inData);
+    ret = HksTestUpdate(&handleVerify, verifyParamSet, &g_inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Abort
     ret = HksAbort(&handleVerify, verifyParamSet);
@@ -232,8 +232,8 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest003, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, Unittest::Ed25519::g_genParamsTest003,
-        sizeof(Unittest::Ed25519::g_genParamsTest003)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParamsTest003,
+        sizeof(g_genParamsTest003)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -241,8 +241,8 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest003, TestSize.Level0)
 
     /* 2. Sign Three Stage (Abort) */
     struct HksParamSet *signParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, Unittest::Ed25519::g_signParamsTest003,
-        sizeof(Unittest::Ed25519::g_signParamsTest003)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_signParamsTest003,
+        sizeof(g_signParamsTest003)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
@@ -250,7 +250,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest003, TestSize.Level0)
     ret = HksInit(&keyAlias, signParamSet, &handleSign);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
-    ret = HksTestUpdate(&handleSign, signParamSet, &Unittest::Ed25519::g_inData);
+    ret = HksTestUpdate(&handleSign, signParamSet, &g_inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Abort
     ret = HksAbort(&handleSign, signParamSet);
@@ -277,8 +277,8 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest004, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, Unittest::Ed25519::g_genParamsTest004,
-        sizeof(Unittest::Ed25519::g_genParamsTest004)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParamsTest004,
+        sizeof(g_genParamsTest004)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -286,8 +286,8 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest004, TestSize.Level0)
 
     /* 2. Sign Three Stage */
     struct HksParamSet *signParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, Unittest::Ed25519::g_signParamsTest004,
-        sizeof(Unittest::Ed25519::g_signParamsTest004)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_signParamsTest004,
+        sizeof(g_signParamsTest004)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};

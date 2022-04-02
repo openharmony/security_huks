@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 
 int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramcount)
 {

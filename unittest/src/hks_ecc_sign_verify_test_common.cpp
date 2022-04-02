@@ -17,7 +17,9 @@
 
 #include <gtest/gtest.h>
 
-int32_t Unittest::EccSifnVerify::HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
+using namespace testing::ext;
+namespace Unittest::EccSifnVerify {
+int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData, bool isSign)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
@@ -35,8 +37,8 @@ int32_t Unittest::EccSifnVerify::HksTestSignVerify(struct HksBlob *keyAlias, str
     }
 
     if (isSign) {
-        uint8_t tmpOut[Unittest::EccSifnVerify::ECC_COMMON_SIZE] = {0};
-        struct HksBlob outData1 = { Unittest::EccSifnVerify::ECC_COMMON_SIZE, tmpOut };
+        uint8_t tmpOut[ECC_COMMON_SIZE] = {0};
+        struct HksBlob outData1 = { ECC_COMMON_SIZE, tmpOut };
         ret = HksSign(keyAlias, paramSet, inData, &outData1);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
     } else {
@@ -47,12 +49,12 @@ int32_t Unittest::EccSifnVerify::HksTestSignVerify(struct HksBlob *keyAlias, str
     return ret;
 }
 
-int32_t Unittest::EccSifnVerify::HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
+int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
     struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
 {
     struct HksBlob inData = {
-        Unittest::EccSifnVerify::g_inData.length(),
-        (uint8_t *)Unittest::EccSifnVerify::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
     int32_t ret = HKS_FAILURE;
 
@@ -62,8 +64,8 @@ int32_t Unittest::EccSifnVerify::HksEccSignVerifyTestNormalCase(struct HksBlob k
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
-    uint8_t outDataS[Unittest::EccSifnVerify::ECC_COMMON_SIZE] = {0};
-    struct HksBlob outDataSign = { Unittest::EccSifnVerify::ECC_COMMON_SIZE, outDataS };
+    uint8_t outDataS[ECC_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { ECC_COMMON_SIZE, outDataS };
     ret = HksTestSignVerify(&keyAlias, signParamSet, &inData, &outDataSign, true);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Sign failed.";
 
@@ -88,4 +90,5 @@ int32_t Unittest::EccSifnVerify::HksEccSignVerifyTestNormalCase(struct HksBlob k
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     return ret;
+}
 }

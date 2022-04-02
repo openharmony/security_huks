@@ -17,7 +17,7 @@
 #define HKS_ECDH_AGREE_TEST_COMMON_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::EcdhAgree {
 static const std::string g_inData = "Hks_ECDH_Agree_Test_000000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

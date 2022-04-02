@@ -17,8 +17,8 @@
 #define HKS_CROSS_TEST_H
 
 #include <string>
-#include "hks_test_common.h"
 #include "hks_cross_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::CrossTest {
 static struct HksParam g_aesGenParams[] = {
     {

@@ -67,12 +67,12 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
     ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t cipher[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob cipherText = { Unittest::CrossTest::CROSS_COMMON_SIZE, cipher };
-    uint8_t plain[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob plainText = { Unittest::CrossTest::CROSS_COMMON_SIZE, plain };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t cipher[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { CROSS_COMMON_SIZE, cipher };
+    uint8_t plain[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { CROSS_COMMON_SIZE, plain };
 
     ret = HksEncrypt(&keyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
@@ -109,12 +109,12 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher002, TestSize.Level0)
     ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t cipher[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob cipherText = { Unittest::CrossTest::CROSS_COMMON_SIZE, cipher };
-    uint8_t plain[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob plainText = { Unittest::CrossTest::CROSS_COMMON_SIZE, plain };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t cipher[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { CROSS_COMMON_SIZE, cipher };
+    uint8_t plain[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { CROSS_COMMON_SIZE, plain };
 
     ret = HksCrossTestAesEncrypt(&keyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAesEncrypt failed.";
@@ -156,12 +156,12 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher001, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, encryptParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData_32.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData_32.c_str() };
-    uint8_t cipher[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob cipherText = { Unittest::CrossTest::CROSS_COMMON_SIZE, cipher };
-    uint8_t plain[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob plainText = { Unittest::CrossTest::CROSS_COMMON_SIZE, plain };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
+    uint8_t cipher[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { CROSS_COMMON_SIZE, cipher };
+    uint8_t plain[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { CROSS_COMMON_SIZE, plain };
 
     ret = HksEncrypt(&newKeyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
@@ -204,12 +204,12 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher002, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, encryptParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData_32.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData_32.c_str() };
-    uint8_t cipher[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob cipherText = { Unittest::CrossTest::CROSS_COMMON_SIZE, cipher };
-    uint8_t plain[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob plainText = { Unittest::CrossTest::CROSS_COMMON_SIZE, plain };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
+    uint8_t cipher[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { CROSS_COMMON_SIZE, cipher };
+    uint8_t plain[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { CROSS_COMMON_SIZE, plain };
 
     ret = HksCrossTestRsaEncrypt(&newKeyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestRsaEncrypt failed.";
@@ -253,10 +253,10 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify001, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
@@ -297,10 +297,10 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify002, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
@@ -342,10 +342,10 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify001, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
@@ -386,10 +386,10 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify002, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
@@ -430,10 +430,10 @@ HWTEST_F(HksCrossTest, HksCrossTestEd25519SignVerify001, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
@@ -474,10 +474,10 @@ HWTEST_F(HksCrossTest, HksCrossTestEd25519SignVerify002, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
@@ -518,10 +518,10 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaSignVerify001, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
@@ -562,10 +562,10 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaSignVerify002, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { Unittest::CrossTest::g_inData.length(),
-                              (uint8_t *)Unittest::CrossTest::g_inData.c_str() };
-    uint8_t sign[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob signedData = { Unittest::CrossTest::CROSS_COMMON_SIZE, sign };
+    struct HksBlob inData = { g_inData.length(),
+                              (uint8_t *)g_inData.c_str() };
+    uint8_t sign[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
@@ -612,10 +612,10 @@ HWTEST_F(HksCrossTest, HksCrossTestDhAgree001, TestSize.Level0)
     ret = HksCrossTestAgreeExport(&g_dhKeyAlias01, &g_dhKeyAlias02, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgreeExport failed.";
 
-    uint8_t tmpOut01[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    uint8_t tmpOut02[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outData01 = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut01 };
-    struct HksBlob outData02 = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut02 };
+    uint8_t tmpOut01[CROSS_COMMON_SIZE] = {0};
+    uint8_t tmpOut02[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outData01 = { CROSS_COMMON_SIZE, tmpOut01 };
+    struct HksBlob outData02 = { CROSS_COMMON_SIZE, tmpOut02 };
     ret = HksCrossTestAgree(&g_dhKeyAlias01, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgree01 failed.";
     ret = HksAgreeKey(initParamSet02, &g_dhKeyAlias02, &publicKey01, &outData02);
@@ -660,10 +660,10 @@ HWTEST_F(HksCrossTest, HksCrossTestEcdhAgree001, TestSize.Level0)
     ret = HksCrossTestAgreeExport(&g_ecdhKeyAlias01, &g_ecdhKeyAlias02, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgreeExport failed.";
 
-    uint8_t tmpOut01[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    uint8_t tmpOut02[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outData01 = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut01 };
-    struct HksBlob outData02 = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut02 };
+    uint8_t tmpOut01[CROSS_COMMON_SIZE] = {0};
+    uint8_t tmpOut02[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outData01 = { CROSS_COMMON_SIZE, tmpOut01 };
+    struct HksBlob outData02 = { CROSS_COMMON_SIZE, tmpOut02 };
     ret = HksCrossTestAgree(&g_ecdhKeyAlias01, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgree01 failed.";
     ret = HksAgreeKey(initParamSet02, &g_ecdhKeyAlias02, &publicKey01, &outData02);
@@ -708,10 +708,10 @@ HWTEST_F(HksCrossTest, HksCrossTestX25519Agree001, TestSize.Level0)
     ret = HksCrossTestAgreeExport(&g_x25519KeyAlias01, &g_x25519KeyAlias02, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgreeExport failed.";
 
-    uint8_t tmpOut01[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    uint8_t tmpOut02[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
-    struct HksBlob outData01 = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut01 };
-    struct HksBlob outData02 = { Unittest::CrossTest::CROSS_COMMON_SIZE, tmpOut02 };
+    uint8_t tmpOut01[CROSS_COMMON_SIZE] = {0};
+    uint8_t tmpOut02[CROSS_COMMON_SIZE] = {0};
+    struct HksBlob outData01 = { CROSS_COMMON_SIZE, tmpOut01 };
+    struct HksBlob outData02 = { CROSS_COMMON_SIZE, tmpOut02 };
     ret = HksCrossTestAgree(&g_x25519KeyAlias01, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgree01 failed.";
     ret = HksAgreeKey(initParamSet02, &g_x25519KeyAlias02, &publicKey01, &outData02);

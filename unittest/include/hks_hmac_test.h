@@ -17,7 +17,7 @@
 #define HKS_HMAC_TEST_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::Hmac {
 static const std::string g_inData = "Hks_HMAC_Test_000000000000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

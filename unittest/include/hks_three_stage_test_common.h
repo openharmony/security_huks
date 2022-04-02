@@ -13,15 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef HKS_TEST_COMMON_H
-#define HKS_TEST_COMMON_H
+#ifndef HKS_THREE_STAGE_TEST_COMMON_H
+#define HKS_THREE_STAGE_TEST_COMMON_H
 
 #include <securec.h>
-#include "hks_type.h"
-#include "hks_param.h"
-#include "hks_mem.h"
-#include "hks_log.h"
+
 #include "hks_api.h"
+#include "hks_log.h"
+#include "hks_mem.h"
+#include "hks_param.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,4 +47,4 @@ int32_t TestCmpKeyAliasHash(const struct HksBlob *srcData1, const struct HksBlob
 }
 #endif
 
-#endif // HKS_TEST_COMMON_H
+#endif // HKS_THREE_STAGE_TEST_COMMON_H

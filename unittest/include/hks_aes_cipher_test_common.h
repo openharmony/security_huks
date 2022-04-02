@@ -17,7 +17,8 @@
 #define HKS_AES_CIPHER_TEST_COMMON_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
+
 namespace Unittest::AesCipher {
 static const uint32_t AES_COMMON_SIZE = 1024;
 static const uint32_t IV_SIZE = 16;
@@ -40,9 +41,9 @@ int32_t HksAesCipherTestDecrypt(const struct HksBlob *keyAlias, const struct Hks
     const struct HksBlob *cipherText, struct HksBlob *plainText, const struct HksBlob *inData);
 int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
-int32_t HksAESCipherTestCaseCcm(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+int32_t HksAesCipherTestCaseGcm1(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
-int32_t HksAesCipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, struct HksParamSet *decrypt1ParamSet);
 } // namespace Unittest::AesCipher
 #endif // HKS_AES_CIPHER_TEST_COMMON_H
