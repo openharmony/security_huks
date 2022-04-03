@@ -41,12 +41,13 @@ void HksRsaSignVerifyPart3Test::TearDownTestCase(void)
 
 void HksRsaSignVerifyPart3Test::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksRsaSignVerifyPart3Test::TearDown()
 {
 }
-
+#ifdef L2_STANDARD
 static struct HksParam g_genParamsTest021[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -264,6 +265,7 @@ static struct HksParam g_verifyParamsTest024[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
+#endif
 #endif
 static struct HksParam g_genParamsTest025[] = {
     {
@@ -592,6 +594,7 @@ static struct HksParam g_verifyParamsTest030[] = {
     }
 };
 
+#ifdef L2_STANDARD
 /**
  * @tc.name: HksRsaSignVerifyPart3Test.HksRsaSignVerifyPart3Test021
  * @tc.desc: alg-RSA pur-Sign pad-PSS digest-SHA224.
@@ -735,6 +738,7 @@ HWTEST_F(HksRsaSignVerifyPart3Test, HksRsaSignVerifyPart3Test024, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 #endif
 
 /**

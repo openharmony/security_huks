@@ -388,8 +388,8 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree006, TestSize.Level0)
     ret = HksEcdhAgreeExport(&g_keyAlias01006, &g_keyAlias02006, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
 
-    struct HksBlob outData01 = { .size = Unittest::EcdhAgree::ECDH_COMMON_SIZE, .data = nullptr };
-    struct HksBlob outData02 = { .size = Unittest::EcdhAgree::ECDH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData01 = { .size = ECDH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = ECDH_COMMON_SIZE, .data = nullptr };
     EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias01006, &publicKey02, initParamSet01, finishParamSet01, &outData01);
@@ -439,8 +439,8 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree007, TestSize.Level0)
     ret = HksEcdhAgreeExport(&g_keyAlias01007, &g_keyAlias02007, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
 
-    struct HksBlob outData01 = { .size = Unittest::EcdhAgree::ECDH_COMMON_SIZE, .data = nullptr };
-    struct HksBlob outData02 = { .size = Unittest::EcdhAgree::ECDH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData01 = { .size = ECDH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = ECDH_COMMON_SIZE, .data = nullptr };
     EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias01007, &publicKey02, initParamSet01, finishParamSet01, &outData01);
@@ -490,8 +490,8 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree008, TestSize.Level0)
     ret = HksEcdhAgreeExport(&g_keyAlias01008, &g_keyAlias02008, &publicKey01, &publicKey02, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
 
-    struct HksBlob outData01 = { .size = Unittest::EcdhAgree::ECDH_COMMON_SIZE, .data = nullptr };
-    struct HksBlob outData02 = { .size = Unittest::EcdhAgree::ECDH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData01 = { .size = ECDH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = ECDH_COMMON_SIZE, .data = nullptr };
     EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias01008, &publicKey02, initParamSet01, finishParamSet01, &outData01);

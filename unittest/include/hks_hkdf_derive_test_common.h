@@ -17,7 +17,7 @@
 #define HKS_HKDF_DERIVE_TEST_COMMON_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::HkdfDerive {
 static const std::string g_inData = "Hks_HKDF_Derive_Test_00000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

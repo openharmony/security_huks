@@ -41,6 +41,7 @@ void HksRsaCipherPart3Test::TearDownTestCase(void)
 
 void HksRsaCipherPart3Test::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksRsaCipherPart3Test::TearDown()
@@ -700,8 +701,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test021, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest021";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams021, sizeof(g_genParams021)/sizeof(HksParam));
@@ -714,7 +715,6 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test021, TestSize.Level0)
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_decryptParams021, sizeof(g_decryptParams021)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
-
     ret = HksRsaCipherTestCaseAbnormal(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);
     EXPECT_EQ(ret, HKS_FAILURE) << "this case should failed.";
 
@@ -733,8 +733,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test022, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest022";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_256.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_256.c_str() };
+    struct HksBlob inData = { g_inData_256.length(),
+                              (uint8_t *)g_inData_256.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams022, sizeof(g_genParams022)/sizeof(HksParam));
@@ -766,8 +766,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test023, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest023";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams023, sizeof(g_genParams023)/sizeof(HksParam));
@@ -798,8 +798,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test024, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest024";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams024, sizeof(g_genParams024)/sizeof(HksParam));
@@ -830,8 +830,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test025, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest025";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams025, sizeof(g_genParams025)/sizeof(HksParam));
@@ -862,8 +862,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test026, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest026";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams026, sizeof(g_genParams026)/sizeof(HksParam));
@@ -894,8 +894,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test027, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest027";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams027, sizeof(g_genParams027)/sizeof(HksParam));
@@ -926,8 +926,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test028, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest028";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams028, sizeof(g_genParams028)/sizeof(HksParam));
@@ -959,8 +959,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test029, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest029";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_384.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_384.c_str() };
+    struct HksBlob inData = { g_inData_384.length(),
+                              (uint8_t *)g_inData_384.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams029, sizeof(g_genParams029)/sizeof(HksParam));
@@ -992,8 +992,8 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test030, TestSize.Level1)
 {
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest030";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::RsaCipher::g_inData_32.length(),
-                              (uint8_t *)Unittest::RsaCipher::g_inData_32.c_str() };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams030, sizeof(g_genParams030)/sizeof(HksParam));

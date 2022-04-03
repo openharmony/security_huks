@@ -58,11 +58,15 @@ ohos_unittest("huks_UT_test") {
     "src/hks_rsa_sign_verify_part7_test.cpp",
     "src/hks_rsa_sign_verify_part8_test.cpp",
     "src/hks_rsa_sign_verify_test_common.cpp",
-    "src/hks_test_common.c",
+    "src/hks_three_stage_test_common.c",
     "src/hks_x25519_agree_test.cpp",
   ]
 
-  defines = [ "_HUKS_LOG_ENABLE_" ]
+  defines = [
+    "L2_STANDARD",
+    "_HUKS_LOG_ENABLE_",
+  ]
+
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
     sources += [ "src/hks_dsa_sign_verify_test.cpp" ]
@@ -78,6 +82,7 @@ ohos_unittest("huks_UT_test") {
     "//test/xts/acts/security_lite/huks/common/include",
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
+    "//base/security/huks/test/unittest/src/common/include",
   ]
 
   deps = [

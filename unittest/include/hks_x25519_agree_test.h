@@ -17,7 +17,7 @@
 #define HKS_X25519_AGREE_TEST_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::X25519Agree {
 static const std::string g_inData = "Hks_X25519_Agree_Test_0000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
