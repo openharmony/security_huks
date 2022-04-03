@@ -17,7 +17,7 @@
 #define HKS_RSA_COMMON_TEST_COMMON_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::RsaCipher {
 static const uint32_t RSA_COMMON_SIZE = 1024;
 static const std::string g_inData_5   = "RSA_5";

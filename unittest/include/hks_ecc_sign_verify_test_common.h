@@ -17,7 +17,7 @@
 #define HKS_ECC_SIGN_VERIFY_TEST_COMMON_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::EccSifnVerify {
 static const std::string g_inData = "Hks_ECC_Sign_Verify_Test_0000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

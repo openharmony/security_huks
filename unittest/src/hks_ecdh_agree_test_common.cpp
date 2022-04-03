@@ -17,12 +17,14 @@
 
 #include <gtest/gtest.h>
 
-int32_t Unittest::EcdhAgree::HksEcdhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
+using namespace testing::ext;
+namespace Unittest::EcdhAgree {
+int32_t HksEcdhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
     const struct HksParamSet *initParamSet, const struct HksParamSet *finishParamSet, struct HksBlob *outData)
 {
     struct HksBlob inData = {
-        Unittest::EcdhAgree::g_inData.length(),
-        (uint8_t *)Unittest::EcdhAgree::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
@@ -33,8 +35,8 @@ int32_t Unittest::EcdhAgree::HksEcdhAgreeFinish(const struct HksBlob *keyAlias, 
         return HKS_FAILURE;
     }
 
-    uint8_t outDataU[Unittest::EcdhAgree::ECDH_COMMON_SIZE] = {0};
-    struct HksBlob outDataUpdate = { Unittest::EcdhAgree::ECDH_COMMON_SIZE, outDataU };
+    uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
+    struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
     ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     if (ret != HKS_SUCCESS) {
@@ -49,7 +51,7 @@ int32_t Unittest::EcdhAgree::HksEcdhAgreeFinish(const struct HksBlob *keyAlias, 
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::EcdhAgree::HksEcdhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
+int32_t HksEcdhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
     const struct HksParamSet *initParamSet)
 {
     uint8_t handleU[sizeof(uint64_t)] = {0};
@@ -60,8 +62,8 @@ int32_t Unittest::EcdhAgree::HksEcdhAgreeAbort(const struct HksBlob *keyAlias, c
         return HKS_FAILURE;
     }
 
-    uint8_t outDataU[Unittest::EcdhAgree::ECDH_COMMON_SIZE] = {0};
-    struct HksBlob outDataUpdate = { Unittest::EcdhAgree::ECDH_COMMON_SIZE, outDataU };
+    uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
+    struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
     ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     if (ret != HKS_SUCCESS) {
@@ -76,7 +78,7 @@ int32_t Unittest::EcdhAgree::HksEcdhAgreeAbort(const struct HksBlob *keyAlias, c
     return HKS_SUCCESS;
 }
 
-int32_t Unittest::EcdhAgree::HksEcdhAgreeExport(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2,
+int32_t HksEcdhAgreeExport(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2,
     struct HksBlob *publicKey1, struct HksBlob *publicKey2, const struct HksParamSet *genParamSet)
 {
     int32_t ret = HksExportPublicKey(keyAlias1, genParamSet, publicKey1);
@@ -92,7 +94,7 @@ int32_t Unittest::EcdhAgree::HksEcdhAgreeExport(const struct HksBlob *keyAlias1,
     return HKS_SUCCESS;
 }
 
-void Unittest::EcdhAgree::HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
+void HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
     struct HksParamSet *paramSet3)
 {
     HksFreeParamSet(&paramSet1);
@@ -100,7 +102,7 @@ void Unittest::EcdhAgree::HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1
     HksFreeParamSet(&paramSet3);
 }
 
-void Unittest::EcdhAgree::HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
+void HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *paramSet2,
     struct HksParamSet *paramSet3, struct HksParamSet *paramSet4, struct HksParamSet *paramSet5)
 {
     HksFreeParamSet(&paramSet1);
@@ -110,17 +112,18 @@ void Unittest::EcdhAgree::HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1
     HksFreeParamSet(&paramSet5);
 }
 
-void Unittest::EcdhAgree::HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2)
+void HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2)
 {
     HksFree(blob1->data);
     HksFree(blob2->data);
 }
 
-void Unittest::EcdhAgree::HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
+void HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
     struct HksBlob *blob3, struct HksBlob *blob4)
 {
     HksFree(blob1->data);
     HksFree(blob2->data);
     HksFree(blob3->data);
     HksFree(blob4->data);
+}
 }

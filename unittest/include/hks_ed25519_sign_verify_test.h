@@ -17,7 +17,7 @@
 #define HKS_ED25519_SIGN_VERIFY_TEST_H
 
 #include <string>
-#include "hks_test_common.h"
+#include "hks_three_stage_test_common.h"
 namespace Unittest::Ed25519 {
 static const std::string tmpInData = "Hks_ED25519_Sign_Verify_Test_000000000000000000000000000000000000000000000000000"
                                      "00000000000000000000000000000000000000000000000000000000000000000000000000000000"

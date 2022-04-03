@@ -40,12 +40,14 @@ void HksHmacTest::TearDownTestCase(void)
 
 void HksHmacTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksHmacTest::TearDown()
 {
 }
 
+#ifdef L2_STANDARD
 static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -101,7 +103,8 @@ static struct HksParam g_hmacParams002[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
-
+#endif
+#ifdef L2_STANDARD
 static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -117,6 +120,23 @@ static struct HksParam g_genParams003[] = {
         .uint32Param = Unittest::Hmac::COMMON_SIZE
     }
 };
+#else
+static struct HksParam g_genParams003 [] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = COMMON_SIZE
+    }
+};
+#endif
 static struct HksParam g_hmacParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -130,6 +150,7 @@ static struct HksParam g_hmacParams003[] = {
     }
 };
 
+#ifdef L2_STANDARD
 static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -185,11 +206,12 @@ static struct HksParam g_hmacParams005[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
+#endif
 
 int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *hmacParamSet)
 {
-    struct HksBlob inData = {Unittest::Hmac::g_inData.length(), (uint8_t *)Unittest::Hmac::g_inData.c_str()};
+    struct HksBlob inData = {g_inData.length(), (uint8_t *)g_inData.c_str()};
 
     /* 1. Generate Key */
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
@@ -234,6 +256,7 @@ int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genP
     return ret;
 }
 
+#ifdef L2_STANDARD
 /**
  * @tc.name: HksHmacTest.HksHmacTest001
  * @tc.desc: alg-HMAC pur-MAC dig-SHA1.
@@ -279,6 +302,7 @@ HWTEST_F(HksHmacTest, HksHmacTest002, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksHmacTest.HksHmacTest003
@@ -292,7 +316,6 @@ HWTEST_F(HksHmacTest, HksHmacTest003, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
-
     struct HksParamSet *hmacParamSet = nullptr;
     ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003)/sizeof(HksParam));
 
@@ -303,6 +326,7 @@ HWTEST_F(HksHmacTest, HksHmacTest003, TestSize.Level0)
     HksFreeParamSet(&hmacParamSet);
 }
 
+#ifdef L2_STANDARD
 /**
  * @tc.name: HksHmacTest.HksHmacTest004
  * @tc.desc: alg-HMAC pur-MAC dig-SHA384.
@@ -348,6 +372,7 @@ HWTEST_F(HksHmacTest, HksHmacTest005, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksHmacTest.HksHmacTest006
@@ -358,19 +383,27 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest006";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { Unittest::Hmac::g_inData.length(), (uint8_t *)Unittest::Hmac::g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     int32_t ret = HKS_FAILURE;
 
     /* 2. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+#endif
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. HMAC Three Stage(Abort) */
     struct HksParamSet *hmacParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
@@ -404,14 +437,22 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
 
     /* 2. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+#endif
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. HMAC Three Stage(Abort) */
     struct HksParamSet *hmacParamSet = nullptr;
+#ifdef L2_STANDARD
     ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005)/sizeof(HksParam));
+#else
+    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003)/sizeof(HksParam));
+#endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};

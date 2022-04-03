@@ -20,8 +20,6 @@ int HksAesCipherPart1Test001(void);
 
 int HksAesCipherPart1Test002(void);
 
-int HksAesCipherPart1Test003(void);
-
 int HksAesCipherPart1Test004(void);
 
 int HksAesCipherPart1Test005(void);
