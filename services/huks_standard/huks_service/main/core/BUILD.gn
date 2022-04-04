@@ -36,6 +36,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
   sources = [
     "src/hks_client_check.c",
     "src/hks_client_service.c",
+    "src/hks_session_manager.c",
     "src/hks_storage.c",
     "src/hks_storage_file_lock.c",
   ]

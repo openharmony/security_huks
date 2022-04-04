@@ -816,9 +816,6 @@ int32_t HksCoreModuleInit(void)
         return ret;
     }
 
-    HksMutexLock(HksCoreGetHuksMutex());
-    InitializeDoubleList(GetKeyNodeList());
-    HksMutexUnlock(HksCoreGetHuksMutex());
     ret = HksCryptoAbilityInit();
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Hks init crypto ability failed, ret = %d", ret);

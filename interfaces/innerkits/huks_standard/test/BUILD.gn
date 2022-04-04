@@ -36,6 +36,7 @@ ohos_unittest("hukssdk_test") {
     "unittest/src/hks_others_test.cpp",
     "unittest/src/hks_safe_cipher_key_test.cpp",
     "unittest/src/hks_safe_compare_key_test.cpp",
+    "unittest/src/hks_session_max_test.cpp",
     "unittest/src/hks_test_aes.c",
     "unittest/src/hks_test_api_performance.c",
     "unittest/src/hks_test_cipher.c",
