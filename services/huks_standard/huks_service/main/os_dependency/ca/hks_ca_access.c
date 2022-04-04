@@ -19,7 +19,6 @@
 #include "hks_config.h"
 #endif
 
-#include "hks_access.h"
 #include "hks_teec.h"
 
 int32_t HksAccessInitialize(void)
