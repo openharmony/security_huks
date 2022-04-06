@@ -23,12 +23,8 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 
-static struct DoubleList g_keyNodeList = { NULL, NULL };
-
-struct DoubleList *GetKeyNodeList(void)
-{
-    return &g_keyNodeList;
-}
+static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
+static uint32_t g_keyNodeCount = 0;
 
 static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct HksParamSet **outParamSet)
 {
@@ -150,6 +146,8 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     keyNode->runtimeParamSet = runtimeParamSet;
     HksMutexLock(HksCoreGetHuksMutex());
     AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
+    ++g_keyNodeCount;
+    HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
     HksMutexUnlock(HksCoreGetHuksMutex());
 
     return keyNode;
@@ -202,6 +200,8 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     keyNode->runtimeParamSet = runtimeParamSet;
     HksMutexLock(HksCoreGetHuksMutex());
     AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
+    ++g_keyNodeCount;
+    HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
     HksMutexUnlock(HksCoreGetHuksMutex());
     HKS_FREE_BLOB(aad);
     return keyNode;
@@ -328,6 +328,8 @@ void HksDeleteKeyNode(uint64_t handle)
             FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
             FreeRuntimeParamSet(&keyNode->runtimeParamSet);
             HKS_FREE_PTR(keyNode);
+            --g_keyNodeCount;
+            HKS_LOG_I("delete keynode count:%u", g_keyNodeCount);
             HksMutexUnlock(HksCoreGetHuksMutex());
             return;
         }

@@ -24,7 +24,7 @@
 #include "hks_client_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_operation.h"
+#include "hks_session_manager.h"
 #include "hks_storage.h"
 #ifdef _STORAGE_LITE_
 #include "hks_storage_adapter.h"
@@ -1206,13 +1206,22 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
 
         ret = GetKeyAndNewParamSet(processInfo, key, paramSet, &keyFromFile, &newParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("GetKeyAndNewParamSet, ret = %d", ret);
+            HKS_LOG_E("GetKeyAndNewParamSet failed, ret = %d", ret);
             break;
         }
 
         ret = HuksAccessInit(&keyFromFile, newParamSet, handle);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HuksAccessInit fail, ret = %d", ret);
+            HKS_LOG_E("HuksAccessInit failed, ret = %d", ret);
+            break;
+        }
+
+        ret = CreateOperation(processInfo, handle);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("create operation failed, ret = %d", ret);
+            if (ret == HKS_ERROR_SESSION_REACHED_LIMIT) {
+                (void)HuksAccessAbort(handle, newParamSet);
+            }
             break;
         }
     } while (0);
@@ -1225,13 +1234,17 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    (void)processInfo;
+    if (QueryOperation(processInfo, handle) == NULL) {
+        HKS_LOG_E("operationHandle is not exist");
+        return HKS_ERROR_NOT_EXIST;
+    }
 
     int32_t ret = HuksAccessUpdate(handle, paramSet, inData, outData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HuksAccessUpdate fail, ret = %d", ret);
-        return ret;
+        DeleteOperation(handle);
     }
+
     return ret;
 }
 
@@ -1254,6 +1267,12 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             break;
         }
 
+        if (QueryOperation(processInfo, handle) == NULL) {
+            HKS_LOG_E("operationHandle is not exist");
+            ret = HKS_ERROR_NOT_EXIST;
+            break;
+        }
+
         struct HksParam *keyAliasParam = NULL;
         if (HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam) == HKS_SUCCESS) {
             ret = HksStoreKeyBlob(processInfo, &keyAliasParam->blob, HKS_STORAGE_TYPE_KEY, outData);
@@ -1264,6 +1283,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         }
     } while (0);
 
+    DeleteOperation(handle);
     HksFreeParamSet(&newParamSet);
     return ret;
 }
@@ -1271,14 +1291,35 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
-    (void)processInfo;
+    if (QueryOperation(processInfo, handle) == NULL) {
+        HKS_LOG_E("operationHandle is not exist");
+        return HKS_SUCCESS; /* return success if the handle is not found */
+    }
+
     int32_t ret = HuksAccessAbort(handle, paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HuksAccessAbort fail, ret = %d", ret);
-        return ret;
     }
+    DeleteOperation(handle);
     return ret;
 }
+
+void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo)
+{
+#ifndef __LITEOS_M__
+    HKS_LOG_I("remove session");
+    DeleteSessionByProcessInfo(processInfo);
+
+    if (processInfo->processName.size == 0) {
+        HksServiceDeleteUserIDKeyAliasFile(processInfo->userId);
+    } else {
+        HksServiceDeleteUIDKeyAliasFile(*processInfo);
+    }
+#else
+    (void)processInfo;
+#endif
+}
+
 #endif
 
 int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBlob *random)

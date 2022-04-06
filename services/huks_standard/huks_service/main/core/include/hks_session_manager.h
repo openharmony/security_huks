@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_OPERATION_H
-#define HKS_OPERATION_H
+#ifndef HKS_SESSION_MANAGER_H
+#define HKS_SESSION_MANAGER_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -25,26 +25,21 @@
 
 struct HksOperation {
     struct DoubleList listHead;
-    struct HksBlob processName;
+    struct HksProcessInfo processInfo;
     uint64_t handle;
-    bool abortable;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t CreateOperation(const struct HksBlob *processName, uint64_t operationHandle, bool abortable);
+int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle);
 
-struct HksOperation *QueryOperation(uint64_t operationHandle);
+struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle);
 
-void DeleteOperation(uint64_t operationHandle);
+void DeleteOperation(const struct HksBlob *operationHandle);
 
-void DeleteSession(const struct HksBlob *processName);
-
-bool DeleteFirstAbortableOperation(void);
-
-uint32_t GetAbortableOperationCount(void);
+void DeleteSessionByProcessInfo(const struct HksProcessInfo *processInfo);
 
 #ifdef __cplusplus
 }

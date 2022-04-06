@@ -30,16 +30,24 @@ huks_sources = [
   "../../../frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
   "../../../interfaces/innerkits/huks_standard/main/src/hks_api.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_auth.c",
+  "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
+  "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
+  "../../../services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_info.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_client_check.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c",
+  "../../../services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_upgrade_storage_data.c",
+  "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
+  "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c",
   "../../../utils/crypto_adapter/hks_client_service_adapter_lite.c",
   "../../../utils/file_operator/hks_file_operator_lite.c",
+  "../../../utils/list/hks_double_list.c",
+  "../../../utils/mutex/hks_mutex.c",
 ]
 
 if (huks_use_mbedtls == true) {
@@ -165,13 +173,6 @@ if (ohos_kernel_type == "liteos_m") {
     sources = huks_sources
     sources += huks_storage_source
     sources += [ "hks_tmp_client.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c" ]
-    sources += [ "//base/security/huks/utils/list/hks_double_list.c" ]
-    sources += [ "//base/security/huks/utils/mutex/hks_mutex.c" ]
 
     include_dirs = [
       "//utils/native/base/include",
@@ -206,14 +207,6 @@ if (ohos_kernel_type == "liteos_m") {
     sources += [
       "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c",
     ]
-
-    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c" ]
-    sources += [ "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c" ]
-    sources += [ "//base/security/huks/utils/list/hks_double_list.c" ]
-    sources += [ "//base/security/huks/utils/mutex/hks_mutex.c" ]
 
     include_dirs = [
       "//utils/native/base/include",

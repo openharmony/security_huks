@@ -749,7 +749,7 @@ HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksPa
     }
 
     int32_t ret = HksClientAbort(handle, paramSet);
-    HKS_LOG_I("leave abrot operation, result = %d", ret);
+    HKS_LOG_I("leave abort operation, result = %d", ret);
     return ret;
 }
 

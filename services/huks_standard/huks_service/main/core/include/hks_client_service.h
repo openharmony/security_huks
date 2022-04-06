@@ -100,6 +100,8 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet);
 
+void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
+
 #ifdef __cplusplus
 }
 #endif
