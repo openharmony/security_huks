@@ -19,9 +19,9 @@
 #include "common_event_support.h"
 #include "os_account_manager.h"
 
+#include "hks_client_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_storage.h"
 #include "hks_type.h"
 
 static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
@@ -49,17 +49,17 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
     processInfo->processName.data = uidData;
 }
 
-static void GetProcessName(int uid, struct HksBlob *processName)
+static void GetUserId(int userId, struct HksBlob *userIdBlob)
 {
-    uint32_t uidSize = sizeof(uid);
-    uint8_t *uidData = (uint8_t *)HksMalloc(uidSize);
-    if (uidData == nullptr) {
+    uint32_t userIdSize = sizeof(userId);
+    uint8_t *userIdData = (uint8_t *)HksMalloc(userIdSize);
+    if (userIdData == nullptr) {
         HKS_LOG_E("uid malloc failed.");
         return;
     }
-    (void)memcpy_s(uidData, uidSize, &uid, uidSize);
-    processName->size = uidSize;
-    processName->data = uidData;
+    (void)memcpy_s(userIdData, userIdSize, &userId, userIdSize);
+    userIdBlob->size = userIdSize;
+    userIdBlob->data = userIdData;
 }
 
 namespace OHOS {
@@ -73,6 +73,8 @@ SystemEventSubscriber::SystemEventSubscriber(const OHOS::EventFwk::CommonEventSu
 
 void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
+    struct HksProcessInfo processInfo = { { 0, nullptr }, { 0, nullptr } };
+
     auto want = data.GetWant();
     std::string action = want.GetAction();
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
@@ -80,19 +82,19 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         int userId = -1;
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
         HKS_LOG_I("HksService package removed: uid is %d userId is %d", uid, userId);
-        struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+
         GetProcessInfo(userId, uid, &processInfo);
-        HksServiceDeleteUIDKeyAliasFile(processInfo);
-        HKS_FREE_BLOB(processInfo.userId);
-        HKS_FREE_BLOB(processInfo.processName);
+        HksServiceDeleteProcessInfo(&processInfo);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int userId = data.GetCode();
         HKS_LOG_I("HksService user removed: userId is %d", userId);
-        struct HksBlob processName = { 0, NULL };
-        GetProcessName(userId, &processName);
-        HksServiceDeleteUserIDKeyAliasFile(processName);
-        HKS_FREE_BLOB(processName);
+
+        GetUserId(userId, &(processInfo.userId));
+        HksServiceDeleteProcessInfo(&processInfo);
     }
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
 }
 
 SystemEventObserver::~SystemEventObserver()

@@ -36,8 +36,6 @@ struct HuksKeyNode {
 extern "C" {
 #endif
 
-struct DoubleList *GetKeyNodeList(void);
-
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet);
 
 struct HuksKeyNode *HksQueryKeyNode(uint64_t handle);
