@@ -372,7 +372,6 @@ int32_t HksMbedtlsHashSha256Init(void **ctx, int is224, uint32_t alg)
 
     if (is224 != 0 && is224 != 1) {
         HKS_LOG_E("Mbedtls Hash not sha224 & not sha256 ");
-        mbedtls_sha256_free(context);
         if (context != NULL) {
             HksFree(context);
         }
