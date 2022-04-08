@@ -349,6 +349,7 @@ int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBl
     }
     uint32_t keyByteLen = (opensslKeyByteLen + OPENSSL_KEY_BLOCK - 1) / OPENSSL_KEY_BLOCK * OPENSSL_KEY_BLOCK;
 
+    (void)memset_s(key->data, key->size, 0, key->size);
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)key->data;
     keyMaterial->keyAlg = HKS_ALG_DSA;
     keyMaterial->keySize = keyByteLen * HKS_BITS_PER_BYTE;
