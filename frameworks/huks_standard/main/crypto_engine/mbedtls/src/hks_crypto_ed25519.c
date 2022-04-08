@@ -104,7 +104,9 @@ int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    return SaveEd25519KeyMaterial(&pubKeyBlob, &priKeyBlob, keyOut);
+    ret = SaveEd25519KeyMaterial(&pubKeyBlob, &priKeyBlob, keyOut);
+    (void)memset_s(priKeyBlob.data, ED25519_PRIVATE_KEY_LEN, 0, ED25519_PRIVATE_KEY_LEN);
+    return ret;
 }
 #endif /* HKS_SUPPORT_ED25519_GENERATE_KEY */
 
