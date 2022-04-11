@@ -17,12 +17,21 @@
 
 #include "bundle_constants.h"
 #include "common_event_support.h"
+#ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
-
+#endif
 #include "hks_client_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type.h"
+
+#ifndef HAS_OS_ACCOUNT_PART
+constexpr static int UID_TRANSFORM_DIVISOR = 200000;
+static void GetOsAccountIdFromUid(int uid, int &osAccountId)
+{
+    osAccountId = uid / UID_TRANSFORM_DIVISOR;
+}
+#endif // HAS_OS_ACCOUNT_PART
 
 static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
@@ -80,7 +89,11 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED) {
         int uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
         int userId = -1;
+#ifdef HAS_OS_ACCOUNT_PART
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);
+#else // HAS_OS_ACCOUNT_PART
+        GetOsAccountIdFromUid(uid, userId);
+#endif // HAS_OS_ACCOUNT_PART
         HKS_LOG_I("HksService package removed: uid is %d userId is %d", uid, userId);
 
         GetProcessInfo(userId, uid, &processInfo);
