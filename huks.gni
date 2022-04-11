@@ -13,3 +13,10 @@
 
 use_crypto_lib = "openssl"
 non_rwlock_support = false
+
+if (!defined(global_parts_info) ||
+    defined(global_parts_info.account_os_account_standard)) {
+  has_os_account_part = true
+} else {
+  has_os_account_part = false
+}
