@@ -30,11 +30,19 @@
 #include "accesstoken_kit.h"
 #endif
 
-#ifdef SUPPORT_ACCOUNT_API
+#ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
-#endif
+#endif // HAS_OS_ACCOUNT_PART
 
 using namespace OHOS;
+
+#ifndef HAS_OS_ACCOUNT_PART
+constexpr static int UID_TRANSFORM_DIVISOR = 200000;
+static void GetOsAccountIdFromUid(int uid, int &osAccountId)
+{
+    osAccountId = uid / UID_TRANSFORM_DIVISOR;
+}
+#endif // HAS_OS_ACCOUNT_PART
 
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response)
 {
@@ -91,10 +99,13 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->processName.data = name;
 
     int userId = 0;
-#ifdef SUPPORT_ACCOUNT_API
+#ifdef HAS_OS_ACCOUNT_PART
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
     HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %d, userId = %d", callingUid, userId);
-#endif
+#else // HAS_OS_ACCOUNT_PART
+    GetOsAccountIdFromUid(callingUid, userId);
+    HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %d, userId = %d", callingUid, userId);
+#endif // HAS_OS_ACCOUNT_PART
 
     uint32_t size;
     if (userId == 0) {
