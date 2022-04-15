@@ -39,8 +39,6 @@ REGISTER_SYSTEM_ABILITY_BY_ID(HksService, SA_ID_KEYSTORE_SERVICE, true);
 
 std::mutex HksService::instanceLock;
 sptr<HksService> HksService::instance;
-const uint32_t UID_ROOT = 0;
-const uint32_t UID_SYSTEM = 1000;
 const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
 #ifdef SUPPORT_COMMON_EVENT
 const uint32_t MAX_DELAY_TIMES = 100;
@@ -246,12 +244,6 @@ bool HksService::Init()
 
     HKS_LOG_I("HksService::Init success.");
     return true;
-}
-
-bool HksService::CanRequest() const
-{
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    return (callingUid == UID_ROOT) || (callingUid == UID_SYSTEM);
 }
 
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
