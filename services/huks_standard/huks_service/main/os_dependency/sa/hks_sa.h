@@ -60,7 +60,6 @@ protected:
 private:
     HksService();
     bool Init();
-    bool CanRequest() const;
 
     bool registerToService_;
     ServiceRunningState runningState_;
