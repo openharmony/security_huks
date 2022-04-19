@@ -36,9 +36,19 @@ group("huks_napi") {
   }
 }
 
+group("cipher_napi") {
+  if (os_level == "standard") {
+    if (support_jsapi) {
+      deps =
+          [ "//base/security/huks/frameworks/crypto_lite/js/napi:cipher_napi" ]
+    }
+  }
+}
+
 group("huks_components") {
   if (os_level == "standard") {
     deps = [
+      "//base/security/huks:cipher_napi",
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
       "//base/security/huks/services/huks_standard:huks_service",
