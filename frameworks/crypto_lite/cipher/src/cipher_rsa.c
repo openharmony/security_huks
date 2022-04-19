@@ -14,10 +14,10 @@
  */
 
 #include "cipher.h"
+#include "cipher_log.h"
 #include "base64.h"
 #include "ctr_drbg.h"
 #include "entropy.h"
-#include "log.h"
 #include "pk.h"
 #include "platform.h"
 #include "rsa.h"
@@ -44,21 +44,21 @@ static char *RsaMallocPrivateKey(const unsigned char *key, size_t *keyLen)
     (void)memset_s(privateKey, keyFinalLen, 0, keyFinalLen);
     ret = memcpy_s(privateKey, keyFinalLen, start, startLen);
     if (ret != EOK) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
+        CIPHER_LOG_E("memcpy failed.");
         free(privateKey);
         return NULL;
     }
 
     ret = memcpy_s(privateKey + startLen, keyFinalLen - startLen, key, *keyLen);
     if (ret != EOK) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
+        CIPHER_LOG_E("memcpy failed.");
         free(privateKey);
         return NULL;
     }
 
     ret = memcpy_s(privateKey + startLen + *keyLen, keyFinalLen - startLen - *keyLen, end, endLen);
     if (ret != EOK) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
+        CIPHER_LOG_E("memcpy failed.");
         (void)memset_s(privateKey, keyFinalLen, 0, keyFinalLen);
         free(privateKey);
         return NULL;
@@ -85,21 +85,21 @@ static char *RsaMallocPublicKey(const unsigned char *key, size_t *keyLen)
     (void)memset_s(pubKey, keyFinalLen, 0, keyFinalLen);
     ret = memcpy_s(pubKey, keyFinalLen, start, startLen);
     if (ret) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
+        CIPHER_LOG_E("memcpy failed.");
         free(pubKey);
         return NULL;
     }
 
     ret = memcpy_s(pubKey + startLen, keyFinalLen - startLen, key, *keyLen);
     if (ret) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
+        CIPHER_LOG_E("memcpy failed.");
         free(pubKey);
         return NULL;
     }
 
     ret = memcpy_s(pubKey + startLen + *keyLen, keyFinalLen - startLen - *keyLen, end, endLen);
     if (ret) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed.");
+        CIPHER_LOG_E("memcpy failed.");
         (void)memset_s(pubKey, keyFinalLen, 0, keyFinalLen);
         free(pubKey);
         return NULL;
@@ -116,24 +116,24 @@ static int32_t RsaLoadPrivateKey(int32_t mode, mbedtls_pk_context *pk, const uns
     mbedtls_rsa_context *rsa = NULL;
     char *finalKey = RsaMallocPrivateKey(key, &finalKeyLen);
     if (finalKey == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc private key error, final Key Length:%{public}zu.", finalKeyLen);
+        CIPHER_LOG_E("malloc private key error, final Key Length:%zu.", finalKeyLen);
         return ERROR_CODE_GENERAL;
     }
 
     ret = mbedtls_pk_parse_key(pk, (const unsigned char *)finalKey, finalKeyLen, NULL, 0);
     if (ret != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "parse private key error, mode:%{public}d ret:%{public}d.", mode, ret);
+        CIPHER_LOG_E("parse private key error, mode:%d ret:%d.", mode, ret);
         goto ERROR;
     }
 
     rsa = mbedtls_pk_rsa(*pk);
     if (rsa == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "rsa error, mode:%{public}d.", mode);
+        CIPHER_LOG_E("rsa error, mode:%d.", mode);
         goto ERROR;
     }
 
     if (mbedtls_rsa_check_privkey(rsa) != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "check private key failed.");
+        CIPHER_LOG_E("check private key failed.");
         goto ERROR;
     }
 
@@ -156,24 +156,24 @@ static int32_t RsaLoadPublicKey(int32_t mode, mbedtls_pk_context *pk, const unsi
     mbedtls_rsa_context *rsa = NULL;
     char* finalKey = RsaMallocPublicKey(key, &finalKeyLen);
     if (finalKey == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc public key error, final Key Length:%{public}zu.", finalKeyLen);
+        CIPHER_LOG_E("malloc public key error, final Key Length:%zu.", finalKeyLen);
         return ERROR_CODE_GENERAL;
     }
 
     ret = mbedtls_pk_parse_public_key(pk, (const unsigned char *)finalKey, finalKeyLen);
     if (ret != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "parse public key error, mode:%{public}d ret:%{public}d.", mode, ret);
+        CIPHER_LOG_E("parse public key error, mode:%d ret:%d.", mode, ret);
         goto ERROR;
     }
 
     rsa = mbedtls_pk_rsa(*pk);
     if (rsa == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "pk rsa error, mode:%{public}d.", mode);
+        CIPHER_LOG_E("pk rsa error, mode:%d.", mode);
         goto ERROR;
     }
 
     if (mbedtls_rsa_check_pubkey(rsa)) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "check public key failed.");
+        CIPHER_LOG_E("check public key failed.");
         goto ERROR;
     }
     /* set padding as OAEPWITHSHA256 */
@@ -218,13 +218,13 @@ static int32_t RsaEncryptBase64Encode(int32_t cipherTotalLen, char *cipherText, 
 
     char *tempBuf = malloc(cipherTotalLen);
     if (tempBuf == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "RsaEncrypt Base64Encode malloc fail.");
+        CIPHER_LOG_E("RsaEncrypt Base64Encode malloc fail.");
         return ERROR_CODE_GENERAL;
     }
 
     int32_t ret = memcpy_s(tempBuf, cipherTotalLen, cipherText, cipherTotalLen);
     if (ret) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy fail.");
+        CIPHER_LOG_E("memcpy fail.");
         free(tempBuf);
         return ERROR_CODE_GENERAL;
     }
@@ -233,7 +233,7 @@ static int32_t RsaEncryptBase64Encode(int32_t cipherTotalLen, char *cipherText, 
     size_t dataLen = 0;
     ret = mbedtls_base64_encode(NULL, 0, &dataLen, (const unsigned char *)tempBuf, cipherTotalLen);
     if (ret != MBEDTLS_ERR_BASE64_BUFFER_TOO_SMALL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "base64_encode fail.");
+        CIPHER_LOG_E("base64_encode fail.");
         free(tempBuf);
         return ERROR_CODE_GENERAL;
     }
@@ -241,7 +241,7 @@ static int32_t RsaEncryptBase64Encode(int32_t cipherTotalLen, char *cipherText, 
     ret = mbedtls_base64_encode((unsigned char *)cipherText, cipherTextLen, &dataLen,
         (const unsigned char *)tempBuf, cipherTotalLen);
     if (ret) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "base64_encode fail.");
+        CIPHER_LOG_E("base64_encode fail.");
         free(tempBuf);
         return ERROR_CODE_GENERAL;
     }
@@ -257,7 +257,7 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
     int32_t rsaLen = mbedtls_rsa_get_len(rsa);
     int32_t rsaContentLen = rsaLen - RSA_KEY_BYTE;
     if ((rsaContentLen <= 0) || (rsaLen <= 0)) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "rsa content len:%{public}d, rsaLen:%{public}d.", rsaContentLen, rsaLen);
+        CIPHER_LOG_E("rsa content len:%d, rsaLen:%d.", rsaContentLen, rsaLen);
         return ERROR_CODE_GENERAL;
     }
     int32_t count = strlen((const char *)(uintptr_t)plainText) / rsaContentLen;
@@ -272,9 +272,11 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
         (void)memset_s(buf, rsaLen, 0, rsaLen);
         if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
             MBEDTLS_RSA_PUBLIC, rsaContentLen, (const unsigned char *)(plainText + i * rsaContentLen), buf)) {
+                CIPHER_LOG_E("chenhao error here 1.");
             goto ERROR;
         }
         if (memcpy_s(cipherText + i * rsaLen, cipherTextLen - i * rsaLen, buf, rsaLen)) {
+            CIPHER_LOG_E("chenhao error here 2.");
             goto ERROR;
         }
         cipherTotalLen += rsaLen;
@@ -283,14 +285,17 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
         (void)memset_s(buf, rsaLen, 0, rsaLen);
         if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
             MBEDTLS_RSA_PUBLIC, remain, (const unsigned char *)(plainText + count * rsaContentLen), buf)) {
+                CIPHER_LOG_E("chenhao error here 3.");
             goto ERROR;
         }
         if (memcpy_s(cipherText + count * rsaLen, cipherTextLen - count * rsaLen, buf, rsaLen)) {
+            CIPHER_LOG_E("chenhao error here 4.");
             goto ERROR;
         }
         cipherTotalLen += rsaLen;
     }
     if (RsaEncryptBase64Encode(cipherTotalLen, cipherText, cipherTextLen)) {
+        CIPHER_LOG_E("chenhao error here 5.");
         goto ERROR;
     }
     free(buf);
@@ -339,7 +344,7 @@ static int32_t RsaEncrypt(RsaKeyData *key, const RsaData *plain, RsaData *cipher
     }
 
     if (RsaEncryptMultipleBlock(rsa, plain->data, cipher->data, cipher->length) != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "Rsa encrypt block error.");
+        CIPHER_LOG_E("Rsa encrypt block error.");
         mbedtls_pk_free(&pk);
         return ERROR_CODE_GENERAL;
     }
@@ -423,7 +428,7 @@ static int32_t RsaDecrypt(RsaKeyData *key, RsaData *cipher, RsaData *plain)
     size_t rsaLen = mbedtls_rsa_get_len(rsa);
     int32_t ret = RsaPkcs1Decrypt(rsa, rsaLen, cipher, plain);
     if (ret != ERROR_SUCCESS) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "Rsa pkcs1 decrypt failed.");
+        CIPHER_LOG_E("Rsa pkcs1 decrypt failed.");
         mbedtls_pk_free(&pk);
         return ERROR_CODE_GENERAL;
     }
