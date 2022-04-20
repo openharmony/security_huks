@@ -44,9 +44,6 @@ static const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
 
 static const std::string HKS_HANDLE_PROPERTY_ERRORCODE = "errorCode";
 static const std::string HKS_HANDLE_PROPERTY_HANDLE = "handle";
-static const std::string HKS_HANDLE_PROPERTY_HANDLE_1 = "handle1";
-static const std::string HKS_HANDLE_PROPERTY_HANDLE_2 = "handle2";
-
 
 napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob);
 
