@@ -418,18 +418,12 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_ERRORCODE.c_str(), errorCode));
 
     uint64_t tempHandle = *(uint64_t *)data;
-    uint32_t handle1 = 0;
-    uint32_t handle2 = 0;
-    napi_value handlejs1;
-    napi_value handlejs2;
+    uint32_t handle = (uint32_t)tempHandle; /* Temporarily only use 32 bit handle */
+    HKS_LOG_I("init handle:%u", handle);
 
-    handle2 = tempHandle;
-    handle1 = tempHandle >> HKS_HANDLE_OFFSET32;
-
-    NAPI_CALL(env, napi_create_uint32(env, handle1, &handlejs1));
-    NAPI_CALL(env, napi_create_uint32(env, handle2, &handlejs2));
-    NAPI_CALL(env, napi_set_named_property(env, result, "handle1", handlejs1));
-    NAPI_CALL(env, napi_set_named_property(env, result, "handle2", handlejs2));
+    napi_value handlejs = nullptr;
+    NAPI_CALL(env, napi_create_uint32(env, handle, &handlejs));
+    NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_HANDLE.c_str(), handlejs));
 
     return result;
 }
