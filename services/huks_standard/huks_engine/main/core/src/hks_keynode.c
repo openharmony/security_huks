@@ -77,9 +77,9 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 
 static int32_t GenerateKeyNodeHandle(uint64_t *handle)
 {
-    uint64_t handleData = 0;
+    uint32_t handleData = 0;
     struct HksBlob opHandle = {
-        .size = sizeof(uint64_t),
+        .size = sizeof(uint32_t),
         .data = (uint8_t *)&handleData
     };
 
@@ -89,11 +89,7 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
         return ret;
     }
 
-    if (memcpy_s(handle, sizeof(*handle), opHandle.data, opHandle.size) != EOK) {
-        HKS_LOG_E("memcpy handle failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
+    *handle = handleData; /* Temporarily only use 32 bit handle */
     return HKS_SUCCESS;
 }
 

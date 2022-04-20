@@ -154,7 +154,6 @@ static napi_value InitWriteResult(napi_env env, InitAsyncCtxPtr context)
         (context->result == HKS_SUCCESS && context->handle != nullptr) ? context->handle->size : 0);
 }
 
-
 static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
 {
     napi_value promise = nullptr;
