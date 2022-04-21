@@ -64,8 +64,6 @@ static struct HksBlob g_keyAliasFinal2001 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_final"
 };
 
-#ifdef L2_STANDARD
-#ifdef _USE_MBEDTLS_
 static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -78,34 +76,6 @@ static struct HksParam g_genParams001[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-#else
-static struct HksParam g_genParams001[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ED25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
-#else
-static struct HksParam g_genParams001[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_X25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
 static struct HksParam g_agreeParams01Init001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -196,8 +166,6 @@ static struct HksBlob g_keyAlias02002 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_2"
 };
 
-#ifdef L2_STANDARD
-#if defined(_USE_MBEDTLS_)
 static struct HksParam g_genParams002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -210,34 +178,6 @@ static struct HksParam g_genParams002[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-#else
-static struct HksParam g_genParams002[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ED25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
-#else
-static struct HksParam g_genParams002[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_X25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
 static struct HksParam g_agreeParams01Init002[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -283,9 +223,6 @@ static struct HksBlob g_keyAlias02003 = {
     strlen("HksX25519AgreeKeyAliasTest003_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest003_2"
 };
-
-#ifdef L2_STANDARD
-#if defined(_USE_MBEDTLS_)
 static struct HksParam g_genParams003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -298,34 +235,6 @@ static struct HksParam g_genParams003[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-#else
-static struct HksParam g_genParams003[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ED25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
-#else
-static struct HksParam g_genParams003[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_X25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
 static struct HksParam g_agreeParams01Init003[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -360,8 +269,6 @@ static struct HksBlob g_keyAlias02004 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest004_2"
 };
 
-#ifdef L2_STANDARD
-#if defined(_USE_MBEDTLS_)
 static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -374,34 +281,6 @@ static struct HksParam g_genParams004[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-#else
-static struct HksParam g_genParams004[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ED25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
-#else
-static struct HksParam g_genParams004[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_X25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
 static struct HksParam g_agreeParams01Init004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -577,7 +456,7 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksX25519AgreeFinish01 failed.";
     ret = HksX25519AgreeFinish(&g_keyAlias02001, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksX25519AgreeFinish02 failed.";
-    EXPECT_EQ(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "outData01 not equals outData02";
+    EXPECT_NE(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "error: outData01 equals outData02";
 
     HksDeleteKey(&g_keyAlias01001, genParamSet);
     HksDeleteKey(&g_keyAlias02001, genParamSet);

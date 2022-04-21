@@ -136,7 +136,6 @@ static struct HksBlob g_x25519KeyAlias02 = {
     strlen("HksCrossTestX25519Agree001_02"),
     (uint8_t *)"HksCrossTestX25519Agree001_02"
 };
-#ifdef _USE_MBEDTLS_
 static struct HksParam g_x25519GenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -149,20 +148,6 @@ static struct HksParam g_x25519GenParams[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }
 };
-#else
-static struct HksParam g_x25519GenParams[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ED25519
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_CURVE25519_KEY_SIZE_256
-    }
-};
-#endif // _USE_MBEDTLS_
 static struct HksParam g_x25519InitParams01[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
