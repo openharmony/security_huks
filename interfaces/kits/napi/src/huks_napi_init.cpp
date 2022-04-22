@@ -181,9 +181,6 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         [](napi_env env, napi_status status, void *data) {
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
             napi_value result = InitWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
             if (context->callback != nullptr) {
                 CallAsyncCallback(env, context->callback, context->result, result);
             } else {
