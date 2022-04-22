@@ -28,6 +28,27 @@ static struct DoubleList g_operationList = { &g_operationList, &g_operationList 
 static uint32_t g_operationCount = 0;
 static pthread_mutex_t g_lock = PTHREAD_MUTEX_INITIALIZER;
 
+static void DeleteKeyNode(uint64_t operationHandle)
+{
+    uint8_t *handle = (uint8_t *)HksMalloc(sizeof(uint64_t));
+    if (handle == NULL) {
+        HKS_LOG_E("malloc failed");
+        return;
+    }
+    (void)memcpy_s(handle, sizeof(uint64_t), &operationHandle, sizeof(uint64_t));
+    struct HksBlob handleBlob = { sizeof(uint64_t), handle };
+
+    struct HksParamSet *paramSet = NULL;
+    if (HksInitParamSet(&paramSet) != HKS_SUCCESS) {
+        return;
+    }
+
+    (void)HuksAccessAbort(&handleBlob, paramSet);
+
+    HksFreeParamSet(&paramSet);
+    HksFree(handle);
+}
+
 /* Need to lock before calling FreeOperation */
 static void FreeOperation(struct HksOperation **operation)
 {
@@ -40,13 +61,33 @@ static void FreeOperation(struct HksOperation **operation)
     HKS_FREE_PTR(*operation);
 }
 
+/* Need to lock before calling DeleteFirstAbortableOperation */
+static bool DeleteFirstAbortableOperation(void)
+{
+    struct HksOperation *operation = NULL;
+
+    HKS_DLIST_ITER(operation, &g_operationList) {
+        if ((operation != NULL) && operation->abortable) {
+            DeleteKeyNode(operation->handle);
+            FreeOperation(&operation);
+            --g_operationCount;
+            HKS_LOG_I("delete operation count:%u", g_operationCount);
+            return true;
+        }
+    }
+    return false;
+}
+
 static int32_t AddOperation(struct HksOperation *operation)
 {
     pthread_mutex_lock(&g_lock);
     if (g_operationCount >= MAX_OPERATIONS_COUNT) {
-        HKS_LOG_E("Add operation failed: maximum number of sessions reached");
-        pthread_mutex_unlock(&g_lock);
-        return HKS_ERROR_SESSION_REACHED_LIMIT;
+        HKS_LOG_I("maximum number of sessions reached: delete oldest session.");
+        if (!DeleteFirstAbortableOperation()) {
+            pthread_mutex_unlock(&g_lock);
+            HKS_LOG_E("not found abortable session");
+            return HKS_ERROR_SESSION_REACHED_LIMIT;
+        }
     }
 
     AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
@@ -100,7 +141,8 @@ static int32_t ConstructOperationHandle(const struct HksBlob *operationHandle, u
     return HKS_SUCCESS;
 }
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle)
+int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle,
+    bool abortable)
 {
     struct HksOperation *operation = (struct HksOperation *)HksMalloc(sizeof(struct HksOperation));
     if (operation == NULL) {
@@ -123,6 +165,8 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
         HKS_FREE_PTR(operation);
         return ret;
     }
+
+    operation->abortable = abortable;
 
     ret = AddOperation(operation);
     if (ret != HKS_SUCCESS) {
@@ -192,27 +236,6 @@ void DeleteOperation(const struct HksBlob *operationHandle)
         }
     }
     pthread_mutex_unlock(&g_lock);
-}
-
-static void DeleteKeyNode(uint64_t operationHandle)
-{
-    uint8_t *handle = (uint8_t *)HksMalloc(sizeof(uint64_t));
-    if (handle == NULL) {
-        HKS_LOG_E("malloc failed");
-        return;
-    }
-    (void)memcpy_s(handle, sizeof(uint64_t), &operationHandle, sizeof(uint64_t));
-    struct HksBlob handleBlob = { sizeof(uint64_t), handle };
-
-    struct HksParamSet *paramSet = NULL;
-    if (HksInitParamSet(&paramSet) != HKS_SUCCESS) {
-        return;
-    }
-
-    (void)HuksAccessAbort(&handleBlob, paramSet);
-
-    HksFreeParamSet(&paramSet);
-    HksFree(handle);
 }
 
 static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOperation *operation)
