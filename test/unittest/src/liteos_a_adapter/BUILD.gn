@@ -65,7 +65,7 @@ unittest("huks_3.0_test") {
     "//base/security/huks/unittest/src/hks_rsa_sign_verify_part7_test.cpp",
     "//base/security/huks/unittest/src/hks_rsa_sign_verify_part8_test.cpp",
     "//base/security/huks/unittest/src/hks_rsa_sign_verify_test_common.cpp",
-    "//base/security/huks/unittest/src/hks_test_three_stage_common.c",
+    "//base/security/huks/unittest/src/hks_three_stage_test_common.c",
     "//base/security/huks/unittest/src/hks_x25519_agree_test.cpp",
   ]
 

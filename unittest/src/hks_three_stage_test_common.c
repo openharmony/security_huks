@@ -248,7 +248,7 @@ int32_t TestCmpKeyAliasHash(const struct HksBlob *srcData1, const struct HksBlob
         HksFreeParamSet(&hashParamSet);
         return HKS_FAILURE;
     }
-    ret = HksHash(hashParamSet, srcData1, &hash2);
+    ret = HksHash(hashParamSet, srcData2, &hash2);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&hashParamSet);
         HksFree(hash1.data);
