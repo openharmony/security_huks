@@ -27,13 +27,15 @@ struct HksOperation {
     struct DoubleList listHead;
     struct HksProcessInfo processInfo;
     uint64_t handle;
+    bool abortable;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle);
+int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle,
+    bool abortable);
 
 struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle);
 
