@@ -109,7 +109,8 @@ static void SessionMaxTest(const struct HksBlob *alias)
     struct HksBlob handleMaxBlob = { sizeof(uint64_t), (uint8_t *)&handleMax };
     struct HksParamSet *paramSetMax = NULL;
     ConstructInitParamSet(&paramSetMax);
-    ASSERT_TRUE(HksInit(alias, paramSetMax, &handleMaxBlob) == HKS_ERROR_SESSION_REACHED_LIMIT);
+    ASSERT_TRUE(HksInit(alias, paramSetMax, &handleMaxBlob) == 0);
+    ASSERT_TRUE(HksAbort(&handleMaxBlob, paramSetMax) == 0);
     HksFreeParamSet(&paramSetMax);
 
     for (uint32_t i = 0; i < MAX_SESSION_NUM; ++i) {

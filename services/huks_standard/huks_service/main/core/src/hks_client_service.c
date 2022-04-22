@@ -1216,12 +1216,9 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
             break;
         }
 
-        ret = CreateOperation(processInfo, handle);
+        ret = CreateOperation(processInfo, handle, true);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("create operation failed, ret = %d", ret);
-            if (ret == HKS_ERROR_SESSION_REACHED_LIMIT) {
-                (void)HuksAccessAbort(handle, newParamSet);
-            }
             break;
         }
     } while (0);
