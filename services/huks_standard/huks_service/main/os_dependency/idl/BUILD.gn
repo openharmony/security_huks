@@ -21,11 +21,7 @@ ohos_static_library("libhuks_service_idl_standard_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-  include_dirs = [
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
-    "//third_party/json/include",
-    "//utils/native/base/include",
-  ]
+  include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough" ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
@@ -41,7 +37,6 @@ ohos_static_library("libhuks_service_idl_standard_static") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-    "//utils/native/base:utils",
   ]
   external_deps = [ "ipc:ipc_core" ]
   if (support_jsapi) {

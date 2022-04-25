@@ -192,11 +192,6 @@ if (ohos_kernel_type == "liteos_m") {
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
     }
   }
-  #if (ohos_build_type == "debug") {
-  #  group("huks_3.0_test") {
-  #    deps = [ "//base/security/huks/test:huks_3.0_test" ]
-  #  }
-  #}
 } else {
   ohos_shared_library("huks_3.0_sdk") {
     public_configs = [ ":public_huks_config" ]
