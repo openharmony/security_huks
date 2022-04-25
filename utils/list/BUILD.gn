@@ -22,14 +22,13 @@ ohos_static_library("libhuks_utils_list_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-  include_dirs = [ "//utils/native/base/include" ]
 
   sources = [ "hks_double_list.c" ]
   cflags = [
     "-Wall",
     "-Werror",
   ]
-  deps = [ "//utils/native/base:utils" ]
+  external_deps = [ "utils_base:utils" ]
 
   complete_static_lib = true
 }
