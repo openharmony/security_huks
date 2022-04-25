@@ -921,7 +921,7 @@ static napi_module g_module = {
     .nm_flags = 0,
     .nm_filename = nullptr,
     .nm_register_func = HuksNapiRegister,
-    .nm_modname = "huks",
+    .nm_modname = "security.huks",
     .nm_priv = ((void *)0),
     .reserved = {0},
 };
