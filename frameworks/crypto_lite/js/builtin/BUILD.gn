@@ -27,8 +27,8 @@ shared_library("ace_kit_cipher") {
     "include",
     "//third_party/bounds_checking_function/include",
     "//base/security/huks/frameworks/crypto_lite/cipher/include",
-    "//foundation/ace/ace_engine_lite/interfaces/innerkits/builtin/jsi",
-    "//foundation/ace/ace_engine_lite/interfaces/innerkits/builtin/base",
+    "//foundation/arkui/ace_engine_lite/interfaces/inner_api/builtin/jsi",
+    "//foundation/arkui/ace_engine_lite/interfaces/inner_api/builtin/base",
   ]
   deps = [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
