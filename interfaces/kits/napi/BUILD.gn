@@ -23,9 +23,6 @@ ohos_shared_library("huks") {
   include_dirs = [
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//foundation/ace/napi/interfaces/kits/napi",
-    "//utils/native/base/include",
-    "//third_party/node/src",
     "include",
   ]
 
@@ -56,9 +53,11 @@ ohos_shared_library("huks") {
     "src/huks_napi_wrap_key.cpp",
   ]
 
-  deps = [ "//foundation/ace/napi:ace_napi" ]
-
-  external_deps = [ "huks:libhukssdk" ]
+  external_deps = [
+    "huks:libhukssdk",
+    "napi:ace_napi",
+    "utils_base:utils",
+  ]
   cflags_cc = [
     "-Wall",
     "-Werror",
