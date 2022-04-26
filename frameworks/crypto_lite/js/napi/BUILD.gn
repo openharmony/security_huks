@@ -32,7 +32,7 @@ ohos_shared_library("cipher_napi") {
   ]
   deps = [
     "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
-    "//foundation/ace/napi:ace_napi",
+    "//foundation/arkui/napi:ace_napi",
     "//third_party/bounds_checking_function:libsec_shared",
     "//utils/native/base:utils",
   ]
