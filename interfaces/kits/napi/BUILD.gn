@@ -56,6 +56,7 @@ ohos_shared_library("huks") {
   external_deps = [
     "huks:libhukssdk",
     "napi:ace_napi",
+    "utils_base:utils",
   ]
   cflags_cc = [
     "-Wall",
