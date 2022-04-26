@@ -22,7 +22,7 @@ ohos_static_library("libhuks_openssl_standard_static") {
   part_name = "huks"
   public_configs = [ ":huks_config" ]
 
-  include_dirs = [ "//third_party/openssl/include/" ]
+  include_dirs = [ "//third_party/openssl/include" ]
 
   defines = [
     "L2_STANDARD",
@@ -50,6 +50,7 @@ ohos_static_library("libhuks_openssl_standard_static") {
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//third_party/openssl:libcrypto_shared",
   ]
+  external_deps = [ "utils_base:utils" ]
   cflags = [
     "-DHILOG_ENABLE",
     "-Wall",
