@@ -22,7 +22,8 @@
 
 using namespace testing::ext;
 namespace {
-static const uint32_t MAX_SESSION_NUM = 15;
+static const uint32_t MAX_SESSION_NUM_MORE_1 = 16;
+static const uint32_t HMAC_OUTPUT_SIZE = 32;
 class HksSessionMaxTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -96,28 +97,41 @@ static void ConstructInitParamSet(struct HksParamSet **outParamSet)
 
 static void SessionMaxTest(const struct HksBlob *alias)
 {
-    uint64_t handle[MAX_SESSION_NUM];
-    for (uint32_t i = 0; i < MAX_SESSION_NUM; ++i) {
+    uint64_t handle[MAX_SESSION_NUM_MORE_1];
+    for (uint32_t i = 0; i < MAX_SESSION_NUM_MORE_1; ++i) {
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
         struct HksParamSet *paramSet = NULL;
         ConstructInitParamSet(&paramSet);
-        ASSERT_TRUE(HksInit(alias, paramSet, &handleBlob) == 0);
+        EXPECT_EQ(HksInit(alias, paramSet, &handleBlob), HKS_SUCCESS);
         HksFreeParamSet(&paramSet);
     }
 
-    uint64_t handleMax;
-    struct HksBlob handleMaxBlob = { sizeof(uint64_t), (uint8_t *)&handleMax };
-    struct HksParamSet *paramSetMax = NULL;
-    ConstructInitParamSet(&paramSetMax);
-    ASSERT_TRUE(HksInit(alias, paramSetMax, &handleMaxBlob) == 0);
-    ASSERT_TRUE(HksAbort(&handleMaxBlob, paramSetMax) == 0);
-    HksFreeParamSet(&paramSetMax);
+    for (uint32_t i = 0; i < MAX_SESSION_NUM_MORE_1; ++i) {
+        struct HksParamSet *paramSet = NULL;
+        ConstructInitParamSet(&paramSet);
 
-    for (uint32_t i = 0; i < MAX_SESSION_NUM; ++i) {
+        uint8_t tmpInput[] = "testForSessionMaxTest";
+        uint8_t tmpOutput[HMAC_OUTPUT_SIZE] = {0};
+        struct HksBlob input = { sizeof(tmpInput), tmpInput };
+        struct HksBlob output = { sizeof(tmpOutput), tmpOutput };
+        struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
+
+        if (i == 0) {
+            EXPECT_EQ(HksUpdate(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+            EXPECT_EQ(HksFinish(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+        } else {
+            EXPECT_EQ(HksUpdate(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
+            EXPECT_EQ(HksFinish(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
+        }
+
+        HksFreeParamSet(&paramSet);
+    }
+
+    for (uint32_t i = 0; i < MAX_SESSION_NUM_MORE_1; ++i) {
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
         struct HksParamSet *paramSet = NULL;
         ConstructInitParamSet(&paramSet);
-        ASSERT_TRUE(HksAbort(&handleBlob, paramSet) == 0);
+        EXPECT_EQ(HksAbort(&handleBlob, paramSet), HKS_SUCCESS) << "i:" << i;
         HksFreeParamSet(&paramSet);
     }
 }
@@ -135,6 +149,31 @@ HWTEST_F(HksSessionMaxTest, HksSessionMaxTest001, TestSize.Level0)
 
     SessionMaxTest(&aliasBlob);
 
-    ASSERT_TRUE(HksDeleteKey(&aliasBlob, NULL) == 0);
+    EXPECT_EQ(HksDeleteKey(&aliasBlob, NULL), 0);
+}
+
+/**
+ * @tc.name: HksSessionMaxTest.HksSessionMaxTest002
+ * @tc.desc: The static function will return true;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSessionMaxTest, HksSessionMaxTest002, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = NULL;
+    ConstructInitParamSet(&paramSet);
+
+    uint8_t tmpInput[] = "testForSessionMaxTest";
+    uint8_t tmpOutput[HMAC_OUTPUT_SIZE] = {0};
+    struct HksBlob input = { sizeof(tmpInput), tmpInput };
+    struct HksBlob output = { sizeof(tmpOutput), tmpOutput };
+    uint64_t temp = HMAC_OUTPUT_SIZE;
+    struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&temp };
+
+    EXPECT_EQ(HksUpdate(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(HksFinish(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(HksAbort(&handleBlob, paramSet), HKS_SUCCESS);
+
+    HksFreeParamSet(&paramSet);
 }
 }
+
