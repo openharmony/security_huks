@@ -1258,15 +1258,15 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             break;
         }
 
-        ret = HuksAccessFinish(handle, newParamSet, inData, outData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HuksAccessFinish fail, ret = %d", ret);
-            break;
-        }
-
         if (QueryOperation(processInfo, handle) == NULL) {
             HKS_LOG_E("operationHandle is not exist");
             ret = HKS_ERROR_NOT_EXIST;
+            break;
+        }
+
+        ret = HuksAccessFinish(handle, newParamSet, inData, outData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HuksAccessFinish fail, ret = %d", ret);
             break;
         }
 
