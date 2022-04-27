@@ -96,34 +96,22 @@ static void DeleteFinishAsyncContext(napi_env env, FinishAsyncCtxPtr &context)
 
 static napi_value GetHandleValue(napi_env env, napi_value object, FinishAsyncCtxPtr context)
 {
-    uint64_t handle = 0;
     napi_valuetype valueType = napi_valuetype::napi_undefined;
     napi_typeof(env, object, &valueType);
-    if (valueType != napi_valuetype::napi_object) {
+    if (valueType != napi_valuetype::napi_number) {
         napi_throw_type_error(env, nullptr, "Parameter type does not match");
         return nullptr;
     }
 
     uint32_t handle1 = 0;
-    uint32_t handle2 = 0;
-    napi_value handlejs1;
-    napi_value handlejs2;
-    napi_get_named_property(env, object, HKS_HANDLE_PROPERTY_HANDLE_1.c_str(), &handlejs1);
-    napi_status status = napi_get_value_uint32(env, handlejs1, &handle1);
+    napi_status status = napi_get_value_uint32(env, object, &handle1);
     if (status != napi_ok) {
         HKS_LOG_E("Retrieve field failed");
         return nullptr;
     }
 
-    napi_get_named_property(env, object, HKS_HANDLE_PROPERTY_HANDLE_2.c_str(), &handlejs2);
-    status = napi_get_value_uint32(env, handlejs2, &handle2);
-    if (status != napi_ok) {
-        HKS_LOG_E("Retrieve field failed");
-        return nullptr;
-    }
-
-    handle = handle1;
-    handle = (handle << HKS_HANDLE_OFFSET32) | handle2;
+    uint64_t handle = handle1;
+    HKS_LOG_I("finish handle:%u", handle1);
 
     context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
     if (context->handle == nullptr) {

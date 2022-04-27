@@ -154,7 +154,6 @@ static napi_value InitWriteResult(napi_env env, InitAsyncCtxPtr context)
         (context->result == HKS_SUCCESS && context->handle != nullptr) ? context->handle->size : 0);
 }
 
-
 static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
 {
     napi_value promise = nullptr;
@@ -182,9 +181,6 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         [](napi_env env, napi_status status, void *data) {
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
             napi_value result = InitWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
             if (context->callback != nullptr) {
                 CallAsyncCallback(env, context->callback, context->result, result);
             } else {
@@ -208,7 +204,6 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiInit(napi_env env, napi_callback_info info)
