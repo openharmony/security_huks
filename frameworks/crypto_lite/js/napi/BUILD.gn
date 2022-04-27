@@ -22,7 +22,7 @@ ohos_shared_library("cipher_napi") {
     "_HUKS_LOG_ENABLE_",
   ]
 
-  sources = [ "cipher.cpp" ]
+  sources = [ "cipher_napi.cpp" ]
 
   include_dirs = [
     "//third_party/bounds_checking_function/include",
