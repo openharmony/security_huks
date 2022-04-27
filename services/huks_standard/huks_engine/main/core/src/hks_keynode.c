@@ -24,7 +24,6 @@
 #include "hks_mem.h"
 
 static struct DoubleList g_keyNodeList = { NULL, NULL };
-static uint64_t g_keyNodeHandle = 0;
 
 struct DoubleList *GetKeyNodeList(void)
 {
@@ -82,27 +81,19 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 
 static int32_t GenerateKeyNodeHandle(uint64_t *handle)
 {
-    int32_t ret;
-    if (g_keyNodeHandle == HKS_KEYNODE_HANDLE_INVALID_VALUE) {
-        uint64_t handleData = 0;
-        struct HksBlob opHandle = {
-            .size = sizeof(uint64_t),
-            .data = (uint8_t *)&handleData
-        };
+    uint32_t handleData = 0;
+    struct HksBlob opHandle = {
+        .size = sizeof(uint32_t),
+        .data = (uint8_t *)&handleData
+    };
 
-        ret = HksCryptoHalFillRandom(&opHandle);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("fill keyNode handle failed");
-            return ret;
-        }
-
-        if (memcpy_s(&g_keyNodeHandle, sizeof(g_keyNodeHandle), opHandle.data, opHandle.size) != EOK) {
-            HKS_LOG_E("memcpy handle failed");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+    int32_t ret = HksCryptoHalFillRandom(&opHandle);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("fill keyNode handle failed");
+        return ret;
     }
 
-    *handle = g_keyNodeHandle++;
+    *handle = handleData; /* Temporarily only use 32 bit handle */
     return HKS_SUCCESS;
 }
 
