@@ -17,7 +17,7 @@
 #include "aes.h"
 #include "base64.h"
 #include "cipher.h"
-#include "log.h"
+#include "cipher_log.h"
 #include "md.h"
 #include "md_internal.h"
 #include "pkcs5.h"
@@ -70,14 +70,14 @@ static char *MallocDecodeData(const char *text, size_t *olen)
     }
     char *decData = (char *)malloc(decodeLen + 1);
     if (decData == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc failed, length:%{public}d.", (int32_t)(decodeLen + 1));
+        CIPHER_LOG_E("malloc failed, length:%d.", (int32_t)(decodeLen + 1));
         return NULL;
     }
     (void)memset_s(decData, decodeLen + 1, 0, decodeLen + 1);
     if (mbedtls_base64_decode((unsigned char *)decData, decodeLen + 1, olen,
         (const unsigned char *)text, strlen(text)) != 0) {
         free(decData);
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "decode data failed, text:%s.", text);
+        CIPHER_LOG_E("decode data failed, text:%s.", text);
         return NULL;
     }
     return decData;
@@ -96,12 +96,12 @@ static char *MallocEncodeData(const unsigned char *text, size_t *olen)
     }
     char *encData = (char *)malloc(dataLen + 1);
     if (encData == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc data failed, expect len:%{public}zu.", dataLen);
+        CIPHER_LOG_E("malloc data failed, expect len:%zu.", dataLen);
         return NULL;
     }
     (void)memset_s(encData, dataLen + 1, 0, dataLen + 1);
     if (mbedtls_base64_encode((unsigned char *)(encData), dataLen, olen, text, *olen) != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "encode data failed.");
+        CIPHER_LOG_E("encode data failed.");
         free(encData);
         return NULL;
     }
@@ -115,18 +115,18 @@ static int32_t SetIv(const char *ivBuf, int32_t ivBufLen, AesCryptContext *ctx)
     }
 
     if ((ivBufLen < (ctx->iv.ivOffset + ctx->iv.ivLen)) || (ctx->iv.ivOffset < 0) || (ctx->iv.ivLen <= 0)) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "ivLen or ivOffset err.");
+        CIPHER_LOG_E("ivLen or ivOffset err.");
         return ERROR_CODE_GENERAL;
     }
     ctx->iv.ivBuf = malloc(ctx->iv.ivLen);
     if (ctx->iv.ivBuf == NULL) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "malloc failed.");
+        CIPHER_LOG_E("malloc failed.");
         return ERROR_CODE_GENERAL;
     }
 
     int32_t ret = memcpy_s(ctx->iv.ivBuf, ctx->iv.ivLen, ivBuf + ctx->iv.ivOffset, ctx->iv.ivLen);
     if (ret) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "memcpy failed, ret:%{public}d.", ret);
+        CIPHER_LOG_E("memcpy failed, ret:%d.", ret);
         free(ctx->iv.ivBuf);
         ctx->iv.ivBuf = NULL;
         return ERROR_CODE_GENERAL;
@@ -144,14 +144,14 @@ static int32_t InitAesCryptContext(const char *key, const AesIvMode *iv, AesCryp
     }
 
     if ((iv->transformation != NULL) && (strcmp(iv->transformation, "AES/CBC/PKCS5Padding"))) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "transformation err.");
+        CIPHER_LOG_E("transformation err.");
         return ERROR_CODE_GENERAL;
     }
     ctx->mode = CIPHER_AES_CBC;
     ctx->iv.ivOffset = iv->ivOffset;
 
-    if ((iv->ivLen >= 0) && (iv->ivLen != AES_BLOCK_SIZE)) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "ivLen:%{public}d error, need be %{public}d Bytes.",
+    if ((iv->ivLen < 0) || (iv->ivLen != AES_BLOCK_SIZE)) {
+        CIPHER_LOG_E("ivLen:%d error, need be %d Bytes.",
             iv->ivLen, AES_BLOCK_SIZE);
         return ERROR_CODE_GENERAL;
     }
@@ -161,20 +161,20 @@ static int32_t InitAesCryptContext(const char *key, const AesIvMode *iv, AesCryp
         size_t ivBufLen = strlen((const char *)(uintptr_t)iv->ivBuf);
         char* ivBuf = MallocDecodeData(iv->ivBuf, &ivBufLen);
         if (ivBuf == NULL) {
-            HILOG_ERROR(HILOG_MODULE_HIVIEW, "base64 decode failed.");
+            CIPHER_LOG_E("base64 decode failed.");
             return ERROR_CODE_GENERAL;
         }
         ret = SetIv((const char *)ivBuf, strlen((const char *)(uintptr_t)ivBuf), ctx);
         if (ret == ERROR_CODE_GENERAL) {
             free(ivBuf);
-            HILOG_ERROR(HILOG_MODULE_HIVIEW, "SetIv failed.");
+            CIPHER_LOG_E("SetIv failed.");
             return ERROR_CODE_GENERAL;
         }
         free(ivBuf);
     } else {
         ret = SetIv(ctx->data.key, strlen((const char *)(uintptr_t)ctx->data.key), ctx);
         if (ret == ERROR_CODE_GENERAL) {
-            HILOG_ERROR(HILOG_MODULE_HIVIEW, "SetIv failed.");
+            CIPHER_LOG_E("SetIv failed.");
             return ERROR_CODE_GENERAL;
         }
     }
@@ -221,7 +221,7 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
         goto ERROR;
     }
     if (data->keyLen != KEY_LEN) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "key length:%{public}d error, need be %{public}d Bytes.",
+        CIPHER_LOG_E("key length:%d error, need be %d Bytes.",
             data->keyLen, KEY_LEN);
         (void)memset_s(data->key, data->keyLen, 0, data->keyLen);
         free(data->key);
@@ -268,14 +268,14 @@ static int32_t DoAesCbcEncrypt(mbedtls_aes_context *aesCtx, AesCryptContext *ctx
         ret = mbedtls_aes_setkey_dec(aesCtx, (const unsigned char *)ctx->data.key, AES_BYTE_SIZE);
     }
     if (ret != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "aes setkey error.");
+        CIPHER_LOG_E("aes setkey error.");
         return ERROR_CODE_GENERAL;
     }
 
     ret = mbedtls_aes_crypt_cbc(aesCtx, ctx->data.action, ctx->data.textLen,
         (unsigned char *)ctx->iv.ivBuf, (const unsigned char *)ctx->data.text, (unsigned char *)ctx->data.text);
     if (ret != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "aes crypt cbc error, ret:%{public}d.", ret);
+        CIPHER_LOG_E("aes crypt cbc error, ret:%d.", ret);
         return ERROR_CODE_GENERAL;
     }
 
@@ -305,14 +305,14 @@ int32_t InitAesCryptData(const char *action, const char *text, const char *key, 
 
     int32_t ret = InitAesData(action, key, text, &(aesCryptCxt->data));
     if (ret != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "fill aes crypt data failed.");
+        CIPHER_LOG_E("fill aes crypt data failed.");
         DeinitAesCryptData(aesCryptCxt);
         return ERROR_CODE_GENERAL;
     }
 
     ret = InitAesCryptContext(key, iv, aesCryptCxt);
     if (ret != 0) {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "fill aes crypt context failed.");
+        CIPHER_LOG_E("fill aes crypt context failed.");
         return ERROR_CODE_GENERAL;
     }
     return ERROR_SUCCESS;
@@ -329,14 +329,14 @@ int32_t AesCrypt(AesCryptContext* aesCryptCxt)
         mbedtls_aes_init(&aes);
         int32_t ret = DoAesCbcEncrypt(&aes, aesCryptCxt);
         if (ret != ERROR_SUCCESS) {
-            HILOG_ERROR(HILOG_MODULE_HIVIEW, "Aes cbc encrypt failed.");
+            CIPHER_LOG_E("Aes cbc encrypt failed.");
             mbedtls_aes_free(&aes);
             return ERROR_CODE_GENERAL;
         }
         mbedtls_aes_free(&aes);
         return ERROR_SUCCESS;
     } else {
-        HILOG_ERROR(HILOG_MODULE_HIVIEW, "crypt mode not support.");
+        CIPHER_LOG_E("crypt mode not support.");
         return ERROR_CODE_GENERAL;
     }
 }
