@@ -134,21 +134,25 @@ static napi_value GetHandleValue(napi_env env, napi_value object, UpdateAsyncCon
     return GetInt32(env, 0);
 }
 
-static int32_t FillContextInDataAndOutData(napi_env env, napi_value data, UpdateAsyncContext context)
+static int32_t FillContextInDataAndOutData(napi_env env, napi_value *argv, UpdateAsyncContext context, size_t index)
 {
-    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->outData == nullptr || context->inData == nullptr) {
-        HKS_LOG_E("malloc memory failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
-    (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
-
-    napi_value result = GetUint8Array(env, data, *(context->inData));
-    if (result == nullptr) {
-        HKS_LOG_E("could not get indata");
-        return HKS_FAILURE;
+    napi_value inData = nullptr;
+    bool hasInData = false;
+    napi_has_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_INDATA.c_str(), &hasInData);
+    napi_status status = napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
+    if (status == napi_ok && inData != nullptr && hasInData) {
+        napi_value result = GetUint8Array(env, inData, *context->inData);
+        if (result == nullptr) {
+            HKS_LOG_E("could not get inData");
+            return HKS_ERROR_BAD_STATE;
+        }
+    } else {
+        context->inData->size = 0;
+        context->inData->data = (uint8_t *)HksMalloc(1);
+        if (context->inData->data == nullptr) {
+            HKS_LOG_E("could not alloc memory");
+            return HKS_ERROR_MALLOC_FAIL;
+        }
     }
 
     context->outData->size = context->inData->size + DATA_SIZE_64KB;
@@ -196,16 +200,21 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         return nullptr;
     }
 
-    napi_value inData = nullptr;
-    status = napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
-    if (status != napi_ok || inData == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
+    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->outData == nullptr) {
+        HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
 
-    int32_t ret = FillContextInDataAndOutData(env, inData, context);
-    if (ret != HKS_SUCCESS) {
+    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->inData == nullptr) {
+        HKS_LOG_E("could not alloc memory");
+        return nullptr;
+    }
+    (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+    (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (FillContextInDataAndOutData(env, argv, context, index) != HKS_SUCCESS) {
         HKS_LOG_E("fill data failed");
         return nullptr;
     }
