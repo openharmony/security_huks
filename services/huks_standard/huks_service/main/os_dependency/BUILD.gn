@@ -54,7 +54,7 @@ ohos_static_library("libhuks_service_os_dependency_standard_static") {
     ]
     if (has_os_account_part) {
       defines += [ "HAS_OS_ACCOUNT_PART" ]
-      external_deps += [ "os_account_standard:os_account_innerkits" ]
+      external_deps += [ "os_account:os_account_innerkits" ]
     }
   }
   cflags_cc = [
