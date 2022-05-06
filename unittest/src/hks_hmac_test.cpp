@@ -243,7 +243,7 @@ int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genP
     // Update & Finish
     uint8_t out[Unittest::Hmac::COMMON_SIZE] = {0};
     struct HksBlob outData = { Unittest::Hmac::COMMON_SIZE, out };
-    ret = TestUpdateFinish(&handleHMAC, hmacParamSet, &inData, &outData);
+    ret = TestUpdateFinish(&handleHMAC, hmacParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
     if (ret != HKS_SUCCESS) {
         HksDeleteKey(keyAlias, genParamSet);
         return ret;

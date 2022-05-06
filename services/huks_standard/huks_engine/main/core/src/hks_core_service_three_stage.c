@@ -972,8 +972,20 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     (void)paramSet;
     (void)alg;
 
+    struct HksBlob message = { 0, NULL };
+    struct HksParam *purposeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_PURPOSE);
+        return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
+    }
+    if (purposeParam->uint32Param == HKS_KEY_PURPOSE_SIGN) { /* inData indicates signature when processing verify */
+        message.data = inData->data;
+        message.size = inData->size;
+    }
+
     struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
@@ -981,16 +993,18 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
 
     struct HksBlob signVerifyData = { 0, NULL };
     if (algParam->uint32Param == HKS_ALG_ED25519) {
-        ret = FinishCachedData(keyNode, inData, &signVerifyData);
+        ret = FinishCachedData(keyNode, &message, &signVerifyData);
     } else {
-        ret = CoreHashFinish(keyNode, inData, &signVerifyData);
+        ret = CoreHashFinish(keyNode, &message, &signVerifyData);
     }
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("signVerify Finish get Data failed, ret = %d", ret);
         return ret;
     }
 
-    ret = CoreSignVerify(keyNode, &signVerifyData, outData);
+    /* inData indicates signature when processing verify */
+    ret = CoreSignVerify(keyNode, &signVerifyData,
+        (purposeParam->uint32Param == HKS_KEY_PURPOSE_SIGN) ? outData : (struct HksBlob *)inData);
     HKS_FREE_BLOB(signVerifyData);
     return ret;
 }
