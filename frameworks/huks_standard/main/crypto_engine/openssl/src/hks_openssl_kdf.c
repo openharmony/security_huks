@@ -78,10 +78,12 @@ int32_t HksOpensslHkdf(const struct HksBlob *mainKey, const struct HksKeySpec *d
             HksLogOpensslError();
             break;
         }
-        if (EVP_PKEY_derive(pctx, derivedKey->data, (size_t *)&derivedKey->size) <= 0) {
+        size_t keyLen = derivedKey->size;
+        if (EVP_PKEY_derive(pctx, derivedKey->data, &keyLen) <= 0) {
             HksLogOpensslError();
             break;
         }
+        derivedKey->size = (uint32_t)keyLen;
         ret = HKS_SUCCESS;
     } while (0);
     EVP_PKEY_CTX_free(pctx);
