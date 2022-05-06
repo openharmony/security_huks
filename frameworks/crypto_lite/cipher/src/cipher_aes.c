@@ -208,9 +208,7 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
         data->textLen = PaddingPkcs5(data->text, strlen(text));
     } else if (!strcmp(action, "decrypt")) {
         data->action = MBEDTLS_AES_DECRYPT;
-        size_t keyLen = data->textLen;
-        data->text = MallocDecodeData(text, &keyLen);
-        data->textLen = (int32_t)keyLen;
+        data->text = MallocDecodeData(text, (size_t *)&data->textLen);
         if (data->text == NULL) {
             return ERROR_CODE_GENERAL;
         }
@@ -218,9 +216,7 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
     } else {
         return ERROR_CODE_GENERAL;
     }
-    size_t keyLen = data->keyLen;
-    data->key = MallocDecodeData(key, &keyLen);
-    data->keyLen = (int32_t)keyLen;
+    data->key = MallocDecodeData(key, (size_t *)&data->keyLen);
     if (data->key == NULL) {
         goto ERROR;
     }
@@ -284,9 +280,7 @@ static int32_t DoAesCbcEncrypt(mbedtls_aes_context *aesCtx, AesCryptContext *ctx
     }
 
     if (ctx->data.action == MBEDTLS_AES_ENCRYPT) {
-        size_t keyLen = ctx->data.textLen;
-        char *out = MallocEncodeData((const unsigned char *)ctx->data.text, &keyLen);
-        ctx->data.textLen = (int32_t)keyLen;
+        char *out = MallocEncodeData((const unsigned char *)ctx->data.text, (size_t *)&ctx->data.textLen);
         free(ctx->data.text);
         ctx->data.text = out;
         if (out == NULL) {
