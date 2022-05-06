@@ -304,15 +304,14 @@ static int32_t AesCbcPkcs7Crypt(const struct HksBlob *key, const struct HksCiphe
             HKS_LOG_E("Mbedtls cbc pkcs7 set key failed! mbedtls ret = 0x%X", ret);
             break;
         }
-        size_t keyLen = cipherText->size;
+
         ret = mbedtls_cipher_crypt(&ctx,
             cipherParam->iv.data,
             cipherParam->iv.size,
             message->data,
             message->size,
             cipherText->data,
-            &keyLen);
-        cipherText->data = (uint32_t)keyLen;
+            (size_t *)&(cipherText->size));
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls cbc pkcs7 crypt failed! mbedtls ret = 0x%X", ret);
             (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
@@ -403,10 +402,9 @@ static int32_t AesCbcPkcs7CryptUpdate(void *cryptoCtx, const struct HksBlob *mes
     if (cbcPkcs7ctx == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    size_t keyLen = cipherText->size;
+
     int32_t ret = mbedtls_cipher_update(cbcPkcs7ctx, message->data, message->size, cipherText->data,
-        &keyLen);
-    cipherText->size = (uint32_t)keyLen;
+        (size_t *)&(cipherText->size));
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls cbc pkcs7 crypt update failed! mbedtls ret = 0x%X", ret);
         (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
@@ -429,10 +427,8 @@ static int32_t AesCbcPkcs7CryptFinal(void **cryptoCtx, const struct HksBlob *mes
     int32_t ret;
     do {
         if (message->size != 0) {
-            size_t keyLen = cipherText->size;
             ret = mbedtls_cipher_update(cbcPkcs7ctx, message->data, message->size, cipherText->data,
-                &keyLen);
-            cipherText->size = (uint32_t)keyLen;
+                (size_t*)&cipherText->size);
             if (ret != HKS_MBEDTLS_SUCCESS) {
                 HKS_LOG_E("Mbedtls cbc pkcs7 crypt update failed! mbedtls ret = 0x%X", ret);
                 (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
