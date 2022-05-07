@@ -107,7 +107,7 @@ static int32_t GetString(napi_env env, napi_value object, char **element, size_t
     }
     (void)memset_s(*element, *len + 1, 0, *len + 1);
     size_t result = 0;
-    status = napi_get_value_string_utf8(env, object, *element, *len, &result);
+    status = napi_get_value_string_utf8(env, object, *element, *len + 1, &result);
     if (status != napi_ok) {
         return ERROR_CODE_GENERAL;
     }
