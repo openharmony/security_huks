@@ -182,11 +182,8 @@ static int32_t InitAesCryptContext(const char *key, const AesIvMode *iv, AesCryp
     return ERROR_SUCCESS;
 }
 
-static int32_t InitAesData(const char *action, const char *key, const char *text, CryptData *data)
+static int32_t InitAesCryptDataText(const char *action, const char *key, const char *text, CryptData *data)
 {
-    if (action == NULL || text == 0 || data == NULL || key == NULL) {
-        return ERROR_CODE_GENERAL;
-    }
     if (!strcmp(action, "encrypt")) {
         data->action = MBEDTLS_AES_ENCRYPT;
         if (strlen(text) % AES_BLOCK_SIZE) {
@@ -203,12 +200,16 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
         }
         (void)memset_s(data->text, data->textLen + 1, 0, data->textLen + 1);
         if (memcpy_s(data->text, data->textLen + 1, text, strlen(text)) != EOK) {
-            goto ERROR;
+            free(data->text);
+            data->text = NULL;
+            return ERROR_CODE_GENERAL;
         }
         data->textLen = PaddingPkcs5(data->text, strlen(text));
     } else if (!strcmp(action, "decrypt")) {
         data->action = MBEDTLS_AES_DECRYPT;
-        data->text = MallocDecodeData(text, (size_t *)&data->textLen);
+        size_t textLen = (size_t)data->textLen;
+        data->text = MallocDecodeData(text, &textLen);
+        data->textLen = (uint32_t)textLen;
         if (data->text == NULL) {
             return ERROR_CODE_GENERAL;
         }
@@ -216,7 +217,21 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
     } else {
         return ERROR_CODE_GENERAL;
     }
-    data->key = MallocDecodeData(key, (size_t *)&data->keyLen);
+    return ERROR_SUCCESS;
+}
+
+static int32_t InitAesData(const char *action, const char *key, const char *text, CryptData *data)
+{
+    if (action == NULL || text == 0 || data == NULL || key == NULL) {
+        return ERROR_CODE_GENERAL;
+    }
+    int32_t ret = InitAesCryptDataText(action, key, text, data);
+    if (ret != ERROR_SUCCESS) {
+        return ERROR_CODE_GENERAL;
+    }
+    size_t keyLen = (size_t)data->keyLen;
+    data->key = MallocDecodeData(key, &keyLen);
+    data->keyLen = (uint32_t)keyLen;
     if (data->key == NULL) {
         goto ERROR;
     }
@@ -280,7 +295,9 @@ static int32_t DoAesCbcEncrypt(mbedtls_aes_context *aesCtx, AesCryptContext *ctx
     }
 
     if (ctx->data.action == MBEDTLS_AES_ENCRYPT) {
-        char *out = MallocEncodeData((const unsigned char *)ctx->data.text, (size_t *)&ctx->data.textLen);
+        size_t textLen = ctx->data.textLen;
+        char *out = MallocEncodeData((const unsigned char *)ctx->data.text, &textLen);
+        ctx->data.textLen = (uint32_t)textLen;
         free(ctx->data.text);
         ctx->data.text = out;
         if (out == NULL) {
