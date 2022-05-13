@@ -80,9 +80,10 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
         if (ret != HKS_SUCCESS) {
             break;
         }
-
+        size_t keyLen = signature->size;
         ret = mbedtls_ecdsa_write_signature(&ctx, mbedtlsAlg, message->data, (size_t)message->size,
-            signature->data, (size_t *)&(signature->size), mbedtls_ctr_drbg_random, &ctrDrbg);
+            signature->data, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
+        signature->size = (uint32_t)keyLen;
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Ecc mbedtls sign fail! mbedtls ret = 0x%X", ret);
             (void)memset_s(signature->data, signature->size, 0, signature->size);
