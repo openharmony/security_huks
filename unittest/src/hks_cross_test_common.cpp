@@ -98,7 +98,7 @@ int32_t Unittest::CrossTest::HksCrossTestRsaEncrypt(const struct HksBlob *keyAli
         return HKS_FAILURE;
     }
 
-    ret = TestUpdateFinish(&handle, encryptParamSet, inData, cipherText);
+    ret = TestUpdateFinish(&handle, encryptParamSet, HKS_KEY_PURPOSE_ENCRYPT, inData, cipherText);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("RsaEncry TestUpdateFinish failed.");
         return HKS_FAILURE;
@@ -123,7 +123,7 @@ int32_t Unittest::CrossTest::HksCrossTestRsaDecrypt(const struct HksBlob *keyAli
         return HKS_FAILURE;
     }
 
-    ret = TestUpdateFinish(&handle, decryptParamSet, cipherTest, plainText);
+    ret = TestUpdateFinish(&handle, decryptParamSet, HKS_KEY_PURPOSE_DECRYPT, cipherTest, plainText);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("RsaDecry TestUpdateFinish failed.");
         return HKS_FAILURE;
@@ -148,7 +148,14 @@ int32_t Unittest::CrossTest::HksCrossTestSignVerify(const struct HksBlob *keyAli
         return HKS_FAILURE;
     }
 
-    ret = TestUpdateFinish(&handle, signVerifyParamSet, inData, signedData);
+    struct HksParam *tmpParam = NULL;
+    ret = HksGetParam(signVerifyParamSet, HKS_TAG_PURPOSE, &tmpParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get tag purpose failed.");
+        return HKS_FAILURE;
+    }
+
+    ret = TestUpdateFinish(&handle, signVerifyParamSet, tmpParam->uint32Param, inData, signedData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Sign/verify TestUpdateFinish failed.");
         return HKS_FAILURE;
@@ -182,7 +189,7 @@ int32_t Unittest::CrossTest::HksCrossTestHmac(const struct HksBlob *keyAlias, co
 
     uint8_t out[Unittest::CrossTest::CROSS_COMMON_SIZE] = {0};
     struct HksBlob outData = { Unittest::CrossTest::CROSS_COMMON_SIZE, out };
-    ret = TestUpdateFinish(&handleHMAC, hmacParamSet, &inData, &outData);
+    ret = TestUpdateFinish(&handleHMAC, hmacParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("TestUpdateFinish failed.");
         return HKS_FAILURE;

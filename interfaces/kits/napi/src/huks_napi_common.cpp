@@ -29,16 +29,29 @@ constexpr size_t ASYNCCALLBACK_ARGC = 2;
 
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 {
-    char *data = (char *)HksMalloc(HKS_MAX_KEY_ALIAS_LEN);
+    size_t length = 0;
+    napi_status status = napi_get_value_string_utf8(env, object, nullptr, 0, &length);
+    if (status != napi_ok) {
+        GET_AND_THROW_LAST_ERROR((env));
+        HKS_LOG_E("could not get string length");
+        return nullptr;
+    }
+
+    if (length > HKS_MAX_DATA_LEN) {
+        HKS_LOG_E("input key alias length too large");
+        return nullptr;
+    }
+
+    char *data = (char *)HksMalloc(length + 1);
     if (data == nullptr) {
         napi_throw_error(env, NULL, "could not alloc memory");
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    (void)memset_s(data, HKS_MAX_KEY_ALIAS_LEN, 0x0, HKS_MAX_KEY_ALIAS_LEN);
+    (void)memset_s(data, length + 1, 0, length + 1);
 
-    size_t length = 0;
-    napi_status status = napi_get_value_string_utf8(env, object, data, HKS_MAX_KEY_ALIAS_LEN, &length);
+    size_t result = 0;
+    status = napi_get_value_string_utf8(env, object, data, length + 1, &result);
     if (status != napi_ok) {
         HksFree(data);
         GET_AND_THROW_LAST_ERROR((env));

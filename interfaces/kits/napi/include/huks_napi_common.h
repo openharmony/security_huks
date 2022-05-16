@@ -30,7 +30,6 @@ namespace HuksNapi {
 static const size_t HKS_HANDLE_OFFSET32 = 32;
 static const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
 static const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
-static const std::string HKS_OPTIONS_PROPERTY_OUTDATA = "outData";
 
 static const std::string HKS_PARAM_PROPERTY_TAG = "tag";
 static const std::string HKS_PARAM_PROPERTY_VALUE = "value";
