@@ -161,7 +161,8 @@ config("public_huks_config") {
 
 config("get_dev_udid_config") {
   cflags = [ "-DGET_DEV_UDID_ENABLE" ]
-  include_dirs = [ "//base/startup/init_lite/interfaces/innerkits/include/syspara" ]
+  include_dirs =
+      [ "//base/startup/init_lite/interfaces/innerkits/include/syspara" ]
 }
 
 #begin: add
