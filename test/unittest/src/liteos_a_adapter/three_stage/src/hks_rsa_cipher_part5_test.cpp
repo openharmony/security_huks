@@ -283,7 +283,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     // Update & Finish
     uint8_t cipher[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
     struct HksBlob cipherText = { Unittest::RsaCipher::RSA_COMMON_SIZE, cipher };
-    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, &inData, &cipherText);
+    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, HKS_KEY_PURPOSE_ENCRYPT, &inData, &cipherText);
     EXPECT_NE(memcmp(inData.data, cipherText.data, inData.size), HKS_SUCCESS) << "cipherText equals inData";
 
     /* 4. Decrypt Three Stage */

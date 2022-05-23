@@ -17,13 +17,51 @@
 
 #include <gtest/gtest.h>
 
-int32_t Unittest::RsaSignVerify::HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias,
+using namespace testing::ext;
+namespace Unittest::RsaSignVerify {
+int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData, bool isSign)
+{
+    uint8_t tmpHandle[sizeof(uint64_t)] = {0};
+    struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
+    int32_t ret = HksInit(keyAlias, paramSet, &handle);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    if (ret != HKS_SUCCESS) {
+        return HKS_FAILURE;
+    }
+
+    struct HksParam *tmpParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get tag purpose failed.");
+        return HKS_FAILURE;
+    }
+
+    ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
+    if (ret != HKS_SUCCESS) {
+        return HKS_FAILURE;
+    }
+
+    if (isSign) {
+        uint8_t tmpOut[RSA_COMMON_SIZE] = {0};
+        struct HksBlob outData1 = { RSA_COMMON_SIZE, tmpOut };
+        ret = HksSign(keyAlias, paramSet, inData, &outData1);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
+    } else {
+        ret = HksVerify(keyAlias, paramSet, inData, outData);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
+    }
+
+    return ret;
+}
+
+int32_t HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias,
     struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
 {
-    struct HksBlob inData = {
-        Unittest::RsaSignVerify::g_inData.length(),
-        (uint8_t *)Unittest::RsaSignVerify::g_inData.c_str()
-    };
+    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    uint8_t tmpIn[] = "tempIn";
+    struct HksBlob finishInData = { 0, tmpIn };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -41,9 +79,9 @@ int32_t Unittest::RsaSignVerify::HksRsaSignVerifyTestNormalCase(struct HksBlob k
     ret = HksTestUpdate(&handleSign, signParamSet, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    uint8_t outDataS[Unittest::RsaSignVerify::RSA_COMMON_SIZE] = {0};
-    struct HksBlob outDataSign = { Unittest::RsaSignVerify::RSA_COMMON_SIZE, outDataS };
-    ret = HksFinish(&handleSign, signParamSet, &inData, &outDataSign);
+    uint8_t outDataS[RSA_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { RSA_COMMON_SIZE, outDataS };
+    ret = HksFinish(&handleSign, signParamSet, &finishInData, &outDataSign);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     /* 3. Export Public Key */
@@ -68,7 +106,9 @@ int32_t Unittest::RsaSignVerify::HksRsaSignVerifyTestNormalCase(struct HksBlob k
     ret = HksTestUpdate(&handleVerify, verifyParamSet, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    ret = HksFinish(&handleVerify, verifyParamSet, &inData, &outDataSign);
+    uint8_t temp[] = "out";
+    struct HksBlob verifyOut = { sizeof(temp), temp };
+    ret = HksFinish(&handleVerify, verifyParamSet, &outDataSign, &verifyOut);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     /* 6. Delete New Key */
@@ -78,13 +118,14 @@ int32_t Unittest::RsaSignVerify::HksRsaSignVerifyTestNormalCase(struct HksBlob k
     return ret;
 }
 
-int32_t Unittest::RsaSignVerify::HksRSASignVerifyTestAbnormalCase(struct HksBlob keyAlias,
+int32_t HksRSASignVerifyTestAbnormalCase(struct HksBlob keyAlias,
     struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
 {
     struct HksBlob inData = {
-        Unittest::RsaSignVerify::g_inData.length(),
-        (uint8_t *)Unittest::RsaSignVerify::g_inData.c_str()
+        g_inData.length(),
+        (uint8_t *)g_inData.c_str()
     };
+    struct HksBlob finishInData = { 0, NULL };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -102,10 +143,10 @@ int32_t Unittest::RsaSignVerify::HksRSASignVerifyTestAbnormalCase(struct HksBlob
     ret = HksTestUpdate(&handleSign, signParamSet, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    uint8_t outDataS[Unittest::RsaSignVerify::RSA_COMMON_SIZE] = {0};
-    struct HksBlob outDataSign = { Unittest::RsaSignVerify::RSA_COMMON_SIZE, outDataS };
-    ret = HksFinish(&handleSign, signParamSet, &inData, &outDataSign);
-    EXPECT_NE(ret, HKS_SUCCESS) << "Finish should failed.";
+    uint8_t outDataS[RSA_COMMON_SIZE] = {0};
+    struct HksBlob outDataSign = { RSA_COMMON_SIZE, outDataS };
+    ret = HksFinish(&handleSign, signParamSet, &finishInData, &outDataSign);
+    EXPECT_NE(ret, HKS_SUCCESS) << "Finish failed.";
     int32_t abortRet = HksAbort(&handleSign, signParamSet);
     EXPECT_EQ(abortRet, HKS_SUCCESS) << "Abort failed.";
 
@@ -131,8 +172,10 @@ int32_t Unittest::RsaSignVerify::HksRSASignVerifyTestAbnormalCase(struct HksBlob
     ret = HksTestUpdate(&handleVerify, verifyParamSet, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
-    ret = HksFinish(&handleVerify, verifyParamSet, &inData, &outDataSign);
-    EXPECT_NE(ret, HKS_SUCCESS) << "Finish should failed.";
+    uint8_t temp[] = "out";
+    struct HksBlob verifyOut = { sizeof(temp), temp };
+    ret = HksFinish(&handleVerify, verifyParamSet, &outDataSign, &verifyOut);
+    EXPECT_NE(ret, HKS_SUCCESS) << "Finish failed.";
     abortRet = HksAbort(&handleVerify, verifyParamSet);
     EXPECT_EQ(abortRet, HKS_SUCCESS) << "Abort failed.";
 
@@ -141,4 +184,5 @@ int32_t Unittest::RsaSignVerify::HksRSASignVerifyTestAbnormalCase(struct HksBlob
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     return ret;
+}
 }

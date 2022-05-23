@@ -28,7 +28,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestEncryptAbnormal(const struct HksBlo
         return ret;
     }
 
-    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, inData, cipherText);
+    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, HKS_KEY_PURPOSE_ENCRYPT, inData, cipherText);
     EXPECT_EQ(ret, HKS_FAILURE) << "TestUpdateFinish should failed.";
     if (ret != HKS_SUCCESS) {
         int32_t abortRet = HksAbort(&handleEncrypt, encryptParamSet);
@@ -60,7 +60,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestEncrypt(const struct HksBlob *keyAl
         return ret;
     }
 
-    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, inData, cipherText);
+    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, HKS_KEY_PURPOSE_ENCRYPT, inData, cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -90,7 +90,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestDecrypt(const struct HksBlob *keyAl
         return ret;
     }
 
-    ret = TestUpdateFinish(&handleDecrypt, decryptParamSet, cipherText, plainText);
+    ret = TestUpdateFinish(&handleDecrypt, decryptParamSet, HKS_KEY_PURPOSE_DECRYPT, cipherText, plainText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
     if (ret != HKS_SUCCESS) {
         return ret;

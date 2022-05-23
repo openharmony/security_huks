@@ -32,13 +32,11 @@ static const uint32_t MAX_UPDATE_SIZE = 64;
 static const uint32_t MAX_OUTDATA_SIZE = MAX_UPDATE_SIZE * TIMES;
 
 int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramcount);
-int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                           const struct HksBlob *inData, struct HksBlob *outData);
 int32_t HksTestUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData);
 int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                             const struct HksBlob *inData, struct HksBlob *outData);
+    const struct HksBlob *inData, struct HksBlob *outData);
 int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                         const struct HksBlob *inData, struct HksBlob *outData);
+    uint32_t purpose, const struct HksBlob *inData, struct HksBlob *outData);
 int32_t MallocAndCheckBlobData(struct HksBlob *blob, const uint32_t blobSize);
 int32_t TestCmpKeyAliasHash(const struct HksBlob *srcData1, const struct HksBlob *srcData2);
 
