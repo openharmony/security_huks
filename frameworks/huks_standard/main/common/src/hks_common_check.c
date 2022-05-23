@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -154,6 +154,9 @@ int32_t HksGetDigestLen(uint32_t digest, uint32_t *digestLen)
             break;
         case HKS_DIGEST_SHA512:
             *digestLen = HKS_DIGEST_SHA512_LEN;
+            break;
+        case HKS_DIGEST_SM3:
+            *digestLen = HKS_DIGEST_SM3_LEN;
             break;
         default:
             return HKS_ERROR_INVALID_DIGEST;

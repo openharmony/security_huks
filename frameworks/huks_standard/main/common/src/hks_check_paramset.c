@@ -66,6 +66,15 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_ECDH_C
     HKS_ALG_ECDH,
 #endif
+#ifdef HKS_SUPPORT_SM2_C
+    HKS_ALG_SM2,
+#endif
+#ifdef HKS_SUPPORT_SM3_C
+    HKS_ALG_SM3,
+#endif
+#ifdef HKS_SUPPORT_SM4_C
+    HKS_ALG_SM4,
+#endif
 };
 
 static uint32_t g_importKeyAlg[] = {
@@ -86,6 +95,9 @@ static uint32_t g_importKeyAlg[] = {
 #endif
 #ifdef HKS_SUPPORT_DSA_C
     HKS_ALG_DSA,
+#endif
+#ifdef HKS_SUPPORT_SM2_C
+    HKS_ALG_SM2,
 #endif
 };
 
@@ -159,7 +171,7 @@ static uint32_t g_digest[] = {
     HKS_DIGEST_SHA224,
     HKS_DIGEST_SHA256,
     HKS_DIGEST_SHA384,
-    HKS_DIGEST_SHA512
+    HKS_DIGEST_SHA512,
 };
 static uint32_t g_macDigest[] = {
     HKS_DIGEST_SHA1,
@@ -167,6 +179,7 @@ static uint32_t g_macDigest[] = {
     HKS_DIGEST_SHA256,
     HKS_DIGEST_SHA384,
     HKS_DIGEST_SHA512,
+    HKS_DIGEST_SM3
 };
 #ifdef HKS_SUPPORT_AES_C
 static uint32_t g_aesKeySizeLocal[] = {
@@ -255,7 +268,7 @@ static int32_t CheckGenKeyParamsByAlg(uint32_t alg, const struct HksParamSet *pa
 static int32_t CheckGenKeyMacDeriveParams(
     uint32_t alg, uint32_t inputPurpose, const struct HksParamSet *paramSet, struct ParamsValues *params)
 {
-    if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC) {
+    if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3) {
         HKS_LOG_E("check mac or derive, not aes alg, alg: %u", alg);
         return HKS_ERROR_INVALID_PURPOSE;
     }
@@ -325,6 +338,7 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
         case HKS_ALG_X25519:
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
+        case HKS_ALG_SM2:
             if (key->size < sizeof(struct HksPubKeyInfo)) {
                 ret = HKS_ERROR_INVALID_KEY_INFO;
             }
@@ -615,7 +629,7 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
         return ret;
     }
 
-    if (alg == HKS_ALG_RSA) {
+    if ((alg == HKS_ALG_RSA) || (alg == HKS_ALG_SM4)) {
         ret = HksGetKeySize(alg, key, &params.keyLen.value);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("rsa cipher get key size failed");

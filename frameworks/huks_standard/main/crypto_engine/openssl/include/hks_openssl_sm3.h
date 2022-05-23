@@ -13,25 +13,24 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CLIENT_SERVICE_ADAPTER_H
-#define HKS_CLIENT_SERVICE_ADAPTER_H
+#ifndef HKS_OPENSSL_SM3_H
+#define HKS_OPENSSL_SM3_H
 
-#include "hks_type_inner.h"
+#include "hks_crypto_hal.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob *x509Key);
-
-int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x509Key, struct HksBlob *publicKey);
-
-int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct HksBlob *key, struct HksBlob *publicKey);
-
-int32_t TranslateToInnerAesFormat(const struct HksBlob *key, struct HksBlob *outKey);
+#ifdef HKS_SUPPORT_SM3_C
+#ifdef HKS_SUPPORT_SM3_GENERATE_KEY
+int32_t HksOpensslSm3GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key);
+#endif /* HKS_SUPPORT_SM3_GENERATE_KEY */
+#endif /* HKS_SUPPORT_SM3_C */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HKS_CLIENT_SERVICE_ADAPTER_H */
+#endif /* HKS_OPENSSL_SM3_H */
+

@@ -33,6 +33,9 @@
 #include "hks_openssl_hmac.h"
 #include "hks_openssl_kdf.h"
 #include "hks_openssl_rsa.h"
+#include "hks_openssl_sm2.h"
+#include "hks_openssl_sm3.h"
+#include "hks_openssl_sm4.h"
 
 static void RegisterAbilityGenerateKey(void)
 {
@@ -60,6 +63,15 @@ static void RegisterAbilityGenerateKey(void)
 #if defined(HKS_SUPPORT_DH_C) && defined(HKS_SUPPORT_DH_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_DH), HksOpensslDhGenerateKey);
 #endif
+#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_SM2), HksOpensslSm2GenerateKey);
+#endif
+#if defined(HKS_SUPPORT_SM3_C) && defined(HKS_SUPPORT_SM3_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_SM3), HksOpensslSm3GenerateKey);
+#endif
+#if defined(HKS_SUPPORT_SM4_C) && defined(HKS_SUPPORT_SM4_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_SM4), HksOpensslSm4GenerateKey);
+#endif
 }
 
 static void RegisterAbilityGetPublicKey(void)
@@ -82,6 +94,9 @@ static void RegisterAbilityGetPublicKey(void)
 #if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_GET_PUBLIC_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_DSA), HksOpensslGetDsaPubKey);
 #endif
+#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_SM2), HksOpensslGetSm2PubKey);
+#endif
 }
 
 static void RegisterAbilitySign(void)
@@ -98,6 +113,9 @@ static void RegisterAbilitySign(void)
 #if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_SIGN_VERIFY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_SIGN(HKS_ALG_DSA), HksOpensslDsaSign);
 #endif
+#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_SIGN_VERIFY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_SIGN(HKS_ALG_SM2), HksOpensslSm2Sign);
+#endif
 }
 
 static void RegisterAbilityVerify(void)
@@ -113,6 +131,9 @@ static void RegisterAbilityVerify(void)
 #endif
 #if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_SIGN_VERIFY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_VERIFY(HKS_ALG_DSA), HksOpensslDsaVerify);
+#endif
+#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_SIGN_VERIFY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_VERIFY(HKS_ALG_SM2), HksOpensslSm2Verify);
 #endif
 }
 
@@ -132,6 +153,16 @@ static void RegisterAbilityEncrypt(void)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_AES),
         HksOpensslAesHalFreeCtx);
 #endif
+#ifdef HKS_SUPPORT_SM4_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(HKS_ALG_SM4),
+        HksOpensslSm4EncryptInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(HKS_ALG_SM4),
+        HksOpensslSm4EncryptUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(HKS_ALG_SM4),
+        HksOpensslSm4EncryptFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_SM4),
+        HksOpensslSm4HalFreeCtx);
+#endif
 }
 
 static void RegisterAbilityDecrypt(void)
@@ -149,6 +180,16 @@ static void RegisterAbilityDecrypt(void)
         HksOpensslAesDecryptFinal);
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_AES),
         HksOpensslAesHalFreeCtx);
+#endif
+#ifdef HKS_SUPPORT_SM4_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(HKS_ALG_SM4),
+        HksOpensslSm4DecryptInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(HKS_ALG_SM4),
+        HksOpensslSm4DecryptUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(HKS_ALG_SM4),
+        HksOpensslSm4DecryptFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_SM4),
+        HksOpensslSm4HalFreeCtx);
 #endif
 }
 

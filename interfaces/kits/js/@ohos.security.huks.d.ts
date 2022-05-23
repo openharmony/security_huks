@@ -253,8 +253,8 @@ declare namespace huks {
     }
 
     export enum HuksKeyPurpose {
-        HUKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC and AES keys. */
-        HUKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC and AES keys. */
+        HUKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC, SM4 and AES keys. */
+        HUKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC, SM4 and AES keys. */
         HUKS_KEY_PURPOSE_SIGN = 4,                      /* Usable with RSA, EC keys. */
         HUKS_KEY_PURPOSE_VERIFY = 8,                    /* Usable with RSA, EC keys. */
         HUKS_KEY_PURPOSE_DERIVE = 16,                   /* Usable with EC keys. */
@@ -267,6 +267,7 @@ declare namespace huks {
     export enum HuksKeyDigest {
         HUKS_DIGEST_NONE = 0,
         HUKS_DIGEST_MD5 = 1,
+        HUKS_DIGEST_SM3 = 2,
         HUKS_DIGEST_SHA1 = 10,
         HUKS_DIGEST_SHA224 = 11,
         HUKS_DIGEST_SHA256 = 12,
@@ -315,6 +316,9 @@ declare namespace huks {
         HUKS_DH_KEY_SIZE_2048 = 2048,
         HUKS_DH_KEY_SIZE_3072 = 3072,
         HUKS_DH_KEY_SIZE_4096 = 4096,
+
+        HUKS_SM2_KEY_SIZE_256 = 256,
+        HUKS_SM4_KEY_SIZE_128 = 128,
     }
 
     export enum HuksKeyAlg {
@@ -331,6 +335,10 @@ declare namespace huks {
         HUKS_ALG_X25519 = 101,
         HUKS_ALG_ED25519 = 102,
         HUKS_ALG_DH = 103,
+
+        HUKS_ALG_SM2 = 150,
+        HUKS_ALG_SM3 = 151,
+        HUKS_ALG_SM4 = 152,
     }
 
     export enum HuksKeyGenerateType {

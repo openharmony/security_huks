@@ -13,23 +13,30 @@
  * limitations under the License.
  */
 
-#ifndef HKS_HMAC_TEST_H
-#define HKS_HMAC_TEST_H
+#ifndef HKS_SM2_SIGN_VERIFY_TEST_H
+#define HKS_SM2_SIGN_VERIFY_TEST_H
 
 #include <string>
 #include "hks_three_stage_test_common.h"
-namespace Unittest::Hmac {
-static const std::string g_inData = "Hks_HMAC_Test_000000000000000000000000000000000000000000000000000000000000000000"
+namespace Unittest::Sm2SignVerify {
+#ifdef _USE_OPENSSL_
+static const std::string g_inData = "Hks_SM2_Sign_Verify_Test_0000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
                                     "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
-const uint32_t COMMON_SIZE = 256;
+static const uint32_t SM2_COMMON_SIZE = 1024;
 
-#ifdef _USE_OPENSSL_
 struct GenerateKeyCaseParam {
     uint32_t id;
     int32_t result;
     struct HksParam params[4];
 };
+
+int HksSm2SignVerifyTest001(void);
+
+int HksSm2SignVerifyTest002(void);
+
+int HksSm2SignVerifyTest003(void);
 #endif
 }
-#endif // HKS_HMAC_TEST_H
+#endif // HKS_SM2_SIGN_VERIFY_TEST_H
+

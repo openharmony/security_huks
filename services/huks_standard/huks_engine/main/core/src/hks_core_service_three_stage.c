@@ -55,6 +55,9 @@
 #define HKS_TEMP_SIZE               32
 #define MAX_BUF_SIZE                (5 * 1024 * 1024)
 
+#define HKS_SM4_CBC_IV_LEN          16
+#define HKS_SM4_CBC_BLOCK_SIZE      16
+
 static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsageSpec *usageSpec,
     const struct HksBlob *outData)
 {
@@ -161,6 +164,50 @@ static int32_t CheckAesCipherData(bool isEncrypt, uint32_t padding, uint32_t mod
     return ret;
 }
 
+static int32_t CheckSm4CipherOther(bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
+    const struct HksBlob *outData)
+{
+    uint32_t paddingSize = 0;
+
+    if (isEncrypt) {
+        if (padding == HKS_PADDING_NONE) {
+            if (inData->size % HKS_SM4_CBC_BLOCK_SIZE != 0) {
+                HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        } else {
+            paddingSize = HKS_SM4_CBC_BLOCK_SIZE - inData->size % HKS_SM4_CBC_BLOCK_SIZE;
+            if (inData->size > (UINT32_MAX - paddingSize)) {
+                HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+        if (outData->size < (inData->size + paddingSize)) {
+            HKS_LOG_E("encrypt, outData buffer too small size: %u, need: %u",
+                outData->size, inData->size + paddingSize);
+            return HKS_ERROR_BUFFER_TOO_SMALL;
+        }
+    } else {
+        if (outData->size < inData->size) {
+            HKS_LOG_E("decrypt, outData buffer too small size: %u, inDataSize: %u", outData->size, inData->size);
+            return HKS_ERROR_BUFFER_TOO_SMALL;
+        }
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckSm4CipherData(bool isEncrypt, uint32_t padding, uint32_t mode,
+    const struct HksBlob *inData, const struct HksBlob *outData)
+{
+    int32_t ret = HKS_FAILURE;
+    if ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB)) {
+        ret = CheckSm4CipherOther(isEncrypt, padding, inData, outData);
+    }
+
+    return ret;
+}
+
 static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSet,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
@@ -175,6 +222,8 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
             return CheckRsaCipherData(isEncrypt, cihperSpec.keyLen, &usageSpec, outData);
         case HKS_ALG_AES:
             return CheckAesCipherData(isEncrypt, usageSpec.padding, usageSpec.mode, inData, outData);
+        case HKS_ALG_SM4:
+            return CheckSm4CipherData(isEncrypt, usageSpec.padding, usageSpec.mode, inData, outData);
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -207,7 +256,7 @@ static int32_t GetHksInnerKeyFormat(const struct HksParamSet *paramSet, const st
         case HKS_ALG_ECDH:
         case HKS_ALG_DSA:
         case HKS_ALG_DH:
-            return TranslateFromX509PublicKey(key, outKey);
+            return TranslateFromX509PublicKey(algParam->uint32Param, key, outKey);
 #endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
@@ -227,6 +276,8 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_SM2) {
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_SM2, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
         return HKS_SUCCESS;
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
@@ -249,6 +300,8 @@ static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksPar
         return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_RSA) {
         return HksThreeStageAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_SM4) {
+        return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -760,6 +813,70 @@ static int32_t CoreAesDecryptFinish(const struct HuksKeyNode *keyNode,
     return ret;
 }
 
+
+static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
+    const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    int32_t ret = HksCheckFinishOutSize(true, keyNode->runtimeParamSet, inData, outData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("aes encrypt finish check data size failed");
+        return ret;
+    }
+
+    struct HksParam *ctxParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get ctx from keyNode failed!");
+        return ret;
+    }
+    void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+    if (ctx == NULL) {
+        HKS_LOG_E("ctx is invalid: null!");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, NULL, alg);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("aes encrypt Finish failed! ret : %d", ret);
+        ctxParam->uint64Param = 0; /* clear ctx to NULL */
+        return ret;
+    }
+
+    ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    return HKS_SUCCESS;
+}
+
+
+static int32_t CoreSm4DecryptFinish(const struct HuksKeyNode *keyNode,
+    const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    int32_t ret = HksCheckFinishOutSize(false, keyNode->runtimeParamSet, inData, outData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("sm4 decrypt finish check data size failed");
+        return ret;
+    }
+
+    struct HksParam *ctxParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get ctx from keyNode failed!");
+        return ret;
+    }
+    void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+    if (ctx == NULL) {
+        HKS_LOG_E("ctx is invalid: null!");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, NULL, alg);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("cipher DecryptFinish failed! ret : %d", ret);
+    }
+    ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    return ret;
+}
+
+
 static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
@@ -1041,6 +1158,8 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
         return SetCacheModeCtx(keyNode);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreCipherInit(keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_SM4) {
+        return CoreCipherInit(keyNode);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -1064,6 +1183,8 @@ int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
     if (algParam->uint32Param == HKS_ALG_RSA) {
         return UpdateCachedData(keyNode, inData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
+        return CoreCipherUpdate(keyNode, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreCipherUpdate(keyNode, inData, outData, alg);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
@@ -1090,6 +1211,8 @@ int32_t HksCoreEncryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return CoreRsaCipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesEncryptFinish(keyNode, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_SM4) {
+        return CoreSm4EncryptFinish(keyNode, inData, outData, alg);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -1115,6 +1238,8 @@ int32_t HksCoreDecryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return CoreRsaCipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesDecryptFinish(keyNode, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_SM4) {
+        return CoreSm4DecryptFinish(keyNode, inData, outData, alg);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }

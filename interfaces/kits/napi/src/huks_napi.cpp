@@ -341,6 +341,9 @@ static napi_value CreateHuksKeySize(napi_env env)
     AddInt32Property(env, keySize, "HUKS_DH_KEY_SIZE_3072", HKS_DH_KEY_SIZE_3072);
     AddInt32Property(env, keySize, "HUKS_DH_KEY_SIZE_4096", HKS_DH_KEY_SIZE_4096);
 
+    AddInt32Property(env, keySize, "HUKS_SM2_KEY_SIZE_256", HKS_SM2_KEY_SIZE_256);
+    AddInt32Property(env, keySize, "HUKS_SM4_KEY_SIZE_128", HKS_SM4_KEY_SIZE_128);
+
     return keySize;
 }
 
@@ -372,6 +375,9 @@ static napi_value CreateHksKeySize(napi_env env)
     AddInt32Property(env, keySize, "HKS_DH_KEY_SIZE_3072", HKS_DH_KEY_SIZE_3072);
     AddInt32Property(env, keySize, "HKS_DH_KEY_SIZE_4096", HKS_DH_KEY_SIZE_4096);
 
+    AddInt32Property(env, keySize, "HKS_SM2_KEY_SIZE_256", HKS_SM2_KEY_SIZE_256);
+    AddInt32Property(env, keySize, "HKS_SM4_KEY_SIZE_128", HKS_SM4_KEY_SIZE_128);
+
     return keySize;
 }
 
@@ -394,6 +400,10 @@ static napi_value CreateHuksKeyAlg(napi_env env)
     AddInt32Property(env, keyAlg, "HUKS_ALG_ED25519", HKS_ALG_ED25519);
     AddInt32Property(env, keyAlg, "HUKS_ALG_DH", HKS_ALG_DH);
 
+    AddInt32Property(env, keyAlg, "HUKS_ALG_SM2", HKS_ALG_SM2);
+    AddInt32Property(env, keyAlg, "HUKS_ALG_SM3", HKS_ALG_SM3);
+    AddInt32Property(env, keyAlg, "HUKS_ALG_SM4", HKS_ALG_SM4);
+
     return keyAlg;
 }
 
@@ -415,6 +425,10 @@ static napi_value CreateHksKeyAlg(napi_env env)
     AddInt32Property(env, keyAlg, "HKS_ALG_X25519", HKS_ALG_X25519);
     AddInt32Property(env, keyAlg, "HKS_ALG_ED25519", HKS_ALG_ED25519);
     AddInt32Property(env, keyAlg, "HKS_ALG_DH", HKS_ALG_DH);
+
+    AddInt32Property(env, keyAlg, "HKS_ALG_SM2", HKS_ALG_SM2);
+    AddInt32Property(env, keyAlg, "HKS_ALG_SM3", HKS_ALG_SM3);
+    AddInt32Property(env, keyAlg, "HKS_ALG_SM4", HKS_ALG_SM4);
 
     return keyAlg;
 }
@@ -755,6 +769,7 @@ static napi_value CreateHuksKeyDigest(napi_env env)
     AddInt32Property(env, keyDisgest, "HUKS_DIGEST_SHA256", HKS_DIGEST_SHA256);
     AddInt32Property(env, keyDisgest, "HUKS_DIGEST_SHA384", HKS_DIGEST_SHA384);
     AddInt32Property(env, keyDisgest, "HUKS_DIGEST_SHA512", HKS_DIGEST_SHA512);
+    AddInt32Property(env, keyDisgest, "HUKS_DIGEST_SM3", HKS_DIGEST_SM3);
 
     return keyDisgest;
 }
@@ -771,6 +786,7 @@ static napi_value CreateHksKeyDigest(napi_env env)
     AddInt32Property(env, keyDisgest, "HKS_DIGEST_SHA256", HKS_DIGEST_SHA256);
     AddInt32Property(env, keyDisgest, "HKS_DIGEST_SHA384", HKS_DIGEST_SHA384);
     AddInt32Property(env, keyDisgest, "HKS_DIGEST_SHA512", HKS_DIGEST_SHA512);
+    AddInt32Property(env, keyDisgest, "HKS_DIGEST_SM3", HKS_DIGEST_SM3);
 
     return keyDisgest;
 }

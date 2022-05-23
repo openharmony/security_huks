@@ -82,8 +82,8 @@ enum HksKeyType {
 };
 
 enum HksKeyPurpose {
-    HKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC and AES keys. */
-    HKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC and AES keys. */
+    HKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC, AES, and SM4 keys. */
+    HKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC, AES, and SM4 keys. */
     HKS_KEY_PURPOSE_SIGN = 4,                      /* Usable with RSA, EC keys. */
     HKS_KEY_PURPOSE_VERIFY = 8,                    /* Usable with RSA, EC keys. */
     HKS_KEY_PURPOSE_DERIVE = 16,                   /* Usable with EC keys. */
@@ -96,6 +96,7 @@ enum HksKeyPurpose {
 enum HksKeyDigest {
     HKS_DIGEST_NONE = 0,
     HKS_DIGEST_MD5 = 1,
+    HKS_DIGEST_SM3 = 2,
     HKS_DIGEST_SHA1 = 10,
     HKS_DIGEST_SHA224 = 11,
     HKS_DIGEST_SHA256 = 12,
@@ -144,6 +145,9 @@ enum HksKeySize {
     HKS_DH_KEY_SIZE_2048 = 2048,
     HKS_DH_KEY_SIZE_3072 = 3072,
     HKS_DH_KEY_SIZE_4096 = 4096,
+
+    HKS_SM2_KEY_SIZE_256 = 256,
+    HKS_SM4_KEY_SIZE_128 = 128,
 };
 
 enum HksKeyAlg {
@@ -160,6 +164,10 @@ enum HksKeyAlg {
     HKS_ALG_X25519 = 101,
     HKS_ALG_ED25519 = 102,
     HKS_ALG_DH = 103,
+
+    HKS_ALG_SM2 = 150,
+    HKS_ALG_SM3 = 151,
+    HKS_ALG_SM4 = 152,
 };
 
 enum HksKeyGenerateType {
