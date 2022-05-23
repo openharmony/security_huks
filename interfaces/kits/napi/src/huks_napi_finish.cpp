@@ -129,51 +129,35 @@ static napi_value GetHandleValue(napi_env env, napi_value object, FinishAsyncCtx
     return GetInt32(env, 0);
 }
 
-static bool ParseFinishInParam(napi_env env, napi_value *argv, FinishAsyncCtxPtr context, size_t index)
+static int32_t FillContextInDataAndOutData(napi_env env, napi_value *argv, FinishAsyncCtxPtr context, size_t index)
 {
     napi_value inData = nullptr;
+    bool hasInData = false;
+    napi_has_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_INDATA.c_str(), &hasInData);
     napi_status status = napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
-    if (status != napi_ok || inData == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
-        return false;
-    }
-
-    napi_value result = GetUint8Array(env, inData, *context->inData);
-    if (result == nullptr) {
-        HKS_LOG_E("could not get indata");
-        return false;
-    }
-
-    return true;
-}
-
-static bool ParseFinishOutParam(napi_env env, napi_value *argv, FinishAsyncCtxPtr context, size_t index)
-{
-    napi_value outData = nullptr;
-    bool hasResult = false;
-    napi_has_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_OUTDATA.c_str(), &hasResult);
-    napi_status status = napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_OUTDATA.c_str(), &outData);
-    if (status == napi_ok && outData != nullptr && hasResult) {
-        if (context->outData == nullptr) {
-            HKS_LOG_E("could not alloc memory");
-            return false;
-        }
-        napi_value result = GetUint8Array(env, outData, *context->outData);
+    if (status == napi_ok && inData != nullptr && hasInData) {
+        napi_value result = GetUint8Array(env, inData, *context->inData);
         if (result == nullptr) {
-            HKS_LOG_E("could not get outdata");
-            return false;
+            HKS_LOG_E("could not get inData");
+            return HKS_ERROR_BAD_STATE;
         }
     } else {
-        context->outData->size = context->inData->size + DATA_SIZE_64KB;
-        context->outData->data = (uint8_t *)HksMalloc(context->outData->size + DATA_SIZE_64KB);
-        if (context->outData->data == nullptr) {
+        context->inData->size = 0;
+        context->inData->data = (uint8_t *)HksMalloc(1);
+        if (context->inData->data == nullptr) {
             HKS_LOG_E("could not alloc memory");
-            return false;
+            return HKS_ERROR_MALLOC_FAIL;
         }
     }
 
-    return true;
+    context->outData->size = context->inData->size + DATA_SIZE_64KB;
+    context->outData->data = (uint8_t *)HksMalloc(context->outData->size);
+    if (context->outData->data == nullptr) {
+        HKS_LOG_E("malloc memory failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    return HKS_SUCCESS;
 }
 
 static napi_value ParseFinishParams(napi_env env, napi_callback_info info, FinishAsyncCtxPtr context)
@@ -224,9 +208,8 @@ static napi_value ParseFinishParams(napi_env env, napi_callback_info info, Finis
     (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
     (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
 
-    if (ParseFinishInParam(env, argv, context, index) == false ||
-        ParseFinishOutParam(env, argv, context, index) == false) {
-        HKS_LOG_E("ParseFinishInParam failed");
+    if (FillContextInDataAndOutData(env, argv, context, index) != HKS_SUCCESS) {
+        HKS_LOG_E("fill data failed");
         return nullptr;
     }
 
@@ -289,7 +272,6 @@ static napi_value FinishAsyncWork(napi_env env, FinishAsyncCtxPtr context)
     } else {
         return GetNull(env);
     }
-    return nullptr;
 }
 
 napi_value HuksNapiFinish(napi_env env, napi_callback_info info)

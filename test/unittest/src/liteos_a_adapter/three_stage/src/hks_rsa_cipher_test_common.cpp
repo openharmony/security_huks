@@ -17,6 +17,98 @@
 
 #include <gtest/gtest.h>
 
+int32_t Unittest::RsaCipher::HksRsaCipherTestEncryptAbnormal(const struct HksBlob *keyAlias,
+    const struct HksParamSet *encryptParamSet, const struct HksBlob *inData, struct HksBlob *cipherText)
+{
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+    int32_t ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, HKS_KEY_PURPOSE_ENCRYPT, inData, cipherText);
+    EXPECT_EQ(ret, HKS_FAILURE) << "TestUpdateFinish should failed.";
+    if (ret != HKS_SUCCESS) {
+        int32_t abortRet = HksAbort(&handleEncrypt, encryptParamSet);
+        EXPECT_EQ(abortRet, HKS_SUCCESS) << "Abort failed.";
+        return ret;
+    }
+    EXPECT_NE(HksMemCmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
+
+    uint8_t tmpOut[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
+    struct HksBlob outData = { Unittest::RsaCipher::RSA_COMMON_SIZE, tmpOut };
+    ret = HksEncrypt(keyAlias, encryptParamSet, inData, &outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    EXPECT_EQ(HksMemCmp(outData.data, cipherText->data, outData.size), HKS_SUCCESS) << "cipherText not equals outData";
+
+    return HKS_SUCCESS;
+}
+
+int32_t Unittest::RsaCipher::HksRsaCipherTestEncrypt(const struct HksBlob *keyAlias,
+    const struct HksParamSet *encryptParamSet, const struct HksBlob *inData, struct HksBlob *cipherText)
+{
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+    int32_t ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, HKS_KEY_PURPOSE_ENCRYPT, inData, cipherText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    EXPECT_NE(HksMemCmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
+
+    uint8_t tmpOut[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
+    struct HksBlob outData = { Unittest::RsaCipher::RSA_COMMON_SIZE, tmpOut };
+    ret = HksEncrypt(keyAlias, encryptParamSet, inData, &outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t Unittest::RsaCipher::HksRsaCipherTestDecrypt(const struct HksBlob *keyAlias,
+    const struct HksParamSet *decryptParamSet, const struct HksBlob *cipherText, struct HksBlob *plainText,
+    const struct HksBlob *inData)
+{
+    uint8_t handleD[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
+    int32_t ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = TestUpdateFinish(&handleDecrypt, decryptParamSet, HKS_KEY_PURPOSE_DECRYPT, cipherText, plainText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    EXPECT_EQ(HksMemCmp(inData->data, plainText->data, inData->size), HKS_SUCCESS) << "plainText not equals inData";
+
+    uint8_t tmpOut[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
+    struct HksBlob outData = { Unittest::RsaCipher::RSA_COMMON_SIZE, tmpOut };
+    ret = HksDecrypt(keyAlias, decryptParamSet, cipherText, &outData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDecrypt failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    EXPECT_EQ(HksMemCmp(outData.data, plainText->data, outData.size), HKS_SUCCESS) << "plainText not equals outData";
+
+    return HKS_SUCCESS;
+}
+
 int32_t Unittest::RsaCipher::HksRsaCipherTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, const struct HksBlob *inData)
 {
@@ -35,49 +127,20 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestCase(const struct HksBlob *keyAlias
     ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
 
     /* 4. Encrypt Three Stage */
-    // Init
-    uint8_t handleE[sizeof(uint64_t)] = {0};
-    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
-
-    // Update & Finish
     uint8_t cipher[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
     struct HksBlob cipherText = { Unittest::RsaCipher::RSA_COMMON_SIZE, cipher };
-    ret = TestUpdateFinish(&handleEncrypt, encryptParamSet, inData, &cipherText);
-    EXPECT_NE(memcmp(inData->data, cipherText.data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
-    if (ret != HKS_SUCCESS) {
-        int32_t abortRet = HksAbort(&handleEncrypt, encryptParamSet);
-        EXPECT_EQ(abortRet, HKS_SUCCESS) << "Abort failed.";
-        HksDeleteKey(keyAlias, genParamSet);
-        HksDeleteKey(&newKeyAlias, encryptParamSet);
-        return ret;
-    }
+    ret = HksRsaCipherTestEncrypt(&newKeyAlias, encryptParamSet, inData, &cipherText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaCipherTestEncrypt failed.";
 
     /* 5. Decrypt Three Stage */
-    // Init
-    uint8_t handleD[sizeof(uint64_t)] = {0};
-    struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
-
-    // Update & Finish
     uint8_t plain[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
     struct HksBlob plainText = { Unittest::RsaCipher::RSA_COMMON_SIZE, plain };
-    ret = TestUpdateFinish(&handleDecrypt, decryptParamSet, &cipherText, &plainText);
-    EXPECT_EQ(memcmp(inData->data, plainText.data, inData->size), HKS_SUCCESS) << "plainText not equals inData";
-    if (ret != HKS_SUCCESS) {
-        int32_t abortRet = HksAbort(&handleDecrypt, decryptParamSet);
-        EXPECT_EQ(abortRet, HKS_SUCCESS) << "Abort failed.";
-        HksDeleteKey(keyAlias, genParamSet);
-        HksDeleteKey(&newKeyAlias, encryptParamSet);
-        return ret;
-    }
+    ret = HksRsaCipherTestDecrypt(keyAlias, decryptParamSet, &cipherText, &plainText, inData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksRsaCipherTestDecrypt failed.";
 
     /* 6. Delete Key */
-    ret = HksDeleteKey(keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    ret = HksDeleteKey(&newKeyAlias, encryptParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed.";
+    EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKey(&newKeyAlias, encryptParamSet), HKS_SUCCESS) << "Delete ImportKey failed.";
     return ret;
 }
+

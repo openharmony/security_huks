@@ -40,8 +40,8 @@ int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam *param
     return ret;
 }
 
-int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                           const struct HksBlob *inData, struct HksBlob *outData)
+static int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    uint32_t purpose, const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksBlob tmpOutData = {
         .size = MAX_OUTDATA_SIZE,
@@ -63,7 +63,12 @@ int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct HksParamSe
     if (MallocAndCheckBlobData(&tmpInData, MAX_UPDATE_SIZE) != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
-    ret = HksFinish(handle, paramSet, &tmpInData, outData);
+
+    if (purpose == HKS_KEY_PURPOSE_VERIFY) {
+        ret = HksFinish(handle, paramSet, outData, &tmpInData);
+    } else {
+        ret = HksFinish(handle, paramSet, &tmpInData, outData);
+    }
     HksTestFree(tmpInData.data);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_E("HksFinish Failed.");
@@ -111,7 +116,7 @@ int32_t HksTestUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
 }
 
 int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                             const struct HksBlob *inData, struct HksBlob *outData)
+    const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksBlob inDataSeg = *inData;
     uint8_t *lastPtr = inData->data + inData->size - 1;
@@ -166,7 +171,7 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
 }
 
 int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                         const struct HksBlob *inData, struct HksBlob *outData)
+    uint32_t purpose, const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksBlob inDataSeg = *inData;
     inDataSeg.size = MAX_UPDATE_SIZE;
@@ -177,7 +182,7 @@ int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet 
     bool isFinished = false;
 
     if (inData->size <= MAX_UPDATE_SIZE) {
-        return TestLessThanMaxSeg(handle, paramSet, inData, outData);
+        return TestLessThanMaxSeg(handle, paramSet, purpose, inData, outData);
     }
     while (inDataSeg.data <= lastPtr) {
         if (inDataSeg.data + MAX_UPDATE_SIZE <= lastPtr) {
@@ -201,9 +206,23 @@ int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet 
         }
         inDataSeg.data += MAX_UPDATE_SIZE;
     }
-    if (HksFinish(handle, paramSet, &inDataSeg, outData) != HKS_SUCCESS) {
+
+    if (purpose != HKS_KEY_PURPOSE_VERIFY) {
+        if (HksFinish(handle, paramSet, &inDataSeg, outData) != HKS_SUCCESS) {
         HKS_TEST_LOG_E("HksFinish Failed.");
-        return HKS_FAILURE;
+            return HKS_FAILURE;
+        }
+    } else {
+        uint8_t tmp[] = "temp";
+        struct HksBlob tempBlob = { sizeof(tmp), tmp };
+        if (HksUpdate(handle, paramSet, &inDataSeg, &tempBlob) != HKS_SUCCESS) {
+            HKS_TEST_LOG_E("HksUpdate Failed.");
+            return HKS_FAILURE;
+        }
+        if (HksFinish(handle, paramSet, outData, &tempBlob) != HKS_SUCCESS) {
+            HKS_TEST_LOG_E("HksFinish Failed.");
+            return HKS_FAILURE;
+        }
     }
     return HKS_SUCCESS;
 }

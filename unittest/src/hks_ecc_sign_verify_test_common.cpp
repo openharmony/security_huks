@@ -28,7 +28,14 @@ int32_t Unittest::EccSifnVerify::HksTestSignVerify(struct HksBlob *keyAlias, str
         return HKS_FAILURE;
     }
 
-    ret = TestUpdateFinish(&handle, paramSet, inData, outData);
+    struct HksParam *tmpParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get tag purpose failed.");
+        return HKS_FAILURE;
+    }
+
+    ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
