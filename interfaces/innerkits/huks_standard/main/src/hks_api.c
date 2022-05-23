@@ -79,13 +79,14 @@ static int32_t GetHksInnerKeyFormat(const struct HksParamSet *paramSet, const st
             return TranslateToInnerCurve25519Format(algParam->uint32Param, key, outKey);
 #endif
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C)
+    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
         case HKS_ALG_ECDH:
         case HKS_ALG_DSA:
         case HKS_ALG_DH:
-            return TranslateFromX509PublicKey(key, outKey);
+        case HKS_ALG_SM2:
+            return TranslateFromX509PublicKey(algParam->uint32Param, key, outKey);
 #endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;

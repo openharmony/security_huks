@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #define HKS_DIGEST_SHA256_LEN 32
 #define HKS_DIGEST_SHA384_LEN 48
 #define HKS_DIGEST_SHA512_LEN 64
+#define HKS_DIGEST_SM3_LEN 32
 
 #ifdef __cplusplus
 extern "C" {

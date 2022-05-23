@@ -209,7 +209,7 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
     struct KeyMaterialRsa *key = (struct KeyMaterialRsa *)(keyIn->data);
     PubKey func = (PubKey)GetAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(key->keyAlg));
     if (func == NULL) {
-        HKS_LOG_E("PubKey func is null!");
+        HKS_LOG_E("PubKey func is null, keyAlg:%d", key->keyAlg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return func(keyIn, keyOut);

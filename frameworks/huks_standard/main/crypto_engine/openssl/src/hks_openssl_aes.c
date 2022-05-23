@@ -19,9 +19,237 @@
 #include "hks_config.h"
 #endif
 
-#ifdef HKS_SUPPORT_AES_C
-
 #include "hks_openssl_aes.h"
+
+#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+#if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||        \
+    defined(HKS_SUPPORT_AES_ECB_PKCS7PADDING) || defined(HKS_SUPPORT_AES_CTR_NOPADDING) || \
+    defined(HKS_SUPPORT_AES_ECB_NOPADDING) || defined(HKS_SUPPORT_AES_GCM) ||              \
+    defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||        \
+    defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) ||    \
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+#include <openssl/evp.h>
+
+#include "hks_log.h"
+#include "hks_mem.h"
+#include "hks_openssl_common.h"
+#include "hks_openssl_engine.h"
+#include "hks_type_inner.h"
+
+const EVP_CIPHER *GetBlockCipherType(uint32_t keySize, uint32_t mode,
+    const EVP_CIPHER *(*getCbcCipherType)(uint32_t keySize),
+    const EVP_CIPHER *(*getCtrCipherType)(uint32_t keySize),
+    const EVP_CIPHER *(*getEcbCipherType)(uint32_t keySize))
+{
+    if (mode == HKS_MODE_CBC) {
+        return getCbcCipherType(keySize);
+    } else if (mode == HKS_MODE_CTR) {
+        return getCtrCipherType(keySize);
+    } else if (mode == HKS_MODE_ECB) {
+        return getEcbCipherType(keySize);
+    }
+    return NULL;
+}
+
+static int32_t OpensslBlockCipherCryptInitParams(const struct HksBlob *key, EVP_CIPHER_CTX *ctx,
+    struct HksCipherParam *cipherParam, bool isEncrypt, const struct HksUsageSpec *usageSpec)
+{
+    int32_t ret;
+    if (isEncrypt) {
+        ret = EVP_EncryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
+    } else {
+        ret = EVP_DecryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
+    }
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    if (usageSpec->padding == HKS_PADDING_PKCS7) {
+        // set chipher padding enable
+        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_ENABLE);
+    } else if (usageSpec->padding == HKS_PADDING_NONE) {
+        // set chipher padding none
+        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_NONE);
+    }
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t OpensslBlockCipherCryptInit(
+    const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool isEncrypt, void **cryptoCtx,
+    const EVP_CIPHER *(*getCipherType)(uint32_t keySize, uint32_t mode))
+{
+    int32_t ret;
+    struct HksCipherParam *cipherParam = (struct HksCipherParam *)usageSpec->algParam;
+
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (ctx == NULL) {
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    const EVP_CIPHER *cipher = getCipherType(key->size, usageSpec->mode);
+    if (cipher == NULL) {
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (isEncrypt) {
+        ret = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
+    } else {
+        ret = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
+    }
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    ret = OpensslBlockCipherCryptInitParams(key, ctx, cipherParam, isEncrypt, usageSpec);
+    if (ret != HKS_SUCCESS) {
+        EVP_CIPHER_CTX_free(ctx);
+        HKS_LOG_E("OpensslBlockCipherCryptInitParams fail, ret = %d", ret);
+        return ret;
+    }
+
+    struct HksOpensslBlockCipherCtx *outCtx =
+        (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    if (outCtx == NULL) {
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    outCtx->algType = usageSpec->algType;
+    outCtx->mode = usageSpec->mode;
+    outCtx->padding = usageSpec->padding;
+    outCtx->append = (void *)ctx;
+
+    *cryptoCtx = (void *)outCtx;
+
+    return HKS_SUCCESS;
+}
+
+int32_t OpensslBlockCipherEncryptUpdate(
+    void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+{
+    struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
+    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
+
+    if (ctx == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t outLen = 0;
+    if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    cipherText->size = (uint32_t)outLen;
+
+    return HKS_SUCCESS;
+}
+
+int32_t OpensslBlockCipherEncryptFinalThree(
+    void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+{
+    struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
+    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
+
+    if (ctx == NULL) {
+        HKS_FREE_PTR(*cryptoCtx);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HKS_SUCCESS;
+    do {
+        int32_t outLen = 0;
+        if (message->size != 0) {
+            if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data,
+                message->size) != HKS_OPENSSL_SUCCESS) {
+                HksLogOpensslError();
+                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+                break;
+            }
+            cipherText->size = (uint32_t)outLen;
+        }
+
+        if (EVP_EncryptFinal_ex(ctx, (cipherText->data + outLen), &outLen) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+        cipherText->size += (uint32_t)outLen;
+    } while (0);
+
+    EVP_CIPHER_CTX_free(ctx);
+    blockCipherCtx->append = NULL;
+    HKS_FREE_PTR(*cryptoCtx);
+
+    return ret;
+}
+
+int32_t OpensslBlockCipherDecryptUpdate(
+    void *cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
+{
+    struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
+    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
+
+    if (ctx == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t outLen = 0;
+    if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    plainText->size = (uint32_t)outLen;
+
+    return HKS_SUCCESS;
+}
+
+int32_t OpensslBlockCipherDecryptFinalThree(
+    void **cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
+{
+    struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
+    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
+    if (ctx == NULL) {
+        HKS_FREE_PTR(*cryptoCtx);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HKS_SUCCESS;
+    do {
+        int32_t outLen = 0;
+        if (message->size != 0) {
+            if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
+                HksLogOpensslError();
+                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+                break;
+            }
+            plainText->size = (uint32_t)outLen;
+        }
+
+        if (EVP_DecryptFinal_ex(ctx, plainText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+        plainText->size += (uint32_t)outLen;
+    } while (0);
+
+    EVP_CIPHER_CTX_free(ctx);
+    blockCipherCtx->append = NULL;
+    HKS_FREE_PTR(*cryptoCtx);
+    return ret;
+}
+#endif
+#endif /* defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C) */
+
+#ifdef HKS_SUPPORT_AES_C
 
 #include <openssl/evp.h>
 #include <openssl/rand.h>
@@ -31,16 +259,6 @@
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
 #include "hks_type_inner.h"
-
-struct HksOpensslAesCtx {
-    uint32_t algType;
-    uint32_t mode;
-    uint32_t padding;
-    void *append;
-} HksOpensslAesCtx;
-
-#define OPENSSL_CTX_PADDING_NONE (0)  /* set chipher padding none */
-#define OPENSSL_CTX_PADDING_ENABLE (1)  /* set chipher padding enable */
 
 #ifdef HKS_SUPPORT_AES_GENERATE_KEY
 static int32_t AesGenKeyCheckParam(const struct HksKeySpec *spec)
@@ -64,7 +282,7 @@ int32_t HksOpensslAesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 }
 #endif
 
-static const EVP_CIPHER *GetCbcCipherType(uint32_t keySize)
+static const EVP_CIPHER *GetAesCbcCipherType(uint32_t keySize)
 {
     switch (keySize) {
         case HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128):
@@ -78,7 +296,7 @@ static const EVP_CIPHER *GetCbcCipherType(uint32_t keySize)
     }
 }
 
-static const EVP_CIPHER *GetCtrCipherType(uint32_t keySize)
+static const EVP_CIPHER *GetAesCtrCipherType(uint32_t keySize)
 {
     switch (keySize) {
         case HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128):
@@ -92,7 +310,7 @@ static const EVP_CIPHER *GetCtrCipherType(uint32_t keySize)
     }
 }
 
-static const EVP_CIPHER *GetEcbCipherType(uint32_t keySize)
+static const EVP_CIPHER *GetAesEcbCipherType(uint32_t keySize)
 {
     switch (keySize) {
         case HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128):
@@ -120,16 +338,9 @@ static const EVP_CIPHER *GetGcmCipherType(uint32_t keySize)
     }
 }
 
-static const EVP_CIPHER *GetCipherType(uint32_t keySize, uint32_t mode)
+static const EVP_CIPHER *GetAesCipherType(uint32_t keySize, uint32_t mode)
 {
-    if (mode == HKS_MODE_CBC) {
-        return GetCbcCipherType(keySize);
-    } else if (mode == HKS_MODE_CTR) {
-        return GetCtrCipherType(keySize);
-    } else if (mode == HKS_MODE_ECB) {
-        return GetEcbCipherType(keySize);
-    }
-    return NULL;
+    return GetBlockCipherType(keySize, mode, GetAesCbcCipherType, GetAesCtrCipherType, GetAesEcbCipherType);
 }
 
 static const EVP_CIPHER *GetAeadCipherType(uint32_t keySize, uint32_t mode)
@@ -328,9 +539,10 @@ static int32_t OpensslAesAeadCryptInit(
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    struct HksOpensslAesCtx *outCtx = (struct HksOpensslAesCtx *)HksMalloc(sizeof(HksOpensslAesCtx));
+    struct HksOpensslBlockCipherCtx *outCtx =
+        (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
     if (outCtx == NULL) {
-        HKS_LOG_E("HksOpensslAesCtx malloc fail");
+        HKS_LOG_E("HksOpensslBlockCipherCtx malloc fail");
         EVP_CIPHER_CTX_free(ctx);
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -346,7 +558,7 @@ static int32_t OpensslAesAeadCryptInit(
 static int32_t OpensslAesAeadEnryptUpdate(void *cryptoCtx, const struct HksBlob *message,
     struct HksBlob *cipherText)
 {
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)cryptoCtx;
+    struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
 
     int32_t outLen = 0;
@@ -363,7 +575,7 @@ static int32_t OpensslAesAeadEnryptUpdate(void *cryptoCtx, const struct HksBlob 
 static int32_t OpensslAesAeadDecryptUpdate(void *cryptoCtx,
     const struct HksBlob *message, struct HksBlob *plainText)
 {
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)cryptoCtx;
+    struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
     int32_t outLen = 0;
 
@@ -380,7 +592,7 @@ static int32_t OpensslAesAeadDecryptUpdate(void *cryptoCtx,
 static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksBlob *message,
     struct HksBlob *cipherText, struct HksBlob *tagAead)
 {
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)*cryptoCtx;
+    struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
 
     if (ctx == NULL) {
@@ -426,7 +638,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
 static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksBlob *message,
     struct HksBlob *plainText, struct HksBlob *tagAead)
 {
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)*cryptoCtx;
+    struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
 
     if (ctx == NULL) {
@@ -488,7 +700,7 @@ static int32_t OpensslAesCipherInit(
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    const EVP_CIPHER *cipher = GetCipherType(key->size, usageSpec->mode);
+    const EVP_CIPHER *cipher = GetAesCipherType(key->size, usageSpec->mode);
     if (cipher == NULL) {
         EVP_CIPHER_CTX_free(*ctx);
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -553,200 +765,6 @@ static int32_t OpensslAesCipherEncryptFinal(
     return HKS_SUCCESS;
 }
 
-static int32_t OpensslAesCipherCryptInitParams(const struct HksBlob *key, EVP_CIPHER_CTX *ctx,
-    struct HksCipherParam *cipherParam, bool isEncrypt, const struct HksUsageSpec *usageSpec)
-{
-    int32_t ret;
-    if (isEncrypt) {
-        ret = EVP_EncryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
-    } else {
-        ret = EVP_DecryptInit_ex(ctx, NULL, NULL, key->data, (cipherParam == NULL) ? NULL : cipherParam->iv.data);
-    }
-    if (ret != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-
-    if (usageSpec->padding == HKS_PADDING_PKCS7) {
-        // set chipher padding enable
-        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_ENABLE);
-    } else if (usageSpec->padding == HKS_PADDING_NONE) {
-        // set chipher padding none
-        ret = EVP_CIPHER_CTX_set_padding(ctx, OPENSSL_CTX_PADDING_NONE);
-    }
-    if (ret != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    return HKS_SUCCESS;
-}
-
-static int32_t OpensslAesCipherCryptInit(
-    const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool isEncrypt, void **cryptoCtx)
-{
-    int32_t ret;
-    struct HksCipherParam *cipherParam = (struct HksCipherParam *)usageSpec->algParam;
-
-    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
-    if (ctx == NULL) {
-        HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-
-    const EVP_CIPHER *cipher = GetCipherType(key->size, usageSpec->mode);
-    if (cipher == NULL) {
-        EVP_CIPHER_CTX_free(ctx);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (isEncrypt) {
-        ret = EVP_EncryptInit_ex(ctx, cipher, NULL, NULL, NULL);
-    } else {
-        ret = EVP_DecryptInit_ex(ctx, cipher, NULL, NULL, NULL);
-    }
-    if (ret != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        EVP_CIPHER_CTX_free(ctx);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-
-    ret = OpensslAesCipherCryptInitParams(key, ctx, cipherParam, isEncrypt, usageSpec);
-    if (ret != HKS_SUCCESS) {
-        EVP_CIPHER_CTX_free(ctx);
-        HKS_LOG_E("OpensslAesCipherCryptInitParams fail, ret = %d", ret);
-        return ret;
-    }
-
-    struct HksOpensslAesCtx *outCtx = (struct HksOpensslAesCtx *)HksMalloc(sizeof(HksOpensslAesCtx));
-    if (outCtx == NULL) {
-        EVP_CIPHER_CTX_free(ctx);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    outCtx->algType = usageSpec->algType;
-    outCtx->mode = usageSpec->mode;
-    outCtx->padding = usageSpec->padding;
-    outCtx->append = (void *)ctx;
-
-    *cryptoCtx = (void *)outCtx;
-
-    return HKS_SUCCESS;
-}
-
-static int32_t OpensslAesCipherEncryptUpdate(
-    void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
-{
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)cryptoCtx;
-    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-
-    if (ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t outLen = 0;
-    if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    cipherText->size = (uint32_t)outLen;
-
-    return HKS_SUCCESS;
-}
-
-static int32_t OpensslAesCipherEncryptFinalThree(
-    void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
-{
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)*cryptoCtx;
-    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-
-    if (ctx == NULL) {
-        HKS_FREE_PTR(*cryptoCtx);
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t ret = HKS_SUCCESS;
-    do {
-        int32_t outLen = 0;
-        if (message->size != 0) {
-            if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data,
-                message->size) != HKS_OPENSSL_SUCCESS) {
-                HksLogOpensslError();
-                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-                break;
-            }
-            cipherText->size = (uint32_t)outLen;
-        }
-
-        if (EVP_EncryptFinal_ex(ctx, (cipherText->data + outLen), &outLen) != HKS_OPENSSL_SUCCESS) {
-            HksLogOpensslError();
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
-        cipherText->size += (uint32_t)outLen;
-    } while (0);
-
-    EVP_CIPHER_CTX_free(ctx);
-    aesCtx->append = NULL;
-    HKS_FREE_PTR(*cryptoCtx);
-
-    return ret;
-}
-
-static int32_t OpensslAesCipherDecryptUpdate(
-    void *cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
-{
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)cryptoCtx;
-    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-
-    if (ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t outLen = 0;
-    if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
-        HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    plainText->size = (uint32_t)outLen;
-
-    return HKS_SUCCESS;
-}
-
-static int32_t OpensslAesCipherDecryptFinalThree(
-    void **cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
-{
-    struct HksOpensslAesCtx *aesCtx = (struct HksOpensslAesCtx *)*cryptoCtx;
-    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
-    if (ctx == NULL) {
-        HKS_FREE_PTR(*cryptoCtx);
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t ret = HKS_SUCCESS;
-    do {
-        int32_t outLen = 0;
-        if (message->size != 0) {
-            if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
-                HksLogOpensslError();
-                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-                break;
-            }
-            plainText->size = (uint32_t)outLen;
-        }
-
-        if (EVP_DecryptFinal_ex(ctx, plainText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
-            HksLogOpensslError();
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
-        plainText->size += (uint32_t)outLen;
-    } while (0);
-
-    EVP_CIPHER_CTX_free(ctx);
-    aesCtx->append = NULL;
-    HKS_FREE_PTR(*cryptoCtx);
-    return ret;
-}
-
 static int32_t OpensslAesCipherDecryptFinal(
     EVP_CIPHER_CTX *ctx, const struct HksBlob *message, struct HksBlob *plainText)
 {
@@ -790,9 +808,9 @@ int32_t HksOpensslAesEncryptInit(void **cryptoCtx, const struct HksBlob *key, co
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherCryptInit(key, usageSpec, true, cryptoCtx);
+            ret = OpensslBlockCipherCryptInit(key, usageSpec, true, cryptoCtx, GetAesCipherType);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherCryptInit fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherCryptInit for aes fail, ret = %d", ret);
                 return ret;
             }
             break;
@@ -807,7 +825,7 @@ int32_t HksOpensslAesEncryptInit(void **cryptoCtx, const struct HksBlob *key, co
 
 int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)cryptoCtx;
+    struct HksOpensslBlockCipherCtx *contex = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
@@ -827,9 +845,9 @@ int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherEncryptUpdate(cryptoCtx, message, cipherText);
+            ret = OpensslBlockCipherEncryptUpdate(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherEncryptUpdate fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherEncryptUpdate for aes fail, ret = %d", ret);
                 return ret;
             }
             break;
@@ -845,7 +863,7 @@ int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
 int32_t HksOpensslAesEncryptFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)*cryptoCtx;
+    struct HksOpensslBlockCipherCtx *contex = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
@@ -865,9 +883,9 @@ int32_t HksOpensslAesEncryptFinal(void **cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherEncryptFinalThree(cryptoCtx, message, cipherText);
+            ret = OpensslBlockCipherEncryptFinalThree(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherEncryptFinalThree fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherEncryptFinalThree for aes fail, ret = %d", ret);
                 return ret;
             }
             break;
@@ -895,9 +913,9 @@ int32_t HksOpensslAesDecryptInit(void **cryptoCtx, const struct HksBlob *key,
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherCryptInit(key, usageSpec, false, cryptoCtx);
+            ret = OpensslBlockCipherCryptInit(key, usageSpec, false, cryptoCtx, GetAesCipherType);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherCryptInit fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherCryptInit for aes fail, ret = %d", ret);
                 return ret;
             }
             break;
@@ -911,7 +929,7 @@ int32_t HksOpensslAesDecryptInit(void **cryptoCtx, const struct HksBlob *key,
 
 int32_t HksOpensslAesDecryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)cryptoCtx;
+    struct HksOpensslBlockCipherCtx *contex = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
@@ -926,9 +944,9 @@ int32_t HksOpensslAesDecryptUpdate(void *cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherDecryptUpdate(cryptoCtx, message, plainText);
+            ret = OpensslBlockCipherDecryptUpdate(cryptoCtx, message, plainText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherDecryptUpdate fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherDecryptUpdate for aes fail, ret = %d", ret);
                 return ret;
             }
             break;
@@ -943,7 +961,7 @@ int32_t HksOpensslAesDecryptUpdate(void *cryptoCtx, const struct HksBlob *messag
 int32_t HksOpensslAesDecryptFinal(void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText,
     struct HksBlob *tagAead)
 {
-    struct HksOpensslAesCtx *contex = (struct HksOpensslAesCtx *)*cryptoCtx;
+    struct HksOpensslBlockCipherCtx *contex = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     uint32_t mode = contex->mode;
 
     int32_t ret;
@@ -963,9 +981,9 @@ int32_t HksOpensslAesDecryptFinal(void **cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
-            ret = OpensslAesCipherDecryptFinalThree(cryptoCtx, message, cipherText);
+            ret = OpensslBlockCipherDecryptFinalThree(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherDecryptFinalThree fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherDecryptFinalThree for aes fail, ret = %d", ret);
                 return ret;
             }
             break;
@@ -985,7 +1003,7 @@ void HksOpensslAesHalFreeCtx(void **cryptoCtx)
         return;
     }
 
-    struct HksOpensslAesCtx *opensslAesCtx = (struct HksOpensslAesCtx *)*cryptoCtx;
+    struct HksOpensslBlockCipherCtx *opensslAesCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     switch (opensslAesCtx->mode) {
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:

@@ -13,25 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CLIENT_SERVICE_ADAPTER_H
-#define HKS_CLIENT_SERVICE_ADAPTER_H
+#ifndef HKS_SM4_CIPHER_PART2_TEST_H
+#define HKS_SM4_CIPHER_PART2_TEST_H
+namespace Unittest::Sm4Cipher {
+#ifdef _USE_OPENSSL_
+int HksSm4CipherPartTest001(void);
 
-#include "hks_type_inner.h"
+int HksSm4CipherPartTest002(void);
 
-#ifdef __cplusplus
-extern "C" {
+int HksSm4CipherPartTest003(void);
+
+int HksSm4CipherPartTest004(void);
+
+int HksSm4CipherPartTest005(void);
+
+int HksSm4CipherPartTest006(void);
+
+int HksSm4CipherPartTest007(void);
+
+int HksSm4CipherPartTest008(void);
 #endif
-
-int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob *x509Key);
-
-int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x509Key, struct HksBlob *publicKey);
-
-int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct HksBlob *key, struct HksBlob *publicKey);
-
-int32_t TranslateToInnerAesFormat(const struct HksBlob *key, struct HksBlob *outKey);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif /* HKS_CLIENT_SERVICE_ADAPTER_H */
+} // namespace Unittest::Sm4Cipher
+#endif // HKS_SM4_CIPHER_PART2_TEST_H

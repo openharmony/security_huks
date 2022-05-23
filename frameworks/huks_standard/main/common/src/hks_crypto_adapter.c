@@ -171,6 +171,17 @@ int32_t HksFillIvParam(const struct HksParamSet *paramSet, struct HksUsageSpec *
     return HKS_SUCCESS;
 }
 
+static bool HksCheckAlgorithmSm4(const struct HksParamSet *paramSet)
+{
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check sm4 get alg param failed!");
+        return false;
+    }
+    return (algParam->uint32Param == HKS_ALG_SM4);
+}
+
 int32_t HksBuildCipherUsageSpec(
     const struct HksParamSet *paramSet, bool isEncrypt, struct HksBlob *inputText, struct HksUsageSpec **outUsageSpec)
 {
@@ -194,14 +205,14 @@ int32_t HksBuildCipherUsageSpec(
         usageSpec->digest = HKS_DIGEST_SHA1;
     }
 
-    if (!isAes) {
+    if (HksCheckAlgorithmSm4(paramSet)) { // is sm4
+        ret = HksFillIvParam(paramSet, usageSpec);
+    } else if (!isAes) { // not sm4, not aes
         *outUsageSpec = usageSpec;
         return HKS_SUCCESS;
-    }
-
-    if (isAeMode) {
+    } else if (isAeMode) { // is aes, is ae mode
         ret = HksFillAeadParam(paramSet, inputText, usageSpec, isEncrypt);
-    } else {
+    } else { // is aes, not ae mode
         ret = HksFillIvParam(paramSet, usageSpec);
     }
 

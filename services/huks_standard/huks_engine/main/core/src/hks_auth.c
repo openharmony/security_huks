@@ -31,6 +31,7 @@ static uint32_t g_signVerifyRsaPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST
 static uint32_t g_signVerifyEccPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_macPolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_derivePolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
+static uint32_t g_signVerifySm2PolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 
 struct HksAuthPolicy g_authPolicyList[] = {
     { HKS_AUTH_ID_SYM_CIPHER, HKS_ARRAY_SIZE(g_symCipherPolicyTag), g_symCipherPolicyTag },
@@ -38,7 +39,8 @@ struct HksAuthPolicy g_authPolicyList[] = {
     { HKS_AUTH_ID_SIGN_VERIFY_RSA, HKS_ARRAY_SIZE(g_signVerifyRsaPolicyTag), g_signVerifyRsaPolicyTag },
     { HKS_AUTH_ID_SIGN_VERIFY_ECC, HKS_ARRAY_SIZE(g_signVerifyEccPolicyTag), g_signVerifyEccPolicyTag },
     { HKS_AUTH_ID_MAC, HKS_ARRAY_SIZE(g_macPolicyTag), g_macPolicyTag },
-    { HKS_AUTH_ID_DERIVE, HKS_ARRAY_SIZE(g_derivePolicyTag), g_derivePolicyTag }
+    { HKS_AUTH_ID_DERIVE, HKS_ARRAY_SIZE(g_derivePolicyTag), g_derivePolicyTag },
+    { HKS_AUTH_ID_SIGN_VERIFY_SM2, HKS_ARRAY_SIZE(g_signVerifySm2PolicyTag), g_signVerifySm2PolicyTag }
 };
 
 static int32_t CheckPurpose(const struct HksParam *authParam, const struct HksParam *requestParam)

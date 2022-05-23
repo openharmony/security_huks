@@ -27,6 +27,7 @@ extern "C" {
 #define HKS_DIGEST_SHA256_LEN 32
 #define HKS_DIGEST_SHA384_LEN 48
 #define HKS_DIGEST_SHA512_LEN 64
+#define HKS_DIGEST_SM3_LEN 32
 
 #ifdef HKS_SUPPORT_HMAC_C
 #ifdef HKS_SUPPORT_HMAC_GENERATE_KEY
@@ -34,7 +35,7 @@ int32_t HksOpensslHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
 #endif /* HKS_SUPPORT_HMAC_GENERATE_KEY */
 
 #if defined(HKS_SUPPORT_HMAC_SHA1) || defined(HKS_SUPPORT_HMAC_SHA224) || defined(HKS_SUPPORT_HMAC_SHA256) || \
-    defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512)
+    defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512) || defined(HKS_SUPPORT_HMAC_SM3)
 int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac);
 
 int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t digestAlg);
