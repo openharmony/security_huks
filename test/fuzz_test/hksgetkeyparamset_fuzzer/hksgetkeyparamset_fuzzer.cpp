@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,15 +20,15 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-#include <stddef.h>
-#include <stdint.h>
 #include <securec.h>
+
+#define BLOB_SIZE 10
+#define DOUBLE 2
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) * 2 + 10))
-        {
+        if (data == nullptr || size <= (sizeof(struct HksParamSet) * DOUBLE + BLOB_SIZE)) {
             return false;
         }
 
@@ -39,14 +39,16 @@ namespace OHOS {
 
         (void)memcpy_s(mydata, size, data, size);
 
-        struct HksBlob keyAlias = { 10, (uint8_t *)mydata };
+        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)mydata };
 
-        int paramSize = (size - 10) / 2;
-        struct HksParamSet *paramSetIn = (struct HksParamSet *)(mydata + 10);
-        paramSetIn->paramSetSize = paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
+        int paramSize = (size - BLOB_SIZE) / DOUBLE;
+        struct HksParamSet *paramSetIn = (struct HksParamSet *)(mydata + BLOB_SIZE);
+        paramSetIn->paramSetSize = 
+        paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
-        struct HksParamSet *paramSetOut = (struct HksParamSet *)(mydata + 10 + paramSize);
-        paramSetOut->paramSetSize = paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
+        struct HksParamSet *paramSetOut = (struct HksParamSet *)(mydata + BLOB_SIZE + paramSize);
+        paramSetOut->paramSetSize = 
+        paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
         (void)HksGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut);
 

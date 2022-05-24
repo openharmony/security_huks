@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,38 +19,36 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-#include <iostream>
-#include <stddef.h>
-#include <stdint.h>
 #include <securec.h>
+
+#define BLOB_SIZE 10
+#define DOUBLE_BLOB_SIZE 20
 
 namespace OHOS
 {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + 20))
-        {
+        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
             return false;
         }
 
         uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if (mydata == nullptr)
-        {
+        if (mydata == nullptr) {
             return false;
         }
 
         (void)memcpy_s(mydata, size, data, size);
 
-        struct HksBlob keyAlias = { 10, (uint8_t *)mydata };
-        struct HksBlob handle = { 10, (uint8_t *)(mydata + 10) };
+        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)mydata };
+        struct HksBlob handle = { BLOB_SIZE, (uint8_t *)(mydata + BLOB_SIZE) };
 
-        struct HksParamSet *paramSet = (struct HksParamSet *)(mydata + 20);
-        paramSet->paramSetSize = (size - 20) < HKS_PARAM_SET_MAX_SIZE ? (size - 20) : HKS_PARAM_SET_MAX_SIZE;
+        struct HksParamSet *paramSet = (struct HksParamSet *)(mydata + DOUBLE_BLOB_SIZE);
+        paramSet->paramSetSize = 
+        (size - DOUBLE_BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - DOUBLE_BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
 
         HksInit(&keyAlias, paramSet, &handle);
 
-        if (mydata != nullptr)
-        {
+        if (mydata != nullptr) {
             HksFree(mydata);
         }
 

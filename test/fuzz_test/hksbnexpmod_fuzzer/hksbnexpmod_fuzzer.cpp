@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,10 +19,11 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-#include <iostream>
-#include <stddef.h>
-#include <stdint.h>
 #include <securec.h>
+
+#define BLOB_SIZE 10
+#define DOUBLE_BLOB_SIZE 20
+#define TRIPLE_BLOB_SIZE 30
 
 namespace OHOS
 {
@@ -34,22 +35,20 @@ namespace OHOS
         }
 
         uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if (mydata == nullptr)
-        {
+        if (mydata == nullptr) {
             return false;
         }
 
         (void)memcpy_s(mydata, size, data, size);
 
-        struct HksBlob x = { 10, (uint8_t *)mydata };
-        struct HksBlob a = { 10, (uint8_t *)(mydata + 10) };
-        struct HksBlob e = { 10, (uint8_t *)(mydata + 20) };
-        struct HksBlob n = { 10, (uint8_t *)(mydata + 30) };
+        struct HksBlob x = { BLOB_SIZE, (uint8_t *)mydata };
+        struct HksBlob a = { BLOB_SIZE, (uint8_t *)(mydata + BLOB_SIZE) };
+        struct HksBlob e = { BLOB_SIZE, (uint8_t *)(mydata + DOUBLE_BLOB_SIZE) };
+        struct HksBlob n = { BLOB_SIZE, (uint8_t *)(mydata + TRIPLE_BLOB_SIZE) };
 
         (void)HksBnExpMod(&x, &a, &e, &n);
 
-        if (mydata != nullptr)
-        {
+        if (mydata != nullptr) {
             HksFree(mydata);
         }
 
