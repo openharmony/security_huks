@@ -24,8 +24,8 @@
     #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
 #else
     #ifdef L2_STANDARD
-        #define HKS_KEY_STORE_PATH            "/data/data/maindata"
-        #define HKS_KEY_STORE_BAK_PATH        "/data/data/bakdata"
+        #define HKS_KEY_STORE_PATH            "/data/service/el1/public/huks_service/maindata"
+        #define HKS_KEY_STORE_BAK_PATH        "/data/service/el1/public/huks_service/bakdata"
     #else
         #define HKS_KEY_STORE_PATH            "/storage/maindata"
         #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"
