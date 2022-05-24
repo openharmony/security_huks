@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 
-#include <cstdint>
-#include <unistd.h>
-#include <climits>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-
+#ifndef FUZZ_PROJECT_NAME
 #define FUZZ_PROJECT_NAME "hksgetkeyparamset_fuzzer"
 
+#endif

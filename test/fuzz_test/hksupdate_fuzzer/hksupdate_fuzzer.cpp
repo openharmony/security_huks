@@ -22,12 +22,11 @@
 
 #include <securec.h>
 
-#define BLOB_SIZE 10
-#define DOUBLE_BLOB_SIZE 20
-#define TRIPLE_BLOB_SIZE 30
+const int BLOB_SIZE = 10;
+const int DOUBLE_BLOB_SIZE = 20;
+const int TRIPLE_BLOB_SIZE = 30;
 
-namespace OHOS
-{
+namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size <= (sizeof(struct HksParamSet) + TRIPLE_BLOB_SIZE)) {
@@ -46,12 +45,12 @@ namespace OHOS
         struct HksBlob outData = { BLOB_SIZE, (uint8_t *)(mydata + DOUBLE_BLOB_SIZE) };
 
         struct HksParamSet *paramSet = (struct HksParamSet *)(mydata + TRIPLE_BLOB_SIZE);
-        paramSet->paramSetSize = 
+        paramSet->paramSetSize =
         (size - DOUBLE_BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - DOUBLE_BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
 
         HksUpdate(&handle, paramSet, &inData, &outData);
 
-        if(mydata != nullptr) {
+        if (mydata != nullptr) {
             HksFree(mydata);
         }
 

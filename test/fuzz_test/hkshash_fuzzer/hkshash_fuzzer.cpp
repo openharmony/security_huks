@@ -21,11 +21,10 @@
 
 #include <securec.h>
 
-#define BLOB_SIZE 10
-#define DOUBLE_BLOB_SIZE 20
+const int BLOB_SIZE = 10;
+const int DOUBLE_BLOB_SIZE = 20;
 
-namespace OHOS
-{
+namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
@@ -43,7 +42,7 @@ namespace OHOS
         struct HksBlob hash = { BLOB_SIZE, (uint8_t *)(mydata + BLOB_SIZE) };
         struct HksParamSet *paramSet = (struct HksParamSet *)(mydata + DOUBLE_BLOB_SIZE);
 
-        paramSet->paramSetSize = 
+        paramSet->paramSetSize =
         (size - DOUBLE_BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - DOUBLE_BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
 
         HksHash(paramSet, &srcData, &hash);

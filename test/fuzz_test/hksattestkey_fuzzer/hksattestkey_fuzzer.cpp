@@ -21,13 +21,12 @@
 
 #include <securec.h>
 
-#define BLOB_SIZE 10
+const int BLOB_SIZE = 10;
 
-namespace OHOS
-{
+namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || 
+        if (data == nullptr ||
         size <= (BLOB_SIZE + sizeof(struct HksParamSet) + sizeof(struct HksCertChain))) {
             return false;
         }
@@ -45,15 +44,15 @@ namespace OHOS
         certChain->certsCount = 0;
         certChain->certs = nullptr;
 
-        struct HksParamSet *paramSet = 
+        struct HksParamSet *paramSet =
         (struct HksParamSet *)(mydata + sizeof(struct HksCertChain) + BLOB_SIZE);
         int paramSize = size - BLOB_SIZE - sizeof(struct HksCertChain);
-        paramSet->paramSetSize = 
+        paramSet->paramSetSize =
         paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
         (void)HksAttestKey(&keyAlias, paramSet, certChain);
 
-        if(mydata != nullptr) {
+        if (mydata != nullptr) {
             HksFree(mydata);
         }
 

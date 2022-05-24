@@ -21,10 +21,9 @@
 
 #include <securec.h>
 
-#define BLOB_SIZE 10
+const int BLOB_SIZE = 10;
 
-namespace OHOS
-{
+namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
         if (data == nullptr || size <= (sizeof(struct HksParamSet) + BLOB_SIZE)) {
@@ -39,7 +38,7 @@ namespace OHOS
 
         struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)mydata };
         struct HksParamSet *paramSetIn = (struct HksParamSet *)(mydata + BLOB_SIZE);
-        paramSetIn->paramSetSize = 
+        paramSetIn->paramSetSize =
         (size - BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
 
         (void)HksKeyExist(&keyAlias, paramSetIn);

@@ -12,13 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include <cstdint>
-#include <unistd.h>
-#include <climits>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-
+#ifndef FUZZ_PROJECT_NAME
 #define FUZZ_PROJECT_NAME "hksbnexpmod_fuzzer"
 
+#endif

@@ -21,16 +21,14 @@
 
 #include <securec.h>
 
-#define BLOB_SIZE 10
-#define DOUBLE_BLOB_SIZE 20
-#define TRIPLE_BLOB_SIZE 30
+const int BLOB_SIZE = 10;
+const int DOUBLE_BLOB_SIZE = 20;
+const int TRIPLE_BLOB_SIZE = 30;
 
-namespace OHOS
-{
+namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || size <= 40)
-        {
+        if (data == nullptr || size <= 40) {
             return false;
         }
 
