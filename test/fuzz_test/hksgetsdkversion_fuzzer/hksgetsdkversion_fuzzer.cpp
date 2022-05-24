@@ -21,8 +21,7 @@
 
 #include <securec.h>
 
-namespace OHOS
-{
+namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
         if (data == nullptr) {

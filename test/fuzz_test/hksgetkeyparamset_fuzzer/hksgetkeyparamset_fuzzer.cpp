@@ -22,8 +22,8 @@
 
 #include <securec.h>
 
-#define BLOB_SIZE 10
-#define DOUBLE 2
+const int BLOB_SIZE = 10;
+const int DOUBLE = 2;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -33,7 +33,7 @@ namespace OHOS {
         }
 
         uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if(mydata == nullptr) {
+        if (mydata == nullptr) {
             return false;
         }
 
@@ -43,16 +43,16 @@ namespace OHOS {
 
         int paramSize = (size - BLOB_SIZE) / DOUBLE;
         struct HksParamSet *paramSetIn = (struct HksParamSet *)(mydata + BLOB_SIZE);
-        paramSetIn->paramSetSize = 
+        paramSetIn->paramSetSize =
         paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
         struct HksParamSet *paramSetOut = (struct HksParamSet *)(mydata + BLOB_SIZE + paramSize);
-        paramSetOut->paramSetSize = 
+        paramSetOut->paramSetSize =
         paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
         (void)HksGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut);
 
-        if(mydata != nullptr) {
+        if (mydata != nullptr) {
             HksFree(mydata);
         }
 
