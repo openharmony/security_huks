@@ -946,7 +946,7 @@ static void FreeCryptoCtx(const struct HuksKeyNode *keyNode, uint32_t alg)
         return;
     }
 
-    if (alg == HKS_ALG_AES) {
+    if (alg == HKS_ALG_AES || alg == HKS_ALG_SM4) {
         HksCryptoHalEncryptFreeCtx(&ctx, alg);
     } else {
         struct HksBlob *cachedData = (struct HksBlob *)ctx;
