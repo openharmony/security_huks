@@ -34,7 +34,7 @@ namespace OHOS
             return false;
         }
 
-        uint8_t *mydata = (uint8_t *)malloc(sizeof(uint8_t) * size);
+        uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
         if (mydata == nullptr)
         {
             return false;
@@ -52,7 +52,7 @@ namespace OHOS
         HksUpdate(&handle, paramSet, &inData, &outData);
 
         if(mydata != nullptr) {
-            free(mydata);
+            HksFree(mydata);
         }
 
         return true;
