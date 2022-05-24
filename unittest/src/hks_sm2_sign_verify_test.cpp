@@ -268,6 +268,7 @@ static int32_t HksSm2SignVerifyTestNormalCase(struct HksBlob keyAlias, struct Hk
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("GenerateKey failed");
+        return ret;
     }
 
     /* 2. Sign Three Stage */
