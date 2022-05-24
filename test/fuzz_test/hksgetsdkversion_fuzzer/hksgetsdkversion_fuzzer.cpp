@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,22 +19,18 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-#include <stddef.h>
-#include <stdint.h>
 #include <securec.h>
 
 namespace OHOS
 {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr)
-        {
+        if (data == nullptr) {
             return false;
         }
 
         uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if (mydata == nullptr)
-        {
+        if (mydata == nullptr) {
             return false;
         }
 
@@ -44,8 +40,7 @@ namespace OHOS
 
         (void)HksGetSdkVersion(&sdkVersion);
 
-        if (mydata != nullptr)
-        {
+        if (mydata != nullptr) {
             HksFree(mydata);
         }
 
