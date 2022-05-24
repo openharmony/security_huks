@@ -20,7 +20,7 @@ module_output_path = "/"
 ohos_fuzztest("HksAttestKeyFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//base/security/huks/test/fuzz_test/hksattestkey_fuzzer"
-  
+
   include_dirs = [
     ".",
     "//utils/native/base/include",
