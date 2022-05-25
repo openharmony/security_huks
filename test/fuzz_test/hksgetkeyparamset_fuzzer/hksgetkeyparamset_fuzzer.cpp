@@ -32,28 +32,28 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if (mydata == nullptr) {
+        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        if (myData == nullptr) {
             return false;
         }
 
-        (void)memcpy_s(mydata, size, data, size);
+        (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)mydata };
+        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
 
         int paramSize = (size - BLOB_SIZE) / DOUBLE;
-        struct HksParamSet *paramSetIn = (struct HksParamSet *)(mydata + BLOB_SIZE);
+        struct HksParamSet *paramSetIn = (struct HksParamSet *)(myData + BLOB_SIZE);
         paramSetIn->paramSetSize =
         paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
-        struct HksParamSet *paramSetOut = (struct HksParamSet *)(mydata + BLOB_SIZE + paramSize);
+        struct HksParamSet *paramSetOut = (struct HksParamSet *)(myData + BLOB_SIZE + paramSize);
         paramSetOut->paramSetSize =
         paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
 
         (void)HksGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut);
 
-        if (mydata != nullptr) {
-            HksFree(mydata);
+        if (myData != nullptr) {
+            HksFree(myData);
         }
 
         return true;

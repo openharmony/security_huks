@@ -32,25 +32,25 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if (mydata == nullptr) {
+        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        if (myData == nullptr) {
             return false;
         }
 
-        (void)memcpy_s(mydata, size, data, size);
+        (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob handle = { BLOB_SIZE, (uint8_t *)mydata };
-        struct HksBlob inData = { BLOB_SIZE, (uint8_t *)(mydata + BLOB_SIZE) };
-        struct HksBlob outData = { BLOB_SIZE, (uint8_t *)(mydata + DOUBLE_BLOB_SIZE) };
+        struct HksBlob handle = { BLOB_SIZE, (uint8_t *)myData };
+        struct HksBlob inData = { BLOB_SIZE, (uint8_t *)(myData + BLOB_SIZE) };
+        struct HksBlob outData = { BLOB_SIZE, (uint8_t *)(myData + DOUBLE_BLOB_SIZE) };
 
-        struct HksParamSet *paramSet = (struct HksParamSet *)(mydata + TRIPLE_BLOB_SIZE);
+        struct HksParamSet *paramSet = (struct HksParamSet *)(myData + TRIPLE_BLOB_SIZE);
         paramSet->paramSetSize =
         (size - DOUBLE_BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - DOUBLE_BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
 
         HksFinish(&handle, paramSet, &inData, &outData);
 
-        if (mydata != nullptr) {
-            HksFree(mydata);
+        if (myData != nullptr) {
+            HksFree(myData);
         }
 
         return true;
