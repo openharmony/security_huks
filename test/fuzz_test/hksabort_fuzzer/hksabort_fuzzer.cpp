@@ -39,8 +39,7 @@ namespace OHOS {
 
         struct HksBlob handle = { BLOB_SIZE, (uint8_t *)myData };
         struct HksParamSet *paramSet = (struct HksParamSet *)(myData + BLOB_SIZE);
-        paramSet->paramSetSize =
-        (size - BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
+        paramSet->paramSetSize = size - BLOB_SIZE;
 
         (void)HksAbort(&handle, paramSet);
 

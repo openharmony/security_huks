@@ -28,7 +28,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
     {
         if (data == nullptr ||
-        size <= (BLOB_SIZE + sizeof(struct HksParamSet) + sizeof(struct HksCertChain))) {
+            size <= (BLOB_SIZE + sizeof(struct HksParamSet) + sizeof(struct HksBlob) * CERT_COUNT)) {
             return false;
         }
 
@@ -41,15 +41,19 @@ namespace OHOS {
 
         struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
 
-        struct HksCertChain *certChain = (struct HksCertChain *)(myData + BLOB_SIZE);
-        certChain->certsCount = 0;
-        certChain->certs = nullptr;
+        struct HksCertChain *certChain = (struct HksCertChain *)HksMalloc(sizeof(struct HksCertChain));
+        certChain->certsCount = CERT_COUNT;
+        certChain->certs = (struct HksBlob *)(myData + BLOB_SIZE);
 
-        struct HksParamSet *paramSet = (struct HksParamSet *)(myData + sizeof(struct HksCertChain) + BLOB_SIZE);
-        int paramSize = size - BLOB_SIZE - sizeof(struct HksCertChain);
-        paramSet->paramSetSize = paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
+        struct HksParamSet *paramSet =
+        (struct HksParamSet *)(myData + BLOB_SIZE + sizeof(struct HksBlob) * CERT_COUNT);
+        paramSet->paramSetSize = size - BLOB_SIZE - sizeof(struct HksBlob) * CERT_COUNT;
 
         (void)HksGetCertificateChain(&keyAlias, paramSet, certChain);
+
+        if (certChain != nullptr) {
+            HksFree(certChain);
+        }
 
         if (myData != nullptr) {
             HksFree(myData);

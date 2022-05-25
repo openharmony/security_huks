@@ -24,11 +24,12 @@
 const int BLOB_SIZE = 10;
 const int DOUBLE_BLOB_SIZE = 20;
 const int TRIPLE_BLOB_SIZE = 30;
+const int FOURFOLD_BLOB_SIZE = 40;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || size <= 40) {
+        if (data == nullptr || size <= FOURFOLD_BLOB_SIZE) {
             return false;
         }
 
