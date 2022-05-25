@@ -30,22 +30,22 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *mydata = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
-        if (mydata == nullptr) {
+        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        if (myData == nullptr) {
             return false;
         }
 
-        (void)memcpy_s(mydata, size, data, size);
+        (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob handle = { BLOB_SIZE, (uint8_t *)mydata };
-        struct HksParamSet *paramSet = (struct HksParamSet *)(mydata + BLOB_SIZE);
+        struct HksBlob handle = { BLOB_SIZE, (uint8_t *)myData };
+        struct HksParamSet *paramSet = (struct HksParamSet *)(myData + BLOB_SIZE);
         paramSet->paramSetSize =
         (size - BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
 
         (void)HksAbort(&handle, paramSet);
 
-        if (mydata != nullptr) {
-            HksFree(mydata);
+        if (myData != nullptr) {
+            HksFree(myData);
         }
 
         return true;
