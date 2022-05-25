@@ -82,7 +82,7 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("GenerateKey failed");
-		return ret;
+        return ret;
     }
 
     /* 2. Encrypt */

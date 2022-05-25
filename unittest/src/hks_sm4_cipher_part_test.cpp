@@ -680,7 +680,7 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest001, TestSize.Level0)
 
 HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest002, TestSize.Level0)
 {
-    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest001";
+    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest002";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
