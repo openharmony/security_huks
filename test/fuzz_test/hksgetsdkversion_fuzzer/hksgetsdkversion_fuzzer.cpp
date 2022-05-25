@@ -14,12 +14,12 @@
  */
 #include "hksgetsdkversion_fuzzer.h"
 
+#include <securec.h>
+
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
-
-#include <securec.h>
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)

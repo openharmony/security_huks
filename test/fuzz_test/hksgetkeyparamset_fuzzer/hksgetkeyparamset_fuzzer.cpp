@@ -15,12 +15,12 @@
 
 #include "hksgetkeyparamset_fuzzer.h"
 
+#include <securec.h>
+
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
-
-#include <securec.h>
 
 const int BLOB_SIZE = 10;
 const int DOUBLE = 2;
