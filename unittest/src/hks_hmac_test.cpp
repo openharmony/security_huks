@@ -313,7 +313,7 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("GenerateKey failed");
-		return ret;
+        return ret;
     }
 
     /* 2. HMAC One Stage */
