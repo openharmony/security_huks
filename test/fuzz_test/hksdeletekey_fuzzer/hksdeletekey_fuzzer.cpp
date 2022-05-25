@@ -35,10 +35,9 @@ namespace OHOS {
 
         struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
         struct HksParamSet *paramSetIn = (struct HksParamSet *)(myData + BLOB_SIZE);
-        paramSetIn->paramSetSize =
-        (size - BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
+        paramSetIn->paramSetSize = size - BLOB_SIZE;
 
-        HksDeleteKey(&keyAlias, paramSetIn);
+        (void)HksDeleteKey(&keyAlias, paramSetIn);
 
         if (myData != nullptr) {
             HksFree(myData);

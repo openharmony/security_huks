@@ -40,10 +40,9 @@ namespace OHOS {
 
         struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
         struct HksParamSet *paramSetIn = (struct HksParamSet *)(myData + BLOB_SIZE);
-        paramSetIn->paramSetSize =
-        (size - BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
+        paramSetIn->paramSetSize = size - BLOB_SIZE;
 
-        HksGenerateKey(&keyAlias, paramSetIn, NULL);
+        (void)HksGenerateKey(&keyAlias, paramSetIn, NULL);
 
         if (myData != nullptr) {
             HksFree(myData);

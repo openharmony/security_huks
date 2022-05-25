@@ -44,10 +44,9 @@ namespace OHOS {
         struct HksBlob outData = { BLOB_SIZE, (uint8_t *)(myData + DOUBLE_BLOB_SIZE) };
 
         struct HksParamSet *paramSet = (struct HksParamSet *)(myData + TRIPLE_BLOB_SIZE);
-        paramSet->paramSetSize =
-        (size - DOUBLE_BLOB_SIZE) < HKS_PARAM_SET_MAX_SIZE ? (size - DOUBLE_BLOB_SIZE) : HKS_PARAM_SET_MAX_SIZE;
+        paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
 
-        HksFinish(&handle, paramSet, &inData, &outData);
+        (void)HksFinish(&handle, paramSet, &inData, &outData);
 
         if (myData != nullptr) {
             HksFree(myData);

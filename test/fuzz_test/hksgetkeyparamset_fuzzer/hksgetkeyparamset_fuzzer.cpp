@@ -43,12 +43,10 @@ namespace OHOS {
 
         int paramSize = (size - BLOB_SIZE) / DOUBLE;
         struct HksParamSet *paramSetIn = (struct HksParamSet *)(myData + BLOB_SIZE);
-        paramSetIn->paramSetSize =
-        paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
+        paramSetIn->paramSetSize = paramSize;
 
         struct HksParamSet *paramSetOut = (struct HksParamSet *)(myData + BLOB_SIZE + paramSize);
-        paramSetOut->paramSetSize =
-        paramSize < HKS_PARAM_SET_MAX_SIZE ? paramSize : HKS_PARAM_SET_MAX_SIZE;
+        paramSetOut->paramSetSize = paramSize;
 
         (void)HksGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut);
 
