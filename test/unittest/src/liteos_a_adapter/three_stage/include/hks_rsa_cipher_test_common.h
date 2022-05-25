@@ -51,5 +51,11 @@ static const std::string g_inData_512 = "RSA_512_ttttttttttttttttttttttttttttttt
 
 int32_t HksRsaCipherTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, const struct HksBlob *inData);
+int32_t HksRsaCipherTestEncrypt(const struct HksBlob *keyAlias, const struct HksParamSet *encryptParamSet,
+    const struct HksBlob *inData, struct HksBlob *cipherText);
+int32_t HksRsaCipherTestEncryptAbnormal(const struct HksBlob *keyAlias, const struct HksParamSet *encryptParamSet,
+    const struct HksBlob *inData, struct HksBlob *cipherText);
+int32_t HksRsaCipherTestDecrypt(const struct HksBlob *keyAlias, const struct HksParamSet *decryptParamSet,
+    const struct HksBlob *cipherText, struct HksBlob *plainText, const struct HksBlob *inData);
 }
 #endif // HKS_RSA_COMMON_TEST_COMMON_H
