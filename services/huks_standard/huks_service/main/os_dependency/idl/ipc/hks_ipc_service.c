@@ -662,7 +662,7 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
     for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             if (paramSet->params[j].tag == g_idList[i]) {
-                return Apl3Check();
+                return SensitivePermissionCheck();
             }
         }
     }
