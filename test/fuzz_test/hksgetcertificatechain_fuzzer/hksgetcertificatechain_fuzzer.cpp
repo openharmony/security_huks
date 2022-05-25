@@ -23,6 +23,7 @@
 #include "hks_type.h"
 
 const int BLOB_SIZE = 10;
+const int CERT_COUNT = 4;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
