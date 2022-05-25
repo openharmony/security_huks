@@ -35,7 +35,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestEncryptAbnormal(const struct HksBlo
         EXPECT_EQ(abortRet, HKS_SUCCESS) << "Abort failed.";
         return ret;
     }
-    EXPECT_NE(HksMemCmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
+    EXPECT_NE(memcmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
 
     uint8_t tmpOut[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
     struct HksBlob outData = { Unittest::RsaCipher::RSA_COMMON_SIZE, tmpOut };
@@ -44,7 +44,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestEncryptAbnormal(const struct HksBlo
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    EXPECT_EQ(HksMemCmp(outData.data, cipherText->data, outData.size), HKS_SUCCESS) << "cipherText not equals outData";
+    EXPECT_EQ(memcmp(outData.data, cipherText->data, outData.size), HKS_SUCCESS) << "cipherText not equals outData";
 
     return HKS_SUCCESS;
 }
@@ -65,7 +65,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestEncrypt(const struct HksBlob *keyAl
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    EXPECT_NE(HksMemCmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
+    EXPECT_NE(memcmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
 
     uint8_t tmpOut[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
     struct HksBlob outData = { Unittest::RsaCipher::RSA_COMMON_SIZE, tmpOut };
@@ -95,7 +95,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestDecrypt(const struct HksBlob *keyAl
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    EXPECT_EQ(HksMemCmp(inData->data, plainText->data, inData->size), HKS_SUCCESS) << "plainText not equals inData";
+    EXPECT_EQ(memcmp(inData->data, plainText->data, inData->size), HKS_SUCCESS) << "plainText not equals inData";
 
     uint8_t tmpOut[Unittest::RsaCipher::RSA_COMMON_SIZE] = {0};
     struct HksBlob outData = { Unittest::RsaCipher::RSA_COMMON_SIZE, tmpOut };
@@ -104,7 +104,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestDecrypt(const struct HksBlob *keyAl
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    EXPECT_EQ(HksMemCmp(outData.data, plainText->data, outData.size), HKS_SUCCESS) << "plainText not equals outData";
+    EXPECT_EQ(memcmp(outData.data, plainText->data, outData.size), HKS_SUCCESS) << "plainText not equals outData";
 
     return HKS_SUCCESS;
 }
