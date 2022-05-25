@@ -69,7 +69,7 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     struct HksParam *tmpParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get tag purpose failed.");
+        HKS_TEST_LOG_E("get tag purpose failed.");
         return HKS_FAILURE;
     }
 
