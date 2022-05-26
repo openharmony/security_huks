@@ -20,7 +20,7 @@
 #include "hks_three_stage_test_common.h"
 
 namespace Unittest::Sm4Cipher {
-static const uint32_t SM4_COMMON_SIZE = 128;
+static const uint32_t SM4_COMMON_SIZE = 256;
 static const uint32_t IV_SIZE = 16;
 static const uint32_t AAD_SIZE = 16;
 static const uint32_t NONCE_SIZE = 12;
