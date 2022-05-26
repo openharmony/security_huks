@@ -86,14 +86,14 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     }
 
     /* 2. Encrypt */
-    uint8_t cipher[SM4_COMMON_SIZE * 2] = {0};
-    struct HksBlob cipherText = { SM4_COMMON_SIZE * 2, cipher };
+    uint8_t cipher[SM4_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { SM4_COMMON_SIZE, cipher };
     ret = HksSm4CipherTestEncrypt(keyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestEncrypt failed.";
 
     /* 3. Decrypt Three Stage */
-    uint8_t plain[SM4_COMMON_SIZE * 2] = {0};
-    struct HksBlob plainText = { SM4_COMMON_SIZE * 2, plain };
+    uint8_t plain[SM4_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { SM4_COMMON_SIZE, plain };
     ret = HksSm4CipherTestDecrypt(keyAlias, decryptParamSet, &cipherText, &plainText, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestDecrypt failed.";
 
