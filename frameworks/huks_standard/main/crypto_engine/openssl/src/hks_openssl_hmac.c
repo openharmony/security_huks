@@ -116,10 +116,11 @@ int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const stru
         opensslAlg = EVP_sm3();
     } else {
         opensslAlg = GetOpensslAlg(digestAlg);
-        if (opensslAlg == NULL) {
-            HKS_LOG_E("get openssl algorithm failed");
-            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-        }
+    }
+
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("hmac get openssl algorithm failed");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     uint8_t *hmacData = HMAC(opensslAlg, key->data, (int32_t)key->size, msg->data, msg->size, mac->data, &mac->size);
@@ -148,10 +149,11 @@ int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
         opensslAlg = EVP_sm3();
     } else {
         opensslAlg = GetOpensslAlg(digestAlg);
-        if (opensslAlg == NULL) {
-            HKS_LOG_E("get openssl algorithm failed");
-            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-        }
+    }
+
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("hmac_init get openssl algorithm fail");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     uint32_t digestLen;

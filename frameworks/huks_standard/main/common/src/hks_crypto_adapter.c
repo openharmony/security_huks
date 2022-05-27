@@ -171,7 +171,7 @@ int32_t HksFillIvParam(const struct HksParamSet *paramSet, struct HksUsageSpec *
     return HKS_SUCCESS;
 }
 
-static bool HksCheckAlgorithmSm4(const struct HksParamSet *paramSet)
+static bool HksIsAlgorithmSm4(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
@@ -205,7 +205,7 @@ int32_t HksBuildCipherUsageSpec(
         usageSpec->digest = HKS_DIGEST_SHA1;
     }
 
-    if (HksCheckAlgorithmSm4(paramSet)) { // is sm4
+    if (HksIsAlgorithmSm4(paramSet)) { // is sm4
         ret = HksFillIvParam(paramSet, usageSpec);
     } else if (!isAes) { // not sm4, not aes
         *outUsageSpec = usageSpec;
