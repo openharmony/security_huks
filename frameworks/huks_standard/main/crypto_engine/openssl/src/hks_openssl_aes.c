@@ -132,6 +132,7 @@ int32_t OpensslBlockCipherCryptInit(
     return HKS_SUCCESS;
 }
 
+// blob data and size have been checked in hks_core_service_three_stage.c
 int32_t OpensslBlockCipherEncryptUpdate(
     void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
@@ -152,6 +153,7 @@ int32_t OpensslBlockCipherEncryptUpdate(
     return HKS_SUCCESS;
 }
 
+// blob data and size have been checked in hks_core_service_three_stage.c
 int32_t OpensslBlockCipherEncryptFinalThree(
     void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
@@ -191,6 +193,7 @@ int32_t OpensslBlockCipherEncryptFinalThree(
     return ret;
 }
 
+// blob data and size have been checked in hks_core_service_three_stage.c
 int32_t OpensslBlockCipherDecryptUpdate(
     void *cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
 {
@@ -211,6 +214,7 @@ int32_t OpensslBlockCipherDecryptUpdate(
     return HKS_SUCCESS;
 }
 
+// blob data and size have been checked in hks_core_service_three_stage.c
 int32_t OpensslBlockCipherDecryptFinalThree(
     void **cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
 {
