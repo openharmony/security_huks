@@ -316,13 +316,13 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_genParamsTest[index].params,
-        sizeof(g_genParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_genParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_signParamsTest[index].params,
-        sizeof(g_signParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_signParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[index].params,
-        sizeof(g_verifyParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_verifyParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -355,13 +355,13 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_genParamsTest[index].params,
-        sizeof(g_genParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_genParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_signParamsTest[index].params,
-        sizeof(g_signParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_signParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[index].params,
-        sizeof(g_verifyParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_verifyParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -394,13 +394,13 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest003, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_genParamsTest[index].params,
-        sizeof(g_genParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_genParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_signParamsTest[index].params,
-        sizeof(g_signParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_signParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[index].params,
-        sizeof(g_verifyParamsTest[index].params)/sizeof(HksParam));
+        sizeof(g_verifyParamsTest[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {

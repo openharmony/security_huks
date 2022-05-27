@@ -97,7 +97,6 @@ static int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsi
     return HKS_SUCCESS;
 }
 
-/* 16 is the output length that mbedtls need */
 static int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, struct HksBlob *hash)
 {
     int32_t ret;
@@ -192,7 +191,6 @@ static int32_t HksMbedtlsHashSha1Update(struct HksMbedtlsHashCtx *ctx, const uns
     return HKS_SUCCESS;
 }
 
-/* 20 is the output length that mbedtls need */
 static int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, struct HksBlob *hash)
 {
     mbedtls_sha1_context *context = (mbedtls_sha1_context *)ctx->append;
@@ -295,7 +293,6 @@ static int32_t HksMbedtlsHashSha256Update(struct HksMbedtlsHashCtx *ctx, const u
     return HKS_SUCCESS;
 }
 
-/* 32 is the output length that mbedtls need */
 static int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg,
     struct HksBlob *hash)
 {
@@ -402,7 +399,6 @@ static int32_t HksMbedtlsHashSha512Update(struct HksMbedtlsHashCtx *ctx, const u
     return HKS_SUCCESS;
 }
 
-/* 64 is the output length that mbedtls need */
 static int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg,
     struct HksBlob *hash)
 {
@@ -452,7 +448,7 @@ static void HksMbedtlsMd5HashFreeCtx(void **cryptoCtx)
     }
     struct HksMbedtlsHashCtx *hashCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     if (hashCtx->append != NULL) {
-        mbedtls_md5_free((mbedtls_md5_context *)hashCtx->append); /* 0 for MD5 */
+        mbedtls_md5_free((mbedtls_md5_context *)hashCtx->append);
     }
 }
 
@@ -464,7 +460,7 @@ static void HksMbedtlsSHA1HashFreeCtx(void **cryptoCtx)
     }
     struct HksMbedtlsHashCtx *hashCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     if (hashCtx->append != NULL) {
-        mbedtls_sha1_free((mbedtls_sha1_context *)hashCtx->append); /* 0 for MD5 */
+        mbedtls_sha1_free((mbedtls_sha1_context *)hashCtx->append);
     }
 }
 
@@ -497,10 +493,10 @@ int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
     int32_t ret;
     switch (digestAlg) {
         case HKS_DIGEST_MD5:
-            ret = HksMbedtlsHashMd5Init(cryptoCtx, digestAlg); /* 0 for MD5 */
+            ret = HksMbedtlsHashMd5Init(cryptoCtx, digestAlg);
             break;
         case HKS_DIGEST_SHA1:
-            ret = HksMbedtlsHashSha1Init(cryptoCtx, digestAlg); /* 0 for SHA-1 */
+            ret = HksMbedtlsHashSha1Init(cryptoCtx, digestAlg);
             break;
         case HKS_DIGEST_SHA224:
             ret = HksMbedtlsHashSha256Init(cryptoCtx, 1, digestAlg); /* 0 for SHA-224 */
@@ -533,10 +529,10 @@ int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 
     switch (hashCtx->mAlg) {
         case HKS_DIGEST_MD5:
-            ret = HksMbedtlsHashMd5Update(hashCtx, msg->data, msg->size); /* 0 for MD5 */
+            ret = HksMbedtlsHashMd5Update(hashCtx, msg->data, msg->size);
             break;
         case HKS_DIGEST_SHA1:
-            ret = HksMbedtlsHashSha1Update(hashCtx, msg->data, msg->size); /* 0 for SHA-1 */
+            ret = HksMbedtlsHashSha1Update(hashCtx, msg->data, msg->size);
             break;
         case HKS_DIGEST_SHA224:
         case HKS_DIGEST_SHA256:
@@ -568,10 +564,10 @@ int32_t HksMbedtlsHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct 
 
     switch (hashCtx->mAlg) {
         case HKS_DIGEST_MD5:
-            ret = HksMbedtlsHashMd5Final(hashCtx, msg, hash); /* 0 for MD5 */
+            ret = HksMbedtlsHashMd5Final(hashCtx, msg, hash);
             break;
         case HKS_DIGEST_SHA1:
-            ret = HksMbedtlsHashSha1Final(hashCtx, msg, hash); /* 0 for SHA-1 */
+            ret = HksMbedtlsHashSha1Final(hashCtx, msg, hash);
             break;
         case HKS_DIGEST_SHA224:
         case HKS_DIGEST_SHA256:
@@ -645,12 +641,12 @@ int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
     switch (alg) {
 #ifdef HKS_SUPPORT_HASH_MD5
         case HKS_DIGEST_MD5:
-            ret = mbedtls_md5_ret(msg->data, msg->size, hash->data); /* 0 for MD5 */
+            ret = mbedtls_md5_ret(msg->data, msg->size, hash->data);
             break;
 #endif
 #ifdef HKS_SUPPORT_HASH_SHA1
         case HKS_DIGEST_SHA1:
-            ret = mbedtls_sha1_ret(msg->data, msg->size, hash->data); /* 0 for SHA-1 */
+            ret = mbedtls_sha1_ret(msg->data, msg->size, hash->data);
             break;
 #endif
 #ifdef HKS_SUPPORT_HASH_SHA224

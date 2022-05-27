@@ -114,10 +114,11 @@ int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
         opensslAlg = EVP_sm3();
     } else {
         opensslAlg = GetOpensslAlg(alg);
-        if (opensslAlg == NULL) {
-            HKS_LOG_E("get openssl algorithm fail");
-            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-        }
+    }
+
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("hash_init get openssl algorithm fail");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     EVP_MD_CTX *tmpctx = EVP_MD_CTX_new();

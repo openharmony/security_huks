@@ -14,10 +14,10 @@
  */
 
 #include "hks_sm4_cipher_part_test.h"
-#include "hks_sm4_cipher_test_common.h"
 
 #include <gtest/gtest.h>
 
+#include "hks_sm4_cipher_test_common.h"
 
 using namespace testing::ext;
 namespace Unittest::Sm4Cipher {
@@ -659,15 +659,15 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams001, sizeof(g_encryptParams001)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams001, sizeof(g_encryptParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams001, sizeof(g_decryptParams001)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams001, sizeof(g_decryptParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -684,15 +684,15 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams002, sizeof(g_encryptParams002)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams002, sizeof(g_encryptParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams002, sizeof(g_encryptParams002)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams002, sizeof(g_encryptParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -709,15 +709,15 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest003, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams003, sizeof(g_encryptParams003)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams003, sizeof(g_encryptParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams003, sizeof(g_decryptParams003)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams003, sizeof(g_decryptParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -734,15 +734,15 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest004, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams004, sizeof(g_encryptParams004)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams004, sizeof(g_encryptParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams004, sizeof(g_decryptParams004)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams004, sizeof(g_decryptParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -759,15 +759,15 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest005, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams005, sizeof(g_encryptParams005)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams005, sizeof(g_encryptParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams005, sizeof(g_decryptParams005)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams005, sizeof(g_decryptParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -786,17 +786,17 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest006, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genFailParams[index].params,
-        sizeof(g_genFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_genFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_encryptFailParams[index].params,
-        sizeof(g_encryptFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_encryptFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_decryptFailParams[index].params,
-        sizeof(g_decryptFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_decryptFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -815,17 +815,17 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest007, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genFailParams[index].params,
-        sizeof(g_genFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_genFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_encryptFailParams[index].params,
-        sizeof(g_encryptFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_encryptFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_decryptFailParams[index].params,
-        sizeof(g_decryptFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_decryptFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -844,17 +844,17 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest008, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genFailParams[index].params,
-        sizeof(g_genFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_genFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_encryptFailParams[index].params,
-        sizeof(g_encryptFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_encryptFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_decryptFailParams[index].params,
-        sizeof(g_decryptFailParams[index].params)/sizeof(HksParam));
+        sizeof(g_decryptFailParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);

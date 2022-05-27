@@ -803,7 +803,6 @@ static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
     return HKS_SUCCESS;
 }
 
-
 static int32_t CoreSm4DecryptFinish(const struct HuksKeyNode *keyNode,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
 {
@@ -832,7 +831,6 @@ static int32_t CoreSm4DecryptFinish(const struct HuksKeyNode *keyNode,
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
     return ret;
 }
-
 
 static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct HksBlob *inData,
     struct HksBlob *outData)
