@@ -14,7 +14,7 @@ import("//base/security/huks/huks.gni")
 import("//build/config/features.gni")
 import("//build/test.gni")
 
-module_output_path = "base/huks"
+module_output_path = "security/huks"
 
 ##############################fuzztest##########################################
 ohos_fuzztest("HksInitFuzzTest") {
