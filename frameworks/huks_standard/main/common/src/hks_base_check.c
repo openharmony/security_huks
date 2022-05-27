@@ -33,19 +33,16 @@
 #undef HKS_SUPPORT_ED25519_C
 #endif
 
-#define HKS_AES_CBC_IV_LEN          16
+#define HKS_BLOCK_CIPHER_CBC_IV_LEN 16
 #define HKS_AES_CCM_AAD_LEN_MIN     4
 #define HKS_AES_CCM_NONCE_LEN_MIN   7
 #define HKS_AES_CCM_NONCE_LEN_MAX   13
 #define HKS_AES_GCM_NONCE_LEN_MIN   12
 
 #define HKS_RSA_OAEP_DIGEST_NUM     2
-#define HKS_AES_CBC_BLOCK_SIZE      16
+#define HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE 16
 
 #define HKS_ECC_SIGN_MAX_TL_SIZE    8
-
-#define HKS_SM4_CBC_IV_LEN          16
-#define HKS_SM4_CBC_BLOCK_SIZE      16
 
 #ifdef HKS_SUPPORT_RSA_C
 static uint32_t g_rsaKeySize[] = {
@@ -1101,6 +1098,99 @@ static int32_t CheckRsaCipherData(uint32_t cmdId, const struct ParamsValues *inp
 #endif
 
 #ifdef HKS_SUPPORT_AES_C
+static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData);
+#endif
+
+#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+static int32_t CheckBlockCbcCipherData(uint32_t cmdId, uint32_t padding,
+    const struct HksBlob *inData, const struct HksBlob *outData)
+{
+    /*
+     * encrypt: inSize greater than 0(has been checked), no-padding: inSize need to be integer multiple of 16
+     *          outSize no less than inSize + (16 - inSize % 16) (in: plain; out: cipher)
+     * decrypt: inSize greater than 0(has been checked) && inSize is integer multiple of 16
+     *          outSize no less than inSize (in: cipher; out: plain)
+     */
+    switch (cmdId) {
+        case HKS_CMD_ID_ENCRYPT: {
+            uint32_t paddingSize = 0;
+            if (padding == HKS_PADDING_NONE) {
+                if (inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
+                    HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
+                    return HKS_ERROR_INVALID_ARGUMENT;
+                }
+            } else {
+                paddingSize = HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE - inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE;
+                if (inData->size > (UINT32_MAX - paddingSize)) {
+                    HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
+                    return HKS_ERROR_INVALID_ARGUMENT;
+                }
+            }
+            if (outData->size < (inData->size + paddingSize)) {
+                HKS_LOG_E("encrypt, outData buffer too small size: %u, need: %u",
+                    outData->size, inData->size + paddingSize);
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
+            break;
+        }
+        case HKS_CMD_ID_DECRYPT:
+            if ((inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE) != 0) {
+                HKS_LOG_E("decrypt, invalid inData size: %u", inData->size);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            if (outData->size < inData->size) {
+                HKS_LOG_E("decrypt, outData buffer too small size: %u, inDataSize: %u", outData->size, inData->size);
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
+            break;
+        default:
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckBlockCipherData(uint32_t cmdId, const struct ParamsValues *inputParams,
+    const struct HksBlob *inData, const struct HksBlob *outData, uint32_t alg)
+{
+    uint32_t mode = inputParams->mode.value;
+
+#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+    if (((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM4)) &&
+        ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB))) {
+        uint32_t padding = inputParams->padding.value;
+        return CheckBlockCbcCipherData(cmdId, padding, inData, outData);
+#endif
+#ifdef HKS_SUPPORT_AES_C
+    } else if ((alg == HKS_ALG_AES) && ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM))) {
+        return CheckAesAeCipherData(cmdId, inData, outData);
+#endif
+#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+    }
+#endif
+
+    return HKS_ERROR_INVALID_MODE;
+}
+
+static int32_t CheckBlockCipherIvMaterial(const struct HksParamSet *paramSet)
+{
+    struct HksParam *ivParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("cipher get iv param failed!");
+        return HKS_ERROR_CHECK_GET_IV_FAIL;
+    }
+
+    if ((ivParam->blob.size != HKS_BLOCK_CIPHER_CBC_IV_LEN) || (ivParam->blob.data == NULL)) {
+        HKS_LOG_E("cbc iv param invalid");
+        return HKS_ERROR_INVALID_IV;
+    }
+
+    return ret;
+}
+#endif // defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+
+#ifdef HKS_SUPPORT_AES_C
 static int32_t CheckAesPadding(uint32_t mode, uint32_t padding)
 {
     if (mode == HKS_MODE_CBC) {
@@ -1117,54 +1207,6 @@ static int32_t CheckAesPadding(uint32_t mode, uint32_t padding)
 
     if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {
         return HksCheckValue(padding, g_aesAeadPadding, HKS_ARRAY_SIZE(g_aesAeadPadding));
-    }
-
-    return HKS_SUCCESS;
-}
-
-static int32_t CheckAesCbcCipherData(uint32_t cmdId, uint32_t padding,
-    const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    /*
-     * encrypt: inSize greater than 0(has been checked), no-padding: inSize need to be integer multiple of 16
-     *          outSize no less than inSize + (16 - inSize % 16) (in: plain; out: cipher)
-     * decrypt: inSize greater than 0(has been checked) && inSize is integer multiple of 16
-     *          outSize no less than inSize (in: cipher; out: plain)
-     */
-    switch (cmdId) {
-        case HKS_CMD_ID_ENCRYPT: {
-            uint32_t paddingSize = 0;
-            if (padding == HKS_PADDING_NONE) {
-                if (inData->size % HKS_AES_CBC_BLOCK_SIZE != 0) {
-                    HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-            } else {
-                paddingSize = HKS_AES_CBC_BLOCK_SIZE - inData->size % HKS_AES_CBC_BLOCK_SIZE;
-                if (inData->size > (UINT32_MAX - paddingSize)) {
-                    HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-            }
-            if (outData->size < (inData->size + paddingSize)) {
-                HKS_LOG_E("encrypt, outData buffer too small size: %u, need: %u",
-                    outData->size, inData->size + paddingSize);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        }
-        case HKS_CMD_ID_DECRYPT:
-            if ((inData->size % HKS_AES_CBC_BLOCK_SIZE) != 0) {
-                HKS_LOG_E("decrypt, invalid inData size: %u", inData->size);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (outData->size < inData->size) {
-                HKS_LOG_E("decrypt, outData buffer too small size: %u, inDataSize: %u", outData->size, inData->size);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        default:
-            return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     return HKS_SUCCESS;
@@ -1200,38 +1242,6 @@ static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData
     }
 
     return HKS_SUCCESS;
-}
-
-static int32_t CheckAesCipherData(uint32_t cmdId, const struct ParamsValues *inputParams,
-    const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    uint32_t mode = inputParams->mode.value;
-
-    if ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB)) {
-        uint32_t padding = inputParams->padding.value;
-        return CheckAesCbcCipherData(cmdId, padding, inData, outData);
-    } else if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {
-        return CheckAesAeCipherData(cmdId, inData, outData);
-    }
-
-    return HKS_ERROR_INVALID_MODE;
-}
-
-static int32_t CheckAesCipherIvMaterial(const struct HksParamSet *paramSet)
-{
-    struct HksParam *ivParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get iv param failed!");
-        return HKS_ERROR_CHECK_GET_IV_FAIL;
-    }
-
-    if ((ivParam->blob.size != HKS_AES_CBC_IV_LEN) || (ivParam->blob.data == NULL)) {
-        HKS_LOG_E("cbc iv param invalid");
-        return HKS_ERROR_INVALID_IV;
-    }
-
-    return ret;
 }
 
 static int32_t CheckCipherAeAadMaterial(uint32_t mode, const struct HksParamSet *paramSet)
@@ -1321,84 +1331,6 @@ static int32_t CheckSm4Padding(uint32_t mode, uint32_t padding)
     }
 
     return HKS_ERROR_INVALID_ARGUMENT;
-}
-
-static int32_t CheckSm4CbcCipherData(uint32_t cmdId, uint32_t padding,
-    const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    /*
-     * encrypt: inSize greater than 0(has been checked), no-padding: inSize need to be integer multiple of 16
-     *          outSize no less than inSize + (16 - inSize % 16) (in: plain; out: cipher)
-     * decrypt: inSize greater than 0(has been checked) && inSize is integer multiple of 16
-     *          outSize no less than inSize (in: cipher; out: plain)
-     */
-    switch (cmdId) {
-        case HKS_CMD_ID_ENCRYPT: {
-            uint32_t paddingSize = 0;
-            if (padding == HKS_PADDING_NONE) {
-                if (inData->size % HKS_SM4_CBC_BLOCK_SIZE != 0) {
-                    HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-            } else {
-                paddingSize = HKS_SM4_CBC_BLOCK_SIZE - inData->size % HKS_AES_CBC_BLOCK_SIZE;
-                if (inData->size > (UINT32_MAX - paddingSize)) {
-                    HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-            }
-            if (outData->size < (inData->size + paddingSize)) {
-                HKS_LOG_E("encrypt, outData buffer too small size: %u, need: %u",
-                    outData->size, inData->size + paddingSize);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        }
-        case HKS_CMD_ID_DECRYPT:
-            if ((inData->size % HKS_SM4_CBC_BLOCK_SIZE) != 0) {
-                HKS_LOG_E("decrypt, invalid inData size: %u", inData->size);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (outData->size < inData->size) {
-                HKS_LOG_E("decrypt, outData buffer too small size: %u, inDataSize: %u", outData->size, inData->size);
-                return HKS_ERROR_BUFFER_TOO_SMALL;
-            }
-            break;
-        default:
-            return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    return HKS_SUCCESS;
-}
-
-static int32_t CheckSm4CipherData(uint32_t cmdId, const struct ParamsValues *inputParams,
-    const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    uint32_t mode = inputParams->mode.value;
-
-    if ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB)) {
-        uint32_t padding = inputParams->padding.value;
-        return CheckSm4CbcCipherData(cmdId, padding, inData, outData);
-    }
-
-    return HKS_ERROR_INVALID_MODE;
-}
-
-static int32_t CheckSm4CipherIvMaterial(const struct HksParamSet *paramSet)
-{
-    struct HksParam *ivParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get iv param failed!");
-        return HKS_ERROR_CHECK_GET_IV_FAIL;
-    }
-
-    if ((ivParam->blob.size != HKS_SM4_CBC_IV_LEN) || (ivParam->blob.data == NULL)) {
-        HKS_LOG_E("cbc iv param invalid");
-        return HKS_ERROR_INVALID_IV;
-    }
-
-    return ret;
 }
 #endif
 
@@ -1779,11 +1711,11 @@ int32_t HksCheckCihperData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
 #endif
 #ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
-            return CheckAesCipherData(cmdId, inputParams, inData, outData);
+            return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_AES);
 #endif
 #ifdef HKS_SUPPORT_SM4_C
         case HKS_ALG_SM4:
-            return CheckSm4CipherData(cmdId, inputParams, inData, outData);
+            return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_SM4);
 #endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
@@ -1797,7 +1729,7 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
     if (alg == HKS_ALG_AES) {
         uint32_t mode = inputParams->mode.value;
         if (mode == HKS_MODE_CBC) {
-            return CheckAesCipherIvMaterial(paramSet);
+            return CheckBlockCipherIvMaterial(paramSet);
         } else if ((mode == HKS_MODE_CCM) || (mode == HKS_MODE_GCM)) {
             return CheckCipherAeMaterial(mode, paramSet);
         }
@@ -1807,7 +1739,7 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
     if (alg == HKS_ALG_SM4) {
         uint32_t mode = inputParams->mode.value;
         if (mode == HKS_MODE_CBC) {
-            return CheckSm4CipherIvMaterial(paramSet);
+            return CheckBlockCipherIvMaterial(paramSet);
         }
     }
 #endif

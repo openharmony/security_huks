@@ -51,12 +51,9 @@
 
 #endif
 #define HKS_RSA_OAEP_DIGEST_NUM     2
-#define HKS_AES_CBC_BLOCK_SIZE      16
+#define HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE 16
 #define HKS_TEMP_SIZE               32
 #define MAX_BUF_SIZE                (5 * 1024 * 1024)
-
-#define HKS_SM4_CBC_IV_LEN          16
-#define HKS_SM4_CBC_BLOCK_SIZE      16
 
 static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsageSpec *usageSpec,
     const struct HksBlob *outData)
@@ -118,19 +115,19 @@ static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
     return HKS_SUCCESS;
 }
 
-static int32_t CheckAesCipherOther(bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
+static int32_t CheckBlockCipherOther(bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
     const struct HksBlob *outData)
 {
     uint32_t paddingSize = 0;
 
     if (isEncrypt) {
         if (padding == HKS_PADDING_NONE) {
-            if (inData->size % HKS_AES_CBC_BLOCK_SIZE != 0) {
+            if (inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
                 HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         } else {
-            paddingSize = HKS_AES_CBC_BLOCK_SIZE - inData->size % HKS_AES_CBC_BLOCK_SIZE;
+            paddingSize = HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE - inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE;
             if (inData->size > (UINT32_MAX - paddingSize)) {
                 HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
@@ -151,58 +148,18 @@ static int32_t CheckAesCipherOther(bool isEncrypt, uint32_t padding, const struc
     return HKS_SUCCESS;
 }
 
-static int32_t CheckAesCipherData(bool isEncrypt, uint32_t padding, uint32_t mode,
+static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
+    const uint32_t padding = usageSpec->padding;
+    const uint32_t mode = usageSpec->mode;
+    const uint32_t alg = usageSpec->algType;
     int32_t ret = HKS_FAILURE;
-    if ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB)) {
-        ret = CheckAesCipherOther(isEncrypt, padding, inData, outData);
-    } else if ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM)) {
+    if (((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM4)) &&
+        ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB))) {
+        ret = CheckBlockCipherOther(isEncrypt, padding, inData, outData);
+    } else if ((alg == HKS_ALG_AES) && ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM))) {
         ret = CheckAesCipherAead(isEncrypt, inData, outData);
-    }
-
-    return ret;
-}
-
-static int32_t CheckSm4CipherOther(bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
-    const struct HksBlob *outData)
-{
-    uint32_t paddingSize = 0;
-
-    if (isEncrypt) {
-        if (padding == HKS_PADDING_NONE) {
-            if (inData->size % HKS_SM4_CBC_BLOCK_SIZE != 0) {
-                HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-        } else {
-            paddingSize = HKS_SM4_CBC_BLOCK_SIZE - inData->size % HKS_SM4_CBC_BLOCK_SIZE;
-            if (inData->size > (UINT32_MAX - paddingSize)) {
-                HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-        }
-        if (outData->size < (inData->size + paddingSize)) {
-            HKS_LOG_E("encrypt, outData buffer too small size: %u, need: %u",
-                outData->size, inData->size + paddingSize);
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
-    } else {
-        if (outData->size < inData->size) {
-            HKS_LOG_E("decrypt, outData buffer too small size: %u, inDataSize: %u", outData->size, inData->size);
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
-    }
-
-    return HKS_SUCCESS;
-}
-
-static int32_t CheckSm4CipherData(bool isEncrypt, uint32_t padding, uint32_t mode,
-    const struct HksBlob *inData, const struct HksBlob *outData)
-{
-    int32_t ret = HKS_FAILURE;
-    if ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB)) {
-        ret = CheckSm4CipherOther(isEncrypt, padding, inData, outData);
     }
 
     return ret;
@@ -221,9 +178,9 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
         case HKS_ALG_RSA:
             return CheckRsaCipherData(isEncrypt, cihperSpec.keyLen, &usageSpec, outData);
         case HKS_ALG_AES:
-            return CheckAesCipherData(isEncrypt, usageSpec.padding, usageSpec.mode, inData, outData);
+            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:
-            return CheckSm4CipherData(isEncrypt, usageSpec.padding, usageSpec.mode, inData, outData);
+            return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
