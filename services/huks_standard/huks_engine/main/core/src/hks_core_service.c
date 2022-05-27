@@ -876,7 +876,7 @@ int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur
         return HKS_FAILURE;
     }
 
-    if (*alg == HKS_ALG_HMAC || *pur == HKS_KEY_PURPOSE_SIGN || *pur == HKS_KEY_PURPOSE_VERIFY) {
+    if (*alg == HKS_ALG_HMAC || *alg == HKS_ALG_SM3 || *pur == HKS_KEY_PURPOSE_SIGN || *pur == HKS_KEY_PURPOSE_VERIFY) {
         for (i = 0; i < paramSet->paramsCnt; i++) {
             if (paramSet->params[i].tag ==  HKS_TAG_DIGEST) {
                 *alg = paramSet->params[i].uint32Param;

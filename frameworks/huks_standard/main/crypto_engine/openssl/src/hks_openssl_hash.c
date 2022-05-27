@@ -50,6 +50,9 @@ static int32_t CheckDigestAlg(uint32_t alg)
 #ifdef HKS_SUPPORT_HASH_MD5
         case HKS_DIGEST_MD5:
 #endif
+#ifdef HKS_SUPPORT_HASH_SM3
+        case HKS_DIGEST_SM3:
+#endif
             break;
         default:
             HKS_LOG_E("Unsupport HASH Type!");
@@ -106,9 +109,15 @@ int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
         return HKS_ERROR_INVALID_DIGEST;
     }
 
-    const EVP_MD *opensslAlg = GetOpensslAlg(alg);
+    const EVP_MD *opensslAlg = NULL;
+    if (alg == HKS_DIGEST_SM3) {
+        opensslAlg = EVP_sm3();
+    } else {
+        opensslAlg = GetOpensslAlg(alg);
+    }
+
     if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm fail");
+        HKS_LOG_E("hash_init get openssl algorithm fail");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 

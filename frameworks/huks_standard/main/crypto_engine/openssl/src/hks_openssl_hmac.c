@@ -58,6 +58,7 @@ static int32_t HmacCheckBuffer(const struct HksBlob *key, const struct HksBlob *
 static int32_t HmacGenKeyCheckParam(const struct HksKeySpec *spec)
 {
     if ((spec->keyLen == 0) || (spec->keyLen % BIT_NUM_OF_UINT8 != 0)) {
+        HKS_LOG_E("keyLen is wrong, len = %u", spec->keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -84,7 +85,7 @@ static int32_t HmacCheckParam(
     }
 
     if ((alg != HKS_DIGEST_SHA1) && (alg != HKS_DIGEST_SHA224) && (alg != HKS_DIGEST_SHA256) &&
-        (alg != HKS_DIGEST_SHA384) && (alg != HKS_DIGEST_SHA512)) {
+        (alg != HKS_DIGEST_SHA384) && (alg != HKS_DIGEST_SHA512) && (alg != HKS_DIGEST_SM3)) {
         HKS_LOG_E("Invalid alg(0x%x)", alg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -103,16 +104,22 @@ static int32_t HmacCheckParam(
 }
 
 #if defined(HKS_SUPPORT_HMAC_SHA1) || defined(HKS_SUPPORT_HMAC_SHA224) || defined(HKS_SUPPORT_HMAC_SHA256) || \
-    defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512)
+    defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512) || defined(HKS_SUPPORT_HMAC_SM3)
 int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac)
 {
     if (HmacCheckParam(key, digestAlg, msg, mac) != HKS_SUCCESS) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    const EVP_MD *opensslAlg = GetOpensslAlg(digestAlg);
+    const EVP_MD *opensslAlg = NULL;
+    if (digestAlg == HKS_DIGEST_SM3) {
+        opensslAlg = EVP_sm3();
+    } else {
+        opensslAlg = GetOpensslAlg(digestAlg);
+    }
+
     if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm failed");
+        HKS_LOG_E("hmac get openssl algorithm failed");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -132,14 +139,20 @@ int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
     }
 
     if ((digestAlg != HKS_DIGEST_SHA1) && (digestAlg != HKS_DIGEST_SHA224) && (digestAlg != HKS_DIGEST_SHA256) &&
-        (digestAlg != HKS_DIGEST_SHA384) && (digestAlg != HKS_DIGEST_SHA512)) {
+        (digestAlg != HKS_DIGEST_SHA384) && (digestAlg != HKS_DIGEST_SHA512) && (digestAlg != HKS_DIGEST_SM3)) {
         HKS_LOG_E("Invalid alg(0x%x)", digestAlg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    const EVP_MD *opensslAlg = GetOpensslAlg(digestAlg);
+    const EVP_MD *opensslAlg = NULL;
+    if (digestAlg == HKS_DIGEST_SM3) {
+        opensslAlg = EVP_sm3();
+    } else {
+        opensslAlg = GetOpensslAlg(digestAlg);
+    }
+
     if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm failed");
+        HKS_LOG_E("hmac_init get openssl algorithm fail");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 

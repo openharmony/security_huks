@@ -69,7 +69,12 @@ ohos_unittest("huks_UT_test") {
 
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
-    sources += [ "src/hks_dsa_sign_verify_test.cpp" ]
+    sources += [
+      "src/hks_dsa_sign_verify_test.cpp",
+      "src/hks_sm2_sign_verify_test.cpp",
+      "src/hks_sm4_cipher_part_test.cpp",
+      "src/hks_sm4_cipher_test_common.cpp",
+    ]
   }
   if (use_crypto_lib == "mbedtls") {
     defines += [ "_USE_MBEDTLS_" ]

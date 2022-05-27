@@ -44,6 +44,9 @@ ohos_static_library("libhuks_openssl_standard_static") {
     "src/hks_openssl_hmac.c",
     "src/hks_openssl_kdf.c",
     "src/hks_openssl_rsa.c",
+    "src/hks_openssl_sm2.c",
+    "src/hks_openssl_sm3.c",
+    "src/hks_openssl_sm4.c",
   ]
 
   deps = [
