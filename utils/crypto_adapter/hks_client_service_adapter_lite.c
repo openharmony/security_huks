@@ -426,8 +426,9 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
 #endif
 #endif
 
-int32_t TranslateFromX509PublicKey(const struct HksBlob *x509Key, struct HksBlob *publicKey)
+int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x509Key, struct HksBlob *publicKey)
 {
+    (void)alg;
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C)
     mbedtls_pk_context ctx;
     mbedtls_pk_init(&ctx);

@@ -102,8 +102,10 @@ static int32_t TransEccKeyToKeyBlob(
     return HKS_SUCCESS;
 }
 
-static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keySize, uint8_t **output, uint32_t *outputSize)
+static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const struct HksKeySpec *spec,
+    uint8_t **output, uint32_t *outputSize)
 {
+    uint32_t keySize = spec->keyLen;
     /* public exponent x and y, and private exponent, so need size is: keySize / 8 * 3 */
     uint32_t rawMaterialLen = sizeof(struct KeyMaterialEcc) + HKS_KEY_BYTES(keySize) * ECC_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
@@ -119,7 +121,7 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keySize, 
      * struct KeyMaterialEcc + pubX_data + pubY_data + pri_data
      */
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)rawMaterial;
-    keyMaterial->keyAlg = HKS_ALG_ECC;
+    keyMaterial->keyAlg = (enum HksKeyAlg)spec->algType;
     keyMaterial->keySize = keySize;
     keyMaterial->xSize = HKS_KEY_BYTES(keySize);
     keyMaterial->ySize = HKS_KEY_BYTES(keySize);
@@ -159,34 +161,49 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const uint32_t keySize, 
 
 int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (HksOpensslEccCheckKeyLen(spec->keyLen) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid Param!");
-        return HKS_ERROR_INVALID_ARGUMENT;
+    int curveId;
+    switch (spec->algType) {
+#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GENERATE_KEY)
+        case HKS_ALG_SM2:
+            if (spec->keyLen != HKS_SM2_KEY_SIZE_256) {
+                HKS_LOG_E("Sm2 Invalid Param!");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            curveId = NID_sm2;
+            break;
+#endif
+        default:
+            if (HksOpensslEccCheckKeyLen(spec->keyLen) != HKS_SUCCESS) {
+                HKS_LOG_E("Ecc Invalid Param!");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+
+            if (HksOpensslGetCurveId(spec->keyLen, &curveId) != HKS_SUCCESS) {
+                HKS_LOG_E("Ecc get curveId failed!");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+            break;
     }
 
     EC_KEY *eccKey = NULL;
     int32_t ret = HKS_FAILURE;
     do {
-        int curveId;
-        ret = HksOpensslGetCurveId(spec->keyLen, &curveId);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
-
         eccKey = EC_KEY_new_by_curve_name(curveId);
         if (eccKey == NULL) {
+            HKS_LOG_E("new ec key failed");
             HksLogOpensslError();
             break;
         }
 
         if (EC_KEY_generate_key(eccKey) <= 0) {
+            HKS_LOG_E("generate ec key failed");
             HksLogOpensslError();
             break;
         }
 
-        ret = EccSaveKeyMaterial(eccKey, spec->keyLen, &key->data, &key->size);
+        ret = EccSaveKeyMaterial(eccKey, spec, &key->data, &key->size);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("save ecc key material failed! ret=0x%x", ret);
+            HKS_LOG_E("save ec key material failed! ret=0x%x", ret);
         }
     } while (0);
 

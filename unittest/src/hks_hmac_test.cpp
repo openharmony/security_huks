@@ -206,17 +206,113 @@ static struct HksParam g_hmacParams005[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
+
+#ifdef _USE_OPENSSL_
+static struct HksParam g_genParams006[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HMAC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SM3
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = Unittest::Hmac::COMMON_SIZE
+    }
+};
+static struct HksParam g_hmacParams006[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HMAC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SM3
+    }
+};
+
+static struct HksParam g_genParams007[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM3
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SM3
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = Unittest::Hmac::COMMON_SIZE
+    }
+};
+static struct HksParam g_hmacParams007[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM3
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SM3
+    }
+};
+
+static const struct GenerateKeyCaseParam g_genParamsFail[] = {
+    {   0,
+        HKS_ERROR_INVALID_DIGEST,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM3
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = Unittest::Hmac::COMMON_SIZE
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_MAC
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_SHA512
+            },
+        },
+    },
+};
+static const struct GenerateKeyCaseParam g_hmacParamsFail[] = {
+    {   0,
+        HKS_ERROR_INVALID_DIGEST,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM3
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_MAC
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_SHA512
+            },
+        },
+    },
+};
+#endif
 #endif
 
-int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *hmacParamSet)
 {
-    struct HksBlob inData = {g_inData.length(), (uint8_t *)g_inData.c_str()};
+    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
 
     /* 1. Generate Key */
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
     if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("GenerateKey failed");
         return ret;
     }
 
@@ -268,10 +364,10 @@ HWTEST_F(HksHmacTest, HksHmacTest001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
-    ret = InitParamSet(&hmacParamSet, g_hmacParams001, sizeof(g_hmacParams001)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams001, sizeof(g_hmacParams001) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
@@ -291,10 +387,10 @@ HWTEST_F(HksHmacTest, HksHmacTest002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
-    ret = InitParamSet(&hmacParamSet, g_hmacParams002, sizeof(g_hmacParams002)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams002, sizeof(g_hmacParams002) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
@@ -315,9 +411,9 @@ HWTEST_F(HksHmacTest, HksHmacTest003, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
     struct HksParamSet *hmacParamSet = nullptr;
-    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
@@ -338,10 +434,10 @@ HWTEST_F(HksHmacTest, HksHmacTest004, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
-    ret = InitParamSet(&hmacParamSet, g_hmacParams004, sizeof(g_hmacParams004)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams004, sizeof(g_hmacParams004) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
@@ -361,10 +457,10 @@ HWTEST_F(HksHmacTest, HksHmacTest005, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
-    ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
@@ -389,9 +485,9 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     /* 2. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
 #ifdef L2_STANDARD
-    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
 #else
-    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
 #endif
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, NULL);
@@ -400,9 +496,9 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     /* 2. HMAC Three Stage(Abort) */
     struct HksParamSet *hmacParamSet = nullptr;
 #ifdef L2_STANDARD
-    ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005) / sizeof(HksParam));
 #else
-    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003) / sizeof(HksParam));
 #endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
@@ -438,9 +534,9 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     /* 2. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
 #ifdef L2_STANDARD
-    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
 #else
-    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
 #endif
     // Generate Key
     ret = HksGenerateKey(&keyAlias, genParamSet, NULL);
@@ -449,9 +545,9 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     /* 2. HMAC Three Stage(Abort) */
     struct HksParamSet *hmacParamSet = nullptr;
 #ifdef L2_STANDARD
-    ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005) / sizeof(HksParam));
 #else
-    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams003, sizeof(g_hmacParams003) / sizeof(HksParam));
 #endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
@@ -466,4 +562,78 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
+
+#ifdef _USE_OPENSSL_
+/**
+ * @tc.name: HksHmacTest.HksHmacTest008
+ * @tc.desc: alg-HMAC pur-MAC dig-sm3.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksHmacTest, HksHmacTest008, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksHMACKeyAliasTest008";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006) / sizeof(HksParam));
+
+    struct HksParamSet *hmacParamSet = nullptr;
+    ret = InitParamSet(&hmacParamSet, g_hmacParams006, sizeof(g_hmacParams006) / sizeof(HksParam));
+
+    ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&hmacParamSet);
+}
+
+    /**
+     * @tc.name: HksHmacTest.HksHmacTest009
+     * @tc.desc: alg-SM3 pur-MAC dig-sm3.
+     * @tc.type: FUNC
+     */
+HWTEST_F(HksHmacTest, HksHmacTest009, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSM3KeyAliasTest009";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007) / sizeof(HksParam));
+
+    struct HksParamSet *hmacParamSet = nullptr;
+    ret = InitParamSet(&hmacParamSet, g_hmacParams007, sizeof(g_hmacParams007) / sizeof(HksParam));
+
+    ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&hmacParamSet);
+}
+
+    /**
+     * @tc.name: HksHmacTest.HksHmacTest010
+     * @tc.desc: alg-SM3 pur-MAC dig-hmac.
+     * @tc.type: FUNC
+     */
+HWTEST_F(HksHmacTest, HksHmacTest010, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSM3KeyAliasTest010";
+    uint32_t index = 0;
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParamsFail[index].params,
+        sizeof(g_genParamsFail[index].params) / sizeof(HksParam));
+
+    struct HksParamSet *hmacParamSet = nullptr;
+    ret = InitParamSet(&hmacParamSet, g_hmacParamsFail[index].params,
+        sizeof(g_hmacParamsFail[index].params) / sizeof(HksParam));
+
+    ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_DIGEST) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&hmacParamSet);
+}
+#endif
 } // namespace Unittest::Hmac

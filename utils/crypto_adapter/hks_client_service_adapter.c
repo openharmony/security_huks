@@ -33,7 +33,7 @@
 #include "hks_mem.h"
 
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C)
+    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
 static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
     uint32_t length = (uint32_t)i2d_PUBKEY(pkey, NULL);
@@ -134,20 +134,23 @@ static int32_t GetEccNid(uint32_t keySize, int32_t *nid)
 }
 
 static int32_t EccToX509PublicKey(
-    uint32_t keySize, const struct HksBlob *x, const struct HksBlob *y, struct HksBlob *x509Key)
+    const uint32_t alg, uint32_t keySize, const struct HksBlob *x, const struct HksBlob *y, struct HksBlob *x509Key)
 {
     int32_t nid;
-    int32_t ret = GetEccNid(keySize, &nid);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetNidFromKeySize fail");
-        return ret;
+    if (alg == HKS_ALG_SM2) {
+        nid = NID_sm2;
+    } else {
+        if (GetEccNid(keySize, &nid) != HKS_SUCCESS) {
+            HKS_LOG_E("GetNidFromKeySize fail");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
     }
 
     EC_KEY *ecKey = NULL;
     BIGNUM *ecX = NULL;
     BIGNUM *ecY = NULL;
     EVP_PKEY *pkey = NULL;
-    ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
         ecKey = EC_KEY_new_by_curve_name(nid);
         if (ecKey == NULL) {
@@ -419,9 +422,11 @@ int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob
         case HKS_ALG_RSA:
             return RsaToX509PublicKey(&material1, &material2, x509Key);
 #endif
-#if defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY)
+#if (defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY)) || \
+        (defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY))
         case HKS_ALG_ECC:
-            return EccToX509PublicKey(publicKeyInfo->keySize, &material1, &material2, x509Key);
+        case HKS_ALG_SM2:
+            return EccToX509PublicKey(publicKeyInfo->keyAlg, publicKeyInfo->keySize, &material1, &material2, x509Key);
 #endif
 #if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_GET_PUBLIC_KEY)
         case HKS_ALG_DSA:
@@ -488,7 +493,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
 #endif
 
 #ifdef HKS_SUPPORT_ECC_C
-static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
+static int32_t EcKeyToPublicKey(const uint32_t alg, EC_KEY *ecKey, struct HksBlob *eccPublicKey)
 {
     BIGNUM *x = BN_new();
     BIGNUM *y = BN_new();
@@ -523,7 +528,7 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
         }
 
         struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
-        pubKeyInfo->keyAlg = HKS_ALG_ECC;
+        pubKeyInfo->keyAlg = alg;
         pubKeyInfo->keySize = keyLen;
         pubKeyInfo->nOrXSize = xSize;
         pubKeyInfo->eOrYSize = ySize;
@@ -545,7 +550,7 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
     return ret;
 }
 
-static int32_t X509PublicKeyToEcc(EVP_PKEY *pkey, struct HksBlob *eccPublicKey)
+static int32_t X509PublicKeyToEcc(const uint32_t alg, EVP_PKEY *pkey, struct HksBlob *eccPublicKey)
 {
     EC_KEY *ecKey = EVP_PKEY_get0_EC_KEY(pkey);
     if (ecKey == NULL) {
@@ -553,7 +558,7 @@ static int32_t X509PublicKeyToEcc(EVP_PKEY *pkey, struct HksBlob *eccPublicKey)
         return HKS_ERROR_NULL_POINTER;
     }
 
-    return EcKeyToPublicKey(ecKey, eccPublicKey);
+    return EcKeyToPublicKey(alg, ecKey, eccPublicKey);
 }
 #endif
 
@@ -651,7 +656,7 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
 }
 #endif
 
-int32_t TranslateFromX509PublicKey(const struct HksBlob *x509Key, struct HksBlob *publicKey)
+int32_t TranslateFromX509PublicKey(const uint32_t alg, const struct HksBlob *x509Key, struct HksBlob *publicKey)
 {
     if (x509Key == NULL || x509Key->data == NULL || x509Key->size == 0 || publicKey == NULL) {
         HKS_LOG_E("TranslateFromX509PublicKey invalid args");
@@ -674,8 +679,8 @@ int32_t TranslateFromX509PublicKey(const struct HksBlob *x509Key, struct HksBlob
         ret = HKS_ERROR_INVALID_ALGORITHM;
 #endif
     } else if (keyType == EVP_PKEY_EC) {
-#ifdef HKS_SUPPORT_ECC_C
-        ret = X509PublicKeyToEcc(pkey, publicKey);
+#if defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_SM2_C)
+        ret = X509PublicKeyToEcc(alg, pkey, publicKey);
 #else
         ret = HKS_ERROR_INVALID_ALGORITHM;
 #endif
