@@ -316,11 +316,13 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init001, sizeof(g_agreeParams01Init001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish001, sizeof(g_agreeParams01Finish001) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish001,
+    sizeof(g_agreeParams01Finish001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init001, sizeof(g_agreeParams02Init001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish001, sizeof(g_agreeParams02Finish001) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish001,
+    sizeof(g_agreeParams02Finish001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -369,11 +371,13 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init002, sizeof(g_agreeParams01Init002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish002, sizeof(g_agreeParams01Finish002) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish002,
+    sizeof(g_agreeParams01Finish002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init002, sizeof(g_agreeParams02Init002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish002, sizeof(g_agreeParams02Finish002) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish002,
+    sizeof(g_agreeParams02Finish002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01002, genParamSet, nullptr);
@@ -422,11 +426,13 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init003, sizeof(g_agreeParams01Init003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish003, sizeof(g_agreeParams01Finish003) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish003,
+    sizeof(g_agreeParams01Finish003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init003, sizeof(g_agreeParams02Init003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish003, sizeof(g_agreeParams02Finish003) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish003,
+    sizeof(g_agreeParams02Finish003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01003, genParamSet, nullptr);
@@ -475,11 +481,13 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree004, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init004, sizeof(g_agreeParams01Init004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish004, sizeof(g_agreeParams01Finish004) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish004,
+    sizeof(g_agreeParams01Finish004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init004, sizeof(g_agreeParams02Init004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish004, sizeof(g_agreeParams02Finish004) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish004,
+    sizeof(g_agreeParams02Finish004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01004, genParamSet, nullptr);
@@ -526,11 +534,13 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init005, sizeof(g_agreeParams01Init005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish005, sizeof(g_agreeParams01Finish005) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish005,
+    sizeof(g_agreeParams01Finish005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init005, sizeof(g_agreeParams02Init005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish005, sizeof(g_agreeParams02Finish005) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish005,
+    sizeof(g_agreeParams02Finish005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01005, genParamSet, nullptr);
@@ -577,11 +587,13 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init006, sizeof(g_agreeParams01Init006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish006, sizeof(g_agreeParams01Finish006) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish006,
+    sizeof(g_agreeParams01Finish006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init006, sizeof(g_agreeParams02Init006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish006, sizeof(g_agreeParams02Finish006) / sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish006,
+    sizeof(g_agreeParams02Finish006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01006, genParamSet, nullptr);
