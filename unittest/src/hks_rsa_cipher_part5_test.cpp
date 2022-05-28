@@ -189,15 +189,15 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test041, TestSize.Level1)
                               (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams041, sizeof(g_genParams041)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams041, sizeof(g_genParams041) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams041, sizeof(g_encryptParams041)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams041, sizeof(g_encryptParams041) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams041, sizeof(g_decryptParams041)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams041, sizeof(g_decryptParams041) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksRsaCipherTestCase(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);
@@ -221,15 +221,15 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test042, TestSize.Level1)
                               (uint8_t *)g_inData_32.c_str() };
 
     struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams042, sizeof(g_decryptParams042)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams042, sizeof(g_decryptParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksRsaCipherTestCase(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);
@@ -255,7 +255,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
@@ -267,7 +267,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
 
     /* 3. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Import Key */
@@ -288,7 +288,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
 
     /* 4. Decrypt Three Stage */
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&decryptParamSet, g_decryptParams042, sizeof(g_decryptParams042)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_decryptParams042, sizeof(g_decryptParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
@@ -328,7 +328,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
@@ -340,7 +340,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
 
     /* 3. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Import Key */
@@ -382,7 +382,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
@@ -394,7 +394,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
 
     /* 3. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_encryptParams042, sizeof(g_encryptParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Import Key */
