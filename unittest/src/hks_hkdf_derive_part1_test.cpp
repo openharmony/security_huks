@@ -546,16 +546,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams001, sizeof(g_hkdfParams001)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams001, sizeof(g_hkdfParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams001, sizeof(g_hkdfFinishParams001)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams001, sizeof(g_hkdfFinishParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -584,16 +584,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive002, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams002, sizeof(g_hkdfParams002)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams002, sizeof(g_hkdfParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams002, sizeof(g_hkdfFinishParams002)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams002, sizeof(g_hkdfFinishParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -622,16 +622,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams003, sizeof(g_hkdfParams003)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams003, sizeof(g_hkdfParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams003, sizeof(g_hkdfFinishParams003)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams003, sizeof(g_hkdfFinishParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -660,16 +660,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams004, sizeof(g_hkdfParams004)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams004, sizeof(g_hkdfParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams004, sizeof(g_hkdfFinishParams004)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams004, sizeof(g_hkdfFinishParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -698,16 +698,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive005, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams005, sizeof(g_hkdfParams005)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams005, sizeof(g_hkdfParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams005, sizeof(g_hkdfFinishParams005)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams005, sizeof(g_hkdfFinishParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -736,16 +736,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams006, sizeof(g_hkdfParams006)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams006, sizeof(g_hkdfParams006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams006, sizeof(g_hkdfFinishParams006)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams006, sizeof(g_hkdfFinishParams006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -774,16 +774,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams007, sizeof(g_hkdfParams007)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams007, sizeof(g_hkdfParams007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams007, sizeof(g_hkdfFinishParams007)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams007, sizeof(g_hkdfFinishParams007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -812,16 +812,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive008, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams008, sizeof(g_hkdfParams008)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams008, sizeof(g_hkdfParams008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams008, sizeof(g_hkdfFinishParams008)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams008, sizeof(g_hkdfFinishParams008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -850,16 +850,16 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive009, TestSize.Level0)
 
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. HKDF Three Stage */
     struct HksParamSet *hkdfParamSet = nullptr;
     struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams009, sizeof(g_hkdfParams009)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams009, sizeof(g_hkdfParams009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams009, sizeof(g_hkdfFinishParams009)/sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams009, sizeof(g_hkdfFinishParams009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
