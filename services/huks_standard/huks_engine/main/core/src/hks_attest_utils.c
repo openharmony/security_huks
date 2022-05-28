@@ -33,14 +33,8 @@ static const uint8_t g_p521SpkiHeader[] = {
     0x2b, 0x81, 0x04, 0x00, 0x23, 0x03, 0x81, 0x86, 0x00, 0x04
 };
 
-static uint8_t g_rsaSha256Tag[] = { 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B };
-DECLARE_OID(g_rsaSha256)
-
-static uint8_t g_rsaSha384Tag[] = { 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0C };
-DECLARE_OID(g_rsaSha384)
-
-static uint8_t g_rsaSha512Tag[] = { 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0D };
-DECLARE_OID(g_rsaSha512)
+static uint8_t g_rsaEnTag[] = { 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01 };
+DECLARE_OID(g_rsaEn)
 
 static uint8_t g_x25519Tag[] = { 0x06, 0x03, 0x2B, 0x65, 0x6E, 0x05, 0x00 };
 DECLARE_OID(g_x25519)
@@ -171,16 +165,8 @@ static int32_t ConstructKeySeq(struct HksBlob *out, const struct HksPubKeyInfo *
 
 static const struct HksBlob *GetRsaSignOid(uint32_t digest)
 {
-    switch (digest) {
-        case HKS_DIGEST_SHA256:
-            return &g_rsaSha256Oid;
-        case HKS_DIGEST_SHA384:
-            return &g_rsaSha384Oid;
-        case HKS_DIGEST_SHA512:
-            return &g_rsaSha512Oid;
-        default:
-            return NULL;
-    }
+    (void)digest;
+    return &g_rsaEnOid;
 }
 
 static int32_t GetRsaPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info,
