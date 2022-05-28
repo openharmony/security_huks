@@ -236,9 +236,47 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
     } else if (algParam->uint32Param == HKS_ALG_SM2) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_SM2, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
-        return HKS_SUCCESS;
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_DSA, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
-        return HKS_SUCCESS;
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode);
+    } else {
+        return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
+static int32_t AgreeAuth(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
+{
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("append agree get alg param failed!");
+        return ret;
+    }
+
+    if (algParam->uint32Param == HKS_ALG_ECDH) {
+        return HksThreeStageAuth(HKS_AUTH_ID_AGREE_ECC, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_X25519) {
+        return HksThreeStageAuth(HKS_AUTH_ID_AGREE_X25519, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_DH) {
+        return HksThreeStageAuth(HKS_AUTH_ID_AGREE_DH, keyNode);
+    } else {
+        return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
+static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
+{
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("append agree get alg param failed!");
+        return ret;
+    }
+
+    if (algParam->uint32Param == HKS_ALG_HMAC) {
+        return HksThreeStageAuth(HKS_AUTH_ID_MAC_HMAC, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_SM3) {
+        return HksThreeStageAuth(HKS_AUTH_ID_MAC_SM3, keyNode);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -258,7 +296,7 @@ static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksPar
     } else if (algParam->uint32Param == HKS_ALG_RSA) {
         return HksThreeStageAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
-        return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_CIPHER_SM4, keyNode);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -996,9 +1034,14 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
     uint32_t alg)
 {
     (void)paramSet;
+    int32_t ret = SignVerifyAuth(keyNode, keyNode->runtimeParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCoreSignVerifyThreeStageInit SignAuth fail ret : %d", ret);
+        return ret;
+    }
 
     struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
@@ -1018,14 +1061,8 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
     (void)alg;
     (void)paramSet;
 
-    int32_t ret = SignVerifyAuth(keyNode, keyNode->runtimeParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCoreSignVerifyThreeStageUpdate SignAuth fail ret : %d", ret);
-        return ret;
-    }
-
     struct HksParam *algParam = NULL;
-    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
@@ -1123,13 +1160,8 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
 int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
 {
-    int32_t ret = CipherAuth(keyNode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-
     struct HksParam *algParam = NULL;
-    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
@@ -1350,6 +1382,11 @@ int32_t HksCoreAgreeThreeStageInit(const struct HuksKeyNode *keyNode, const stru
     uint32_t alg)
 {
     (void)keyNode;
+	int32_t ret = AgreeAuth(keyNode, keyNode->runtimeParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCoreAgreeThreeStageInit AgreeAuth fail ret : %d", ret);
+        return ret;
+    }
     (void)paramSet;
     (void)alg;
 
@@ -1498,9 +1535,14 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
     uint32_t alg)
 {
     (void)paramSet;
+	int32_t ret = HmacAuth(keyNode, keyNode->runtimeParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCoreMacThreeStageInit MacAuth fail ret : %d", ret);
+        return ret;
+    }
 
     struct HksParam *ctxParam = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get ctx from keyNode failed!");
         return HKS_ERROR_BAD_STATE;

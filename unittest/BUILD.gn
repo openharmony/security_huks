@@ -60,6 +60,8 @@ ohos_unittest("huks_UT_test") {
     "src/hks_rsa_sign_verify_test_common.cpp",
     "src/hks_three_stage_test_common.c",
     "src/hks_x25519_agree_test.cpp",
+    "src/hks_auth_part_test.cpp",
+    "src/hks_auth_part_test_common.cpp",
   ]
 
   defines = [
