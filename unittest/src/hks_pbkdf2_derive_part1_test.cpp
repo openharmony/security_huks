@@ -632,13 +632,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive001, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params001, sizeof(g_pbkdf2Params001)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params001, sizeof(g_pbkdf2Params001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -646,7 +646,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams001,
-        sizeof(g_pbkdf2FinishParams001)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -676,13 +676,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive002, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params002, sizeof(g_pbkdf2Params002)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params002, sizeof(g_pbkdf2Params002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -690,7 +690,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams002,
-        sizeof(g_pbkdf2FinishParams002)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -720,13 +720,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive003, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params003, sizeof(g_pbkdf2Params003)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params003, sizeof(g_pbkdf2Params003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -734,7 +734,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams003,
-        sizeof(g_pbkdf2FinishParams003)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams003) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -764,13 +764,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive004, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params004, sizeof(g_pbkdf2Params004)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params004, sizeof(g_pbkdf2Params004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -778,7 +778,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive004, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams004,
-        sizeof(g_pbkdf2FinishParams004)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams004) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -808,13 +808,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive005, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params005, sizeof(g_pbkdf2Params005)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params005, sizeof(g_pbkdf2Params005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -822,7 +822,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams005,
-        sizeof(g_pbkdf2FinishParams005)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -852,13 +852,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive006, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params006, sizeof(g_pbkdf2Params006)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params006, sizeof(g_pbkdf2Params006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -866,7 +866,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams006,
-        sizeof(g_pbkdf2FinishParams006)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -896,13 +896,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive007, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params007, sizeof(g_pbkdf2Params007)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params007, sizeof(g_pbkdf2Params007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -910,7 +910,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive007, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams007,
-        sizeof(g_pbkdf2FinishParams007)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -940,13 +940,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive008, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params008, sizeof(g_pbkdf2Params008)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params008, sizeof(g_pbkdf2Params008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -954,7 +954,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive008, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams008,
-        sizeof(g_pbkdf2FinishParams008)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -984,13 +984,13 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive009, TestSize.Level0)
     int32_t ret = HKS_FAILURE;
     /* 1. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009)/sizeof(HksParam));
+    ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 2. PBKDF2 Three Stage */
     struct HksParamSet *pbkdf2ParamSet = nullptr;
     struct HksParamSet *pbkdf2FinishParamSet = nullptr;
-    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params009, sizeof(g_pbkdf2Params009)/sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params009, sizeof(g_pbkdf2Params009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     struct HksParam *saltParam = nullptr;
     HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
@@ -998,7 +998,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive009, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
     ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams009,
-        sizeof(g_pbkdf2FinishParams009)/sizeof(HksParam));
+        sizeof(g_pbkdf2FinishParams009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final

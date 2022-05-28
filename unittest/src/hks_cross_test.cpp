@@ -57,14 +57,14 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_aesGenParams,
-        sizeof(g_aesGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_aesGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_aesEncryParams, sizeof(g_aesEncryParams)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_aesEncryParams, sizeof(g_aesEncryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(en) failed.";
-    ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
     struct HksBlob inData = { g_inData.length(),
@@ -99,14 +99,14 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_aesGenParams,
-        sizeof(g_aesGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_aesGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_aesEncryParams, sizeof(g_aesEncryParams)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_aesEncryParams, sizeof(g_aesEncryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(en) failed.";
-    ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
     struct HksBlob inData = { g_inData.length(),
@@ -141,14 +141,14 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_rsaGenParams,
-        sizeof(g_rsaGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_rsaGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_rsaEncryParams, sizeof(g_rsaEncryParams)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_rsaEncryParams, sizeof(g_rsaEncryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(en) failed.";
-    ret = InitParamSet(&decryptParamSet, g_rsaDecryParams, sizeof(g_rsaDecryParams)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_rsaDecryParams, sizeof(g_rsaDecryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
     char tmpKey[] = "HksCrossTestRsaCipher001_new";
@@ -189,14 +189,14 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_rsaGenParams,
-        sizeof(g_rsaGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_rsaGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     struct HksParamSet *decryptParamSet = nullptr;
-    ret = InitParamSet(&encryptParamSet, g_rsaEncryParams, sizeof(g_rsaEncryParams)/sizeof(HksParam));
+    ret = InitParamSet(&encryptParamSet, g_rsaEncryParams, sizeof(g_rsaEncryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(en) failed.";
-    ret = InitParamSet(&decryptParamSet, g_rsaDecryParams, sizeof(g_rsaDecryParams)/sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSet, g_rsaDecryParams, sizeof(g_rsaDecryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
     char tmpKey[] = "HksCrossTestRsaCipher002_new";
@@ -238,14 +238,14 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_dsaSVGenParams,
-        sizeof(g_dsaSVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_dsaSVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_dsaSVSignParams, sizeof(g_dsaSVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_dsaSVSignParams, sizeof(g_dsaSVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_dsaSVVerParams, sizeof(g_dsaSVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_dsaSVVerParams, sizeof(g_dsaSVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestDsaSignVerify001_new";
@@ -282,14 +282,14 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_dsaSVGenParams,
-        sizeof(g_dsaSVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_dsaSVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_dsaSVSignParams, sizeof(g_dsaSVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_dsaSVSignParams, sizeof(g_dsaSVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_dsaSVVerParams, sizeof(g_dsaSVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_dsaSVVerParams, sizeof(g_dsaSVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestDsaSignVerify002_new";
@@ -327,14 +327,14 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_eccSVGenParams,
-        sizeof(g_eccSVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_eccSVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_eccSVSignParams, sizeof(g_eccSVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_eccSVSignParams, sizeof(g_eccSVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_eccSVVerParams, sizeof(g_eccSVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_eccSVVerParams, sizeof(g_eccSVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestEccSignVerify001_new";
@@ -371,14 +371,14 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_eccSVGenParams,
-        sizeof(g_eccSVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_eccSVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_eccSVSignParams, sizeof(g_eccSVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_eccSVSignParams, sizeof(g_eccSVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_eccSVVerParams, sizeof(g_eccSVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_eccSVVerParams, sizeof(g_eccSVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestEccSignVerify002_new";
@@ -415,14 +415,14 @@ HWTEST_F(HksCrossTest, HksCrossTestEd25519SignVerify001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_ed25519SVGenParams,
-        sizeof(g_ed25519SVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_ed25519SVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_ed25519SVSignParams, sizeof(g_ed25519SVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_ed25519SVSignParams, sizeof(g_ed25519SVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_ed25519SVVerParams, sizeof(g_ed25519SVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_ed25519SVVerParams, sizeof(g_ed25519SVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestEd25519SignVerify001_new";
@@ -459,14 +459,14 @@ HWTEST_F(HksCrossTest, HksCrossTestEd25519SignVerify002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_ed25519SVGenParams,
-        sizeof(g_ed25519SVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_ed25519SVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_ed25519SVSignParams, sizeof(g_ed25519SVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_ed25519SVSignParams, sizeof(g_ed25519SVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_ed25519SVVerParams, sizeof(g_ed25519SVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_ed25519SVVerParams, sizeof(g_ed25519SVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestEd25519SignVerify002_new";
@@ -503,14 +503,14 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaSignVerify001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_rsaSVGenParams,
-        sizeof(g_rsaSVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_rsaSVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_rsaSVSignParams, sizeof(g_rsaSVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_rsaSVSignParams, sizeof(g_rsaSVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_rsaSVVerParams, sizeof(g_rsaSVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_rsaSVVerParams, sizeof(g_rsaSVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestRsaSignVerify001_new";
@@ -547,14 +547,14 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaSignVerify002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_rsaSVGenParams,
-        sizeof(g_rsaSVGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_rsaSVGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    ret = InitParamSet(&signParamSet, g_rsaSVSignParams, sizeof(g_rsaSVSignParams)/sizeof(HksParam));
+    ret = InitParamSet(&signParamSet, g_rsaSVSignParams, sizeof(g_rsaSVSignParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(S) failed.";
-    ret = InitParamSet(&verifyParamSet, g_rsaSVVerParams, sizeof(g_rsaSVVerParams)/sizeof(HksParam));
+    ret = InitParamSet(&verifyParamSet, g_rsaSVVerParams, sizeof(g_rsaSVVerParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(V) failed.";
 
     char tmpKey[] = "HksCrossTestRsaSignVerify002_new";
@@ -592,17 +592,17 @@ HWTEST_F(HksCrossTest, HksCrossTestDhAgree001, TestSize.Level0)
     struct HksParamSet *finishParamSet01 = nullptr;
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
-    int32_t ret = InitParamSet(&initParamSet01, g_dhInitParams01, sizeof(g_dhInitParams01)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&initParamSet01, g_dhInitParams01, sizeof(g_dhInitParams01) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_dhFinishParams01, sizeof(g_dhFinishParams01)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_dhFinishParams01, sizeof(g_dhFinishParams01) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
-    ret = InitParamSet(&initParamSet02, g_dhInitParams02, sizeof(g_dhInitParams02)/sizeof(HksParam));
+    ret = InitParamSet(&initParamSet02, g_dhInitParams02, sizeof(g_dhInitParams02) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_dhFinishParams02, sizeof(g_dhFinishParams02)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_dhFinishParams02, sizeof(g_dhFinishParams02) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksCrossTestAgreeGenerate(&g_dhKeyAlias01, &g_dhKeyAlias02, genParamSet,
-        g_dhGenParams, sizeof(g_dhGenParams)/sizeof(HksParam));
+        g_dhGenParams, sizeof(g_dhGenParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgreeGenerate failed.";
 
     uint8_t tmpPub01[HKS_DH_KEY_SIZE_4096] = {0};
@@ -640,17 +640,17 @@ HWTEST_F(HksCrossTest, HksCrossTestEcdhAgree001, TestSize.Level0)
     struct HksParamSet *finishParamSet01 = nullptr;
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
-    int32_t ret = InitParamSet(&initParamSet01, g_ecdhInitParams01, sizeof(g_ecdhInitParams01)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&initParamSet01, g_ecdhInitParams01, sizeof(g_ecdhInitParams01) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_ecdhFinishParams01, sizeof(g_ecdhFinishParams01)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_ecdhFinishParams01, sizeof(g_ecdhFinishParams01) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
-    ret = InitParamSet(&initParamSet02, g_ecdhInitParams02, sizeof(g_ecdhInitParams02)/sizeof(HksParam));
+    ret = InitParamSet(&initParamSet02, g_ecdhInitParams02, sizeof(g_ecdhInitParams02) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_ecdhFinishParams02, sizeof(g_ecdhFinishParams02)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_ecdhFinishParams02, sizeof(g_ecdhFinishParams02) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksCrossTestAgreeGenerate(&g_ecdhKeyAlias01, &g_ecdhKeyAlias02, genParamSet,
-        g_ecdhGenParams, sizeof(g_ecdhGenParams)/sizeof(HksParam));
+        g_ecdhGenParams, sizeof(g_ecdhGenParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgreeGenerate failed.";
 
     uint8_t tmpPub01[HKS_ECC_KEY_SIZE_224] = {0};
@@ -688,17 +688,17 @@ HWTEST_F(HksCrossTest, HksCrossTestX25519Agree001, TestSize.Level0)
     struct HksParamSet *finishParamSet01 = nullptr;
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
-    int32_t ret = InitParamSet(&initParamSet01, g_x25519InitParams01, sizeof(g_x25519InitParams01)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&initParamSet01, g_x25519InitParams01, sizeof(g_x25519InitParams01) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
-    ret = InitParamSet(&finishParamSet01, g_x25519FinishParams01, sizeof(g_x25519FinishParams01)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet01, g_x25519FinishParams01, sizeof(g_x25519FinishParams01) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
-    ret = InitParamSet(&initParamSet02, g_x25519InitParams02, sizeof(g_x25519InitParams02)/sizeof(HksParam));
+    ret = InitParamSet(&initParamSet02, g_x25519InitParams02, sizeof(g_x25519InitParams02) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_x25519FinishParams02, sizeof(g_x25519FinishParams02)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet02, g_x25519FinishParams02, sizeof(g_x25519FinishParams02) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksCrossTestAgreeGenerate(&g_x25519KeyAlias01, &g_x25519KeyAlias02, genParamSet,
-        g_x25519GenParams, sizeof(g_x25519GenParams)/sizeof(HksParam));
+        g_x25519GenParams, sizeof(g_x25519GenParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgreeGenerate failed.";
 
     uint8_t tmpPub01[HKS_CURVE25519_KEY_SIZE_256] = {0};
@@ -734,11 +734,11 @@ HWTEST_F(HksCrossTest, HksCrossTestHkdfDerive001, TestSize.Level0)
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet = nullptr;
     struct HksParamSet *finishParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_hkdfGenParams, sizeof(g_hkdfGenParams)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_hkdfGenParams, sizeof(g_hkdfGenParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-    ret = InitParamSet(&initParamSet, g_hkdfInitParams, sizeof(g_hkdfInitParams)/sizeof(HksParam));
+    ret = InitParamSet(&initParamSet, g_hkdfInitParams, sizeof(g_hkdfInitParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update) failed.";
-    ret = InitParamSet(&finishParamSet, g_hkdfFinishParams, sizeof(g_hkdfFinishParams)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet, g_hkdfFinishParams, sizeof(g_hkdfFinishParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish) failed.";
 
     char tmpKeyAlias[] = "HksCrossTestHkdfDerive001";
@@ -763,11 +763,11 @@ HWTEST_F(HksCrossTest, HksCrossTestPbkdf2Derive001, TestSize.Level0)
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet = nullptr;
     struct HksParamSet *finishParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, g_pbkdf2GenParams, sizeof(g_pbkdf2GenParams)/sizeof(HksParam));
+    int32_t ret = InitParamSet(&genParamSet, g_pbkdf2GenParams, sizeof(g_pbkdf2GenParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-    ret = InitParamSet(&initParamSet, g_pbkdf2InitParams, sizeof(g_pbkdf2InitParams)/sizeof(HksParam));
+    ret = InitParamSet(&initParamSet, g_pbkdf2InitParams, sizeof(g_pbkdf2InitParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update) failed.";
-    ret = InitParamSet(&finishParamSet, g_pbkdf2FinishParams, sizeof(g_pbkdf2FinishParams)/sizeof(HksParam));
+    ret = InitParamSet(&finishParamSet, g_pbkdf2FinishParams, sizeof(g_pbkdf2FinishParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish) failed.";
 
     struct HksParam *saltParam = nullptr;
@@ -798,11 +798,11 @@ HWTEST_F(HksCrossTest, HksCrossTestHmac001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksCrossTestGenerateKey(&keyAlias, g_hmacGenParams,
-        sizeof(g_hmacGenParams)/sizeof(HksParam), genParamSet);
+        sizeof(g_hmacGenParams) / sizeof(HksParam), genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *hmacParamSet = nullptr;
-    ret = InitParamSet(&hmacParamSet, g_hmacParams, sizeof(g_hmacParams)/sizeof(HksParam));
+    ret = InitParamSet(&hmacParamSet, g_hmacParams, sizeof(g_hmacParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(HMAC) failed.";
 
     ret = HksCrossTestHmac(&keyAlias, hmacParamSet);
