@@ -1107,7 +1107,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams2[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -1173,7 +1173,7 @@ static const struct GenerateKeyCaseParam g_testHmacParams[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ALGORITHM,
         {
