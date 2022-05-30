@@ -61,7 +61,7 @@ int32_t HksAuthCipherTestDecrypt(const struct HksBlob *keyAlias,
 int32_t HksAuthCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
 int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
-        struct HksParamSet *hmacParamSet);
+    struct HksParamSet *hmacParamSet);
 }
 #endif // HKS_AUTH_PART_TEST_COMMON_H
 
