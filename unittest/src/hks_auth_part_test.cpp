@@ -20,7 +20,6 @@
 
 using namespace testing::ext;
 namespace Unittest::AuthPartTest {
-
 class HksAuthPartTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -944,7 +943,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams1[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -1010,7 +1009,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams2[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -1092,7 +1091,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams2[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -1126,7 +1125,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams2[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testHmacParams[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -1142,7 +1141,7 @@ static const struct GenerateKeyCaseParam g_testHmacParams[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -1158,7 +1157,7 @@ static const struct GenerateKeyCaseParam g_testHmacParams[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -1534,7 +1533,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest002, TestSize.Level0)
         sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAuthCipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AesCipherCase failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -2064,5 +2063,4 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest004, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
-
 }

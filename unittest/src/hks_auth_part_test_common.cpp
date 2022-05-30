@@ -328,10 +328,7 @@ int32_t HksAuthCipherTest(const struct HksBlob *keyAlias, struct HksParamSet *ge
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
     char tmpInData[] = "AUTH_ECB_INDATA_1";
-    struct HksBlob inData = {
-        g_inData.length(),
-        (uint8_t *)g_inData.c_str()
-    };
+    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
 
     struct HksParam *modeParam = nullptr;
     HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
@@ -437,6 +434,4 @@ int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genP
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     return ret;
 }
-
 } // namespace Unittest::AuthPartTest
-
