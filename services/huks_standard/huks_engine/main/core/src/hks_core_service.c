@@ -330,8 +330,6 @@ static int32_t CipherAuth(const struct HksKeyNode *keyNode, const struct HksPara
         return HksAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode, paramSet);
     } else if (algParam->uint32Param == HKS_ALG_RSA) {
         return HksAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_SM4) {
-        return HksAuth(HKS_AUTH_ID_CIPHER_SM4, keyNode, paramSet);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -342,7 +340,7 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append signverify get alg param failed!");
+        HKS_LOG_E("append cipher get alg param failed!");
         return ret;
     }
 
@@ -351,49 +349,9 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
         return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode, paramSet);
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
-        return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_DSA, keyNode, paramSet);
+        return HKS_SUCCESS;
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
-        return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_SM2) {
-        return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_SM2, keyNode, paramSet);
-    } else {
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
-}
-
-static int32_t AgreeAuth(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
-{
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append agree get alg param failed!");
-        return ret;
-    }
-
-    if (algParam->uint32Param == HKS_ALG_ECDH) {
-        return HksAuth(HKS_AUTH_ID_AGREE_ECC, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_X25519) {
-        return HksAuth(HKS_AUTH_ID_AGREE_X25519, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_DH) {
-        return HksAuth(HKS_AUTH_ID_AGREE_DH, keyNode, paramSet);
-    } else {
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
-}
-
-static int32_t HmacAuth(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
-{
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append hmac get alg param failed!");
-        return ret;
-    }
-
-    if (algParam->uint32Param == HKS_ALG_HMAC) {
-        return HksAuth(HKS_AUTH_ID_MAC_HMAC, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_SM3) {
-        return HksAuth(HKS_AUTH_ID_MAC_SM3, keyNode, paramSet);
+        return HKS_SUCCESS;
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -668,11 +626,6 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
         HKS_LOG_E("agree key generate keynode failed");
         return HKS_ERROR_BAD_STATE;
     }
-    
-    ret = AgreeAuth(privateKeyNode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
 
     struct HksBlob key = { 0, NULL };
     ret = HksGetRawKey(privateKeyNode->paramSet, &key);
@@ -748,9 +701,9 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     }
 
     do {
-        ret = HmacAuth(keyNode, paramSet);
+        ret = HksAuth(HKS_AUTH_ID_MAC_HMAC, keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HmacAuth failed!");
+            HKS_LOG_E("mac auth failed!");
             break;
         }
 
@@ -982,7 +935,13 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         }
     }
 
-    if (i == size || ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
+        HKS_LOG_E("CoreInit failed, ret : %d", ret);
+        return ret;
+    }
+
+    if (i == size) {
         HksDeleteKeyNode(keyNode->handle);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
         return HKS_FAILURE;
