@@ -58,7 +58,7 @@ int32_t HksAuthCipherTestEncrypt(const struct HksBlob *keyAlias,
 int32_t HksAuthCipherTestDecrypt(const struct HksBlob *keyAlias,
     const struct HksParamSet *decryptParamSet, const struct HksBlob *cipherText, struct HksBlob *plainText,
     const struct HksBlob *inData);
-int32_t HksAuthCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+int32_t HksAuthCipherTest(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
 int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *hmacParamSet);

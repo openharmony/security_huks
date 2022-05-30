@@ -324,7 +324,7 @@ int32_t HksAuthCipherTestDecrypt(const struct HksBlob *keyAlias,
 
     return HKS_SUCCESS;
 }
-int32_t HksAuthCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+int32_t HksAuthCipherTest(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
     char tmpInData[] = "AUTH_ECB_INDATA_1";
