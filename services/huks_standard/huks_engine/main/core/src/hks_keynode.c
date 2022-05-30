@@ -209,7 +209,7 @@ struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
     struct HuksKeyNode *keyNode = NULL;
     HksMutexLock(HksCoreGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
-        if ((keyNode != NULL) && (keyNode->handle == handle)) {
+        if (keyNode->handle == handle) {
             HksMutexUnlock(HksCoreGetHuksMutex());
             return keyNode;
         }
@@ -319,7 +319,7 @@ void HksDeleteKeyNode(uint64_t handle)
     struct HuksKeyNode *keyNode = NULL;
     HksMutexLock(HksCoreGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
-        if ((keyNode != NULL) && (keyNode->handle == handle)) {
+        if (keyNode->handle == handle) {
             RemoveDoubleListNode(&keyNode->listHead);
             FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
             FreeRuntimeParamSet(&keyNode->runtimeParamSet);
