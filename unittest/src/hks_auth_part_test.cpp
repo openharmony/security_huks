@@ -84,7 +84,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -100,7 +100,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -116,7 +116,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_SUCCESS,
         {
@@ -132,7 +132,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_SUCCESS,
         {
@@ -148,7 +148,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         5,
         HKS_SUCCESS,
         {
@@ -164,7 +164,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         6,
         HKS_SUCCESS,
         {
@@ -180,7 +180,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         7,
         HKS_SUCCESS,
         {
@@ -196,7 +196,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         8,
         HKS_SUCCESS,
         {
@@ -212,7 +212,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         9,
         HKS_SUCCESS,
         {
@@ -228,7 +228,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         10,
         HKS_SUCCESS,
         {
@@ -244,7 +244,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         11,
         HKS_SUCCESS,
         {
@@ -260,7 +260,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         12,
         HKS_SUCCESS,
         {
@@ -276,7 +276,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         13,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -292,7 +292,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         14,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -308,7 +308,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         15,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -324,7 +324,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         16,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -340,7 +340,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         17,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -356,7 +356,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         18,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -372,7 +372,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         19,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -388,7 +388,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
         },
     },
 
-    { 
+    {
         20,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -406,7 +406,7 @@ static const struct GenerateKeyCaseParam g_testGenKeyParams[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -422,7 +422,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -438,7 +438,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -454,7 +454,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_SUCCESS,
         {
@@ -470,7 +470,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_SUCCESS,
         {
@@ -486,7 +486,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
         },
     },
 
-    { 
+    {
         5,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -502,7 +502,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
         },
     },
 
-    { 
+    {
         6,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -520,7 +520,7 @@ static const struct GenerateKeyCaseParam g_testSignKeyParams[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -536,7 +536,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -552,7 +552,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -568,7 +568,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_SUCCESS,
         {
@@ -584,7 +584,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_SUCCESS,
         {
@@ -600,7 +600,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
         },
     },
 
-    { 
+    {
         5,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -616,7 +616,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
         },
     },
 
-    { 
+    {
         6,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -634,7 +634,7 @@ static const struct GenerateKeyCaseParam g_testVerifyKeyParams[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testEncryptKeyParams[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -650,7 +650,7 @@ static const struct GenerateKeyCaseParam g_testEncryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -666,7 +666,7 @@ static const struct GenerateKeyCaseParam g_testEncryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -682,7 +682,7 @@ static const struct GenerateKeyCaseParam g_testEncryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -698,7 +698,7 @@ static const struct GenerateKeyCaseParam g_testEncryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -716,7 +716,7 @@ static const struct GenerateKeyCaseParam g_testEncryptKeyParams[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testDecryptKeyParams[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -732,7 +732,7 @@ static const struct GenerateKeyCaseParam g_testDecryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -748,7 +748,7 @@ static const struct GenerateKeyCaseParam g_testDecryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -764,7 +764,7 @@ static const struct GenerateKeyCaseParam g_testDecryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -780,7 +780,7 @@ static const struct GenerateKeyCaseParam g_testDecryptKeyParams[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -798,7 +798,7 @@ static const struct GenerateKeyCaseParam g_testDecryptKeyParams[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testAgreeInitParams1[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -814,7 +814,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams1[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -830,7 +830,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams1[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -846,7 +846,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams1[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -862,7 +862,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams1[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -880,7 +880,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams1[] = {
 };
 
 static const struct GenerateKeyCaseParam g_testAgreeFinishParams1[] = {
-    { 
+    {
         0,
         HKS_SUCCESS,
         {
@@ -896,7 +896,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams1[] = {
         },
     },
 
-    { 
+    {
         1,
         HKS_SUCCESS,
         {
@@ -912,7 +912,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams1[] = {
         },
     },
 
-    { 
+    {
         2,
         HKS_SUCCESS,
         {
@@ -928,7 +928,7 @@ static const struct GenerateKeyCaseParam g_testAgreeFinishParams1[] = {
         },
     },
 
-    { 
+    {
         3,
         HKS_ERROR_INVALID_ARGUMENT,
         {
@@ -1026,7 +1026,7 @@ static const struct GenerateKeyCaseParam g_testAgreeInitParams2[] = {
         },
     },
 
-    { 
+    {
         4,
         HKS_ERROR_INVALID_ALGORITHM,
         {
@@ -1430,7 +1430,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksAuthPartTest.HksAuthSignVerifyTest007
+ * @tc.name: HksAuthPartTest.HksAuthSignVerifyTest006
  * @tc.desc: alg-ECC pur-Agree.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
@@ -1570,7 +1570,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest003, TestSize.Level0)
         sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAuthCipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Sm4CipherCase failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -1606,7 +1606,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest004, TestSize.Level0)
         sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAuthCipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "AESCipherCase failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -1643,7 +1643,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest005, TestSize.Level0)
         sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAuthCipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ALGORITHM) << "DSACipherCase failed.";
 
     HksFreeParamSet(&genParamSet);
