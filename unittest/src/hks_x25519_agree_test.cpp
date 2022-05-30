@@ -430,12 +430,12 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree001, TestSize.Level0)
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init001, sizeof(g_agreeParams01Init001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish001,
-    sizeof(g_agreeParams01Finish001) / sizeof(HksParam));
+        sizeof(g_agreeParams01Finish001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init001, sizeof(g_agreeParams02Init001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish001,
-    sizeof(g_agreeParams02Finish001) / sizeof(HksParam));
+        sizeof(g_agreeParams02Finish001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -485,12 +485,12 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree002, TestSize.Level0)
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init002, sizeof(g_agreeParams01Init002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish002,
-    sizeof(g_agreeParams01Finish002) / sizeof(HksParam));
+        sizeof(g_agreeParams01Finish002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init002, sizeof(g_agreeParams02Init002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish002,
-    sizeof(g_agreeParams02Finish002) / sizeof(HksParam));
+        sizeof(g_agreeParams02Finish002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01002, genParamSet, nullptr);
