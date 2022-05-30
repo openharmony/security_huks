@@ -669,7 +669,7 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
         return HKS_ERROR_BAD_STATE;
     }
     
-	ret = AgreeAuth(privateKeyNode, paramSet);
+    ret = AgreeAuth(privateKeyNode, paramSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -748,7 +748,7 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     }
 
     do {
-		ret = HmacAuth(keyNode, paramSet);
+        ret = HmacAuth(keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HmacAuth failed!");
             break;

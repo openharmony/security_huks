@@ -1382,7 +1382,7 @@ int32_t HksCoreAgreeThreeStageInit(const struct HuksKeyNode *keyNode, const stru
     uint32_t alg)
 {
     (void)keyNode;
-	int32_t ret = AgreeAuth(keyNode, keyNode->runtimeParamSet);
+    int32_t ret = AgreeAuth(keyNode, keyNode->runtimeParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCoreAgreeThreeStageInit AgreeAuth fail ret : %d", ret);
         return ret;
@@ -1535,7 +1535,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
     uint32_t alg)
 {
     (void)paramSet;
-	int32_t ret = HmacAuth(keyNode, keyNode->runtimeParamSet);
+    int32_t ret = HmacAuth(keyNode, keyNode->runtimeParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCoreMacThreeStageInit MacAuth fail ret : %d", ret);
         return ret;

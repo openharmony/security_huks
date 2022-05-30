@@ -1191,7 +1191,6 @@ static const struct GenerateKeyCaseParam g_testHmacParams[] = {
     },
 };
 
-
 /**
  * @tc.name: HksAuthPartTest.HksAuthSignVerifyTest001
  * @tc.desc: alg-RSA pur-Sign.
@@ -1199,7 +1198,7 @@ static const struct GenerateKeyCaseParam g_testHmacParams[] = {
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest001, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest001";
+    const char *keyAliasString = "HksAuthSignVerifyTest001";
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
@@ -1238,7 +1237,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest001, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest002, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest002";
+    const char *keyAliasString = "HksAuthSignVerifyTest002";
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
@@ -1277,7 +1276,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest002, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest003, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest003";
+    const char *keyAliasString = "HksAuthSignVerifyTest003";
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
@@ -1316,7 +1315,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest003, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest004, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest004";
+    const char *keyAliasString = "HksAuthSignVerifyTest004";
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
@@ -1356,7 +1355,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest004, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest005, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest005";
+    const char *keyAliasString = "HksAuthSignVerifyTest005";
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
@@ -1397,7 +1396,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest005, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest006, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest006";
+    const char *keyAliasString = "HksAuthSignVerifyTest006";
     uint32_t genIndex = 15;
     uint32_t signIndex = 5;
     struct HksParamSet *genParamSet = nullptr;
@@ -1431,14 +1430,14 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksAuthPartTest.HksAuthSignVerifyTest006
+ * @tc.name: HksAuthPartTest.HksAuthSignVerifyTest007
  * @tc.desc: alg-ECC pur-Agree.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
 HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest007, TestSize.Level0)
 {
-    const char *keyAliasString = "HksSignVerifyKeyAliasTest007";
+    const char *keyAliasString = "HksAuthSignVerifyTest007";
     uint32_t genIndex = 16;
     uint32_t cipherIndex = 6;
     struct HksParamSet *genParamSet = nullptr;
@@ -1478,7 +1477,7 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest007, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthCipherTest001, TestSize.Level0)
 {
-    char tmpKeyAlias[] = "HksRSACipherKeyAliasTest001";
+    char tmpKeyAlias[] = "HksAuthCipherTest001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksBlob inData = { g_inData.length(),
                               (uint8_t *)g_inData.c_str() };
@@ -1515,7 +1514,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest001, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthCipherTest002, TestSize.Level0)
 {
-    char tmpKeyAlias[] = "HksAesCipherKeyAliasTest002";
+    char tmpKeyAlias[] = "HksAuthCipherTest002";
     uint32_t genIndex = 6;
     uint32_t cipherIndex = 1;
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -1551,7 +1550,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest002, TestSize.Level0)
 */
 HWTEST_F(HksAuthPartTest, HksAuthCipherTest003, TestSize.Level0)
 {
-    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest003";
+    char tmpKeyAlias[] = "HksAuthCipherTest003";
     uint32_t genIndex = 7;
     uint32_t cipherIndex = 2;
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -1588,7 +1587,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest003, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthCipherTest004, TestSize.Level0)
 {
-    char tmpKeyAlias[] = "HksRSACipherKeyAliasTest004";
+    char tmpKeyAlias[] = "HksAuthCipherTest004";
     uint32_t genIndex = 13;
     uint32_t cipherIndex = 3;
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -1625,7 +1624,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest004, TestSize.Level0)
  */
 HWTEST_F(HksAuthPartTest, HksAuthCipherTest005, TestSize.Level0)
 {
-    char tmpKeyAlias[] = "HksRSACipherKeyAliasTest005";
+    char tmpKeyAlias[] = "HksAuthCipherTest005";
     uint32_t genIndex = 14;
     uint32_t cipherIndex = 4;
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
@@ -1654,7 +1653,7 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest005, TestSize.Level0)
 
 
 /**
- * @tc.name: HksDhAgreeTest.HksX25519Agree001
+ * @tc.name: HksAuthPartTest.HksAuthAgreeTest001
  * @tc.desc: alg-X25519, pur-AGREE
  * @tc.type: FUNC
  */
@@ -1714,7 +1713,7 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksDhAgreeTest.HksECCAgree002
+ * @tc.name: HksAuthPartTest.HksAuthAgreeTest002
  * @tc.desc: alg-ECC, pur-AGREE
  * @tc.type: FUNC
  */
@@ -1775,7 +1774,7 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest002, TestSize.Level0)
 
 
 /**
- * @tc.name: HksDhAgreeTest.HksDhAgree003
+ * @tc.name: HksAuthPartTest.HksAuthAgreeTest003
  * @tc.desc: alg-DH, pur-AGREE
  * @tc.type: FUNC
  */
@@ -1835,7 +1834,7 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksDhAgreeTest.HksDhAgree004
+ * @tc.name: HksAuthPartTest.HksAuthAgreeTest004
  * @tc.desc: alg-ECC, pur-Sign
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
@@ -1895,7 +1894,7 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest004, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksDhAgreeTest.HksDhAgree005
+ * @tc.name: HksAuthPartTest.HksAuthAgreeTest005
  * @tc.desc: alg-DSA, pur-AGREE
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
@@ -1955,7 +1954,7 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksHmacTest.HksAuthHmacTest001
+ * @tc.name: HksAuthPartTest.HksAuthHmacTest001
  * @tc.desc: alg-HMAC pur-MAC dig-sha1.
  * @tc.type: FUNC
  */
@@ -1963,7 +1962,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest001, TestSize.Level0)
 {
     uint32_t genIndex = 11;
     uint32_t hmacIndex = 0;
-    char tmpKeyAlias[] = "HksHmacKeyAliasTest001";
+    char tmpKeyAlias[] = "HksAuthHmacTest001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
@@ -1983,7 +1982,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest001, TestSize.Level0)
 
 #ifdef _USE_OPENSSL_
 /**
- * @tc.name: HksHmacTest.HksAuthHmacTest002
+ * @tc.name: HksAuthPartTest.HksAuthHmacTest002
  * @tc.desc: alg-SM3 pur-MAC dig-sm3.
  * @tc.type: FUNC
  */
@@ -1991,7 +1990,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest002, TestSize.Level0)
 {
     uint32_t genIndex = 12;
     uint32_t hmacIndex = 1;
-    char tmpKeyAlias[] = "HksSM3KeyAliasTest002";
+    char tmpKeyAlias[] = "HksAuthHmacTest002";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
@@ -2011,7 +2010,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest002, TestSize.Level0)
 #endif
 
 /**
- * @tc.name: HksHmacTest.HksAuthHmacTest003
+ * @tc.name: HksAuthPartTest.HksAuthHmacTest003
  * @tc.desc: alg-HMAC pur-MAC dig-MD5.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
@@ -2020,7 +2019,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest003, TestSize.Level0)
 {
     uint32_t genIndex = 19;
     uint32_t hmacIndex = 2;
-    char tmpKeyAlias[] = "HksSM3KeyAliasTest003";
+    char tmpKeyAlias[] = "HksAuthHmacTest003";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
@@ -2039,7 +2038,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest003, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksHmacTest.HksAuthHmacTest004
+ * @tc.name: HksAuthPartTest.HksAuthHmacTest004
  * @tc.desc: alg-AES pur-Encrypt dig-NONE.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
@@ -2048,7 +2047,7 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest004, TestSize.Level0)
 {
     uint32_t genIndex = 20;
     uint32_t hmacIndex = 3;
-    char tmpKeyAlias[] = "HksSM3KeyAliasTest004";
+    char tmpKeyAlias[] = "HksAuthHmacTest004";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
