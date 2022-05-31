@@ -1790,7 +1790,7 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest003, TestSize.Level0)
         sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_testAgreeInitParams1[agreeIndex].params,
-        sizeof(g_testAgreeInitParams1[agreeIndex].params)  / sizeof(HksParam));
+        sizeof(g_testAgreeInitParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_testAgreeFinishParams1[agreeIndex].params,
         sizeof(g_testAgreeFinishParams1[agreeIndex].params) / sizeof(HksParam));
