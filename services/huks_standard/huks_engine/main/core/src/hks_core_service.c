@@ -943,7 +943,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
 
     if (i == size) {
         HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        HKS_LOG_E("don't found purpose, pur : %u", pur);
         return HKS_FAILURE;
     }
 
@@ -990,9 +990,15 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         }
     }
 
-    if (i == size || ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
+        HKS_LOG_E("CoreUpdate failed, ret : %d", ret);
+        return ret;
+    }
+
+    if (i == size) {
         HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        HKS_LOG_E("don't found purpose, pur : %u", pur);
         return HKS_FAILURE;
     }
     return ret;
