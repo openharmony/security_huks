@@ -18,16 +18,6 @@
 
 #include <string>
 namespace Unittest::AuthPartTest {
-static const uint32_t IV_SIZE = 16;
-static const uint32_t AAD_SIZE = 16;
-static const uint32_t NONCE_SIZE = 12;
-static const uint32_t AEAD_SIZE = 16;
-
-static uint8_t IV[IV_SIZE] = {0};
-static uint8_t AAD[AAD_SIZE] = {0};
-static uint8_t NONCE[NONCE_SIZE] = {0};
-static uint8_t AEAD[AEAD_SIZE] = {0};
-
 int HksAuthSignVerifyTest001(void);
     
 int HksAuthSignVerifyTest002(void);
@@ -41,34 +31,6 @@ int HksAuthSignVerifyTest005(void);
 int HksAuthSignVerifyTest006(void);
 
 int HksAuthSignVerifyTest007(void);
-
-int HksAuthCipherTest001(void);
-
-int HksAuthCipherTest002(void);
-
-int HksAuthCipherTest003(void);
-
-int HksAuthCipherTest004(void);
-
-int HksAuthCipherTest005(void);
-
-int HksAuthAgreeTest001(void);
-
-int HksAuthAgreeTest002(void);
-
-int HksAuthAgreeTest003(void);
-
-int HksAuthAgreeTest004(void);
-
-int HksAuthAgreeTest005(void);
-
-int HksAuthHmacTest001(void);
-
-int HksAuthHmacTest002(void);
-
-int HksAuthHmacTest003(void);
-
-int HksAuthHmacTest004(void);
 }
 #endif // HKS_AUTH_PART_TEST_H
 
