@@ -1160,6 +1160,7 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
 int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
 {
+    (void)paramSet;
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
