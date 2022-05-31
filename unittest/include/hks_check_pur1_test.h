@@ -13,24 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef HKS_AUTH_PART_TEST_H
-#define HKS_AUTH_PART_TEST_H
+#ifndef HKS_CHECK_PUR_TEST_H
+#define HKS_CHECK_PUR_TEST_H
 
 #include <string>
-namespace Unittest::AuthPartTest {
-int HksAuthSignVerifyTest001(void);
+#include <vector>
+#include "hks_three_stage_test_common.h"
+namespace Unittest::HksCheckPurposeTest {
+struct TestPurposeCaseParams {
+    std::vector<HksParam> genParams;
+    std::vector<HksParam> initParams;
+    HksErrorCode initResult = HksErrorCode::HKS_SUCCESS;
+};
+
+int HksCheckPurposeTest001(void);
     
-int HksAuthSignVerifyTest002(void);
-    
-int HksAuthSignVerifyTest003(void);
-
-int HksAuthSignVerifyTest004(void);
-
-int HksAuthSignVerifyTest005(void);
-
-int HksAuthSignVerifyTest006(void);
-
-int HksAuthSignVerifyTest007(void);
+int HksCheckPurposeTest002(void);
 }
-#endif // HKS_AUTH_PART_TEST_H
+#endif // HKS_CHECK_PUR_TEST_H
 
