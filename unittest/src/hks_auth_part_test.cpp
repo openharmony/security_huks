@@ -1206,13 +1206,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest001, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[index].params,
-        sizeof(g_testGenKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[index].params,
-        sizeof(g_testSignKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[index].params,
-        sizeof(g_testVerifyKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1245,13 +1245,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[index].params,
-        sizeof(g_testGenKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[index].params,
-        sizeof(g_testSignKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[index].params,
-        sizeof(g_testVerifyKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1284,13 +1284,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest003, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[index].params,
-        sizeof(g_testGenKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[index].params,
-        sizeof(g_testSignKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[index].params,
-        sizeof(g_testVerifyKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1323,13 +1323,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest004, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[index].params,
-        sizeof(g_testGenKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[index].params,
-        sizeof(g_testSignKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[index].params,
-        sizeof(g_testVerifyKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1363,13 +1363,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest005, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[index].params,
-        sizeof(g_testGenKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[index].params,
-        sizeof(g_testSignKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[index].params,
-        sizeof(g_testVerifyKeyParams[index].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[index].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1405,13 +1405,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest006, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[signIndex].params,
-        sizeof(g_testSignKeyParams[signIndex].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[signIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[signIndex].params,
-        sizeof(g_testVerifyKeyParams[signIndex].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[signIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1446,13 +1446,13 @@ HWTEST_F(HksAuthPartTest, HksAuthSignVerifyTest007, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&signParamSet, g_testSignKeyParams[cipherIndex].params,
-        sizeof(g_testSignKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testSignKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_testVerifyKeyParams[cipherIndex].params,
-        sizeof(g_testVerifyKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testVerifyKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
@@ -1485,17 +1485,17 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest001, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_testEncryptKeyParams[cipherIndex].params,
-        sizeof(g_testEncryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testEncryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_testDecryptKeyParams[cipherIndex].params,
-        sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testDecryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksRsaCipherTestCase(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);
@@ -1520,17 +1520,17 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest002, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_testEncryptKeyParams[cipherIndex].params,
-        sizeof(g_testEncryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testEncryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_testDecryptKeyParams[cipherIndex].params,
-        sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testDecryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -1556,17 +1556,17 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest003, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_testEncryptKeyParams[cipherIndex].params,
-        sizeof(g_testEncryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testEncryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_testDecryptKeyParams[cipherIndex].params,
-        sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testDecryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -1592,17 +1592,17 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest004, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_testEncryptKeyParams[cipherIndex].params,
-        sizeof(g_testEncryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testEncryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_testDecryptKeyParams[cipherIndex].params,
-        sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testDecryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -1629,17 +1629,17 @@ HWTEST_F(HksAuthPartTest, HksAuthCipherTest005, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
     ret = InitParamSet(&encryptParamSet, g_testEncryptKeyParams[cipherIndex].params,
-        sizeof(g_testEncryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testEncryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_testDecryptKeyParams[cipherIndex].params,
-        sizeof(g_testDecryptKeyParams[cipherIndex].params)/sizeof(HksParam));
+        sizeof(g_testDecryptKeyParams[cipherIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAuthCipherTest(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
@@ -1666,19 +1666,19 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest001, TestSize.Level0)
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_testAgreeInitParams1[agreeIndex].params,
-        sizeof(g_testAgreeInitParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_testAgreeFinishParams1[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_testAgreeInitParams2[agreeIndex].params,
-        sizeof(g_testAgreeInitParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_testAgreeFinishParams2[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -1726,19 +1726,19 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest002, TestSize.Level0)
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_testAgreeInitParams1[agreeIndex].params,
-        sizeof(g_testAgreeInitParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_testAgreeFinishParams1[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_testAgreeInitParams2[agreeIndex].params,
-        sizeof(g_testAgreeInitParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_testAgreeFinishParams1[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -1787,19 +1787,19 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest003, TestSize.Level0)
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_testAgreeInitParams1[agreeIndex].params,
-        sizeof(g_testAgreeInitParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams1[agreeIndex].params)  / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_testAgreeFinishParams1[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_testAgreeInitParams2[agreeIndex].params,
-        sizeof(g_testAgreeInitParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_testAgreeFinishParams2[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -1848,19 +1848,19 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest004, TestSize.Level0)
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_testAgreeInitParams1[agreeIndex].params,
-        sizeof(g_testAgreeInitParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_testAgreeFinishParams1[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams1[agreeIndex].params)  / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_testAgreeInitParams2[agreeIndex].params,
-        sizeof(g_testAgreeInitParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_testAgreeFinishParams2[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -1908,19 +1908,19 @@ HWTEST_F(HksAuthPartTest, HksAuthAgreeTest005, TestSize.Level0)
     struct HksParamSet *initParamSet02 = nullptr;
     struct HksParamSet *finishParamSet02 = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_testAgreeInitParams1[agreeIndex].params,
-        sizeof(g_testAgreeInitParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
     ret = InitParamSet(&finishParamSet01, g_testAgreeFinishParams1[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams1[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams1[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_testAgreeInitParams2[agreeIndex].params,
-        sizeof(g_testAgreeInitParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeInitParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
     ret = InitParamSet(&finishParamSet02, g_testAgreeFinishParams2[agreeIndex].params,
-        sizeof(g_testAgreeFinishParams2[agreeIndex].params)/sizeof(HksParam));
+        sizeof(g_testAgreeFinishParams2[agreeIndex].params) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
     ret = HksGenerateKey(&g_keyAlias01001, genParamSet, nullptr);
@@ -1966,11 +1966,11 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest001, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
     ret = InitParamSet(&hmacParamSet, g_testHmacParams[hmacIndex].params,
-        sizeof(g_testHmacParams[hmacIndex].params)/sizeof(HksParam));
+        sizeof(g_testHmacParams[hmacIndex].params) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HMAC Hmaccase failed.";
@@ -1994,11 +1994,11 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest002, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
     ret = InitParamSet(&hmacParamSet, g_testHmacParams[hmacIndex].params,
-        sizeof(g_testHmacParams[hmacIndex].params)/sizeof(HksParam));
+        sizeof(g_testHmacParams[hmacIndex].params) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "SM3 Hmaccase failed.";
@@ -2023,11 +2023,11 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest003, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
     ret = InitParamSet(&hmacParamSet, g_testHmacParams[hmacIndex].params,
-        sizeof(g_testHmacParams[hmacIndex].params)/sizeof(HksParam));
+        sizeof(g_testHmacParams[hmacIndex].params) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HMAC FailureCase failed.";
@@ -2051,11 +2051,11 @@ HWTEST_F(HksAuthPartTest, HksAuthHmacTest004, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_testGenKeyParams[genIndex].params,
-        sizeof(g_testGenKeyParams[genIndex].params)/sizeof(HksParam));
+        sizeof(g_testGenKeyParams[genIndex].params) / sizeof(HksParam));
 
     struct HksParamSet *hmacParamSet = nullptr;
     ret = InitParamSet(&hmacParamSet, g_testHmacParams[hmacIndex].params,
-        sizeof(g_testHmacParams[hmacIndex].params)/sizeof(HksParam));
+        sizeof(g_testHmacParams[hmacIndex].params) / sizeof(HksParam));
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ALGORITHM) << "AES FailureCase failed.";
