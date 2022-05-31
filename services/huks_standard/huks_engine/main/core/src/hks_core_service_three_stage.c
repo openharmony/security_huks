@@ -234,9 +234,9 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM2) {
-        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_SM2, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
-        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_DSA, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode);
     } else {
@@ -254,11 +254,11 @@ static int32_t AgreeAuth(const struct HuksKeyNode *keyNode, const struct HksPara
     }
 
     if (algParam->uint32Param == HKS_ALG_ECDH) {
-        return HksThreeStageAuth(HKS_AUTH_ID_AGREE_ECC, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_X25519) {
-        return HksThreeStageAuth(HKS_AUTH_ID_AGREE_X25519, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_DH) {
-        return HksThreeStageAuth(HKS_AUTH_ID_AGREE_DH, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -296,7 +296,7 @@ static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksPar
     } else if (algParam->uint32Param == HKS_ALG_RSA) {
         return HksThreeStageAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
-        return HksThreeStageAuth(HKS_AUTH_ID_CIPHER_SM4, keyNode);
+        return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
