@@ -203,7 +203,7 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
     uint32_t partDataLength = 0;
     uint32_t blobIndex = 0;
 
-    for (blobIndex = 0;blobIndex < validTotalBlobs && offset < dataSize;blobIndex++) {
+    for (blobIndex = 0; blobIndex < validTotalBlobs && offset < dataSize; blobIndex++) {
         partDataLength = 0;
         if (memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
             HKS_LOG_E("the blob part:%u is invalid!", blobIndex);
@@ -243,7 +243,7 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
     uint32_t dataSize = wrappedData->size;
     uint32_t partDataLength = 0;
 
-    for (uint32_t index = 0, offset = 0;index < totalBlobs && offset < dataSize;index++) {
+    for (uint32_t index = 0, offset = 0; index < totalBlobs && offset < dataSize; index++) {
         partDataLength = 0;
         if (memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
             return HKS_ERROR_INVALID_WRAPPED_FORMAT;
@@ -262,5 +262,5 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
         }
         offset += partDataLength;
     }
-    return HKS_ERROR_INVALID_WRAPPED_FORMAT;;
+    return HKS_ERROR_INVALID_WRAPPED_FORMAT;
 }
