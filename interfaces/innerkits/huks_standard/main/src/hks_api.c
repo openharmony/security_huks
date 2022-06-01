@@ -22,6 +22,7 @@
 #include "hks_api.h"
 
 #include "hks_ability.h"
+#include "hks_api_adapter.h"
 #include "hks_client_ipc.h"
 #include "hks_client_service_adapter.h"
 #include "hks_local_engine.h"
@@ -50,48 +51,6 @@
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
 #undef HKS_SUPPORT_API_WRAP_KEY
 #undef HKS_SUPPORT_API_UNWRAP_KEY
-#endif
-
-#if defined(HKS_SUPPORT_API_IMPORT) || defined(HKS_SUPPORT_API_AGREE_KEY)
-static int32_t GetHksInnerKeyFormat(const struct HksParamSet *paramSet, const struct HksBlob *key,
-    struct HksBlob *outKey)
-{
-    if ((CheckBlob(key) != HKS_SUCCESS) || (outKey == NULL)) {
-        HKS_LOG_E("invalid key or outKey");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get alg param failed");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
-
-    switch (algParam->uint32Param) {
-#ifdef HKS_SUPPORT_AES_C
-        case HKS_ALG_AES:
-            return TranslateToInnerAesFormat(key, outKey);
-#endif
-#if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
-        case HKS_ALG_ED25519:
-        case HKS_ALG_X25519:
-            return TranslateToInnerCurve25519Format(algParam->uint32Param, key, outKey);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
-        case HKS_ALG_RSA:
-        case HKS_ALG_ECC:
-        case HKS_ALG_ECDH:
-        case HKS_ALG_DSA:
-        case HKS_ALG_DH:
-        case HKS_ALG_SM2:
-            return TranslateFromX509PublicKey(algParam->uint32Param, key, outKey);
-#endif
-        default:
-            return HKS_ERROR_INVALID_ALGORITHM;
-    }
-}
 #endif
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
@@ -178,18 +137,7 @@ HKS_API_EXPORT int32_t HksImportKey(const struct HksBlob *keyAlias,
     if ((keyAlias == NULL) || (paramSet == NULL) || (key == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-
-    struct HksBlob publicKey = { 0, NULL };
-    int32_t ret = GetHksInnerKeyFormat(paramSet, key, &publicKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get public key from x509 format failed, ret = %d", ret);
-        return ret;
-    }
-
-    ret = HksClientImportKey(keyAlias, paramSet, &publicKey);
-    (void)memset_s(publicKey.data, publicKey.size, 0, publicKey.size);
-    HKS_FREE_BLOB(publicKey);
-
+    int32_t ret = HksImportKeyAdapter(keyAlias, paramSet, key);
     HKS_LOG_I("leave import key, result = %d", ret);
     return ret;
 #else
@@ -208,34 +156,8 @@ HKS_API_EXPORT int32_t HksExportPublicKey(const struct HksBlob *keyAlias,
     if ((keyAlias == NULL) || (key == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
+    int32_t ret = HksExportPublicKeyAdapter(keyAlias, paramSet, key);
 
-    uint8_t *buffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    (void)memset_s(buffer, MAX_KEY_SIZE, 0, MAX_KEY_SIZE);
-    struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
-
-    int32_t ret = HksClientExportPublicKey(keyAlias, paramSet, &publicKey);
-    if (ret == HKS_SUCCESS) {
-        struct HksBlob x509Key = { 0, NULL };
-        ret = TranslateToX509PublicKey(&publicKey, &x509Key);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_PTR(buffer);
-            return ret;
-        }
-
-        if ((CheckBlob(key) != HKS_SUCCESS) || (memcpy_s(key->data, key->size, x509Key.data, x509Key.size) != EOK)) {
-            ret = HKS_ERROR_BAD_STATE;
-            HKS_LOG_E("x509 format memcpy failed");
-        } else {
-            key->size = x509Key.size;
-        }
-
-        HKS_FREE_BLOB(x509Key);
-    }
-    HKS_FREE_BLOB(publicKey);
     HKS_LOG_I("leave export public key, result = %d", ret);
     return ret;
 #else
@@ -307,6 +229,7 @@ HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, str
     if (random == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
+
     int32_t ret = HksClientGenerateRandom(random, paramSet);
     HKS_LOG_I("leave generate random, result = %d", ret);
     return ret;
@@ -451,16 +374,7 @@ HKS_API_EXPORT int32_t HksAgreeKey(const struct HksParamSet *paramSet, const str
         return ret;
     }
 
-    struct HksBlob publicKey = { 0, NULL };
-    ret = GetHksInnerKeyFormat(paramSet, peerPublicKey, &publicKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get public key from x509 format failed, ret = %d", ret);
-        return ret;
-    }
-
-    ret = HksClientAgreeKey(paramSet, privateKey, &publicKey, agreedKey);
-    (void)memset_s(publicKey.data, publicKey.size, 0, publicKey.size);
-    HKS_FREE_BLOB(publicKey);
+    ret = HksAgreeKeyAdapter(paramSet, privateKey, peerPublicKey, agreedKey);
     HKS_LOG_I("leave agree key with persistent key, result = %d", ret);
     return ret;
 #else

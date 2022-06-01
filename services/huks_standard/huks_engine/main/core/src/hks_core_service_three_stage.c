@@ -24,7 +24,7 @@
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
-#include "hks_client_service_adapter.h"
+#include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
 #include "hks_core_service.h"
@@ -181,40 +181,6 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
-        default:
-            return HKS_ERROR_INVALID_ALGORITHM;
-    }
-}
-
-static int32_t GetHksInnerKeyFormat(const struct HksParamSet *paramSet, const struct HksBlob *key,
-    struct HksBlob *outKey)
-{
-    struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get alg param failed");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
-
-    switch (algParam->uint32Param) {
-#ifdef HKS_SUPPORT_AES_C
-        case HKS_ALG_AES:
-            return TranslateToInnerAesFormat(key, outKey);
-#endif
-#if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
-        case HKS_ALG_ED25519:
-        case HKS_ALG_X25519:
-            return TranslateToInnerCurve25519Format(algParam->uint32Param, key, outKey);
-#endif
-#if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
-    defined(HKS_SUPPORT_DH_C)
-        case HKS_ALG_RSA:
-        case HKS_ALG_ECC:
-        case HKS_ALG_ECDH:
-        case HKS_ALG_DSA:
-        case HKS_ALG_DH:
-            return TranslateFromX509PublicKey(algParam->uint32Param, key, outKey);
-#endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -1378,7 +1344,7 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
     struct HksBlob publicKey = { 0, NULL };
 
     do {
-        ret = GetHksInnerKeyFormat(keyNode->runtimeParamSet, srcData, &publicKey);
+        ret = GetHksPubKeyInnerFormat(keyNode->runtimeParamSet, srcData, &publicKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("get public key from x509 format failed, ret = %d.", ret);
             break;

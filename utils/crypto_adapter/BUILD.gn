@@ -28,7 +28,10 @@ ohos_static_library("libhuks_utils_client_service_adapter_static") {
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
-  sources = [ "hks_client_service_adapter.c" ]
+  sources = [
+    "hks_client_service_adapter.c",
+    "hks_client_service_adapter_common.c",
+  ]
   cflags = [
     "-Wall",
     "-Werror",
