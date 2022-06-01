@@ -19,7 +19,7 @@
 
 using namespace testing::ext;
 namespace Unittest::CheckPurposeTest {
-class HksCheckPurTest : public testing::Test {
+class HksCheckPurPart1Test : public testing::Test {
 public:
     static void SetUpTestCase(void);
 
@@ -30,20 +30,20 @@ public:
     void TearDown();
 };
 
-void HksCheckPurTest::SetUpTestCase(void)
+void HksCheckPurPart1Test::SetUpTestCase(void)
 {
 }
 
-void HksCheckPurTest::TearDownTestCase(void)
+void HksCheckPurPart1Test::TearDownTestCase(void)
 {
 }
 
-void HksCheckPurTest::SetUp()
+void HksCheckPurPart1Test::SetUp()
 {
     EXPECT_EQ(HksInitialize(), 0);
 }
 
-void HksCheckPurTest::TearDown()
+void HksCheckPurPart1Test::TearDown()
 {
 }
 
@@ -139,6 +139,98 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_004_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ALGORITHM
 };
 
+/* 005: gen ecc for sign; init for agree */
+const TestPurposeCaseParams HKS_PURPOE_TEST_005_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_224 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_224 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initResult = HKS_ERROR_INVALID_ARGUMENT
+};
+
+/* 006: gen dsa for sign; init for agree */
+const TestPurposeCaseParams HKS_PURPOE_TEST_006_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+        },
+    .initParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+        },
+    .initResult = HKS_ERROR_INVALID_ALGORITHM
+};
+
+/* 007: gen hmac for mac; init for mac */
+const TestPurposeCaseParams HKS_PURPOE_TEST_007_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_MD5 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initResult = HKS_ERROR_INVALID_ARGUMENT
+};
+
+/* 008: gen aes for cipher; init for mac */
+const TestPurposeCaseParams HKS_PURPOE_TEST_008_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initResult = HKS_ERROR_INVALID_ALGORITHM
+};
+
 static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
 {
     struct HksParamSet *genParamSet = nullptr;
@@ -183,7 +275,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurTest001, TestSize.Level0)
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest001");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_001_PARAMS), HKS_SUCCESS);
@@ -195,9 +287,9 @@ HWTEST_F(HksCheckPurTest, HksCheckPurTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurTest002, TestSize.Level0)
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest002, TestSize.Level0)
 {
-    HKS_LOG_I("Enter HksCheckPurposeTest001");
+    HKS_LOG_I("Enter HksCheckPurposeTest002");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_002_PARAMS), HKS_SUCCESS);
 }
 
@@ -207,9 +299,9 @@ HWTEST_F(HksCheckPurTest, HksCheckPurTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurTest003, TestSize.Level0)
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest003, TestSize.Level0)
 {
-    HKS_LOG_I("Enter HksCheckPurposeTest001");
+    HKS_LOG_I("Enter HksCheckPurposeTest003");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_003_PARAMS), HKS_SUCCESS);
 }
 
@@ -219,10 +311,58 @@ HWTEST_F(HksCheckPurTest, HksCheckPurTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurTest004, TestSize.Level0)
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest004, TestSize.Level0)
 {
-    HKS_LOG_I("Enter HksCheckPurposeTest001");
+    HKS_LOG_I("Enter HksCheckPurposeTest004");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_004_PARAMS), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest005
+ * @tc.desc: alg-ECC gen-pur-Sign init-pur-Agree.
+ * @tc.type: FUNC
+ * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ */
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest005, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksCheckPurposeTest005");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_005_PARAMS), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAuthPartTest.HksCheckPurposeTest006
+ * @tc.desc: alg-DSA gen-pur-Sign init-pur-Agree.
+ * @tc.type: FUNC
+ * @tc.result:HKS_ERROR_INVALID_ALGORITHM
+ */
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest006, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksCheckPurposeTest006");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_006_PARAMS), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest007
+ * @tc.desc: alg-ECC gen-pur-Sign init-pur-Agree.
+ * @tc.type: FUNC
+ * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ */
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest007, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksCheckPurposeTest007");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_007_PARAMS), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAuthPartTest.HksCheckPurposeTest008
+ * @tc.desc: alg-DSA gen-pur-Sign init-pur-Agree.
+ * @tc.type: FUNC
+ * @tc.result:HKS_ERROR_INVALID_ALGORITHM
+ */
+HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest008, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksCheckPurposeTest008");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_008_PARAMS), HKS_SUCCESS);
 }
 }
 
