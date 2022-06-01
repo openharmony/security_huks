@@ -537,6 +537,365 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
     return ret;
 }
 
+static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, struct HksParamSet **outParamSet)
+{
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("init agree_key param set fail");
+        return ret;
+    }
+    uint32_t alg = HKS_ALG_X25519;
+    uint32_t keySize = HKS_CURVE25519_KEY_SIZE_256;
+    switch (suite) {
+        case HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING:
+            alg = HKS_ALG_X25519;
+            keySize = HKS_CURVE25519_KEY_SIZE_256;
+            break;
+        case HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING:
+            alg = HKS_ALG_ECDH;
+            keySize = HKS_ECC_KEY_SIZE_256;
+            break;
+        default:
+            HKS_LOG_E("invalid suite type use x25519 default");
+            break;
+    }
+
+    struct HksParam agreeParams[] = {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = alg },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = keySize }
+    };
+    
+    ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("unwrap suite add params failed.");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("unwrap suite build params failed.");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    *outParamSet = paramSet;
+    return HKS_SUCCESS;
+}
+
+static int32_t BuildDecryptUsageSpecOfUnwrap(const struct HksBlob *aad, const struct HksBlob *nonce,
+    const struct HksBlob *aeadTag, uint32_t payloadLen, struct HksUsageSpec *usageSpec)
+{
+    usageSpec->mode = HKS_MODE_GCM;
+    usageSpec->padding = HKS_PADDING_NONE;
+    usageSpec->digest = HKS_DIGEST_NONE;
+    usageSpec->algType = HKS_ALG_AES;
+
+    struct HksAeadParam *aeadParam = (struct HksAeadParam *)HksMalloc(sizeof(struct HksAeadParam));
+    if (aeadParam == NULL) {
+        HKS_LOG_E("build dec wrapped usage: aeadParam malloc failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    aeadParam->aad = *aad;
+    aeadParam->nonce = *nonce;
+    aeadParam->payloadLen = payloadLen;
+    aeadParam->tagDec = *aeadTag;
+
+    usageSpec->algParam = aeadParam;
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckWrappingKeyIsUsedForUnwrap(const struct HksBlob *wrappingKey)
+{
+    struct HksKeyNode *wrappingKeyNode = HksGenerateKeyNode(wrappingKey);
+    if (wrappingKeyNode == NULL) {
+        HKS_LOG_E("check agree params: generate wrapping keynode failed!");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    struct HksParam *purposeParamWrappingKey = NULL;
+    int32_t ret = HksGetParam(wrappingKeyNode->paramSet, HKS_TAG_PURPOSE, &purposeParamWrappingKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get wrapping key param 0x%x failed!", HKS_TAG_PURPOSE);
+        HksFreeKeyNode(&wrappingKeyNode);
+        return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
+    }
+
+    if (purposeParamWrappingKey->uint32Param != HKS_KEY_PURPOSE_UNWRAP) {
+        HKS_LOG_E("wrapping key is not used for unwrap!");
+        HksFreeKeyNode(&wrappingKeyNode);
+        return HKS_ERROR_INVALID_USAGE_OF_KEY;
+    }
+    HksFreeKeyNode(&wrappingKeyNode);
+    return HKS_SUCCESS;
+}
+
+static int32_t GetPublicKeyInnerFormat(const struct HksBlob *wrappingKey, const struct HksBlob *wrappedKeyData,
+    struct HksBlob *outPublicKey, uint32_t *partOffset)
+{
+    struct HksBlob peerPubKeyPart = { 0, NULL };
+    uint32_t offset = *partOffset;
+    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &peerPubKeyPart);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get peer pub key failed!");
+        return ret;
+    }
+
+    /* peer public key format should be same as wrapping key */
+    struct HksKeyNode *wrappingKeyNode = HksGenerateKeyNode(wrappingKey);
+    if (wrappingKeyNode == NULL) {
+        HKS_LOG_E("generate wrapping key keynode failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+    ret = GetHksPubKeyInnerFormat(wrappingKeyNode->paramSet, &peerPubKeyPart, outPublicKey);
+    HksFreeKeyNode(&wrappingKeyNode);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get peer pub key inner format failed!");
+        return ret;
+    }
+    *partOffset  = offset;
+    return HKS_SUCCESS;
+}
+
+static int32_t AgreeSharedSecretWithPeerPublicKey(const struct HksBlob *wrappingKey, const struct HksBlob *publicKey,
+    uint32_t unwrapSuite, struct HksBlob *agreeSharedSecret)
+{
+    int32_t ret = CheckWrappingKeyIsUsedForUnwrap(wrappingKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check agree params failed!");
+        return ret;
+    }
+
+    struct HksParamSet *agreeKeyParamSet = NULL;
+    ret = GenAgreeKeyParamSetFromUnwrapSuite(unwrapSuite, &agreeKeyParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("gen agree key paramSet failed!");
+        return ret;
+    }
+
+    struct HksBlob sharedSecret = { 0, NULL };
+    sharedSecret.size = HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256);
+    uint8_t *shareSecretBuffer = (uint8_t *) HksMalloc(sharedSecret.size);
+    if (shareSecretBuffer == NULL) {
+        HksFreeParamSet(&agreeKeyParamSet);
+        HKS_LOG_E("malloc shared key failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    sharedSecret.data = shareSecretBuffer;
+
+    ret = HksCoreAgreeKey(agreeKeyParamSet, wrappingKey, publicKey, &sharedSecret);
+    HksFreeParamSet(&agreeKeyParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("agree with peer public key failed! ret = %d", ret);
+        HKS_FREE_PTR(sharedSecret.data);
+        return ret;
+    }
+
+    agreeSharedSecret->size = sharedSecret.size;
+    agreeSharedSecret->data = sharedSecret.data;
+    return HKS_SUCCESS;
+}
+
+static int32_t DecryptKekWithAgreeSharedSecret(const struct HksBlob *wrappedKeyData,
+        const struct HksBlob *agreeSharedSecret, uint32_t *partOffset, struct HksBlob *outKekBlob)
+{
+    struct HksBlob agreeKeyAadPart = { 0, NULL };
+    struct HksBlob agreeKeyNoncePart = { 0, NULL };
+    struct HksBlob agreeKeyTagPart = { 0, NULL };
+    struct HksBlob kekEncDataPart = { 0, NULL };
+
+    uint32_t offset = *partOffset;
+    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &agreeKeyAadPart);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get agreekey aad data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &agreeKeyNoncePart);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get agreekey nonce data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &agreeKeyTagPart);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get agreekey aead tag data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &kekEncDataPart);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get kek enc data failed!");
+        return ret;
+    }
+
+    /* build decrypt kek usagespec */
+    struct HksUsageSpec *decKekUsageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
+    if (decKekUsageSpec == NULL) {
+        HKS_LOG_E("malloc decrypt kek usage spec failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(decKekUsageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
+    ret = BuildDecryptUsageSpecOfUnwrap(&agreeKeyAadPart, &agreeKeyNoncePart, &agreeKeyTagPart, kekEncDataPart.size,
+                                        decKekUsageSpec);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("build decrypt wrapped data kek usageSpec failed!");
+        HksFreeUsageSpec(&decKekUsageSpec);
+        return ret;
+    }
+    struct HksBlob kek = { 0, NULL };
+    kek.size = HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256);;
+    uint8_t *kekBuffer = (uint8_t *) HksMalloc(kek.size);
+    if (kekBuffer == NULL) {
+        HKS_LOG_E("malloc kek memory failed!");
+        HksFreeUsageSpec(&decKekUsageSpec);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    kek.data = kekBuffer;
+    ret = HksCryptoHalDecrypt(agreeSharedSecret, decKekUsageSpec, &kekEncDataPart, &kek);
+    HksFreeUsageSpec(&decKekUsageSpec);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("decrypt kek data failed!");
+        HKS_FREE_PTR(kek.data);
+        return ret;
+    }
+
+    outKekBlob->size = kek.size;
+    outKekBlob->data = kek.data;
+    *partOffset = offset;
+    return HKS_SUCCESS;
+}
+
+static int32_t ParseImportedKeyDecryptParams(const struct HksBlob *wrappedKeyData, uint32_t *partOffset,
+    uint32_t totalBlobs, uint32_t *outKeyMaterialSize, struct HksBlob **blobArray)
+{
+    uint32_t offset = *partOffset;
+    uint32_t blobIndex = 0;
+    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get kek aad data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get kek nonce data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get kek aead tag data failed!");
+        return ret;
+    }
+
+    struct HksBlob keyMatLenBlobPart = { 0, NULL };
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, &keyMatLenBlobPart);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key material len failed!");
+        return ret;
+    }
+    if (keyMatLenBlobPart.size != sizeof(uint32_t)) {
+        HKS_LOG_E("key material len part is invalid!");
+        return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+    }
+
+    uint32_t keyMaterialSize = 0;
+    (void) memcpy_s((uint8_t *)&keyMaterialSize, sizeof(uint32_t), keyMatLenBlobPart.data, keyMatLenBlobPart.size);
+    if ((keyMaterialSize == 0) || (keyMaterialSize > MAX_KEY_SIZE)) {
+        HKS_LOG_E("key material size is invalid!");
+        return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+    }
+
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get imported key encryption data failed!");
+        return ret;
+    }
+
+    *partOffset = offset;
+    *outKeyMaterialSize = keyMaterialSize;
+    return HKS_SUCCESS;
+}
+
+static int32_t DecryptImportedKeyWithKek(const struct HksBlob *wrappedKeyData, const struct HksBlob *kek,
+    uint32_t *partOffset, struct HksBlob *outImportedKey)
+{
+    struct HksBlob kekAadPart = { 0, NULL };
+    struct HksBlob kekNoncePart = { 0, NULL };
+    struct HksBlob kekTagPart = { 0, NULL };
+    struct HksBlob originKeyEncDataPart = { 0, NULL };
+    struct HksBlob *blobArray[] = { &kekAadPart, &kekNoncePart, &kekTagPart, &originKeyEncDataPart };
+
+    uint32_t offset = *partOffset;
+    uint32_t keyMaterialSize = 0;
+    int32_t ret = ParseImportedKeyDecryptParams(wrappedKeyData, &offset, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS,
+                                                &keyMaterialSize, blobArray);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("parse kek decrypt imported-key params failed!");
+        return ret;
+    }
+
+    struct HksBlob originKey = { 0, NULL };
+    originKey.size = keyMaterialSize;
+    uint8_t *originKeyBuffer = (uint8_t *) HksMalloc(originKey.size);
+    if (originKeyBuffer == NULL) {
+        HKS_LOG_E("malloc originKeyBuffer memory failed!");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    originKey.data = originKeyBuffer;
+
+    struct HksUsageSpec *decOriginKeyUsageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
+    if (decOriginKeyUsageSpec == NULL) {
+        HKS_LOG_E("malloc originKeyBuffer memory failed!");
+        HKS_FREE_PTR(originKey.data);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(decOriginKeyUsageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
+    uint32_t payloadSize = originKeyEncDataPart.size;
+    ret = BuildDecryptUsageSpecOfUnwrap(&kekAadPart, &kekNoncePart, &kekTagPart, payloadSize, decOriginKeyUsageSpec);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("build decrypt wrapped data origin key usageSpec failed!");
+        HKS_FREE_PTR(originKey.data);
+        HksFreeUsageSpec(&decOriginKeyUsageSpec);
+        return ret;
+    }
+
+    ret = HksCryptoHalDecrypt(kek, decOriginKeyUsageSpec, &originKeyEncDataPart, &originKey);
+    HksFreeUsageSpec(&decOriginKeyUsageSpec);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("decrypt importKey failed!");
+        HKS_FREE_PTR(originKey.data);
+        return ret;
+    }
+
+    outImportedKey->size = originKey.size;
+    outImportedKey->data = originKey.data;
+    *partOffset = offset;
+    return HKS_SUCCESS;
+}
+
+static void ClearAndFreeKeyBlobsIfNeed(struct HksBlob *peerPublicKey, struct HksBlob *agreeSharedSecret,
+    struct HksBlob *originKey, struct HksBlob *kek)
+{
+    if (originKey->data != NULL) {
+        (void)memset_s(originKey->data, originKey->size, 0, originKey->size);
+        HKS_FREE_PTR(originKey->data);
+    }
+
+    if (kek->data != NULL) {
+        (void)memset_s(kek->data, kek->size, 0, kek->size);
+        HKS_FREE_PTR(kek->data);
+    }
+
+    if (agreeSharedSecret->data != NULL) {
+        (void)memset_s(agreeSharedSecret->data, agreeSharedSecret->size, 0, agreeSharedSecret->size);
+        HKS_FREE_PTR(agreeSharedSecret->data);
+    }
+
+    if (peerPublicKey->data != NULL) {
+        (void)memset_s(peerPublicKey->data, peerPublicKey->size, 0, peerPublicKey->size);
+        HKS_FREE_PTR(peerPublicKey->data);
+    }
+}
+
 int32_t HksCoreSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
@@ -1029,15 +1388,61 @@ int32_t HksCoreRefresh(void)
     return HksCoreRefreshKeyInfo();
 }
 
-int32_t HksCoreImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
+int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
-    (void)(wrappingKeyAlias);
-    (void)(key);
-    (void)(wrappedKeyData);
-    (void)(paramSet);
-    (void)(keyOut);
-    return 0;
+    uint32_t unwrapSuite = 0;
+    int32_t ret = HksCoreCheckImportWrappedKeyParams(wrappingKey, wrappedKeyData, paramSet, keyOut, &unwrapSuite);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check import wrapped key params failed!");
+        return ret;
+    }
+
+    struct HksBlob peerPublicKey = { 0, NULL };
+    struct HksBlob agreeSharedSecret = { 0, NULL };
+    struct HksBlob originKey = { 0, NULL };
+    struct HksBlob kek = { 0, NULL };
+    uint32_t partOffset = 0;
+
+    do {
+        /* 1. get peer public key and translate to inner format */
+        ret = GetPublicKeyInnerFormat(wrappingKey, wrappedKeyData, &peerPublicKey, &partOffset);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get peer public key of inner format failed!");
+            break;
+        }
+
+        /* 2. agree shared key with wrappingAlias's private key and peer public key */
+        ret = AgreeSharedSecretWithPeerPublicKey(wrappingKey, &peerPublicKey, unwrapSuite, &agreeSharedSecret);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("agree share secret failed!");
+            break;
+        }
+
+        /* 4. decrypt kek data with agreed secret */
+        ret = DecryptKekWithAgreeSharedSecret(wrappedKeyData, &agreeSharedSecret, &partOffset, &kek);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("decrypt kek with agreed secret failed!");
+            break;
+        }
+
+        /* 5. decrypt imported key data with kek */
+        ret = DecryptImportedKeyWithKek(wrappedKeyData, &kek, &partOffset, &originKey);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("decrypt origin key failed!");
+            break;
+        }
+
+        /* 6. call HksCoreImportKey to build key blob */
+        ret = HksCoreImportKey(keyAlias, &originKey, paramSet, keyOut);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("import origin key failed!");
+            break;
+        }
+    } while(0);
+
+    ClearAndFreeKeyBlobsIfNeed(&peerPublicKey, &agreeSharedSecret, &originKey, &kek);
+    return ret;
 }
 
 int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur, uint32_t *alg)
