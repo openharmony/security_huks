@@ -18,8 +18,8 @@
 #include <gtest/gtest.h>
 
 using namespace testing::ext;
-namespace Unittest::HksCheckPurposeTest {
-class HksCheckPurposeTest : public testing::Test {
+namespace Unittest::CheckPurposeTest {
+class HksCheckPurTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
 
@@ -30,24 +30,24 @@ public:
     void TearDown();
 };
 
-void HksCheckPurposeTest::SetUpTestCase(void)
+void HksCheckPurTest::SetUpTestCase(void)
 {
 }
 
-void HksCheckPurposeTest::TearDownTestCase(void)
+void HksCheckPurTest::TearDownTestCase(void)
 {
 }
 
-void HksCheckPurposeTest::SetUp()
+void HksCheckPurTest::SetUp()
 {
     EXPECT_EQ(HksInitialize(), 0);
 }
 
-void HksCheckPurposeTest::TearDown()
+void HksCheckPurTest::TearDown()
 {
 }
 
-/* 001: gen rsa for encrypt; init for sign */
+/* 001: gen rsa for cipher; init for sign */
 const TestPurposeCaseParams HKS_PURPOE_TEST_001_PARAMS = {
     .genParams =
         {
@@ -93,37 +93,100 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_002_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ALGORITHM
 };
 
+/* 003: gen aes for derive; init for cipher */
+const TestPurposeCaseParams HKS_PURPOE_TEST_003_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_DERIVE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        },
+    .initResult = HKS_ERROR_INVALID_ARGUMENT
+};
+
+/* 004: gen hmac for hmac; init for cipher */
+const TestPurposeCaseParams HKS_PURPOE_TEST_004_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+        },
+    .initParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+        },
+    .initResult = HKS_ERROR_INVALID_ALGORITHM
+};
+
+static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
+{
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("InitParamSet(gen) failed, ret : %d", ret);
+        return ret;
+    }
+
+    uint8_t alias[] = "testCheckPurpose";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    int32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&genParamSet);
+        HKS_LOG_E("HksGenerateKey failed, ret : %d", ret);
+        return ret;
+    }
+
+    struct HksParamSet *initParamSet = nullptr;
+    ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&genParamSet);
+        HKS_LOG_E("InitParamSet(init) failed, ret : %d", ret);
+        return ret;
+    }
+
+    uint64_t handle = 0;
+    struct HksBlob handleBlob = { sizeof(handle), (uint8_t *)handle };
+    ret = HksInit(&keyAlias, initParamSet, &handleBlob);
+    EXPECT_EQ(ret, testCaseParams.initResult);
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&initParamSet);
+    (void)HksDeleteKey(&keyAlias, nullptr);
+
+    return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
+}
+
 /**
  * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest001
  * @tc.desc: alg-RSA gen-pur-Encrypt init-pur-Sign.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurposeTest, HksCheckPurposeTest001, TestSize.Level0)
+HWTEST_F(HksCheckPurTest, HksCheckPurposeTest001, TestSize.Level0)
 {
-    struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, HKS_PURPOE_TEST_001_PARAMS.genParams.data(),
-        HKS_PURPOE_TEST_001_PARAMS.genParams.size());
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-
-    uint8_t alias[] = "testCheckPurpose001";
-    struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
-
-    struct HksParamSet *initParamSet = nullptr;
-    ret = InitParamSet(&initParamSet, HKS_PURPOE_TEST_001_PARAMS.initParams.data(),
-        HKS_PURPOE_TEST_001_PARAMS.initParams.size());
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init) failed.";
-
-    uint64_t handle = 0;
-    struct HksBlob handleBlob = { sizeof(handle), (uint8_t *)handle };
-    ret = HksInit(&keyAlias, initParamSet, &handleBlob);
-    EXPECT_EQ(ret, HKS_PURPOE_TEST_001_PARAMS.initResult) << "Check pur failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&initParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    HKS_LOG_E("Enter HksCheckPurposeTest001");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_001_PARAMS), HKS_SUCCESS);
 }
 
 /**
@@ -132,30 +195,34 @@ HWTEST_F(HksCheckPurposeTest, HksCheckPurposeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurposeTest, HksCheckPurposeTest002, TestSize.Level0)
+HWTEST_F(HksCheckPurTest, HksCheckPurposeTest002, TestSize.Level0)
 {
-    struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = InitParamSet(&genParamSet, HKS_PURPOE_TEST_002_PARAMS.genParams.data(),
-        HKS_PURPOE_TEST_002_PARAMS.genParams.size());
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+    HKS_LOG_E("Enter HksCheckPurposeTest001");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_002_PARAMS), HKS_SUCCESS);
+}
 
-    uint8_t alias[] = "testCheckPurpose002";
-    struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
+/**
+ * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest003
+ * @tc.desc: alg-AES gen-pur-Derive init-pur-Encrypt.
+ * @tc.type: FUNC
+ * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ */
+HWTEST_F(HksCheckPurTest, HksCheckPurposeTest003, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksCheckPurposeTest001");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_003_PARAMS), HKS_SUCCESS);
+}
 
-    struct HksParamSet *initParamSet = nullptr;
-    ret = InitParamSet(&initParamSet, HKS_PURPOE_TEST_002_PARAMS.initParams.data(),
-        HKS_PURPOE_TEST_002_PARAMS.initParams.size());
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init) failed.";
-
-    uint64_t handle = 0;
-    struct HksBlob handleBlob = { sizeof(handle), (uint8_t *)handle };
-    ret = HksInit(&keyAlias, initParamSet, &handleBlob);
-    EXPECT_EQ(ret, HKS_PURPOE_TEST_002_PARAMS.initResult) << "Check pur failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&initParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+/**
+ * @tc.name: HksAuthPartTest.HksCheckPurposeTest004
+ * @tc.desc: alg-DSA gen-pur-Sign init-pur-Encrypt.
+ * @tc.type: FUNC
+ * @tc.result:HKS_ERROR_INVALID_ALGORITHM
+ */
+HWTEST_F(HksCheckPurTest, HksCheckPurposeTest004, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksCheckPurposeTest001");
+    EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_004_PARAMS), HKS_SUCCESS);
 }
 }
+
