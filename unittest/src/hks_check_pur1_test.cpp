@@ -150,7 +150,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
 
     uint8_t alias[] = "testCheckPurpose";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    int32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
         HKS_LOG_E("HksGenerateKey failed, ret : %d", ret);
