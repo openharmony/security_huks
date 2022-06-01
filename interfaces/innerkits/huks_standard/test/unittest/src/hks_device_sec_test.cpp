@@ -25,6 +25,9 @@
 #include "hks_test_mem.h"
 #include "hks_type.h"
 
+#include "nativetoken_kit.h"
+#include "token_setproc.h"
+
 using namespace testing::ext;
 namespace {
 class HksDeviceSecTest : public testing::Test {
@@ -297,9 +300,35 @@ static int32_t ValidateCertChainTest(struct HksCertChain *certChain)
 
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
 {
+    uint64_t tokenId;
+    const char **acls = new const char *[1];
+    acls[0] = "ohos.permission.ACCESS_IDS"; // system_core
+    const char **perms = new const char *[2];
+    perms[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    perms[1] = "ohos.permission.ACCESS_IDS"; // system_core
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .dcaps = nullptr,
+        .perms = perms,
+        .aplStr = "system_basic",
+    };
+
+    infoInstance.acls = acls;
+    infoInstance.aclsNum = 1;
+    infoInstance.processName = "test_attest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    HKS_TEST_LOG_I("AccessTokenID is %llx!", tokenId);
+
+    int32_t ret = SetSelfTokenID(tokenId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+    }
+    ASSERT_TRUE(ret == 0);
+
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, true, true, g_size };
-    int32_t ret = ConstructDataToCertChain(&certChain, &certParam);
+    ret = ConstructDataToCertChain(&certChain, &certParam);
     ret = TestKeyAttest(certChain);
     ASSERT_TRUE(ret == 0);
     ret = ValidateCertChainTest(certChain);

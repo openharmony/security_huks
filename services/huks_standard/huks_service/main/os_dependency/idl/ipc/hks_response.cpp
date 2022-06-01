@@ -20,6 +20,9 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef SUPPORT_ACCESS_TOCKEN
+#include "accesstoken_kit.h"
+#endif
 #include "ipc_skeleton.h"
 
 #include "hks_log.h"
@@ -135,8 +138,18 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 }
 
 #ifdef SUPPORT_ACCESS_TOCKEN
-int32_t Apl3Check()
+int32_t SensitivePermissionCheck()
 {
-    return HKS_SUCCESS;
+    OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    HKS_LOG_I("AccessTokenID is %llx!", tokenId);
+    int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId,
+        "ohos.permission.ACCESS_IDS");
+    if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
+        HKS_LOG_I("Check Permission success!");
+        return HKS_SUCCESS;
+    } else {
+        HKS_LOG_E("Check Permission failed!");
+        return HKS_FAILURE;
+    }
 }
 #endif
