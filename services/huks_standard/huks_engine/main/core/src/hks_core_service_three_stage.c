@@ -229,19 +229,15 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
         return ret;
     }
 
-    if (algParam->uint32Param == HKS_ALG_RSA) {
+    if (algParam->uint32Param == HKS_ALG_ECC || algParam->uint32Param == HKS_ALG_SM2 ||
+        algParam->uint32Param == HKS_ALG_DSA) {
+        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_RSA) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode);
-    } else if (algParam->uint32Param == HKS_ALG_ECC) {
-        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
-    } else if (algParam->uint32Param == HKS_ALG_SM2) {
-        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
-    } else if (algParam->uint32Param == HKS_ALG_DSA) {
-        return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode);
-    } else {
-        return HKS_ERROR_INVALID_ALGORITHM;
     }
+    return HKS_ERROR_INVALID_ALGORITHM;
 }
 
 static int32_t AgreeAuth(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
@@ -253,15 +249,11 @@ static int32_t AgreeAuth(const struct HuksKeyNode *keyNode, const struct HksPara
         return ret;
     }
 
-    if (algParam->uint32Param == HKS_ALG_ECDH) {
+    if (algParam->uint32Param == HKS_ALG_ECDH || algParam->uint32Param == HKS_ALG_X25519 ||
+        algParam->uint32Param == HKS_ALG_DH) {
         return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
-    } else if (algParam->uint32Param == HKS_ALG_X25519) {
-        return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
-    } else if (algParam->uint32Param == HKS_ALG_DH) {
-        return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
-    } else {
-        return HKS_ERROR_INVALID_ALGORITHM;
     }
+    return HKS_ERROR_INVALID_ALGORITHM;
 }
 
 static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
@@ -277,9 +269,8 @@ static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParam
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_HMAC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM3) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_SM3, keyNode);
-    } else {
-        return HKS_ERROR_INVALID_ALGORITHM;
     }
+    return HKS_ERROR_INVALID_ALGORITHM;
 }
 
 static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
@@ -297,9 +288,8 @@ static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksPar
         return HksThreeStageAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
-    } else {
-        return HKS_ERROR_INVALID_ALGORITHM;
     }
+    return HKS_ERROR_INVALID_ALGORITHM;
 }
 
 static void *GetCryptoCtx(const struct HuksKeyNode *keyNode)
