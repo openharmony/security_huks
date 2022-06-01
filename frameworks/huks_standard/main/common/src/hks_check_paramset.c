@@ -96,8 +96,20 @@ static uint32_t g_importKeyAlg[] = {
 #ifdef HKS_SUPPORT_DSA_C
     HKS_ALG_DSA,
 #endif
+#ifdef HKS_SUPPORT_DH_C
+    HKS_ALG_DH,
+#endif
+#ifdef HKS_SUPPORT_HMAC_C
+    HKS_ALG_HMAC,
+#endif
 #ifdef HKS_SUPPORT_SM2_C
     HKS_ALG_SM2,
+#endif
+#ifdef HKS_SUPPORT_SM3_C
+    HKS_ALG_SM3,
+#endif
+#ifdef HKS_SUPPORT_SM4_C
+    HKS_ALG_SM4,
 #endif
 };
 
@@ -329,16 +341,12 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
 {
     int32_t ret = HKS_SUCCESS;
     switch (alg) {
-        case HKS_ALG_AES:
-            if (key->size != HKS_KEY_BYTES(params->keyLen.value)) {
-                ret = HKS_ERROR_INVALID_KEY_INFO;
-            }
-            break;
         case HKS_ALG_ED25519:
         case HKS_ALG_X25519:
         case HKS_ALG_RSA:
         case HKS_ALG_ECC:
         case HKS_ALG_SM2:
+        case HKS_ALG_DH:
             if (key->size < sizeof(struct HksPubKeyInfo)) {
                 ret = HKS_ERROR_INVALID_KEY_INFO;
             }
@@ -438,6 +446,276 @@ int32_t HksCoreCheckGenKeyParams(const struct HksBlob *keyAlias, const struct Hk
     return CoreCheckGenKeyParams(paramSet, &params);
 }
 
+static int32_t CheckRsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    (void)keyType;
+    if (key->size < sizeof(struct HksKeyMaterialRsa)) {
+        HKS_LOG_E("invalid import key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialRsa *keyMaterial = (struct HksKeyMaterialRsa *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
+        HKS_LOG_E("invalid import key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->nSize > HKS_RSA_KEY_SIZE_4096) || (keyMaterial->nSize == 0) ||
+        (keyMaterial->dSize > HKS_RSA_KEY_SIZE_4096) || (keyMaterial->dSize == 0) ||
+        (keyMaterial->eSize > HKS_RSA_KEY_SIZE_4096) || (keyMaterial->eSize == 0)) {
+        HKS_LOG_E("invalid import key material n/d/e size");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialRsa) + keyMaterial->nSize + keyMaterial->dSize + keyMaterial->eSize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckEccKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    if (key->size < sizeof(struct HksKeyMaterialEcc)) {
+        HKS_LOG_E("invalid import key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialEcc *keyMaterial = (struct HksKeyMaterialEcc *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
+        HKS_LOG_E("invalid import key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->xSize > HKS_ECC_KEY_SIZE_521) || (keyMaterial->ySize > HKS_ECC_KEY_SIZE_521) ||
+        (keyMaterial->zSize > HKS_ECC_KEY_SIZE_521)) {
+        HKS_LOG_E("invalid import key material x/y/z size, bigger than 521");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if (keyMaterial->zSize == 0) {
+        HKS_LOG_E("invalid import key material z size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && ((keyMaterial->xSize == 0) || (keyMaterial->ySize == 0))) {
+        HKS_LOG_E("invalid import key material x/y size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckDsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    if (key->size < sizeof(struct HksKeyMaterialDsa)) {
+        HKS_LOG_E("invalid import key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialDsa *keyMaterial = (struct HksKeyMaterialDsa *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
+        HKS_LOG_E("invalid import key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->xSize > MAX_KEY_SIZE) || (keyMaterial->ySize > MAX_KEY_SIZE) ||
+        (keyMaterial->pSize > MAX_KEY_SIZE) || (keyMaterial->qSize > MAX_KEY_SIZE) ||
+        (keyMaterial->gSize > MAX_KEY_SIZE)) {
+        HKS_LOG_E("invalid import key material x/y/p/q/g size, bigger than 2048");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->xSize == 0) ||
+        (keyMaterial->pSize == 0) || (keyMaterial->qSize == 0) || (keyMaterial->gSize == 0)) {
+        HKS_LOG_E("invalid import key material x/p/q/g size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && (keyMaterial->ySize == 0)) {
+        HKS_LOG_E("invalid import key material y size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialDsa) + keyMaterial->xSize + keyMaterial->ySize +
+        keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckCurve25519KeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    if (key->size < sizeof(struct HksKeyMaterial25519)) {
+        HKS_LOG_E("invalid import key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterial25519 *keyMaterial = (struct HksKeyMaterial25519 *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
+        HKS_LOG_E("invalid import key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->pubKeySize > HKS_CURVE25519_KEY_SIZE_256) ||
+        (keyMaterial->priKeySize > HKS_CURVE25519_KEY_SIZE_256)) {
+        HKS_LOG_E("invalid import key material pubKey/priKey size, bigger than 256");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if (keyMaterial->priKeySize == 0) {
+        HKS_LOG_E("invalid import key material priKey size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && (keyMaterial->pubKeySize == 0)) {
+        HKS_LOG_E("invalid import key material pubKey size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterial25519) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckDHKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    if (key->size < sizeof(struct HksKeyMaterialDh)) {
+        HKS_LOG_E("invalid import key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialDh *keyMaterial = (struct HksKeyMaterialDh *)(key->data);
+    if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
+        HKS_LOG_E("invalid import key material");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyMaterial->pubKeySize > HKS_DH_KEY_SIZE_4096) || (keyMaterial->priKeySize > HKS_DH_KEY_SIZE_4096)) {
+        HKS_LOG_E("invalid import key material pubKey/priKey size, bigger than 4096");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if (keyMaterial->priKeySize == 0) {
+        HKS_LOG_E("invalid import key material priKey size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && (keyMaterial->pubKeySize == 0)) {
+        HKS_LOG_E("invalid import key material pubKey size: 0");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialDh) + keyMaterial->pubKeySize + keyMaterial->priKeySize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    switch (alg) {
+        case HKS_ALG_RSA:
+            return CheckRsaKeyLen(alg, keyType, params, key);
+        case HKS_ALG_ECC:
+        case HKS_ALG_SM2:
+            return CheckEccKeyLen(alg, keyType, params, key);
+        case HKS_ALG_DSA:
+            return CheckDsaKeyLen(alg, keyType, params, key);
+        case HKS_ALG_X25519:
+        case HKS_ALG_ED25519:
+            return CheckCurve25519KeyLen(alg, keyType, params, key);
+        case HKS_ALG_DH:
+            return CheckDHKeyLen(alg, keyType, params, key);
+        default:
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
+static int32_t CheckMutableParams(uint32_t alg, uint32_t keyType, const struct ParamsValues *params)
+{
+    if (keyType == HKS_KEY_TYPE_KEY_PAIR) {
+        return HKS_SUCCESS;
+    }
+
+    switch (alg) {
+        case HKS_ALG_RSA:
+            if ((params->purpose.value != HKS_KEY_PURPOSE_SIGN) &&
+                (params->purpose.value != HKS_KEY_PURPOSE_DECRYPT)) {
+                HKS_LOG_E("Import rsa private key check purpose failed.");
+                return HKS_ERROR_INVALID_PURPOSE;
+            }
+            return HKS_SUCCESS;
+        case HKS_ALG_ECC:
+            if ((params->purpose.value != HKS_KEY_PURPOSE_SIGN) && (params->purpose.value != HKS_KEY_PURPOSE_AGREE) &&
+                (params->purpose.value != HKS_KEY_PURPOSE_UNWRAP)) {
+                HKS_LOG_E("Import ecc private key check purpose failed.");
+                return HKS_ERROR_INVALID_PURPOSE;
+            }
+            return HKS_SUCCESS;
+        case HKS_ALG_SM2:
+        case HKS_ALG_DSA:
+        case HKS_ALG_ED25519:
+            if (params->purpose.value != HKS_KEY_PURPOSE_SIGN) {
+                HKS_LOG_E("Import sm2 or dsa or ed25519 private key check purpose failed.");
+                return HKS_ERROR_INVALID_PURPOSE;
+            }
+            return HKS_SUCCESS;
+        case HKS_ALG_X25519:
+        case HKS_ALG_DH:
+            return HKS_SUCCESS;
+        default:
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
+static int32_t CheckImportKey(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
+    const struct HksBlob *key)
+{
+    int32_t ret = CheckKeyLen(alg, keyType, params, key);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check key len failed, ret = %d", ret);
+        return ret;
+    }
+
+    ret = CheckMutableParams(alg, keyType, params);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check mutable params faile, ret = %d", ret);
+    }
+    return ret;
+}
+
+static int32_t CheckImportSymmetricKeySize(const struct ParamsValues *params, const struct HksBlob *key)
+{
+    if (key->size != HKS_KEY_BYTES(params->keyLen.value)) {
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksBlob *keyOut)
 {
@@ -459,14 +737,27 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
         return ret;
     }
 
-    /* check keySize */
+    if ((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM3) || (alg == HKS_ALG_SM4) || (alg == HKS_ALG_HMAC)) {
+        return CheckImportSymmetricKeySize(&params, key);
+    }
+
+    struct HksParam *importKeyTypeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_IMPORT_KEY_TYPE, &importKeyTypeParam);
+    if ((ret == HKS_SUCCESS) &&
+        ((importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PRIVATE_KEY) ||
+        (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
+        /* check private key or keypair key params */
+        return CheckImportKey(alg, importKeyTypeParam->uint32Param, &params, key);
+    }
+
+    /* check public key params: 1. check keySize */
     ret = CheckImportKeySize(alg, &params, key);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("import key check key size invalid");
         return ret;
     }
 
-    /* check mutable params */
+    /* check public key params: 2. check mutable params */
     return CheckImportMutableParams(alg, &params);
 }
 

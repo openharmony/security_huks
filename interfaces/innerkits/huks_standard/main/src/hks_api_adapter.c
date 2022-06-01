@@ -40,7 +40,16 @@ int32_t HksImportKeyAdapter(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *key)
 {
     struct HksBlob innerKey = { 0, NULL };
-    int32_t ret = GetHksPubKeyInnerFormat(paramSet, key, &innerKey);
+
+    struct HksParam *importKeyTypeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IMPORT_KEY_TYPE, &importKeyTypeParam);
+    if ((ret == HKS_SUCCESS) &&
+        ((importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PRIVATE_KEY) ||
+        (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
+        ret = CopyToInnerKey(key, &innerKey);
+    } else {
+        ret = GetHksPubKeyInnerFormat(paramSet, key, &innerKey);
+    }
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("translate key to inner format failed, ret = %d", ret);
         return ret;
