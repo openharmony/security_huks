@@ -54,6 +54,22 @@ int32_t HksCheckGenAndImportKeyParams(const struct HksBlob *processName, const s
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
 
+int32_t HksCheckImportWrappedKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKeyData)
+{
+    int32_t ret = HksCheckBlob4AndParamSet(processName, keyAlias, wrappingKeyAlias, wrappedKeyData, paramSetIn);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return CheckProcessNameAndKeyAliasSize(processName->size, wrappingKeyAlias->size);
+}
+
 int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *data1, const struct HksBlob *data2)
 {
