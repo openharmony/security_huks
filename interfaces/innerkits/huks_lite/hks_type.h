@@ -170,11 +170,19 @@ enum HksKeyGenerateType {
 enum HksKeyFlag {
     HKS_KEY_FLAG_IMPORT_KEY = 1,
     HKS_KEY_FLAG_GENERATE_KEY = 2,
+    HKS_KEY_FLAG_AGREE_KEY = 3,
+    HKS_KEY_FLAG_DERIVE_KEY = 4,
 };
 
 enum HksKeyStorageType {
     HKS_STORAGE_TEMP = 0,
     HKS_STORAGE_PERSISTENT = 1,
+};
+
+enum HksImportKeyType {
+    HKS_KEY_TYPE_PUBLIC_KEY = 0,
+    HKS_KEY_TYPE_PRIVATE_KEY = 1,
+    HKS_KEY_TYPE_KEY_PAIR = 2,
 };
 
 enum HksErrorCode {
@@ -223,7 +231,7 @@ enum HksErrorCode {
     HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL = -101,
     HKS_ERROR_CHECK_GET_PADDING_FAIL = -102,
     HKS_ERROR_CHECK_GET_PURPOSE_FAIL = -103,
-    HKS_ERROR_CHECK_GET_DIGEST_FAIL =  -104,
+    HKS_ERROR_CHECK_GET_DIGEST_FAIL = -104,
     HKS_ERROR_CHECK_GET_MODE_FAIL = -105,
     HKS_ERROR_CHECK_GET_NONCE_FAIL = -106,
     HKS_ERROR_CHECK_GET_AAD_FAIL = -107,
@@ -296,6 +304,7 @@ enum HksTag {
     HKS_TAG_AGREE_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 22,
     HKS_TAG_KEY_ALIAS = HKS_TAG_TYPE_BYTES | 23,
     HKS_TAG_DERIVE_KEY_SIZE = HKS_TAG_TYPE_UINT | 24,
+    HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HksImportKeyType */
 
     /*
      * Key authentication related TAG: 201 - 300
@@ -420,6 +429,48 @@ struct HksPubKeyInfo {
     uint32_t nOrXSize;
     uint32_t eOrYSize;
     uint32_t placeHolder;
+};
+
+struct HksKeyMaterialRsa {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t nSize;
+    uint32_t eSize;
+    uint32_t dSize;
+};
+
+struct HksKeyMaterialEcc {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t xSize;
+    uint32_t ySize;
+    uint32_t zSize;
+};
+
+struct HksKeyMaterialDsa {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t xSize;
+    uint32_t ySize;
+    uint32_t pSize;
+    uint32_t qSize;
+    uint32_t gSize;
+};
+
+struct HksKeyMaterialDh {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t pubKeySize;
+    uint32_t priKeySize;
+    uint32_t reserved;
+};
+
+struct HksKeyMaterial25519 {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t pubKeySize;
+    uint32_t priKeySize;
+    uint32_t reserved;
 };
 
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16

@@ -260,6 +260,11 @@ static int32_t GetEccPubKeyCheckParams(const struct HksBlob *keyIn, const struct
 
     /* check keyOut size */
     const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(keyIn->data);
+    if ((keyMaterial->xSize == 0) || (keyMaterial->ySize == 0)) {
+        HKS_LOG_E("not support get pubkey");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
     if (keyOut->size < (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize)) {
         HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%X", keyOut->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
