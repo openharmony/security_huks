@@ -120,10 +120,12 @@ static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
         return NULL;
     }
 
-    if (Sm2InitPublicKey(sm2Key, keyPair, publicXSize, publicYSize) != HKS_SUCCESS) {
-        HKS_LOG_E("initialize sm2 public key failed");
-        SELF_FREE_PTR(sm2Key, EC_KEY_free);
-        return NULL;
+    if (!private) {
+        if (Sm2InitPublicKey(sm2Key, keyPair, publicXSize, publicYSize) != HKS_SUCCESS) {
+            HKS_LOG_E("initialize sm2 public key failed");
+            SELF_FREE_PTR(sm2Key, EC_KEY_free);
+            return NULL;
+        }
     }
 
     if (private) {
