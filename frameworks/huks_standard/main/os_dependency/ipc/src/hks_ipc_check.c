@@ -58,6 +58,28 @@ int32_t HksCheckIpcImportKey(const struct HksBlob *keyAlias, const struct HksPar
     return HKS_SUCCESS;
 }
 
+int32_t HksCheckIpcImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
+    const struct HksParamSet *paramSet,const struct HksBlob *wrappedKeyData)
+{
+    int32_t ret = HksCheckBlob3AndParamSet(keyAlias, wrappingKeyAlias, wrappedKeyData, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check keyAlias or wrappingKeyAlias or wrappedKeyData or paramSet failed");
+        return ret;
+    }
+
+    if ((keyAlias->size > MAX_PROCESS_SIZE) || (wrappingKeyAlias->size > MAX_PROCESS_SIZE) ||
+        (wrappedKeyData->size > MAX_PROCESS_SIZE)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+         sizeof(wrappingKeyAlias->size) + ALIGN_SIZE(wrappingKeyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
+         sizeof(wrappedKeyData->size) + ALIGN_SIZE(wrappedKeyData->size)) > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct HksBlob *key)
 {
     if (HksCheckBlob2(keyAlias, key) != HKS_SUCCESS) {

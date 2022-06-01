@@ -33,6 +33,9 @@ int32_t HksCheckProcessNameAndKeyAlias(const struct HksBlob *processName, const 
 int32_t HksCheckGenAndImportKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, const struct HksBlob *key);
 
+int32_t HksCheckImportWrappedKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKeyData);
+
 int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *data1, const struct HksBlob *data2);
 
