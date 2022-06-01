@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_check_pur1_test.h"
+#include "hks_check_pur_part1_test.h"
 
 #include <gtest/gtest.h>
 
@@ -183,7 +183,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurposeTest001, TestSize.Level0)
+HWTEST_F(HksCheckPurTest, HksCheckPurTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest001");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_001_PARAMS), HKS_SUCCESS);
@@ -195,7 +195,7 @@ HWTEST_F(HksCheckPurTest, HksCheckPurposeTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurposeTest002, TestSize.Level0)
+HWTEST_F(HksCheckPurTest, HksCheckPurTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest001");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_002_PARAMS), HKS_SUCCESS);
@@ -207,7 +207,7 @@ HWTEST_F(HksCheckPurTest, HksCheckPurposeTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurposeTest003, TestSize.Level0)
+HWTEST_F(HksCheckPurTest, HksCheckPurTest003, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest001");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_003_PARAMS), HKS_SUCCESS);
@@ -219,7 +219,7 @@ HWTEST_F(HksCheckPurTest, HksCheckPurposeTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurTest, HksCheckPurposeTest004, TestSize.Level0)
+HWTEST_F(HksCheckPurTest, HksCheckPurTest004, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest001");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_004_PARAMS), HKS_SUCCESS);

@@ -25,14 +25,6 @@ struct TestPurposeCaseParams {
     std::vector<HksParam> initParams;
     HksErrorCode initResult = HksErrorCode::HKS_SUCCESS;
 };
-
-int HksCheckPurposeTest001(void);
-    
-int HksCheckPurposeTest002(void);
-
-int HksCheckPurposeTest003(void);
-    
-int HksCheckPurposeTest004(void);
 }
 #endif // HKS_CHECK_PUR_TEST_H
 
