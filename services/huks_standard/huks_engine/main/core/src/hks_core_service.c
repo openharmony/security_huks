@@ -25,6 +25,7 @@
 #include "hks_attest.h"
 #include "hks_auth.h"
 #include "hks_check_paramset.h"
+#include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
@@ -44,6 +45,8 @@
 
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
+
+static const uint8_t g_defaultRsaPubExponent[] = { 0x01, 0x00, 0x01 }; /* default 65537 */
 
 static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
 
@@ -572,15 +575,205 @@ int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct Hks
     return HKS_SUCCESS;
 }
 
-int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+static int32_t CheckRsaKeyLen(uint32_t keyType, const struct HksBlob *key)
 {
-    int32_t ret = HksCoreCheckImportKeyParams(keyAlias, key, paramSet, keyOut);
+    if (key->size < sizeof(struct HksKeyMaterialRsa)) {
+        HKS_LOG_E("invalid import key size: %u", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    struct HksKeyMaterialRsa *keyMaterial = (struct HksKeyMaterialRsa *)(key->data);
+
+    if ((keyMaterial->nSize > HKS_RSA_KEY_SIZE_4096) || (keyMaterial->nSize == 0) ||
+        (keyMaterial->dSize > HKS_RSA_KEY_SIZE_4096) || (keyMaterial->dSize == 0) ||
+        (keyMaterial->eSize > HKS_RSA_KEY_SIZE_4096)) {
+        HKS_LOG_E("invalid import key material n/d/e size");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && (keyMaterial->eSize == 0)) {
+        HKS_LOG_E("invalid import key material e size while import key pair");
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t keySize = sizeof(struct HksKeyMaterialRsa) + keyMaterial->nSize + keyMaterial->dSize + keyMaterial->eSize;
+    if (key->size < keySize) {
+        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t AppendRsaPublicExponent(const struct HksBlob *key, struct HksBlob *outKey)
+{
+    /* key len has been checked by caller */
+    struct HksKeyMaterialRsa *keyMaterial = (struct HksKeyMaterialRsa *)(key->data);
+    uint32_t size = sizeof(struct HksKeyMaterialRsa) + keyMaterial->nSize + keyMaterial->dSize +
+        sizeof(g_defaultRsaPubExponent);
+
+    uint8_t *out = (uint8_t *)HksMalloc(size);
+    if (out == NULL) {
+        HKS_LOG_E("malloc failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    int32_t ret = HKS_SUCCESS;
+    uint32_t offset = 0;
+    do {
+        if (memcpy_s(out + offset, size - offset, key->data, sizeof(struct HksKeyMaterialRsa)) != EOK) {
+            HKS_LOG_E("copy keymaterial header failed");
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+        offset += sizeof(struct HksKeyMaterialRsa);
+
+        struct HksKeyMaterialRsa *newkeyMaterial = (struct HksKeyMaterialRsa *)out;
+        newkeyMaterial->eSize = sizeof(g_defaultRsaPubExponent);
+
+        if (memcpy_s(out + offset, size - offset, key->data + offset, keyMaterial->nSize) != EOK) {
+            HKS_LOG_E("copy material n failed");
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+        offset += keyMaterial->nSize;
+
+        if (memcpy_s(out + offset, size - offset, g_defaultRsaPubExponent, sizeof(g_defaultRsaPubExponent)) != EOK) {
+            HKS_LOG_E("copy material e failed");
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+
+        if (memcpy_s(out + offset + sizeof(g_defaultRsaPubExponent), size - offset - sizeof(g_defaultRsaPubExponent),
+            key->data + offset, keyMaterial->dSize) != EOK) {
+            HKS_LOG_E("copy material d failed");
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+    } while (0);
+
+    if (ret != HKS_SUCCESS) {
+        (void)memset_s(out, size, 0, size);
+        HKS_FREE_PTR(out);
+    }
+    outKey->data = out;
+    outKey->size = size;
+    return HKS_SUCCESS;
+}
+
+static int32_t GetRsaPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlob *key, struct HksBlob *outKey)
+{
+    int32_t ret = CheckRsaKeyLen(keyType, key);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
-    return HksBuildKeyBlob(keyAlias, HKS_KEY_FLAG_IMPORT_KEY, key, paramSet, keyOut);
+    struct HksKeyMaterialRsa *keyMaterial = (struct HksKeyMaterialRsa *)(key->data);
+    if ((keyType == HKS_KEY_TYPE_PRIVATE_KEY) && (keyMaterial->eSize == 0)) {
+        return AppendRsaPublicExponent(key, outKey);
+    }
+
+    return CopyToInnerKey(key, outKey);
+}
+
+static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyType,
+    const struct HksBlob *key, struct HksBlob *outKey)
+{
+    if (keyType == HKS_KEY_TYPE_KEY_PAIR) {
+        return CopyToInnerKey(key, outKey);
+    }
+
+    if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
+        HKS_LOG_E("Invalid curve25519 private key size! key size = 0x%X", key->size);
+        return HKS_ERROR_INVALID_KEY_INFO;
+    }
+
+    uint32_t totalSize = sizeof(struct HksKeyMaterial25519) + key->size;
+    uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
+    if (buffer == NULL) {
+        HKS_LOG_E("malloc failed! %u", totalSize);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(buffer, totalSize, 0, totalSize);
+
+    struct HksKeyMaterial25519 *curve25519Key = (struct HksKeyMaterial25519 *)buffer;
+    curve25519Key->keyAlg = alg;
+    curve25519Key->keySize = HKS_CURVE25519_KEY_SIZE_256;
+    curve25519Key->priKeySize = key->size; /* curve25519 private key */
+
+    uint32_t offset = sizeof(struct HksKeyMaterial25519);
+    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
+        HKS_LOG_E("copy pub key failed!");
+        HKS_FREE_PTR(buffer);
+        return HKS_ERROR_BAD_STATE;
+    }
+    outKey->data = buffer;
+    outKey->size = totalSize;
+    return HKS_SUCCESS;
+}
+
+static int32_t GetPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *outKey)
+{
+    if (CheckBlob(key) != HKS_SUCCESS) {
+        HKS_LOG_E("invalid key or outKey");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get alg param failed");
+        return HKS_ERROR_CHECK_GET_ALG_FAIL;
+    }
+
+    switch (algParam->uint32Param) {
+        case HKS_ALG_RSA:
+            return GetRsaPrivateOrPairInnerFormat(keyType, key, outKey);
+        case HKS_ALG_ECC:
+        case HKS_ALG_DSA:
+        case HKS_ALG_DH:
+        case HKS_ALG_SM2:
+        case HKS_ALG_HMAC:
+        case HKS_ALG_SM3:
+        case HKS_ALG_SM4:
+        case HKS_ALG_AES:
+            return CopyToInnerKey(key, outKey);
+        case HKS_ALG_ED25519:
+        case HKS_ALG_X25519:
+            return GetCurve25519PrivateOrPairInnerFormat(algParam->uint32Param, keyType, key, outKey);
+        default:
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
+int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    struct HksBlob innerKey = { 0, NULL };
+    struct HksParam *importKeyTypeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IMPORT_KEY_TYPE, &importKeyTypeParam);
+    if ((ret == HKS_SUCCESS) &&
+        ((importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PRIVATE_KEY) ||
+        (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
+        ret = GetPrivateOrPairInnerFormat(importKeyTypeParam->uint32Param, key, paramSet, &innerKey);
+    } else {
+        ret = CopyToInnerKey(key, &innerKey);
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("translate key to inner format failed, ret = %d", ret);
+        return ret;
+    }
+
+    ret = HksCoreCheckImportKeyParams(keyAlias, &innerKey, paramSet, keyOut);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = HksBuildKeyBlob(keyAlias, HKS_KEY_FLAG_IMPORT_KEY, &innerKey, paramSet, keyOut);
+    (void)memset_s(innerKey.data, innerKey.size, 0, innerKey.size);
+    HKS_FREE_BLOB(innerKey);
+    return ret;
 }
 
 int32_t HksCoreExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
