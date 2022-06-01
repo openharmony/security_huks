@@ -19,7 +19,7 @@
 #include <string>
 #include <vector>
 #include "hks_three_stage_test_common.h"
-namespace Unittest::HksCheckPurposeTest {
+namespace Unittest::CheckPurposeTest {
 struct TestPurposeCaseParams {
     std::vector<HksParam> genParams;
     std::vector<HksParam> initParams;
@@ -29,6 +29,10 @@ struct TestPurposeCaseParams {
 int HksCheckPurposeTest001(void);
     
 int HksCheckPurposeTest002(void);
+
+int HksCheckPurposeTest003(void);
+    
+int HksCheckPurposeTest004(void);
 }
 #endif // HKS_CHECK_PUR_TEST_H
 
