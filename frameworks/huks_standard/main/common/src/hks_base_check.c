@@ -1360,7 +1360,6 @@ int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose)
 
 #ifdef HKS_SUPPORT_DSA_C
 static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
-
 {
     if (key->size < sizeof(struct HksParamSet)) {
         HKS_LOG_E("check key size: invalid keyfile size: %u", key->size);

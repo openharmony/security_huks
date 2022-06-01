@@ -171,6 +171,7 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_SYMMETRIC_KEY_DATA", HKS_TAG_SYMMETRIC_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA", HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA", HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA);
+    AddInt32Property(env, tag, "HUKS_TAG_IMPORT_KEY_TYPE", HKS_TAG_IMPORT_KEY_TYPE);
 }
 
 static napi_value CreateHuksTag(napi_env env)
@@ -447,6 +448,18 @@ static napi_value CreateHuksTagType(napi_env env)
 
     return tagType;
 }
+
+static napi_value CreateHuksImportKeyType(napi_env env)
+{
+    napi_value ImportKeyType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &ImportKeyType));
+
+    AddInt32Property(env, ImportKeyType, "HUKS_KEY_TYPE_PUBLIC_KEY", HKS_KEY_TYPE_PUBLIC_KEY);
+    AddInt32Property(env, ImportKeyType, "HUKS_KEY_TYPE_PRIVATE_KEY", HKS_KEY_TYPE_PRIVATE_KEY);
+    AddInt32Property(env, ImportKeyType, "HUKS_KEY_TYPE_KEY_PAIR", HKS_KEY_TYPE_KEY_PAIR);
+
+    return ImportKeyType;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -467,6 +480,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksKeyStorageType", CreateHuksKeyStorageType(env)),
         DECLARE_NAPI_PROPERTY("HuksTagType", CreateHuksTagType(env)),
         DECLARE_NAPI_PROPERTY("HuksTag", CreateHuksTag(env)),
+        DECLARE_NAPI_PROPERTY("HuksImportKeyType", CreateHuksImportKeyType(env)),
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),

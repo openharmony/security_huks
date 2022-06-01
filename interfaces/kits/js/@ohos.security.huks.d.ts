@@ -432,6 +432,18 @@ declare namespace huks {
     }
 
     /**
+     * @name HuksImportKeyType
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     * @permission N/A
+     */
+    export enum HuksImportKeyType {
+        HUKS_KEY_TYPE_PUBLIC_KEY = 0,
+        HUKS_KEY_TYPE_PRIVATE_KEY = 1,
+        HUKS_KEY_TYPE_KEY_PAIR = 2,
+    };
+
+    /**
      * @name HuksSendType
      * @since 8
      * @syscap SystemCapability.Security.Huks
@@ -495,6 +507,14 @@ declare namespace huks {
         HUKS_TAG_AGREE_PUBLIC_KEY = HuksTagType.HUKS_TAG_TYPE_BYTES | 22,
         HUKS_TAG_KEY_ALIAS = HuksTagType.HUKS_TAG_TYPE_BYTES | 23,
         HUKS_TAG_DERIVE_KEY_SIZE = HuksTagType.HUKS_TAG_TYPE_UINT | 24,
+
+        /**
+         * @name HKS_TAG_IMPORT_KEY_TYPE
+         * @since 9
+         * @syscap SystemCapability.Security.Huks
+         * @permission N/A
+         */
+        HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HuksImportKeyType */
 
         /*
          * Key authentication related TAG: 201 - 300

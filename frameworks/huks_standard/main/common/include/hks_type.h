@@ -193,6 +193,12 @@ enum HksKeyStorageType {
     HKS_STORAGE_PERSISTENT = 1,
 };
 
+enum HksImportKeyType {
+    HKS_KEY_TYPE_PUBLIC_KEY = 0,
+    HKS_KEY_TYPE_PRIVATE_KEY = 1,
+    HKS_KEY_TYPE_KEY_PAIR = 2,
+};
+
 enum HksErrorCode {
     HKS_SUCCESS = 0,
     HKS_FAILURE = -1,
@@ -312,6 +318,7 @@ enum HksTag {
     HKS_TAG_AGREE_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 22,
     HKS_TAG_KEY_ALIAS = HKS_TAG_TYPE_BYTES | 23,
     HKS_TAG_DERIVE_KEY_SIZE = HKS_TAG_TYPE_UINT | 24,
+    HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HksImportKeyType */
 
     /*
      * Key authentication related TAG: 201 - 300
@@ -468,6 +475,48 @@ struct HksPubKeyInfo {
     uint32_t nOrXSize;
     uint32_t eOrYSize;
     uint32_t placeHolder;
+};
+
+struct HksKeyMaterialRsa {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t nSize;
+    uint32_t eSize;
+    uint32_t dSize;
+};
+
+struct HksKeyMaterialEcc {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t xSize;
+    uint32_t ySize;
+    uint32_t zSize;
+};
+
+struct HksKeyMaterialDsa {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t xSize;
+    uint32_t ySize;
+    uint32_t pSize;
+    uint32_t qSize;
+    uint32_t gSize;
+};
+
+struct HksKeyMaterialDh {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t pubKeySize;
+    uint32_t priKeySize;
+    uint32_t reserved;
+};
+
+struct HksKeyMaterial25519 {
+    enum HksKeyAlg keyAlg;
+    uint32_t keySize;
+    uint32_t pubKeySize;
+    uint32_t priKeySize;
+    uint32_t reserved;
 };
 
 struct HksKeyMaterialHeader {
