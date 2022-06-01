@@ -894,7 +894,7 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     }
 
     do {
-        ret = HksAuth(HKS_AUTH_ID_MAC, keyNode, paramSet);
+        ret = HksAuth(HKS_AUTH_ID_MAC_HMAC, keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("mac auth failed!");
             break;
@@ -1128,9 +1128,15 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         }
     }
 
-    if (i == size || ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        HKS_LOG_E("CoreInit failed, ret : %d", ret);
+        return ret;
+    }
+
+    if (i == size) {
+        HksDeleteKeyNode(keyNode->handle);
+        HKS_LOG_E("don't found purpose, pur : %u", pur);
         return HKS_FAILURE;
     }
 
@@ -1177,9 +1183,15 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         }
     }
 
-    if (i == size || ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
+        HKS_LOG_E("CoreUpdate failed, ret : %d", ret);
+        return ret;
+    }
+
+    if (i == size) {
         HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        HKS_LOG_E("don't found purpose, pur : %u", pur);
         return HKS_FAILURE;
     }
     return ret;

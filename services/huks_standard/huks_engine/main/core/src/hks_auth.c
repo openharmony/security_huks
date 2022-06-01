@@ -29,18 +29,22 @@ static uint32_t g_symCipherPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_BLOCK_MODE
 static uint32_t g_asymCipherPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PADDING, HKS_TAG_PURPOSE };
 static uint32_t g_signVerifyRsaPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PADDING, HKS_TAG_PURPOSE };
 static uint32_t g_signVerifyEccPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
+static uint32_t g_signVerifyEd25519PolicyTag[] = { HKS_TAG_PURPOSE };
 static uint32_t g_macPolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
+static uint32_t g_macSm3PolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_derivePolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
-static uint32_t g_signVerifySm2PolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
+static uint32_t g_agreePolicyTag[] = { HKS_TAG_PURPOSE };
 
 struct HksAuthPolicy g_authPolicyList[] = {
     { HKS_AUTH_ID_SYM_CIPHER, HKS_ARRAY_SIZE(g_symCipherPolicyTag), g_symCipherPolicyTag },
     { HKS_AUTH_ID_ASYM_CIPHER, HKS_ARRAY_SIZE(g_asymCipherPolicyTag), g_asymCipherPolicyTag },
     { HKS_AUTH_ID_SIGN_VERIFY_RSA, HKS_ARRAY_SIZE(g_signVerifyRsaPolicyTag), g_signVerifyRsaPolicyTag },
     { HKS_AUTH_ID_SIGN_VERIFY_ECC, HKS_ARRAY_SIZE(g_signVerifyEccPolicyTag), g_signVerifyEccPolicyTag },
-    { HKS_AUTH_ID_MAC, HKS_ARRAY_SIZE(g_macPolicyTag), g_macPolicyTag },
+    { HKS_AUTH_ID_SIGN_VERIFY_ED25519, HKS_ARRAY_SIZE(g_signVerifyEd25519PolicyTag), g_signVerifyEd25519PolicyTag },
+    { HKS_AUTH_ID_MAC_HMAC, HKS_ARRAY_SIZE(g_macPolicyTag), g_macPolicyTag },
+    { HKS_AUTH_ID_MAC_SM3, HKS_ARRAY_SIZE(g_macSm3PolicyTag), g_macSm3PolicyTag },
     { HKS_AUTH_ID_DERIVE, HKS_ARRAY_SIZE(g_derivePolicyTag), g_derivePolicyTag },
-    { HKS_AUTH_ID_SIGN_VERIFY_SM2, HKS_ARRAY_SIZE(g_signVerifySm2PolicyTag), g_signVerifySm2PolicyTag }
+    { HKS_AUTH_ID_AGREE, HKS_ARRAY_SIZE(g_agreePolicyTag), g_agreePolicyTag }
 };
 
 static int32_t CheckPurpose(const struct HksParam *authParam, const struct HksParam *requestParam)
