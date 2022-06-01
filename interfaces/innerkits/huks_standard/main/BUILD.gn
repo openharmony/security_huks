@@ -32,7 +32,10 @@ if (os_level == "standard") {
       "//utils/native/base/include",
     ]
 
-    sources = [ "src/hks_api.c" ]
+    sources = [
+      "src/hks_api.c",
+      "src/hks_api_adapter.c",
+    ]
 
     cflags = [
       "-Wall",
