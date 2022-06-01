@@ -221,6 +221,11 @@ int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *outp
 {
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;
 
+    if ((keyMaterial->xSize == 0) || (keyMaterial->ySize == 0)) {
+        HKS_LOG_E("not support get pubkey");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
     output->size = sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize;
 
     struct KeyMaterialEcc *publickeyMaterial = (struct KeyMaterialEcc *)output->data;
@@ -328,10 +333,12 @@ static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
         return NULL;
     }
 
-    if (EccInitPublicKey(eccKey, keyPair, publicXSize, publicYSize) != HKS_SUCCESS) {
-        HKS_LOG_E("initialize ecc public key failed");
-        EC_KEY_free(eccKey);
-        return NULL;
+    if (!private) {
+        if (EccInitPublicKey(eccKey, keyPair, publicXSize, publicYSize) != HKS_SUCCESS) {
+            HKS_LOG_E("initialize ecc public key failed");
+            EC_KEY_free(eccKey);
+            return NULL;
+        }
     }
 
     if (private) {
