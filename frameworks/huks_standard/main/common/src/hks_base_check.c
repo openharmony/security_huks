@@ -546,7 +546,7 @@ static uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_ECC_C
     {
         HKS_ALG_ECC,
-        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP |
+        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP |
             HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
     },
 #endif
@@ -574,7 +574,8 @@ static uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_AES_C
     {
         HKS_ALG_AES,
-        HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_AGREE,
+        HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_AGREE | HKS_KEY_PURPOSE_WRAP |
+            HKS_KEY_PURPOSE_UNWRAP,
     },
 #endif
 #ifdef HKS_SUPPORT_ED25519_C
@@ -587,7 +588,8 @@ static uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_X25519_C
     {
         HKS_ALG_X25519,
-        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT |
+            HKS_KEY_PURPOSE_WRAP,
     },
 #endif
 #ifdef HKS_SUPPORT_HMAC_C
@@ -607,7 +609,7 @@ static uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_DH_C
     {
         HKS_ALG_DH,
-        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP |
+        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP |
             HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT | HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
     },
 #endif
@@ -1541,12 +1543,15 @@ int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inp
 
 int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params)
 {
-    if (alg == HKS_ALG_AES) {
-        return HKS_SUCCESS;
+    if (((alg == HKS_ALG_SM2) || (alg == HKS_ALG_DSA) || (alg == HKS_ALG_ED25519)) &&
+        (params->purpose.value != HKS_KEY_PURPOSE_VERIFY)) {
+        HKS_LOG_E("Import key check purpose failed.");
+        return HKS_ERROR_INVALID_PURPOSE;
     }
 
-    if (((alg == HKS_ALG_ECC) || (alg == HKS_ALG_ED25519) || (alg == HKS_ALG_SM2)) &&
-        (params->purpose.value != HKS_KEY_PURPOSE_VERIFY)) {
+    if ((alg == HKS_ALG_ECC) &&
+        ((params->purpose.value != HKS_KEY_PURPOSE_VERIFY) && (params->purpose.value != HKS_KEY_PURPOSE_UNWRAP) &&
+        (params->purpose.value != HKS_KEY_PURPOSE_AGREE))) {
         HKS_LOG_E("Import key check purpose failed.");
         return HKS_ERROR_INVALID_PURPOSE;
     }
