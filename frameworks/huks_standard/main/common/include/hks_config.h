@@ -133,7 +133,7 @@
 #define HKS_SUPPORT_HASH_SM3
 #endif
 
-/* SM4 */
+    /* SM4 */
 #define HKS_SUPPORT_SM4_C
 #define HKS_SUPPORT_SM4_GENERATE_KEY
 #define HKS_SUPPORT_SM4_CBC_NOPADDING
