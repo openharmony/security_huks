@@ -86,6 +86,24 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
     return HksServiceImportKey(&processInfo, keyAlias, paramSet, key);
 }
 
+int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+    char *processName = NULL;
+    char *userId = NULL;
+    if (GetProcessInfo(&processName, &userId) != HKS_SUCCESS) {
+        HKS_LOG_E("get process info failed");
+        return HKS_ERROR_INTERNAL_ERROR;
+    }
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName }
+    };
+
+    return HksServiceImportWrappedKey(&processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+}
+
 int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *key)
 {
