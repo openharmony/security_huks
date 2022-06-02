@@ -32,6 +32,8 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
 
 void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t *context);
+
 void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *context);

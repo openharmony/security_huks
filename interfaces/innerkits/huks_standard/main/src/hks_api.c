@@ -148,6 +148,28 @@ HKS_API_EXPORT int32_t HksImportKey(const struct HksBlob *keyAlias,
 #endif
 }
 
+HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+#ifdef HKS_SUPPORT_API_IMPORT_WRAPPED_KEY
+    HKS_LOG_I("enter import wrapped key");
+    if ((keyAlias == NULL) || (wrappingKeyAlias == NULL)|| (paramSet == NULL) || (wrappedKeyData == NULL)) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksClientImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+
+    HKS_LOG_I("leave import wrapped key, result = %d", ret);
+    return ret;
+#else
+    (void)keyAlias;
+    (void)wrappingKeyAlias;
+    (void)paramSet;
+    (void)wrappedKeyData;
+    return HKS_ERROR_NOT_SUPPORTED;
+#endif
+}
+
 HKS_API_EXPORT int32_t HksExportPublicKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {

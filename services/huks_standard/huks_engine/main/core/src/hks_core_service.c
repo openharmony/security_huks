@@ -26,6 +26,8 @@
 #include "hks_auth.h"
 #include "hks_check_paramset.h"
 #include "hks_client_service_adapter_common.h"
+#include "hks_core_service_three_stage.h"
+#include "hks_common_check.h"
 #include "hks_cmd_id.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
@@ -1029,11 +1031,11 @@ int32_t HksCoreRefresh(void)
     return HksCoreRefreshKeyInfo();
 }
 
-int32_t HksCoreImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
+int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
-    (void)(wrappingKeyAlias);
-    (void)(key);
+    (void)(keyAlias);
+    (void)(wrappingKey);
     (void)(wrappedKeyData);
     (void)(paramSet);
     (void)(keyOut);
