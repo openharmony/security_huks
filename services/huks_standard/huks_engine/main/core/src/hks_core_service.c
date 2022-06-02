@@ -26,6 +26,7 @@
 #include "hks_auth.h"
 #include "hks_check_paramset.h"
 #include "hks_client_service_adapter_common.h"
+#include "hks_common_check.h"
 #include "hks_cmd_id.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
