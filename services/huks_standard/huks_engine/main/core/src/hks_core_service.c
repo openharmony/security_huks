@@ -637,7 +637,8 @@ static int32_t GetPublicKeyInnerFormat(const struct HksBlob *wrappingKey, const 
 {
     struct HksBlob peerPubKeyPart = { 0, NULL };
     uint32_t offset = *partOffset;
-    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &peerPubKeyPart);
+    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS,
+                                            &peerPubKeyPart);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get peer pub key failed!");
         return ret;
