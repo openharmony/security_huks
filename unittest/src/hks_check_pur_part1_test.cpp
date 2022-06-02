@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_check_pur_part1_test.h"
+#include "hks_check_pur_part_test.h"
 
 #include <gtest/gtest.h>
 

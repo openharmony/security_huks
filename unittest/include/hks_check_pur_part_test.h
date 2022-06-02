@@ -25,6 +25,9 @@ struct TestPurposeCaseParams {
     std::vector<HksParam> initParams;
     HksErrorCode initResult = HksErrorCode::HKS_SUCCESS;
 };
+
+static const uint32_t IV_SIZE = 16;
+static uint8_t IV[IV_SIZE] = {0};
 }
 #endif // HKS_CHECK_PUR_TEST_H
 
