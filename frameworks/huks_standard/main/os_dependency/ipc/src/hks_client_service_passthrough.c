@@ -97,8 +97,8 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
     }
 
     struct HksProcessInfo processInfo = {
-            { strlen(userId), (uint8_t *)userId },
-            { strlen(processName), (uint8_t *)processName }
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName }
     };
 
     return HksServiceImportWrappedKey(&processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
