@@ -240,6 +240,31 @@ int32_t HksImportKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAli
     return GetBlobFromBuffer(key, srcData, &offset);
 }
 
+int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksBlob *wrappingKeyAlias, struct HksParamSet **paramSet, struct HksBlob *wrappedKeyData)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get keyAlias failed");
+        return ret;
+    }
+
+    ret = GetBlobFromBuffer(wrappingKeyAlias, srcData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get wrappingKeyAlias failed");
+        return ret;
+    }
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get paramSet failed");
+        return ret;
+    }
+
+    return GetBlobFromBuffer(wrappedKeyData, srcData, &offset);
+}
+
 int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksBlob *key)
 {
     uint32_t offset = 0;

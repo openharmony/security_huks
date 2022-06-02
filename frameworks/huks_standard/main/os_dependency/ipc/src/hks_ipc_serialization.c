@@ -153,6 +153,30 @@ int32_t HksImportKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlia
     return CopyBlobToBuffer(key, destData, &offset);
 }
 
+int32_t HksImportWrappedKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("copy keyAlias failed");
+        return ret;
+    }
+
+    ret = CopyBlobToBuffer(wrappingKeyAlias, destData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("copy wrappingKeyAlias failed");
+        return ret;
+    }
+
+    ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("copy paramSet failed");
+        return ret;
+    }
+    return CopyBlobToBuffer(wrappedKeyData, destData, &offset);
+}
+
 int32_t HksExportPublicKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *key)
 {
     uint32_t offset = 0;

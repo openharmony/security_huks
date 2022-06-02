@@ -905,6 +905,61 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
     return ret;
 }
 
+int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob wrappingKeyFromFile = { 0, NULL };
+
+    do {
+        ret = HksCheckImportWrappedKeyParams(&processInfo->processName, keyAlias,
+            wrappingKeyAlias, paramSet, wrappedKeyData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("check import params failed, ret = %d", ret);
+            break;
+        }
+
+        ret = HksServiceKeyExist(processInfo, wrappingKeyAlias);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("wrapping key is not exist, ret = %d", ret);
+            break;
+        }
+
+        ret = CheckKeyCondition(processInfo, keyAlias);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("check condition failed, ret = %d", ret);
+            break;
+        }
+
+        ret = GetKeyAndNewParamSet(processInfo, wrappingKeyAlias, paramSet, &wrappingKeyFromFile, &newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get wrapping key and new paramSet failed, ret = %d", ret);
+            break;
+        }
+
+        uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+        if (keyOutBuffer == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        struct HksBlob keyOut = { MAX_KEY_SIZE, keyOutBuffer };
+        ret = HuksAccessImportWrappedKey(wrappingKeyAlias, &wrappingKeyFromFile, wrappedKeyData, newParamSet, &keyOut);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("access level import wrapped key failed, ret = %d", ret);
+            HKS_FREE_PTR(keyOutBuffer);
+            break;
+        }
+
+        ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyOut);
+        HKS_FREE_PTR(keyOutBuffer);
+    } while (0);
+
+    HKS_FREE_BLOB(wrappingKeyFromFile);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     struct HksBlob *key)
 {
