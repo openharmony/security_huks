@@ -190,7 +190,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_007_PARAMS = {
     .genParams =
         {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
@@ -199,7 +199,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_007_PARAMS = {
     .initParams =
         {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_MD5 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
