@@ -562,9 +562,9 @@ static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, struct HksPara
     }
 
     struct HksParam agreeParams[] = {
-            { .tag = HKS_TAG_ALGORITHM, .uint32Param = alg },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
-            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = keySize }
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = alg },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = keySize }
     };
     
     ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
@@ -698,33 +698,49 @@ static int32_t AgreeSharedSecretWithPeerPublicKey(const struct HksBlob *wrapping
     return HKS_SUCCESS;
 }
 
+static int32_t ParseKekDecryptParams(const struct HksBlob *wrappedKeyData, uint32_t *partOffset,
+    uint32_t totalBlobs, struct HksBlob **blobArray)
+{
+    uint32_t offset = *partOffset;
+    uint32_t blobIndex = 0;
+    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get agree-key aad data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get agree-key nonce data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get agree-key aead tag data failed!");
+        return ret;
+    }
+    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, totalBlobs, blobArray[blobIndex++]);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get kek enc data failed!");
+        return ret;
+    }
+
+    *partOffset = offset;
+    return HKS_SUCCESS;
+}
+
 static int32_t DecryptKekWithAgreeSharedSecret(const struct HksBlob *wrappedKeyData,
-        const struct HksBlob *agreeSharedSecret, uint32_t *partOffset, struct HksBlob *outKekBlob)
+    const struct HksBlob *agreeSharedSecret, uint32_t *partOffset, struct HksBlob *outKekBlob)
 {
     struct HksBlob agreeKeyAadPart = { 0, NULL };
     struct HksBlob agreeKeyNoncePart = { 0, NULL };
     struct HksBlob agreeKeyTagPart = { 0, NULL };
     struct HksBlob kekEncDataPart = { 0, NULL };
+    struct HksBlob *blobArray[] = { &agreeKeyAadPart, &agreeKeyNoncePart, &agreeKeyTagPart, &kekEncDataPart };
 
     uint32_t offset = *partOffset;
-    int32_t ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &agreeKeyAadPart);
+    int32_t ret = ParseKekDecryptParams(wrappedKeyData, partOffset, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, blobArray);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get agreekey aad data failed!");
-        return ret;
-    }
-    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &agreeKeyNoncePart);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get agreekey nonce data failed!");
-        return ret;
-    }
-    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &agreeKeyTagPart);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get agreekey aead tag data failed!");
-        return ret;
-    }
-    ret = HksGetBlobFromWrappedData(wrappedKeyData, offset++, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, &kekEncDataPart);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get kek enc data failed!");
+        HKS_LOG_E("parse agree-key decrypt kek params failed!");
         return ret;
     }
 
@@ -743,7 +759,7 @@ static int32_t DecryptKekWithAgreeSharedSecret(const struct HksBlob *wrappedKeyD
         return ret;
     }
     struct HksBlob kek = { 0, NULL };
-    kek.size = HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256);;
+    kek.size = HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256);
     uint8_t *kekBuffer = (uint8_t *) HksMalloc(kek.size);
     if (kekBuffer == NULL) {
         HKS_LOG_E("malloc kek memory failed!");
@@ -1439,7 +1455,7 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
             HKS_LOG_E("import origin key failed!");
             break;
         }
-    } while(0);
+    } while (0);
 
     ClearAndFreeKeyBlobsIfNeed(&peerPublicKey, &agreeSharedSecret, &originKey, &kek);
     return ret;
