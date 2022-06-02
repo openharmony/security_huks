@@ -53,6 +53,17 @@ declare namespace huks {
     function importKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Import Wrapped Key.
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     * @param keyAlias Indicates the name of key to be imported.
+     * @param wrappingKeyAlias Indicates the name of key for wrapping the key to be imported
+     * @param options Indicates the properties of the key.
+     */
+    function importWrappedKey(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
+    function importWrappedKey(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions) : Promise<HuksResult>;
+
+    /**
      * Export Key.
      * @since 8
      * @syscap SystemCapability.Security.Huks
@@ -265,6 +276,8 @@ declare namespace huks {
         HUKS_ERROR_INVALID_SALT = -123,
         HUKS_ERROR_INVALID_ITERATION = -124,
         HUKS_ERROR_INVALID_OPERATION = -125,
+        HUKS_ERROR_INVALID_WRAPPED_FORMAT = -126,
+        HUKS_ERROR_INVALID_USAGE_OF_KEY = -127,
 
         HUKS_ERROR_INTERNAL_ERROR = -999,
         HUKS_ERROR_UNKNOWN_ERROR = -1000,
@@ -396,6 +409,17 @@ declare namespace huks {
     }
 
     /**
+     * @name HuksUnwrapSuite
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     * @permission N/A
+     */
+    export enum HuksUnwrapSuite {
+        HUKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING = 1,
+        HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING = 2,
+    }
+
+    /**
      * @name HuksKeyGenerateType
      * @since 8
      * @syscap SystemCapability.Security.Huks
@@ -514,8 +538,16 @@ declare namespace huks {
          * @syscap SystemCapability.Security.Huks
          * @permission N/A
          */
-        HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HuksImportKeyType */
-
+        HKS_TAG_IMPORT_KEY_TYPE = HuksTagType.HUKS_TAG_TYPE_UINT | 25, /* choose from enum HuksImportKeyType */
+	
+	/**
+         * @name HUKS_TAG_UNWRAP_ALGORITHM_SUITE
+         * @since 9
+         * @syscap SystemCapability.Security.Huks
+         * @permission N/A
+         */
+        HUKS_TAG_UNWRAP_ALGORITHM_SUITE = HuksTagType.HUKS_TAG_TYPE_UINT | 26,
+	
         /*
          * Key authentication related TAG: 201 - 300
          *
