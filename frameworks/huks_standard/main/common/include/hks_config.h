@@ -166,6 +166,12 @@
 #define HKS_SUPPORT_API_EXPORT
 #endif
 
+#if defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ED25519_C) || \
+    defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DSA_C) ||  \
+    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
+#define HKS_SUPPORT_API_IMPORT_WRAPPED_KEY
+#endif
+
 #define HKS_SUPPORT_API_GENERATE_RANDOM
 
 #if defined(HKS_SUPPORT_ECDSA_SIGN_VERIFY) || defined(HKS_SUPPORT_ED25519_SIGN_VERIFY) || \
