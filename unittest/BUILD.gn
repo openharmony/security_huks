@@ -38,6 +38,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_ecdh_agree_test_common.cpp",
     "src/hks_ed25519_sign_verify_test.cpp",
     "src/hks_export_test.cpp",
+    "src/hks_export_test_mt.cpp",
     "src/hks_hkdf_derive_part1_test.cpp",
     "src/hks_hkdf_derive_part2_test.cpp",
     "src/hks_hkdf_derive_test_common.cpp",
