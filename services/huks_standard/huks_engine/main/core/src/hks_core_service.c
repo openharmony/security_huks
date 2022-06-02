@@ -577,7 +577,7 @@ int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct Hks
     return HKS_SUCCESS;
 }
 
-static int32_t CheckRsaKeyLen(uint32_t keyType, const struct HksBlob *key)
+static int32_t CheckRsaKeyMaterialLen(uint32_t keyType, const struct HksBlob *key)
 {
     if (key->size < sizeof(struct HksKeyMaterialRsa)) {
         HKS_LOG_E("invalid import key size: %u", key->size);
@@ -665,7 +665,7 @@ static int32_t AppendRsaPublicExponent(const struct HksBlob *key, struct HksBlob
 
 static int32_t GetRsaPrivateOrPairInnerFormat(uint32_t keyType, const struct HksBlob *key, struct HksBlob *outKey)
 {
-    int32_t ret = CheckRsaKeyLen(keyType, key);
+    int32_t ret = CheckRsaKeyMaterialLen(keyType, key);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -1052,11 +1052,11 @@ int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur
 
     HKS_LOG_D("Get paramSet->paramsCnt %u", paramSet->paramsCnt);
     for (i = 0; i < paramSet->paramsCnt; i++) {
-        if (paramSet->params[i].tag ==  HKS_TAG_PURPOSE) {
+        if (paramSet->params[i].tag == HKS_TAG_PURPOSE) {
             *pur = paramSet->params[i].uint32Param;
         }
 
-        if (paramSet->params[i].tag ==  HKS_TAG_ALGORITHM) {
+        if (paramSet->params[i].tag == HKS_TAG_ALGORITHM) {
             *alg = paramSet->params[i].uint32Param;
         }
 

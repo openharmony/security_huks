@@ -64,6 +64,13 @@ ohos_unittest("huks_UT_test") {
     "src/hks_x25519_agree_test.cpp",
   ]
 
+  sources += [
+    "src/hks_import_agree_test.cpp",
+    "src/hks_import_key_test.cpp",
+    "src/hks_import_rsa_test.cpp",
+    "src/hks_import_sign_verify_test.cpp",
+  ]
+
   defines = [
     "L2_STANDARD",
     "_HUKS_LOG_ENABLE_",
