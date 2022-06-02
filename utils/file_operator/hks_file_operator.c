@@ -375,7 +375,7 @@ int32_t HksDeletDirPartTwo(const char *path)
         }
 
         if ((strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
-            (void)remove(deletePath);
+            ret = remove(deletePath);
         }
         dire = readdir(dir);
     }
@@ -415,7 +415,7 @@ int32_t HksDeletDirPartOne(const char *path)
         if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
             HksDeletDirPartTwo(deletePath);
         } else if (dire->d_type != DT_DIR) {
-            (void)remove(deletePath);
+            ret = remove(deletePath);
         }
         dire = readdir(dir);
     }
@@ -456,7 +456,7 @@ int32_t HksDeleteDir(const char *path)
         if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
             HksDeletDirPartOne(deletePath);
         } else if (dire->d_type != DT_DIR) {
-            (void)remove(deletePath);
+            ret = remove(deletePath);
         }
         dire = readdir(dir);
     }
