@@ -178,6 +178,15 @@ static uint32_t g_deriveAlgLocal[] = {
 #endif
 };
 
+static uint32_t g_unwrapSuite[] = {
+#if defined(HKS_SUPPORT_X25519_C) && defined(HKS_SUPPORT_AES_GCM)
+    HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING,
+#endif
+#if defined(HKS_SUPPORT_ECDH_C) && defined(HKS_SUPPORT_AES_GCM)
+    HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING,
+#endif
+};
+
 static uint32_t g_digest[] = {
     HKS_DIGEST_SHA1,
     HKS_DIGEST_SHA224,
@@ -363,6 +372,25 @@ static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *param
             return HKS_ERROR_INVALID_ALGORITHM;
     }
     return ret;
+}
+
+static int32_t CheckAndGetWrappedKeyUnwrapAlgSuite(const struct HksParamSet *paramSet, uint32_t *algSuite)
+{
+    struct HksParam *algorithmSuite = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_UNWRAP_ALGORITHM_SUITE, &algorithmSuite);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get unwrap algorithm suite fail");
+        return HKS_ERROR_CHECK_GET_ALG_FAIL;
+    }
+
+    ret = HksCheckValue(algorithmSuite->uint32Param, g_unwrapSuite, HKS_ARRAY_SIZE(g_unwrapSuite));
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("unwrap algorithm suite value %u not expected", algorithmSuite->uint32Param);
+        return HKS_ERROR_INVALID_ALGORITHM;
+    }
+
+    *algSuite = algorithmSuite->uint32Param;
+    return HKS_SUCCESS;
 }
 
 #ifdef HKS_SUPPORT_API_SIGN_VERIFY
@@ -759,6 +787,45 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
 
     /* check public key params: 2. check mutable params */
     return CheckImportMutableParams(alg, &params);
+}
+
+int32_t HksCoreCheckImportWrappedKeyParams(const struct HksBlob *key, const struct HksBlob *wrappedKeyData,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut, uint32_t *outUnwrapSuite)
+{
+    (void)key;
+    (void)keyOut;
+
+    /* first check wrapping-related params and wrapped key data */
+    uint32_t unwrapSuite = 0;
+    int32_t ret = CheckAndGetWrappedKeyUnwrapAlgSuite(paramSet, &unwrapSuite);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check import wrapped params set failed");
+        return ret;
+    }
+
+    ret = HksCheckWrappedDataFormatValidity(wrappedKeyData, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, NULL);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check import wrapped key data format failed");
+        return ret;
+    }
+
+    /* then check the origin key paramset which is the same as import key */
+    struct ParamsValues params;
+    (void)memset_s(&params, sizeof(params), 0, sizeof(params));
+    ret = CoreCheckGenKeyParams(paramSet, &params);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check origin key param set failed");
+        return ret;
+    }
+
+    uint32_t alg;
+    ret = CheckAndGetAlgorithm(paramSet, g_importKeyAlg, HKS_ARRAY_SIZE(g_importKeyAlg), &alg);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("CheckImportKeyParams get alg failed");
+        return ret;
+    }
+    *outUnwrapSuite = unwrapSuite;
+    return HKS_SUCCESS;
 }
 
 int32_t HksCoreCheckSignVerifyParams(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
