@@ -339,7 +339,7 @@ enum HksTag {
     HKS_TAG_DERIVE_KEY_SIZE = HKS_TAG_TYPE_UINT | 24,
     HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HksImportKeyType */
     HKS_TAG_UNWRAP_ALGORITHM_SUITE = HKS_TAG_TYPE_UINT | 26,
-	
+
     /*
      * Key authentication related TAG: 201 - 300
      *
