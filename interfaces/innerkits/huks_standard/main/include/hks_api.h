@@ -35,7 +35,7 @@ HKS_API_EXPORT int32_t HksImportKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *key);
 
 HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
-        const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
 
 HKS_API_EXPORT int32_t HksExportPublicKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key);
