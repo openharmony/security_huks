@@ -740,7 +740,7 @@ static int32_t DecryptKekWithAgreeSharedSecret(const struct HksBlob *wrappedKeyD
     struct HksBlob *blobArray[] = { &agreeKeyAadPart, &agreeKeyNoncePart, &agreeKeyTagPart, &kekEncDataPart };
 
     uint32_t offset = *partOffset;
-    int32_t ret = ParseKekDecryptParams(wrappedKeyData, partOffset, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, blobArray);
+    int32_t ret = ParseKekDecryptParams(wrappedKeyData, &offset, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, blobArray);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("parse agree-key decrypt kek params failed!");
         return ret;
