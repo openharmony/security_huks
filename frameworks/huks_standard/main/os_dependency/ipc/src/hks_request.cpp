@@ -57,7 +57,6 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 {
     int32_t ret = reply.ReadInt32();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("reply.ReadInt32 fail, ret:%d", ret);
         return ret;
     }
 
@@ -66,12 +65,10 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         if (outBlob != NULL) {
             outBlob->size = 0;
         }
-        HKS_LOG_E("outLen == 0, ret:%d", ret);
         return ret;
     }
 
     if (CheckBlob(outBlob) != HKS_SUCCESS) {
-        HKS_LOG_E("CheckBlob fail, ret:%d", ret);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
