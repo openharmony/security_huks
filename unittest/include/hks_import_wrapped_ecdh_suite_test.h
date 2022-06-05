@@ -25,4 +25,4 @@ namespace Unittest::ImportWrappedKey {
     void HksImportWrappedKeyTestEcdhSuite003(void);
 }
 
-#endif //HKS_IMPORT_WRAPPED_ECDH_SUITE_TEST_H
+#endif // HKS_IMPORT_WRAPPED_ECDH_SUITE_TEST_H
