@@ -191,7 +191,7 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append cipher get alg param failed!");
+        HKS_LOG_E("append sign/verify get alg param failed!");
         return ret;
     }
 
@@ -227,7 +227,7 @@ static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParam
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append agree get alg param failed!");
+        HKS_LOG_E("append hmac get alg param failed!");
         return ret;
     }
 
