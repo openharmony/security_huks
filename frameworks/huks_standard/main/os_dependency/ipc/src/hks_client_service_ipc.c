@@ -141,6 +141,39 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
     return ret;
 }
 
+int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
+{
+    int32_t ret = HksCheckIpcImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksClientImportWrappedKey fail");
+        return ret;
+    }
+
+    struct HksBlob inBlob = { 0, NULL };
+    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+                  sizeof(wrappingKeyAlias->size) + ALIGN_SIZE(wrappingKeyAlias->size) +
+                  ALIGN_SIZE(paramSet->paramSetSize) +
+                  sizeof(wrappedKeyData->size) + ALIGN_SIZE(wrappedKeyData->size);
+    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+    if (inBlob.data == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    do {
+        ret = HksImportWrappedKeyPack(&inBlob, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksImportWrappedKeyPack fail");
+            break;
+        }
+
+        ret = HksSendRequest(HKS_MSG_IMPORT_WRAPPED_KEY, &inBlob, NULL, paramSet);
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}
+
 int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
     if (CheckBlob(keyAlias) != HKS_SUCCESS) {

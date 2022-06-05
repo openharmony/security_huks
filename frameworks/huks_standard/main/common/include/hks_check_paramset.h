@@ -29,6 +29,9 @@ int32_t HksCoreCheckGenKeyParams(const struct HksBlob *keyAlias, const struct Hk
 int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksBlob *keyOut);
 
+int32_t HksCoreCheckImportWrappedKeyParams(const struct HksBlob *key, const struct HksBlob *wrappedKeyData,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut, uint32_t *outUnwrapSuite);
+
 int32_t HksCoreCheckSignVerifyParams(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature);
 

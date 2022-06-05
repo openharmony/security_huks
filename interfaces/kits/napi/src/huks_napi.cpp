@@ -31,6 +31,7 @@
 #include "huks_napi_get_key_properties.h"
 #include "huks_napi_get_sdk_version.h"
 #include "huks_napi_import_key.h"
+#include "huks_napi_import_wrapped_key.h"
 #include "huks_napi_is_key_exist.h"
 #include "huks_napi_mac.h"
 #include "huks_napi_sign.h"
@@ -172,6 +173,7 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA", HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA", HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_IMPORT_KEY_TYPE", HKS_TAG_IMPORT_KEY_TYPE);
+    AddInt32Property(env, tag, "HUKS_TAG_UNWRAP_ALGORITHM_SUITE", HKS_TAG_UNWRAP_ALGORITHM_SUITE);
 }
 
 static napi_value CreateHuksTag(napi_env env)
@@ -304,6 +306,18 @@ static napi_value CreateHuksKeyStorageType(napi_env env)
     return keyStorageType;
 }
 
+static napi_value CreateHuksUnwrapSuite(napi_env env)
+{
+    napi_value huksUnwrapSuite = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &huksUnwrapSuite));
+
+    AddInt32Property(env, huksUnwrapSuite, "HUKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING",
+                     HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING);
+    AddInt32Property(env, huksUnwrapSuite, "HUKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING",
+                     HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING);
+    return huksUnwrapSuite;
+}
+
 static void AddHuksErrorCodePart1(napi_env env, napi_value errorCode)
 {
     AddInt32Property(env, errorCode, "HUKS_SUCCESS", HKS_SUCCESS);
@@ -376,6 +390,8 @@ static void AddHuksErrorCodePart2(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_SALT", HKS_ERROR_INVALID_SALT);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_ITERATION", HKS_ERROR_INVALID_ITERATION);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_OPERATION", HKS_ERROR_INVALID_OPERATION);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_WRAPPED_FORMAT", HKS_ERROR_INVALID_WRAPPED_FORMAT);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_USAGE_OF_KEY", HKS_ERROR_INVALID_USAGE_OF_KEY);
 
     AddInt32Property(env, errorCode, "HUKS_ERROR_INTERNAL_ERROR", HKS_ERROR_INTERNAL_ERROR);
     AddInt32Property(env, errorCode, "HUKS_ERROR_UNKNOWN_ERROR", HKS_ERROR_UNKNOWN_ERROR);
@@ -481,6 +497,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksTagType", CreateHuksTagType(env)),
         DECLARE_NAPI_PROPERTY("HuksTag", CreateHuksTag(env)),
         DECLARE_NAPI_PROPERTY("HuksImportKeyType", CreateHuksImportKeyType(env)),
+        DECLARE_NAPI_PROPERTY("HuksUnwrapSuite", CreateHuksUnwrapSuite(env)),
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
@@ -488,6 +505,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("decrypt", HuksNapiDecrypt),
         DECLARE_NAPI_FUNCTION("getSdkVersion", HuksNapiGetSdkVersion),
         DECLARE_NAPI_FUNCTION("importKey", HuksNapiImportKey),
+        DECLARE_NAPI_FUNCTION("importWrappedKey", HuksNapiImportWrappedKey),
         DECLARE_NAPI_FUNCTION("exportKey", HuksNapiExportKey),
         DECLARE_NAPI_FUNCTION("getKeyProperties", HuksNapiGetKeyProperties),
         DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),

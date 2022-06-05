@@ -43,6 +43,7 @@ ohos_shared_library("huks") {
     "src/huks_napi_get_key_properties.cpp",
     "src/huks_napi_get_sdk_version.cpp",
     "src/huks_napi_import_key.cpp",
+    "src/huks_napi_import_wrapped_key.cpp",
     "src/huks_napi_init.cpp",
     "src/huks_napi_is_key_exist.cpp",
     "src/huks_napi_mac.cpp",

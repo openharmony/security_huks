@@ -55,6 +55,11 @@ int32_t HksGetDigestLen(uint32_t digest, uint32_t *digestLen);
 
 int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool *isAeMode);
 
+int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uint32_t validTotalBlobs,
+    const uint32_t *validBlobLengths);
+
+int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t blobIndex, uint32_t totalBlobs,
+    struct HksBlob *blob);
 #ifdef __cplusplus
 }
 #endif

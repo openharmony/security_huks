@@ -41,10 +41,10 @@ int32_t HuksHdiImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
     return HksCoreImportKey(keyAlias, key, paramSet, keyOut);
 }
 
-int32_t HuksHdiImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
+int32_t HuksHdiImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
-    return HksCoreImportWrappedKey(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut);
+    return HksCoreImportWrappedKey(keyAlias, key, wrappedKeyData, paramSet, keyOut);
 }
 
 int32_t HuksHdiExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
