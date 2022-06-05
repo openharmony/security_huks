@@ -23,37 +23,33 @@
 using namespace testing::ext;
 namespace Unittest::ImportWrappedKey {
     static struct HksParam g_aesKekEncryptParams[] = {
-            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
-            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
-            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
-            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_GCM },
-            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
-            { .tag = HKS_TAG_ASSOCIATED_DATA, .blob =
-                { .size = Unittest::ImportWrappedKey::AAD_SIZE,
-                  .data = (uint8_t *) Unittest::ImportWrappedKey::AAD
-                }
-            },
-            { .tag = HKS_TAG_NONCE, .blob =
-                { .size = Unittest::ImportWrappedKey::NONCE_SIZE,
-                  .data = (uint8_t *) Unittest::ImportWrappedKey::NONCE
-                }
-            }
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256},
+        {.tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE},
+        {.tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_GCM},
+        {.tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE},
+        {.tag = HKS_TAG_ASSOCIATED_DATA, .blob = {.size = Unittest::ImportWrappedKey::AAD_SIZE,
+                                                  .data = (uint8_t *) Unittest::ImportWrappedKey::AAD}
+        },
+        { .tag = HKS_TAG_NONCE, .blob = {.size = Unittest::ImportWrappedKey::NONCE_SIZE,
+                                         .data = (uint8_t *) Unittest::ImportWrappedKey::NONCE}
+        }
     };
 
     static struct HksParam g_importAgreeKeyParams[] = {
-            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT },
-            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
-            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
-            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_GCM },
-            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
-            { .tag = HKS_TAG_IV, .blob =
-                { .size = Unittest::ImportWrappedKey::IV_SIZE, .data = (uint8_t *) Unittest::ImportWrappedKey::IV }
-            }
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256},
+        {.tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE},
+        {.tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_GCM},
+        {.tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE},
+        {.tag = HKS_TAG_IV, .blob = {.size = Unittest::ImportWrappedKey::IV_SIZE,
+                                     .data = (uint8_t *) Unittest::ImportWrappedKey::IV }
+        }
     };
 
-    static void BuildWrappedKeyData(struct HksBlob **blobArray, uint32_t size, struct HksBlob *outData)
+    static int32_t BuildWrappedKeyData(struct HksBlob **blobArray, uint32_t size, struct HksBlob *outData)
     {
         uint32_t totalLength = size * sizeof(uint32_t);
 
@@ -69,18 +65,23 @@ namespace Unittest::ImportWrappedKey {
         uint32_t offset = 0;
 
         /* copy data */
-        for (uint32_t i = 0;i < size; ++i) {
-            (void) memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t * ) &blobArray[i]->size,
-                            sizeof(blobArray[i]->size));
+        for (uint32_t i = 0; i < size; ++i) {
+            if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t * ) &blobArray[i]->size,
+                sizeof(blobArray[i]->size) != EOK) {
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
             offset += sizeof(blobArray[i]->size);
 
-            (void) memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t *) blobArray[i]->data,
-                            blobArray[i]->size);
+            if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t *) blobArray[i]->data,
+                blobArray[i]->size) != EOK) {
+                return HKS_ERROR_BUFFER_TOO_SMALL;
+            }
             offset += blobArray[i]->size;
         }
 
         outData->size = outBlob.size;
         outData->data = outBlob.data;
+        return HKS_SUCCESS;
     }
 
     static int32_t CheckParamsValid(const struct HksImportWrappedKeyTestParams *params)
@@ -180,7 +181,7 @@ namespace Unittest::ImportWrappedKey {
                 .data = (uint8_t *) Unittest::ImportWrappedKey::AAD};
         struct HksBlob commonNonce = {.size = Unittest::ImportWrappedKey::NONCE_SIZE,
                 .data = (uint8_t *) Unittest::ImportWrappedKey::NONCE};
-        struct HksBlob keyMaterialLen = { .size = sizeof(uint32_t), .data = (uint8_t *)&params->keyMaterialLen };
+        struct HksBlob keyMaterialLen = {.size = sizeof(uint32_t), .data = (uint8_t *)&params->keyMaterialLen };
 
         /* copy AEAD tag from cipher text and decrease its size */
         const uint32_t tagSize = Unittest::ImportWrappedKey::AEAD_TAG_SIZE;
@@ -197,10 +198,11 @@ namespace Unittest::ImportWrappedKey {
 
         struct HksBlob *blobArray[] = { peerPublicKey, &commonAad, &commonNonce, &agreeKeyTag, kekCipherText,
                                         &commonAad, &commonNonce, &kekTag, &keyMaterialLen, plainCipher };
-        BuildWrappedKeyData(blobArray, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, wrappedKeyData);
+        int32_t ret = BuildWrappedKeyData(blobArray, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, wrappedKeyData);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "BuildWrappedKeyData failed.";
 
-        int32_t ret = HksImportWrappedKey(params->importedKeyAlias, params->wrappingKeyAlias,
-                                          params->importWrappedKeyParamSet, wrappedKeyData);
+        ret = HksImportWrappedKey(params->importedKeyAlias, params->wrappingKeyAlias,
+                                  params->importWrappedKeyParamSet, wrappedKeyData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportWrappedKey failed.";
     }
 
