@@ -258,7 +258,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
     }
 
     uint64_t handle = 0;
-    struct HksBlob handleBlob = { sizeof(handle), (uint8_t *)handle };
+    struct HksBlob handleBlob = { sizeof(handle), (uint8_t *)&handle };
     ret = HksInit(&keyAlias, initParamSet, &handleBlob);
     EXPECT_EQ(ret, testCaseParams.initResult);
 
