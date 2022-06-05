@@ -19,7 +19,7 @@
 
 using namespace testing::ext;
 namespace Unittest::CheckPurposeTest {
-class HksCheckPurPart1Test : public testing::Test {
+class HksCheckPurPartTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
 
@@ -30,20 +30,20 @@ public:
     void TearDown();
 };
 
-void HksCheckPurPart1Test::SetUpTestCase(void)
+void HksCheckPurPartTest::SetUpTestCase(void)
 {
 }
 
-void HksCheckPurPart1Test::TearDownTestCase(void)
+void HksCheckPurPartTest::TearDownTestCase(void)
 {
 }
 
-void HksCheckPurPart1Test::SetUp()
+void HksCheckPurPartTest::SetUp()
 {
     EXPECT_EQ(HksInitialize(), 0);
 }
 
-void HksCheckPurPart1Test::TearDown()
+void HksCheckPurPartTest::TearDown()
 {
 }
 
@@ -275,7 +275,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest001, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest001");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_001_PARAMS), HKS_SUCCESS);
@@ -287,7 +287,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest002, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest002");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_002_PARAMS), HKS_SUCCESS);
@@ -299,7 +299,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest002, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest003, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest003, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest003");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_003_PARAMS), HKS_SUCCESS);
@@ -311,7 +311,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest003, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest004, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest004, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest004");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_004_PARAMS), HKS_SUCCESS);
@@ -323,7 +323,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest005, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest005, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest005");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_005_PARAMS), HKS_SUCCESS);
@@ -335,7 +335,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest006, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest006, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest006");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_006_PARAMS), HKS_SUCCESS);
@@ -347,7 +347,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest006, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest007, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest007, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest007");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_007_PARAMS), HKS_SUCCESS);
@@ -359,7 +359,7 @@ HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest007, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ALGORITHM
  */
-HWTEST_F(HksCheckPurPart1Test, HksCheckPurTest008, TestSize.Level0)
+HWTEST_F(HksCheckPurPartTest, HksCheckPurTest008, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckPurposeTest008");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_008_PARAMS), HKS_SUCCESS);
