@@ -15,11 +15,11 @@
 
 #include <gtest/gtest.h>
 
+#include "hks_import_wrapped_test_common.h"
+#include "hks_three_stage_test_common.h"
 #include "hks_mem.h"
 #include "hks_test_log.h"
 #include "hks_type.h"
-#include "hks_three_stage_test_common.h"
-#include "hks_import_wrapped_test_common.h"
 
 #include "hks_import_wrapped_x25519_suite_test.h"
 
@@ -346,7 +346,8 @@ namespace Unittest::ImportWrappedKey {
 
 
     static int32_t ConstructRsaKey(const struct HksBlob *nDataBlob, const struct HksBlob *dDataBlob,
-        uint32_t keySize, struct HksBlob *outKey, bool isPriKey) {
+        uint32_t keySize, struct HksBlob *outKey, bool isPriKey)
+    {
         struct HksKeyMaterialRsa material;
         material.keyAlg = HKS_ALG_RSA;
         material.keySize = keySize;
