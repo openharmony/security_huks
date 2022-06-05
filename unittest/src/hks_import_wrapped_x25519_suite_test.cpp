@@ -13,17 +13,19 @@
  * limitations under the License.
  */
 
-#include "hks_import_wrapped_x25519_suite_test.h"
-#include "hks_import_wrapped_test_common.h"
-#include "hks_three_stage_test_common.h"
+#include <gtest/gtest.h>
+
 #include "hks_mem.h"
 #include "hks_test_log.h"
 #include "hks_type.h"
-#include <gtest/gtest.h>
+#include "hks_three_stage_test_common.h"
+#include "hks_import_wrapped_test_common.h"
+
+#include "hks_import_wrapped_x25519_suite_test.h"
 
 using namespace testing::ext;
 namespace Unittest::ImportWrappedKey {
-    class HksImportWrappedKeyTest : public testing::Test {
+    class HksImportWrappedX25519SuiteTest : public testing::Test {
     public:
         static void SetUpTestCase(void);
 
@@ -34,20 +36,20 @@ namespace Unittest::ImportWrappedKey {
         void TearDown();
     };
 
-    void HksImportWrappedKeyTest::SetUpTestCase(void)
+    void HksImportWrappedX25519SuiteTest::SetUpTestCase(void)
     {
     }
 
-    void HksImportWrappedKeyTest::TearDownTestCase(void)
+    void HksImportWrappedX25519SuiteTest::TearDownTestCase(void)
     {
     }
 
-    void HksImportWrappedKeyTest::SetUp()
+    void HksImportWrappedX25519SuiteTest::SetUp()
     {
         EXPECT_EQ(HksInitialize(), 0);
     }
 
-    void HksImportWrappedKeyTest::TearDown() {
+    void HksImportWrappedX25519SuiteTest::TearDown() {
     }
 
 
@@ -289,7 +291,8 @@ namespace Unittest::ImportWrappedKey {
     /* ------------------ End of X25519 pair import key material and params define -------------------- */
 
     static int32_t ConstructCurve25519Key(struct TestImportKeyData *key,
-        uint32_t alg, uint32_t keySize, uint32_t importType, struct HksBlob *outKey) {
+        uint32_t alg, uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
+    {
         struct HksKeyMaterial25519 material;
         material.keyAlg = (enum HksKeyAlg) alg;
         material.keySize = keySize;
@@ -329,7 +332,8 @@ namespace Unittest::ImportWrappedKey {
     }
 
     static int32_t ConstructImportedCurve25519Key(uint32_t alg, uint32_t keySize, uint32_t importType,
-        struct HksBlob *outKey) {
+        struct HksBlob *outKey)
+    {
         struct TestImportKeyData key;
         (void) memset_s(&key, sizeof(key), 0, sizeof(key));
         key.privateOrYData.data = (uint8_t *) g_x25519PriDataOne;
@@ -391,7 +395,8 @@ namespace Unittest::ImportWrappedKey {
     }
 
     static void InitCommonTestParamsAndDoImport(struct HksImportWrappedKeyTestParams *importWrappedKeyTestParams,
-        const struct HksParam *importedKeyParamSetArray, uint32_t arraySize) {
+        const struct HksParam *importedKeyParamSetArray, uint32_t arraySize)
+    {
         int32_t ret = 0;
         importWrappedKeyTestParams->agreeKeyAlgName = &g_agreeKeyAlgNameBlob;
 
@@ -434,13 +439,14 @@ namespace Unittest::ImportWrappedKey {
     }
 
     /**
-     * @tc.name: HksImportWrappedKeyTest.HksImportWrappedKeyTestX25519Suite001
-     * @tc.desc: Test import wrapped aes256-gcm-no_padding key including generate&export x25519 key, generate kek, agree,
-     * encrypt, of which generate kek, agree, encrypt should done by caller self.
+     * @tc.name: HksImportWrappedX25519SuiteTest.HksImportWrappedKeyTestX25519Suite001
+     * @tc.desc: Test import wrapped aes256-gcm-no_padding key including generate&export x25519 key, generate kek,
+     * agree, encrypt, of which generate kek, agree, encrypt should done by caller self.
      * @tc.type: FUNC
      */
-    HWTEST_F(HksImportWrappedKeyTest, HksImportWrappedKeyTestX25519Suite001, TestSize.Level0) {
-    struct HksImportWrappedKeyTestParams importWrappedKeyTestParams001 = {0};
+    HWTEST_F(HksImportWrappedX25519SuiteTest, HksImportWrappedKeyTestX25519Suite001, TestSize.Level0)
+    {
+        struct HksImportWrappedKeyTestParams importWrappedKeyTestParams001 = {0};
 
         importWrappedKeyTestParams001.wrappingKeyAlias = &g_wrappingKeyAliasAes256;
         importWrappedKeyTestParams001.keyMaterialLen = g_importedAes256PlainKey.size;
@@ -456,12 +462,12 @@ namespace Unittest::ImportWrappedKey {
     }
 
     /**
-     * @tc.name: HksImportWrappedKeyTest.HksImportWrappedKeyTestX25519Suite002
+     * @tc.name: HksImportWrappedX25519SuiteTest.HksImportWrappedKeyTestX25519Suite002
      * @tc.desc: Test import wrapped rsa key pair including generate&export x25519 key, generate kek, agree, encrypt,
      *           of which generate kek, agree, encrypt should done by caller self.
      * @tc.type: FUNC
      */
-    HWTEST_F(HksImportWrappedKeyTest, HksImportWrappedKeyTestX25519Suite002, TestSize.Level0)
+    HWTEST_F(HksImportWrappedX25519SuiteTest, HksImportWrappedKeyTestX25519Suite002, TestSize.Level0)
     {
         struct HksBlob nDataBlob = {sizeof(g_nData2048), (uint8_t *) g_nData2048};
         struct HksBlob dDataBlob = {sizeof(g_dData2048), (uint8_t *) g_dData2048};
@@ -489,19 +495,19 @@ namespace Unittest::ImportWrappedKey {
     }
 
     /**
-     * @tc.name: HksImportWrappedKeyTest.HksImportWrappedKeyTestX25519Suite003
+     * @tc.name: HksImportWrappedX25519SuiteTest.HksImportWrappedKeyTestX25519Suite003
      * @tc.desc: Test import wrapped x25519 key pair including generate&export x25519 key, generate kek, agree, encrypt,
      *           of which generate kek, agree, encrypt should done by caller self.
      * @tc.type: FUNC
      */
-    HWTEST_F(HksImportWrappedKeyTest, HksImportWrappedKeyTestX25519Suite003, TestSize.Level0)
+    HWTEST_F(HksImportWrappedX25519SuiteTest, HksImportWrappedKeyTestX25519Suite003, TestSize.Level0)
     {
         struct HksBlob plainKey = {0, nullptr};
         int32_t ret = ConstructImportedCurve25519Key(HKS_ALG_X25519, HKS_CURVE25519_KEY_SIZE_256, HKS_KEY_TYPE_KEY_PAIR,
                                                      &plainKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "construct x25519 pair failed.";
 
-struct HksImportWrappedKeyTestParams importWrappedKeyTestParams003 = {0};
+        struct HksImportWrappedKeyTestParams importWrappedKeyTestParams003 = {0};
 
         importWrappedKeyTestParams003.wrappingKeyAlias = &g_wrappingKeyAliasX25519;
         importWrappedKeyTestParams003.keyMaterialLen = plainKey.size;

@@ -58,4 +58,4 @@ namespace Unittest::ImportWrappedKey {
 
     void HksClearKeysForWrappedKeyTest(const struct HksImportWrappedKeyTestParams *params);
 }
-#endif //HKS_IMPORT_WRAPPED_KEY_TEST_COMMON_H
+#endif // HKS_IMPORT_WRAPPED_KEY_TEST_COMMON_H

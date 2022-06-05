@@ -25,4 +25,4 @@ namespace Unittest::ImportWrappedKey {
     void HksImportWrappedKeyTestX25519Suite003(void);
 }
 
-#endif //HKS_IMPORT_WRAPPED_X25519_SUITE_TEST_H
+#endif // HKS_IMPORT_WRAPPED_X25519_SUITE_TEST_H
