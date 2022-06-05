@@ -539,15 +539,15 @@ declare namespace huks {
          * @permission N/A
          */
         HKS_TAG_IMPORT_KEY_TYPE = HuksTagType.HUKS_TAG_TYPE_UINT | 25, /* choose from enum HuksImportKeyType */
-	
-	/**
+
+        /**
          * @name HUKS_TAG_UNWRAP_ALGORITHM_SUITE
          * @since 9
          * @syscap SystemCapability.Security.Huks
          * @permission N/A
          */
         HUKS_TAG_UNWRAP_ALGORITHM_SUITE = HuksTagType.HUKS_TAG_TYPE_UINT | 26,
-	
+
         /*
          * Key authentication related TAG: 201 - 300
          *
