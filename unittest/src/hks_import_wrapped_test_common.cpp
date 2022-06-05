@@ -67,7 +67,7 @@ namespace Unittest::ImportWrappedKey {
         /* copy data */
         for (uint32_t i = 0; i < size; ++i) {
             if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t * ) &blobArray[i]->size,
-                sizeof(blobArray[i]->size) != EOK) {
+                sizeof(blobArray[i]->size)) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
             offset += sizeof(blobArray[i]->size);
