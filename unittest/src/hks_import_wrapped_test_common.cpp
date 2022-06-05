@@ -190,7 +190,6 @@ namespace Unittest::ImportWrappedKey {
         if (memcpy_s(kekTag.data, tagSize, plainCipher->data + (plainCipher->size - tagSize), tagSize) != EOK) {
             EXPECT_EQ(HKS_ERROR_BUFFER_TOO_SMALL, EOK) << "memcpy kek tag failed.";
         }
-        EXPECT_EQ(ret, EOK) << "memcpy kek tag failed.";
         plainCipher->size -= tagSize;
 
         /* copy AEAD tag from kek cipher text and decrease its size */
