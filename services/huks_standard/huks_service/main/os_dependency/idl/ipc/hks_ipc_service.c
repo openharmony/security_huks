@@ -905,7 +905,6 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
         }
     } while (0);
     HksSendResponse(context, ret, outData);
-    HKS_LOG_E("HksSendResponse, ret = %d", ret);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
     HKS_FREE_BLOB(processInfo.processName);
