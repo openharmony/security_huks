@@ -35,6 +35,9 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
 int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *key);
 
+int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
+
 int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
 
 int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSet);

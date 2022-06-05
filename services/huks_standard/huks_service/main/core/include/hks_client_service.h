@@ -62,6 +62,9 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
 int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     struct HksBlob *key);
 
+int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
+
 int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *privateKey, const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey);
 

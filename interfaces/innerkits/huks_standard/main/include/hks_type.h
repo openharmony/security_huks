@@ -55,6 +55,8 @@ extern "C" {
 #define HKS_SIGNATURE_MIN_SIZE 64
 #define HKS_ARRAY_SIZE(arr) ((sizeof(arr)) / (sizeof((arr)[0])))
 #define MAX_OUT_BLOB_SIZE (5 * 1024 * 1024)
+#define HKS_WRAPPED_FORMAT_MAX_SIZE (1024 * 1024)
+#define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
 
 enum HksKeyType {
     HKS_KEY_TYPE_RSA_PUBLIC_KEY = 0x01001000,
@@ -170,6 +172,28 @@ enum HksKeyAlg {
     HKS_ALG_SM4 = 152,
 };
 
+enum HuksAlgSuite {
+    /* Algorithm suites of unwrapping wrapped-key by huks */
+    /* Unwrap suite of key agreement type */
+    /* WrappedData format(Bytes Array):
+     *  | x25519_plain_pubkey_length  (4 Byte) | x25519_plain_pubkey |  agreekey_aad_length (4 Byte) | agreekey_aad
+     *  |   agreekey_nonce_length     (4 Byte) |   agreekey_nonce    | agreekey_aead_tag_len(4 Byte) | agreekey_aead_tag
+     *  |    kek_enc_data_length      (4 Byte) |    kek_enc_data     |    kek_aad_length    (4 Byte) | kek_aad
+     *  |      kek_nonce_length       (4 Byte) |      kek_nonce      |   kek_aead_tag_len   (4 Byte) | kek_aead_tag
+     *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
+     */
+    HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING = 1,
+
+    /* WrappedData format(Bytes Array):
+     *  |  ECC_plain_pubkey_length    (4 Byte) |  ECC_plain_pubkey   |  agreekey_aad_length (4 Byte) | agreekey_aad
+     *  |   agreekey_nonce_length     (4 Byte) |   agreekey_nonce    | agreekey_aead_tag_len(4 Byte) | agreekey_aead_tag
+     *  |    kek_enc_data_length      (4 Byte) |    kek_enc_data     |    kek_aad_length    (4 Byte) | kek_aad
+     *  |      kek_nonce_length       (4 Byte) |      kek_nonce      |   kek_aead_tag_len   (4 Byte) | kek_aead_tag
+     *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
+     */
+    HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING = 2,
+};
+
 enum HksKeyGenerateType {
     HKS_KEY_GENERATE_TYPE_DEFAULT = 0,
     HKS_KEY_GENERATE_TYPE_DERIVE = 1,
@@ -262,6 +286,8 @@ enum HksErrorCode {
     HKS_ERROR_INVALID_SALT = -123,
     HKS_ERROR_INVALID_ITERATION = -124,
     HKS_ERROR_INVALID_OPERATION = -125,
+    HKS_ERROR_INVALID_WRAPPED_FORMAT = -126,
+    HKS_ERROR_INVALID_USAGE_OF_KEY = -127,
 
     HKS_ERROR_INTERNAL_ERROR = -999,
     HKS_ERROR_UNKNOWN_ERROR = -1000,
@@ -314,6 +340,7 @@ enum HksTag {
     HKS_TAG_KEY_ALIAS = HKS_TAG_TYPE_BYTES | 23,
     HKS_TAG_DERIVE_KEY_SIZE = HKS_TAG_TYPE_UINT | 24,
     HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HksImportKeyType */
+    HKS_TAG_UNWRAP_ALGORITHM_SUITE = HKS_TAG_TYPE_UINT | 26,
 
     /*
      * Key authentication related TAG: 201 - 300

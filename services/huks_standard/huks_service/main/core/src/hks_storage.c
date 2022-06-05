@@ -1126,13 +1126,13 @@ static int32_t GetFileNameList(const char *path, struct HksFileEntry *fileNameLi
         count++;
         uint32_t nameLen = strlen(dire.fileName);
         if ((*fileCount < count) || (fileNameList[count - 1].fileNameLen < (nameLen + 1))) {
-            HKS_LOG_E("the input params are wrong and too small");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
         }
 
         if (strncpy_s(fileNameList[count - 1].fileName, fileNameList[count - 1].fileNameLen,
             dire.fileName, nameLen) != EOK) {
-            HKS_LOG_E("failed to copy the string");
+            ret = HKS_ERROR_BAD_STATE;
             break;
         }
         fileNameList[count - 1].fileName[nameLen] = '\0';

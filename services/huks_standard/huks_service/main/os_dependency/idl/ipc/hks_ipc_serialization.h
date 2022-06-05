@@ -31,6 +31,9 @@ int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyA
 int32_t HksImportKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
     struct HksBlob *key);
 
+int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksBlob *wrappingKeyAlias, struct HksParamSet **paramSet, struct HksBlob *wrappedKeyData);
+
 int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksBlob *key);
 
 int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,

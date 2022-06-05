@@ -133,7 +133,7 @@
 #define HKS_SUPPORT_HASH_SM3
 #endif
 
-/* SM4 */
+    /* SM4 */
 #define HKS_SUPPORT_SM4_C
 #define HKS_SUPPORT_SM4_GENERATE_KEY
 #define HKS_SUPPORT_SM4_CBC_NOPADDING
@@ -164,6 +164,12 @@
     defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DSA_C) ||  \
     defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
 #define HKS_SUPPORT_API_EXPORT
+#endif
+
+#if defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ED25519_C) || \
+    defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DSA_C) ||  \
+    defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
+#define HKS_SUPPORT_API_IMPORT_WRAPPED_KEY
 #endif
 
 #define HKS_SUPPORT_API_GENERATE_RANDOM

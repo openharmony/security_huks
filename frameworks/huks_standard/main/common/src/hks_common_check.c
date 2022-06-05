@@ -187,3 +187,80 @@ int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool 
     *isAeMode = (modeParam->uint32Param == HKS_MODE_CCM) || (modeParam->uint32Param == HKS_MODE_GCM);
     return HKS_SUCCESS;
 }
+
+int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uint32_t validTotalBlobs,
+    const uint32_t *validBlobLengths)
+{
+    if ((CheckBlob(wrappedData) != HKS_SUCCESS) || (wrappedData->size > HKS_WRAPPED_FORMAT_MAX_SIZE) ||
+        (validTotalBlobs == 0)) {
+        HKS_LOG_E("wrapped data format:invalid argument!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    const uint8_t *data = wrappedData->data;
+    uint32_t dataSize = wrappedData->size;
+
+    uint32_t offset = 0;
+    uint32_t partDataLength = 0;
+    uint32_t blobIndex = 0;
+
+    for (blobIndex = 0; blobIndex < validTotalBlobs && offset < dataSize; blobIndex++) {
+        partDataLength = 0;
+        if (memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
+            HKS_LOG_E("the blob part:%u is invalid!", blobIndex);
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
+        offset += sizeof(uint32_t);
+
+        if ((partDataLength == 0) || (partDataLength > dataSize - offset)) {
+            HKS_LOG_E(" the blob part:%u length is out of range!", blobIndex);
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
+        offset += partDataLength;
+
+        if ((validBlobLengths != NULL) && (*(validBlobLengths + blobIndex) != partDataLength)) {
+            HKS_LOG_E("the blob part:%u length is invalid, should be %u!",
+                blobIndex, *(validBlobLengths + blobIndex));
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
+    }
+
+    if (offset != dataSize) {
+        HKS_LOG_E("data is redundant!");
+        return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t blobIndex, uint32_t totalBlobs,
+    struct HksBlob *blob)
+{
+    if ((CheckBlob(wrappedData) != HKS_SUCCESS) || (blobIndex >= totalBlobs) || (blob == NULL)) {
+        HKS_LOG_E("invalid argument!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    const uint8_t *data = wrappedData->data;
+    uint32_t dataSize = wrappedData->size;
+    uint32_t partDataLength = 0;
+
+    for (uint32_t index = 0, offset = 0; index < totalBlobs && offset < dataSize; index++) {
+        partDataLength = 0;
+        if (memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t)) != EOK) {
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
+        offset += sizeof(uint32_t);
+
+        if ((partDataLength == 0) || (partDataLength > HKS_WRAPPED_FORMAT_MAX_SIZE) ||
+            (partDataLength > dataSize - offset)) {
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
+
+        if (blobIndex == index) {
+            blob->size = partDataLength;
+            blob->data = (uint8_t *)(data + offset);
+            return HKS_SUCCESS;
+        }
+        offset += partDataLength;
+    }
+    return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+}

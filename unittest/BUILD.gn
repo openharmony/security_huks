@@ -37,11 +37,15 @@ ohos_unittest("huks_UT_test") {
     "src/hks_ecdh_agree_part2_test.cpp",
     "src/hks_ecdh_agree_test_common.cpp",
     "src/hks_ed25519_sign_verify_test.cpp",
+    "src/hks_export_test.cpp",
+    "src/hks_export_test_mt.cpp",
     "src/hks_hkdf_derive_part1_test.cpp",
     "src/hks_hkdf_derive_part2_test.cpp",
     "src/hks_hkdf_derive_test_common.cpp",
     "src/hks_hmac_test.cpp",
     "src/hks_import_wrapped_ecdh_suite_test.cpp",
+    "src/hks_import_wrapped_test_common.cpp",
+    "src/hks_import_wrapped_x25519_suite_test.cpp",
     "src/hks_pbkdf2_derive_part1_test.cpp",
     "src/hks_pbkdf2_derive_part2_test.cpp",
     "src/hks_pbkdf2_derive_test_common.cpp",
@@ -63,6 +67,13 @@ ohos_unittest("huks_UT_test") {
     "src/hks_three_stage_test_common.c",
     "src/hks_x25519_agree_test.cpp",
     "src/hks_import_wrapped_ecdh_suite_test.cpp",
+  ]
+
+  sources += [
+    "src/hks_import_agree_test.cpp",
+    "src/hks_import_key_test.cpp",
+    "src/hks_import_rsa_test.cpp",
+    "src/hks_import_sign_verify_test.cpp",
   ]
 
   defines = [

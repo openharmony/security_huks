@@ -142,6 +142,40 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     HKS_FREE_BLOB(processInfo.userId);
 }
 
+void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksBlob wrappingKeyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksBlob wrappedKeyData = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    int32_t ret;
+
+    do {
+        ret  = HksImportWrappedKeyUnpack(srcData, &keyAlias, &wrappingKeyAlias, &paramSet, &wrappedKeyData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("unpack data for Ipc fail");
+            break;
+        }
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get process info fail, ret = %d", ret);
+            break;
+        }
+
+        ret =  HksServiceImportWrappedKey(&processInfo, &keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("do import wrapped key fail, ret = %d", ret);
+        }
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
+
 void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
