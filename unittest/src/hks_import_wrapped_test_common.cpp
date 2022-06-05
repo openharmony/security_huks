@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 
-#include "hks_import_wrapped_test_common.h"
-#include "hks_three_stage_test_common.h"
+#include <gtest/gtest.h>
+
 #include "hks_mem.h"
 #include "hks_test_log.h"
 #include "hks_type.h"
-#include <gtest/gtest.h>
+#include "hks_three_stage_test_common.h"
+
+#include "hks_import_wrapped_test_common.h"
 
 using namespace testing::ext;
 namespace Unittest::ImportWrappedKey {
@@ -66,7 +68,7 @@ namespace Unittest::ImportWrappedKey {
 
         /* copy data */
         for (uint32_t i = 0; i < size; ++i) {
-            if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t * ) &blobArray[i]->size,
+            if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t *) &blobArray[i]->size,
                 sizeof(blobArray[i]->size)) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
@@ -138,7 +140,6 @@ namespace Unittest::ImportWrappedKey {
         int32_t ret = HksImportKey(params->callerKekAlias, params->importCallerKekParamSet, params->callerKek);
         EXPECT_EQ(ret, HKS_SUCCESS) << "ImportCallerSelfKek failed.";
 
-
         HKS_TEST_LOG_I("-------------5. Test_CallerAgree[%s]Key and Import To Huks!\n",
                        (char *)(params->agreeKeyAlgName->data));
         EXPECT_EQ(MallocAndCheckBlobData(outSharedKey, outSharedKey->size), HKS_SUCCESS) << "Malloc sharedKey failed.";
@@ -178,22 +179,24 @@ namespace Unittest::ImportWrappedKey {
     {
         HKS_TEST_LOG_I("-------------8. Test_ImportWrappedKey!\n");
         struct HksBlob commonAad = {.size = Unittest::ImportWrappedKey::AAD_SIZE,
-                .data = (uint8_t *) Unittest::ImportWrappedKey::AAD};
+                                    .data = (uint8_t *) Unittest::ImportWrappedKey::AAD};
         struct HksBlob commonNonce = {.size = Unittest::ImportWrappedKey::NONCE_SIZE,
-                .data = (uint8_t *) Unittest::ImportWrappedKey::NONCE};
+                                      .data = (uint8_t *) Unittest::ImportWrappedKey::NONCE};
         struct HksBlob keyMaterialLen = {.size = sizeof(uint32_t), .data = (uint8_t *)&params->keyMaterialLen };
 
         /* copy AEAD tag from cipher text and decrease its size */
         const uint32_t tagSize = Unittest::ImportWrappedKey::AEAD_TAG_SIZE;
         uint8_t kekTagBuf[tagSize] = {0};
         struct HksBlob kekTag = { .size = tagSize, .data = kekTagBuf };
-        (void) memcpy_s(kekTag.data, tagSize, plainCipher->data + (plainCipher->size - tagSize), tagSize);
+        ret = memcpy_s(kekTag.data, tagSize, plainCipher->data + (plainCipher->size - tagSize), tagSize);
+        EXPECT_EQ(ret, EOK) << "memcpy kek tag failed.";
         plainCipher->size -= tagSize;
 
         /* copy AEAD tag from kek cipher text and decrease its size */
         uint8_t agreeKeyTagBuf[tagSize] = {0};
         struct HksBlob agreeKeyTag = { .size = tagSize, .data = agreeKeyTagBuf };
-        (void) memcpy_s(agreeKeyTagBuf, tagSize, kekCipherText->data + (kekCipherText->size - tagSize), tagSize);
+        ret = memcpy_s(agreeKeyTagBuf, tagSize, kekCipherText->data + (kekCipherText->size - tagSize), tagSize);
+        EXPECT_EQ(ret, EOK) << "memcpy agreekey tag failed.";
         kekCipherText->size -= tagSize;
 
         struct HksBlob *blobArray[] = { peerPublicKey, &commonAad, &commonNonce, &agreeKeyTag, kekCipherText,
