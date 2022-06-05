@@ -127,8 +127,7 @@ namespace Unittest::ImportWrappedKey {
         EXPECT_EQ(ret, HKS_SUCCESS) << "Generate caller key failed.";
 
         callerSelfPublicKey->size = params->publicKeySize;
-        EXPECT_EQ(MallocAndCheckBlobData(callerSelfPublicKey,
-                                         callerSelfPublicKey->size), HKS_SUCCESS) << "Malloc self pub key failed.";
+        EXPECT_EQ(MallocAndCheckBlobData(callerSelfPublicKey, callerSelfPublicKey->size), HKS_SUCCESS) << "malloc fail";
         ret = HksExportPublicKey(params->callerKeyAlias, params->genWrappingKeyParamSet, callerSelfPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Export caller public key failed.";
     }
@@ -188,15 +187,18 @@ namespace Unittest::ImportWrappedKey {
         const uint32_t tagSize = Unittest::ImportWrappedKey::AEAD_TAG_SIZE;
         uint8_t kekTagBuf[tagSize] = {0};
         struct HksBlob kekTag = { .size = tagSize, .data = kekTagBuf };
-        ret = memcpy_s(kekTag.data, tagSize, plainCipher->data + (plainCipher->size - tagSize), tagSize);
+        if (memcpy_s(kekTag.data, tagSize, plainCipher->data + (plainCipher->size - tagSize), tagSize) != EOK) {
+            EXPECT_EQ(HKS_ERROR_BUFFER_TOO_SMALL, EOK) << "memcpy kek tag failed.";
+        }
         EXPECT_EQ(ret, EOK) << "memcpy kek tag failed.";
         plainCipher->size -= tagSize;
 
         /* copy AEAD tag from kek cipher text and decrease its size */
         uint8_t agreeKeyTagBuf[tagSize] = {0};
         struct HksBlob agreeKeyTag = { .size = tagSize, .data = agreeKeyTagBuf };
-        ret = memcpy_s(agreeKeyTagBuf, tagSize, kekCipherText->data + (kekCipherText->size - tagSize), tagSize);
-        EXPECT_EQ(ret, EOK) << "memcpy agreekey tag failed.";
+        if (memcpy_s(agreeKeyTagBuf, tagSize, kekCipherText->data + (kekCipherText->size - tagSize), tagSize) != EOK) {
+            EXPECT_EQ(HKS_ERROR_BUFFER_TOO_SMALL, EOK) << "memcpy agreekey tag failed.";
+        }
         kekCipherText->size -= tagSize;
 
         struct HksBlob *blobArray[] = { peerPublicKey, &commonAad, &commonNonce, &agreeKeyTag, kekCipherText,
