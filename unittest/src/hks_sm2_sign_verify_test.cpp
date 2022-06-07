@@ -48,6 +48,9 @@ void HksSm2SignVerifyTest::TearDown()
 }
 
 #ifdef _USE_OPENSSL_
+const uint32_t SUCCESS_RETURN_INDEX = 0;
+const uint32_t FAILURE_RETURN_INDEX = 1;
+
 static const struct GenerateKeyCaseParam g_genParamsTest[] = {
     {   0,
         HKS_SUCCESS,
@@ -105,6 +108,25 @@ static const struct GenerateKeyCaseParam g_genParamsTest[] = {
             },
         },
     },
+
+    {   3,
+        HKS_ERROR_INVALID_PURPOSE,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM2
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = HKS_SM2_KEY_SIZE_256
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_SM3
+            },
+        },
+    },
 };
 static const struct GenerateKeyCaseParam g_signParamsTest[] = {
     {   0,
@@ -127,7 +149,7 @@ static const struct GenerateKeyCaseParam g_signParamsTest[] = {
     },
 
     {   1,
-        HKS_ERROR_INVALID_KEY_SIZE,
+        HKS_ERROR_INVALID_ARGUMENT,
         {
             {
                 .tag = HKS_TAG_ALGORITHM,
@@ -146,7 +168,7 @@ static const struct GenerateKeyCaseParam g_signParamsTest[] = {
     },
 
     {   2,
-        HKS_ERROR_INVALID_DIGEST,
+        HKS_ERROR_INVALID_ARGUMENT,
         {
             {
                 .tag = HKS_TAG_ALGORITHM,
@@ -160,6 +182,25 @@ static const struct GenerateKeyCaseParam g_signParamsTest[] = {
             }, {
                 .tag = HKS_TAG_DIGEST,
                 .uint32Param = HKS_DIGEST_SHA1
+            },
+        },
+    },
+
+    {   3,
+        HKS_ERROR_INVALID_ALGORITHM,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM2
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = HKS_SM2_KEY_SIZE_256
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_SM3
             },
         },
     },
@@ -221,201 +262,216 @@ static const struct GenerateKeyCaseParam g_verifyParamsTest[] = {
             },
         },
     },
+
+    {   3,
+        HKS_ERROR_INVALID_PURPOSE,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM2
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = HKS_SM2_KEY_SIZE_256
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_SM3
+            },
+        },
+    },
 };
 
-static int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData, bool isSign)
+static int32_t HksTestSignVerify(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
 {
-    (void)isSign;
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
+    int32_t ret;
 
-    struct HksParam *tmpParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get tag purpose failed.");
-        return HKS_FAILURE;
-    }
+    do {
+        ret = HksInit(keyAlias, paramSet, &handle);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
 
-    ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
+        struct HksParam *tmpParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
 
-    ret = HksAbort(&handle, paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+        ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HKS_SUCCESS;
+    } while (0);
+
+    (void)HksAbort(&handle, paramSet);
     return ret;
 }
 
-static int32_t HksSm2SignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
-    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
+static int CreateImportKeyAlias(struct HksBlob *importKeyAlias, const struct HksBlob *keyAlias)
 {
-    struct HksBlob inData = {
-        g_inData.length(),
-        (uint8_t *)g_inData.c_str()
-    };
-    int32_t ret = HKS_FAILURE;
-
-    /* 1. Generate Key */
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("GenerateKey failed");
-        return ret;
+    const char *tmp = "new";
+    importKeyAlias->size = keyAlias->size + strlen(tmp);
+    importKeyAlias->data = (uint8_t *)HksMalloc(importKeyAlias->size);
+    if (importKeyAlias->data == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
     }
 
-    /* 2. Sign Three Stage */
+    if (memcpy_s(importKeyAlias->data, importKeyAlias->size, keyAlias->data, keyAlias->size) != EOK) {
+        HKS_FREE_PTR(importKeyAlias->data);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (memcpy_s(importKeyAlias->data + keyAlias->size,
+        importKeyAlias->size - keyAlias->size, tmp, strlen(tmp)) != EOK) {
+        HKS_FREE_PTR(importKeyAlias->data);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    return HKS_SUCCESS;
+}
+
+void static FreeBuffAndDeleteKey(struct HksParamSet **paramSet1, struct HksParamSet **paramSet2,
+    struct HksParamSet **paramSet3, const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2)
+{
+    (void)HksDeleteKey(keyAlias1, *paramSet1);
+    (void)HksDeleteKey(keyAlias2, *paramSet1);
+    HksFreeParamSet(paramSet1);
+    HksFreeParamSet(paramSet2);
+    HksFreeParamSet(paramSet3);
+}
+
+static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uint32_t genIndex,
+    const uint32_t signIndex, const uint32_t verifyIndex, const bool isTestSignData)
+{
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+
+    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     uint8_t outDataS[SM2_COMMON_SIZE] = {0};
     struct HksBlob outDataSign = { SM2_COMMON_SIZE, outDataS };
-    ret = HksTestSignVerify(&keyAlias, signParamSet, &inData, &outDataSign, true);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "outSign failed.";
 
-    /* 3. Export Public Key */
     uint8_t pubKey[HKS_MAX_KEY_LEN] = {0};
     struct HksBlob publicKey = { HKS_MAX_KEY_LEN, pubKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
-    /* 4. Import Key */
-    char newKey[] = "SM2_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
-    ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
+    struct HksBlob importKeyAlias;
+    int ret = CreateImportKeyAlias(&importKeyAlias, keyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "createImportKeyAlias failed.";
 
-    /* 5. Verify Three Stage */
-    ret = HksTestSignVerify(&newKeyAlias, verifyParamSet, &inData, &outDataSign, false);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Verify failed.";
+    do {
+        /* 1. Generate Key */
+        ret = InitParamSet(&genParamSet, g_genParamsTest[genIndex].params,
+            sizeof(g_genParamsTest[genIndex].params) / sizeof(HksParam));
+        EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
+        ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+        if (ret != HKS_SUCCESS) {
+            ret = ((ret == g_genParamsTest[genIndex].result) ? HKS_SUCCESS : ret);
+            break;
+        }
 
-    /* 6. Delete New Key */
-    int32_t deleteRet = HksDeleteKey(&newKeyAlias, genParamSet);
-    EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete key failed.";
+        /* 2. Sign Three Stage */
+        ret = InitParamSet(&signParamSet, g_signParamsTest[signIndex].params,
+            sizeof(g_signParamsTest[signIndex].params) / sizeof(HksParam));
+        EXPECT_EQ(ret, HKS_SUCCESS) << "InitSignParamSet failed.";
+        ret = HksTestSignVerify(keyAlias, signParamSet, &inData, &outDataSign);
+        if (ret != HKS_SUCCESS) {
+            ret = ((ret == g_signParamsTest[signIndex].result) ? HKS_SUCCESS : ret);
+            break;
+        }
 
+        /* 3. Export Public Key */
+        ret = HksExportPublicKey(keyAlias, genParamSet, &publicKey);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
+
+        /* 4. Import Key */
+        ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[verifyIndex].params,
+            sizeof(g_verifyParamsTest[verifyIndex].params) / sizeof(HksParam));
+        EXPECT_EQ(ret, HKS_SUCCESS) << "InitVerifyParamSet failed.";
+        ret = HksImportKey(&importKeyAlias, verifyParamSet, &publicKey);
+        if (ret != HKS_SUCCESS) {
+            ret = ((ret == g_verifyParamsTest[verifyIndex].result) ? HKS_SUCCESS : ret);
+            break;
+        }
+
+        /* 5. Verify Three Stage */
+        if (isTestSignData) {
+            (void)memset_s(outDataSign.data, outDataSign.size, 0, outDataSign.size);
+        }
+        ret = HksTestSignVerify(&importKeyAlias, verifyParamSet, &inData, &outDataSign);
+        if (ret != HKS_SUCCESS) {
+            ret = ((ret == g_verifyParamsTest[verifyIndex].result) ? HKS_SUCCESS : ret);
+        }
+    } while (0);
+
+    FreeBuffAndDeleteKey(&genParamSet, &signParamSet, &verifyParamSet, keyAlias, &importKeyAlias);
+    HKS_FREE_PTR(importKeyAlias.data);
     return ret;
 }
 
 /**
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest001
- * @tc.desc: alg-SM2 pur-Sign.
+ * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-SM3.
  * @tc.type: FUNC
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest001, TestSize.Level0)
 {
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest001";
-    struct HksParamSet *genParamSet = nullptr;
-    struct HksParamSet *signParamSet = nullptr;
-    struct HksParamSet *verifyParamSet = nullptr;
-    uint32_t index = 0;
-    int32_t ret = HKS_FAILURE;
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
-
-    ret = InitParamSet(&genParamSet, g_genParamsTest[index].params,
-        sizeof(g_genParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&signParamSet, g_signParamsTest[index].params,
-        sizeof(g_signParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[index].params,
-        sizeof(g_verifyParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksSm2SignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
-        EXPECT_EQ(ret, HKS_SUCCESS) << "Sm2SignVerify SuccessCase failed.";
-    }
-
-    /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&signParamSet);
-    HksFreeParamSet(&verifyParamSet);
+    int ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX,
+            SUCCESS_RETURN_INDEX, SUCCESS_RETURN_INDEX, false);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest001 failed.";
 }
 
 /**
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest002
- * @tc.desc: alg-SM2 pur-Sign.
+ * @tc.desc: abnormal parameter test cases : the abnormal parameter is tag
  * @tc.type: FUNC
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest002, TestSize.Level0)
 {
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest002";
-    struct HksParamSet *genParamSet = nullptr;
-    struct HksParamSet *signParamSet = nullptr;
-    struct HksParamSet *verifyParamSet = nullptr;
-    uint32_t index = 1;
-    int32_t ret = HKS_FAILURE;
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
-    ret = InitParamSet(&genParamSet, g_genParamsTest[index].params,
-        sizeof(g_genParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&signParamSet, g_signParamsTest[index].params,
-        sizeof(g_signParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[index].params,
-        sizeof(g_verifyParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    uint32_t genPramCnt = sizeof(g_genParamsTest) / sizeof(GenerateKeyCaseParam);
+    uint32_t signPramCnt = sizeof(g_signParamsTest) / sizeof(GenerateKeyCaseParam);
+    uint32_t verifyPramCnt = sizeof(g_verifyParamsTest) / sizeof(GenerateKeyCaseParam);
 
-    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksSm2SignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
-        EXPECT_EQ(ret, HKS_ERROR_INVALID_KEY_SIZE) << "Sm2SignVerify FailureCase failed.";
+    int ret;
+    for (uint32_t i = FAILURE_RETURN_INDEX; i < genPramCnt; i++) {
+        ret = HksSm2SignVerifyTestRun(&keyAlias, i, SUCCESS_RETURN_INDEX, SUCCESS_RETURN_INDEX, false);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest002 gen abnormal test failed.";
     }
 
-    /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "DeleteKey success.";
+    for (uint32_t j = FAILURE_RETURN_INDEX; j < signPramCnt; j++) {
+        ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX, j, SUCCESS_RETURN_INDEX, false);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest002 sign abnormal test failed.";
+    }
 
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&signParamSet);
-    HksFreeParamSet(&verifyParamSet);
+    for (uint32_t k = FAILURE_RETURN_INDEX; k < verifyPramCnt; k++) {
+        ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX, SUCCESS_RETURN_INDEX, k, false);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest002 verify abnormal test failed.";
+    }
 }
 
 /**
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest002
- * @tc.desc: alg-SM2 pur-Sign.
+ * @tc.desc: abnormal parameter test case : the abnormal parameter is verifyData
  * @tc.type: FUNC
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest003, TestSize.Level0)
 {
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest003";
-    struct HksParamSet *genParamSet = nullptr;
-    struct HksParamSet *signParamSet = nullptr;
-    struct HksParamSet *verifyParamSet = nullptr;
-    uint32_t index = 2;
-    int32_t ret = HKS_FAILURE;
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
-    ret = InitParamSet(&genParamSet, g_genParamsTest[index].params,
-        sizeof(g_genParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&signParamSet, g_signParamsTest[index].params,
-        sizeof(g_signParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[index].params,
-        sizeof(g_verifyParamsTest[index].params) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksSm2SignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
-        EXPECT_EQ(ret, HKS_ERROR_INVALID_DIGEST) << "Sm2SignVerify FailureCase failed.";
-    }
-
-    /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "DeleteKey success.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&signParamSet);
-    HksFreeParamSet(&verifyParamSet);
+    int ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX,
+            SUCCESS_RETURN_INDEX, SUCCESS_RETURN_INDEX, true);
+    EXPECT_EQ(ret, HKS_FAILURE) << "sm2SignVerifyTest003 failed.";
 }
 #endif
 }
-
