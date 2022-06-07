@@ -29,10 +29,10 @@ group("fuzztest") {
       "//base/security/huks/test/fuzz_test/hksgetsdkversion_fuzzer:fuzztest",
       "//base/security/huks/test/fuzz_test/hkshash_fuzzer:fuzztest",
       "//base/security/huks/test/fuzz_test/hksimportkey_fuzzer:fuzztest",
+      "//base/security/huks/test/fuzz_test/hksimportwrappedkey_fuzzer:fuzztest",
       "//base/security/huks/test/fuzz_test/hksinit_fuzzer:fuzztest",
       "//base/security/huks/test/fuzz_test/hkskeyexist_fuzzer:fuzztest",
       "//base/security/huks/test/fuzz_test/hksupdate_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksimportwrappedkey_fuzzer:fuzztest",
     ]
   }
 }
