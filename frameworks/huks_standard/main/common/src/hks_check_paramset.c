@@ -161,6 +161,15 @@ static uint32_t g_agreeAlgLocal[] = {
     HKS_ALG_DH,
 #endif
 };
+
+static uint32_t g_unwrapSuite[] = {
+#if defined(HKS_SUPPORT_X25519_C) && defined(HKS_SUPPORT_AES_GCM)
+    HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING,
+#endif
+#if defined(HKS_SUPPORT_ECDH_C) && defined(HKS_SUPPORT_AES_GCM)
+    HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING,
+#endif
+};
 #endif /* _CUT_AUTHENTICATE_ */
 
 static uint32_t g_deriveAlg[] = {
@@ -175,15 +184,6 @@ static uint32_t g_deriveAlg[] = {
 static uint32_t g_deriveAlgLocal[] = {
 #ifdef HKS_SUPPORT_KDF_HKDF
     HKS_ALG_HKDF,
-#endif
-};
-
-static uint32_t g_unwrapSuite[] = {
-#if defined(HKS_SUPPORT_X25519_C) && defined(HKS_SUPPORT_AES_GCM)
-    HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING,
-#endif
-#if defined(HKS_SUPPORT_ECDH_C) && defined(HKS_SUPPORT_AES_GCM)
-    HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING,
 #endif
 };
 
