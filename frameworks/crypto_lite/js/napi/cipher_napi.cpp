@@ -70,6 +70,7 @@ struct AesAsyncContext {
 static const char g_failCode[] = "System error";
 static const int g_errorCode = 200;
 static const int g_successArg = 2;
+static const int g_ivLen = 16;
 
 #define SELF_FREE_PTR(PTR, FREE_FUNC) \
 { \
@@ -111,27 +112,6 @@ static int32_t GetString(napi_env env, napi_value object, char **element, size_t
     if (status != napi_ok) {
         return ERROR_CODE_GENERAL;
     }
-    return ERROR_SUCCESS;
-}
-
-static int32_t GetInt32(napi_env env, napi_value object, int32_t *len)
-{
-    napi_valuetype valueType = napi_undefined;
-    napi_status status = napi_typeof(env, object, &valueType);
-    if (status != napi_ok) {
-        return ERROR_CODE_GENERAL;
-    }
-
-    if (valueType != napi_number) {
-        *len = 0;
-        return ERROR_CODE_GENERAL;
-    }
-    
-    status = napi_get_value_int32(env, object, len);
-    if (status != napi_ok) {
-        return ERROR_CODE_GENERAL;
-    }
-
     return ERROR_SUCCESS;
 }
 
@@ -219,11 +199,9 @@ static int32_t ReadAesData(napi_env env, AesAsyncContext *context)
         return ret;
     }
 
-    ret = GetInt32(env, context->ivLen_napi, &context->ivLen);
-    if (ret != ERROR_SUCCESS) {
-        CIPHER_LOG_E("get ivLen fail");
-        return ret;
-    }
+    (void)context->ivLen_napi;
+    context->ivLen = g_ivLen;
+
     len = 0;
     ret = GetString(env, context->iv_napi, &context->ivBuf, &len);
     if (ret != ERROR_SUCCESS) {
@@ -231,10 +209,8 @@ static int32_t ReadAesData(napi_env env, AesAsyncContext *context)
         return ret;
     }
 
-    ret = GetInt32(env, context->ivOffset_napi, &context->ivOffset);
-    if (ret != ERROR_SUCCESS) {
-        CIPHER_LOG_E("get ivOffset fail");
-    }
+    (void)context->ivOffset_napi;
+    context->ivOffset = 0;
     return ret;
 }
 
