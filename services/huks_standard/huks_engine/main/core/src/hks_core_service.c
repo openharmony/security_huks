@@ -129,7 +129,7 @@ static int32_t GetGenType(const struct HksParamSet *paramSet, uint32_t *genType)
 }
 
 #ifdef HKS_SUPPORT_ED25519_TO_X25519
-int32_t CheckAgreeKeyIn(const struct HksBlob *key)
+static int32_t CheckAgreeKeyIn(const struct HksBlob *key)
 {
     if (CheckBlob(key) != HKS_SUCCESS) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -149,7 +149,7 @@ int32_t CheckAgreeKeyIn(const struct HksBlob *key)
     return HKS_SUCCESS;
 }
 
-int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, const struct HksBlob *keyIn,
+static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, const struct HksBlob *keyIn,
     struct HksBlob *keyOut)
 {
     struct Hks25519KeyPair *keyPair = (struct Hks25519KeyPair *)(keyIn->data);
@@ -190,12 +190,12 @@ int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, const str
     return ret;
 }
 
-int32_t GetAgreePriKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
+static int32_t GetAgreePriKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     return GetAgreeBaseKey(false, false, keyIn, keyOut);
 }
 
-int32_t GetAgreePubKey(const struct HksBlob *keyIn, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+static int32_t GetAgreePubKey(const struct HksBlob *keyIn, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     struct HksParam *isKeyAliasParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS, &isKeyAliasParam);
@@ -206,7 +206,7 @@ int32_t GetAgreePubKey(const struct HksBlob *keyIn, const struct HksParamSet *pa
     return GetAgreeBaseKey(true, false, keyIn, keyOut);
 }
 
-int32_t GenAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
+static int32_t GenAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
     struct HksParam *agreeAlgParam = NULL;
