@@ -272,11 +272,9 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
         (void)memset_s(buf, rsaLen, 0, rsaLen);
         if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
             MBEDTLS_RSA_PUBLIC, rsaContentLen, (const unsigned char *)(plainText + i * rsaContentLen), buf)) {
-                CIPHER_LOG_E("chenhao error here 1.");
             goto ERROR;
         }
         if (memcpy_s(cipherText + i * rsaLen, cipherTextLen - i * rsaLen, buf, rsaLen)) {
-            CIPHER_LOG_E("chenhao error here 2.");
             goto ERROR;
         }
         cipherTotalLen += rsaLen;
@@ -285,17 +283,14 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
         (void)memset_s(buf, rsaLen, 0, rsaLen);
         if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
             MBEDTLS_RSA_PUBLIC, remain, (const unsigned char *)(plainText + count * rsaContentLen), buf)) {
-                CIPHER_LOG_E("chenhao error here 3.");
             goto ERROR;
         }
         if (memcpy_s(cipherText + count * rsaLen, cipherTextLen - count * rsaLen, buf, rsaLen)) {
-            CIPHER_LOG_E("chenhao error here 4.");
             goto ERROR;
         }
         cipherTotalLen += rsaLen;
     }
     if (RsaEncryptBase64Encode(cipherTotalLen, cipherText, cipherTextLen)) {
-        CIPHER_LOG_E("chenhao error here 5.");
         goto ERROR;
     }
     free(buf);
