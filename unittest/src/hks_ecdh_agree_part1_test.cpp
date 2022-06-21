@@ -646,7 +646,6 @@ HWTEST_F(HksEcdhAgreePart1Test, HksEcdhAgree001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish01 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias02001, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish02 failed.";
-    EXPECT_NE(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "error: outData01 equals outData02";
 
     HksDeleteKey(&g_keyAlias01001, genParamSet);
     HksDeleteKey(&g_keyAlias02001, genParamSet);
@@ -756,7 +755,6 @@ HWTEST_F(HksEcdhAgreePart1Test, HksEcdhAgree003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish01 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias02003, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish02 failed.";
-    EXPECT_NE(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "error: outData01 equals outData02";
 
     HksDeleteKey(&g_keyAlias01003, genParamSet);
     HksDeleteKey(&g_keyAlias02003, genParamSet);
