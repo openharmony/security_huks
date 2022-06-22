@@ -614,6 +614,44 @@ static int32_t GetKeyIn(const struct HksProcessInfo *processInfo, const struct H
     return HKS_SUCCESS;
 }
 
+static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
+    struct HksBlob *output, struct HksBlob *outData, bool isStorage)
+{
+    if (!isStorage) {
+        if ((outData->size != 0) && (memcpy_s(outData->data, outData->size, output->data, output->size) != EOK)) {
+            HKS_LOG_E("copy keyblob data fail");
+            return HKS_ERROR_BAD_STATE;
+        }
+        outData->size = output->size;
+        return HKS_SUCCESS;
+    }
+
+    struct HksParam *keyAliasParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key alias fail, ret = %d", ret);
+        return ret;
+    }
+
+    if (keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN) {
+        HKS_LOG_E("key alias size is too long, size is %u", keyAliasParam->blob.size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = CheckKeyCondition(processInfo, &keyAliasParam->blob);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("CheckKeyCondition fail, ret = %d", ret);
+        return ret;
+    }
+
+    ret = HksStoreKeyBlob(processInfo, &keyAliasParam->blob, HKS_STORAGE_TYPE_KEY, output);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksStoreKeyBlob fail, ret = %d", ret);
+    }
+
+    return ret;
+}
+
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut)
 {
@@ -1305,7 +1343,31 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 {
     struct HksParamSet *newParamSet = NULL;
 
-    int32_t ret;
+    bool isStorage = false;
+    uint32_t outSize = outData->size;
+
+    struct HksParam *storageFlag = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
+        isStorage = true;
+        outSize = MAX_KEY_SIZE;
+    }
+
+    uint8_t *outBuffer = (uint8_t *)HksMalloc(outSize);
+    if (outBuffer == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    struct HksBlob output = { outSize, outBuffer };
+    (void)memset_s(output.data, output.size, 0, output.size);
+
+    if (!isStorage) {
+        if ((outData->size != 0) && (memcpy_s(output.data, output.size, outData->data, outData->size) != EOK)) {
+            HKS_FREE_BLOB(output);
+            DeleteOperation(handle);
+            return HKS_ERROR_BAD_STATE;
+        }
+    }
+
     do {
         ret = AppendProcessNameTag(paramSet, &processInfo->processName, &newParamSet);
         if (ret != HKS_SUCCESS) {
@@ -1318,23 +1380,20 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
             ret = HKS_ERROR_NOT_EXIST;
             break;
         }
-
-        ret = HuksAccessFinish(handle, newParamSet, inData, outData);
+        ret = HuksAccessFinish(handle, newParamSet, inData, &output);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessFinish fail, ret = %d", ret);
             break;
         }
 
-        struct HksParam *keyAliasParam = NULL;
-        if (HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam) == HKS_SUCCESS) {
-            ret = HksStoreKeyBlob(processInfo, &keyAliasParam->blob, HKS_STORAGE_TYPE_KEY, outData);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksStoreKeyBlob fail, ret = %d", ret);
-                break;
-            }
+        ret = StoreOrCopyKeyBlob(paramSet, processInfo, &output, outData, isStorage);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("StoreOrCopyKeyBlob fail, ret = %d", ret);
+            break;
         }
     } while (0);
-
+    (void)memset_s(output.data, output.size, 0, output.size);
+    HKS_FREE_BLOB(output);
     DeleteOperation(handle);
     HksFreeParamSet(&newParamSet);
     return ret;
