@@ -161,8 +161,6 @@ config("public_huks_config") {
 
 config("get_dev_udid_config") {
   cflags = [ "-DGET_DEV_UDID_ENABLE" ]
-  include_dirs =
-      [ "//base/startup/init_lite/interfaces/innerkits/include/syspara" ]
 }
 
 #begin: add
@@ -211,7 +209,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//frameworks/huks_standard/main/os_dependency/ipc/include",
     ]
 
-    deps = [ "//base/startup/init_lite/interfaces/innerkits:libbegetutil" ]
+    external_deps = [ "init_lite:libbegetutil" ]
 
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
