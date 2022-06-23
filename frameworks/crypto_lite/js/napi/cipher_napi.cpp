@@ -69,7 +69,7 @@ struct AesAsyncContext {
 
 static const char g_failCode[] = "System error";
 static const int g_errorCode = 200;
-static const int g_successArg = 2;
+static const int g_failArg = 2;
 static const int g_ivLen = 16;
 
 #define SELF_FREE_PTR(PTR, FREE_FUNC) \
@@ -459,8 +459,9 @@ static int32_t RsaExcute(RsaAsyncContext *asyncContext)
 void SetComplete(napi_env env, CallbackContext *asyncContext)
 {
     napi_value callback = nullptr;
-    napi_value ret;
-    napi_call_function(env, nullptr, callback, 1, nullptr, &ret);
+    napi_value ret = 0;
+    napi_get_reference_value(env, asyncContext->callbackComplete, &callback);
+    napi_call_function(env, nullptr, callback, 0, nullptr, &ret);
     napi_delete_reference(env, asyncContext->callbackComplete);
 }
 
@@ -475,12 +476,8 @@ void SetSuccess(napi_env env, char *textOut, size_t textLength, CallbackContext 
     napi_create_string_utf8(env, textOut, textLength, &result);
     napi_set_named_property(env, returnObj, "text", result);
 
-    napi_value successObj = nullptr;
-    napi_create_object(env, &successObj);
-    napi_set_named_property(env, successObj, "data", returnObj);
-
     napi_get_reference_value(env, asyncContext->callbackSuccess, &callback);
-    napi_call_function(env, nullptr, callback, 1, &successObj, &ret);
+    napi_call_function(env, nullptr, callback, 1, &returnObj, &ret);
     napi_delete_reference(env, asyncContext->callbackSuccess);
 }
 
@@ -490,20 +487,14 @@ void SetFail(napi_env env, CallbackContext *asyncContext)
     napi_value ret;
 
     napi_value result = nullptr;
-    napi_value returnData = nullptr;
-    napi_create_object(env, &returnData);
     napi_create_string_utf8(env, g_failCode, sizeof(g_failCode), &result);
-    napi_set_named_property(env, returnData, "data", result);
 
     napi_value errorCode = nullptr;
-    napi_value returnCode = nullptr;
-    napi_create_object(env, &returnCode);
     napi_create_int32(env, g_errorCode, &errorCode);
-    napi_set_named_property(env, returnCode, "code", errorCode);
     
-    napi_value params[g_successArg] = { returnData, returnCode };
+    napi_value params[g_failArg] = { result, errorCode };
     napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-    napi_call_function(env, nullptr, callback, g_successArg, params, &ret);
+    napi_call_function(env, nullptr, callback, g_failArg, params, &ret);
     napi_delete_reference(env, asyncContext->callbackFail);
 }
 
