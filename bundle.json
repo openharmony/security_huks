@@ -27,10 +27,18 @@
       "ram": "500kB",
       "deps": {
         "components": [
-          "libhilog",
-          "ipc_core",
-          "system_ability_fwk",
-          "samgr_proxy",
+          "ability_base",
+          "access_token",
+          "bundle_framework",
+          "common",
+          "common_event_service",
+          "hiviewdfx_hilog_native",
+          "ipc",
+          "napi",
+          "os_account",
+          "safwk",
+          "samgr_standard",
+          "thirdparty_bounds_checking_function",
           "utils_base"
         ],
         "third_party": [ 
