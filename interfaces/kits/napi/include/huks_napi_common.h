@@ -52,7 +52,6 @@ napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&param
 
 napi_ref GetCallback(napi_env env, napi_value object);
 
-napi_value GenerateHksResult(napi_env env, int32_t error);
 napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size);
 napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size, const HksParamSet &paramSet);
 
