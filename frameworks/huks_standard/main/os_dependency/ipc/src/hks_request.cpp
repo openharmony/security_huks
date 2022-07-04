@@ -78,7 +78,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     }
 
     if (outBlob->size < outLen) {
-        HKS_LOG_E("outBlob->size smaller than outLen.outBlob.siza[%d]", outBlob->size);
+        HKS_LOG_E("outBlob size[%u] smaller than outLen[%u]", outBlob->size, outLen);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
