@@ -19,12 +19,8 @@
 #include "napi/native_node_api.h"
 
 #include "hks_type.h"
-#include "huks_napi_agree_key.h"
 #include "huks_napi_attest_key.h"
-#include "huks_napi_decrypt.h"
 #include "huks_napi_delete_key.h"
-#include "huks_napi_derive_key.h"
-#include "huks_napi_encrypt.h"
 #include "huks_napi_export_key.h"
 #include "huks_napi_generate_key.h"
 #include "huks_napi_get_certificate_chain.h"
@@ -33,10 +29,7 @@
 #include "huks_napi_import_key.h"
 #include "huks_napi_import_wrapped_key.h"
 #include "huks_napi_is_key_exist.h"
-#include "huks_napi_mac.h"
-#include "huks_napi_sign.h"
 #include "huks_napi_unwrap_key.h"
-#include "huks_napi_verify.h"
 #include "huks_napi_wrap_key.h"
 
 #include "huks_napi_abort.h"
@@ -501,19 +494,12 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
-        DECLARE_NAPI_FUNCTION("encrypt", HuksNapiEncrypt),
-        DECLARE_NAPI_FUNCTION("decrypt", HuksNapiDecrypt),
         DECLARE_NAPI_FUNCTION("getSdkVersion", HuksNapiGetSdkVersion),
         DECLARE_NAPI_FUNCTION("importKey", HuksNapiImportKey),
         DECLARE_NAPI_FUNCTION("importWrappedKey", HuksNapiImportWrappedKey),
         DECLARE_NAPI_FUNCTION("exportKey", HuksNapiExportKey),
         DECLARE_NAPI_FUNCTION("getKeyProperties", HuksNapiGetKeyProperties),
         DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),
-        DECLARE_NAPI_FUNCTION("sign", HuksNapiSign),
-        DECLARE_NAPI_FUNCTION("verify", HuksNapiVerify),
-        DECLARE_NAPI_FUNCTION("agreeKey", HuksNapiAgreeKey),
-        DECLARE_NAPI_FUNCTION("deriveKey", HuksNapiDeriveKey),
-        DECLARE_NAPI_FUNCTION("mac", HuksNapiMac),
         DECLARE_NAPI_FUNCTION("attestKey", HuksNapiAttestKey),
         DECLARE_NAPI_FUNCTION("getCertificateChain", HuksNapiGetCertificateChain),
         DECLARE_NAPI_FUNCTION("wrapKey", HuksNapiWrapKey),
