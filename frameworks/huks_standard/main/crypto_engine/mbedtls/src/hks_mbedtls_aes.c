@@ -268,8 +268,8 @@ static int32_t AesCbcNoPaddingCryptFinal(void **cryptoCtx,
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
-            cipherText->size = message->size;
         }
+        cipherText->size = message->size;
     } while (0);
 
     mbedtls_aes_free(cbcNoPaddingCtx);
@@ -428,6 +428,7 @@ static int32_t AesCbcPkcs7CryptFinal(void **cryptoCtx, const struct HksBlob *mes
     size_t finish_olen;
     int32_t ret;
     do {
+        cipherText->size = 0;
         if (message->size != 0) {
             size_t keyLen = cipherText->size;
             ret = mbedtls_cipher_update(cbcPkcs7ctx, message->data, message->size, cipherText->data,
@@ -660,8 +661,8 @@ static int32_t AesEncryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
                 (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
                 break;
             }
-            cipherText->size = message->size;
         }
+        cipherText->size = message->size;
 
         ret = mbedtls_gcm_finish(gcmCtx, tagAead->data, tagAead->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
@@ -796,8 +797,8 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
                 (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
                 break;
             }
-            cipherText->size = message->size;
         }
+        cipherText->size = message->size;
 
         uint8_t check_tag[16];
         ret =  mbedtls_gcm_finish(gcmCtx, check_tag, tagAead->size);
