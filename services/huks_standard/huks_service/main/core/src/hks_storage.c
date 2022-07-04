@@ -763,6 +763,7 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get backup full path failed, ret = %d.", ret);
     }
+    return ret;
 }
 #endif
 
