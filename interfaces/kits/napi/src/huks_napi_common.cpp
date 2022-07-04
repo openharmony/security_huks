@@ -285,24 +285,6 @@ static napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSe
     return paramArray;
 }
 
-napi_value GenerateHksResult(napi_env env, int32_t error)
-{
-    napi_value result = nullptr;
-    NAPI_CALL(env, napi_create_object(env, &result));
-
-    napi_value errorCode = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, error, &errorCode));
-    NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PROPERTY_ERRORCODE.c_str(), errorCode));
-
-    napi_value outData = GetNull(env);
-    NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PROPERTY_OUTDATA.c_str(), outData));
-
-    napi_value properties = GetNull(env);
-    NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PRPPERTY_PROPERTIES.c_str(), properties));
-
-    return result;
-}
-
 napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size)
 {
     napi_value result = nullptr;
