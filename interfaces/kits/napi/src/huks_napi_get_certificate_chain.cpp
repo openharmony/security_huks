@@ -101,7 +101,7 @@ static napi_value GetCertificateChainParseParams(
     size_t index = 0;
     napi_value result = ParseKeyAlias(env, argv[index], context->keyAlias);
     if (result == nullptr) {
-        HKS_LOG_E("could not get alias");
+        HKS_LOG_E("could not get certificate chain alias");
         return nullptr;
     }
 
@@ -111,7 +111,7 @@ static napi_value GetCertificateChainParseParams(
         napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
     if (status != napi_ok || properties == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        HKS_LOG_E("could not get certificate property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
     result = ParseHksParamSet(env, properties, context->paramSet);
