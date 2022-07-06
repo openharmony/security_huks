@@ -94,7 +94,7 @@ ohos_unittest("huks_UT_test") {
   }
 
   include_dirs = [
-    "//base/security/huks/unittest/include",
+    "//base/security/huks/test/unittest/three_stage_test/include",
     "//utils/native/base/include",
     "include",
     "//test/xts/acts/security_lite/huks/common/include",
