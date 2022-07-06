@@ -1,0 +1,9 @@
+##########################################
+# the hisysevent definition for module a #
+##########################################
+
+domain: SECURITY
+
+TEST:
+    __BASE: {type: FAULT, level: CRITICAL, desc: event name}
+    NAME1: {type: STRING, desc: name1}
