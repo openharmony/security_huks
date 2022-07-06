@@ -30,7 +30,6 @@ base/security/huks/
 ├── services
 │   └── huks_standard
 ├── test
-├── unittest
 └── utils
    └── crypto_adapter
    └── file_operator
