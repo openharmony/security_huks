@@ -44,7 +44,7 @@ namespace OHOS {
         struct HksParamSet *paramSet = (struct HksParamSet *)(myData + DOUBLE_BLOB_SIZE);
         paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
 
-        (void)HksInit(&keyAlias, paramSet, &handle);
+        (void)HksInit(&keyAlias, paramSet, &handle, nullptr);
 
         if (myData != nullptr) {
             HksFree(myData);

@@ -75,7 +75,8 @@ int32_t HksCoreRefresh(void);
 int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
-int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle);
+int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token);
 
 int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData);

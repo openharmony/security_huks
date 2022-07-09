@@ -105,7 +105,8 @@ int32_t HuksAccessExportPublicKey(const struct HksBlob *key,  const struct HksPa
     return g_hksHalDevicePtr->HuksHdiExportPublicKey(key, paramSet, keyOut);
 }
 
-int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle)
+int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -114,7 +115,7 @@ int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *par
         HKS_LOG_E("Init function is null pointer");
         return HKS_ERROR_NULL_POINTER;
     }
-    return g_hksHalDevicePtr->HuksHdiInit(key, paramSet, handle);
+    return g_hksHalDevicePtr->HuksHdiInit(key, paramSet, handle, token);
 }
 
 int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,

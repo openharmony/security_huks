@@ -567,7 +567,7 @@ static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, struct HksPara
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = keySize }
     };
-    
+
     ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("unwrap suite add params failed.");
@@ -1509,12 +1509,13 @@ int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur
     return HKS_SUCCESS;
 }
 
-int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle)
+int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token)
 {
     HKS_LOG_D("HksCoreInit in Core start");
+    (void)token;
     uint32_t pur = 0;
     uint32_t alg = 0;
-    int32_t ret;
 
     if (key == NULL || paramSet == NULL || handle == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
@@ -1535,7 +1536,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     handle->size = sizeof(uint64_t);
     (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
 
-    ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
+    int32_t ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
         return ret;

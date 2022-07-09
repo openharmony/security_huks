@@ -39,7 +39,8 @@ int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const
 int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *keyOut);
 
-int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle);
+int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token);
 
 int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData);

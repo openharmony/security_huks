@@ -316,7 +316,7 @@ int32_t HksX25519AgreeFinish(const struct HksBlob *keyAlias, const struct HksBlo
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -343,7 +343,7 @@ int32_t HksX25519AgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob
 {
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -584,9 +584,9 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree004, TestSize.Level0)
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, initParamSet01, &handle);
+    ret = HksInit(NULL, initParamSet01, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksInit01 should failed.";
-    ret = HksInit(NULL, initParamSet02, &handle);
+    ret = HksInit(NULL, initParamSet02, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksInit02 should failed.";
 
     HksDeleteKey(&g_keyAlias01004, genParamSet);
