@@ -40,6 +40,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "src/hks_session_manager.c",
     "src/hks_storage.c",
     "src/hks_storage_file_lock.c",
+    "src/hks_report.c",
   ]
   if (non_rwlock_support) {
     sources += [ "src/hks_lock_lite.c" ]
@@ -59,6 +60,5 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     "//utils/native/base:utils",
   ]
-
   complete_static_lib = true
 }

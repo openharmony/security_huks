@@ -21,12 +21,27 @@
 extern "C" {
 #endif
 
-extern int WriteEvent()
+// int WriteEvent(void)
+// {
+//     std::string TEST = "TEST";
+//     constexpr const char *name = "NAME1";
+//     std::string value = "value";
+//     return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, TEST, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, name, value);
+// }
+
+constexpr const char *eventName = "HUKS_ERROR";
+constexpr const char *tagFunction = "FUNCTION";
+constexpr const char *tagUserId = "USER_ID";
+constexpr const char *tagProcessName = "PROCESS_NAME";
+constexpr const char *tagKeyType = "KEY_TYPE";
+constexpr const char *tagErrorCode = "ERROR_CODE";
+constexpr const char *tagExtra = "EXTRA";
+
+int WriteEvent(const char *functionName, struct EventValues *eventValues, const char *extra)
 {
-    std::string TEST = "TEST";
-    constexpr const char *name = "NAME1";
-    std::string value = "value";
-    return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, TEST, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, name, value);
+
+    return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, eventName, OHOS::HiviewDFX::HiSysEvent::EventType::FAULT, 
+        tagFunction, functionName, tagUserId, eventValues->userId, tagProcessName, eventValues->processName, tagKeyType, eventValues->keyType, tagErrorCode, eventValues->errorCode, tagExtra, extra);
 }
 
 #ifdef __cplusplus
