@@ -29,7 +29,7 @@ int32_t HksEcdhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob 
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -56,7 +56,7 @@ int32_t HksEcdhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *
 {
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;

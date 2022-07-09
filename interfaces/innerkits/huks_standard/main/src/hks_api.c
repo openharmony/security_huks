@@ -636,15 +636,15 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain
 }
 
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksBlob *handle)
+    struct HksBlob *handle, struct HksBlob *token)
 {
     HKS_LOG_I("enter init operation");
-    if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) {
+    if ((keyAlias == NULL) || (paramSet == NULL) || (handle == NULL)) { /* token can be null */
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret = HksClientInit(keyAlias, paramSet, handle);
+    int32_t ret = HksClientInit(keyAlias, paramSet, handle, token);
     HKS_LOG_I("leave init operation, result = %d", ret);
     return ret;
 }

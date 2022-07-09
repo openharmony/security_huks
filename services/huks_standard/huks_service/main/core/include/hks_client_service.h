@@ -91,8 +91,8 @@ int32_t HksServiceUnwrapKey(const struct HksBlob *processName, const struct HksB
 
 int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct HksBlob *certChain);
 
-int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
-    const struct HksParamSet *paramSet, struct HksBlob *handle);
+int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token);
 
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);

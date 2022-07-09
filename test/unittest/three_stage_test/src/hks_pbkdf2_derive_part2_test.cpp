@@ -866,7 +866,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0019, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(&keyAlias, pbkdf2ParamSet, &handle);
+    ret = HksInit(&keyAlias, pbkdf2ParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update
@@ -939,7 +939,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0020, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, pbkdf2ParamSet, &handle);
+    ret = HksInit(NULL, pbkdf2ParamSet, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
 
     /* 3. Delete Key */

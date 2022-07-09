@@ -330,7 +330,7 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     // Init
     uint8_t handle[sizeof(uint64_t)] = {0};
     struct HksBlob handleHMAC = { sizeof(uint64_t), handle };
-    ret = HksInit(keyAlias, hmacParamSet, &handleHMAC);
+    ret = HksInit(keyAlias, hmacParamSet, &handleHMAC, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         HksDeleteKey(keyAlias, genParamSet);
@@ -504,7 +504,7 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(&keyAlias, hmacParamSet, &handle);
+    ret = HksInit(&keyAlias, hmacParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handle, hmacParamSet, &inData);
@@ -553,7 +553,7 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, hmacParamSet, &handle);
+    ret = HksInit(NULL, hmacParamSet, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init should failed.";
 
     ret = HksDeleteKey(&keyAlias, genParamSet);

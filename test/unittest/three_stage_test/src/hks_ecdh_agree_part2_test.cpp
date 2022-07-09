@@ -576,9 +576,9 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree0010, TestSize.Level0)
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, initParamSet01, &handle);
+    ret = HksInit(NULL, initParamSet01, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksInit01 should failed.";
-    ret = HksInit(NULL, initParamSet02, &handle);
+    ret = HksInit(NULL, initParamSet02, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksInit02 should failed.";
 
     HksDeleteKey(&g_keyAlias01010, genParamSet);

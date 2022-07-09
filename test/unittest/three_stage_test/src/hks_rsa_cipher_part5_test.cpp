@@ -278,7 +278,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt);
+    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update & Finish
     uint8_t cipher[RSA_COMMON_SIZE] = {0};
@@ -293,7 +293,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    ret = HksInit(&keyAlias, decryptParamSet, &handleDecrypt);
+    ret = HksInit(&keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleDecrypt, decryptParamSet, &cipherText);
@@ -350,7 +350,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt);
+    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleEncrypt, encryptParamSet, &inData);
@@ -404,7 +404,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(NULL, encryptParamSet, &handleEncrypt);
+    ret = HksInit(NULL, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init should failed.";
 
     /* 4. Delete Key */

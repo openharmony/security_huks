@@ -44,7 +44,7 @@ int32_t HksCrossTestAesEncrypt(const struct HksBlob *keyAlias,
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, encryptParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, encryptParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AesEncry Init failed.");
         return HKS_FAILURE;
@@ -69,7 +69,7 @@ int32_t HksCrossTestAesDecrypt(const struct HksBlob *keyAlias,
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, decryptParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, decryptParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AesDecry Init failed.");
         return HKS_FAILURE;
@@ -94,7 +94,7 @@ int32_t HksCrossTestRsaEncrypt(const struct HksBlob *keyAlias,
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, encryptParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, encryptParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("RsaEncry Init failed.");
         return HKS_FAILURE;
@@ -119,7 +119,7 @@ int32_t HksCrossTestRsaDecrypt(const struct HksBlob *keyAlias,
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, decryptParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, decryptParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("RsaDecry Init failed.");
         return HKS_FAILURE;
@@ -144,7 +144,7 @@ int32_t HksCrossTestSignVerify(const struct HksBlob *keyAlias,
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, signVerifyParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, signVerifyParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Sign/verify Init failed.");
         return HKS_FAILURE;
@@ -183,7 +183,7 @@ int32_t HksCrossTestHmac(const struct HksBlob *keyAlias, const struct HksParamSe
 
     uint8_t handle[sizeof(uint64_t)] = {0};
     struct HksBlob handleHMAC = { sizeof(uint64_t), handle };
-    ret = HksInit(keyAlias, hmacParamSet, &handleHMAC);
+    ret = HksInit(keyAlias, hmacParamSet, &handleHMAC, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksInit failed.");
         return HKS_FAILURE;
@@ -275,7 +275,7 @@ int32_t HksCrossTestAgree(const struct HksBlob *keyAlias, const struct HksBlob *
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle);
+    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksInit failed.");
         return HKS_FAILURE;
@@ -313,7 +313,7 @@ int32_t HksCrossTestDerive(const struct HksBlob *keyAlias, const struct HksParam
 
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
-    ret = HksInit(keyAlias, initParamSet, &handleDerive);
+    ret = HksInit(keyAlias, initParamSet, &handleDerive, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksInit failed.");
         return HKS_FAILURE;

@@ -162,7 +162,7 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
                 context->handle->size = HKS_MAX_TOKEN_SIZE;
             }
             context->result =
-                HksInit(context->keyAlias, context->paramSet, context->handle);
+                HksInit(context->keyAlias, context->paramSet, context->handle, nullptr);
         },
         [](napi_env env, napi_status status, void *data) {
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
