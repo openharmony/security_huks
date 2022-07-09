@@ -424,6 +424,9 @@ static int32_t CoreHashInit(const struct HuksKeyNode *keyNode, uint32_t alg)
 
     void *ctx = NULL;
     uint32_t digest = (alg == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : alg;
+
+    HKS_LOG_I("Hal hash init.");
+
     ret = HksCryptoHalHashInit(digest, &ctx);
     if (ret != HKS_SUCCESS)  {
         HKS_LOG_E("hal hash init failed ret : %d", ret);
@@ -440,6 +443,8 @@ static int32_t CoreHashUpdate(const struct HuksKeyNode *keyNode, const struct Hk
         HKS_LOG_E("ctx is invalid: null!");
         return HKS_ERROR_BAD_STATE;
     }
+
+    HKS_LOG_I("Hal hash update.");
 
     int32_t ret = HksCryptoHalHashUpdate(srcData, ctx);
     if (ret != HKS_SUCCESS) {
@@ -470,6 +475,8 @@ static int32_t CoreHashFinish(const struct HuksKeyNode *keyNode, const struct Hk
         HKS_LOG_E("malloc fail.");
         return HKS_ERROR_MALLOC_FAIL;
     }
+
+    HKS_LOG_I("Hal hash final.");
 
     ret = HksCryptoHalHashFinal(srcData, &ctx, outData);
     if (ret != HKS_SUCCESS) {
@@ -618,6 +625,8 @@ static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
             break;
         }
 
+        HKS_LOG_I("Hal encrypt or decrypt init.");
+
         void *ctx = NULL;
         if (purposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) {
             ret = HksCryptoHalEncryptInit(&rawKey, usageSpec, &ctx);
@@ -664,6 +673,8 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
         HKS_LOG_E("append cipher get purpose param failed!");
         return ret;
     }
+
+    HKS_LOG_I("Hal encrypt or decrypt.");
 
     if (purposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) {
         ret = HksCryptoHalEncryptUpdate(inData, ctx, outData, alg);
@@ -1003,6 +1014,8 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
+    HKS_LOG_I("Init cache or hash init.");
+
     if (algParam->uint32Param == HKS_ALG_ED25519) {
         return SetCacheModeCtx(keyNode);
     } else {
@@ -1023,6 +1036,8 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
+
+    HKS_LOG_I("Update cache or hash update.");
 
     if (algParam->uint32Param == HKS_ALG_ED25519) {
         return UpdateCachedData(keyNode, srcData);
@@ -1055,6 +1070,8 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
+
+    HKS_LOG_I("Finish cache or hash finish.");
 
     struct HksBlob signVerifyData = { 0, NULL };
     if (algParam->uint32Param == HKS_ALG_ED25519) {
@@ -1102,6 +1119,8 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
+    HKS_LOG_I("Init cache or cipher init.");
+
     if (algParam->uint32Param == HKS_ALG_RSA) {
         return SetCacheModeCtx(keyNode);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
@@ -1123,6 +1142,8 @@ int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
+
+    HKS_LOG_I("Update cache or cipher update.");
 
     if (algParam->uint32Param == HKS_ALG_RSA) {
         return UpdateCachedData(keyNode, inData);
@@ -1151,6 +1172,8 @@ int32_t HksCoreEncryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
+    HKS_LOG_I("Finish cache or encrypt finish.");
+
     if (algParam->uint32Param == HKS_ALG_RSA) {
         return CoreRsaCipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
@@ -1177,6 +1200,8 @@ int32_t HksCoreDecryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
+
+    HKS_LOG_I("Finish cache or decrypt finish.");
 
     if (algParam->uint32Param == HKS_ALG_RSA) {
         return CoreRsaCipherFinish(keyNode, inData, outData);
@@ -1239,6 +1264,9 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         struct HksKeySpec derivationSpec = { 0, 0, &derParam };
         HksFillKeySpec(keyNode->runtimeParamSet, &derivationSpec);
         HksFillKeyDerivationParam(keyNode->runtimeParamSet, &derParam);
+
+        HKS_LOG_I("Hal derive update.");
+
         ret = HksCryptoHalDeriveKey(&rawKey, &derivationSpec, deriveBlob);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksCryptoHalDeriveKey fail");
@@ -1394,6 +1422,9 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
 
         struct HksKeySpec agreeSpec = { 0 };
         HksFillKeySpec(keyNode->runtimeParamSet, &agreeSpec);
+
+        HKS_LOG_I("Hal agree update.");
+
         ret = HksCryptoHalAgreeKey(&rawKey, &publicKey, &agreeSpec, agreeTemp);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksCryptoHalAgreeKey failed, ret = %d.", ret);
@@ -1513,6 +1544,8 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
             return ret;
         }
 
+        HKS_LOG_I("Init hmac.");
+
         void *ctx = NULL;
         ret = HksCryptoHalHmacInit(&rawKey, alg, &ctx);
         if (ret != HKS_SUCCESS) {
@@ -1543,6 +1576,8 @@ int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const stru
     if (ctx == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
+
+    HKS_LOG_I("Hal hmac update.");
 
     ret = HksCryptoHalHmacUpdate(srcData, ctx);
     if (ret != HKS_SUCCESS) {
@@ -1589,6 +1624,8 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
         HKS_LOG_E("ctx invalid");
         return HKS_ERROR_NULL_POINTER;
     }
+
+    HKS_LOG_I("Finish cache or hmac finish.");
 
     ret = HksCryptoHalHmacFinal(inData, &ctx, outData);
     if (ret != HKS_SUCCESS) {

@@ -26,27 +26,6 @@
 extern "C" {
 #endif
 
-#define STRING_TAG_ALGORITHM "algorithm"
-extern const struct HksBlob tagAlgorithm;
-
-#define STRING_TAG_KEY_SIZE "keySize"
-extern const struct HksBlob tagKeySize;
-
-#define STRING_TAG_DIGEST "digest"
-extern const struct HksBlob tagDigest;
-
-#define STRING_TAG_BLOCK_MODE "blockMode"
-extern const struct HksBlob tagBlockMode;
-
-#define STRING_TAG_UNWRAP_ALGORITHM_SUITE "unwrapAlgorithmSuit"
-extern const struct HksBlob tagUnwrapAlgorithmSuit;
-
-#define STRING_TAG_ITERATION "iteration"
-extern const struct HksBlob tagIteration;
-
-#define STRING_TAG_PURPOSE "purpose"
-extern const struct HksBlob tagPurpose;
-
 int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSetIn, int32_t errorCode);
 
 #ifdef __cplusplus

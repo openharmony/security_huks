@@ -19,13 +19,19 @@
 #include "hks_log.h"
 #include "hks_param.h"
 
-const struct HksBlob tagAlgorithm = {sizeof(STRING_TAG_ALGORITHM) - 1, (uint8_t *)STRING_TAG_ALGORITHM};
-const struct HksBlob tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
-const struct HksBlob tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
-const struct HksBlob tagBlockMode = {sizeof(STRING_TAG_BLOCK_MODE) - 1, (uint8_t *)STRING_TAG_BLOCK_MODE};
-const struct HksBlob tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP_ALGORITHM_SUITE) - 1, (uint8_t *)STRING_TAG_UNWRAP_ALGORITHM_SUITE};
-const struct HksBlob tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, (uint8_t *)STRING_TAG_ITERATION};
-const struct HksBlob tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
+#define STRING_TAG_KEY_SIZE "keySize"
+#define STRING_TAG_DIGEST "digest"
+#define STRING_TAG_BLOCK_MODE "blockMode"
+#define STRING_TAG_UNWRAP_ALGORITHM_SUITE "unwrapAlgorithmSuit"
+#define STRING_TAG_ITERATION "iteration"
+#define STRING_TAG_PURPOSE "purpose"
+
+const struct HksBlob g_tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
+const struct HksBlob g_tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
+const struct HksBlob g_tagBlockMode = {sizeof(STRING_TAG_BLOCK_MODE) - 1, (uint8_t *)STRING_TAG_BLOCK_MODE};
+const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP_ALGORITHM_SUITE) - 1, (uint8_t *)STRING_TAG_UNWRAP_ALGORITHM_SUITE};
+const struct HksBlob g_tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, (uint8_t *)STRING_TAG_ITERATION};
+const struct HksBlob g_tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
 
 static enum HksTagType GetTagType(enum HksTag tag)
 {
@@ -93,12 +99,12 @@ static void GetAlgorithmTag(const struct HksParamSet *paramSetIn ,uint32_t *algo
 static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
 {
     uint32_t index = 0;
-    AppendIfExist(HKS_TAG_PURPOSE, paramSetIn, &tagPurpose, extraOut, &index);
-    AppendIfExist(HKS_TAG_KEY_SIZE, paramSetIn, &tagKeySize, extraOut, &index);
-    AppendIfExist(HKS_TAG_DIGEST, paramSetIn, &tagDigest, extraOut, &index);
-    AppendIfExist(HKS_TAG_BLOCK_MODE, paramSetIn, &tagBlockMode, extraOut, &index);
-    AppendIfExist(HKS_TAG_UNWRAP_ALGORITHM_SUITE, paramSetIn, &tagUnwrapAlgorithmSuit, extraOut, &index);
-    AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &tagIteration, extraOut, &index);
+    AppendIfExist(HKS_TAG_PURPOSE, paramSetIn, &g_tagPurpose, extraOut, &index);
+    AppendIfExist(HKS_TAG_KEY_SIZE, paramSetIn, &g_tagKeySize, extraOut, &index);
+    AppendIfExist(HKS_TAG_DIGEST, paramSetIn, &g_tagDigest, extraOut, &index);
+    AppendIfExist(HKS_TAG_BLOCK_MODE, paramSetIn, &g_tagBlockMode, extraOut, &index);
+    AppendIfExist(HKS_TAG_UNWRAP_ALGORITHM_SUITE, paramSetIn, &g_tagUnwrapAlgorithmSuit, extraOut, &index);
+    AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &g_tagIteration, extraOut, &index);
 
     HKS_LOG_E("PackExtra: %s", extraOut);
 }
@@ -115,6 +121,10 @@ static int32_t BuildEmptyString (char **pString)
 
 int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSetIn, int32_t errorCode)
 {
+    if (errorCode == 0) {
+        return HKS_SUCCESS;
+    }
+
     HKS_LOG_E("start to report event.");
 
     char *extra = NULL;

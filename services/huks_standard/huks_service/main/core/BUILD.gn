@@ -60,5 +60,8 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     "//utils/native/base:utils",
   ]
+  external_deps = [ 
+    "hitrace_native:libhitrace" 
+  ]
   complete_static_lib = true
 }
