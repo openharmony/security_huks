@@ -22,8 +22,16 @@
 extern "C" {
 #endif
 
-extern int WriteEvent(void);
+struct EventValues
+{
+    uint32_t userId;
+    const char *processName;
+    uint32_t keyType;
+    int32_t errorCode;
+};
 
+
+int WriteEvent(const char *functionName, struct EventValues *eventValues, const char *extra);
 
 #ifdef __cplusplus
 }
