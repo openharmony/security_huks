@@ -20,6 +20,8 @@
 #endif
 
 #include "hks_client_service.h"
+#include "hks_report.h"
+//#include "hitrace/trace.h"
 
 #include "hks_client_check.h"
 #include "hks_log.h"
@@ -104,7 +106,11 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
         return ret;
     }
 
-    return HksStoreGetKeyInfoList(keyInfoList, listCount);
+    ret = HksStoreGetKeyInfoList(keyInfoList, listCount);
+
+    (void)ReportFaultEvent(__func__, processInfo, NULL, ret);
+
+    return ret;
 }
 #else
 
@@ -299,6 +305,8 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
             return ret;
         }
     }
+
+    (void)ReportFaultEvent(__func__, processInfo, NULL, ret);
 
     return ret;
 }
@@ -709,6 +717,9 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     HKS_FREE_PTR(keyOutBuffer);
     HKS_FREE_PTR(keyIn.data);
     HksFreeParamSet(&newParamSet);
+    
+    (void)ReportFaultEvent(__func__, processInfo, paramSetIn, ret);
+
     return ret;
 }
 
@@ -737,6 +748,9 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -765,6 +779,9 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -793,6 +810,9 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -821,6 +841,9 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -843,8 +866,10 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
     int32_t deleteCertRet = HksStoreDeleteKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_CERTCHAIN);
     if ((deleteCertRet != HKS_SUCCESS) && (deleteCertRet != HKS_ERROR_NOT_EXIST)) {
         HKS_LOG_E("service delete cert chain failed, ret = %d", ret);
-        return deleteCertRet;
+        ret = deleteCertRet;
     }
+
+    (void)ReportFaultEvent(__func__, processInfo, NULL, ret);
 
     return ret;
 }
@@ -856,7 +881,11 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
         return ret;
     }
 
-    return HksStoreIsKeyBlobExist(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY);
+    ret = HksStoreIsKeyBlobExist(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY);
+
+    (void)ReportFaultEvent(__func__, processInfo, NULL, ret);
+
+    return ret;
 }
 
 int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
@@ -893,6 +922,9 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -940,6 +972,9 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
     } while (0);
 
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -995,6 +1030,9 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
 
     HKS_FREE_BLOB(wrappingKeyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -1023,6 +1061,9 @@ int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, cons
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, NULL, ret);
+    
     return ret;
 }
 
@@ -1051,6 +1092,9 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -1079,6 +1123,9 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -1107,34 +1154,41 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
 int32_t HksServiceInitialize(void)
 {
     int32_t ret;
+    do {
+    #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
+        ret = HksUpgradeStorageData();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("hks update storage data failed, ret = %d", ret);
+            break;
+        }
+    #endif
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-    ret = HksUpgradeStorageData();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks update storage data failed, ret = %d", ret);
-        return ret;
-    }
-#endif
+        ret = HuksAccessModuleInit();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("hks core service initialize failed! ret = %d", ret);
+            break;
+        }
 
-    ret = HuksAccessModuleInit();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks core service initialize failed! ret = %d", ret);
-        return ret;
-    }
+    #ifdef _STORAGE_LITE_
+        ret = HksLoadFileToBuffer();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("load file to buffer failed, ret = %d", ret);
+            break;
+        }
+    #endif
+    } while(0);
 
-#ifdef _STORAGE_LITE_
-    ret = HksLoadFileToBuffer();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("load file to buffer failed, ret = %d", ret);
-        return ret;
-    }
-#endif
+    (void)ReportFaultEvent(__func__, NULL, NULL, ret);
+
     return ret;
 }
 
@@ -1147,22 +1201,35 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     ret = HksDestroyOldVersionFiles();
     HKS_LOG_I("destroy old version files ret = 0x%X", ret); /* only recode log */
 #endif
+    do {
+    #ifndef _HARDWARE_ROOT_KEY_
+        ret = HuksAccessRefresh();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("Hks core service refresh info failed! ret = 0x%X", ret);
+            break;
+        }
+    #endif
 
-#ifndef _HARDWARE_ROOT_KEY_
-    ret = HuksAccessRefresh();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks core service refresh info failed! ret = 0x%X", ret);
-        return ret;
-    }
-#endif
+    #ifdef _STORAGE_LITE_
+        ret = HksFileBufferRefresh();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("load file to buffer failed, ret = %d", ret);
+            break;
+        }
+    #endif
+    } while(0);
 
-#ifdef _STORAGE_LITE_
-    ret = HksFileBufferRefresh();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("load file to buffer failed, ret = %d", ret);
-        return ret;
-    }
-#endif
+    HKS_LOG_E("start to build process info"); 
+
+    int userId = 0;
+    struct HksBlob userIdBlob = { sizeof(int), (uint8_t *)&userId };
+    struct HksProcessInfo processInfo = {userIdBlob, *processName};
+
+    HKS_LOG_E("done build process info"); 
+
+    (void)ReportFaultEvent(__func__, &processInfo, NULL, ret);
+    HKS_LOG_E("done build process info 2"); 
+
     return ret;
 }
 
@@ -1199,6 +1266,9 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 #else
     (void)processInfo;
@@ -1213,7 +1283,7 @@ int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, 
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
 #ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-    int32_t ret = HksCheckGetCertificateChainParams(processInfo, keyAlias, paramSet, certChain);
+    int32_t ret = HksCheckGetCertificateChainParams(&processInfo->processName, keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -1230,6 +1300,9 @@ int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, 
     }
     certChain->size = certFromFile.size;
     HKS_FREE_BLOB(certFromFile);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 #else
     (void)processInfo;
@@ -1295,6 +1368,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("check ServiceInit params failed, ret = %d", ret);
             break;
+
         }
 
         ret = GetKeyAndNewParamSet(processInfo, key, paramSet, &keyFromFile, &newParamSet);
@@ -1318,6 +1392,9 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -1334,6 +1411,8 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         HKS_LOG_E("HuksAccessUpdate fail, ret = %d", ret);
         DeleteOperation(handle);
     }
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
 
     return ret;
 }
@@ -1396,6 +1475,9 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     HKS_FREE_BLOB(output);
     DeleteOperation(handle);
     HksFreeParamSet(&newParamSet);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -1412,6 +1494,9 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         HKS_LOG_E("HuksAccessAbort fail, ret = %d", ret);
     }
     DeleteOperation(handle);
+
+    (void)ReportFaultEvent(__func__, processInfo, paramSet, ret);
+
     return ret;
 }
 
@@ -1455,5 +1540,12 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
     } while (0);
 
     HksFreeParamSet(&newParamSet);
+
+    int userId = 0;
+    struct HksBlob userIdBlob = { sizeof(int), (uint8_t *)&userId };
+    struct HksProcessInfo processInfo = {userIdBlob, *processName};
+    
+    (void)ReportFaultEvent(__func__, &processInfo, NULL, ret);
+
     return ret;
 }
