@@ -14,9 +14,10 @@
  */
 
 #include "hks_param.h"
+#include <stddef.h>
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 enum HksTag g_validTags[] = {
     HKS_TAG_ALGORITHM,
