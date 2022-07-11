@@ -15,17 +15,20 @@
 
 #include "hks_verifier.h"
 
+#include <openssl/asn1.h>
 #include <openssl/bio.h>
-#include <openssl/err.h>
+#include <openssl/crypto.h>
 #include <openssl/evp.h>
+#include <openssl/obj_mac.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/pem.h>
-#include <openssl/rsa.h>
 #include <openssl/x509.h>
-#include <openssl/x509_vfy.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type.h"
+#include "securec.h"
 
 #define OPENSSL_SUCCESS 1
 #define OPENSSL_ERROR 0
