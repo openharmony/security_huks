@@ -109,27 +109,14 @@ static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
     HKS_LOG_E("PackExtra: %s", extraOut);
 }
 
-static int32_t BuildEmptyString (char **pString)
-{
-    *pString = (char *)HksMalloc(1);
-    if (*pString == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }                
-    (void)memset_s(*pString, 1, 0, 1);
-    return HKS_SUCCESS;
-}
-
 int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSetIn, int32_t errorCode)
 {
     if (errorCode == 0) {
         return HKS_SUCCESS;
     }
 
-    HKS_LOG_E("start to report event.");
-
     char *extra = NULL;
     int32_t ret;
-    char *processName = NULL;
     do {
         extra = (char *)HksMalloc(EXTRA_DATA_SIZE);
         if (extra == NULL) {
@@ -138,48 +125,38 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
             break;
         }
         (void)memset_s(extra, EXTRA_DATA_SIZE, 0, EXTRA_DATA_SIZE);
-        // algorithmTag is 0 if no algorithm designed in param set
+
+        // algorithmTag is 0 if no algorithm designed in paramset
         uint32_t algorithmTag = 0;
         if (paramSetIn != NULL) {
-            GetAlgorithmTag(paramSetIn, &algorithmTag);
-            PackExtra(paramSetIn, extra);
+            if (HksCheckParamSet(paramSetIn, paramSetIn->paramSetSize) == HKS_SUCCESS) {
+                GetAlgorithmTag(paramSetIn, &algorithmTag);
+                PackExtra(paramSetIn, extra);
+            }
         }
+
+        // userId is 0 if no userId
         int userId = 0;
+
+        // processName is 0 if no processName
+        int processName = 0;
         if (processInfo != NULL) {
             if (memcpy_s(&userId, processInfo->userId.size, processInfo->userId.data, processInfo->userId.size) != EOK) {
                 HKS_LOG_E("copy user id failed!");
                 ret = HKS_ERROR_BAD_STATE;
                 break;
             }
-            processName = (char *)HksMalloc(processInfo->processName.size + 1);
-            if (processName == NULL) {
-                ret = HKS_ERROR_MALLOC_FAIL;
-                break;
-            }
 
-            HKS_LOG_E("size of process name is : %d", processInfo->processName.size);
-                
-            (void)memset_s(processName, processInfo->processName.size + 1, 0, processInfo->processName.size + 1);
-            if (memcpy_s(processName, processInfo->processName.size + 1, processInfo->processName.data, processInfo->processName.size) != EOK) {
+            if (memcpy_s(&processName, processInfo->processName.size + 1, processInfo->processName.data, processInfo->processName.size) != EOK) {
                 HKS_LOG_E("copy process name failed!");
                 ret = HKS_ERROR_BAD_STATE;
                 break;
             }
-        } else {
-            ret = BuildEmptyString(&processName);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("Build empty string failed!");
-                break;
-            }
         }
-        HKS_LOG_E("process name is %s", processName);
         struct EventValues eventValues = { userId, processName, algorithmTag, errorCode };
         ret = WriteEvent(funcName, &eventValues, extra);
     } while(0);
-    HKS_FREE_PTR(processName);
     HKS_FREE_PTR(extra);
-
-    HKS_LOG_E("done report event.");
 
     return ret;
 }
