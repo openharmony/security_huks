@@ -848,7 +848,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest026, TestSize.Level0)
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
-    ret = HksInit(&keyAlias, signParamSet, &handleSign);
+    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleSign, signParamSet, &inData);
@@ -891,7 +891,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest027, TestSize.Level0)
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
-    ret = HksInit(NULL, signParamSet, &handleSign);
+    ret = HksInit(NULL, signParamSet, &handleSign, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
 
     /* 3. Delete Key */

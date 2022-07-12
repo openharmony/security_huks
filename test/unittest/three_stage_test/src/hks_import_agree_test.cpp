@@ -1109,7 +1109,7 @@ static int32_t TestAgree(const struct HksBlob *keyAlias, const struct HksBlob *p
     do {
         uint64_t handleValue = 0;
         struct HksBlob handle = { sizeof(uint64_t), (uint8_t *)&handleValue };
-        ret = HksInit(keyAlias, initParamSet, &handle);
+        ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }

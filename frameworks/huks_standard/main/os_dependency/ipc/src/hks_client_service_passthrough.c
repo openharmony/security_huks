@@ -346,7 +346,7 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob 
 }
 
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksBlob *handle)
+    struct HksBlob *handle, struct HksBlob *token)
 {
     char *processName = NULL;
     char *userId = NULL;
@@ -359,7 +359,22 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName }
     };
-    return HksServiceInit(&processInfo, keyAlias, paramSet, handle);
+
+    struct HksBlob tokenTmp = { 0, NULL };
+    if ((token != NULL) && (token->size != 0)) {
+        tokenTmp.size = token->size;
+        tokenTmp.data = token->data;
+    }
+    int32_t ret = HksServiceInit(&processInfo, keyAlias, paramSet, handle, &tokenTmp);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("service init failed, ret = %d", ret);
+        return ret;
+    }
+
+    if ((token != NULL) && (token->size != 0)) {
+        token->size = tokenTmp.size;
+    }
+    return ret;
 }
 
 int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,

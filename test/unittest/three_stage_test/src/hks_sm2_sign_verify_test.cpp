@@ -291,7 +291,7 @@ static int32_t HksTestSignVerify(const struct HksBlob *keyAlias, const struct Hk
     int32_t ret;
 
     do {
-        ret = HksInit(keyAlias, paramSet, &handle);
+        ret = HksInit(keyAlias, paramSet, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }
