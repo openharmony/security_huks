@@ -284,6 +284,7 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
     do {
         ret = HksCheckGetKeyInfoListParams(&processInfo->processName, keyInfoList, listCount);
         if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get key data failed, ret = %d", ret);
             break;
         }
 
@@ -293,11 +294,13 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
             break;
         }
 
+        bool isBreak = false;
         for (uint32_t i = 0; i < *listCount; ++i) {
             struct HksBlob keyFromFile = { 0, NULL };
             ret = GetKeyData(processInfo, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("get key data failed, ret = %d", ret);
+                isBreak = true;
                 break;
             }
 
@@ -305,8 +308,12 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
             HKS_FREE_BLOB(keyFromFile);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("get key paramSet failed, ret = %d", ret);
+                isBreak = true;
                 break;
             }
+        }
+        if (isBreak) {
+            break;
         }
     } while(0);
 
@@ -1243,16 +1250,11 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     #endif
     } while(0);
 
-    HKS_LOG_E("start to build process info"); 
-
     int userId = 0;
     struct HksBlob userIdBlob = { sizeof(int), (uint8_t *)&userId };
     struct HksProcessInfo processInfo = {userIdBlob, *processName};
 
-    HKS_LOG_E("done build process info"); 
-
     (void)ReportFaultEvent(__func__, &processInfo, NULL, ret);
-    HKS_LOG_E("done build process info 2"); 
 
     return ret;
 }
