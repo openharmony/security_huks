@@ -24,7 +24,7 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle);
+    int32_t ret = HksInit(keyAlias, paramSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;

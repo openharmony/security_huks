@@ -19,4 +19,7 @@
 #include "hks_type.h"
 #include "securec.h"
 
+#define HANDLE_SIZE          8
+#define TOKEN_SIZE           32
+
 #endif /* HKS_TYPE_INNER_H */

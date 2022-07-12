@@ -37,7 +37,7 @@ int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias,
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
-    ret = HksInit(&keyAlias, deriveParamSet, &handleDerive);
+    ret = HksInit(&keyAlias, deriveParamSet, &handleDerive, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
     uint8_t tmpOut[COMMON_SIZE] = {0};
@@ -71,7 +71,7 @@ int32_t HksHkdfDeriveTestCmpCase(const struct HksBlob keyAlias,
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
-    ret = HksInit(&keyAlias, deriveParamSet, &handleDerive);
+    ret = HksInit(&keyAlias, deriveParamSet, &handleDerive, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
     uint8_t tmpOut[COMMON_SIZE] = {0};
