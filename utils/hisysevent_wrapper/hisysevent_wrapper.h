@@ -25,13 +25,20 @@ extern "C" {
 struct EventValues
 {
     uint32_t userId;
-    const char *processName;
+    uint32_t processName;
     uint32_t keyType;
     int32_t errorCode;
 };
 
+enum EventType
+{
+    FAULT,
+    STATISTIC,
+    SECURITY,
+    BEHAVIOR,
+};
 
-int WriteEvent(const char *functionName, struct EventValues *eventValues, const char *extra);
+int WriteEvent(int32_t eventType, const char *functionName, struct EventValues *eventValues, const char *extra);
 
 #ifdef __cplusplus
 }
