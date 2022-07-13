@@ -208,7 +208,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
       "//frameworks/huks_standard/main/os_dependency/ipc/include",
     ]
-
+    deps = []
     external_deps = [ "init_lite:libbegetutil" ]
 
     if (huks_use_mbedtls == true) {
