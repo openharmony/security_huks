@@ -22,15 +22,23 @@
 #include "hks_client_service_adapter.h"
 
 #include <openssl/bn.h>
+#include <openssl/dh.h>
+#include <openssl/dsa.h>
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include <openssl/evp.h>
+#include <openssl/obj_mac.h>
+#include <openssl/ossl_typ.h>
 #include <openssl/rsa.h>
 #include <openssl/x509.h>
+#include <stddef.h>
+#include <stdint.h>
 
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_type.h"
+#include "securec.h"
 
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
     defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
