@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,29 +43,29 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         HKS_LOG_E("copy extra tag failed!");
         return HKS_ERROR_BAD_STATE;
     }
-    *index = *index + tag->size;
+    *index += tag->size;
     char split = ':';
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
         return HKS_ERROR_BAD_STATE;
     }
-    *index = *index + sizeof(char);
+    *index += sizeof(char);
     switch (GetTagType(paramIn->tag))
     {
-    case HKS_TAG_TYPE_UINT: {
-        int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1,"%d", paramIn->uint32Param);
-        *index = *index + num;
-        break;
-    }
-    default:
-        break;
+        case HKS_TAG_TYPE_UINT: {
+            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1,"%d", paramIn->uint32Param);
+            *index = *index + num;
+            break;
+        }
+        default:
+            break;
     }
     split = ';';
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
         return HKS_ERROR_BAD_STATE;
     }
-    *index = *index + sizeof(char);
+    *index += sizeof(char);
     return HKS_SUCCESS;
 }
 
