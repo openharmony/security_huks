@@ -15,10 +15,7 @@
 
 #include "huks_napi_get_key_properties.h"
 
-#include <cstddef>
-#include <cstdint>
-#include <iosfwd>
-#include <string>
+#include "securec.h"
 
 #include "hks_api.h"
 #include "hks_log.h"
@@ -26,11 +23,6 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "huks_napi_common.h"
-#include "js_native_api.h"
-#include "napi/native_common.h"
-#include "node_api.h"
-#include "node_api_types.h"
-#include "securec.h"
 
 namespace HuksNapi {
 namespace {
