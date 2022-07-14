@@ -21,10 +21,10 @@
 extern "C" {
 #endif
 
-static constexpr const char *eventName = "HUKS_ERROR";
+static constexpr const char *eventName = "HUKS_FAULT";
 static constexpr const char *tagFunction = "FUNCTION";
 static constexpr const char *tagUserId = "USER_ID";
-static constexpr const char *tagProcessName = "PROCESS_NAME";
+static constexpr const char *tagProcessUID = "PROCESS_UID";
 static constexpr const char *tagKeyType = "KEY_TYPE";
 static constexpr const char *tagErrorCode = "ERROR_CODE";
 static constexpr const char *tagExtra = "EXTRA";
@@ -56,7 +56,7 @@ static OHOS::HiviewDFX::HiSysEvent::EventType GetEventType(int32_t eventType)
 int WriteEvent(int32_t eventType, const char *functionName, struct EventValues *eventValues, const char *extra)
 {
     return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, eventName, GetEventType(eventType), tagFunction, functionName, 
-        tagUserId, eventValues->userId, tagProcessName, eventValues->processName, tagKeyType, eventValues->keyType, tagErrorCode, eventValues->errorCode, tagExtra, extra);
+        tagUserId, eventValues->userId, tagProcessUID, eventValues->processName, tagKeyType, eventValues->keyType, tagErrorCode, eventValues->errorCode, tagExtra, extra);
 }
 
 #ifdef __cplusplus

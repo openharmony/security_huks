@@ -37,10 +37,10 @@ ohos_static_library("libhuks_service_core_standard_static") {
   sources = [
     "src/hks_client_check.c",
     "src/hks_client_service.c",
+    "src/hks_report.c",
     "src/hks_session_manager.c",
     "src/hks_storage.c",
     "src/hks_storage_file_lock.c",
-    "src/hks_report.c",
   ]
   if (non_rwlock_support) {
     sources += [ "src/hks_lock_lite.c" ]
@@ -52,16 +52,14 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "-Werror",
   ]
   deps = [
-    "//base/security/huks/utils/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+    "//base/security/huks/utils/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     "//utils/native/base:utils",
   ]
-  external_deps = [ 
-    "hitrace_native:libhitrace" 
-  ]
+  external_deps = [ "hitrace_native:libhitrace" ]
   complete_static_lib = true
 }
