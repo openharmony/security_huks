@@ -16,7 +16,11 @@
 #ifndef HKS_CRYPTO_ADAPTER_H
 #define HKS_CRYPTO_ADAPTER_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "hks_crypto_hal.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

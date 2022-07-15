@@ -16,9 +16,10 @@
 #ifndef HKS_CORE_SERVICE_THREE_STAGE_H
 #define HKS_CORE_SERVICE_THREE_STAGE_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
 #include "hks_keynode.h"
-#include "hks_crypto_hal.h"
+#include "hks_type.h"
 
 #define MAX_HASH_SIZE   64
 #define TEMP_DATA_SIZE 64

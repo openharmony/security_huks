@@ -14,12 +14,17 @@
  */
 
 #include "cipher.h"
-#include "cipher_log.h"
+
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "base64.h"
+#include "cipher_log.h"
 #include "ctr_drbg.h"
 #include "entropy.h"
+#include "md.h"
 #include "pk.h"
-#include "platform.h"
 #include "rsa.h"
 #include "securec.h"
 

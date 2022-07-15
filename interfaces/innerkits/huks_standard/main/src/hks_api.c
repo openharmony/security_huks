@@ -21,15 +21,16 @@
 
 #include "hks_api.h"
 
-#include "hks_ability.h"
+#include <stddef.h>
+#include <string.h>
+
 #include "hks_api_adapter.h"
 #include "hks_client_ipc.h"
-#include "hks_client_service_adapter.h"
 #include "hks_local_engine.h"
 #include "hks_log.h"
-#include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
+#include "securec.h"
 
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 #include "hks_verifier.h"

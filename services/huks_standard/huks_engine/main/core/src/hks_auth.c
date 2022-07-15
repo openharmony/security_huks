@@ -14,9 +14,11 @@
  */
 
 #include "hks_auth.h"
+
+#include <stddef.h>
+
 #include "hks_log.h"
 #include "hks_param.h"
-#include "hks_type_inner.h"
 
 struct HksAuthPolicy {
     uint32_t authId;

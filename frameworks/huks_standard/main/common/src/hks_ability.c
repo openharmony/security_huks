@@ -15,7 +15,10 @@
 
 #include "hks_ability.h"
 
+#include <stddef.h>
+
 #include "hks_log.h"
+#include "hks_type.h"
 
 static struct HksAbility g_abilityList[HKS_ABILITY_MAX_SIZE] = {0};
 

@@ -16,9 +16,10 @@
 #ifndef HKS_OPENSSL_ENGINE_H
 #define HKS_OPENSSL_ENGINE_H
 
-#include <openssl/evp.h>
+#include <openssl/ossl_typ.h>
+#include <stdint.h>
 
-#include "hks_type_inner.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -16,7 +16,7 @@
 #ifndef HKS_ABILITY_H
 #define HKS_ABILITY_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
 
 enum HksAbilityType {
     HKS_ABILITY_CRYPTO = 1,

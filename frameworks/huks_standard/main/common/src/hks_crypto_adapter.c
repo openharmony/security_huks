@@ -21,10 +21,13 @@
 
 #include "hks_crypto_adapter.h"
 
+#include <stddef.h>
+
 #include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "securec.h"
 
 void HksFillKeySpec(const struct HksParamSet *paramSet, struct HksKeySpec *spec)
 {

@@ -21,13 +21,15 @@
 
 #include "hks_api_adapter.h"
 
+#include <stddef.h>
+
 #include "hks_client_ipc.h"
 #include "hks_client_service_adapter.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_API_IMPORT

@@ -16,7 +16,9 @@
 #ifndef HKS_VERIFIER_H
 #define HKS_VERIFIER_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #define HKS_DEFAULT_CERT_CHAIN_CNT 4
 #define MAX_ATTEST_EXTENSION_BUF_LEN 10240 // The value needs to be confirmed

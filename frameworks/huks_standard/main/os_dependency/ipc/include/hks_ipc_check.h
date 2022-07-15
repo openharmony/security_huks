@@ -16,7 +16,10 @@
 #ifndef HKS_CRYPTO_CHECK_H
 #define HKS_CRYPTO_CHECK_H
 
-#include "hks_type_inner.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

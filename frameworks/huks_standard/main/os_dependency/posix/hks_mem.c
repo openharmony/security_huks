@@ -15,6 +15,8 @@
 
 #include "hks_mem.h"
 
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef HKS_SUPPORT_PRODUCT_GT_WATCH

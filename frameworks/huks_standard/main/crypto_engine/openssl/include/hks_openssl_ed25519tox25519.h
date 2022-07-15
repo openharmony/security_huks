@@ -16,9 +16,10 @@
 #ifndef HKS_OPENSSL_ED25519TOX25519_H
 #define HKS_OPENSSL_ED25519TOX25519_H
 
-#include <openssl/bn.h>
+#include <openssl/ossl_typ.h>
+#include <stdint.h>
 
-#include "hks_crypto_hal.h"
+#include "hks_type.h"
 
 struct Curve25519Structure {
     BIGNUM *p; // Curve25519 prime
