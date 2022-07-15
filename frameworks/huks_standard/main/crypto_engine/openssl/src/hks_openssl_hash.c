@@ -24,10 +24,11 @@
 #include "hks_openssl_hash.h"
 
 #include <openssl/evp.h>
+#include <openssl/ossl_typ.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
 
 static int32_t CheckDigestAlg(uint32_t alg)
 {

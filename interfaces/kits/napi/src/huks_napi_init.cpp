@@ -24,7 +24,6 @@
 #include "hks_type.h"
 #include "huks_napi_common.h"
 
-
 namespace HuksNapi {
 namespace {
 constexpr int HUKS_NAPI_INIT_MIN_ARGS = 2;

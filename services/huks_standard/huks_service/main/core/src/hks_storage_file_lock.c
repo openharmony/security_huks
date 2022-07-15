@@ -19,11 +19,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "securec.h"
-
 #include "hks_lock.h"
 #include "hks_mem.h"
 #include "hks_mutex.h"
+#include "securec.h"
 
 struct HksStorageFileLock {
     char *path;

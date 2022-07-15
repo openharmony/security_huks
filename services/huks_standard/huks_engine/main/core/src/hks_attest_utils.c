@@ -14,9 +14,13 @@
  */
 
 #include "hks_attest_utils.h"
+
+#include <stddef.h>
+
 #include "hks_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
+#include "securec.h"
 
 static const uint8_t g_p256SpkiHeader[] = {
     0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a,

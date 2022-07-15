@@ -16,7 +16,9 @@
 #ifndef HKS_OPENSSL_COMMON_H
 #define HKS_OPENSSL_COMMON_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

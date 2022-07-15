@@ -22,7 +22,9 @@
 #include "hks_config.h"
 #endif
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

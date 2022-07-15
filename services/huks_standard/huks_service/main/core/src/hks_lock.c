@@ -15,6 +15,8 @@
 
 #include "hks_lock.h"
 
+#include <stddef.h>
+
 #include "hks_mem.h"
 #include "hks_rwlock.h"
 

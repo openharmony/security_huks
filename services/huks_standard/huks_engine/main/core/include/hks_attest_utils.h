@@ -16,6 +16,8 @@
 #ifndef HKS_ATTEST_UTILS_H
 #define HKS_ATTEST_UTILS_H
 
+#include <stdint.h>
+
 #include "hks_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_type.h"

@@ -23,9 +23,13 @@
 
 #include "hks_openssl_bn.h"
 
+#include <openssl/bn.h>
+#include <stddef.h>
+
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "securec.h"
 
 static void BnFreeParams(struct HksBnExpModParams *bnParams)
 {

@@ -19,8 +19,9 @@
 #include "hks_config.h"
 #endif
 
+#include <stdint.h>
+
 #include "hks_ability.h"
-#include "hks_log.h"
 #include "hks_openssl_aes.h"
 #include "hks_openssl_bn.h"
 #include "hks_openssl_common.h"
@@ -28,7 +29,6 @@
 #include "hks_openssl_dh.h"
 #include "hks_openssl_dsa.h"
 #include "hks_openssl_ecc.h"
-#include "hks_openssl_ed25519tox25519.h"
 #include "hks_openssl_hash.h"
 #include "hks_openssl_hmac.h"
 #include "hks_openssl_kdf.h"
@@ -36,6 +36,7 @@
 #include "hks_openssl_sm2.h"
 #include "hks_openssl_sm3.h"
 #include "hks_openssl_sm4.h"
+#include "hks_type.h"
 
 static void RegisterAbilityGenerateKey(void)
 {

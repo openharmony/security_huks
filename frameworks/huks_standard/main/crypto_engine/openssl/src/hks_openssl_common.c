@@ -16,11 +16,12 @@
 #include "hks_openssl_common.h"
 
 #include <openssl/rand.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 {

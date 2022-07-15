@@ -23,10 +23,16 @@
 
 #include "hks_storage.h"
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "hks_file_operator.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_storage_file_lock.h"
+#include "securec.h"
 
 #define HKS_ENCODE_OFFSET_LEN         6
 #define HKS_ENCODE_KEY_SALT_VALUE     0x3f
