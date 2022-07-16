@@ -19,14 +19,12 @@
 #include <stdint.h>
 #include "hisysevent_wrapper.h"
 
-#define EXTRA_DATA_SIZE 512
-
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSetIn, int32_t errorCode);
+int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, 
+    const struct HksParamSet *paramSetIn, int32_t errorCode);
 
 #ifdef __cplusplus
 }

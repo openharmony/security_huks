@@ -26,7 +26,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
     "//base/security/huks/utils/mutex",
-    "//base/security/huks/utils/hisysevent_wrapper",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper",
     "//utils/native/base/include",
   ]
   defines = [
@@ -54,8 +54,8 @@ ohos_static_library("libhuks_service_core_standard_static") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
-    "//base/security/huks/utils/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     "//utils/native/base:utils",

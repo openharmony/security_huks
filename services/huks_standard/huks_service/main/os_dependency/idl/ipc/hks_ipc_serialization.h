@@ -75,8 +75,6 @@ int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certC
 
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt);
 
-enum HksTagType GetTagType(enum HksTag tag);
-
 #ifdef __cplusplus
 }
 #endif

@@ -19,6 +19,8 @@
 #include "hks_report.h"
 #include "hks_type_inner.h"
 
+#define EXTRA_DATA_SIZE 512
+
 #define STRING_TAG_KEY_SIZE "keySize"
 #define STRING_TAG_DIGEST "digest"
 #define STRING_TAG_BLOCK_MODE "blockMode"
@@ -29,31 +31,40 @@
 static const struct HksBlob g_tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
 static const struct HksBlob g_tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
 static const struct HksBlob g_tagBlockMode = {sizeof(STRING_TAG_BLOCK_MODE) - 1, (uint8_t *)STRING_TAG_BLOCK_MODE};
-static const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP_ALGORITHM_SUITE) - 1, (uint8_t *)STRING_TAG_UNWRAP_ALGORITHM_SUITE};
+static const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP_ALGORITHM_SUITE) - 1, 
+    (uint8_t *)STRING_TAG_UNWRAP_ALGORITHM_SUITE};
 static const struct HksBlob g_tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, (uint8_t *)STRING_TAG_ITERATION};
 static const struct HksBlob g_tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
 
-static enum HksTagType GetTagType(enum HksTag tag)
-{
-    return (enum HksTagType)((uint32_t)tag & HKS_TAG_TYPE_MASK);
-}
-
 static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *paramIn, char *extraOut, uint32_t *index) {
+    if (*index > EXTRA_DATA_SIZE) {
+        HKS_LOG_E("no enough space!");
+        return HKS_ERROR_BAD_STATE;
+    }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, tag->data, tag->size) != EOK) {
         HKS_LOG_E("copy extra tag failed!");
         return HKS_ERROR_BAD_STATE;
     }
     *index += tag->size;
     char split = ':';
+    if (*index > EXTRA_DATA_SIZE) {
+        HKS_LOG_E("no enough space!");
+        return HKS_ERROR_BAD_STATE;
+    }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
         return HKS_ERROR_BAD_STATE;
     }
     *index += sizeof(char);
+    if (*index > EXTRA_DATA_SIZE) {
+        HKS_LOG_E("no enough space!");
+        return HKS_ERROR_BAD_STATE;
+    }
     switch (GetTagType(paramIn->tag))
     {
         case HKS_TAG_TYPE_UINT: {
-            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1,"%d", paramIn->uint32Param);
+            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1,"%d", 
+                paramIn->uint32Param);
             *index = *index + num;
             break;
         }
@@ -61,6 +72,10 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
             break;
     }
     split = ';';
+    if (*index > EXTRA_DATA_SIZE) {
+        HKS_LOG_E("no enough space!");
+        return HKS_ERROR_BAD_STATE;
+    }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
         return HKS_ERROR_BAD_STATE;
@@ -69,11 +84,12 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
     return HKS_SUCCESS;
 }
 
-static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, const struct HksBlob *tagString, char *extraOut, uint32_t *index)
+static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, const struct HksBlob *tagString, 
+    char *extraOut, uint32_t *index)
 {
     struct HksParam *temp = NULL;
     int32_t ret = HksGetParam(paramSetIn, tag, &temp);
-     if (ret == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS) {
         ret = AppendToExtra(tagString, temp, extraOut, index);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Append extra data failed!");
@@ -91,7 +107,6 @@ static void GetAlgorithmTag(const struct HksParamSet *paramSetIn ,uint32_t *algo
     if (ret == HKS_SUCCESS) {
         *algorithm = algorithmParam->uint32Param;
     } else {
-        *algorithm = 0;
         HKS_LOG_E("Get key type failed!");
     }
 }
@@ -107,9 +122,10 @@ static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
     AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &g_tagIteration, extraOut, &index);
 }
 
-int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSetIn, int32_t errorCode)
+int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, 
+    const struct HksParamSet *paramSetIn, int32_t errorCode)
 {
-    if (errorCode == 0) {
+    if (errorCode == HKS_SUCCESS) {
         return HKS_SUCCESS;
     }
 
@@ -139,13 +155,15 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
         // processName is 0 if no processName
         int processName = 0;
         if (processInfo != NULL) {
-            if (memcpy_s(&userId, processInfo->userId.size, processInfo->userId.data, processInfo->userId.size) != EOK) {
+            if (memcpy_s(&userId, sizeof(userId), processInfo->userId.data, 
+                processInfo->userId.size) != EOK) {
                 HKS_LOG_E("copy user id failed!");
                 ret = HKS_ERROR_BAD_STATE;
                 break;
             }
 
-            if (memcpy_s(&processName, processInfo->processName.size + 1, processInfo->processName.data, processInfo->processName.size) != EOK) {
+            if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data, 
+                processInfo->processName.size) != EOK) {
                 HKS_LOG_E("copy process name failed!");
                 ret = HKS_ERROR_BAD_STATE;
                 break;
