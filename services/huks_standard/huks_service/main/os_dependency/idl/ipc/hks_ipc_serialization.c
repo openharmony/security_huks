@@ -642,7 +642,3 @@ int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamO
     return HKS_SUCCESS;
 }
 
-enum HksTagType GetTagType(enum HksTag tag)
-{
-    return (enum HksTagType)((uint32_t)tag & HKS_TAG_TYPE_MASK);
-}

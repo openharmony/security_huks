@@ -294,13 +294,11 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
             break;
         }
 
-        bool isBreak = false;
         for (uint32_t i = 0; i < *listCount; ++i) {
             struct HksBlob keyFromFile = { 0, NULL };
             ret = GetKeyData(processInfo, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("get key data failed, ret = %d", ret);
-                isBreak = true;
                 break;
             }
 
@@ -308,12 +306,8 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
             HKS_FREE_BLOB(keyFromFile);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("get key paramSet failed, ret = %d", ret);
-                isBreak = true;
                 break;
             }
-        }
-        if (isBreak) {
-            break;
         }
     } while(0);
 
@@ -1195,13 +1189,13 @@ int32_t HksServiceInitialize(void)
 {
     int32_t ret;
     do {
-    #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
+#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
         ret = HksUpgradeStorageData();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("hks update storage data failed, ret = %d", ret);
             break;
         }
-    #endif
+#endif
 
         ret = HuksAccessModuleInit();
         if (ret != HKS_SUCCESS) {
@@ -1209,13 +1203,13 @@ int32_t HksServiceInitialize(void)
             break;
         }
 
-    #ifdef _STORAGE_LITE_
+#ifdef _STORAGE_LITE_
         ret = HksLoadFileToBuffer();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("load file to buffer failed, ret = %d", ret);
             break;
         }
-    #endif
+#endif
     } while(0);
 
     (void)ReportFaultEvent(__func__, NULL, NULL, ret);
@@ -1233,21 +1227,21 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     HKS_LOG_I("destroy old version files ret = 0x%X", ret); /* only recode log */
 #endif
     do {
-    #ifndef _HARDWARE_ROOT_KEY_
+#ifndef _HARDWARE_ROOT_KEY_
         ret = HuksAccessRefresh();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("Hks core service refresh info failed! ret = 0x%X", ret);
             break;
         }
-    #endif
+#endif
 
-    #ifdef _STORAGE_LITE_
+#ifdef _STORAGE_LITE_
         ret = HksFileBufferRefresh();
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("load file to buffer failed, ret = %d", ret);
             break;
         }
-    #endif
+#endif
     } while(0);
 
     int userId = 0;
@@ -1264,22 +1258,21 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 {
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 	HiTraceIdStruct traceId = HiTraceBegin(__func__, HITRACE_FLAG_DEFAULT);
-
-    int32_t ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check attest key param fail");
-        return ret;
-    }
-
-    struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetKeyAndNewParamSet failed, ret = %d.", ret);
-        return ret;
-    }
-
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret;
     do {
+        ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("check attest key param fail");
+            break;
+        }
+
+        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("GetKeyAndNewParamSet failed, ret = %d.", ret);
+            break;
+        }
         ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessAttestKey fail, ret = %d.", ret);
@@ -1401,7 +1394,6 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("check ServiceInit params failed, ret = %d", ret);
             break;
-
         }
 
         ret = GetKeyAndNewParamSet(processInfo, key, paramSet, &keyFromFile, &newParamSet);
