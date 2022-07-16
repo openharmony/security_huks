@@ -29,13 +29,9 @@ ohos_shared_library("huks") {
   sources = [
     "src/huks_napi.cpp",
     "src/huks_napi_abort.cpp",
-    "src/huks_napi_agree_key.cpp",
     "src/huks_napi_attest_key.cpp",
     "src/huks_napi_common.cpp",
-    "src/huks_napi_decrypt.cpp",
     "src/huks_napi_delete_key.cpp",
-    "src/huks_napi_derive_key.cpp",
-    "src/huks_napi_encrypt.cpp",
     "src/huks_napi_export_key.cpp",
     "src/huks_napi_finish.cpp",
     "src/huks_napi_generate_key.cpp",
@@ -46,11 +42,8 @@ ohos_shared_library("huks") {
     "src/huks_napi_import_wrapped_key.cpp",
     "src/huks_napi_init.cpp",
     "src/huks_napi_is_key_exist.cpp",
-    "src/huks_napi_mac.cpp",
-    "src/huks_napi_sign.cpp",
     "src/huks_napi_unwrap_key.cpp",
     "src/huks_napi_update.cpp",
-    "src/huks_napi_verify.cpp",
     "src/huks_napi_wrap_key.cpp",
   ]
 

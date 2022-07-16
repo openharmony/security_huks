@@ -77,12 +77,15 @@ int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBl
         .blob = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) }
     };
     if (localKey.blob.data == nullptr) {
+        HksFreeParamSet(&paramOutSet);
         return HKS_FAILURE;
     }
     HksAddParams(paramOutSet, &localKey, 1);
     HksBuildParamSet(&paramOutSet);
 
     if (HksGenerateKey(authId, paramSetIn, paramOutSet) != HKS_SUCCESS) {
+        HksFree(localKey.blob.data);
+        HksFreeParamSet(&paramOutSet);
         return HKS_SUCCESS;
     }
 

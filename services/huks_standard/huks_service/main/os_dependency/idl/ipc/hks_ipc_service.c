@@ -890,6 +890,43 @@ void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t 
     HKS_FREE_BLOB(certChainBlob);
 }
 
+static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *outData)
+{
+    uint8_t handleData[HANDLE_SIZE] = {0};
+    uint8_t tokenData[TOKEN_SIZE] = {0};
+    struct HksBlob handle = { sizeof(handleData), handleData };
+    struct HksBlob token = { sizeof(tokenData), tokenData };
+
+    int32_t ret = HksServiceInit(processInfo, keyAlias, paramSet, &handle, &token);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("service init failed, ret = %d", ret);
+        return ret;
+    }
+
+    if ((handle.size > HANDLE_SIZE) || (token.size > TOKEN_SIZE)) {
+        HKS_LOG_E("invalid handle size[%u], or token size[%u]", handle.size, token.size);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (outData->size < (handle.size + token.size)) {
+        HKS_LOG_E("ipc out size[%u] too small", outData->size);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    if (memcpy_s(outData->data, outData->size, handle.data, handle.size) != HKS_SUCCESS) {
+        HKS_LOG_E("copy handle failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+    if (memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != HKS_SUCCESS) {
+        HKS_LOG_E("copy token failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+    outData->size = handle.size + token.size;
+
+    return HKS_SUCCESS;
+}
+
 void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
 {
     int32_t ret;
@@ -932,12 +969,13 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
             break;
         }
 
-        ret = HksServiceInit(&processInfo, &keyAlias, inParamSet, outData);
+        ret = IpcServiceInit(&processInfo, &keyAlias, inParamSet, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceInit fail, ret = %d", ret);
+            HKS_LOG_E("ipc service init fail, ret = %d", ret);
             break;
         }
     } while (0);
+
     HksSendResponse(context, ret, outData);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);

@@ -36,7 +36,8 @@ struct HuksHdi {
     int32_t (*HuksHdiExportPublicKey)(const struct HksBlob *key, const struct HksParamSet *paramSet,
         struct HksBlob *keyOut);
 
-    int32_t (*HuksHdiInit)(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle);
+    int32_t (*HuksHdiInit)(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+        struct HksBlob *token);
 
     int32_t (*HuksHdiUpdate)(const struct HksBlob *handle, const struct HksParamSet *paramSet,
         const struct HksBlob *inData, struct HksBlob *outData);
