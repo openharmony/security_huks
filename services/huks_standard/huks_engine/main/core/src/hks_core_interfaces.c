@@ -52,9 +52,10 @@ int32_t HuksHdiExportPublicKey(const struct HksBlob *key, const struct HksParamS
     return HksCoreExportPublicKey(key, paramSet, keyOut);
 }
 
-int32_t HuksHdiInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle)
+int32_t HuksHdiInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token)
 {
-    return HksCoreInit(key, paramSet, handle);
+    return HksCoreInit(key, paramSet, handle, token);
 }
 
 int32_t HuksHdiUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,

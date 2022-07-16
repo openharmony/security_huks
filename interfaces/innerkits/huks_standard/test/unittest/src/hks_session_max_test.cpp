@@ -102,7 +102,9 @@ static void SessionMaxTest(const struct HksBlob *alias)
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
         struct HksParamSet *paramSet = NULL;
         ConstructInitParamSet(&paramSet);
-        EXPECT_EQ(HksInit(alias, paramSet, &handleBlob), HKS_SUCCESS);
+        uint8_t tokenData[HMAC_OUTPUT_SIZE] = {0};
+        struct HksBlob token = { sizeof(tokenData), tokenData };
+        EXPECT_EQ(HksInit(alias, paramSet, &handleBlob, &token), HKS_SUCCESS);
         HksFreeParamSet(&paramSet);
     }
 

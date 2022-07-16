@@ -1388,8 +1388,8 @@ int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct Hks
     return 0;
 }
 
-int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  HksBlob *key,
-    const struct HksParamSet *paramSet, struct HksBlob *handle)
+int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -1410,7 +1410,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct  H
             break;
         }
 
-        ret = HuksAccessInit(&keyFromFile, newParamSet, handle);
+        ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessInit failed, ret = %d", ret);
             break;

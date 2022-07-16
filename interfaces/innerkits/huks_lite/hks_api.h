@@ -89,7 +89,7 @@ HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n);
 
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksBlob *handle);
+    struct HksBlob *handle, struct HksBlob *token);
 
 HKS_API_EXPORT int32_t HksUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData);
