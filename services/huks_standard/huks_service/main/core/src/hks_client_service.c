@@ -1454,7 +1454,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
 {
-    uint32_t ret;
+    int32_t ret;
     do {
         ret = AppendProcessNameTag(paramSet, &processInfo->processName, newParamSet);
         if (ret != HKS_SUCCESS) {

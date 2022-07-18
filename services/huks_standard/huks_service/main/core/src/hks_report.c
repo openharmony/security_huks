@@ -82,7 +82,7 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         HKS_LOG_E("no enough space!");
         return HKS_ERROR_BAD_STATE;
     }
-    uint32_t ret = AppendParamToExtra(paramIn, extraOut, index);
+    int32_t ret = AppendParamToExtra(paramIn, extraOut, index);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("append param to extra failed!");
         return ret;
