@@ -21,8 +21,8 @@ ohos_unittest("huksHiSysEventTest") {
   module_out_path = module_output_path
 
   sources = [
-    "src/hks_hisysevent_test_common.cpp",
     "src/hks_hisysevent_test.cpp",
+    "src/hks_hisysevent_test_common.cpp",
   ]
 
   defines = [
@@ -43,5 +43,5 @@ ohos_unittest("huksHiSysEventTest") {
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
   ]
 
-  external_deps = [ "hisysevent_native:libhisyseventmanager", ]
+  external_deps = [ "hisysevent_native:libhisyseventmanager" ]
 }

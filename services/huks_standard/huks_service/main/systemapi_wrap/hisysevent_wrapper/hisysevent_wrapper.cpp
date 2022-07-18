@@ -17,41 +17,57 @@
 #include "hisysevent_wrapper.h"
 #include "hisysevent.h"
 
+#include "hks_log.h"
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-static constexpr const char eventName[] = "HUKS_FAULT";
-static constexpr const char tagFunction[] = "FUNCTION";
-static constexpr const char tagUserId[] = "USER_ID";
-static constexpr const char tagProcessUID[] = "PROCESS_UID";
-static constexpr const char tagKeyType[] = "KEY_TYPE";
-static constexpr const char tagErrorCode[] = "ERROR_CODE";
-static constexpr const char tagExtra[] = "EXTRA";
+static constexpr const char g_eventName[] = "HUKS_FAULT";
+static constexpr const char g_tagFunction[] = "FUNCTION";
+static constexpr const char g_tagUserId[] = "USER_ID";
+static constexpr const char g_tagProcessUID[] = "PROCESS_UID";
+static constexpr const char g_tagKeyType[] = "KEY_TYPE";
+static constexpr const char g_tagErrorCode[] = "ERROR_CODE";
+static constexpr const char g_tagExtra[] = "EXTRA";
 
-static OHOS::HiviewDFX::HiSysEvent::EventType GetEventType(int32_t eventType)
+static uint32_t ConvertToHiSysEventType(enum EventType inEventType, 
+    enum OHOS::HiviewDFX::HiSysEvent::EventType *outEventType)
 {
-    switch (eventType)
-    {
-    case FAULT:
-        return OHOS::HiviewDFX::HiSysEvent::EventType::FAULT;
-    case STATISTIC:
-        return OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC;
-    case SECURITY:
-        return OHOS::HiviewDFX::HiSysEvent::EventType::SECURITY;
-    case BEHAVIOR:
-        return OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
-    default:
-        return OHOS::HiviewDFX::HiSysEvent::EventType::FAULT;
+    switch (inEventType) {
+        case FAULT:
+            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::FAULT;
+            break;
+        case STATISTIC:
+            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC;
+            break;
+        case SECURITY:
+            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::SECURITY;
+            break;
+        case BEHAVIOR:
+            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
+            break;
+        default:
+            HKS_LOG_E("Invalid inEventType!");
+            return HKS_ERROR_INVALID_ARGUMENT;
     }
+    return HKS_SUCCESS;
 }
 
-int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues, const char *extra)
+int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues,
+    const char *extra)
 {
-    return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, eventName, 
-        GetEventType(eventType), tagFunction, functionName, tagUserId, eventValues->userId, tagProcessUID, 
-        eventValues->processName, tagKeyType, eventValues->keyType, tagErrorCode, eventValues->errorCode, 
-        tagExtra, extra);
+    enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType;
+    uint32_t ret;
+    ret = ConvertToHiSysEventType(eventType, &outEventType);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("convert to hiSysEvent event type failed!");
+        return ret;
+    }
+    return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, g_eventName,
+        outEventType, g_tagFunction, functionName, g_tagUserId, eventValues->userId, g_tagProcessUID,
+        eventValues->processName, g_tagKeyType, eventValues->keyType, g_tagErrorCode, eventValues->errorCode,
+        g_tagExtra, extra);
 }
 
 #ifdef __cplusplus

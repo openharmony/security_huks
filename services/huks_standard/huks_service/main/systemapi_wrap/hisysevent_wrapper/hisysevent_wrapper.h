@@ -38,7 +38,8 @@ enum EventType
     BEHAVIOR,
 };
 
-int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues, const char *extra);
+int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues,
+    const char *extra);
 
 #ifdef __cplusplus
 }
