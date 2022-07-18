@@ -21,11 +21,13 @@
 
 #include "hks_client_service_adapter_common.h"
 
+#include <stddef.h>
+
 #include "hks_client_service_adapter.h"
-#include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "securec.h"
 
 int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
 {

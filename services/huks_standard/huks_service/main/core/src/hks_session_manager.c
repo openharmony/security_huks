@@ -16,11 +16,15 @@
 #include "hks_session_manager.h"
 
 #include <pthread.h>
+#include <sched.h>
+#include <securec.h>
 #include <stdio.h>
 
-#include "huks_access.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
+#include "huks_access.h"
+#include "securec.h"
 
 #define MAX_OPERATIONS_COUNT 15
 

@@ -14,6 +14,9 @@
  */
 
 #include "hks_ipc_check.h"
+
+#include <stddef.h>
+
 #include "hks_common_check.h"
 #include "hks_ipc_serialization.h"
 #include "hks_log.h"

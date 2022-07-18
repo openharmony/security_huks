@@ -22,16 +22,16 @@
 #ifdef HKS_SUPPORT_SM4_C
 
 #include "hks_openssl_sm4.h"
-#include "hks_openssl_aes.h"
 
 #include <openssl/evp.h>
-#include <openssl/rand.h>
+#include <openssl/ossl_typ.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_openssl_aes.h"
 #include "hks_openssl_common.h"
-#include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
 
 #ifdef HKS_SUPPORT_SM4_GENERATE_KEY
 static int32_t Sm4GenKeyCheckParam(const struct HksKeySpec *spec)

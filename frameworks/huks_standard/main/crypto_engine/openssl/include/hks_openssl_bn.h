@@ -22,9 +22,10 @@
 #include "hks_config.h"
 #endif
 
-#include <openssl/bn.h>
+#include <openssl/ossl_typ.h>
+#include <stdint.h>
 
-#include "hks_type_inner.h"
+#include "hks_type.h"
 
 struct HksBnExpModParams {
     BIGNUM *bnX;

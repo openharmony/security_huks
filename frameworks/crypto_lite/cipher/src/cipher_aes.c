@@ -14,13 +14,13 @@
  */
 
 #include <stdlib.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "aes.h"
 #include "base64.h"
 #include "cipher.h"
 #include "cipher_log.h"
-#include "md.h"
-#include "md_internal.h"
-#include "pkcs5.h"
 #include "securec.h"
 
 #define  AES_BYTE_SIZE  256

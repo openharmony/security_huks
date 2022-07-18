@@ -16,6 +16,9 @@
 #ifndef HKS_PARAM_H
 #define HKS_PARAM_H
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "hks_type.h"
 
 #define HKS_PARAM_SET_MAX_SIZE (4 * 1024 * 1024)

@@ -22,12 +22,13 @@
 #include "hks_openssl_engine.h"
 
 #include <openssl/err.h>
+#include <openssl/evp.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "hks_ability.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
-
-#include "hks_type_inner.h"
 
 void HksLogOpensslError(void)
 {

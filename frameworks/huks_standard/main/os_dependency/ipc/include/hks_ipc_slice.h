@@ -16,7 +16,9 @@
 #ifndef HKS_IPC_SLICE_H
 #define HKS_IPC_SLICE_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -16,7 +16,6 @@
 #ifndef HUKS_CORE_INTERFACES_H
 #define HUKS_CORE_INTERFACES_H
 
-#include "hks_type_inner.h"
 #include "huks_hdi.h"
 
 #ifdef __cplusplus

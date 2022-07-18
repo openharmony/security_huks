@@ -21,11 +21,18 @@
 
 #include "hks_client_service.h"
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "hks_client_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
 #include "hks_session_manager.h"
 #include "hks_storage.h"
+#include "huks_access.h"
+#include "securec.h"
+
 #ifdef _STORAGE_LITE_
 #include "hks_storage_adapter.h"
 #endif
@@ -33,8 +40,6 @@
 #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
 #include "hks_upgrade_storage_data.h"
 #endif
-
-#include "huks_access.h"
 
 #define USER_ID_ROOT_DEFAULT          "0"
 

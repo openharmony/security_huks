@@ -16,9 +16,9 @@
 #ifndef HKS_CLIENT_SERVICE_H
 #define HKS_CLIENT_SERVICE_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
 
-#include "hks_param.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

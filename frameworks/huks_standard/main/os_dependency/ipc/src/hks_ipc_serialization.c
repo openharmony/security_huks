@@ -14,9 +14,15 @@
  */
 
 #include "hks_ipc_serialization.h"
+
+#include <stddef.h>
+#include <stdint.h>
+#include <string.h>
+
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "securec.h"
 
 static const uint8_t g_base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 

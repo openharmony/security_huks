@@ -15,9 +15,14 @@
 
 #include "hks_core_interfaces.h"
 
+#include <stddef.h>
+#include <stdint.h>
+
 #include "hks_core_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_type.h"
+#include "securec.h"
 
 int32_t HuksHdiModuleInit(void)
 {
