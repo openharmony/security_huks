@@ -23,7 +23,7 @@
 extern "C" {
 #endif
 
-int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, 
+int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSetIn, int32_t errorCode);
 
 #ifdef __cplusplus

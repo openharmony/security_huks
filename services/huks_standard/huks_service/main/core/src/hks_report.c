@@ -36,7 +36,29 @@ static const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP
 static const struct HksBlob g_tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, (uint8_t *)STRING_TAG_ITERATION};
 static const struct HksBlob g_tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
 
-static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *paramIn, char *extraOut, uint32_t *index) {
+static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut, uint32_t *index)
+{
+    switch (GetTagType(paramIn->tag))
+    {
+        case HKS_TAG_TYPE_UINT: {
+            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%d",
+                paramIn->uint32Param);
+            if (num < 0) {
+                HKS_LOG_E("snprintf_s failed!");
+                return HKS_ERROR_BAD_STATE;
+            }
+            *index = *index + num;
+            break;
+        }
+        default:
+            break;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *paramIn, char *extraOut,
+    uint32_t *index) 
+{
     if (*index > EXTRA_DATA_SIZE) {
         HKS_LOG_E("no enough space!");
         return HKS_ERROR_BAD_STATE;
@@ -60,16 +82,10 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         HKS_LOG_E("no enough space!");
         return HKS_ERROR_BAD_STATE;
     }
-    switch (GetTagType(paramIn->tag))
-    {
-        case HKS_TAG_TYPE_UINT: {
-            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1,"%d", 
-                paramIn->uint32Param);
-            *index = *index + num;
-            break;
-        }
-        default:
-            break;
+    uint32_t ret = AppendParamToExtra(paramIn, extraOut, index);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("append param to extra failed!");
+        return ret;
     }
     split = ';';
     if (*index > EXTRA_DATA_SIZE) {
@@ -128,7 +144,6 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
     if (errorCode == HKS_SUCCESS) {
         return HKS_SUCCESS;
     }
-
     char *extra = NULL;
     int32_t ret;
     do {
@@ -161,7 +176,6 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
                 ret = HKS_ERROR_BAD_STATE;
                 break;
             }
-
             if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data, 
                 processInfo->processName.size) != EOK) {
                 HKS_LOG_E("copy process name failed!");
@@ -171,8 +185,7 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
         }
         struct EventValues eventValues = { userId, processName, algorithmTag, errorCode };
         ret = WriteEvent(FAULT, funcName, &eventValues, extra);
-    } while(0);
+    } while (0);
     HKS_FREE_PTR(extra);
-
     return ret;
 }
