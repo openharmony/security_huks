@@ -15,6 +15,9 @@
 
 #include "hks_local_engine.h"
 
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "hks_ability.h"
 #include "hks_check_paramset.h"
 #include "hks_cmd_id.h"
@@ -24,6 +27,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "securec.h"
 
 #define MAX_DEGIST_SIZE 64
 #define X25519_KEY_BYTE_SIZE 32

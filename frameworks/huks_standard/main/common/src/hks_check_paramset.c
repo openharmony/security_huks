@@ -21,9 +21,13 @@
 
 #include "hks_check_paramset.h"
 
+#include <stddef.h>
+
 #include "hks_base_check.h"
 #include "hks_common_check.h"
 #include "hks_log.h"
+#include "hks_param.h"
+#include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_HASH_C

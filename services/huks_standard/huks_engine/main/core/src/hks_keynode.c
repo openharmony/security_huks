@@ -17,11 +17,16 @@
 
 #include "hks_keynode.h"
 
+#include <stddef.h>
+
 #include "hks_core_service.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_mutex.h"
+#include "hks_param.h"
+#include "securec.h"
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
@@ -248,7 +253,7 @@ static void FreeCachedData(void **ctx)
     HKS_FREE_PTR(*ctx);
 }
 
-static void FreeCtx(uint32_t purpose, uint32_t alg, void **ctx)
+static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, void **ctx)
 {
     switch (purpose) {
         case HKS_KEY_PURPOSE_AGREE:
@@ -308,7 +313,7 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
             HksFreeParamSet(paramSet);
             return;
         }
-        FreeCtx(param1->uint32Param, param2->uint32Param, &ctx);
+        KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, &ctx);
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
     }
     HksFreeParamSet(paramSet);

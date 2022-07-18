@@ -22,11 +22,13 @@
 #ifdef HKS_SUPPORT_SM2_C
 #include "hks_openssl_sm2.h"
 
-#include <openssl/bio.h>
 #include <openssl/bn.h>
 #include <openssl/ec.h>
-#include <openssl/err.h>
 #include <openssl/evp.h>
+#include <openssl/obj_mac.h>
+#include <openssl/ossl_typ.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"

@@ -16,7 +16,9 @@
 #ifndef HKS_OPENSSL_HASH_H
 #define HKS_OPENSSL_HASH_H
 
-#include "hks_crypto_hal.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

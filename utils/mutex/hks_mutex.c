@@ -16,6 +16,7 @@
 #include "hks_mutex.h"
 
 #include <pthread.h>
+#include <stddef.h>
 
 #include "hks_mem.h"
 

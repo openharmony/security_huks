@@ -26,10 +26,10 @@
 #include <limits.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include "securec.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "securec.h"
 
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {

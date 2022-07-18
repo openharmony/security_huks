@@ -25,14 +25,15 @@
 
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
-#include <openssl/rand.h>
+#include <openssl/ossl_typ.h>
+#include <stddef.h>
 
 #include "hks_common_check.h"
 #include "hks_log.h"
+#include "hks_mem.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
-#include "hks_mem.h"
+
 struct HksOpensslHmacCtx {
     uint32_t digestLen;
     void *append;

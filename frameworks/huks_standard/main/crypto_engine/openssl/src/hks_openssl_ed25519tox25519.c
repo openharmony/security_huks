@@ -16,11 +16,14 @@
 #include "hks_openssl_ed25519tox25519.h"
 
 #include <openssl/bn.h>
-#include <openssl/err.h>
 #include <openssl/evp.h>
+#include <stdbool.h>
+#include <stddef.h>
 
+#include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_openssl_engine.h"
+#include "securec.h"
 
 #define CURVE25519_KEY_LEN 32
 #define CURVE25519_KEY_BITS 256
