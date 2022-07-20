@@ -57,6 +57,9 @@ extern "C" {
 #define MAX_OUT_BLOB_SIZE (5 * 1024 * 1024)
 #define HKS_WRAPPED_FORMAT_MAX_SIZE (1024 * 1024)
 #define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
+#define TOKEN_CHALLENGE_LEN 32
+#define SHA256_SIGN_LEN 32
+
 
 enum HksStageType {
     HKS_STAGE_THREE = 0,
@@ -264,6 +267,11 @@ enum HksErrorCode {
     HKS_ERROR_UPDATE_ROOT_KEY_MATERIAL_FAIL = -37,
     HKS_ERROR_VERIFICATION_FAILED = -38,
     HKS_ERROR_SESSION_REACHED_LIMIT = -39,
+    HKS_ERROR_GET_USERIAM_SECINFO_FAILED = -40,
+    HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED = -41,
+    HKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT = -42,
+    HKS_ERROR_KEY_AUTH_FAILED = -43,
+    HKS_ERROR_DEVICE_NO_CREDENTIAL = -44,
 
     HKS_ERROR_CHECK_GET_ALG_FAIL = -100,
     HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL = -101,
@@ -311,6 +319,34 @@ enum HksSendType {
     HKS_SEND_TYPE_ASYNC = 0,
     HKS_SEND_TYPE_SYNC,
 };
+
+enum HksUserAuthType {
+    HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
+    HKS_USER_AUTH_TYPE_FACE = 1 << 1,
+    HKS_USER_AUTH_TYPE_PIN = 1 << 2,
+}
+
+enum HksAuthAccessType {
+    HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD = 1 << 0,
+    HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1,
+}
+
+enum HksChallengeType {
+    HKS_CHALLENGE_TYPE_NORMAL = 0,
+    HKS_CHALLENGE_TYPE_CUSTOM = 1,
+    HKS_CHALLENGE_TYPE_NONE = 2,
+}
+
+enum HksChallengePosition {
+    HKS_CHALLENGE_POS_0 = 0,
+    HKS_CHALLENGE_POS_1,
+    HKS_CHALLENGE_POS_2,
+    HKS_CHALLENGE_POS_3,
+}
+
+enum HksSecureSignType {
+    HKS_SECURE_SIGN_WITH_AUTHINFO = 1,
+}
 
 enum HksTag {
     /* Invalid TAG */
@@ -371,6 +407,17 @@ enum HksTag {
     HKS_TAG_AUTH_TIMEOUT = HKS_TAG_TYPE_UINT | 305,
     HKS_TAG_AUTH_TOKEN = HKS_TAG_TYPE_BYTES | 306,
 
+    /*
+     * Key secure access control and user auth TAG
+     */
+    HKS_TAG_KEY_AUTH_ACCESS_TYPE = HKS_TAG_TYPE_UINT | 307,
+    HKS_TAG_KEY_SECURE_SIGN_TYPE = HKS_TAG_TYPE_UINT | 308,
+    HKS_TAG_CHALLENGE_TYPE = HKS_TAG_TYPE_UINT | 309,
+    HKS_TAG_CHALLENGE_POS = HKS_TAG_TYPE_UINT | 310,
+    HKS_TAG_USER_AUTH_CHALLENGE = HKS_TAG_TYPE_BYTES | 311,
+    HKS_TAG_USER_AUTH_ENROLL_ID_INFO = HKS_TAG_TYPE_BYTES | 312,
+    HKS_TAG_USER_AUTH_SECURE_UID = HKS_TAG_TYPE_BYTES | 313,
+
     /* Attestation related TAG: 501 - 600 */
     HKS_TAG_ATTESTATION_CHALLENGE = HKS_TAG_TYPE_BYTES | 501,
     HKS_TAG_ATTESTATION_APPLICATION_ID = HKS_TAG_TYPE_BYTES | 502,
@@ -416,6 +463,8 @@ enum HksTag {
     HKS_TAG_PAYLOAD_LEN = HKS_TAG_TYPE_UINT | 10008,
     HKS_TAG_AE_TAG = HKS_TAG_TYPE_BYTES | 10009,
     HKS_TAG_IS_KEY_HANDLE = HKS_TAG_TYPE_ULONG | 10010,
+    HKS_TAG_KEY_INIT_CHALLENGE = HKS_TAG_TYPE_ULONG | 10011,
+    HKS_TAG_IS_SECURE_ACCESS = HKS_TAG_TYPE_BOOL | 10012,
 
     /* Os version related TAG */
     HKS_TAG_OS_VERSION = HKS_TAG_TYPE_UINT | 10101,
@@ -550,6 +599,20 @@ struct HksKeyMaterialHeader {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
 };
+
+struct HksUserAuthToken {
+    uint32_t version;
+    uint8_t challenge[TOKEN_CHALLENGE_LEN];
+    uint64_t secureUid;
+    uint64_t enrolledId;
+    uint64_t credentialId;
+    uint64_t time;
+    uint32_t authTrustLevel;
+    uint32_t authType;
+    uint32_t authMode;
+    uint32_t securityLevel;
+    uint8_t sign[SHA256_SIGN_LEN];
+}
 
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
