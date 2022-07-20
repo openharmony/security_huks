@@ -190,7 +190,18 @@ int32_t HksIsDirExist(const char *path)
 
 int32_t HksMakeDir(const char *path)
 {
-    return mkdir(path, DEFAULT_FILE_PERMISSION);
+    int result = mkdir(path, DEFAULT_FILE_PERMISSION);
+    if (result == 0) {
+        return HKS_SUCCESS;
+    } else {
+        switch (errno) {
+            case EEXIST:
+                return HKS_ERROR_ALREADY_EXISTS;
+            default:
+                HKS_LOG_E("mkdir failed, errno = 0x%x", errno);
+                return HKS_ERROR_MAKE_DIR_FAIL;
+        }
+    }
 }
 
 void *HksOpenDir(const char *path)
