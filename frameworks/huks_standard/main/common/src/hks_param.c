@@ -111,7 +111,7 @@ enum HksTag g_validTags[] = {
     HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA,
 };
 
-static enum HksTagType GetTagType(enum HksTag tag)
+enum HksTagType GetTagType(enum HksTag tag)
 {
     return (enum HksTagType)((uint32_t)tag & HKS_TAG_TYPE_MASK);
 }
@@ -218,10 +218,6 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
             if (IsAdditionOverflow(offset, paramSet->params[i].blob.size)) {
                 HKS_LOG_E("blob size overflow!");
                 return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (paramSet->params[i].blob.size == 0) {
-                HKS_LOG_E("paramSet->params[%d].blob.size == 0!", i);
-                continue;
             }
 
             if (isCopy && (memcpy_s((uint8_t *)paramSet + offset, size - offset,
@@ -372,7 +368,6 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
         }
     }
 
-    HKS_LOG_E("param not exist!");
     return HKS_ERROR_PARAM_NOT_EXIST;
 }
 
