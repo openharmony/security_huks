@@ -1667,6 +1667,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
 
     if (i == size) {
         HKS_LOG_E("don't found purpose, pur : %d", pur);
+        ret = HKS_FAILURE;
     }
     HksDeleteKeyNode(sessionId);
     HKS_LOG_D("HksCoreFinish in Core end");
