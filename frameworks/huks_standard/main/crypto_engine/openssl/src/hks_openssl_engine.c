@@ -218,9 +218,11 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
 
 int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
 {
-    (void)message;
-    (void)mainKey;
-    return 0;
+    GetMainKey func = (GetMainKey)GetAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY);
+    if (func == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return func(message, mainKey);
 }
 
 int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac)
