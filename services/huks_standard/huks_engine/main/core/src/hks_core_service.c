@@ -1579,7 +1579,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     uint32_t pur = 0;
     uint32_t alg = 0;
 
-    if (handle == NULL || paramSet == NULL || inData == NULL || inData->data == NULL) {
+    if (handle == NULL || paramSet == NULL || inData == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
@@ -1633,7 +1633,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     uint32_t alg = 0;
     int32_t ret;
 
-    if (handle == NULL || paramSet == NULL || inData == NULL || inData->data == NULL) {
+    if (handle == NULL || paramSet == NULL || inData == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
