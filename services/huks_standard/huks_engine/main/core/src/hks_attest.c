@@ -1336,6 +1336,10 @@ static void FreeAttestSpec(struct HksAttestSpec **attestSpec)
         (void)memset_s(spec->devKey.data, spec->devKey.size, 0, spec->devKey.size);
         HKS_FREE_PTR(spec->devKey.data);
     }
+    if (spec->attestKey.data != NULL) {
+        (void)memset_s(spec->attestKey.data, spec->attestKey.size, 0, spec->attestKey.size);
+        HKS_FREE_PTR(spec->attestKey.data);
+    }
     HksFree(spec);
     *attestSpec = NULL;
 }
