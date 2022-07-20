@@ -823,8 +823,7 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
             break;
         }
 
-        uint8_t tempBuf2[LENGTH_TO_BE_OPERATED] = {0};
-        struct HksBlob tmpBlob2 = { 0, tempBuf2 };
+        struct HksBlob tmpBlob2 = { 0, nullptr };
 
         // The caller guarantees that the access will not cross the border
         if (initParams[TAG_PURPOSE_ID].uint32Param == HKS_KEY_PURPOSE_VERIFY) {

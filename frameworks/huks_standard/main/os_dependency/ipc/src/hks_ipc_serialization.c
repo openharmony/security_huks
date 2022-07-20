@@ -621,6 +621,21 @@ int32_t HksSignWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const
     return CopyUint32ToBuffer(signature->size, destData, &offset);
 }
 
+static int32_t AddParams(struct HksParam *params, uint32_t cnt, struct HksParamSet *paramSet)
+{
+    uint8_t tmpData = 0;
+    struct HksBlob tmpBlob = { sizeof(tmpData), &tmpData };
+
+    for (uint32_t i = 0; i < cnt; ++i) {
+        if ((GetTagType(params[i].tag) == HKS_TAG_TYPE_BYTES) &&
+            (params[i].blob.size == 0 || params[i].blob.data == NULL)) {
+            params[i].tag += HKS_PARAM_BUFFER_NULL_INTERVAL;
+            params[i].blob = tmpBlob;
+        }
+    }
+    return HksAddParams(paramSet, params, cnt);
+}
+
 int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet)
 {
     struct HksParamSet *newParamSet = NULL;
@@ -631,16 +646,20 @@ int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct 
         return ret;
     }
 
-    ret = HksAddParams(newParamSet, params, cnt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add in params failed");
-        HksFreeParamSet(&newParamSet);
-        return ret;
-    }
+    do {
+        ret = AddParams((struct HksParam *)params, cnt, newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add in params failed");
+            break;
+        }
 
-    ret = HksBuildParamSet(&newParamSet);
+        ret = HksBuildParamSet(&newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("build paramset failed!");
+            break;
+        }
+    } while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build paramset failed!");
         HksFreeParamSet(&newParamSet);
         return ret;
     }
