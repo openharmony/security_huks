@@ -101,13 +101,13 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
 
     FILE *fp = fopen(filePath, "rb");
     if (fp == NULL) {
-        HKS_LOG_E("failed to open file");
+        HKS_LOG_E("failed to open file, errno = 0x%x", errno);
         return 0;
     }
 
     uint32_t size = fread(buf, 1, len, fp);
     if (fclose(fp) < 0) {
-        HKS_LOG_E("failed to close file");
+        HKS_LOG_E("failed to close file, errno = 0x%x", errno);
         return 0;
     }
 
@@ -123,7 +123,7 @@ static uint32_t FileSize(const char *fileName)
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
-        HKS_LOG_E("file stat fail.");
+        HKS_LOG_E("file stat fail, errno = 0x%x", errno);
         return 0;
     }
 
@@ -146,25 +146,25 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
     if (fp == NULL) {
-        HKS_LOG_E("open file fail");
+        HKS_LOG_E("open file fail, errno = 0x%x", errno);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     if (chmod(filePath, S_IRUSR | S_IWUSR) < 0) {
-        HKS_LOG_E("chmod file fail.");
+        HKS_LOG_E("chmod file fail, errno = 0x%x", errno);
         fclose(fp);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     uint32_t size = fwrite(buf, 1, len, fp);
     if (size != len) {
-        HKS_LOG_E("write file size fail.");
+        HKS_LOG_E("write file size fail, errno = 0x%x", errno);
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fclose(fp) < 0) {
-        HKS_LOG_E("failed to close file");
+        HKS_LOG_E("failed to close file, errno = 0x%x", errno);
         return HKS_ERROR_CLOSE_FILE_FAIL;
     }
 
