@@ -242,6 +242,11 @@ static void RegisterAbilityHmac(void)
 #endif
 }
 
+static void RegisterAbilityGetMainKey(void)
+{
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY, HksOpensslGetMainKey);
+}
+
 static void RegisterAbilityFillRandom(void)
 {
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM, HksOpensslFillRandom);
@@ -256,6 +261,7 @@ static void RegisterAbilityBnExpMod(void)
 
 int32_t HksCryptoAbilityInit(void)
 {
+    RegisterAbilityGetMainKey();
     RegisterAbilityGenerateKey();
     RegisterAbilityGetPublicKey();
     RegisterAbilitySign();
