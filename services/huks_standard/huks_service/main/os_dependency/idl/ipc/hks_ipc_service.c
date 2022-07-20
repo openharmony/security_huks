@@ -1044,35 +1044,11 @@ void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *out
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-static int32_t HksIpcServiceFinishParam(struct HksBlob *paramsBlob, struct HksBlob *handle,
-    struct HksBlob *inData, struct HksBlob *outDataTmp, struct HksParamSet *paramSet)
-{
-    struct HksParamOut params[] = {
-        {
-            .tag = HKS_TAG_PARAM0_BUFFER,
-            .blob = paramsBlob
-        }, {
-            .tag = HKS_TAG_PARAM1_BUFFER,
-            .blob = handle
-        }, {
-            .tag = HKS_TAG_PARAM2_BUFFER,
-            .blob = inData
-        }, {
-            .tag = HKS_TAG_PARAM3_BUFFER,
-            .blob = outDataTmp
-        },
-    };
-    int32_t ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
-    return ret;
-}
-
 void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context)
 {
-    (void)outData;
     int32_t ret;
     struct HksParamSet *inParamSet = NULL;
     struct HksParamSet *paramSet   = NULL;
-    struct HksBlob outDataTmp      = { 0, NULL };
     struct HksBlob paramsBlob      = { 0, NULL };
     struct HksBlob handle          = { 0, NULL };
     struct HksBlob inData          = { 0, NULL };
@@ -1085,7 +1061,20 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
             break;
         }
 
-        ret = HksIpcServiceFinishParam(&paramsBlob, &handle, &inData, &outDataTmp, paramSet);
+        struct HksParamOut params[] = {
+            {
+                .tag = HKS_TAG_PARAM0_BUFFER,
+                .blob = &paramsBlob
+            }, {
+                .tag = HKS_TAG_PARAM1_BUFFER,
+                .blob = &handle
+            }, {
+                .tag = HKS_TAG_PARAM2_BUFFER,
+                .blob = &inData
+            },
+        };
+
+        ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -1102,14 +1091,14 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
             break;
         }
 
-        ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, &outDataTmp);
+        ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksServiceFinish fail, ret = %d", ret);
             break;
         }
     } while (0);
 
-    HksSendResponse(context, ret, &outDataTmp);
+    HksSendResponse(context, ret, outData);
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
     HKS_FREE_BLOB(processInfo.processName);

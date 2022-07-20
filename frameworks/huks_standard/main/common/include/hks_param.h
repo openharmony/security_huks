@@ -52,6 +52,8 @@ int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size);
 
 int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param);
 
+enum HksTagType GetTagType(enum HksTag tag);
+
 #ifdef __cplusplus
 }
 #endif
