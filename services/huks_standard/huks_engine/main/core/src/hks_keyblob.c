@@ -20,7 +20,6 @@
 
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
-#include "hks_file_operator.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -66,45 +65,10 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode)
 }
 
 #ifndef _STORAGE_LITE_
-#ifdef L2_STANDARD
-#define HKS_ENCRYPT_KEY_NAME "root_encrypt_key"
-
-static int32_t WriteEncryptKey(struct HksBlob *key)
-{
-    int32_t ret = HksCryptoHalFillRandom(key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("generate encrypt key failed!");
-        return ret;
-    }
-
-    ret = HksFileWrite(HKS_KEY_STORE_PATH, HKS_ENCRYPT_KEY_NAME, 0, key->data, key->size);
-    if (ret != 0) {
-        HKS_LOG_E("write encrypt key fail, ret:%x", ret);
-        return ret;
-    }
-    return HKS_SUCCESS;
-}
-
-static int32_t GetEncryptKey(struct HksBlob *key)
-{
-    uint32_t fileSize = HksFileSize(HKS_KEY_STORE_PATH, HKS_ENCRYPT_KEY_NAME);
-    if (fileSize != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)) {
-        return WriteEncryptKey(key);
-    } else {
-        fileSize = HksFileRead(HKS_KEY_STORE_PATH, HKS_ENCRYPT_KEY_NAME, 0, key->data, key->size);
-        if (fileSize != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)) {
-            HKS_LOG_E("read encrypt key fail\n");
-            return HKS_ERROR_BAD_STATE;
-        }
-        return HKS_SUCCESS;
-    }
-}
-#else
 static int32_t GetEncryptKey(struct HksBlob *mainKey)
 {
     return HksCryptoHalGetMainKey(NULL, mainKey);
 }
-#endif
 
 static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBlobInfo *keyBlobInfo,
     struct HksBlob *salt)
