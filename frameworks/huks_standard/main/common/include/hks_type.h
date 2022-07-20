@@ -324,29 +324,29 @@ enum HksUserAuthType {
     HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
     HKS_USER_AUTH_TYPE_FACE = 1 << 1,
     HKS_USER_AUTH_TYPE_PIN = 1 << 2,
-}
+};
 
 enum HksAuthAccessType {
     HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD = 1 << 0,
     HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1,
-}
+};
 
 enum HksChallengeType {
     HKS_CHALLENGE_TYPE_NORMAL = 0,
     HKS_CHALLENGE_TYPE_CUSTOM = 1,
     HKS_CHALLENGE_TYPE_NONE = 2,
-}
+};
 
 enum HksChallengePosition {
     HKS_CHALLENGE_POS_0 = 0,
     HKS_CHALLENGE_POS_1,
     HKS_CHALLENGE_POS_2,
     HKS_CHALLENGE_POS_3,
-}
+};
 
 enum HksSecureSignType {
     HKS_SECURE_SIGN_WITH_AUTHINFO = 1,
-}
+};
 
 enum HksTag {
     /* Invalid TAG */
@@ -612,7 +612,7 @@ struct HksUserAuthToken {
     uint32_t authMode;
     uint32_t securityLevel;
     uint8_t sign[SHA256_SIGN_LEN];
-}
+};
 
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
