@@ -19,19 +19,20 @@
 #endif
 
 #include "hks_attest.h"
+
+#include <stddef.h>
+#include <sys/time.h>
+
 #include "hks_attest_utils.h"
 #include "hks_certs_and_key.h"
-#include "hks_check_paramset.h"
 #include "hks_common_check.h"
-#include "hks_core_service.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_type_inner.h"
-#include "sys/time.h"
+#include "securec.h"
 
 #define ID_HUKS_BASE            0x2B, 0x06, 0x01, 0x04, 0x01, 0x8F, 0x5B
 #define ID_HUKS_BASE_SIZE       0x07
@@ -1334,6 +1335,10 @@ static void FreeAttestSpec(struct HksAttestSpec **attestSpec)
     if (spec->devKey.data != NULL) {
         (void)memset_s(spec->devKey.data, spec->devKey.size, 0, spec->devKey.size);
         HKS_FREE_PTR(spec->devKey.data);
+    }
+    if (spec->attestKey.data != NULL) {
+        (void)memset_s(spec->attestKey.data, spec->attestKey.size, 0, spec->attestKey.size);
+        HKS_FREE_PTR(spec->attestKey.data);
     }
     HksFree(spec);
     *attestSpec = NULL;

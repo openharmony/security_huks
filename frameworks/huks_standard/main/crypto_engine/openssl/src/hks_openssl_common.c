@@ -16,11 +16,12 @@
 #include "hks_openssl_common.h"
 
 #include <openssl/rand.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 {
@@ -76,4 +77,30 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
     }
     HKS_LOG_D("generate random success");
     return HKS_SUCCESS;
+}
+
+int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
+{
+    (void)message;
+
+#ifndef _HARDWARE_ROOT_KEY_
+    return HKS_ERROR_NOT_SUPPORTED;
+#else
+    /*
+     * Currently, root key is implemented using stubs.
+     * Product adaptation needs to be performed based on hardware capabilities.
+     */
+    uint8_t stubBuf[] = {
+        0x0c, 0xb4, 0x29, 0x39, 0xb7, 0x46, 0xa6, 0x4b,
+        0xdd, 0xf3, 0x75, 0x4c, 0xe0, 0x73, 0x91, 0x51,
+        0xc4, 0x88, 0xbe, 0xa4, 0xe1, 0x87, 0xb5, 0x42,
+        0x06, 0x27, 0x08, 0x21, 0xe2, 0x8f, 0x9b, 0xc1,
+    };
+
+    if (memcpy_s(mainKey->data, mainKey->size, stubBuf, sizeof(stubBuf)) != EOK) {
+        HKS_LOG_E("memcpy failed, get stub main key failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+#endif
 }

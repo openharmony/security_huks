@@ -14,9 +14,12 @@
  */
 
 #include "hks_param.h"
+
+#include <stddef.h>
+
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 enum HksTag g_validTags[] = {
     HKS_TAG_ALGORITHM,
@@ -87,6 +90,11 @@ enum HksTag g_validTags[] = {
     HKS_TAG_KEY_ROLE,
     HKS_TAG_KEY_FLAG,
     HKS_TAG_KEY_DOMAIN,
+
+    HKS_TAG_KEY_AUTH_ACCESS_TYPE,
+    HKS_TAG_KEY_SECURE_SIGN_TYPE,
+    HKS_TAG_CHALLENGE_TYPE,
+    HKS_TAG_CHALLENGE_POS,
 
     HKS_TAG_PROCESS_NAME,
     HKS_TAG_PACKAGE_NAME,
@@ -210,10 +218,6 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
             if (IsAdditionOverflow(offset, paramSet->params[i].blob.size)) {
                 HKS_LOG_E("blob size overflow!");
                 return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (paramSet->params[i].blob.size == 0) {
-                HKS_LOG_E("paramSet->params[%d].blob.size == 0!", i);
-                continue;
             }
 
             if (isCopy && (memcpy_s((uint8_t *)paramSet + offset, size - offset,
@@ -364,7 +368,6 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
         }
     }
 
-    HKS_LOG_E("param not exist!");
     return HKS_ERROR_PARAM_NOT_EXIST;
 }
 

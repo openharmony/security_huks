@@ -16,7 +16,9 @@
 #ifndef HKS_STORAGE_H
 #define HKS_STORAGE_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 enum HksStorageType {
     HKS_STORAGE_TYPE_KEY = 0,

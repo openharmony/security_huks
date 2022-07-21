@@ -16,7 +16,9 @@
 #ifndef HKS_OPENSSL_COMMON_H
 #define HKS_OPENSSL_COMMON_H
 
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -25,6 +27,8 @@ extern "C" {
 int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key);
 
 int32_t HksOpensslFillRandom(struct HksBlob *randomData);
+
+int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
 
 #ifdef __cplusplus
 }

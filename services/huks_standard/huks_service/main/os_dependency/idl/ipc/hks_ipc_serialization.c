@@ -608,35 +608,64 @@ int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certC
     return ret;
 }
 
+static int32_t GetNullBlobParam(const struct HksParamSet *paramSet, struct HksParamOut *outParams)
+{
+    if (GetTagType(outParams->tag) != HKS_TAG_TYPE_BYTES) {
+        HKS_LOG_E("get param tag[0x%x] from ipc buffer failed", outParams->tag);
+        return HKS_ERROR_PARAM_NOT_EXIST;
+    }
+
+    struct HksParam *param = NULL;
+    int32_t ret = HksGetParam(paramSet, outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL, &param);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get param tag[0x%x] from ipc buffer failed", outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL);
+        return ret;
+    }
+
+    outParams->blob->data = NULL;
+    outParams->blob->size = 0;
+    return HKS_SUCCESS;
+}
+
+static int32_t GetNormalParam(const struct HksParam *param, struct HksParamOut *outParams)
+{
+    switch (GetTagType(outParams->tag)) {
+        case HKS_TAG_TYPE_INT:
+            *(outParams->int32Param) = param->int32Param;
+            break;
+        case HKS_TAG_TYPE_UINT:
+            *(outParams->uint32Param) = param->uint32Param;
+            break;
+        case HKS_TAG_TYPE_ULONG:
+            *(outParams->uint64Param) = param->uint64Param;
+            break;
+        case HKS_TAG_TYPE_BOOL:
+            *(outParams->boolParam) = param->boolParam;
+            break;
+        case HKS_TAG_TYPE_BYTES:
+            *(outParams->blob) = param->blob;
+            break;
+        default:
+            HKS_LOG_I("invalid tag type:%x", GetTagType(outParams->tag));
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt)
 {
     int32_t ret;
     struct HksParam *param = NULL;
     for (uint32_t i = 0; i < cnt; i++) {
         ret = HksGetParam(paramSet, outParams[i].tag, &param);
-        if (ret != HKS_SUCCESS) {
-            return ret;
+        if (ret == HKS_SUCCESS) {
+            ret = GetNormalParam(param, &outParams[i]);
+        } else {
+            ret = GetNullBlobParam(paramSet, &outParams[i]);
         }
-
-        switch (GetTagType(outParams[i].tag)) {
-            case HKS_TAG_TYPE_INT:
-                *outParams[i].int32Param = param->int32Param;
-                break;
-            case HKS_TAG_TYPE_UINT:
-                *outParams[i].uint32Param = param->uint32Param;
-                break;
-            case HKS_TAG_TYPE_ULONG:
-                *outParams[i].uint64Param = param->uint64Param;
-                break;
-            case HKS_TAG_TYPE_BOOL:
-                *outParams[i].boolParam = param->boolParam;
-                break;
-            case HKS_TAG_TYPE_BYTES:
-                *outParams[i].blob = param->blob;
-                break;
-            default:
-                HKS_LOG_I("invalid tag type:%x", GetTagType(outParams[i].tag));
-                return HKS_ERROR_INVALID_ARGUMENT;
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get param failed, ret = %d", ret);
+            return ret;
         }
     }
     return HKS_SUCCESS;

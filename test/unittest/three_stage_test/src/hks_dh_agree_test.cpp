@@ -399,7 +399,6 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish01 failed.";
     ret = HksDhAgreeFinish(&g_keyAlias02002, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish02 failed.";
-    EXPECT_NE(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "error: outData01 equals outData02";
 
     HksDeleteKey(&g_keyAlias01002, genParamSet);
     HksDeleteKey(&g_keyAlias02002, genParamSet);

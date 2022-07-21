@@ -15,6 +15,7 @@
 
 #include "hks_asn1.h"
 #include "hks_log.h"
+#include "securec.h"
 
 #define BIT_NUM_OF_UINT8 8
 #define ASN_1_EXPLICIT_TAG_LEN 3

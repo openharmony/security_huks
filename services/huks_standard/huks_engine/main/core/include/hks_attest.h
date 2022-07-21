@@ -21,9 +21,13 @@
 #else
 #endif
 
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "hks_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
+#include "hks_type.h"
 
 #define HKS_SECURITY_LEVEL_LOW 0
 #define HKS_SECURITY_LEVEL_MEDIUM 1

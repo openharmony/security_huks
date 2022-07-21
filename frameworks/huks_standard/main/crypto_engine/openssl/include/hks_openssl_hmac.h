@@ -16,7 +16,10 @@
 #ifndef HKS_OPENSSL_HMAC_H
 #define HKS_OPENSSL_HMAC_H
 
+#include <stdint.h>
+
 #include "hks_crypto_hal.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {
