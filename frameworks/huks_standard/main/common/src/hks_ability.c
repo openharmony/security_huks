@@ -20,7 +20,7 @@
 #include "hks_log.h"
 #include "hks_type.h"
 
-static struct HksAbility g_abilityList[HKS_ABILITY_MAX_SIZE] = {0};
+static struct HksAbility g_abilityList[HKS_ABILITY_MAX_SIZE] = {{0}};
 
 int32_t RegisterAbility(uint32_t id, void *func)
 {
