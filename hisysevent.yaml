@@ -5,10 +5,10 @@
 domain: SECURITY
 
 HUKS_FAULT:
-    __BASE: {type: FAULT, level: CRITICAL, desc: event name}
-    FUNCTION: {type: STRING, desc: name1}
-    USER_ID: {type: INT32, desc: name1}
-    PROCESS_UID: {type: INT32, desc: name1}
-    KEY_TYPE: {type: INT32, desc: name1}
-    ERROR_CODE: {type: INT32, desc: name1}
-    EXTRA: {type: STRING, desc: name1}
+    __BASE: {type: FAULT, level: CRITICAL, desc: fault event for huks}
+    FUNCTION: {type: STRING, desc: function name}
+    USER_ID: {type: INT32, desc: user id}
+    PROCESS_UID: {type: INT32, desc: process uid}
+    KEY_TYPE: {type: INT32, desc: algorithm of the key}
+    ERROR_CODE: {type: INT32, desc: error code}
+    EXTRA: {type: STRING, desc: extra data}
