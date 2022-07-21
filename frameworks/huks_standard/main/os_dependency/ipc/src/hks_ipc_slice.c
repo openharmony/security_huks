@@ -14,10 +14,13 @@
  */
 
 #include "hks_ipc_slice.h"
+
+#include <stdbool.h>
+#include <stddef.h>
+
 #include "hks_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_param.h"
 #include "hks_request.h"
 
 static bool IsSliceCmd(uint32_t cmdId)

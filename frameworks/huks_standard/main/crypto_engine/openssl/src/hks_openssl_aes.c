@@ -21,6 +21,14 @@
 
 #include "hks_openssl_aes.h"
 
+#include <openssl/evp.h>
+#include <stddef.h>
+
+#include "hks_log.h"
+#include "hks_mem.h"
+#include "hks_openssl_common.h"
+#include "hks_openssl_engine.h"
+
 #if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||        \
     defined(HKS_SUPPORT_AES_ECB_PKCS7PADDING) || defined(HKS_SUPPORT_AES_CTR_NOPADDING) || \
@@ -28,13 +36,6 @@
     defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||        \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) ||    \
     defined(HKS_SUPPORT_SM4_ECB_PKCS7)
-#include <openssl/evp.h>
-
-#include "hks_log.h"
-#include "hks_mem.h"
-#include "hks_openssl_common.h"
-#include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
 
 const EVP_CIPHER *GetBlockCipherType(uint32_t keySize, uint32_t mode,
     const EVP_CIPHER *(*getCbcCipherType)(uint32_t keySize),
@@ -254,16 +255,6 @@ int32_t OpensslBlockCipherDecryptFinalThree(
 #endif /* defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C) */
 
 #ifdef HKS_SUPPORT_AES_C
-
-#include <openssl/evp.h>
-#include <openssl/rand.h>
-
-#include "hks_log.h"
-#include "hks_mem.h"
-#include "hks_openssl_common.h"
-#include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
-
 #ifdef HKS_SUPPORT_AES_GENERATE_KEY
 static int32_t AesGenKeyCheckParam(const struct HksKeySpec *spec)
 {

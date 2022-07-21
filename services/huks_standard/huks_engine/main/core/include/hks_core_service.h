@@ -16,12 +16,11 @@
 #ifndef HKS_CORE_SERVICE_H
 #define HKS_CORE_SERVICE_H
 
-#include "hks_crypto_hal.h"
-#include "hks_type_inner.h"
+#include <stdint.h>
 
-#include "hks_core_service_three_stage.h"
 #include "hks_keynode.h"
 #include "hks_mutex.h"
+#include "hks_type.h"
 
 #define MAX_HASH_SIZE 64
 

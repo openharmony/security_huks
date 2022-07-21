@@ -19,9 +19,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "hks_type_inner.h"
-
 #include "hks_double_list.h"
+#include "hks_type.h"
 
 struct HksOperation {
     struct DoubleList listHead;

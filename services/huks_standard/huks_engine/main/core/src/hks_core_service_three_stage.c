@@ -21,9 +21,12 @@
 
 #include "hks_core_service_three_stage.h"
 
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "hks_auth.h"
 #include "hks_base_check.h"
-#include "hks_check_paramset.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
@@ -34,7 +37,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"

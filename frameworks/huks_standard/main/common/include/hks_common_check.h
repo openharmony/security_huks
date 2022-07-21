@@ -16,8 +16,10 @@
 #ifndef HKS_COMMON_CHECK_H
 #define HKS_COMMON_CHECK_H
 
-#include "hks_param.h"
-#include "hks_type_inner.h"
+#include <stdbool.h>
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #define HKS_DIGEST_MD5_LEN 16
 #define HKS_DIGEST_SHA1_LEN 20

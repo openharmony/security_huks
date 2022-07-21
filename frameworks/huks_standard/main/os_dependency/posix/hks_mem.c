@@ -15,21 +15,10 @@
 
 #include "hks_mem.h"
 
+#include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 
-#ifdef HKS_SUPPORT_PRODUCT_GT_WATCH
-#include "ohos_mem_pool.h"
-
-void *HksMalloc(size_t size)
-{
-    return OhosMalloc(MEM_TYPE_HICHAIN, size);
-}
-
-void HksFree(void *ptr)
-{
-    OhosFree(ptr);
-}
-#else
 void *HksMalloc(size_t size)
 {
     return malloc(size);
@@ -39,7 +28,6 @@ void HksFree(void *ptr)
 {
     free(ptr);
 }
-#endif
 
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
 {

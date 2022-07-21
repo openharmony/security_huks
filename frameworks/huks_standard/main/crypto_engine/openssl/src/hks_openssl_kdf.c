@@ -17,6 +17,8 @@
 
 #include <openssl/evp.h>
 #include <openssl/kdf.h>
+#include <openssl/ossl_typ.h>
+#include <stddef.h>
 
 #include "hks_crypto_hal.h"
 #include "hks_log.h"

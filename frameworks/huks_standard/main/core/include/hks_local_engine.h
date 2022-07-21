@@ -16,8 +16,9 @@
 #ifndef HKS_LOCAL_ENGINE_H
 #define HKS_LOCAL_ENGINE_H
 
-#include "hks_cmd_id.h"
-#include "hks_type_inner.h"
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

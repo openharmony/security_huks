@@ -16,8 +16,12 @@
 #ifndef HKS_OPENSSL_AES_H
 #define HKS_OPENSSL_AES_H
 
-#include <openssl/evp.h>
+#include <openssl/ossl_typ.h>
+#include <stdbool.h>
+#include <stdint.h>
+
 #include "hks_crypto_hal.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

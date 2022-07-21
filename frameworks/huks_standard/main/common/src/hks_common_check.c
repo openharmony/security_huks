@@ -14,8 +14,12 @@
  */
 
 #include "hks_common_check.h"
+
+#include <stddef.h>
+
 #include "hks_log.h"
 #include "hks_param.h"
+#include "securec.h"
 
 int32_t HksCheckBlob4(const struct HksBlob *data1, const struct HksBlob *data2,
     const struct HksBlob *data3, const struct HksBlob *data4)

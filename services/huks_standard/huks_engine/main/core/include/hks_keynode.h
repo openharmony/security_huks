@@ -16,8 +16,9 @@
 #ifndef HKS_KEYNODE_H
 #define HKS_KEYNODE_H
 
+#include <stdint.h>
+
 #include "hks_double_list.h"
-#include "hks_param.h"
 #include "hks_type.h"
 
 #define HKS_OPERATION_PARAM_CNT 3

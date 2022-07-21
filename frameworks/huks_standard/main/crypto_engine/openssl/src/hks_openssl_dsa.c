@@ -23,15 +23,18 @@
 
 #include "hks_openssl_dsa.h"
 
+#include <openssl/bn.h>
 #include <openssl/dsa.h>
 #include <openssl/evp.h>
-#include <openssl/rand.h>
+#include <openssl/ossl_typ.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 #define OPENSSL_KEY_BLOCK 8
 #define OPENSSL_DSA_MIN_KEY_LEN 64

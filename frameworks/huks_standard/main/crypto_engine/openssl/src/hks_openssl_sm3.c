@@ -22,11 +22,9 @@
 #ifdef HKS_SUPPORT_SM3_C
 
 #include "hks_openssl_sm3.h"
-
 #include "hks_log.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
 
 #ifdef HKS_SUPPORT_SM3_GENERATE_KEY
 static int32_t Sm3GenKeyCheckParam(const struct HksKeySpec *spec)

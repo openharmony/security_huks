@@ -14,6 +14,11 @@
  */
 
 #include "hks_client_ipc.h"
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
 #include "hks_common_check.h"
 #include "hks_ipc_check.h"
 #include "hks_ipc_serialization.h"
@@ -22,6 +27,9 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_request.h"
+#include "hks_type.h"
+#include "hks_type_inner.h"
+#include "securec.h"
 
 int32_t HksClientInitialize(void)
 {
@@ -848,8 +856,6 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
           .blob = *handle },
         { .tag = HKS_TAG_PARAM2_BUFFER,
           .blob = *inData },
-        { .tag = HKS_TAG_PARAM3_BUFFER,
-          .blob = *outData },
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);

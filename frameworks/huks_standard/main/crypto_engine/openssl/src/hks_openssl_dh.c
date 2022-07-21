@@ -23,13 +23,17 @@
 
 #include "hks_openssl_dh.h"
 
-#include <openssl/evp.h>
+#include <openssl/bn.h>
 #include <openssl/dh.h>
+#include <openssl/obj_mac.h>
+#include <openssl/ossl_typ.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
-#include "hks_type_inner.h"
+#include "securec.h"
 
 static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
 {

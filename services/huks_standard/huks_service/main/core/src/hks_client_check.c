@@ -15,6 +15,8 @@
 
 #include "hks_client_check.h"
 
+#include <stddef.h>
+
 #include "hks_common_check.h"
 #include "hks_log.h"
 

@@ -16,7 +16,10 @@
 #ifndef HKS_ASN1_H
 #define HKS_ASN1_H
 
-#include "hks_type_inner.h"
+#include <stddef.h>
+#include <stdint.h>
+
+#include "hks_type.h"
 
 #define ASN_1_TAG_TYPE_BOOL 0x01
 #define ASN_1_TAG_TYPE_INT 0x02
