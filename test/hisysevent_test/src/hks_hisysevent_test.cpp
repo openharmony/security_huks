@@ -113,31 +113,16 @@ void HksHiSysEventTest::TearDown()
 /**
  * @tc.name: HksHiSysEventTest.HksHiSysEventTest001
  * @tc.desc: the abnormal test is for hisysevent;
-             the test interface is 'HksServiceGetKeyInfoList' and 'HksServiceKeyExist'.
+             the test interface is 'HksServiceKeyExist'.
  * @tc.type: FUNC
  */
 HWTEST_F(HksHiSysEventTest, HksHiSysEventTest001, TestSize.Level0)
 {
     HksHiSysEventQueryStart();
-
-    struct HksKeyInfo keyInfo;
-    keyInfo.alias.size = (uint32_t)strlen(g_genKeyAlias);
-    keyInfo.alias.data = (uint8_t *)g_genKeyAlias;
-    int ret = HksInitParamSet(&(keyInfo.paramSet));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "init paramSet failed, ret = " << ret;
-
-    uint32_t listCount = sizeof(keyInfo) / sizeof(struct HksKeyInfo);
-    (void)HksGetKeyInfoList(nullptr, &keyInfo, &listCount);
-
-    ret = HksHiSysEventQueryResult("HksServiceGetKeyInfoList");
+    struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
+    (void)HksKeyExist(&keyAlias, nullptr);
+    int ret = HksHiSysEventQueryResult("HksServiceKeyExist");
     EXPECT_EQ(ret, HKS_HISYSEVENT_QUERY_SUCCESS) << "query failed, ret = " << ret;
-
-    HksHiSysEventQueryStart();
-    (void)HksKeyExist(&(keyInfo.alias), nullptr);
-    ret = HksHiSysEventQueryResult("HksServiceKeyExist");
-    EXPECT_EQ(ret, HKS_HISYSEVENT_QUERY_SUCCESS) << "query failed, ret = " << ret;
-
-    HksFreeParamSet(&(keyInfo.paramSet));
 }
 
 /**

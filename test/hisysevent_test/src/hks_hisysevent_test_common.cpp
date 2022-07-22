@@ -24,6 +24,8 @@
 using namespace std;
 
 static const int MAX_QUERY_EVENT_COUNT = 1000;
+static const int TIME_S_TO_MS = 1000;
+static const int TIME_MS_TO_US = 1000;
 
 static long long int g_beginTime = 0;
 static long long int g_endTime = 0;
@@ -70,7 +72,7 @@ static long long int GetCurrentTime()
 {
     struct timeval tv;
     (void)gettimeofday(&tv, nullptr);
-    long long int timeStamp = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    long long int timeStamp = tv.tv_sec * TIME_S_TO_MS + tv.tv_usec / TIME_MS_TO_US;
     return timeStamp;
 }
 
