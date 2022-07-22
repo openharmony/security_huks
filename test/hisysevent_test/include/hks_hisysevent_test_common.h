@@ -23,10 +23,10 @@
 extern "C" {
 #endif
 
-const int32_t HKS_HISYSEVENT_QUERY_SUCCESS = 0;
-const int32_t HKS_HISYSEVENT_QUERY_FAILED = -1;
+#define HKS_HISYSEVENT_QUERY_SUCCESS 0
+#define HKS_HISYSEVENT_QUERY_FAILED -1
 
-void HksHiSysEventQueryStart();
+void HksHiSysEventQueryStart(void);
 
 int32_t HksHiSysEventQueryResult(const std::string funStr);
 

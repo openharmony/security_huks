@@ -15,7 +15,7 @@
 
 #include "hks_hisysevent_test_common.h"
 
-#include <stdio.h>
+#include <cstdio>
 #include <sys/time.h>
 #include <unistd.h>
 
@@ -34,6 +34,7 @@ static string g_queryStr;
 
 namespace OHOS {
 namespace HiviewDFX {
+
 class HksHiSysEventCallBack : public OHOS::HiviewDFX::HiSysEventQueryCallBack {
 public:
     HksHiSysEventCallBack() {}
@@ -54,7 +55,7 @@ void HksHiSysEventCallBack::OnQuery(const ::std::vector<std::string>& sysEvent,
         string::size_type idx = tmp.find(g_queryStr);
         if (idx != string::npos) {
             g_queryResult = true;
-        } 
+        }
     });
     return;
 }
@@ -68,7 +69,7 @@ void HksHiSysEventCallBack::OnComplete(int32_t reason, int32_t total)
 
 using namespace OHOS::HiviewDFX;
 
-static long long int GetCurrentTime()
+static long long int GetCurrentTime(void)
 {
     struct timeval tv;
     (void)gettimeofday(&tv, nullptr);
@@ -76,7 +77,7 @@ static long long int GetCurrentTime()
     return timeStamp;
 }
 
-void HksHiSysEventQueryStart()
+void HksHiSysEventQueryStart(void)
 {
     g_beginTime = GetCurrentTime();
     g_endTime = 0;

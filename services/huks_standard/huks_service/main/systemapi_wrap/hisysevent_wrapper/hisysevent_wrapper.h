@@ -22,16 +22,14 @@
 extern "C" {
 #endif
 
-struct EventValues
-{
+struct EventValues {
     uint32_t userId;
     uint32_t processName;
     uint32_t keyType;
     int32_t errorCode;
 };
 
-enum EventType
-{
+enum EventType {
     FAULT,
     STATISTIC,
     SECURITY,
