@@ -20,16 +20,16 @@
 #endif
 
 #include "hks_client_service.h"
-#include "hks_report.h"
-#include "hitrace/trace.h"
 
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "hitrace/trace.h"
 #include "hks_client_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_report.h"
 #include "hks_session_manager.h"
 #include "hks_storage.h"
 #include "huks_access.h"
@@ -1494,7 +1494,6 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 
     uint8_t *outBuffer = (uint8_t *)HksMalloc(outSize);
     if (outBuffer == NULL) {
-
         HiTraceEnd(&traceId);
 
         return HKS_ERROR_MALLOC_FAIL;

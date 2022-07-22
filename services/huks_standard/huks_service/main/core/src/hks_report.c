@@ -16,8 +16,8 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_report.h"
 #include "hks_type_inner.h"
+#include "hks_report.h"
 
 #define EXTRA_DATA_SIZE 512
 
@@ -31,15 +31,14 @@
 static const struct HksBlob g_tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
 static const struct HksBlob g_tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
 static const struct HksBlob g_tagBlockMode = {sizeof(STRING_TAG_BLOCK_MODE) - 1, (uint8_t *)STRING_TAG_BLOCK_MODE};
-static const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP_ALGORITHM_SUITE) - 1, 
+static const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP_ALGORITHM_SUITE) - 1,
     (uint8_t *)STRING_TAG_UNWRAP_ALGORITHM_SUITE};
 static const struct HksBlob g_tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, (uint8_t *)STRING_TAG_ITERATION};
 static const struct HksBlob g_tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
 
 static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut, uint32_t *index)
 {
-    switch (GetTagType(paramIn->tag))
-    {
+    switch (GetTagType(paramIn->tag)) {
         case HKS_TAG_TYPE_UINT: {
             int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%d",
                 paramIn->uint32Param);
@@ -57,7 +56,7 @@ static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut
 }
 
 static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *paramIn, char *extraOut,
-    uint32_t *index) 
+    uint32_t *index)
 {
     if (*index > EXTRA_DATA_SIZE) {
         HKS_LOG_E("no enough space!");
@@ -100,7 +99,7 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
     return HKS_SUCCESS;
 }
 
-static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, const struct HksBlob *tagString, 
+static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, const struct HksBlob *tagString,
     char *extraOut, uint32_t *index)
 {
     struct HksParam *temp = NULL;
@@ -116,7 +115,7 @@ static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, co
 }
 
 // return -1 if not exist
-static void GetAlgorithmTag(const struct HksParamSet *paramSetIn ,uint32_t *algorithm)
+static void GetAlgorithmTag(const struct HksParamSet *paramSetIn, uint32_t *algorithm)
 {
     struct HksParam *algorithmParam = NULL;
     int32_t ret = HksGetParam(paramSetIn, HKS_TAG_ALGORITHM, &algorithmParam);
@@ -138,7 +137,7 @@ static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
     AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &g_tagIteration, extraOut, &index);
 }
 
-int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo, 
+int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSetIn, int32_t errorCode)
 {
     if (errorCode == HKS_SUCCESS) {
@@ -170,13 +169,13 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
         // processName is 0 if no processName
         int processName = 0;
         if (processInfo != NULL) {
-            if (memcpy_s(&userId, sizeof(userId), processInfo->userId.data, 
+            if (memcpy_s(&userId, sizeof(userId), processInfo->userId.data,
                 processInfo->userId.size) != EOK) {
                 HKS_LOG_E("copy user id failed!");
                 ret = HKS_ERROR_BAD_STATE;
                 break;
             }
-            if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data, 
+            if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data,
                 processInfo->processName.size) != EOK) {
                 HKS_LOG_E("copy process name failed!");
                 ret = HKS_ERROR_BAD_STATE;

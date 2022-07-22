@@ -31,7 +31,7 @@ static constexpr const char g_tagKeyType[] = "KEY_TYPE";
 static constexpr const char g_tagErrorCode[] = "ERROR_CODE";
 static constexpr const char g_tagExtra[] = "EXTRA";
 
-static int32_t ConvertToHiSysEventType(enum EventType inEventType, 
+static int32_t ConvertToHiSysEventType (enum EventType inEventType, 
     enum OHOS::HiviewDFX::HiSysEvent::EventType *outEventType)
 {
     switch (inEventType) {
@@ -58,8 +58,7 @@ int WriteEvent(enum EventType eventType, const char *functionName, const struct 
     const char *extra)
 {
     enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType;
-    int32_t ret;
-    ret = ConvertToHiSysEventType(eventType, &outEventType);
+    int32_t ret = ConvertToHiSysEventType(eventType, &outEventType);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("convert to hiSysEvent event type failed!");
         return ret;
