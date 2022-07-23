@@ -26,7 +26,6 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-
 using namespace testing::ext;
 
 static const uint32_t TEST_DATA_SIZE = 2048;
@@ -58,8 +57,7 @@ struct HksParam g_normalParams[] = {
 
 static int32_t BuildParamSet(const struct HksParam *params, uint32_t paramCnt, struct HksParamSet **tmpParamSetOut)
 {
-    int32_t ret;
-    ret = HksInitParamSet(tmpParamSetOut);
+    int32_t ret = HksInitParamSet(tmpParamSetOut);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("init paramSet failed");
         return ret;
@@ -477,7 +475,6 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest011, TestSize.Level0)
 
     HksFreeParamSet(&paramInSet);
 }
-
 }  // namespace Huks
 }  // namespace Security
 }  // namespace OHOS

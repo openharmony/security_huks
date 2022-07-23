@@ -31,21 +31,21 @@ static constexpr const char g_tagKeyType[] = "KEY_TYPE";
 static constexpr const char g_tagErrorCode[] = "ERROR_CODE";
 static constexpr const char g_tagExtra[] = "EXTRA";
 
-static int32_t ConvertToHiSysEventType (enum EventType inEventType, 
-    enum OHOS::HiviewDFX::HiSysEvent::EventType *outEventType)
+static int32_t ConvertToHiSysEventType(enum EventType inEventType,
+    int32_t *outEventTypeInt)
 {
     switch (inEventType) {
         case FAULT:
-            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::FAULT;
+            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::FAULT;
             break;
         case STATISTIC:
-            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC;
+            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC;
             break;
         case SECURITY:
-            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::SECURITY;
+            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::SECURITY;
             break;
         case BEHAVIOR:
-            *outEventType = OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
+            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
             break;
         default:
             HKS_LOG_E("Invalid inEventType!");
@@ -57,12 +57,14 @@ static int32_t ConvertToHiSysEventType (enum EventType inEventType,
 int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues,
     const char *extra)
 {
-    enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType;
-    int32_t ret = ConvertToHiSysEventType(eventType, &outEventType);
+    int32_t outEventTypeInt = 0;
+    int32_t ret = ConvertToHiSysEventType(eventType, &outEventTypeInt);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("convert to hiSysEvent event type failed!");
         return ret;
     }
+    enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType = 
+        (enum OHOS::HiviewDFX::HiSysEvent::EventType)outEventTypeInt;
     return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, g_eventName,
         outEventType, g_tagFunction, functionName, g_tagUserId, eventValues->userId, g_tagProcessUID,
         eventValues->processName, g_tagKeyType, eventValues->keyType, g_tagErrorCode, eventValues->errorCode,

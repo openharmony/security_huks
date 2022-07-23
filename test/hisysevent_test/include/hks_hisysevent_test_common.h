@@ -24,7 +24,7 @@ extern "C" {
 #endif
 
 #define HKS_HISYSEVENT_QUERY_SUCCESS 0
-#define HKS_HISYSEVENT_QUERY_FAILED -1
+#define HKS_HISYSEVENT_QUERY_FAILED (-1)
 
 void HksHiSysEventQueryStart(void);
 

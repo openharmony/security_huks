@@ -34,7 +34,6 @@ static string g_queryStr;
 
 namespace OHOS {
 namespace HiviewDFX {
-
 class HksHiSysEventCallBack : public OHOS::HiviewDFX::HiSysEventQueryCallBack {
 public:
     HksHiSysEventCallBack() {}
