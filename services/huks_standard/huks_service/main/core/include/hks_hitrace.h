@@ -22,6 +22,8 @@
 #include "hitrace/trace.h"
 #endif
 
+#define HKS_HITRACE_FLAG_DEFAULT 0
+
 #ifdef __cplusplus
 extern "C" {
 #endif
