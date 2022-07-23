@@ -19,7 +19,6 @@
 namespace OHOS {
 namespace Security {
 namespace Huks {
-
 int HksHiSysEventTest001(void);
 int HksHiSysEventTest002(void);
 int HksHiSysEventTest003(void);
@@ -31,7 +30,6 @@ int HksHiSysEventTest008(void);
 int HksHiSysEventTest009(void);
 int HksHiSysEventTest010(void);
 int HksHiSysEventTest011(void);
-
 }  // namespace Huks
 }  // namespace Security
 }  // namespace OHOS
