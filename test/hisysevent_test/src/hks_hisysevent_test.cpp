@@ -117,7 +117,8 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest001, TestSize.Level0)
 {
     HksHiSysEventQueryStart();
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    (void)HksKeyExist(&keyAlias, nullptr);
+    (void)HksDeleteKey(&keyAlias, NULL);
+    (void)HksKeyExist(&keyAlias, NULL);
     int ret = HksHiSysEventQueryResult("HksServiceKeyExist");
     EXPECT_EQ(ret, HKS_HISYSEVENT_QUERY_SUCCESS) << "query failed, ret = " << ret;
 }
@@ -133,11 +134,11 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest002, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
-    (void)HksGenerateKey(&keyAlias, paramInSet, nullptr);
+    (void)HksGenerateKey(&keyAlias, paramInSet, NULL);
 
     ret = HksHiSysEventQueryResult("HksServiceGenerateKey");
     EXPECT_EQ(ret, HKS_HISYSEVENT_QUERY_SUCCESS) << "query failed, ret = " << ret;
@@ -161,7 +162,7 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest003, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
@@ -192,7 +193,7 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest004, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
@@ -223,14 +224,14 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest005, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
     uint8_t data[TEST_DATA_SIZE] = {0};
     struct HksBlob inData = { TEST_DATA_SIZE, data };
 
-    (void)HksGetKeyParamSet(&keyAlias, nullptr, paramInSet);
+    (void)HksGetKeyParamSet(&keyAlias, NULL, paramInSet);
 
     ret = HksHiSysEventQueryResult("HksServiceGetKeyParamSet");
     EXPECT_EQ(ret, HKS_HISYSEVENT_QUERY_SUCCESS) << "query failed, ret = " << ret;
@@ -254,7 +255,7 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest006, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
@@ -285,7 +286,7 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest007, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
@@ -316,7 +317,7 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest008, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
@@ -347,7 +348,7 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest009, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
@@ -374,26 +375,26 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest009, TestSize.Level0)
 
 static void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
 {
-    if (certChain == nullptr || *certChain == nullptr) {
+    if (certChain == NULL || *certChain == NULL) {
         return;
     }
 
-    if ((*certChain)->certs == nullptr) {
+    if ((*certChain)->certs == NULL) {
         HKS_FREE_PTR(*certChain);
         return;
     }
 
     for (uint32_t j = 0; j < pos; j++) {
-        if ((*certChain)->certs[j].data != nullptr) {
+        if ((*certChain)->certs[j].data != NULL) {
             HKS_FREE_PTR((*certChain)->certs[j].data);
         }
     }
 
-    if ((*certChain)->certs != nullptr) {
+    if ((*certChain)->certs != NULL) {
         HKS_FREE_PTR((*certChain)->certs);
     }
 
-    if (*certChain != nullptr) {
+    if (*certChain != NULL) {
         HKS_FREE_PTR(*certChain);
     }
 }
@@ -401,21 +402,21 @@ static void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
 static int32_t ConstructCertChain(struct HksCertChain **certChain)
 {
     *certChain = (struct HksCertChain *)HksMalloc(sizeof(struct HksCertChain));
-    if (*certChain == nullptr) {
+    if (*certChain == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
 
     (*certChain)->certsCount = TEST_CERT_COUNT;
 
     (*certChain)->certs = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob) * ((*certChain)->certsCount));
-    if ((*certChain)->certs == nullptr) {
+    if ((*certChain)->certs == NULL) {
         HKS_FREE_PTR(*certChain);
         return HKS_ERROR_MALLOC_FAIL;
     }
     for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
         (*certChain)->certs[i].size = TEST_DATA_SIZE;
         (*certChain)->certs[i].data = (uint8_t *)HksMalloc((*certChain)->certs[i].size);
-        if ((*certChain)->certs[i].data == nullptr) {
+        if ((*certChain)->certs[i].data == NULL) {
             FreeCertChain(certChain, i);
             return HKS_ERROR_MALLOC_FAIL;
         }
@@ -434,11 +435,11 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest010, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_abnormalParams, sizeof(g_abnormalParams) / sizeof(g_abnormalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
-    HksCertChain *certChain = nullptr;
+    HksCertChain *certChain = NULL;
     ret = ConstructCertChain(&certChain);
     EXPECT_EQ(ret, HKS_SUCCESS) << "construct certChain failed";
 
@@ -462,11 +463,11 @@ HWTEST_F(HksHiSysEventTest, HksHiSysEventTest011, TestSize.Level0)
     HksHiSysEventQueryStart();
 
     struct HksBlob keyAlias = { (uint32_t)strlen(g_genKeyAlias), (uint8_t *)g_genKeyAlias };
-    struct HksParamSet *paramInSet = nullptr;
+    struct HksParamSet *paramInSet = NULL;
     int ret = BuildParamSet(g_normalParams, sizeof(g_normalParams) / sizeof(g_normalParams[0]), &paramInSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "create paramSet failed, ret = " << ret;
 
-    (void)HksGenerateKey(&keyAlias, paramInSet, nullptr);
+    (void)HksGenerateKey(&keyAlias, paramInSet, NULL);
 
     ret = HksHiSysEventQueryResult("HksServiceGenerateKey");
     EXPECT_EQ(ret, HKS_HISYSEVENT_QUERY_FAILED) << "query failed, ret = " << ret;
