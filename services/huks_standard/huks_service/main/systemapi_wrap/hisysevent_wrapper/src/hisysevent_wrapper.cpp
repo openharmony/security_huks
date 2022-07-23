@@ -19,10 +19,6 @@
 
 #include "hks_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 static constexpr const char g_eventName[] = "HUKS_FAULT";
 static constexpr const char g_tagFunction[] = "FUNCTION";
 static constexpr const char g_tagUserId[] = "USER_ID";
@@ -63,14 +59,10 @@ int WriteEvent(enum EventType eventType, const char *functionName, const struct 
         HKS_LOG_E("convert to hiSysEvent event type failed!");
         return ret;
     }
-    enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType = 
+    enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType =
         (enum OHOS::HiviewDFX::HiSysEvent::EventType)outEventTypeInt;
     return OHOS::HiviewDFX::HiSysEvent::Write(OHOS::HiviewDFX::HiSysEvent::Domain::SECURITY, g_eventName,
         outEventType, g_tagFunction, functionName, g_tagUserId, eventValues->userId, g_tagProcessUID,
         eventValues->processName, g_tagKeyType, eventValues->keyType, g_tagErrorCode, eventValues->errorCode,
         g_tagExtra, extra);
 }
-
-#ifdef __cplusplus
-}
-#endif
