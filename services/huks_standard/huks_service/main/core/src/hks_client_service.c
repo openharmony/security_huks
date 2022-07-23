@@ -677,7 +677,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     struct HksBlob output = { MAX_KEY_SIZE, keyOutBuffer };
     struct HksBlob keyIn = { 0, NULL };
@@ -741,7 +741,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
 
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, srcData, signature);
@@ -775,7 +775,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, srcData, signature);
@@ -840,7 +840,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, cipherText, plainText);
@@ -1003,7 +1003,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob wrappingKeyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckImportWrappedKeyParams(&processInfo->processName, keyAlias,
@@ -1093,7 +1093,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, privateKey, paramSet, peerPublicKey, agreedKey);
@@ -1126,7 +1126,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckDeriveKeyParams(&processInfo->processName, paramSet, mainKey, derivedKey);
@@ -1159,7 +1159,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, key, paramSet, srcData, mac);
@@ -1258,7 +1258,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
     int32_t ret;
@@ -1306,7 +1306,7 @@ int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, 
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
 #ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     int32_t ret = HksCheckGetCertificateChainParams(&processInfo->processName, keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
@@ -1388,7 +1388,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob keyFromFile = { 0, NULL };
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     do {
         ret = HksCheckServiceInitParams(&processInfo->processName, key, paramSet);
@@ -1429,7 +1429,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     int32_t ret;
     do {
         if (QueryOperation(processInfo, handle) == NULL) {
@@ -1475,7 +1475,7 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
 int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
     struct HksParamSet *newParamSet = NULL;
 
@@ -1543,7 +1543,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HITRACE_FLAG_DEFAULT);
+    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     int32_t ret;
     do {
         if (QueryOperation(processInfo, handle) == NULL) {
