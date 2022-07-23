@@ -26,7 +26,7 @@ struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 #else
     (void)name;
     (void)flag;
-    struct HksHitraceId hitraceId;
+    struct HksHitraceId hitraceId = {};
     return hitraceId;
 #endif
 }
