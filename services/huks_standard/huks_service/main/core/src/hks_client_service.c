@@ -1317,11 +1317,12 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
 #endif
     } while (0);
 
+#ifdef L2_STANDARD
     int userId = 0;
     struct HksBlob userIdBlob = { sizeof(int), (uint8_t *)&userId };
     struct HksProcessInfo processInfo = {userIdBlob, *processName};
 
-#ifdef L2_STANDARD
+
     (void)ReportFaultEvent(__func__, &processInfo, NULL, ret);
 #endif
 
@@ -1720,12 +1721,12 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
     } while (0);
 
     HksFreeParamSet(&newParamSet);
-
+    
+#ifdef L2_STANDARD
     int userId = 0;
     struct HksBlob userIdBlob = { sizeof(int), (uint8_t *)&userId };
     struct HksProcessInfo processInfo = {userIdBlob, *processName};
     
-#ifdef L2_STANDARD
     (void)ReportFaultEvent(__func__, &processInfo, NULL, ret);
 #endif
 
