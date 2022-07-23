@@ -24,7 +24,10 @@ ohos_static_library("libhuks_utils_hisysevent_wrapper_static") {
   public_configs = [ ":huks_config" ]
   include_dirs =
       [ "//base/security/huks/frameworks/huks_standard/main/common/include" ]
-  sources = [ "hisysevent_wrapper.cpp" ]
+  sources = [ 
+    "src/hisysevent_wrapper.cpp",
+    "src/hks_report_wrapper.c"
+    ]
   cflags = [
     "-Wall",
     "-Werror",

@@ -13,17 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef HKS_REPORT_H
-#define HKS_REPORT_H
+#ifndef HKS_HITRACE_DEFINE_H
+#define HKS_HITRACE_DEFINE_H
 
-#include "hks_type.h"
+#include <stdint.h>
+
+#ifdef L2_STANDARD
+#include "hitrace/trace.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSetIn, int32_t errorCode);
+struct HksHitraceId {
+#ifdef L2_STANDARD
+    HiTraceIdStruct traceId;
+#endif
+};
+
+struct HksHitraceId HksHitraceBegin(const char *name, int flag);
+
+void HksHitraceEnd(struct HksHitraceId *hitraceId);
 
 #ifdef __cplusplus
 }

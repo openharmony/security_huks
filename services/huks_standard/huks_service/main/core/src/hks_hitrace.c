@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,29 @@
  * limitations under the License.
  */
 
-#ifndef HKS_REPORT_H
-#define HKS_REPORT_H
+#include "hks_hitrace.h"
 
-#include "hks_type.h"
-
-#ifdef __cplusplus
-extern "C" {
+struct HksHitraceId HksHitraceBegin(const char *name, int flag)
+{
+#ifdef L2_STANDARD
+    HiTraceIdStruct traceId = HiTraceBegin(name, flag);
+    struct HksHitraceId hitraceId = {
+        .traceId = traceId,
+    };
+    return hitraceId;
+#else
+    (void)name;
+    (void)flag;
+    struct HksHitraceId hitraceId = { 0 };
+    return hitraceId;
 #endif
-
-void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSetIn, int32_t errorCode);
-
-#ifdef __cplusplus
 }
-#endif
 
-#endif  // HKS_RW_LOCK_H
+void HksHitraceEnd(struct HksHitraceId *hitraceId)
+{
+#ifdef L2_STANDARD
+    HiTraceEnd(&hitraceId->traceId);
+#else
+    (void)hitraceId;
+#endif
+}
