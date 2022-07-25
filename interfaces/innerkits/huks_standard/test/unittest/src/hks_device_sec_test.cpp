@@ -69,6 +69,7 @@ static char g_versionData[] = "hi_os_version_data";
 static char g_udidData[] = "hi_udid_data";
 static char g_snData[] = "hi_sn_data";
 static uint32_t g_size = DEFAULT_PARAM_SET_OUT_SIZE;
+static uint32_t U32_IS_32_BITS = 32;
 
 static struct HksBlob g_secInfo = { sizeof(g_secInfoData), (uint8_t *)g_secInfoData };
 static struct HksBlob g_challenge = { sizeof(g_challengeData), (uint8_t *)g_challengeData };
@@ -318,7 +319,9 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
     infoInstance.aclsNum = 1;
     infoInstance.processName = "test_attest";
     tokenId = GetAccessTokenId(&infoInstance);
-    HKS_TEST_LOG_I("AccessTokenID is %llx!", tokenId);
+    uint32_t tokenIdHigh32 = (uint32_t)(tokenId >> U32_IS_32_BITS);
+    uint32_t tokenIdLow32 = (uint32_t)tokenId;
+    HKS_TEST_LOG_I("AccessTokenID: high32 = %x, low32 = %x!", tokenIdHigh32, tokenIdLow32);
 
     int32_t ret = SetSelfTokenID(tokenId);
     if (ret != 0) {
