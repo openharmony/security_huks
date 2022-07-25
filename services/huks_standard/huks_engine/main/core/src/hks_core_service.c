@@ -449,6 +449,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
         HksFillUsageSpec(paramSet, &usageSpec);
         /* NONEwithECDSA/RSA default sha256 */
         usageSpec.digest = (usageSpec.digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec.digest;
+        HKS_LOG_I("Sign or verify.");
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);
         } else {
@@ -523,6 +524,8 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
             HKS_FREE_PTR(rawKey.data);
             break;
         }
+
+        HKS_LOG_I("Encrypt or decrypt.");
 
         if (cmdId == HKS_CMD_ID_ENCRYPT) {
             ret = CipherEncrypt(&rawKey, paramSet, usageSpec, &tmpInData, outData);
@@ -1211,6 +1214,9 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
 
     struct HksKeySpec agreeSpec = {0};
     HksFillKeySpec(paramSet, &agreeSpec);
+
+    HKS_LOG_I("Agree key.");
+
     ret = HksCryptoHalAgreeKey(&key, peerPublicKey, &agreeSpec, agreedKey);
     (void)memset_s(key.data, key.size, 0, key.size);
     HKS_FREE_PTR(key.data);
@@ -1250,6 +1256,9 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
         struct HksKeySpec derivationSpec = { 0, 0, &derParam };
         HksFillKeySpec(paramSet, &derivationSpec);
         HksFillKeyDerivationParam(paramSet, &derParam);
+
+        HKS_LOG_I("Derive key.");
+
         ret = HksCryptoHalDeriveKey(&key, &derivationSpec, derivedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
         HKS_FREE_PTR(key.data);
@@ -1294,6 +1303,8 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
             HKS_LOG_E("mac get raw key failed!");
             break;
         }
+
+        HKS_LOG_I("Do hmac.");
 
         ret = HksCryptoHalHmac(&rawKey, digestParam->uint32Param, srcData, mac);
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
@@ -1434,12 +1445,16 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
             break;
         }
 
+        HKS_LOG_I("Agree shared key.");
+
         /* 2. agree shared key with wrappingAlias's private key and peer public key */
         ret = AgreeSharedSecretWithPeerPublicKey(wrappingKey, &peerPublicKey, unwrapSuite, &agreeSharedSecret);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("agree share secret failed!");
             break;
         }
+
+        HKS_LOG_I("Decrypt with shared key.");
 
         /* 4. decrypt kek data with agreed secret */
         ret = DecryptKekWithAgreeSharedSecret(wrappedKeyData, &agreeSharedSecret, &partOffset, &kek);
@@ -1448,12 +1463,16 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
             break;
         }
 
+        HKS_LOG_I("Decrypt imported key.");
+
         /* 5. decrypt imported key data with kek */
         ret = DecryptImportedKeyWithKek(wrappedKeyData, &kek, &partOffset, &originKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("decrypt origin key failed!");
             break;
         }
+
+        HKS_LOG_I("Import key.");
 
         /* 6. call HksCoreImportKey to build key blob */
         ret = HksCoreImportKey(keyAlias, &originKey, paramSet, keyOut);
