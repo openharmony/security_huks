@@ -854,6 +854,17 @@ static napi_value CreateHksTagType(napi_env env)
 
     return tagType;
 }
+
+static napi_value CreateHuksSendType(napi_env env)
+{
+    napi_value sendType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &sendType));
+
+    AddInt32Property(env, sendType, "HUKS_SEND_TYPE_ASYNC", HKS_SEND_TYPE_ASYNC);
+    AddInt32Property(env, sendType, "HUKS_SEND_TYPE_SYNC", HKS_SEND_TYPE_SYNC);
+
+    return sendType;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -888,6 +899,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksKeyStorageType", CreateHuksKeyStorageType(env)),
         DECLARE_NAPI_PROPERTY("HuksTagType", CreateHuksTagType(env)),
         DECLARE_NAPI_PROPERTY("HuksTag", CreateHuksTag(env)),
+        DECLARE_NAPI_PROPERTY("HuksSendType", CreateHuksSendType(env)),
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
