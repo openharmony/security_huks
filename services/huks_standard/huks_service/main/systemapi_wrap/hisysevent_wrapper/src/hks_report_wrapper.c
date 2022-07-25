@@ -40,7 +40,7 @@ static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut
 {
     switch (GetTagType(paramIn->tag)) {
         case HKS_TAG_TYPE_UINT: {
-            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%d",
+            int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%u",
                 paramIn->uint32Param);
             if (num < 0) {
                 HKS_LOG_E("snprintf_s failed!");
@@ -55,11 +55,20 @@ static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut
     return HKS_SUCCESS;
 }
 
+static bool ISExceedTheLimitSize(const uint32_t val)
+{
+    if (val > EXTRA_DATA_SIZE) {
+        HKS_LOG_E("no enough space!");
+        return true;
+    }
+
+    return false;
+}
+
 static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *paramIn, char *extraOut,
     uint32_t *index)
 {
-    if (*index > EXTRA_DATA_SIZE) {
-        HKS_LOG_E("no enough space!");
+    if (ISExceedTheLimitSize(*index)) {
         return HKS_ERROR_BAD_STATE;
     }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, tag->data, tag->size) != EOK) {
@@ -67,9 +76,9 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         return HKS_ERROR_BAD_STATE;
     }
     *index += tag->size;
+
     char split = ':';
-    if (*index > EXTRA_DATA_SIZE) {
-        HKS_LOG_E("no enough space!");
+    if (ISExceedTheLimitSize(*index)) {
         return HKS_ERROR_BAD_STATE;
     }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
@@ -77,8 +86,8 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         return HKS_ERROR_BAD_STATE;
     }
     *index += sizeof(char);
-    if (*index > EXTRA_DATA_SIZE) {
-        HKS_LOG_E("no enough space!");
+
+    if (ISExceedTheLimitSize(*index)) {
         return HKS_ERROR_BAD_STATE;
     }
     int32_t ret = AppendParamToExtra(paramIn, extraOut, index);
@@ -86,9 +95,9 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         HKS_LOG_E("append param to extra failed!");
         return ret;
     }
+
     split = ';';
-    if (*index > EXTRA_DATA_SIZE) {
-        HKS_LOG_E("no enough space!");
+    if (ISExceedTheLimitSize(*index)) {
         return HKS_ERROR_BAD_STATE;
     }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
@@ -114,7 +123,6 @@ static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, co
     }
 }
 
-// return -1 if not exist
 static void GetAlgorithmTag(const struct HksParamSet *paramSetIn, uint32_t *algorithm)
 {
     struct HksParam *algorithmParam = NULL;
@@ -164,7 +172,7 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
         }
 
         // userId is 0 if no userId
-        int userId = 0;
+        uint32_t userId = 0;
 
         // processName is 0 if no processName
         int processName = 0;
