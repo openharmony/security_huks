@@ -28,7 +28,7 @@ const int TRIPLE_BLOB_SIZE = 30;
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
+        if (data == nullptr || size <= (sizeof(struct HksParamSet) + TRIPLE_BLOB_SIZE)) {
             return false;
         }
 
@@ -44,7 +44,7 @@ namespace OHOS {
         struct HksBlob outData = { BLOB_SIZE, (uint8_t *)(myData + DOUBLE_BLOB_SIZE) };
 
         struct HksParamSet *paramSet = (struct HksParamSet *)(myData + TRIPLE_BLOB_SIZE);
-        paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
+        paramSet->paramSetSize = size - TRIPLE_BLOB_SIZE;
 
         (void)HksFinish(&handle, paramSet, &inData, &outData);
 
