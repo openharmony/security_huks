@@ -12,7 +12,7 @@
 #  limitations under the License.
 
 
-domain: SECURITY
+domain: SECURITY_HUKS
 
 HUKS_FAULT:
     __BASE: {type: FAULT, level: CRITICAL, desc: fault event for huks}

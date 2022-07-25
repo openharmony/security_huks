@@ -98,7 +98,7 @@ int32_t HksHiSysEventQueryResult(const string funStr)
     struct QueryArg args(g_beginTime, g_endTime, MAX_QUERY_EVENT_COUNT);
 
     // queryRules
-    string domain = "SECURITY";
+    string domain = "SECURITY_HUKS";
     vector<string> eventList;
     eventList.push_back("HUKS_FAULT");
     QueryRule rule(domain, eventList);

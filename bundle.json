@@ -25,7 +25,7 @@
         ],
       "hisysevent_config": [
           "//base/security/huks/hisysevent.yaml"
-      ],
+        ],
       "rom": "5000KB",
       "ram": "500kB",
       "deps": {
@@ -35,6 +35,8 @@
           "bundle_framework",
           "common",
           "common_event_service",
+          "hisysevent_native",
+          "hitrace_native",
           "hiviewdfx_hilog_native",
           "ipc",
           "napi",
