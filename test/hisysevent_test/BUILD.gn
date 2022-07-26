@@ -31,7 +31,7 @@ ohos_unittest("huksHiSysEventTest") {
   ]
 
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "include",
     "//test/xts/acts/security_lite/huks/common/include",
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",

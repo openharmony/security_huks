@@ -44,7 +44,7 @@
           "safwk",
           "samgr_standard",
           "thirdparty_bounds_checking_function",
-          "utils_base"
+          "c_utils"
         ],
         "third_party": [ 
           "openssl",

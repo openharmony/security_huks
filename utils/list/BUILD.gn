@@ -28,7 +28,7 @@ ohos_static_library("libhuks_utils_list_static") {
     "-Wall",
     "-Werror",
   ]
-  external_deps = [ "utils_base:utils" ]
+  external_deps = [ "c_utils:utils" ]
 
   complete_static_lib = true
 }
