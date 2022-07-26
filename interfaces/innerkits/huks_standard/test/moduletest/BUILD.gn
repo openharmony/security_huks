@@ -66,7 +66,7 @@ ohos_moduletest("huks_mt_test") {
   }
 
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "//third_party/openssl/include/",
     "../unittest/include",
@@ -85,6 +85,6 @@ ohos_moduletest("huks_mt_test") {
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
     "//third_party/openssl:libcrypto_shared",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 }

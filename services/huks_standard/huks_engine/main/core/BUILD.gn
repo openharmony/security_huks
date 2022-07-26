@@ -27,7 +27,7 @@ ohos_shared_library("huks_engine_core_standard") {
     "_HUKS_LOG_ENABLE_",
   ]
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//base/security/huks/utils/crypto_adapter",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
@@ -55,6 +55,6 @@ ohos_shared_library("huks_engine_core_standard") {
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 }

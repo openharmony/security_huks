@@ -23,7 +23,7 @@ ohos_fuzztest("HksFinishFuzzTest") {
 
   include_dirs = [
     ".",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "//unittest/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
@@ -40,8 +40,8 @@ ohos_fuzztest("HksFinishFuzzTest") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
     "//third_party/bounds_checking_function:libsec_static",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 }
 
 ###############################################################################
