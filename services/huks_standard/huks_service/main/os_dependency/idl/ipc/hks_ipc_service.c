@@ -904,7 +904,7 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
         return ret;
     }
 
-    if ((handle.size > HANDLE_SIZE) || (token.size > TOKEN_SIZE)) {
+    if ((handle.size != HANDLE_SIZE) || (token.size > TOKEN_SIZE)) {
         HKS_LOG_E("invalid handle size[%u], or token size[%u]", handle.size, token.size);
         return HKS_ERROR_BAD_STATE;
     }
@@ -914,11 +914,12 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(outData->data, outData->size, handle.data, handle.size) != HKS_SUCCESS) {
+    if (memcpy_s(outData->data, outData->size, handle.data, handle.size) != EOK) {
         HKS_LOG_E("copy handle failed");
         return HKS_ERROR_BAD_STATE;
     }
-    if (memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != HKS_SUCCESS) {
+    if (token.size != 0 && /* token size can be 0 */
+        memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != EOK) {
         HKS_LOG_E("copy token failed");
         return HKS_ERROR_BAD_STATE;
     }

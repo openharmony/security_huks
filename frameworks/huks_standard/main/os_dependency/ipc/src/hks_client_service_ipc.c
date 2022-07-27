@@ -720,6 +720,11 @@ int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob 
 
 static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob *out)
 {
+    if (size == 0) {
+        out->size = 0;
+        return HKS_SUCCESS;
+    }
+
     if (out->size < size) {
         HKS_LOG_E("out size[%u] smaller than [%u]", out->size, size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
@@ -750,12 +755,11 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
             break;
         }
 
-        if (outBlob.size < (HANDLE_SIZE + TOKEN_SIZE)) {
+        if (outBlob.size < HANDLE_SIZE) { /* token size can be 0, at lease handle size */
             HKS_LOG_E("invalid out size[%u]", outBlob.size);
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
-
         ret = CopyData(outBlob.data, HANDLE_SIZE, handle);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("copy handle failed");
@@ -767,7 +771,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
              * need copy token;
              * In the future, judge whether there is access control attribute to decide whether to copy token
              */
-            ret = CopyData(outBlob.data + HANDLE_SIZE, TOKEN_SIZE, token);
+            ret = CopyData(outBlob.data + HANDLE_SIZE, outBlob.size - HANDLE_SIZE, token);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("copy token failed");
                 break;

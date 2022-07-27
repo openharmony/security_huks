@@ -95,7 +95,7 @@ static napi_value GetHandleValue(napi_env env, napi_value object, AbortAsyncCont
     }
 
     uint64_t handle = handle1;
-    HKS_LOG_I("abort handle:%u", handle1);
+    HKS_LOG_D("abort handle:%u", handle1);
 
     context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
     if (context->handle == nullptr) {
