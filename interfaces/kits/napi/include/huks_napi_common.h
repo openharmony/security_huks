@@ -17,6 +17,7 @@
 #define HUKS_NAPI_COMMON_H
 
 #include <string>
+#include <vector>
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
@@ -43,12 +44,17 @@ static const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
 
 static const std::string HKS_HANDLE_PROPERTY_ERRORCODE = "errorCode";
 static const std::string HKS_HANDLE_PROPERTY_HANDLE = "handle";
+static const std::string HKS_HANDLE_PROPERTY_TOKEN = "token";
 
 napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob);
 
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias);
 
 napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet);
+
+void FreeParsedParams(std::vector<HksParam> &params);
+
+napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &params);
 
 napi_ref GetCallback(napi_env env, napi_value object);
 
@@ -57,7 +63,8 @@ napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_
 
 napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, const uint32_t blobCount);
 
-napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_t size);
+napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *handle,
+    const struct HksBlob *token);
 
 void CallAsyncCallback(napi_env env, napi_ref callback, int32_t error, napi_value data);
 

@@ -13,14 +13,16 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_NAPI_UPDATE_H
-#define HUKS_NAPI_UPDATE_H
+#ifndef HUKS_NAPI_UPDATE_FINISH_H
+#define HUKS_NAPI_UPDATE_FINISH_H
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
 namespace HuksNapi {
 napi_value HuksNapiUpdate(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiFinish(napi_env env, napi_callback_info info);
 }  // namespace HuksNapi
 
-#endif  // HUKS_NAPI_UPDATE_H
+#endif  // HUKS_NAPI_UPDATE_FINISH_H
