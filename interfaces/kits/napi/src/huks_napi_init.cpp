@@ -41,6 +41,7 @@ struct InitAsyncContext {
     struct HksBlob *keyAlias = nullptr;
     struct HksParamSet *paramSet = nullptr;
     struct HksBlob *handle = nullptr;
+    struct HksBlob *token = nullptr;
 };
 
 using InitAsyncCtxPtr = InitAsyncContext *;
@@ -79,10 +80,11 @@ static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context)
     }
 
     if (context->handle != nullptr) {
-        if (context->handle->data != nullptr && context->handle->size != 0) {
-            (void)memset_s(context->handle->data, context->handle->size, 0, context->handle->size);
-        }
         FreeHksBlob(context->handle);
+    }
+
+    if (context->token != nullptr) {
+        FreeHksBlob(context->token);
     }
 
     HksFree(context);
@@ -131,12 +133,38 @@ static napi_value ParseInitParams(napi_env env, napi_callback_info info, InitAsy
     return GetInt32(env, 0);
 }
 
+static int32_t InitOutParams(InitAsyncCtxPtr context)
+{
+    /* free buffer use DeleteInitAsyncContext */
+    context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->handle == nullptr) {
+        HKS_LOG_E("malloc handle failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    context->handle->data = (uint8_t *)HksMalloc(HKS_MAX_TOKEN_SIZE);
+    if (context->handle->data == nullptr) {
+        HKS_LOG_E("malloc handle data failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    context->handle->size = HKS_MAX_TOKEN_SIZE;
+
+    context->token = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->token == nullptr) {
+        HKS_LOG_E("malloc token failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    context->token->data = (uint8_t *)HksMalloc(HKS_MAX_TOKEN_SIZE);
+    if (context->token->data == nullptr) {
+        HKS_LOG_E("malloc token data failed");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    context->token->size = HKS_MAX_TOKEN_SIZE;
+    return HKS_SUCCESS;
+}
+
 static napi_value InitWriteResult(napi_env env, InitAsyncCtxPtr context)
 {
-    return GenerateHksHandle(env,
-        context->result,
-        ((context->result == HKS_SUCCESS && context->handle != nullptr) ? context->handle->data : nullptr),
-        (context->result == HKS_SUCCESS && context->handle != nullptr) ? context->handle->size : 0);
+    return GenerateHksHandle(env, context->result, context->handle, context->token);
 }
 
 static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
@@ -155,13 +183,12 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         resourceName,
         [](napi_env env, void *data) {
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
-            context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
-            if (context->handle != nullptr) {
-                context->handle->data = (uint8_t *)HksMalloc(HKS_MAX_TOKEN_SIZE);
-                context->handle->size = HKS_MAX_TOKEN_SIZE;
+            int32_t ret = InitOutParams(context);
+            if (ret != HKS_SUCCESS) {
+                context->result = ret;
+                return;
             }
-            context->result =
-                HksInit(context->keyAlias, context->paramSet, context->handle, nullptr);
+            context->result = HksInit(context->keyAlias, context->paramSet, context->handle, context->token);
         },
         [](napi_env env, napi_status status, void *data) {
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
@@ -186,9 +213,8 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
 
     if (context->callback == nullptr) {
         return promise;
-    } else {
-        return GetNull(env);
     }
+    return GetNull(env);
 }
 
 napi_value HuksNapiInit(napi_env env, napi_callback_info info)

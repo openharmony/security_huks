@@ -33,9 +33,8 @@
 #include "huks_napi_wrap_key.h"
 
 #include "huks_napi_abort.h"
-#include "huks_napi_finish.h"
 #include "huks_napi_init.h"
-#include "huks_napi_update.h"
+#include "huks_napi_update_finish.h"
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
@@ -167,6 +166,11 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA", HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_IMPORT_KEY_TYPE", HKS_TAG_IMPORT_KEY_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_UNWRAP_ALGORITHM_SUITE", HKS_TAG_UNWRAP_ALGORITHM_SUITE);
+
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_ACCESS_TYPE", HKS_TAG_KEY_AUTH_ACCESS_TYPE);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_SECURE_SIGN_TYPE", HKS_TAG_KEY_SECURE_SIGN_TYPE);
+    AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_TYPE", HKS_TAG_CHALLENGE_TYPE);
+    AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_POS", HKS_TAG_CHALLENGE_POS);
 }
 
 static napi_value CreateHuksTag(napi_env env)
@@ -357,6 +361,12 @@ static void AddHuksErrorCodePart1(napi_env env, napi_value errorCode)
 
 static void AddHuksErrorCodePart2(napi_env env, napi_value errorCode)
 {
+    AddInt32Property(env, errorCode, "HUKS_ERROR_GET_USERIAM_SECINFO_FAILED", HKS_ERROR_GET_USERIAM_SECINFO_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_GET_USERIAM_AUTHINFO_FAILED", HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT", HKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_KEY_AUTH_FAILED", HKS_ERROR_KEY_AUTH_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_DEVICE_NO_CREDENTIAL", HKS_ERROR_DEVICE_NO_CREDENTIAL);
+
     AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_ALG_FAIL", HKS_ERROR_CHECK_GET_ALG_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_KEY_SIZE_FAIL", HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_PADDING_FAIL", HKS_ERROR_CHECK_GET_PADDING_FAIL);
@@ -480,6 +490,64 @@ static napi_value CreateHuksSendType(napi_env env)
 
     return sendType;
 }
+
+static napi_value CreateHuksUserAuthType(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_FINGERPRINT", HKS_USER_AUTH_TYPE_FINGERPRINT);
+    AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_FACE", HKS_USER_AUTH_TYPE_FACE);
+    AddInt32Property(env, value, "HUKS_USER_AUTH_TYPE_PIN", HKS_USER_AUTH_TYPE_PIN);
+
+    return value;
+}
+
+static napi_value CreateHuksAuthAccessType(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD", HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD);
+    AddInt32Property(env, value, "HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL", HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL);
+
+    return value;
+}
+
+static napi_value CreateHuksChallengeType(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_CHALLENGE_TYPE_NORMAL", HKS_CHALLENGE_TYPE_NORMAL);
+    AddInt32Property(env, value, "HUKS_CHALLENGE_TYPE_CUSTOM", HKS_CHALLENGE_TYPE_CUSTOM);
+    AddInt32Property(env, value, "HUKS_CHALLENGE_TYPE_NONE", HKS_CHALLENGE_TYPE_NONE);
+
+    return value;
+}
+
+static napi_value CreateHuksChallengePosition(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_CHALLENGE_POS_0", HKS_CHALLENGE_POS_0);
+    AddInt32Property(env, value, "HUKS_CHALLENGE_POS_1", HKS_CHALLENGE_POS_1);
+    AddInt32Property(env, value, "HUKS_CHALLENGE_POS_2", HKS_CHALLENGE_POS_2);
+    AddInt32Property(env, value, "HUKS_CHALLENGE_POS_3", HKS_CHALLENGE_POS_3);
+
+    return value;
+}
+
+static napi_value CreateHuksSecureSignType(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_SECURE_SIGN_WITH_AUTHINFO", HKS_SECURE_SIGN_WITH_AUTHINFO);
+
+    return value;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -503,6 +571,11 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksImportKeyType", CreateHuksImportKeyType(env)),
         DECLARE_NAPI_PROPERTY("HuksUnwrapSuite", CreateHuksUnwrapSuite(env)),
         DECLARE_NAPI_PROPERTY("HuksSendType", CreateHuksSendType(env)),
+        DECLARE_NAPI_PROPERTY("HuksUserAuthType", CreateHuksUserAuthType(env)),
+        DECLARE_NAPI_PROPERTY("HuksAuthAccessType", CreateHuksAuthAccessType(env)),
+        DECLARE_NAPI_PROPERTY("HuksChallengeType", CreateHuksChallengeType(env)),
+        DECLARE_NAPI_PROPERTY("HuksChallengePosition", CreateHuksChallengePosition(env)),
+        DECLARE_NAPI_PROPERTY("HuksSecureSignType", CreateHuksSecureSignType(env)),
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),

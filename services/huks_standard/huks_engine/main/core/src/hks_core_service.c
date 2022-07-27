@@ -1536,14 +1536,15 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     struct HksBlob *token)
 {
     HKS_LOG_D("HksCoreInit in Core start");
-    (void)token;
     uint32_t pur = 0;
     uint32_t alg = 0;
 
-    if (key == NULL || paramSet == NULL || handle == NULL) {
+    if (key == NULL || paramSet == NULL || handle == NULL || token == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
+
+    token->size = 0; /* if no need token param, set token size 0 */
 
     if (handle->size < sizeof(uint64_t)) {
         HKS_LOG_E("handle size is too small, size : %u", handle->size);
