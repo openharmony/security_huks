@@ -374,7 +374,7 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     }
 
     mbedtls_rsa_context ctx;
-    mbedtls_rsa_init(&ctx, padding, mbedtlsAlg);
+    mbedtls_rsa_init(&ctx, padding, (mbedtls_md_type_t)mbedtlsAlg);
 
     do {
         ret = RsaKeyMaterialToCtx(key, sign, &ctx); /* sign need private exponent (d) */
@@ -384,10 +384,10 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
 
         if (sign) {
             ret = mbedtls_rsa_pkcs1_sign(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg, MBEDTLS_RSA_PRIVATE,
-                mbedtlsAlg, message->size, message->data, signature->data);
+                (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
         } else {
             ret = mbedtls_rsa_pkcs1_verify(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg, MBEDTLS_RSA_PUBLIC,
-                mbedtlsAlg, message->size, message->data, signature->data);
+                (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
         }
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls rsa sign/verify failed! mbedtls ret = 0x%X", ret);
