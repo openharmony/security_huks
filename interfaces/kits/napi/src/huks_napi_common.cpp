@@ -15,6 +15,8 @@
 
 #include "huks_napi_common.h"
 
+#include <vector>
+
 #include "securec.h"
 
 #include "hks_log.h"
@@ -185,6 +187,45 @@ napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&param
         return nullptr;
     }
 
+    return GetInt32(env, 0);
+}
+
+void FreeParsedParams(std::vector<HksParam> &params)
+{
+    HksParam *param = params.data();
+    size_t paramCount = params.size();
+    if (param == nullptr) {
+        return;
+    }
+    while (paramCount > 0) {
+        paramCount--;
+        if ((param->tag & HKS_TAG_TYPE_MASK) == HKS_TAG_TYPE_BYTES) {
+            HKS_FREE_PTR(param->blob.data);
+            param->blob.size = 0;
+        }
+        ++param;
+    }
+}
+
+napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &params)
+{
+    bool hasNextElement = false;
+    napi_value result = nullptr;
+    size_t index = 0;
+    while ((napi_has_element(env, object, index, &hasNextElement) == napi_ok) && hasNextElement) {
+        napi_value element = nullptr;
+        NAPI_CALL(env, napi_get_element(env, object, index, &element));
+
+        HksParam param = {0};
+        result = GetHksParam(env, element, param);
+        if (result == nullptr) {
+            HKS_LOG_E("get param failed when parse input params.");
+            return nullptr;
+        }
+
+        params.push_back(param);
+        index++;
+    }
     return GetInt32(env, 0);
 }
 
@@ -398,7 +439,8 @@ void FreeHksCertChain(HksCertChain *&certChain)
     certChain = nullptr;
 }
 
-napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_t size)
+napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *handle,
+    const struct HksBlob *token)
 {
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -407,19 +449,43 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, uint8_t *data, uint32_
     NAPI_CALL(env, napi_create_int32(env, error, &errorCode));
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_ERRORCODE.c_str(), errorCode));
 
-    if (data == nullptr) {
-        HKS_LOG_E("data: invalid pointer");
+    if (error != HKS_SUCCESS) {
+        HKS_LOG_E("init failed, ret = %d", error);
         return result;
     }
 
-    uint64_t tempHandle = *(uint64_t *)data;
-    uint32_t handle = (uint32_t)tempHandle; /* Temporarily only use 32 bit handle */
-    HKS_LOG_I("init handle:%u", handle);
+    if ((handle == nullptr) || (handle->data == nullptr) || (handle->size != sizeof(uint64_t))) {
+        HKS_LOG_E("invalid handle");
+        return result;
+    }
+
+    uint64_t tempHandle = *(uint64_t *)(handle->data);
+    uint32_t handleValue = (uint32_t)tempHandle; /* Temporarily only use 32 bit handle */
+    HKS_LOG_D("init handle:%u", handleValue);
 
     napi_value handlejs = nullptr;
-    NAPI_CALL(env, napi_create_uint32(env, handle, &handlejs));
+    NAPI_CALL(env, napi_create_uint32(env, handleValue, &handlejs));
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_HANDLE.c_str(), handlejs));
+
+    if (token == nullptr) {
+        HKS_LOG_E("invalid token");
+        return result;
+    }
+
+    napi_value tokenjs = nullptr;
+    if ((token->size != 0) && (token->data != nullptr)) {
+        napi_value outBuffer = GenerateAarrayBuffer(env, token->data, token->size);
+        if (outBuffer != nullptr) {
+            NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, token->size, outBuffer, 0, &tokenjs));
+        } else {
+            tokenjs = GetNull(env);
+        }
+    } else {
+        tokenjs = GetNull(env);
+    }
+    NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_TOKEN.c_str(), tokenjs));
 
     return result;
 }
 }  // namespace HuksNapi
+

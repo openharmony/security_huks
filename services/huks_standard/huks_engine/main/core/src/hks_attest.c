@@ -609,7 +609,8 @@ static int32_t EncodeClaims(const struct HksBlob *oid, const struct HksBlob *cla
 
 static int32_t CreateAttestExtension(const struct HksAttestSpec *attestSpec, struct HksBlob *extension)
 {
-    struct HksAttestExt tmplExt = {{0}};
+    struct HksAttestExt tmplExt;
+    (void)memset_s(&tmplExt, sizeof(struct HksAttestExt), 0, sizeof(struct HksAttestExt));
     struct HksBlob extensionTmpl = { sizeof(g_attestExtTmpl), (uint8_t *)g_attestExtTmpl };
     ParseAttestExtension(&extensionTmpl, &tmplExt);
     if (memcpy_s(extension->data, extension->size, extensionTmpl.data, extensionTmpl.size) != EOK) {
@@ -708,7 +709,8 @@ static void GetSignatureByAlg(uint32_t signAlg, struct HksAsn1Blob *sigature)
 static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestSpec *attestSpec,
     struct HksBlob *tbs, uint32_t signAlg)
 {
-    struct HksAttestTbsSpec draftTbs = {{0}};
+    struct HksAttestTbsSpec draftTbs;
+    (void)memset_s(&draftTbs, sizeof(struct HksAttestTbsSpec), 0, sizeof(struct HksAttestTbsSpec));
     ParseAttestTbs(template, &draftTbs);
     struct HksAsn1Blob sigature = { ASN_1_TAG_TYPE_SEQ, 0, NULL };
     GetSignatureByAlg(signAlg, &sigature);
@@ -720,7 +722,8 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
     struct HksAsn1Blob validBlob = { ASN_1_TAG_TYPE_RAW, validity.size, validity.data };
     draftTbs.validity.value = validBlob;
 
-    struct HksAttestCert devCert = {{0}};
+    struct HksAttestCert devCert;
+    (void)memset_s(&devCert, sizeof(struct HksAttestCert), 0, sizeof(struct HksAttestCert));
     ParseAttestCert(&attestSpec->devCert, &devCert);
     draftTbs.issuer = devCert.tbs.subject;
 
