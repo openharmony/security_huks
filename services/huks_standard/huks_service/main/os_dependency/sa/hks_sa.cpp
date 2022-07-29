@@ -50,41 +50,6 @@ using HksIpcHandlerFuncProc = void (*)(const struct HksBlob *msg, const uint8_t 
 using HksIpcThreeStageHandlerFuncProc = void (*)(const struct HksBlob *msg, struct HksBlob *outData,
     const uint8_t *context);
 
-enum HksMessage {
-    HKS_MSG_BASE = 0x3a400,
-
-    HKS_MSG_GEN_KEY = HKS_MSG_BASE,
-    HKS_MSG_IMPORT_KEY,
-    HKS_MSG_EXPORT_PUBLIC_KEY,
-    HKS_MSG_IMPORT_WRAPPED_KEY,
-    HKS_MSG_DELETE_KEY,
-    HKS_MSG_GET_KEY_PARAMSET,
-    HKS_MSG_KEY_EXIST,
-    HKS_MSG_GENERATE_RANDOM,
-    HKS_MSG_SIGN,
-    HKS_MSG_VERIFY,
-    HKS_MSG_ENCRYPT,
-    HKS_MSG_DECRYPT,
-    HKS_MSG_AGREE_KEY,
-    HKS_MSG_DERIVE_KEY,
-    HKS_MSG_MAC,
-    HKS_MSG_GET_KEY_INFO_LIST,
-    HKS_MSG_ATTEST_KEY,
-    HKS_MSG_GET_CERTIFICATE_CHAIN,
-    HKS_MSG_WRAP_KEY,
-    HKS_MSG_UNWRAP_KEY,
-    HKS_MSG_PROVISION,
-    HKS_MSG_PROVISION_VERIFY,
-    HKS_MSG_EXPORT_TRUST_CERTS,
-    HKS_MSG_INIT,
-    HKS_MSG_UPDATE,
-    HKS_MSG_FINISH,
-    HKS_MSG_ABORT,
-
-    /* new cmd type must be added before HKS_MSG_MAX */
-    HKS_MSG_MAX,
-};
-
 struct HksIpcEntryPoint {
     enum HksMessage msgId;
     HksIpcHandlerFuncProc handler;
@@ -260,6 +225,11 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     }
 
     HKS_LOG_I("OnRemoteRequest code:%d", code);
+    // check that the code is valid
+    if (code < MSG_CODE_BASE || code >= MSG_CODE_MAX) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+
     uint32_t outSize = (uint32_t)data.ReadUint32();
 
     struct HksBlob srcData = { 0, nullptr };
