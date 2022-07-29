@@ -27,7 +27,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "//base/security/huks/utils/list",
     "//base/security/huks/utils/mutex",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
   ]
   defines = [
     "L2_STANDARD",
@@ -59,8 +59,10 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-    "//utils/native/base:utils",
   ]
-  external_deps = [ "hitrace_native:libhitrace" ]
+  external_deps = [
+    "c_utils:utils",
+    "hitrace_native:libhitrace",
+  ]
   complete_static_lib = true
 }

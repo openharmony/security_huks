@@ -23,7 +23,7 @@ ohos_static_library("libhuks_mbedtls_standard_static") {
   public_configs = [ ":huks_config" ]
 
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/openssl/include/",
     "//third_party/openssl/crypto/ec/",
   ]

@@ -29,7 +29,7 @@ if (os_level == "standard") {
     ]
     include_dirs = [
       "//base/security/huks/utils/crypto_adapter",
-      "//utils/native/base/include",
+      "//commonlibrary/c_utils/base/include",
     ]
 
     sources = [
