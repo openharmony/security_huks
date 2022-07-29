@@ -45,7 +45,7 @@ ohos_unittest("hukssdk_test") {
   ]
 
   include_dirs = [
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "unittest/include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
@@ -60,8 +60,8 @@ ohos_unittest("hukssdk_test") {
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 
   if (support_jsapi) {
     deps += [

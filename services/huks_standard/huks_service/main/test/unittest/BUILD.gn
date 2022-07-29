@@ -46,12 +46,12 @@ ohos_unittest("huks_multithread_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/mutex",
-    "//utils/native/base/include",
+    "//commonlibrary/c_utils/base/include",
     "unittest/include",
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
+  external_deps = [ "c_utils:utils" ]
 }
