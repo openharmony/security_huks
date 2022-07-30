@@ -164,13 +164,18 @@ DECLARE_OID(hksDigest)
 DECLARE_TAG(hksPadding, ID_KEY_PROPERTY_PADDING)
 DECLARE_OID(hksPadding)
 
+#define ID_KEY_PROPERTY_SIGN_TYPE       ID_KEY_PROPERTIES, 0x0a
+#define ID_KEY_PROPERTY_SIGN_TYPE_SIZE      (ID_KEY_PROPERTIES_SIZE + 1)
+DECLARE_TAG(hksSignType, ID_KEY_PROPERTY_SIGN_TYPE)
+DECLARE_OID(hksSignType)
+
 #define ID_HUKS_PKI_OID     ID_HUKS_PKI, 0x01
 #define ID_HUKS_PKI_OID_SIZE    (ID_HUKS_PKI_SIZE + 1)
 
 #define ID_HUKS_ATTESTATION_EXTENSION       ID_HUKS_PKI_OID, 0x03
 #define ID_HUKS_ATTESTATION_EXTENSION_SIZE       (ID_HUKS_PKI_OID_SIZE + 1)
-DECLARE_TAG(hksHuaweiAttestationExtension, ID_HUKS_ATTESTATION_EXTENSION)
-DECLARE_OID(hksHuaweiAttestationExtension)
+DECLARE_TAG(hksAttestationExtension, ID_HUKS_ATTESTATION_EXTENSION)
+DECLARE_OID(hksAttestationExtension)
 
 #define ID_KEY_PROPERTY_GROUPS      ID_HUKS_ATTESTATION_BASE, 0x04
 #define ID_KEY_PROPERTY_GROUPS_SIZE     (ID_HUKS_ATTESTATION_BASE_SIZE + 1)
@@ -735,7 +740,7 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
         return ret;
     }
     uint8_t pubKeyDer[PUBKEY_DER_LEN] = {0};
-    struct HksBlob spkiBlob = {PUBKEY_DER_LEN, pubKeyDer };
+    struct HksBlob spkiBlob = { PUBKEY_DER_LEN, pubKeyDer };
     ret = HksGetPublicKey(&spkiBlob, (struct HksPubKeyInfo *)pubKeyBlob.data, &attestSpec->usageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("der public key failed!");
@@ -1110,11 +1115,27 @@ static int32_t BuildAttestMsgClaims(struct HksBlob *out, const struct HksParamSe
     return HKS_SUCCESS;
 }
 
-static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksUsageSpec *attetUsageSpec)
+static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSet *keyParamSet,
+    const struct HksUsageSpec *attetUsageSpec)
 {
     uint32_t secLevel = HKS_SECURITY_LEVEL_HIGH;
+
+    struct HksParam *signTypeParam = NULL;
+    uint32_t signType = 0;
+    int32_t ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SECURE_SIGN_TYPE, &signTypeParam);
+    if (ret == HKS_SUCCESS) {
+        signType = signTypeParam->uint32Param;
+    }
+    struct HksAsn1Blob signTypeBlob = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t), (uint8_t *)&signType };
+    ret = HksInsertClaim(out, &hksSignTypeOid, &signTypeBlob, secLevel);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("insert signType failed");
+        return ret;
+    }
+    HKS_LOG_I("attest key claims signType[%u] success", signType);
+
     bool isGroupInsert = false;
-    int32_t ret = InsertGroupClaim(&isGroupInsert, out, attetUsageSpec, secLevel);
+    ret = InsertGroupClaim(&isGroupInsert, out, attetUsageSpec, secLevel);
     if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_SUPPORTED) {
         HKS_LOG_E("insert group fail, ret %d\n", ret);
         return ret;
@@ -1225,7 +1246,8 @@ static int32_t BuildAttestDeviceClaims(struct HksBlob *out, const struct HksPara
     return ret;
 }
 
-static int32_t BuildAttestClaims(const struct HksParamSet *paramSet, struct HksAttestSpec *attestSpec)
+static int32_t BuildAttestClaims(const struct HksParamSet *paramSet, const struct HksParamSet *keyParamSet,
+    struct HksAttestSpec *attestSpec)
 {
     uint8_t *claims = HksMalloc(ATTEST_CLAIM_BUF_LEN + ASN_1_MAX_HEADER_LEN);
     if (claims == NULL) {
@@ -1251,7 +1273,7 @@ static int32_t BuildAttestClaims(const struct HksParamSet *paramSet, struct HksA
         return ret;
     }
 
-    ret = BuildAttestKeyClaims(&tmp, &attestSpec->usageSpec);
+    ret = BuildAttestKeyClaims(&tmp, keyParamSet, &attestSpec->usageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("build attest key claims fail\n");
         return ret;
@@ -1380,13 +1402,13 @@ static int32_t BuildAttestSpec(const struct HksKeyNode *keyNode, const struct Hk
         return ret;
     }
 
-    ret = BuildAttestClaims(paramSet, attestSpec);
+    ret = BuildAttestClaims(paramSet, keyNode->paramSet, attestSpec);
     if (ret != HKS_SUCCESS) {
         FreeAttestSpec(&attestSpec);
         return ret;
     }
 
-    attestSpec->claimsOid = hksHuaweiAttestationExtensionOid;
+    attestSpec->claimsOid = hksAttestationExtensionOid;
 
     ret = GetCertAndKey(keyNode, attestSpec);
     if (ret != HKS_SUCCESS) {
