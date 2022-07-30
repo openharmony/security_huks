@@ -13,14 +13,25 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_NAPI_UPDATE_H
-#define HUKS_NAPI_UPDATE_H
+#ifndef HKS_HISYSEVENT_TEST_COMMON_H
+#define HKS_HISYSEVENT_TEST_COMMON_H
 
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
+#include <stdint.h>
+#include <string>
 
-namespace HuksNapi {
-napi_value HuksNapiUpdate(napi_env env, napi_callback_info info);
-}  // namespace HuksNapi
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif  // HUKS_NAPI_UPDATE_H
+#define HKS_HISYSEVENT_QUERY_SUCCESS 0
+#define HKS_HISYSEVENT_QUERY_FAILED (-1)
+
+void HksHiSysEventQueryStart(void);
+
+int32_t HksHiSysEventQueryResult(const std::string funStr);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // HKS_HISYSEVENT_TEST_COMMON_H

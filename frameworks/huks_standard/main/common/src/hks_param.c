@@ -111,9 +111,9 @@ enum HksTag g_validTags[] = {
     HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA,
 };
 
-static enum HksTagType GetTagType(enum HksTag tag)
+enum HksTagType GetTagType(enum HksTag tag)
 {
-    return (enum HksTagType)((uint32_t)tag & HKS_TAG_TYPE_MASK);
+    return (enum HksTagType)((uint32_t)tag & (uint32_t)HKS_TAG_TYPE_MASK);
 }
 
 static bool IsValidTag(uint32_t tag)
@@ -161,7 +161,7 @@ static int32_t CheckBeforeAddParams(const struct HksParamSet *paramSet, const st
     }
 
     for (uint32_t i = 0; i < paramCnt; i++) {
-        if ((GetTagType(params[i].tag) == HKS_TAG_TYPE_BYTES) &&
+        if ((GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) &&
             (params[i].blob.data == NULL)) {
             HKS_LOG_E("invalid blob param!");
             return HKS_ERROR_INVALID_ARGUMENT;
@@ -214,14 +214,10 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
             HKS_LOG_E("invalid param set offset!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (GetTagType(paramSet->params[i].tag) == HKS_TAG_TYPE_BYTES) {
+        if (GetTagType((enum HksTag)(paramSet->params[i].tag)) == HKS_TAG_TYPE_BYTES) {
             if (IsAdditionOverflow(offset, paramSet->params[i].blob.size)) {
                 HKS_LOG_E("blob size overflow!");
                 return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            if (paramSet->params[i].blob.size == 0) {
-                HKS_LOG_E("paramSet->params[%d].blob.size == 0!", i);
-                continue;
             }
 
             if (isCopy && (memcpy_s((uint8_t *)paramSet + offset, size - offset,
@@ -283,7 +279,7 @@ HKS_API_EXPORT int32_t HksAddParams(struct HksParamSet *paramSet,
 
     for (uint32_t i = 0; i < paramCnt; i++) {
         paramSet->paramSetSize += sizeof(struct HksParam);
-        if (GetTagType(params[i].tag) == HKS_TAG_TYPE_BYTES) {
+        if (GetTagType((enum HksTag)(params[i].tag)) == HKS_TAG_TYPE_BYTES) {
             if (IsAdditionOverflow(paramSet->paramSetSize, params[i].blob.size)) {
                 HKS_LOG_E("params size overflow!");
                 paramSet->paramSetSize -= sizeof(struct HksParam);
@@ -331,7 +327,7 @@ int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
             HKS_LOG_E("invalid param set offset!");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (GetTagType(paramSet->params[i].tag) == HKS_TAG_TYPE_BYTES) {
+        if (GetTagType((enum HksTag)(paramSet->params[i].tag)) == HKS_TAG_TYPE_BYTES) {
             if (IsAdditionOverflow(offset, paramSet->params[i].blob.size)) {
                 HKS_LOG_E("blob size overflow!");
                 return HKS_ERROR_INVALID_ARGUMENT;
@@ -372,7 +368,6 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
         }
     }
 
-    HKS_LOG_E("param not exist!");
     return HKS_ERROR_PARAM_NOT_EXIST;
 }
 
@@ -408,7 +403,7 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    switch (GetTagType(baseParam->tag)) {
+    switch (GetTagType((enum HksTag)(baseParam->tag))) {
         case HKS_TAG_TYPE_INT:
             return (baseParam->int32Param == param->int32Param) ? HKS_SUCCESS : HKS_ERROR_INVALID_ARGUMENT;
         case HKS_TAG_TYPE_UINT:

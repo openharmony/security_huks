@@ -480,7 +480,7 @@ static int32_t IsValidAttestCert(struct HksAttestCert *cert)
 
 static void ParseAttestTbs(const struct HksBlob *template, struct HksAttestTbsSpec *tbsSpec)
 {
-    struct HksAsn1Obj obj = {0};
+    struct HksAsn1Obj obj = {{0}};
     struct HksBlob skip = { 0, NULL };
     int32_t ret = HksAsn1ExtractTag(&skip, &obj, template, ASN_1_TAG_TYPE_SEQ);
     struct HksBlob val = { obj.value.size, obj.value.data };
@@ -501,13 +501,13 @@ static void ParseAttestTbs(const struct HksBlob *template, struct HksAttestTbsSp
 
 static void ParseAttestCert(const struct HksBlob *devCert, struct HksAttestCert *cert)
 {
-    struct HksAsn1Obj obj = {0};
+    struct HksAsn1Obj obj = {{0}};
     struct HksBlob next = { 0, NULL };
 
     int32_t ret = HksAsn1ExtractTag(&next, &obj, devCert, ASN_1_TAG_TYPE_SEQ);
     struct HksBlob val = { obj.value.size, obj.value.data };
     ParseAttestTbs(&val, &cert->tbs);
-    struct HksAsn1Obj skip = {0};
+    struct HksAsn1Obj skip = {{0}};
     ret += HksAsn1ExtractTag(&val, &skip, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &cert->signAlg, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &cert->signature, &val, ASN_1_TAG_TYPE_BIT_STR);
@@ -609,7 +609,8 @@ static int32_t EncodeClaims(const struct HksBlob *oid, const struct HksBlob *cla
 
 static int32_t CreateAttestExtension(const struct HksAttestSpec *attestSpec, struct HksBlob *extension)
 {
-    struct HksAttestExt tmplExt = {0};
+    struct HksAttestExt tmplExt;
+    (void)memset_s(&tmplExt, sizeof(struct HksAttestExt), 0, sizeof(struct HksAttestExt));
     struct HksBlob extensionTmpl = { sizeof(g_attestExtTmpl), (uint8_t *)g_attestExtTmpl };
     ParseAttestExtension(&extensionTmpl, &tmplExt);
     if (memcpy_s(extension->data, extension->size, extensionTmpl.data, extensionTmpl.size) != EOK) {
@@ -708,7 +709,8 @@ static void GetSignatureByAlg(uint32_t signAlg, struct HksAsn1Blob *sigature)
 static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestSpec *attestSpec,
     struct HksBlob *tbs, uint32_t signAlg)
 {
-    struct HksAttestTbsSpec draftTbs = {0};
+    struct HksAttestTbsSpec draftTbs;
+    (void)memset_s(&draftTbs, sizeof(struct HksAttestTbsSpec), 0, sizeof(struct HksAttestTbsSpec));
     ParseAttestTbs(template, &draftTbs);
     struct HksAsn1Blob sigature = { ASN_1_TAG_TYPE_SEQ, 0, NULL };
     GetSignatureByAlg(signAlg, &sigature);
@@ -720,7 +722,8 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
     struct HksAsn1Blob validBlob = { ASN_1_TAG_TYPE_RAW, validity.size, validity.data };
     draftTbs.validity.value = validBlob;
 
-    struct HksAttestCert devCert = {0};
+    struct HksAttestCert devCert;
+    (void)memset_s(&devCert, sizeof(struct HksAttestCert), 0, sizeof(struct HksAttestCert));
     ParseAttestCert(&attestSpec->devCert, &devCert);
     draftTbs.issuer = devCert.tbs.subject;
 
@@ -762,7 +765,7 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
 
 static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *material)
 {
-    struct HksAsn1Obj obj = {0};
+    struct HksAsn1Obj obj = {{0}};
     struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)material->data;
 
     keyMaterial->keyAlg = HKS_ALG_RSA;
@@ -809,7 +812,7 @@ static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *materi
 
 static int32_t StepIntoPrivateKey(const struct HksBlob *key, struct HksBlob *val)
 {
-    struct HksAsn1Obj obj = {0};
+    struct HksAsn1Obj obj = {{0}};
     struct HksBlob skip = { 0, NULL };
     int32_t ret;
 
@@ -918,7 +921,7 @@ static int32_t CreateAttestCert(struct HksBlob *attestCert, struct HksBlob *temp
     }
 
     uint32_t certSize = tbs.size;
-    struct HksAsn1Obj obj = {0};
+    struct HksAsn1Obj obj = {{0}};
     struct HksBlob tmp = *attestCert;
     tmp.data += ATT_CERT_HEADER_SIZE + tbs.size;
     tmp.size -= ATT_CERT_HEADER_SIZE + tbs.size;
@@ -1335,6 +1338,10 @@ static void FreeAttestSpec(struct HksAttestSpec **attestSpec)
     if (spec->devKey.data != NULL) {
         (void)memset_s(spec->devKey.data, spec->devKey.size, 0, spec->devKey.size);
         HKS_FREE_PTR(spec->devKey.data);
+    }
+    if (spec->attestKey.data != NULL) {
+        (void)memset_s(spec->attestKey.data, spec->attestKey.size, 0, spec->attestKey.size);
+        HKS_FREE_PTR(spec->attestKey.data);
     }
     HksFree(spec);
     *attestSpec = NULL;

@@ -1114,8 +1114,7 @@ static int32_t TestAgree(const struct HksBlob *keyAlias, const struct HksBlob *p
             break;
         }
 
-        uint8_t tempBuf[LENGTH_MAX] = {0};
-        struct HksBlob tmpBlob = { LENGTH_MAX, tempBuf };
+        struct HksBlob tmpBlob = { 0, nullptr };
         ret = HksUpdate(&handle, updateParamSet, peerPubKey, &tmpBlob);
         if (ret != HKS_SUCCESS) {
             break;

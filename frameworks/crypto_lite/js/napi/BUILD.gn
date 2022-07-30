@@ -34,10 +34,12 @@ ohos_shared_library("cipher_napi") {
     "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
     "//foundation/arkui/napi:ace_napi",
     "//third_party/bounds_checking_function:libsec_shared",
-    "//utils/native/base:utils",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 
   cflags_cc = [
     "-Wall",
