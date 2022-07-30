@@ -31,6 +31,13 @@
 #define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
 #define HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL 1
 
+/* temporarily use default hard-coded AT key by disable HKS_SUPPORT_GET_AT_KEY.
+ * while in real scenario,it will generate random only in memory(in TEE)
+ * at every start after enable HKS_SUPPORT_GET_AT_KEY
+ */
+#define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
+#define HKS_DEFAULT_USER_AT_KEY_LEN 32
+
 struct HksKeyBlobInfo {
     uint8_t salt[HKS_KEY_BLOB_DERIVE_SALT_SIZE];
     uint8_t nonce[HKS_KEY_BLOB_NONCE_SIZE];
@@ -65,6 +72,7 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode)
 }
 
 #ifndef _STORAGE_LITE_
+
 static int32_t GetEncryptKey(struct HksBlob *mainKey)
 {
     return HksCryptoHalGetMainKey(NULL, mainKey);
