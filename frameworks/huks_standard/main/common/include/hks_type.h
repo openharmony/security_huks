@@ -59,6 +59,9 @@ extern "C" {
 #define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
 #define TOKEN_CHALLENGE_LEN 32
 #define SHA256_SIGN_LEN 32
+#define TOKEN_SIZE 32
+#define MAX_AUTH_TIMEOUT_SECOND 60
+#define SECURE_SIGN_VERSION 0x01000001
 
 
 enum HksStageType {
@@ -460,11 +463,17 @@ enum HksTag {
     HKS_TAG_PAYLOAD_LEN = HKS_TAG_TYPE_UINT | 10008,
     HKS_TAG_AE_TAG = HKS_TAG_TYPE_BYTES | 10009,
     HKS_TAG_IS_KEY_HANDLE = HKS_TAG_TYPE_ULONG | 10010,
-    HKS_TAG_KEY_INIT_CHALLENGE = HKS_TAG_TYPE_ULONG | 10011,
-    HKS_TAG_IS_SECURE_ACCESS = HKS_TAG_TYPE_BOOL | 10012,
+    HKS_TAG_KEY_INIT_CHALLENGE = HKS_TAG_TYPE_BYTES | 10011,
+    HKS_TAG_IS_USER_AUTH_ACCESS = HKS_TAG_TYPE_BOOL | 10012,
     HKS_TAG_USER_AUTH_CHALLENGE = HKS_TAG_TYPE_BYTES | 10013,
     HKS_TAG_USER_AUTH_ENROLL_ID_INFO = HKS_TAG_TYPE_BYTES | 10014,
     HKS_TAG_USER_AUTH_SECURE_UID = HKS_TAG_TYPE_BYTES | 10015,
+    HKS_TAG_KEY_AUTH_RESULT = HKS_TAG_TYPE_INT | 10016,
+    HKS_TAG_IF_NEED_APPEND_AUTH_INFO = HKS_TAG_TYPE_BOOL | 10017,
+    HKS_TAG_VERIFIED_AUTH_TOKEN = HKS_TAG_TYPE_BYTES | 10018,
+    HKS_TAG_IS_APPEND_UPDATE_DATA = HKS_TAG_TYPE_BOOL | 10019,
+    HKS_TAG_APPENDED_DATA_PREFIX = HKS_TAG_TYPE_BYTES | 10020,
+    HKS_TAG_APPENDED_DATA_SUFFIX = HKS_TAG_TYPE_BYTES | 10021,
 
     /* Os version related TAG */
     HKS_TAG_OS_VERSION = HKS_TAG_TYPE_UINT | 10101,
@@ -513,6 +522,7 @@ struct HksBlob {
 struct HksProcessInfo {
     struct HksBlob userId;
     struct HksBlob processName;
+    int32_t userIdInt;
 };
 
 struct HksParam {
@@ -608,9 +618,9 @@ struct HksKeyMaterialHeader {
     uint32_t keySize;
 };
 
-struct HksUserAuthToken {
+typedef struct __attribute__((__packed__)) HksUserAuthToken {
     uint32_t version;
-    uint8_t challenge[TOKEN_CHALLENGE_LEN];
+    uint8_t challenge[TOKEN_SIZE];
     uint64_t secureUid;
     uint64_t enrolledId;
     uint64_t credentialId;
@@ -620,7 +630,13 @@ struct HksUserAuthToken {
     uint32_t authMode;
     uint32_t securityLevel;
     uint8_t sign[SHA256_SIGN_LEN];
-};
+} __attribute__((__packed__)) HksUserAuthToken;
+
+typedef struct __attribute__((__packed__)) HksSecureSignAuthInfo {
+    uint32_t userAuthType;
+    uint64_t authenticatorId;
+    uint64_t credentialId;
+} __attribute__((__packed__)) HksSecureSignAuthInfo;
 
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64

@@ -63,6 +63,11 @@ struct ExpectParamsValuesChecker {
     const struct ExpectParamsValues paramValues;
 };
 
+struct AuthAccessTypeChecker {
+    enum HksUserAuthType userAuthType;
+    const struct ExpectParams allowAuthAccessTypes;
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
