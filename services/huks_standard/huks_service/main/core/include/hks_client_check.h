@@ -71,6 +71,9 @@ int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, con
 int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet);
 
+int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t *userAuthType,
+    uint32_t *authAccessType);
+
 #ifdef __cplusplus
 }
 #endif
