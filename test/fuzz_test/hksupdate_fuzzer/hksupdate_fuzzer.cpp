@@ -45,7 +45,7 @@ namespace OHOS {
         struct HksBlob outData = { BLOB_SIZE, (uint8_t *)(myData + DOUBLE_BLOB_SIZE) };
 
         struct HksParamSet *paramSet = (struct HksParamSet *)(myData + TRIPLE_BLOB_SIZE);
-        paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
+        paramSet->paramSetSize = size - TRIPLE_BLOB_SIZE;
 
         (void)HksUpdate(&handle, paramSet, &inData, &outData);
 

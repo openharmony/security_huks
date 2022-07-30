@@ -33,7 +33,6 @@ ohos_shared_library("huks") {
     "src/huks_napi_common.cpp",
     "src/huks_napi_delete_key.cpp",
     "src/huks_napi_export_key.cpp",
-    "src/huks_napi_finish.cpp",
     "src/huks_napi_generate_key.cpp",
     "src/huks_napi_get_certificate_chain.cpp",
     "src/huks_napi_get_key_properties.cpp",
@@ -43,14 +42,14 @@ ohos_shared_library("huks") {
     "src/huks_napi_init.cpp",
     "src/huks_napi_is_key_exist.cpp",
     "src/huks_napi_unwrap_key.cpp",
-    "src/huks_napi_update.cpp",
+    "src/huks_napi_update_finish.cpp",
     "src/huks_napi_wrap_key.cpp",
   ]
 
   external_deps = [
+    "c_utils:utils",
     "huks:libhukssdk",
     "napi:ace_napi",
-    "utils_base:utils",
   ]
   cflags_cc = [
     "-Wall",

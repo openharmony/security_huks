@@ -41,10 +41,10 @@ ohos_static_library("libhuks_os_dependency_standard_static") {
   ]
   deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
   external_deps = [
+    "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
-    "utils_base:utils",
   ]
   cflags_cc = [
     "-DHILOG_ENABLE",

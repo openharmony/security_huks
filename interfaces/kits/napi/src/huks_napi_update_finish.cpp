@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
-#include "huks_napi_update.h"
+#include "huks_napi_update_finish.h"
+
+#include <vector>
 
 #include "securec.h"
 
@@ -41,6 +43,7 @@ struct UpdateAsyncContextT {
     struct HksBlob *inData = nullptr;
     struct HksBlob *outData = nullptr;
     struct HksBlob *token = nullptr;
+    bool isUpdate = false;
 };
 using UpdateAsyncContext = UpdateAsyncContextT *;
 
@@ -116,7 +119,7 @@ static napi_value GetHandleValue(napi_env env, napi_value object, UpdateAsyncCon
     }
 
     uint64_t handle = handle1;
-    HKS_LOG_I("update handle:%u", handle1);
+    HKS_LOG_D("update handle:%u", handle1);
 
     context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
     if (context->handle == nullptr) {
@@ -131,6 +134,7 @@ static napi_value GetHandleValue(napi_env env, napi_value object, UpdateAsyncCon
         return nullptr;
     }
     (void)memcpy_s(context->handle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
+
     return GetInt32(env, 0);
 }
 
@@ -148,21 +152,195 @@ static int32_t FillContextInDataAndOutData(napi_env env, napi_value *argv, Updat
         }
     } else {
         context->inData->size = 0;
-        context->inData->data = (uint8_t *)HksMalloc(1);
-        if (context->inData->data == nullptr) {
-            HKS_LOG_E("could not alloc memory");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        context->inData->data = nullptr;
     }
 
     context->outData->size = context->inData->size + DATA_SIZE_64KB;
-    context->outData->data = (uint8_t *)HksMalloc(context->outData->size + DATA_SIZE_64KB);
+    context->outData->data = (uint8_t *)HksMalloc(context->outData->size);
     if (context->outData->data == nullptr) {
         HKS_LOG_E("malloc memory failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
 
     return HKS_SUCCESS;
+}
+
+static int32_t FillContextInDataAndOutBlob(napi_env env, napi_value *argv, UpdateAsyncContext context, size_t index)
+{
+    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->outData == nullptr) {
+        HKS_LOG_E("could not alloc out blob memory");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->inData == nullptr) {
+        HKS_LOG_E("could not alloc in blob memory");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    int32_t ret = FillContextInDataAndOutData(env, argv, context, index);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("fill data failed");
+    }
+    return ret;
+}
+
+static int32_t CheckIsCallbackFuction(napi_env env, napi_value object, bool &isFunc)
+{
+    isFunc = false;
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, object, &valueType);
+    if (status != napi_ok) {
+        HKS_LOG_E("could not get object type");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (valueType == napi_function) {
+        isFunc = true;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t GetCallBackFunction(napi_env env, napi_value object, UpdateAsyncContext context)
+{
+    napi_ref ref = nullptr;
+    napi_status status = napi_create_reference(env, object, 1, &ref);
+    if (status != napi_ok) {
+        HKS_LOG_E("could not create reference");
+        return HKS_ERROR_BAD_STATE;
+    }
+    context->callback = ref;
+    return HKS_SUCCESS;
+}
+
+static int32_t GetToken(napi_env env, napi_value object, UpdateAsyncContext context)
+{
+    context->token = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->token == nullptr) {
+        HKS_LOG_E("could not alloc token blob memory");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(context->token, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    napi_value result = GetUint8Array(env, object, *(context->token));
+    if (result == nullptr) {
+        HKS_LOG_E("could not get token data");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncContext context,
+    size_t index, size_t maxIndex)
+{
+    if (index >= maxIndex) { /* only 2 input params */
+        return HKS_SUCCESS;
+    }
+
+    /*
+     * check wether arg 3 is callback: if true, get callback function and return;
+     * else get token, then check wether has arg 4: if true, get arg 4 as callback function
+     */
+    bool isFunc = false;
+    int32_t ret = CheckIsCallbackFuction(env, argv[index], isFunc);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    if (isFunc) {
+        return GetCallBackFunction(env, argv[index], context); /* return if arg 3 is callback */
+    }
+
+    /* get token */
+    ret = GetToken(env, argv[index], context);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    index++;
+    if (index < maxIndex) { /* has arg 4: can only be callback */
+        ret = CheckIsCallbackFuction(env, argv[index], isFunc);
+        if (ret != HKS_SUCCESS || !isFunc) {
+            HKS_LOG_E("check param4 failed[ret = %d], or param4 is not func.", ret);
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        return GetCallBackFunction(env, argv[index], context);
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet *&paramSet)
+{
+    const HksParam *param = params.data();
+    size_t paramCount = params.size();
+    if (param == nullptr) {
+        return HKS_SUCCESS;
+    }
+
+    for (size_t i = 0; i < paramCount; ++i) {
+        int32_t ret = HksAddParams(paramSet, param, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add param[%u] failed", i);
+            return ret;
+        }
+        param++;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t GetInputParamSet(napi_env env, napi_value object, struct HksBlob *&token, HksParamSet *&paramSet)
+{
+    std::vector<HksParam> params;
+    napi_value result = ParseParams(env, object, params);
+    if (result == nullptr) {
+        HKS_LOG_E("parse params failed");
+        FreeParsedParams(params);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    HksParamSet *outParamSet = nullptr;
+    int32_t ret;
+    do {
+        ret = HksInitParamSet(&outParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("init paramSet failed");
+            break;
+        }
+
+        if (CheckBlob(token) == HKS_SUCCESS) { /* has token param */
+            HksParam tokenParam = {
+                .tag = HKS_TAG_AUTH_TOKEN,
+                .blob = *token
+            };
+            ret = HksAddParams(outParamSet, &tokenParam, 1);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("add token param failed.");
+                break;
+            }
+        }
+
+        ret = AddParams(params, outParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add params failed");
+            break;
+        }
+
+        ret = HksBuildParamSet(&outParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("build params failed");
+            break;
+        }
+    } while (0);
+    FreeParsedParams(params);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&outParamSet);
+    }
+    paramSet = outParamSet;
+    return ret;
 }
 
 static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, UpdateAsyncContext context)
@@ -178,7 +356,6 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     }
 
     size_t index = 0;
-
     napi_value result = GetHandleValue(env, argv[index], context);
     if (result == nullptr) {
         HKS_LOG_E("could not get handle value");
@@ -194,33 +371,21 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
-    result = ParseHksParamSet(env, properties, context->paramSet);
-    if (result == nullptr) {
+
+    if (FillContextInDataAndOutBlob(env, argv, context, index) != HKS_SUCCESS) {
+        HKS_LOG_E("fill in or out blob failed");
+        return nullptr;
+    }
+
+    index++;
+    if (GetTokenOrCallback(env, argv, context, index, argc) != HKS_SUCCESS) {
+        HKS_LOG_E("get token or callback failed");
+        return nullptr;
+    }
+
+    if (GetInputParamSet(env, properties, context->token, context->paramSet) != HKS_SUCCESS) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
-    }
-
-    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->outData == nullptr) {
-        HKS_LOG_E("could not alloc memory");
-        return nullptr;
-    }
-
-    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->inData == nullptr) {
-        HKS_LOG_E("could not alloc memory");
-        return nullptr;
-    }
-    (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
-    (void)memset_s(context->inData, sizeof(HksBlob), 0, sizeof(HksBlob));
-
-    if (FillContextInDataAndOutData(env, argv, context, index) != HKS_SUCCESS) {
-        HKS_LOG_E("fill data failed");
-        return nullptr;
-    }
-
-    if (++index < argc) {
-        context->callback = GetCallback(env, argv[index]);
     }
 
     return GetInt32(env, 0);
@@ -234,7 +399,7 @@ static napi_value UpdateWriteResult(napi_env env, UpdateAsyncContext context)
         (context->result == HKS_SUCCESS && context->outData != nullptr) ? context->outData->size : 0);
 }
 
-static napi_value UpdateAsyncWork(napi_env env, UpdateAsyncContext context)
+static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
@@ -251,7 +416,11 @@ static napi_value UpdateAsyncWork(napi_env env, UpdateAsyncContext context)
         [](napi_env env, void *data) {
             UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
 
-            context->result = HksUpdate(context->handle, context->paramSet, context->inData, context->outData);
+            if (context->isUpdate) {
+                context->result = HksUpdate(context->handle, context->paramSet, context->inData, context->outData);
+            } else {
+                context->result = HksFinish(context->handle, context->paramSet, context->inData, context->outData);
+            }
         },
         [](napi_env env, napi_status status, void *data) {
             UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
@@ -295,8 +464,34 @@ napi_value HuksNapiUpdate(napi_env env, napi_callback_info info)
         DeleteUpdateAsyncContext(env, context);
         return nullptr;
     }
+    context->isUpdate = true;
 
-    result = UpdateAsyncWork(env, context);
+    result = UpdateFinishAsyncWork(env, context);
+    if (result == nullptr) {
+        HKS_LOG_E("could not start async work");
+        DeleteUpdateAsyncContext(env, context);
+        return nullptr;
+    }
+    return result;
+}
+
+napi_value HuksNapiFinish(napi_env env, napi_callback_info info)
+{
+    UpdateAsyncContext context = CreateUpdateAsyncContext();
+    if (context == nullptr) {
+        HKS_LOG_E("could not create context");
+        return nullptr;
+    }
+
+    napi_value result = ParseUpdateParams(env, info, context);
+    if (result == nullptr) {
+        HKS_LOG_E("could not parse params");
+        DeleteUpdateAsyncContext(env, context);
+        return nullptr;
+    }
+    context->isUpdate = false;
+
+    result = UpdateFinishAsyncWork(env, context);
     if (result == nullptr) {
         HKS_LOG_E("could not start async work");
         DeleteUpdateAsyncContext(env, context);

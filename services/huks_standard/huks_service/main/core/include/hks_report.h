@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_NAPI_FINISH_H
-#define HUKS_NAPI_FINISH_H
+#ifndef HKS_REPORT_H
+#define HKS_REPORT_H
 
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
+#include "hks_type.h"
 
-namespace HuksNapi {
-napi_value HuksNapiFinish(napi_env env, napi_callback_info info);
-}  // namespace HuksNapi
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-#endif  // HUKS_NAPI_FINISH_H
+void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSetIn, int32_t errorCode);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif  // HKS_RW_LOCK_H

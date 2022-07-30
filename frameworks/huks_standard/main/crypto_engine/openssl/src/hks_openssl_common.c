@@ -101,7 +101,6 @@ int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *main
         HKS_LOG_E("memcpy failed, get stub main key failed");
         return HKS_ERROR_BAD_STATE;
     }
-    HKS_LOG_I("use stub main key");
     return HKS_SUCCESS;
 #endif
 }
