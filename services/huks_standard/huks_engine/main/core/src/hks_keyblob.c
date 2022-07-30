@@ -31,6 +31,13 @@
 #define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
 #define HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL 1
 
+/* temporarily use default hard-coded AT key by disable HKS_SUPPORT_GET_AT_KEY.
+ * while in real scenario,it will generate random only in memory(in TEE)
+ * at every start after enable HKS_SUPPORT_GET_AT_KEY
+ */
+#define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
+#define HKS_DEFAULT_USER_AT_KEY_LEN 32
+
 struct HksKeyBlobInfo {
     uint8_t salt[HKS_KEY_BLOB_DERIVE_SALT_SIZE];
     uint8_t nonce[HKS_KEY_BLOB_NONCE_SIZE];
@@ -65,6 +72,7 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode)
 }
 
 #ifndef _STORAGE_LITE_
+
 static int32_t GetEncryptKey(struct HksBlob *mainKey)
 {
     return HksCryptoHalGetMainKey(NULL, mainKey);
@@ -504,6 +512,40 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     return HKS_SUCCESS;
 }
 
+int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
+{
+    if (authToken == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint8_t hmacKey[HKS_KEY_BLOB_AT_HMAC_KEY_BYTES] = {0};
+    struct HksBlob macKeyBlob = { HKS_KEY_BLOB_AT_HMAC_KEY_BYTES, hmacKey };
+
+    int32_t ret = HksGetAuthTokenKey(&macKeyBlob);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get authtoken key failed");
+        return ret;
+    }
+
+    uint32_t authTokenDataSize = sizeof(struct HksUserAuthToken) - SHA256_SIGN_LEN;
+    struct HksBlob srcDataBlob = { authTokenDataSize, (uint8_t *)authToken };
+    
+    uint8_t computedMac[SHA256_SIGN_LEN] = {0};
+    struct HksBlob macBlob = { SHA256_SIGN_LEN, computedMac };
+    ret = HksCryptoHalHmac(&macKeyBlob, HKS_DIGEST_SHA256, &srcDataBlob, &macBlob);
+    (void)memset_s(hmacKey, sizeof(hmacKey), 0, sizeof(hmacKey));
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("compute authtoken data mac failed!");
+        return ret;
+    }
+
+    ret = HksMemCmp(computedMac, (uint8_t *)authToken + authTokenDataSize, SHA256_SIGN_LEN);
+    if (ret != 0) {
+        HKS_LOG_E("compute authtoken data mac failed!");
+        return HKS_ERROR_KEY_AUTH_FAILED;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
@@ -552,6 +594,121 @@ int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSe
 {
     return DecryptKeyBlob(aad, paramSet);
 }
-#endif
+
+#endif /* STORAGE_LITE */
+
+#ifndef HKS_SUPPORT_GET_AT_KEY
+static struct HksBlob g_cachedAuthTokenKey = {
+    .size = (uint32_t)HKS_DEFAULT_USER_AT_KEY_LEN,
+    .data = (uint8_t *)HKS_DEFAULT_USER_AT_KEY
+};
+int32_t HksCoreInitAuthTokenKey()
+{
+    HKS_LOG_I("generate At key success!");
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
+{
+    if (CheckBlob(authTokenKey) != HKS_SUCCESS) {
+        HKS_LOG_E("authTokenKey param is invalid!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (CheckBlob(&g_cachedAuthTokenKey) != HKS_SUCCESS) {
+        HKS_LOG_E("cached auth token key is invalid!");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (authTokenKey->size < g_cachedAuthTokenKey.size) {
+        HKS_LOG_E("buffer is too small");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    if (memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size) != EOK) {
+        HKS_LOG_E("copy memory failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    authTokenKey->size = g_cachedAuthTokenKey.size;
+
+    return HKS_SUCCESS;
+}
+#else
+static HksMutex *g_genAtKeyMutex = NULL;
+static struct HksBlob g_cachedAuthTokenKey = { 0, NULL };
+static volatile bool g_isInitAuthTokenKey = false;
+
+static int32_t GenerateAuthTokenKey()
+{
+    struct HksKeySpec spec = { HKS_ALG_HMAC, HKS_KEY_BLOB_AT_HMAC_KEY_SIZE, NULL };
+    int32_t ret = HksCryptoHalGenerateKey(&spec, &g_cachedAuthTokenKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("generate hmac key failed!");
+    }
+    return ret;
+}
+
+int32_t HksCoreInitAuthTokenKey()
+{
+    if (g_isInitAuthTokenKey == false) {
+        if (GenerateAuthTokenKey() == HKS_SUCCESS) {
+            HKS_LOG_I("generate At key success!");
+            g_isInitAuthTokenKey = true;
+            return HKS_SUCCESS;
+        }
+    }
+
+    HKS_LOG_E("generate auth token key failed at core init stage");
+    g_isInitAuthTokenKey = false;
+
+    if (g_genAtKeyMutex == NULL) {
+        g_genAtKeyMutex = HksMutexCreate();
+    }
+
+    if (g_genAtKeyMutex == NULL) {
+        HKS_LOG_I("create mutex failed!");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    // here we return success for we could generate later at usage stage
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
+{
+    if (CheckBlob(authTokenKey) != HKS_SUCCESS) {
+        HKS_LOG_E("authTokenKey param is invalid!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    
+    if (g_isInitAuthTokenKey == false) {
+        (void)HksMutexLock(g_genAtKeyMutex);
+
+        // double check for avoid duplicate create in multi thread case
+        if (g_isInitAuthTokenKey == false) {
+            if (GenerateAuthTokenKey() != HKS_SUCCESS) {
+                HKS_LOG_E("generate auth token key failed");
+                (void)HksMutexUnLock(g_genAtKeyMutex);
+                return ret;
+            }
+            HKS_LOG_I("generate At key success!");
+            g_isInitAuthTokenKey = true;
+        }
+        (void)HksMutexUnLock(g_genAtKeyMutex);
+    }
+
+    if (authTokenKey->size < g_cachedAuthTokenKey.size) {
+        HKS_LOG_E("buffer is too small");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    if (memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size) != EOK) {
+        HKS_LOG_E("copy memory failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    authTokenKey->size = g_cachedAuthTokenKey.size;
+    return HKS_SUCCESS;
+}
+#endif /* HKS_SUPPORT_GET_AT_KEY */
 
 #endif /* _CUT_AUTHENTICATE_ */

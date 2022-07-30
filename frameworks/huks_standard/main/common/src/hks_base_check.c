@@ -623,6 +623,48 @@ static uint32_t g_invalidPurpose[][2] = {
 };
 #endif
 
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static const uint32_t g_userAuthChallengeType[] = {
+    HKS_CHALLENGE_TYPE_NORMAL,
+    HKS_CHALLENGE_TYPE_CUSTOM,
+    HKS_CHALLENGE_TYPE_NONE,
+};
+
+static const uint32_t g_validBiometricAuthAccessType[] = {
+    HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL
+};
+
+static const uint32_t g_validPinAuthAccessType[] = {
+    HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
+};
+
+static const struct AuthAccessTypeChecker g_expectAuthAccessParams[] = {
+    { HKS_USER_AUTH_TYPE_FACE,
+        { true, g_validBiometricAuthAccessType, HKS_ARRAY_SIZE(g_validBiometricAuthAccessType)}
+    },
+    { HKS_USER_AUTH_TYPE_FINGERPRINT,
+        { true, g_validBiometricAuthAccessType, HKS_ARRAY_SIZE(g_validBiometricAuthAccessType)}
+    },
+    { HKS_USER_AUTH_TYPE_PIN,
+        { true, g_validPinAuthAccessType, HKS_ARRAY_SIZE(g_validPinAuthAccessType)}
+    }
+};
+
+static const uint32_t g_supportUserAuthTypes[] = {
+    HKS_USER_AUTH_TYPE_PIN,
+    HKS_USER_AUTH_TYPE_FINGERPRINT,
+    HKS_USER_AUTH_TYPE_FACE,
+    HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FINGERPRINT,
+    HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FACE,
+    HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT,
+    HKS_USER_AUTH_TYPE_PIN | HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT
+};
+
+static const uint32_t g_supportSecureSignType[] = {
+    HKS_SECURE_SIGN_WITH_AUTHINFO
+};
+#endif
+
 #ifndef _CUT_AUTHENTICATE_
 #ifndef _STORAGE_LITE_
 static int32_t CheckAndGetKeySize(const struct HksBlob *key, const uint32_t *expectKeySize,
@@ -1338,14 +1380,12 @@ static int32_t CheckSm4Padding(uint32_t mode, uint32_t padding)
 
 int32_t HksCheckValue(uint32_t inputValue, const uint32_t *expectValues, uint32_t valuesCount)
 {
-    int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     for (uint32_t i = 0; i < valuesCount; ++i) {
         if (inputValue == expectValues[i]) {
-            ret = HKS_SUCCESS;
-            break;
+            return HKS_SUCCESS;
         }
     }
-    return ret;
+    return HKS_ERROR_INVALID_ARGUMENT;
 }
 
 #ifndef _CUT_AUTHENTICATE_
@@ -1748,4 +1788,62 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
     }
 #endif
     return HKS_SUCCESS;
+}
+
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static int32_t HasValidAuthAccessType(const struct ExpectParams allowAuthAccessTypes, uint32_t authAccessType)
+{
+    for (uint32_t i = 0; i < allowAuthAccessTypes.valueCnt; i++) {
+        if ((authAccessType & allowAuthAccessTypes.values[i]) != 0) {
+            return HKS_SUCCESS;
+        }
+    }
+    return HKS_ERROR_INVALID_ARGUMENT;
+}
+
+static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint32_t authAccessType)
+{
+    uint32_t valuesCnt = HKS_ARRAY_SIZE(g_expectAuthAccessParams);
+    for (uint32_t i = 0; i < valuesCnt; i++) {
+        struct AuthAccessTypeChecker checker = g_expectAuthAccessParams[i];
+        if ((checker.userAuthType & userAuthType) != 0 &&
+            HasValidAuthAccessType(checker.allowAuthAccessTypes, authAccessType) != HKS_SUCCESS) {
+            HKS_LOG_E("check access type valid failed");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, uint32_t challengeType)
+{
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+    int32_t ret = HksCheckValue(userAuthType, g_supportUserAuthTypes, HKS_ARRAY_SIZE(g_supportUserAuthTypes));
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = HksCheckValue(challengeType, g_userAuthChallengeType, HKS_ARRAY_SIZE(g_userAuthChallengeType));
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    return HksCheckAuthAccessTypeByUserAuthType(userAuthType, authAccessType);
+#else
+    (void)userAuthType;
+    (void)authAccessType;
+    (void)challengeType;
+    return HKS_SUCCESS;
+#endif
+}
+
+int32_t HksCheckSecureSignParams(uint32_t secureSignType)
+{
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+    return HksCheckValue(secureSignType, g_supportSecureSignType, HKS_ARRAY_SIZE(g_supportSecureSignType));
+#else
+    (void)secureSignType;
+    return HKS_SUCCESS;
+#endif
 }

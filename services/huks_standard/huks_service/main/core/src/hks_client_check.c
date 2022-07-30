@@ -19,6 +19,8 @@
 
 #include "hks_common_check.h"
 #include "hks_log.h"
+#include "hks_param.h"
+#include "hks_base_check.h"
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
@@ -209,3 +211,100 @@ int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, con
     return HksCheckGenAndImportKeyParams(processName, keyAlias, paramSet, certChain);
 }
 #endif
+
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, uint32_t userAuthType,
+    uint32_t authAccessType, uint32_t challengeType)
+{
+    int32_t ret = HksCheckUserAuthParams(userAuthType, authAccessType, challengeType);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check user auth params failed");
+        return ret;
+    }
+
+    if (challengeType == HKS_CHALLENGE_TYPE_NONE) {
+        struct HksParam *authTimeout = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_AUTH_TIMEOUT, &authTimeout);
+        if (ret == HKS_SUCCESS) {
+            if (authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND || authTimeout->uint32Param == 0) {
+                HKS_LOG_E("invalid auth timeout param");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+
+    struct HksParam *secureSignType = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_SECURE_SIGN_TYPE, &secureSignType);
+    if (ret == HKS_SUCCESS) {
+        ret = HksCheckSecureSignParams(secureSignType->uint32Param);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("secure sign type is invalid");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        /* secure sign ability only support sign-purpose algorithm */
+        struct HksParam *purposeParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
+        if (ret != HKS_SUCCESS || (purposeParam->uint32Param & HKS_KEY_PURPOSE_SIGN) == 0) {
+            HKS_LOG_E("secure sign tag only support sign-purpose alg");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t *userAuthType,
+    uint32_t *authAccessType)
+{
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+    if (paramSet == NULL) {
+        HKS_LOG_I("null init paramSet: not support user auth!");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    struct HksParam *noRequireAuth = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_NO_AUTH_REQUIRED, &noRequireAuth);
+    if (ret == HKS_SUCCESS && noRequireAuth->boolParam == true) {
+        HKS_LOG_I("no require auth=true");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    struct HksParam *userAuthTypeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("no user auth type param: not support user auth!");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    struct HksParam *accessTypeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get auth access type param failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksParam *challengeTypeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &challengeTypeParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get challenge type param failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = CheckUserAuthParamsValidity(paramSet, userAuthTypeParam->uint32Param, accessTypeParam->uint32Param,
+        challengeTypeParam->uint32Param);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check user auth params validity failed");
+        return ret;
+    }
+
+    *userAuthType = userAuthTypeParam->uint32Param;
+    *authAccessType = accessTypeParam->uint32Param;
+    return HKS_SUCCESS;
+#else
+    (void)paramSet;
+    (void)userAuthType;
+    (void)authAccessType;
+    return HKS_SUCCESS;
+#endif
+}
