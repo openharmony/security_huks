@@ -19,7 +19,17 @@
 #include "hks_type.h"
 #include "securec.h"
 
-#define HANDLE_SIZE          8
-#define TOKEN_SIZE           32
+#define HANDLE_SIZE              8
+#define DEFAULT_AUTH_TIMEOUT     5
+
+/* EnrolledIdInfo stored format: |-enrolledId len-|-enrolledId1 type-|-enrolledId1 value-|...|  */
+#define ENROLLED_ID_INFO_MIN_LEN  (sizeof(uint32_t) + (sizeof(uint32_t) + sizeof(uint64_t)))
+
+enum HksUserAuthResult {
+    HKS_AUTH_RESULT_NONE = -2, // not support user auth
+    HKS_AUTH_RESULT_INIT = -1,
+    HKS_AUTH_RESULT_SUCCESS = 0,
+    HKS_AUTH_RESULT_FAILED = 1,
+};
 
 #endif /* HKS_TYPE_INNER_H */

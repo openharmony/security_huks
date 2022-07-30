@@ -29,7 +29,25 @@
 struct HuksKeyNode {
     struct DoubleList listHead;
     struct HksParamSet *keyBlobParamSet;
-    struct HksParamSet *runtimeParamSet;
+    
+    /**
+     * @brief used to cache params of caller and state or temp prop in memory during using key
+     * CURRENT state:
+     * uint64_t crypto_ctx;     // crypto engine context
+     */
+    struct HksParamSet *runtimeParamSet; // only used to store caller's paramset
+
+    /**
+     * @brief used to cache params of caller and state or temp prop in memory during using key
+     * CURRENT state:
+     * bool     isSecureAccess; // is set secure access
+     * bool     isSupportSecureSign; // is set secure sign tag
+     * bool     isAppendUpdateData;  // is append update data for auth info
+     * uint8 challenge[TOKEN_SIZE];// key challenge(token)
+     * uint32_t accessTime;     // key init access timestamp in second
+     * int32_t keyAuthResult;   // key auth result cache
+     */
+    struct HksParamSet *authRuntimeParamSet;
     uint64_t handle;
 };
 
