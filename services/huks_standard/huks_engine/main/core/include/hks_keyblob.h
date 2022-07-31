@@ -53,6 +53,12 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
 
 int32_t HksGetEncryptKey(struct HksBlob *mainKey);
 
+int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey);
+
+int32_t HksCoreInitAuthTokenKey(void);
+
+int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken);
+
 int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey);
 
 int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, struct HksParamSet **paramSet);
