@@ -38,6 +38,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_secure_access.h"
 #include "securec.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
@@ -1406,6 +1407,12 @@ int32_t HksCoreModuleInit(void)
         HKS_LOG_E("Hks init crypto ability failed, ret = %d", ret);
         return ret;
     }
+
+    ret = HksCoreInitAuthTokenKey();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Hks init auth token key failed, ret = %d", ret);
+        return ret;
+    }
 #ifndef _HARDWARE_ROOT_KEY_
     ret = HksRkcInit();
     if (ret != HKS_SUCCESS) {
@@ -1544,8 +1551,6 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         return HKS_FAILURE;
     }
 
-    token->size = 0; /* if no need token param, set token size 0 */
-
     if (handle->size < sizeof(uint64_t)) {
         HKS_LOG_E("handle size is too small, size : %u", handle->size);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -1562,6 +1567,13 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
 
     int32_t ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
+        return ret;
+    }
+
+    ret = HksCoreSecureAccessInitParams(keyNode, paramSet, token);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("init secure access params failed");
         HksDeleteKeyNode(keyNode->handle);
         return ret;
     }
@@ -1592,6 +1604,30 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     return ret;
 }
 
+static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_t *sessionId,
+    struct HuksKeyNode **keyNode, uint32_t *pur, uint32_t *alg)
+{
+    if (handle == NULL || sessionId == NULL || keyNode == NULL) {
+        HKS_LOG_E("invalid input for GetSessionAndKeyNode");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (memcpy_s(sessionId, sizeof(*sessionId), handle->data, handle->size) != EOK) {
+        HKS_LOG_E("memcpy handle value fail");
+        return HKS_FAILURE;
+    }
+    *keyNode = HksQueryKeyNode(*sessionId);
+    if (*keyNode == NULL) {
+        HKS_LOG_E("HksCoreUpdate query keynode failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+    int32_t ret = GetPurposeAndAlgorithm((*keyNode)->runtimeParamSet, pur, alg);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(*sessionId);
+        return ret;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
@@ -1605,20 +1641,18 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     uint64_t sessionId;
-    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size) != EOK) {
-        HKS_LOG_E("memcpy handle value fail");
-        return HKS_FAILURE;
+    struct HuksKeyNode *keyNode = NULL;
+
+    int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode, &pur, &alg);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("GetParamsForCoreUpdate failed");
+        return ret;
     }
 
-    struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
-    if (keyNode == NULL) {
-        HKS_LOG_E("HksCoreUpdate query keynode failed");
-        return HKS_ERROR_BAD_STATE;
-    }
-
-    int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("HksCoreUpdate secure access verify failed");
         return ret;
     }
 
@@ -1626,7 +1660,17 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     uint32_t size = HKS_ARRAY_SIZE(g_hksCoreUpdateHandler);
     for (i = 0; i < size; i++) {
         if (g_hksCoreUpdateHandler[i].pur == pur) {
-            ret = g_hksCoreUpdateHandler[i].handler(keyNode, paramSet, inData, outData, alg);
+            struct HksBlob appendInData = { 0, NULL };
+            ret = HksCoreAppendAuthInfoBeforeUpdate(keyNode, pur, paramSet, inData, &appendInData);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("before update: append auth info failed");
+                break;
+            }
+            ret = g_hksCoreUpdateHandler[i].handler(keyNode, paramSet,
+                appendInData.data == NULL ? inData : &appendInData, outData, alg);
+            if (appendInData.data != NULL) {
+                HKS_FREE_BLOB(appendInData);
+            }
             break;
         }
     }
@@ -1651,7 +1695,6 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     HKS_LOG_D("HksCoreFinish in Core start");
     uint32_t pur = 0;
     uint32_t alg = 0;
-    int32_t ret;
 
     if (handle == NULL || paramSet == NULL || inData == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
@@ -1659,20 +1702,18 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     uint64_t sessionId;
-    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size)) {
-        HKS_LOG_E("memcpy handle fail");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    struct HuksKeyNode *keyNode = NULL;
+
+    int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode, &pur, &alg);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("GetParamsForCoreUpdate failed");
+        return ret;
     }
 
-    struct HuksKeyNode *keyNode = HksQueryKeyNode(sessionId);
-    if (keyNode == NULL) {
-        HKS_LOG_E("Cipher generate keynode failed");
-        return HKS_ERROR_BAD_STATE;
-    }
-
-    ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("HksCoreFinish secure access verify failed");
         return ret;
     }
 
@@ -1680,7 +1721,22 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     uint32_t size = HKS_ARRAY_SIZE(g_hksCoreFinishHandler);
     for (i = 0; i < size; i++) {
         if (g_hksCoreFinishHandler[i].pur == pur) {
-            ret = g_hksCoreFinishHandler[i].handler(keyNode, paramSet, inData, outData, alg);
+            uint32_t outDataBufferSize = (outData == NULL) ? 0 : outData->size;
+            struct HksBlob appendInData = { 0, NULL };
+            ret = HksCoreAppendAuthInfoBeforeFinish(keyNode, pur, paramSet, inData, &appendInData);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("before finish: append auth info failed");
+                break;
+            }
+            ret = g_hksCoreFinishHandler[i].handler(keyNode, paramSet,
+                appendInData.data == NULL ? inData : &appendInData, outData, alg);
+            if (appendInData.data != NULL) {
+                HKS_FREE_BLOB(appendInData);
+            }
+            if (ret != HKS_SUCCESS) {
+                break;
+            }
+            ret = HksCoreAppendAuthInfoAfterFinish(keyNode, pur, paramSet, outDataBufferSize, outData);
             break;
         }
     }

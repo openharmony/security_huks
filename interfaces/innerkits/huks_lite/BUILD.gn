@@ -38,6 +38,7 @@ huks_sources = [
   "../../../services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
+  "../../../services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_info.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_client_check.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c",

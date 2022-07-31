@@ -918,7 +918,8 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
         HKS_LOG_E("copy handle failed");
         return HKS_ERROR_BAD_STATE;
     }
-    if (token.size != 0 && /* token size can be 0 */
+
+    if (token.size != 0 &&
         memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != EOK) {
         HKS_LOG_E("copy token failed");
         return HKS_ERROR_BAD_STATE;
@@ -1063,16 +1064,9 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
         }
 
         struct HksParamOut params[] = {
-            {
-                .tag = HKS_TAG_PARAM0_BUFFER,
-                .blob = &paramsBlob
-            }, {
-                .tag = HKS_TAG_PARAM1_BUFFER,
-                .blob = &handle
-            }, {
-                .tag = HKS_TAG_PARAM2_BUFFER,
-                .blob = &inData
-            },
+            { .tag = HKS_TAG_PARAM0_BUFFER, .blob = &paramsBlob },
+            { .tag = HKS_TAG_PARAM1_BUFFER, .blob = &handle },
+            { .tag = HKS_TAG_PARAM2_BUFFER, .blob = &inData },
         };
 
         ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));

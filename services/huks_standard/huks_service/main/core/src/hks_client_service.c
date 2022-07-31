@@ -43,6 +43,12 @@
 #include "hks_upgrade_storage_data.h"
 #endif
 
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+
+#include "hks_useridm_api_wrap.h"
+
+#endif
+
 #define USER_ID_ROOT_DEFAULT          "0"
 
 #define MAX_KEY_COUNT 256
@@ -401,6 +407,221 @@ static int32_t AppendProcessNameTag(const struct HksParamSet *paramSet, const st
     return ret;
 }
 
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static int32_t AppendSecUid(struct HksParamSet *newParamSet, struct SecInfoWrap *secInfo)
+{
+    struct HksParam secureUid;
+    secureUid.tag = HKS_TAG_USER_AUTH_SECURE_UID;
+    secureUid.blob.size = sizeof(uint64_t);
+    secureUid.blob.data = (uint8_t *)&secInfo->secureUid;
+    return HksAddParams(newParamSet, &secureUid, 1);
+}
+
+static int32_t ConstructEnrolledInfoBlob(struct SecInfoWrap *secInfo, struct HksBlob *enrolledInfo,
+    struct HksParam *outParam)
+{
+    (void)memset_s(enrolledInfo->data, enrolledInfo->size, 0, enrolledInfo->size);
+
+    uint32_t index = 0;
+    if (memcpy_s(enrolledInfo->data, enrolledInfo->size, &secInfo->enrolledInfoLen,
+        sizeof(uint32_t)) != EOK) {
+        HKS_LOG_E("copy enrolledInfoLen failed!");
+        return HKS_ERROR_BAD_STATE;
+    }
+    index += sizeof(secInfo->enrolledInfoLen);
+    for (uint32_t i = 0; i < secInfo->enrolledInfoLen; ++i) {
+        uint32_t authTypeInt = (uint32_t)secInfo->enrolledInfo[i].authType;
+        if (memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index, &authTypeInt,
+            sizeof(uint32_t)) != EOK) {
+            HKS_LOG_E("copy authType failed!");
+            return HKS_ERROR_BAD_STATE;
+        }
+        index += sizeof(authTypeInt);
+        if (memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index,
+            &((secInfo->enrolledInfo[i]).enrolledId), sizeof(uint64_t)) != EOK) {
+            HKS_LOG_E("copy enrolledId failed!");
+            return HKS_ERROR_BAD_STATE;
+        }
+        index += sizeof(secInfo->enrolledInfo[i].enrolledId);
+    }
+
+    outParam->tag = HKS_TAG_USER_AUTH_ENROLL_ID_INFO;
+    outParam->blob = *enrolledInfo;
+    return HKS_SUCCESS;
+}
+
+static int32_t ComputeEnrolledInfoLen(uint32_t enrolledInfoLen)
+{
+    return sizeof(uint32_t) + (sizeof(uint32_t) + sizeof(uint64_t)) * enrolledInfoLen;
+}
+
+static int32_t AddEnrolledInfoInPAramSet(struct SecInfoWrap *secInfo, struct HksBlob *enrolledInfo,
+    struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    do {
+        struct HksParam tmpParam;
+        enrolledInfo->size = ComputeEnrolledInfoLen(secInfo->enrolledInfoLen);
+        enrolledInfo->data = (uint8_t *)HksMalloc(enrolledInfo->size);
+        if (enrolledInfo->data == NULL) {
+            HKS_LOG_E("malloc enrolledInfo blob failed");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+
+        ret = ConstructEnrolledInfoBlob(secInfo, enrolledInfo, &tmpParam);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("ConstructEnrolledInfoBlob failed!");
+            break;
+        }
+        ret = HksAddParams(paramSet, &tmpParam, 1);
+        return ret;
+    } while (0);
+    HKS_FREE_PTR(enrolledInfo->data);
+    return ret;
+}
+
+static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t userId, uint32_t authAccessType,
+    uint32_t userAuthType, struct HksParamSet **outParamSet)
+{
+    struct SecInfoWrap *secInfo = NULL;
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret;
+
+    struct HksBlob enrolledInfo = { 0, NULL };
+    do {
+        ret = HksUserIdmGetSecInfo(userId, &secInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get useriam sec info failed ret=%d", ret);
+            ret = HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
+            break;
+        }
+        
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("init param set failed");
+            break;
+        }
+
+        ret = AppendSecUid(newParamSet, secInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("append sec uid failed");
+            break;
+        }
+
+        ret = AddEnrolledInfoInPAramSet(secInfo, &enrolledInfo, newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("AddEnrolledInfoInPAramSet failed!");
+            break;
+        }
+
+        ret = HksBuildParamSet(&newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("build append info failed");
+            break;
+        }
+
+        *outParamSet = newParamSet;
+    } while (0);
+    HKS_FREE_PTR(enrolledInfo.data);
+    HKS_FREE_PTR(secInfo);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&newParamSet);
+        *outParamSet = NULL;
+    }
+    return ret;
+}
+
+static int32_t CheckIfEnrollAuthInfo(int32_t userId, enum HksUserAuthType authType)
+{
+    uint32_t numOfAuthInfo = 0;
+    if (HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo) != HKS_SUCCESS) {
+        HKS_LOG_E("HksUserIdmGetAuthInfoNum failed.");
+        return HKS_FAILURE;
+    }
+    if (numOfAuthInfo == 0) {
+        HKS_LOG_E("have not enroll the auth info.");
+        return HKS_FAILURE;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthType)
+{
+    const enum HksUserAuthType userAuthTypes[] = {
+        HKS_USER_AUTH_TYPE_FINGERPRINT,
+        HKS_USER_AUTH_TYPE_FACE,
+        HKS_USER_AUTH_TYPE_PIN
+    };
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(userAuthTypes); ++i) {
+        if ((userAuthType & userAuthTypes[i]) == 0) {
+            continue;
+        }
+
+        if (CheckIfEnrollAuthInfo(userId, userAuthTypes[i]) != HKS_SUCCESS) {
+            HKS_LOG_E("no enrolled info of the user auth type: %d.", userAuthTypes[i]);
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    uint32_t userAuthType = 0;
+    uint32_t authAccessType = 0;
+    int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, &userAuthType, &authAccessType);
+    if (ret == HKS_ERROR_NOT_SUPPORTED) {
+        struct HksParamSet *newParamSet = NULL;
+        ret = AppendProcessNameTag(paramSet, &processInfo->processName, &newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("append tag processName failed, ret = %d", ret);
+            return ret;
+        }
+        *outParamSet = newParamSet;
+        return HKS_SUCCESS;
+    }
+
+    if (ret == HKS_SUCCESS) {
+        HKS_LOG_I("support secure access");
+        if (CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType) != HKS_SUCCESS) {
+            HKS_LOG_E("UserIAM do not support current user auth or not enrolled cur auth info");
+            return HKS_ERROR_NOT_SUPPORTED;
+        }
+
+        struct HksParamSet *userAuthParamSet = NULL;
+        ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, userAuthType, &userAuthParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("append secure access info failed!");
+            return ret;
+        }
+
+        struct HksParamSet *newInfoParamSet = NULL;
+        ret = AppendProcessNameTag(userAuthParamSet, &processInfo->processName, &newInfoParamSet);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(&userAuthParamSet);
+            HKS_LOG_E("append tag processName failed, ret = %d", ret);
+            return ret;
+        }
+        HksFreeParamSet(&userAuthParamSet);
+        *outParamSet = newInfoParamSet;
+        return HKS_SUCCESS;
+    }
+    return ret;
+}
+#else
+static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    return AppendProcessNameTag(paramSet, &processInfo->processName, outParamSet);
+}
+#endif
+
 #ifndef _CUT_AUTHENTICATE_
 static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
@@ -700,7 +921,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
             break;
         }
 
-        ret = AppendProcessNameTag(paramSetIn, &processInfo->processName, &newParamSet);
+        ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append processName tag failed, ret = %d", ret);
             break;
@@ -966,7 +1187,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
             break;
         }
 
-        ret = AppendProcessNameTag(paramSet, &processInfo->processName, &newParamSet);
+        ret = AppendNewInfoForGenKeyInService(processInfo, paramSet, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append processName tag failed, ret = %d", ret);
             break;
@@ -991,8 +1212,25 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
     } while (0);
 
     HksFreeParamSet(&newParamSet);
-
     HksReport(__func__, processInfo, paramSet, ret);
+    return ret;
+}
+
+static int32_t GetKeyAndNewParamSetInForGenKeyInService(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key,
+    struct HksParamSet **outParamSet)
+{
+    int32_t ret = AppendNewInfoForGenKeyInService(processInfo, paramSet, outParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("append new info failed, ret = %d", ret);
+        return ret;
+    }
+
+    ret = GetKeyData(processInfo, keyAlias, key, HKS_STORAGE_TYPE_KEY);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key data failed, ret = %d.", ret);
+        HksFreeParamSet(outParamSet);
+    }
 
     return ret;
 }
@@ -1025,7 +1263,8 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
             break;
         }
 
-        ret = GetKeyAndNewParamSet(processInfo, wrappingKeyAlias, paramSet, &wrappingKeyFromFile, &newParamSet);
+        ret = GetKeyAndNewParamSetInForGenKeyInService(processInfo, wrappingKeyAlias, paramSet, &wrappingKeyFromFile,
+            &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("get wrapping key and new paramSet failed, ret = %d", ret);
             break;
