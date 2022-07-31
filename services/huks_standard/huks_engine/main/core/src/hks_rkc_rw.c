@@ -306,7 +306,8 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
 
         struct HksProcessInfo processInfo = {
             { strlen(userId), (uint8_t *)userId },
-            { strlen(processName), (uint8_t *)processName }
+            { strlen(processName), (uint8_t *)processName },
+            0
         };
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
 
@@ -568,7 +569,8 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
 
         struct HksProcessInfo processInfo = {
             { strlen(userId), (uint8_t *)userId },
-            { strlen(processName), (uint8_t *)processName }
+            { strlen(processName), (uint8_t *)processName },
+            0
         };
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
@@ -594,7 +596,8 @@ bool RkcKsfExist(void)
 
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName }
+        { strlen(processName), (uint8_t *)processName },
+        0
     };
 
     for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttr.num; ++i) {
