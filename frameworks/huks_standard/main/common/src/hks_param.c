@@ -21,7 +21,7 @@
 #include "hks_mem.h"
 #include "securec.h"
 
-enum HksTag g_validTags[] = {
+static uint32_t g_validTags[] = {
     HKS_TAG_ALGORITHM,
     HKS_TAG_PURPOSE,
     HKS_TAG_KEY_SIZE,

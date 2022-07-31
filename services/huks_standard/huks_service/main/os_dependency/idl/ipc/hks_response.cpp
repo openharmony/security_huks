@@ -133,6 +133,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     processInfo->userId.size = size;
     processInfo->userId.data = name1;
+    processInfo->userIdInt = userId;
 
     return HKS_SUCCESS;
 }
