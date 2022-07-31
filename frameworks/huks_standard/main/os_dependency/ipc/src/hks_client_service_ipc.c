@@ -755,7 +755,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
             break;
         }
 
-        if (outBlob.size < HANDLE_SIZE) { /* token size can be 0, at lease handle size */
+        if (outBlob.size < HANDLE_SIZE) {
             HKS_LOG_E("invalid out size[%u]", outBlob.size);
             ret = HKS_ERROR_BAD_STATE;
             break;
@@ -766,12 +766,19 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
             break;
         }
 
-        if ((token != NULL) && (token->size != 0)) {
-            /*
-             * need copy token;
-             * In the future, judge whether there is access control attribute to decide whether to copy token
-             */
-            ret = CopyData(outBlob.data + HANDLE_SIZE, outBlob.size - HANDLE_SIZE, token);
+        if (token != NULL) {
+		    if (outBlob.size < (HANDLE_SIZE + TOKEN_SIZE)) {
+                HKS_LOG_W("client init success without out token");
+                token->size = 0;
+                break;
+            }
+			if (token->size < TOKEN_SIZE) {
+                HKS_LOG_E("copy token failed");
+                ret = HKS_ERROR_BUFFER_TOO_SMALL;
+                break;
+            }
+
+            ret = CopyData(outBlob.data + HANDLE_SIZE, TOKEN_SIZE, token);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("copy token failed");
                 break;
@@ -860,6 +867,8 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
           .blob = *handle },
         { .tag = HKS_TAG_PARAM2_BUFFER,
           .blob = *inData },
+        { .tag = HKS_TAG_PARAM3_BUFFER,
+          .blob = *outData },
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
