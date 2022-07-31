@@ -1065,8 +1065,8 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
 
         struct HksParamOut params[] = {
             { .tag = HKS_TAG_PARAM0_BUFFER, .blob = &paramsBlob },
-			{ .tag = HKS_TAG_PARAM1_BUFFER, .blob = &handle },
-			{ .tag = HKS_TAG_PARAM2_BUFFER, .blob = &inData },
+            { .tag = HKS_TAG_PARAM1_BUFFER, .blob = &handle },
+            { .tag = HKS_TAG_PARAM2_BUFFER, .blob = &inData },
         };
 
         ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
