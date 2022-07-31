@@ -28,6 +28,8 @@
 #include "hks_param.h"
 #include "securec.h"
 
+#define S_TO_MS 1000
+
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
 
@@ -98,6 +100,23 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
     return HKS_SUCCESS;
 }
 
+static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
+{
+    if ((paramSet == NULL) || (*paramSet == NULL)) {
+        HKS_LOG_E("invalid keyblob paramset");
+        return;
+    }
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(*paramSet, HKS_TAG_KEY, &keyParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key param failed!");
+        HksFreeParamSet(paramSet);
+        return;
+    }
+    (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
+    HksFreeParamSet(paramSet);
+}
+
 #ifdef _STORAGE_LITE_
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
@@ -154,6 +173,36 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     return keyNode;
 }
 #else // _STORAGE_LITE_
+
+static void AddKeyNodeToList(struct HuksKeyNode *keyNode)
+{
+    HksMutexLock(HksCoreGetHuksMutex());
+    AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
+    ++g_keyNodeCount;
+    HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
+    HksMutexUnlock(HksCoreGetHuksMutex());
+}
+
+static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **runtimeParamSet,
+    struct HksParamSet **keyblobParamSet, struct HuksKeyNode *keyNode)
+{
+    if (aad != NULL && aad->data != NULL) {
+        HKS_FREE_BLOB(*aad);
+    }
+
+    if (runtimeParamSet != NULL && *runtimeParamSet != NULL) {
+        HksFreeParamSet(runtimeParamSet);
+    }
+
+    if (keyblobParamSet != NULL && *keyblobParamSet != NULL) {
+        FreeKeyBlobParamSet(keyblobParamSet);
+    }
+    
+    if (keyNode != NULL) {
+        HksFree((void *)keyNode);
+    }
+}
+
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *keyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
@@ -162,48 +211,46 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         return NULL;
     }
 
-    int32_t ret = GenerateKeyNodeHandle(&keyNode->handle);
-    if (ret != HKS_SUCCESS) {
-        HksFree((void *)keyNode);
-        HKS_LOG_E("get keynode handle failed");
-        return NULL;
-    }
-
-    struct HksParamSet *runtimeParamSet = NULL;
-    ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
-    if (ret != HKS_SUCCESS) {
-        HksFree((void *)keyNode);
-        HKS_LOG_E("get runtime paramSet failed");
-        return NULL;
-    }
-
+    int32_t ret = -1;
     struct HksBlob aad = { 0, NULL };
+    struct HksParamSet *runtimeParamSet = NULL;
     struct HksParamSet *keyBlobParamSet = NULL;
-    ret = HksGetAadAndParamSet(key, &aad, &keyBlobParamSet);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&runtimeParamSet);
-        HksFree((void *)keyNode);
-        HKS_LOG_E("get aad and paramSet failed");
-        return NULL;
-    }
+    do {
+        ret = GenerateKeyNodeHandle(&keyNode->handle);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get keynode handle failed");
+            break;
+        }
 
-    ret = HksDecryptKeyBlob(&aad, keyBlobParamSet);
+        ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get runtime paramSet failed");
+            break;
+        }
+
+        ret = HksGetAadAndParamSet(key, &aad, &keyBlobParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get aad and paramSet failed");
+            break;
+        }
+
+        ret = HksDecryptKeyBlob(&aad, keyBlobParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("decrypt keyBlob failed");
+            break;
+        }
+    } while (0);
+
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("decrypt keyBlob failed");
-        HKS_FREE_BLOB(aad);
-        HksFreeParamSet(&runtimeParamSet);
-        HksFreeParamSet(&keyBlobParamSet);
-        HksFree((void *)keyNode);
+        FreeParamsForBuildKeyNode(&aad, &runtimeParamSet, &keyBlobParamSet, keyNode);
         return NULL;
     }
 
     keyNode->keyBlobParamSet = keyBlobParamSet;
     keyNode->runtimeParamSet = runtimeParamSet;
-    HksMutexLock(HksCoreGetHuksMutex());
-    AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
-    ++g_keyNodeCount;
-    HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    keyNode->authRuntimeParamSet = NULL;
+
+    AddKeyNodeToList(keyNode);
     HKS_FREE_BLOB(aad);
     return keyNode;
 }
@@ -221,23 +268,6 @@ struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
     }
     HksMutexUnlock(HksCoreGetHuksMutex());
     return NULL;
-}
-
-static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
-{
-    if ((paramSet == NULL) || (*paramSet == NULL)) {
-        HKS_LOG_E("invalid keyblob paramset");
-        return;
-    }
-    struct HksParam *keyParam = NULL;
-    int32_t ret = HksGetParam(*paramSet, HKS_TAG_KEY, &keyParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get key param failed!");
-        HksFreeParamSet(paramSet);
-        return;
-    }
-    (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
-    HksFreeParamSet(paramSet);
 }
 
 static void FreeCachedData(void **ctx)
@@ -328,6 +358,7 @@ void HksDeleteKeyNode(uint64_t handle)
             RemoveDoubleListNode(&keyNode->listHead);
             FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
             FreeRuntimeParamSet(&keyNode->runtimeParamSet);
+            FreeRuntimeParamSet(&keyNode->authRuntimeParamSet);
             HKS_FREE_PTR(keyNode);
             --g_keyNodeCount;
             HKS_LOG_I("delete keynode count:%u", g_keyNodeCount);

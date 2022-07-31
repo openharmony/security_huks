@@ -47,10 +47,13 @@ ohos_shared_library("huks_engine_core_standard") {
     "src/hks_core_service_three_stage.c",
     "src/hks_keyblob.c",
     "src/hks_keynode.c",
+    "src/hks_secure_access.c",
   ]
 
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static",
     "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
