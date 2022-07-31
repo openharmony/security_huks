@@ -21,10 +21,17 @@ ohos_unittest("huks_UT_test") {
   module_out_path = module_output_path
 
   sources = [
+    "src/hks_access_control_agree_test.cpp",
+    "src/hks_access_control_cipher_test.cpp",
+    "src/hks_access_control_derive_test.cpp",
+    "src/hks_access_control_mac_test.cpp",
+    "src/hks_access_control_secure_sign_test.cpp",
+    "src/hks_access_control_test_common.cpp",
     "src/hks_aes_cipher_part1_test.cpp",
     "src/hks_aes_cipher_part2_test.cpp",
     "src/hks_aes_cipher_part3_test.cpp",
     "src/hks_aes_cipher_test_common.cpp",
+    "src/hks_check_auth_part_test.cpp",
     "src/hks_check_pur_part_test.cpp",
     "src/hks_cross_test.cpp",
     "src/hks_cross_test_common.cpp",
@@ -107,5 +114,6 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
     "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
   ]
 }
