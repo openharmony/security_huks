@@ -767,12 +767,12 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
         }
 
         if (token != NULL) {
-		    if (outBlob.size < (HANDLE_SIZE + TOKEN_SIZE)) {
+            if (outBlob.size < (HANDLE_SIZE + TOKEN_SIZE)) {
                 HKS_LOG_W("client init success without out token");
                 token->size = 0;
                 break;
             }
-			if (token->size < TOKEN_SIZE) {
+            if (token->size < TOKEN_SIZE) {
                 HKS_LOG_E("copy token failed");
                 ret = HKS_ERROR_BUFFER_TOO_SMALL;
                 break;
