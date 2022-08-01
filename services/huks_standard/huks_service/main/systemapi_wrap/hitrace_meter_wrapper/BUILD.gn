@@ -24,13 +24,11 @@ ohos_static_library("libhuks_utils_hitrace_meter_wrapper_static") {
   public_configs = [ ":huks_config" ]
   include_dirs =
       [ "//base/security/huks/frameworks/huks_standard/main/common/include" ]
-  sources = [
-    "src/hitrace_meter_wrapper.cpp",
-  ]
+  sources = [ "src/hitrace_meter_wrapper.cpp" ]
   cflags = [
     "-Wall",
     "-Werror",
   ]
-  external_deps = [ "hitrace_native:libhitrace" ]
+  external_deps = [ "hitrace_native:hitrace_meter" ]
   complete_static_lib = true
 }

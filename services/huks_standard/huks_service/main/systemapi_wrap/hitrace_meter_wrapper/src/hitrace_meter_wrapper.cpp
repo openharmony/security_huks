@@ -16,12 +16,13 @@
 #include "hitrace_meter_wrapper.h"
 
 #include "hks_log.h"
+#include "hitrace_meter.h"
 
 #include <cstdlib>
 
 void HksTraceMeterStart(uint64_t label, const char *value, float limit)
 {
-    string valueString(value);
+    const std::string valueString(value);
     StartTrace(label, valueString, limit);
 }
 
