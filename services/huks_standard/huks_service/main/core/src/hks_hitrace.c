@@ -14,6 +14,9 @@
  */
 
 #include "hks_hitrace.h"
+#ifdef L2_STANDARD
+#include "hitrace_meter_wrapper.h"
+#endif
 
 struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 {
@@ -22,6 +25,7 @@ struct HksHitraceId HksHitraceBegin(const char *name, int flag)
     struct HksHitraceId hitraceId = {
         .traceId = traceId,
     };
+    HksTraceMeterStart(1, name, -1);
     return hitraceId;
 #else
     (void)name;
@@ -35,6 +39,7 @@ void HksHitraceEnd(struct HksHitraceId *hitraceId)
 {
 #ifdef L2_STANDARD
     HiTraceEnd(&hitraceId->traceId);
+    HksTraceMeterFinish(1);
 #else
     (void)hitraceId;
 #endif
