@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
@@ -53,11 +54,15 @@ ohos_shared_library("huks_engine_core_standard") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static",
     "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
   ]
+  if (enable_mock) {
+    deps += [ "//base/security/huks/test/unittest/systemapi_mock:libhuks_service_systemapi_mock_static", ]
+  } else {
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static", ]
+  }
   external_deps = [ "c_utils:utils" ]
 }
