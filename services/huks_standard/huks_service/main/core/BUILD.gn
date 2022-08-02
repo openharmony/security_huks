@@ -62,6 +62,11 @@ ohos_static_library("libhuks_service_core_standard_static") {
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
   ]
+  if (enable_mock) {
+    deps += [ "//base/security/huks/test/unittest/systemapi_mock:libhuks_service_systemapi_mock_static" ]
+  } else {
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
+  }
   external_deps = [
     "c_utils:utils",
     "hitrace_native:libhitrace",
