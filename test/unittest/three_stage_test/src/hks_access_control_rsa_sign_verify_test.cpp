@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-
 #include "hks_access_control_rsa_sign_verify_test.h"
+
 #include "hks_access_control_rsa_sign_verify_test_common.h"
 
 #include <gtest/gtest.h>
@@ -103,7 +103,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_002_PARAMS = {
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_512 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT   },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
@@ -187,7 +187,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_004_PARAMS_01 = {
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN   },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
         },
@@ -198,9 +198,11 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_004_PARAMS_01 = {
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN   },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
+
         },
     .verifyParams =
         {
@@ -209,9 +211,10 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_004_PARAMS_01 = {
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN   },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initResult = HKS_SUCCESS
 };
@@ -222,9 +225,9 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_004_PARAMS_02 = {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
-            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN   },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
         },
@@ -233,22 +236,24 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_004_PARAMS_02 = {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
-            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN   },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 1 },
         },
     .verifyParams =
         {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
-            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN   },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 1 },
         },
     .initResult = HKS_SUCCESS
 };
@@ -269,7 +274,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_005_PARAMS = {
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
-            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param =  30 },
+            { .tag = HKS_TAG_AUTH_TIMEOUT, .uint32Param = 30 },
         },
     .signParams =
         {
@@ -281,7 +286,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_005_PARAMS = {
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
-            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param =  30 },
+            { .tag = HKS_TAG_AUTH_TIMEOUT, .uint32Param = 30 },
         },
     .verifyParams =
         {
@@ -293,7 +298,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_005_PARAMS = {
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
-            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param =  30 },
+            { .tag = HKS_TAG_AUTH_TIMEOUT, .uint32Param = 30 },
         },
     .initResult = HKS_SUCCESS
 };
@@ -311,9 +316,10 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_006_PARAMS = {
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_4096 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
-            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param =  30 },
+            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param = 1 },
         },
     .signParams =
         {
@@ -324,7 +330,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_006_PARAMS = {
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
-            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param =  30 },
+            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param = 1 },
         },
     .verifyParams =
         {
@@ -335,11 +341,17 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_006_PARAMS = {
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
-            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param =  30 },
+            { .tag =  HKS_TAG_AUTH_TIMEOUT, .uint32Param = 1 },
         },
     .initResult = HKS_SUCCESS
 };
 
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest002
+ * @tc.desc: pin test.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest001");
@@ -350,10 +362,15 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest001, TestSize.
         .authType = 1
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestNormalCase(HKS_ACCESS_TEST_RSA_SIGN_001_PARAMS, RSAIDMParams001),
-              HKS_SUCCESS);
+        HKS_SUCCESS);
 }
 
-
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest002
+ * @tc.desc: fingerprint test.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest002");
@@ -364,10 +381,15 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest002, TestSize.
         .authType = 4
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestNormalCase(HKS_ACCESS_TEST_RSA_SIGN_002_PARAMS, RSAIDMParams002),
-              HKS_SUCCESS);
+        HKS_SUCCESS);
 }
 
-
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest003
+ * @tc.desc: wrong token auth type.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest003, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest003");
@@ -378,10 +400,15 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest003, TestSize.
         .authType = 2
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestAbnormalCase(HKS_ACCESS_TEST_RSA_SIGN_003_PARAMS, RSAIDMParams003),
-              HKS_SUCCESS);
+        HKS_SUCCESS);
 }
 
-
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest004
+ * @tc.desc: custom test.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest004, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest004");
@@ -395,7 +422,12 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest004, TestSize.
         HKS_ACCESS_TEST_RSA_SIGN_004_PARAMS_02, RSAIDMParams004), HKS_SUCCESS);
 }
 
-
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest005
+ * @tc.desc: time stamp test.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest005, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest005");
@@ -406,9 +438,15 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest005, TestSize.
         .authType = 1
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestNormalCase(HKS_ACCESS_TEST_RSA_SIGN_005_PARAMS, RSAIDMParams005),
-              HKS_SUCCESS);
+        HKS_SUCCESS);
 }
 
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest006
+ * @tc.desc: time out test.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest006, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest006");
@@ -419,7 +457,6 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest006, TestSize.
         .authType = 1
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestAbnormalCase(HKS_ACCESS_TEST_RSA_SIGN_006_PARAMS, RSAIDMParams006),
-              HKS_SUCCESS);
+        HKS_SUCCESS);
 }
-
 }
