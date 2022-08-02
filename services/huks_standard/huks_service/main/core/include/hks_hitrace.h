@@ -31,6 +31,8 @@ extern "C" {
 struct HksHitraceId {
 #ifdef L2_STANDARD
     HiTraceIdStruct traceId;
+#else
+    uint8_t id;
 #endif
 };
 
