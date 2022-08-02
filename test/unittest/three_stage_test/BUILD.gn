@@ -98,6 +98,8 @@ ohos_unittest("huks_UT_test") {
       "src/hks_access_control_cipher_test.cpp",
       "src/hks_access_control_derive_test.cpp",
       "src/hks_access_control_mac_test.cpp",
+      "src/hks_access_control_rsa_sign_verify_test.cpp",
+      "src/hks_access_control_rsa_sign_verify_test_common.cpp",
       "src/hks_access_control_secure_sign_test.cpp",
       "src/hks_access_control_test_common.cpp",
       "src/hks_check_auth_part_test.cpp",
