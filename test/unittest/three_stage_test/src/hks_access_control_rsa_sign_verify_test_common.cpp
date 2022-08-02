@@ -127,11 +127,13 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
     ret = HksTestUpdate(&handle, newParamSet, &inData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Update failed, ret : %d", ret);
+        HksFreeParamSet(&newParamSet);
         return ret;
     }
 
     // Finish
     ret = HksFinish(&handle, newParamSet, inDataSign, outDataSign);
+    HksFreeParamSet(&newParamSet);
     return ret;
 }
 
@@ -168,11 +170,13 @@ int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParam
     ret = HksTestUpdate(&handle, newParamSet, &inData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Update failed, ret : %d", ret);
+        HksFreeParamSet(&newParamSet);
         return ret;
     }
 
     // Finish
     ret = HksFinish(&handle, newParamSet, inDataSign, outDataSign);
+    HksFreeParamSet(&newParamSet);
     return ret;
 }
 
@@ -265,6 +269,8 @@ int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksPa
     struct HksBlob finishInData2 = { 0, tmpIn2 };
     ret = HksFinish(&handle2, paramSet2, &finishInData2, &outData2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
+    HksFreeParamSet(&newParamSet1);
+    HksFreeParamSet(&newParamSet2);
     return ret;
 }
 
@@ -313,6 +319,8 @@ int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct Hks
     struct HksBlob finishOutData2 = { 0, tmpIn2 };
     ret = HksFinish(&handle2, paramSet2, &outData2, &finishOutData2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
+    HksFreeParamSet(&newParamSet1);
+    HksFreeParamSet(&newParamSet2);
     return ret;
 }
 
