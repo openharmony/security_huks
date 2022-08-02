@@ -32,7 +32,7 @@ struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 #else
     (void)name;
     (void)flag;
-    struct HksHitraceId hitraceId = {};
+    struct HksHitraceId hitraceId = {0};
     return hitraceId;
 #endif
 }
