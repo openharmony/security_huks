@@ -27,6 +27,7 @@
 #define AUTH_TOKEN_LEN sizeof(struct HksUserAuthToken)
 #define AUTH_TOKEN_DATA_LEN (AUTH_TOKEN_LEN - SHA256_SIGN_LEN)
 #define TOKEN_CHALLENGE_LEN 32
+#define TOKEN_CHALLENGE_LEN_PER_POS 8
 #define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
 
 struct IDMParams {
