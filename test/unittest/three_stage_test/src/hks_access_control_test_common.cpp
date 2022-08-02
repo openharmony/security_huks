@@ -151,7 +151,7 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
 static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newParamSet = nullptr;
     HKS_LOG_E("AppendToNewParamSet start ");
     do {
         ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
@@ -208,7 +208,7 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
     tmpParams.blob.size = AUTH_TOKEN_LEN;
     HKS_LOG_I("AuthToekn Data: %u", authToken);
 
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newParamSet = nullptr;
 
     ret = AppendToNewParamSet(*initParamSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
@@ -260,7 +260,7 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     tmpParams.blob.size = AUTH_TOKEN_LEN;
     HKS_LOG_I("AuthToekn Data: %u", authToken);
 
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newParamSet = nullptr;
 
     ret = AppendToNewParamSet(paramSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
