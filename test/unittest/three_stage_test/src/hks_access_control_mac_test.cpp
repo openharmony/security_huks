@@ -43,7 +43,7 @@ void HksAccessControlMacTest::TearDownTestCase(void)
 
 void HksAccessControlMacTest::SetUp()
 {
-    EXPECT_EQ(HksInitialize(), 0);
+    ASSERT_EQ(HksInitialize(), 0);
 }
 
 void HksAccessControlMacTest::TearDown()
@@ -60,9 +60,9 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
         },
     .initParams =
         {
@@ -72,9 +72,9 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1  },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
         },
     .initResult = HKS_SUCCESS
 };
@@ -89,7 +89,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SM3 },
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+			{ .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initParams =
         {
@@ -99,7 +100,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SM3  },
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+			{ .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initResult = HKS_SUCCESS
 };
@@ -108,28 +110,36 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
  * @tc.desc: alg-AES gen-pur-Encrypt.
  * @tc.type: FUNC
+ * @tc.auth_type: FACE
  * @tc.result:HKS_SUCCESS
  */
 HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessMacPartTest003");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 3;
-    uint64_t time = 0;
-    EXPECT_EQ(CheckAccessHmacTest(HKS_ACCESS_TEST_001_PARAMS, secureUid, enrolledId, time), HKS_SUCCESS);
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 3,
+        .time = 0,
+        .authType = 2
+    };
+    ASSERT_EQ(CheckAccessHmacTest(HKS_ACCESS_TEST_001_PARAMS, testIDMParams), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest002
  * @tc.desc: alg-AES gen-pur-Encrypt.
  * @tc.type: FUNC
+ * @tc.auth_type: PIN
  * @tc.result:HKS_SUCCESS
  */
 HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessMacPartTest002");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 2;
-    uint64_t time = 0;
-    EXPECT_EQ(CheckAccessHmacTest(HKS_ACCESS_TEST_002_PARAMS, secureUid, enrolledId, time), HKS_SUCCESS);
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 1,
+        .time = 0,
+        .authType = 1
+    };
+    ASSERT_EQ(CheckAccessHmacTest(HKS_ACCESS_TEST_002_PARAMS, testIDMParams), HKS_SUCCESS);
 }
 }
