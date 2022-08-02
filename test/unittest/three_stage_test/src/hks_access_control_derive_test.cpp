@@ -110,7 +110,7 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
-			{ .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initParams =
         {
@@ -124,7 +124,7 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
-			{ .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initResult = HKS_SUCCESS
 };
