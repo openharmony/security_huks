@@ -682,6 +682,8 @@ static int32_t AssignVerifyResultAndFree(bool isSuccess, struct HksParam *authRe
         }
     } else {
         authResult->uint32Param = HKS_AUTH_RESULT_FAILED;
+        HKS_FREE_PTR(authToken);
+        return HKS_ERROR_KEY_AUTH_FAILED;
     }
     HKS_FREE_PTR(authToken);
     return HKS_SUCCESS;
@@ -1003,6 +1005,7 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
     }
 
     if (authResult->uint32Param == HKS_AUTH_RESULT_FAILED) {
+        HKS_LOG_E("check key auth failed");
         return HKS_ERROR_KEY_AUTH_FAILED;
     }
 
