@@ -295,7 +295,7 @@ int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct Hks
 
     // Update loop
     struct HksParamSet *newParamSet1 = nullptr;
-    struct HksParamSet *newParamSet2 = NULL;
+    struct HksParamSet *newParamSet2 = nullptr;
     struct HksParam signParams;
     ret = AddAuthToeknParamCustomCase(challengeBlob1, challengeBlob2, &signParams, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddAuthToeknParam failed.";
