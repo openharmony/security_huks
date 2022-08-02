@@ -34,6 +34,7 @@ static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUs
             break;
         case USER_IAM::AuthType::FINGERPRINT:
             *hksAuthType =  HKS_USER_AUTH_TYPE_FINGERPRINT;
+            break;
         default:
             HKS_LOG_E("Invalid authType!");
             return HKS_FAILURE;
