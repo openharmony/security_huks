@@ -121,15 +121,13 @@ config("soft_huks_config") {
   if (board_toolchain_type != "iccarm") {
     defines = [ "_FORTIFY_SOURCE = 2" ]
   }
-  
   if (board_toolchain_type == "iccarm") {
-    cflags = [
-    ]
+    cflags = []
   } else {
     cflags = [
-    "-fvisibility=hidden",
-    "-Wall",
-    "-Werror",
+      "-fvisibility=hidden",
+      "-Wall",
+      "-Werror",
     ]
   }
 
