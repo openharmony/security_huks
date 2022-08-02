@@ -198,7 +198,7 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
         HKS_LOG_E("AuthToeknSign Failed.");
         return ret;
     }
-    HKS_LOG_I("HksBuildAuthtoken 1.");
+
     uint8_t authToken[AUTH_TOKEN_LEN] = {0};
     for (uint32_t i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
@@ -206,7 +206,6 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
     tmpParams.tag = HKS_TAG_AUTH_TOKEN;
     tmpParams.blob.data = authToken;
     tmpParams.blob.size = AUTH_TOKEN_LEN;
-    HKS_LOG_I("AuthToekn Data: %u", authToken);
 
     struct HksParamSet *newParamSet = nullptr;
 
@@ -215,8 +214,6 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
         HKS_LOG_I("AppendToNewParamSet failed!\n");
         return ret;
     }
-
-    HKS_LOG_I("HksBuildAuthtoken 1.5");
 
     ret = HksAddParams(newParamSet, &tmpParams, 1);
     if (ret != 0) {
@@ -230,7 +227,6 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
     }
 
     *initParamSet = newParamSet;
-    HKS_LOG_I("HksBuildAuthtoken 3.");
     return ret;
 }
 
@@ -250,7 +246,6 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
         HKS_LOG_E("AuthToeknSign Failed.");
         return ret;
     }
-    HKS_LOG_I("HksBuildAuthtoken 1.");
     uint8_t authToken[AUTH_TOKEN_LEN] = {0};
     for (int i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
@@ -258,7 +253,6 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     tmpParams.tag = HKS_TAG_AUTH_TOKEN;
     tmpParams.blob.data = authToken;
     tmpParams.blob.size = AUTH_TOKEN_LEN;
-    HKS_LOG_I("AuthToekn Data: %u", authToken);
 
     struct HksParamSet *newParamSet = nullptr;
 
@@ -267,8 +261,6 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
         HKS_LOG_I("AppendToNewParamSet failed!\n");
         return ret;
     }
-
-    HKS_LOG_I("HksBuildAuthtoken 1.5");
 
     ret = HksAddParams(newParamSet, &tmpParams, 1);
     if (ret != 0) {
@@ -282,7 +274,6 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     }
 
     *outParamSet = newParamSet;
-    HKS_LOG_I("HksBuildAuthtoken 3.");
     return ret;
 }
 
