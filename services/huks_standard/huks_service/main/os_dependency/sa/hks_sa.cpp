@@ -205,10 +205,6 @@ bool HksService::Init()
         return false;
     }
 
-#ifdef SUPPORT_COMMON_EVENT
-    HksSubscribeSystemEvent();
-#endif
-
     HKS_LOG_I("HksService::Init success.");
     return true;
 }
@@ -280,8 +276,25 @@ void HksService::OnStart()
         return;
     }
 
+#ifdef SUPPORT_COMMON_EVENT
+    (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+#endif
+
     runningState_ = STATE_RUNNING;
     HKS_LOG_I("HksService start success.");
+}
+
+void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
+{
+    HKS_LOG_I("systemAbilityId is %d!", systemAbilityId);
+#ifdef SUPPORT_COMMON_EVENT
+    HksSubscribeSystemEvent();
+#endif
+}
+
+void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HKS_LOG_I("systemAbilityId is %d!", systemAbilityId);
 }
 
 void HksService::OnStop()
