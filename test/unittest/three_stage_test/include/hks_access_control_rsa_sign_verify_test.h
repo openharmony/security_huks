@@ -27,5 +27,5 @@ int HksAcRsaSignVerifyAccessTest004(void);
 int HksAcRsaSignVerifyAccessTest005(void);
 
 int HksAcRsaSignVerifyAccessTest006(void);
-} 
+}
 #endif

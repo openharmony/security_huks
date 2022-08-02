@@ -21,9 +21,7 @@
 
 using namespace testing::ext;
 namespace Unittest::AccessControlRsaSignVerify {
-
-int32_t RSAAuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
-                         struct HksParam *tmpParams)
+int32_t RSAAuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams, struct HksParam *tmpParams)
 {
     std::vector<uint8_t> token;
     // 添加authtoken
@@ -99,8 +97,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
 }
 
 int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
-                                     const IDMParams &testIDMParams, 
-                                     struct HksBlob *inDataSign, struct HksBlob *outDataSign)
+    const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
 {
     struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     // Init
@@ -120,7 +117,7 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
 
     ret = AppendToNewParamSet(paramSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("AppendToNewParamSet failed, ret : %d", ret);
+        HKS_LOG_E("AppendToNewParamSet failed, ret : %d", ret);
         return ret;
     }
 
@@ -129,7 +126,48 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
     EXPECT_EQ(ret, HKS_SUCCESS) << "Add Param failed.";
     ret = HksTestUpdate(&handle, newParamSet, &inData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Update failed, ret : %d", ret);
+        HKS_LOG_E("Update failed, ret : %d", ret);
+        return ret;
+    }
+
+    // Finish
+    ret = HksFinish(&handle, newParamSet, inDataSign, outDataSign);
+    return ret;
+}
+
+int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
+    const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
+{
+    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    // Init
+    uint8_t handleS[sizeof(uint64_t)] = {0};
+    struct HksBlob handle = { sizeof(uint64_t), handleS };
+    uint8_t challenge[TOKEN_CHALLENGE_LEN] = {0};
+    struct HksBlob challengeBlob = { TOKEN_CHALLENGE_LEN, challenge };
+    int32_t ret = HksInit(keyAlias, paramSet, &handle, &challengeBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+
+    sleep(2); // Waiting for time out
+
+    // Update loop
+    struct HksParam Params;
+    ret = RSAAuthTokenSign(&challengeBlob, testIDMParams, &Params);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "AuthToken sign failed.";
+    
+    struct HksParamSet *newParamSet = NULL;
+
+    ret = AppendToNewParamSet(paramSet, &newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("AppendToNewParamSet failed, ret : %d", ret);
+        return ret;
+    }
+
+    ret = AddAuthTokenParam(&newParamSet, &Params);
+
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Add Param failed.";
+    ret = HksTestUpdate(&handle, newParamSet, &inData);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Update failed, ret : %d", ret);
         return ret;
     }
 
@@ -139,49 +177,37 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
 }
 
 int32_t AddAuthToeknParamCustomCase(struct HksBlob &challengeBlob1, struct HksBlob &challengeBlob2,
-                                    struct HksParam *signParams, const IDMParams &testIDMParams)
+    struct HksParam *signParams, const IDMParams &testIDMParams)
 {
     uint8_t challenge[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob = { TOKEN_CHALLENGE_LEN, challenge };
-    if (memcpy_s(challengeBlob.data, sizeof(uint64_t), challengeBlob1.data, sizeof(uint64_t)) != EOK) {
+    if (memcpy_s(challengeBlob.data, TOKEN_CHALLENGE_LEN, challengeBlob1.data, TOKEN_CHALLENGE_LEN_PER_POS) != EOK) {
         return HKS_FAILURE;
     }
-    if (memcpy_s(challengeBlob.data + sizeof(uint64_t), sizeof(uint64_t),
-                 challengeBlob2.data, sizeof(uint64_t)) != EOK) {
+
+    if (memcpy_s(challengeBlob.data + TOKEN_CHALLENGE_LEN_PER_POS, TOKEN_CHALLENGE_LEN - TOKEN_CHALLENGE_LEN_PER_POS,
+        challengeBlob2.data + TOKEN_CHALLENGE_LEN_PER_POS, TOKEN_CHALLENGE_LEN_PER_POS) != EOK) {
         return HKS_FAILURE;
     }
+
     int32_t ret = RSAAuthTokenSign(&challengeBlob, testIDMParams, signParams);
     return ret;
 }
 
-int32_t AddPosParamCustomCase(struct HksParam *signParams, struct HksParamSet *paramSet,
-                              struct HksParamSet *newParamSet, int32_t pos,
-                              const IDMParams &testIDMParams)
+int32_t AddSignParamCustomCase(struct HksParam *signParams, struct HksParamSet *paramSet,
+    struct HksParamSet **newParamSet, const IDMParams &testIDMParams)
 {
-    int32_t ret = AppendToNewParamSet(paramSet, &newParamSet);
+    int32_t ret = AppendToNewParamSet(paramSet, newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("AppendToNewParamSet failed, ret : %d", ret);
+        HKS_LOG_E("AppendToNewParamSet failed, ret : %d", ret);
         return ret;
     }
-
-    struct HksParam challengePos;
-    challengePos.tag = HKS_TAG_CHALLENGE_POS;
-    if (pos == 0) {
-        challengePos.uint32Param = HKS_CHALLENGE_POS_0;
-    } else {
-        challengePos.uint32Param = HKS_CHALLENGE_POS_1;
-    }
-    ret = HksAddParams(newParamSet, signParams, 1);
+    ret = HksAddParams(*newParamSet, signParams, 1);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksAddParam failed!\n");
         return ret;
     }
-    ret = HksAddParams(newParamSet, &challengePos, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParam failed!\n");
-        return ret;
-    }
-    ret = HksBuildParamSet(&newParamSet);
+    ret = HksBuildParamSet(newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksBuildParamSet failed!\n");
         return ret;
@@ -189,14 +215,13 @@ int32_t AddPosParamCustomCase(struct HksParam *signParams, struct HksParamSet *p
     return ret;
 }
 
-
 uint8_t outDataS1[RSA_COMMON_SIZE] = {0};
 struct HksBlob outData1 = { RSA_COMMON_SIZE, outDataS1 };
 uint8_t outDataS2[RSA_COMMON_SIZE] = {0};
 struct HksBlob outData2 = { RSA_COMMON_SIZE, outDataS2 };
+
 int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *paramSet1,
-                                         struct HksBlob *keyAlias2, struct HksParamSet *paramSet2,
-                                         const IDMParams &testIDMParams)
+    struct HksBlob *keyAlias2, struct HksParamSet *paramSet2, const IDMParams &testIDMParams)
 {
     struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     uint8_t handleS1[sizeof(uint64_t)] = {0};
@@ -220,12 +245,12 @@ int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksPa
     ret = AddAuthToeknParamCustomCase(challengeBlob1, challengeBlob2, &signParams, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddAuthToeknParam failed.";
 
-    ret = AddPosParamCustomCase(&signParams, paramSet1, newParamSet1, 0, testIDMParams);
+    ret = AddSignParamCustomCase(&signParams, paramSet1, &newParamSet1, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle1, newParamSet1, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
  
-    ret = AddPosParamCustomCase(&signParams, paramSet2, newParamSet2, 0, testIDMParams);
+    ret = AddSignParamCustomCase(&signParams, paramSet2, &newParamSet2, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle2, newParamSet2, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
@@ -244,8 +269,7 @@ int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksPa
 }
 
 int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *paramSet1,
-                                           struct HksBlob *keyAlias2, struct HksParamSet *paramSet2,
-                                           const IDMParams &testIDMParams)
+    struct HksBlob *keyAlias2, struct HksParamSet *paramSet2, const IDMParams &testIDMParams)
 {
     struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     uint8_t handleS1[sizeof(uint64_t)] = {0};
@@ -269,12 +293,12 @@ int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct Hks
     ret = AddAuthToeknParamCustomCase(challengeBlob1, challengeBlob2, &signParams, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddAuthToeknParam failed.";
 
-    ret = AddPosParamCustomCase(&signParams, paramSet1, newParamSet1, 0, testIDMParams);
+    ret = AddSignParamCustomCase(&signParams, paramSet1, &newParamSet1, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle1, newParamSet1, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
  
-    ret = AddPosParamCustomCase(&signParams, paramSet2, newParamSet2, 0, testIDMParams);
+    ret = AddSignParamCustomCase(&signParams, paramSet2, &newParamSet2, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle2, newParamSet2, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
@@ -292,8 +316,7 @@ int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct Hks
     return ret;
 }
 
-int32_t HksAcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &testCaseParams,
-                                         const IDMParams &testIDMParams)
+int32_t HksAcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &testCaseParams, const IDMParams &testIDMParams)
 {
     /* 1. Generate Key */
     // Generate Key
@@ -351,7 +374,7 @@ int32_t HksAcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &testCase
 }
 
 int32_t HksAcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &testCaseParams,
-                                           const IDMParams &testIDMParams)
+    const IDMParams &testIDMParams)
 {
     /* 1. Generate Key */
     // Generate Key
@@ -370,7 +393,7 @@ int32_t HksAcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &testCa
     struct HksParamSet *signParamSet = nullptr;
     ret = InitParamSet(&signParamSet, testCaseParams.signParams.data(), testCaseParams.signParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitsignParamSet failed.";
-    ret = HksAcRsaThreeStageNormalCase(&keyAlias, signParamSet, testIDMParams, &finishInData, &outDataSign);
+    ret = HksAcRsaThreeStageAbnormalCase(&keyAlias, signParamSet, testIDMParams, &finishInData, &outDataSign);
     EXPECT_NE(ret, HKS_SUCCESS) << "Three stage failed.";
 
     /* 3. Export Public Key */
@@ -391,7 +414,7 @@ int32_t HksAcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &testCa
     
     uint8_t temp[] = "out";
     struct HksBlob verifyOut = { sizeof(temp), temp };
-    ret = HksAcRsaThreeStageNormalCase(&newKeyAlias, verifyParamSet, testIDMParams, &outDataSign, &verifyOut);
+    ret = HksAcRsaThreeStageAbnormalCase(&newKeyAlias, verifyParamSet, testIDMParams, &outDataSign, &verifyOut);
     EXPECT_NE(ret, HKS_SUCCESS) << "Three stage failed.";
 
     /* 6. Delete New Key */
@@ -409,8 +432,7 @@ int32_t HksAcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &testCa
 }
 
 int32_t HksAcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCaseParams1,
-                                         const TestAccessCaseRSAParams &testCaseParams2,
-                                         const IDMParams &testIDMParams)
+    const TestAccessCaseRSAParams &testCaseParams2, const IDMParams &testIDMParams)
 {
     /* 1. Generate Key */
     // Generate Key
@@ -453,7 +475,7 @@ int32_t HksAcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCaseParams
     ret = HksExportPublicKey(&keyAlias2, genParamSet2, &publicKey2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
-    ret = HksAcRsaVerifyTestCustomCase(testCaseParams1, testCaseParams2, &publicKey1, &publicKey1, testIDMParams);
+    ret = HksAcRsaVerifyTestCustomCase(testCaseParams1, testCaseParams2, &publicKey1, &publicKey2, testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RSA Verify failed.";
 
     ret = HksDeleteKey(&keyAlias1, genParamSet1);
@@ -469,10 +491,9 @@ int32_t HksAcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCaseParams
     return ret;
 }
 
-int32_t HksAcRsaVerifyTestCustomCase (const TestAccessCaseRSAParams &testCaseParams1,
-                                    const TestAccessCaseRSAParams &testCaseParams2,
-                                    struct HksBlob *publicKey1, struct HksBlob *publicKey2,
-                                    const IDMParams &testIDMParams)
+int32_t HksAcRsaVerifyTestCustomCase (const TestAccessCaseRSAParams &testCaseParams1, 
+    const TestAccessCaseRSAParams &testCaseParams2, struct HksBlob *publicKey1, struct HksBlob *publicKey2,
+    const IDMParams &testIDMParams)
 {
     /* 4. Import Key */
     struct HksParamSet *verifyParamSet1 = nullptr;

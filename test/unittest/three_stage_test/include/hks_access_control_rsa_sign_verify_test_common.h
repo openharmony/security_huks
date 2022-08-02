@@ -22,11 +22,9 @@
 #include "hks_api.h"
 
 namespace Unittest::AccessControlRsaSignVerify {
-
-
 static const std::string g_inData = "Hks_RSA_Sign_Verify_Test_0000000000000000000000000000000000000000000000000000000"
-                                    "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
-                                    "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
+    "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
 static const uint32_t RSA_COMMON_SIZE = 1024;
 
 struct TestAccessCaseRSAParams {
@@ -37,30 +35,25 @@ struct TestAccessCaseRSAParams {
 };
 
 int32_t RSAAuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
-                         struct HksParam *tmpParams);
+    struct HksParam *tmpParams);
 int32_t AddAuthTokenParam(struct HksParamSet *paramSet, const struct HksParam *tmpParams);
 int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *ParamSet,
-                                     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign);
+    const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign);
 int32_t AddAuthToeknParamCustomCase(struct HksBlob &challengeBlob1, struct HksBlob &challengeBlob2,
-                                    struct HksParam *signParams, const IDMParams &testIDMParams);
-int32_t AddPosParamCustomCase(struct HksParam *signParams, struct HksParamSet *ParamSet, struct HksParamSet *newParamSet, 
-                              int32_t pos, const IDMParams &testIDMParams);
+    struct HksParam *signParams, const IDMParams &testIDMParams);
+int32_t AddPosParamCustomCase(struct HksParam *signParams, struct HksParamSet *ParamSet,
+    struct HksParamSet *newParamSet, int32_t pos, const IDMParams &testIDMParams);
 int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *ParamSet1,
-                                         struct HksBlob *keyAlias2, struct HksParamSet *ParamSet2,
-                                         const IDMParams &testIDMParams);
+    struct HksBlob *keyAlias2, struct HksParamSet *ParamSet2, const IDMParams &testIDMParams);
 int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *ParamSet1,
-                                           struct HksBlob *keyAlias2, struct HksParamSet *ParamSet2,
-                                           const IDMParams &testIDMParams);
-int32_t HksAcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &testCaseParams,
-                                         const IDMParams &testIDMParams);
+    struct HksBlob *keyAlias2, struct HksParamSet *ParamSet2, const IDMParams &testIDMParams);
+int32_t HksAcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &testCaseParams, const IDMParams &testIDMParams);
 int32_t HksAcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &testCaseParams,
-                                           const IDMParams &testIDMParams);
+    const IDMParams &testIDMParams);
 int32_t HksAcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCaseParams1,
-                                         const TestAccessCaseRSAParams &testCaseParams2,
-                                         const IDMParams &testIDMParams);
+    const TestAccessCaseRSAParams &testCaseParams2, const IDMParams &testIDMParams);
 int32_t HksAcRsaVerifyTestCustomCase (const TestAccessCaseRSAParams &testCaseParams1,
-                                      const TestAccessCaseRSAParams &testCaseParams2,
-                                      struct HksBlob *publicKey1, struct HksBlob *publicKey2,
-                                      const IDMParams &testIDMParams);
+    const TestAccessCaseRSAParams &testCaseParams2, struct HksBlob *publicKey1, struct HksBlob *publicKey2,
+    const IDMParams &testIDMParams);
 }
 #endif
