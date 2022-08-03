@@ -78,7 +78,7 @@ static int32_t AssignAuthToken(HksUserAuthToken *authTokenHal, struct HksBlob *c
     authTokenHal->secureUid = testIDMParams.secureUid;
     authTokenHal->enrolledId = testIDMParams.enrolledId;
     authTokenHal->authType = testIDMParams.authType;
-    
+
     if (memcpy_s(authTokenHal->challenge, TOKEN_CHALLENGE_LEN, challenge->data, challenge->size) != EOK) {
         HKS_LOG_E("memcpy_s failed");
         return HKS_FAILURE;
@@ -151,7 +151,7 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
 static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newParamSet = nullptr;
     HKS_LOG_E("AppendToNewParamSet start ");
     do {
         ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
@@ -187,18 +187,17 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
-int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *authChallenge, uint64_t secureUid,
-    uint64_t enrolledId, uint64_t time)
+int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *authChallenge,
+    const IDMParams &testIDMParams)
 {
     struct HksParam tmpParams;
     std::vector<uint8_t> token;
-    struct IDMParams testIDMParams = {secureUid, enrolledId, time, 1};
-    int32_t ret = AuthTokenSign(authChallenge, testIDMParams, token);
+    int ret = AuthTokenSign(authChallenge, testIDMParams, token);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AuthToeknSign Failed.");
         return ret;
     }
-    HKS_LOG_I("HksBuildAuthtoken 1.");
+
     uint8_t authToken[AUTH_TOKEN_LEN] = {0};
     for (uint32_t i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
@@ -206,17 +205,14 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
     tmpParams.tag = HKS_TAG_AUTH_TOKEN;
     tmpParams.blob.data = authToken;
     tmpParams.blob.size = AUTH_TOKEN_LEN;
-    HKS_LOG_I("AuthToekn Data: %u", authToken);
 
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newParamSet = nullptr;
 
     ret = AppendToNewParamSet(*initParamSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("AppendToNewParamSet failed!\n");
         return ret;
     }
-
-    HKS_LOG_I("HksBuildAuthtoken 1.5");
 
     ret = HksAddParams(newParamSet, &tmpParams, 1);
     if (ret != 0) {
@@ -230,7 +226,6 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
     }
 
     *initParamSet = newParamSet;
-    HKS_LOG_I("HksBuildAuthtoken 3.");
     return ret;
 }
 
@@ -250,7 +245,6 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
         HKS_LOG_E("AuthToeknSign Failed.");
         return ret;
     }
-    HKS_LOG_I("HksBuildAuthtoken 1.");
     uint8_t authToken[AUTH_TOKEN_LEN] = {0};
     for (int i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
@@ -260,15 +254,13 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     tmpParams.blob.size = AUTH_TOKEN_LEN;
     HKS_LOG_I("AuthToekn Data: %u", authToken);
 
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newParamSet = nullptr;
 
     ret = AppendToNewParamSet(paramSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("AppendToNewParamSet failed!\n");
         return ret;
     }
-
-    HKS_LOG_I("HksBuildAuthtoken 1.5");
 
     ret = HksAddParams(newParamSet, &tmpParams, 1);
     if (ret != 0) {
@@ -282,7 +274,6 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     }
 
     *outParamSet = newParamSet;
-    HKS_LOG_I("HksBuildAuthtoken 3.");
     return ret;
 }
 
@@ -302,7 +293,7 @@ int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle,
 }
 
 int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
-    uint64_t secureUid, uint64_t enrolledId, uint64_t time)
+    const IDMParams &testIDMParams)
 {
     struct HksParamSet *genParamSet = nullptr;
 
@@ -336,7 +327,7 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
         return ret;
     }
 
-    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, secureUid, enrolledId, time);
+    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, testIDMParams);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksBuildAuthtoken failed, ret : %d", ret);
         HksDeleteKey(&keyAlias, genParamSet);
@@ -352,7 +343,7 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
 }
 
 int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
-    uint64_t secureUid, uint64_t enrolledId, uint64_t time)
+    const IDMParams &testIDMParams)
 {
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
@@ -384,7 +375,7 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
         return ret;
     }
 
-    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, secureUid, enrolledId, time);
+    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, testIDMParams);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksBuildAuthtoken failed, ret : %d", ret);
         HksDeleteKey(&keyAlias, genParamSet);
@@ -413,7 +404,7 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
 }
 
 int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
-    uint64_t secureUid, uint64_t enrolledId, uint64_t time)
+    const IDMParams &testIDMParams)
 {
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
@@ -451,7 +442,7 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
         return HKS_FAILURE;
     }
 
-    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, secureUid, enrolledId, time);
+    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, testIDMParams);
     if (ret != HKS_SUCCESS) {
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
@@ -475,7 +466,7 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
 }
 
 int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
-    uint64_t secureUid, uint64_t enrolledId, uint64_t time)
+    const IDMParams &testIDMParams)
 {
     struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     struct HksParamSet *genParamSet = nullptr;
@@ -507,7 +498,7 @@ int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const 
         return ret;
     }
 
-    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, secureUid, enrolledId, time);
+    ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, testIDMParams);
     if (ret != HKS_SUCCESS) {
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;

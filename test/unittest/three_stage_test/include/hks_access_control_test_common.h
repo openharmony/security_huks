@@ -38,90 +38,90 @@ struct IDMParams {
 };
 
 namespace Unittest::HksAccessControlPartTest {
-    static const std::string g_inData = "Hks_Authtoken_Test_00000000000000000000000000000000000000000000000000000000000"
-        "000000000000000000000000000000000000000000000000000000000000000000000000000000000"
-        "00000000000000000000000000000000000000000000000000000000000000000000000000_string";
+static const std::string g_inData = "Hks_Authtoken_Test_00000000000000000000000000000000000000000000000000000000000"
+    "000000000000000000000000000000000000000000000000000000000000000000000000000000000"
+    "00000000000000000000000000000000000000000000000000000000000000000000000000_string";
 
-    static const uint32_t IV_SIZE = 16;
+static const uint32_t IV_SIZE = 16;
 
-    const uint32_t KEY_PARAMSET_SIZE = 1024;
+const uint32_t KEY_PARAMSET_SIZE = 1024;
 
-    const uint32_t HMAC_COMMON_SIZE = 256;
+const uint32_t HMAC_COMMON_SIZE = 256;
 
-    const uint32_t DATA_COMMON_SIZE = 1024;
+const uint32_t DATA_COMMON_SIZE = 1024;
 
-    const uint32_t RSA_COMMON_SIZE = 1024;
+const uint32_t RSA_COMMON_SIZE = 1024;
 
-    const uint32_t ECDH_COMMON_SIZE = 1024;
+const uint32_t ECDH_COMMON_SIZE = 1024;
 
-    const uint32_t DERIVE_KEY_SIZE_32 = 32;
+const uint32_t DERIVE_KEY_SIZE_32 = 32;
 
-    const uint32_t DERIVE_ITERATION = 1000;
+const uint32_t DERIVE_ITERATION = 1000;
 
-    const uint32_t DERIVE_COMMON_SIZE = 2048;
+const uint32_t DERIVE_COMMON_SIZE = 2048;
 
-    const uint32_t DSA_COMMON_SIZE = 1024;
+const uint32_t DSA_COMMON_SIZE = 1024;
 
-    static uint8_t IV[IV_SIZE] = {0};
+static uint8_t IV[IV_SIZE] = {0};
 
-    static uint8_t g_saltdata[16] = {0};
+static uint8_t g_saltdata[16] = {0};
 
-    struct TestAccessCaseParams {
-        std::vector<HksParam> genParams;
-        std::vector<HksParam> initParams;
-        HksErrorCode initResult = HksErrorCode::HKS_SUCCESS;
-    };
+struct TestAccessCaseParams {
+    std::vector<HksParam> genParams;
+    std::vector<HksParam> initParams;
+    HksErrorCode initResult = HksErrorCode::HKS_SUCCESS;
+};
 
-    struct TestDsaKeyParams {
-        struct HksBlob *xData;
-        struct HksBlob *yData;
-        struct HksBlob *pData;
-        struct HksBlob *qData;
-        struct HksBlob *gData;
-    };
+struct TestDsaKeyParams {
+    struct HksBlob *xData;
+    struct HksBlob *yData;
+    struct HksBlob *pData;
+    struct HksBlob *qData;
+    struct HksBlob *gData;
+};
 
-    struct HksTestGenAuthTokenParams {
-        struct HksBlob *authChallenge;
-        uint64_t secureUid;
-        uint64_t enrolledId;
-        uint64_t credentialId;
-        uint64_t time;
-    };
+struct HksTestGenAuthTokenParams {
+    struct HksBlob *authChallenge;
+    uint64_t secureUid;
+    uint64_t enrolledId;
+    uint64_t credentialId;
+    uint64_t time;
+};
 
-    int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle, struct HksParamSet *initParamSet, uint32_t posNum);
+int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle, struct HksParamSet *initParamSet, uint32_t posNum);
 
-    int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
-        uint64_t secureUid, uint64_t enrolledId, uint64_t time);
+int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
+    const IDMParams &testIDMParams);
 
-    int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
-        uint64_t secureUid, uint64_t enrolledId, uint64_t time);
+int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
+    const IDMParams &testIDMParams);
 
-    int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
-        uint64_t secureUid, uint64_t enrolledId, uint64_t time);
+int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
+    const IDMParams &testIDMParams);
 
-    int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
-        uint64_t secureUid, uint64_t enrolledId, uint64_t time);
+int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
+    const IDMParams &testIDMParams);
 
-    int32_t AuthTokenImportKey();
+int32_t AuthTokenImportKey();
 
-    int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams, std::vector<uint8_t>& token);
+int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams, std::vector<uint8_t>& token);
 
-    int32_t AuthTokenMac(const struct HksBlob *keyAlias, const struct HksBlob *inData, HksUserAuthToken *authTokenHal);
-    
-    int32_t HksBuildAuthtoken(const struct HksParamSet *initParamSet, uint8_t *authChallenge, uint64_t secureUid,
-        uint64_t enrolledId, uint64_t time);
+int32_t AuthTokenMac(const struct HksBlob *keyAlias, const struct HksBlob *inData, HksUserAuthToken *authTokenHal);
 
-    int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
-        struct HksTestGenAuthTokenParams *genAuthTokenParams, struct HksParamSet **outParamSet);
+int32_t HksBuildAuthtoken(const struct HksParamSet *initParamSet, uint8_t *authChallenge,
+    const IDMParams &testIDMParams);
 
-    int32_t ConstructRsaKeyPair(const struct HksBlob *nDataBlob, const struct HksBlob *dDataBlob,
-        const struct HksBlob *eDataBlob, uint32_t keySize, struct HksBlob *outKey);
+int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
+    struct HksTestGenAuthTokenParams *genAuthTokenParams, struct HksParamSet **outParamSet);
 
-    int32_t ConstructEd25519KeyPair(uint32_t keySize, uint32_t alg, struct HksBlob *ed25519PubData,
-        struct HksBlob *ed25519PrivData, struct HksBlob *outKey);
+int32_t ConstructRsaKeyPair(const struct HksBlob *nDataBlob, const struct HksBlob *dDataBlob,
+    const struct HksBlob *eDataBlob, uint32_t keySize, struct HksBlob *outKey);
 
-    int32_t ConstructDsaKeyPair(uint32_t keySize, const struct TestDsaKeyParams *params, struct HksBlob *outKey);
+int32_t ConstructEd25519KeyPair(uint32_t keySize, uint32_t alg, struct HksBlob *ed25519PubData,
+    struct HksBlob *ed25519PrivData, struct HksBlob *outKey);
 
-    int32_t GenParamSetAuthTest(struct HksParamSet **paramOutSet, const struct HksParamSet *genParamSet);
+int32_t ConstructDsaKeyPair(uint32_t keySize, const struct TestDsaKeyParams *params, struct HksBlob *outKey);
+
+int32_t GenParamSetAuthTest(struct HksParamSet **paramOutSet, const struct HksParamSet *genParamSet);
 }
 #endif // HKS_THREE_STAGE_TEST_COMMON_H

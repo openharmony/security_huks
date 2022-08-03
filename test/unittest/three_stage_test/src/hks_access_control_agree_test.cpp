@@ -43,7 +43,7 @@ void HksAccessControlAgreeTest::TearDownTestCase(void)
 
 void HksAccessControlAgreeTest::SetUp()
 {
-    EXPECT_EQ(HksInitialize(), 0);
+    ASSERT_EQ(HksInitialize(), 0);
 }
 
 void HksAccessControlAgreeTest::TearDown()
@@ -121,8 +121,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
     .initParams =
@@ -130,8 +130,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519 },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
     .initResult = HKS_SUCCESS
@@ -178,8 +178,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_003_PARAMS = {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
     .initParams =
@@ -187,8 +187,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_003_PARAMS = {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
     .initResult = HKS_SUCCESS
@@ -238,15 +238,18 @@ static struct HksParam g_agreeAccessFinish003[] = {
 HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessAgreePartTest001");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 1;
-    uint64_t time = 0;
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 1,
+        .time = 0,
+        .authType = 1
+    };
     struct HksParamSet *finishParamSet = nullptr;
     int ret = InitParamSet(&finishParamSet, g_agreeAccessFinish001,
         sizeof(g_agreeAccessFinish001) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
-        secureUid, enrolledId, time), HKS_SUCCESS);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
+        testIDMParams), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
@@ -258,15 +261,18 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest001, TestSize.Level0)
 HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessAgreePartTest002");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 3;
-    uint64_t time = 0;
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 3,
+        .time = 0,
+        .authType = 2
+    };
     struct HksParamSet *finishParamSet = nullptr;
     int ret = InitParamSet(&finishParamSet, g_agreeAccessFinish002,
         sizeof(g_agreeAccessFinish002) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
-        secureUid, enrolledId, time), HKS_SUCCESS);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
+        testIDMParams), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
@@ -278,14 +284,17 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest002, TestSize.Level0)
 HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest003, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessAgreePartTest003");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 2;
-    uint64_t time = 0;
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 2,
+        .time = 0,
+        .authType = 4
+    };
     struct HksParamSet *finishParamSet = nullptr;
     int ret = InitParamSet(&finishParamSet, g_agreeAccessFinish003,
         sizeof(g_agreeAccessFinish003) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_003_PARAMS, finishParamSet,
-        secureUid, enrolledId, time), HKS_SUCCESS);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_003_PARAMS, finishParamSet,
+        testIDMParams), HKS_SUCCESS);
 }
 }
