@@ -43,7 +43,7 @@ void HksAccessControlDeriveTest::TearDownTestCase(void)
 
 void HksAccessControlDeriveTest::SetUp()
 {
-    EXPECT_EQ(HksInitialize(), 0);
+    ASSERT_EQ(HksInitialize(), 0);
 }
 
 void HksAccessControlDeriveTest::TearDown()
@@ -58,9 +58,9 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_DERIVE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
         },
     .initParams =
         {
@@ -68,9 +68,9 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_DERIVE },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
             { .tag = HKS_TAG_DERIVE_KEY_SIZE, .uint32Param = DERIVE_KEY_SIZE_32 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
         },
     .initResult = HKS_SUCCESS
 };
@@ -107,9 +107,10 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_DERIVE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initParams =
         {
@@ -120,9 +121,10 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
             { .tag = HKS_TAG_ITERATION, .int32Param = DERIVE_ITERATION },
             { .tag = HKS_TAG_SALT, .blob = { sizeof(g_saltdata), (uint8_t *)g_saltdata }},
             { .tag = HKS_TAG_DERIVE_KEY_SIZE, .uint32Param = DERIVE_KEY_SIZE_32 },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FACE },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initResult = HKS_SUCCESS
 };
@@ -155,40 +157,46 @@ static struct HksParam g_deriveAccessFinish002[] = {
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
  * @tc.desc: alg-HKDF gen-pur-Derive.
  * @tc.type: FUNC
- * @tc.auth_type: PIN
+ * @tc.auth_type: FINGERPRINT
  * @tc.result:HKS_SUCCESS
  */
 HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessDerivePartTest001");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 2;
-    uint64_t time = 0;
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 2,
+        .time = 0,
+        .authType = 4
+    };
     struct HksParamSet *finishParamSet = nullptr;
     int ret = InitParamSet(&finishParamSet, g_deriveAccessFinish001,
         sizeof(g_deriveAccessFinish001) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
-        secureUid, enrolledId, time), HKS_SUCCESS);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
+        testIDMParams), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest002
  * @tc.desc: alg-PBKDF2 gen-pur-Derive.
  * @tc.type: FUNC
- * @tc.auth_type: FINGERPRINT
+ * @tc.auth_type: FACE
  * @tc.result:HKS_SUCCESS
  */
 HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksAccessDerivePartTest002");
-    uint64_t secureUid = 1;
-    uint64_t enrolledId = 1;
-    uint64_t time = 0;
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 3,
+        .time = 0,
+        .authType = 2
+    };
     struct HksParamSet *finishParamSet = nullptr;
     int ret = InitParamSet(&finishParamSet, g_deriveAccessFinish002,
         sizeof(g_deriveAccessFinish002) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    EXPECT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
-        secureUid, enrolledId, time), HKS_SUCCESS);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
+        testIDMParams), HKS_SUCCESS);
 }
 }
