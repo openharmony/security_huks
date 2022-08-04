@@ -78,6 +78,9 @@ static uint8_t g_secInfoOid[] = {
 static uint8_t g_versionInfoOid[] = {
     0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x02, 0x04
 };
+static uint8_t g_deviceIdOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x04, 0x05
+};
 
 static const struct HksParam g_oidParams[] = {
     {
@@ -109,6 +112,12 @@ static const struct HksParam g_oidParams[] = {
         .blob = {
             .size = sizeof(g_versionInfoOid),
             .data = g_versionInfoOid
+        }
+    }, {
+        .tag = HKS_TAG_ATTESTATION_ID_DEVICE,
+        .blob = {
+            .size = sizeof(g_deviceIdOid),
+            .data = g_deviceIdOid
         }
     },
 };
