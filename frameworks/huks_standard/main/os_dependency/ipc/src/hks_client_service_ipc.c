@@ -625,7 +625,7 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
 
     do {
         struct HksParam *isBase64Param = NULL;
-		bool isBase64 = false;
+        bool isBase64 = false;
         ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_BASE64, &isBase64Param);
         if (ret == HKS_SUCCESS) {
             isBase64 = isBase64Param->boolParam;
