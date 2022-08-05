@@ -586,7 +586,7 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     int32_t ret = HksCheckIpcCertificateChain(keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksCheckIpcCertificateChain fail");
-        return HKS_ERROR_NOT_SUPPORTED;
+        return ret;
     }
 
     uint32_t certBufSize = sizeof(certChain->certsCount);
@@ -616,6 +616,7 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
 {
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
+    
     int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("CertificateChainInitBlob fail");
@@ -623,6 +624,12 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
     }
 
     do {
+        struct HksParam *isBase64Param = NULL;
+        bool isBase64 = false;
+        ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_BASE64, &isBase64Param);
+        if (ret == HKS_SUCCESS) {
+            isBase64 = isBase64Param->boolParam;
+        }
         ret = HksCertificateChainPack(&inBlob, keyAlias, paramSet, &outBlob);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksCertificateChainPack fail");
@@ -634,8 +641,7 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
             HKS_LOG_E("CertificateChainGetOrAttest request fail");
             break;
         }
-
-        ret = HksCertificateChainUnpackFromService(&outBlob, false, certChain);
+        ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
     } while (0);
 
     HKS_FREE_BLOB(inBlob);
