@@ -28,6 +28,11 @@ namespace HuksNapi {
 namespace {
 constexpr int HUKS_NAPI_ATTEST_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_ATTEST_KEY_MAX_ARGS = 3;
+
+constexpr int INDEX_0 = 0;
+constexpr int INDEX_1 = 1;
+constexpr int INDEX_2 = 2;
+constexpr int INDEX_3 = 3;
 }  // namespace
 
 struct AttestKeyAsyncContextT {
@@ -111,7 +116,8 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
         HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
-    result = ParseHksParamSet(env, properties, context->paramSet);
+    HksParam param = { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true };
+    result = ParseHksParamSetAndAddParam(env, properties, context->paramSet, &param);
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
@@ -137,6 +143,26 @@ static napi_value AttestKeyWriteResult(napi_env env, AttestKeyAsyncContext conte
     return result;
 }
 
+static void InitCertChain(struct HksCertChain *certChain)
+{
+    certChain->certsCount = HKS_CERT_COUNT;
+    certChain->certs = (struct HksBlob *)HksMalloc(certChain->certsCount * sizeof(struct HksBlob));
+    if (certChain->certs != nullptr) {
+        certChain->certs[INDEX_0].data = NULL;
+        certChain->certs[INDEX_1].data = NULL;
+        certChain->certs[INDEX_2].data = NULL;
+        certChain->certs[INDEX_3].data = NULL;
+        certChain->certs[INDEX_0].size = HKS_CERT_ROOT_SIZE;
+        certChain->certs[INDEX_0].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_0].size);
+        certChain->certs[INDEX_1].size = HKS_CERT_CA_SIZE;
+        certChain->certs[INDEX_1].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_1].size);
+        certChain->certs[INDEX_2].size = HKS_CERT_DEVICE_SIZE;
+        certChain->certs[INDEX_2].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_2].size);
+        certChain->certs[INDEX_3].size = HKS_CERT_APP_SIZE;
+        certChain->certs[INDEX_3].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_3].size);
+    }
+}
+
 static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context)
 {
     napi_value promise = nullptr;
@@ -156,8 +182,7 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
 
             context->certChain = (struct HksCertChain *)HksMalloc(sizeof(struct HksCertChain));
             if (context->certChain != nullptr) {
-                context->certChain->certs = nullptr;
-                context->certChain->certsCount = 0;
+                InitCertChain(context->certChain);
             }
 
             context->result = HksAttestKey(context->keyAlias, context->paramSet, context->certChain);
