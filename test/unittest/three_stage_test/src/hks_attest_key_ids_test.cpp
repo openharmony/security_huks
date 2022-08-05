@@ -86,7 +86,7 @@ static int32_t SetIdsToken()
 
 /**
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest001
- * @tc.desc: attest without permission.
+ * @tc.desc: attest without permission and fail.
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
@@ -128,7 +128,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest002
- * @tc.desc: attest and get cert suc.
+ * @tc.desc: attest with permission and right param then validate suc.
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
@@ -175,7 +175,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
 
 /**
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest003
- * @tc.desc: attest without cert data.
+ * @tc.desc: attest without cert data and fail.
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
@@ -215,7 +215,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
 
 /**
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest004
- * @tc.desc: attest without cert count.
+ * @tc.desc: attest without cert count and fail.
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
@@ -255,7 +255,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
 
 /**
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest005
- * @tc.desc: attest without cert chain.
+ * @tc.desc: attest without cert chain and fail.
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
