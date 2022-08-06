@@ -42,7 +42,7 @@
           "napi",
           "os_account",
           "safwk",
-          "samgr_standard",
+          "samgr",
           "thirdparty_bounds_checking_function",
           "c_utils"
         ],
