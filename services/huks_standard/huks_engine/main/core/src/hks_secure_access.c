@@ -181,6 +181,7 @@ static int32_t AssignToken(struct HksBlob *token, const struct HksBlob *challeng
             HKS_LOG_E("copy token failed");
             return HKS_ERROR_BAD_STATE;
         }
+        token->size = challenge->size;
         return HKS_SUCCESS;
     } else if (token->size == 0) {
         return HKS_SUCCESS;
@@ -827,21 +828,30 @@ static int32_t GetSecureSignAuthInfo(const struct HuksKeyNode *keyNode, struct H
 static int32_t DoAppendPrefixAuthInfoToUpdateInData(const struct HuksKeyNode *keyNode,
     struct HksSecureSignAuthInfo *secureSignInfo, const struct HksBlob *inData, struct HksBlob *outDataBlob)
 {
-    outDataBlob->size = sizeof(struct HksSecureSignAuthInfo) + inData->size;
-    uint8_t *outData = (uint8_t *)HksMalloc(outDataBlob->size);
+    uint32_t outDataSize = sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo) + inData->size;
+    uint8_t *outData = (uint8_t *)HksMalloc(outDataSize);
     if (outData == NULL) {
         HKS_LOG_E("malloc outData failed!");
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(outData, outDataBlob->size, secureSignInfo, sizeof(struct HksSecureSignAuthInfo)) != EOK) {
+    uint32_t version = SECURE_SIGN_VERSION;
+    if (memcpy_s(outData, outDataSize, (uint8_t *)&version, sizeof(uint32_t)) != EOK) {
+        HKS_LOG_E("memcpy secure sign auth info version to outData failed!");
+        HKS_FREE_PTR(outData);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    if (memcpy_s(outData + sizeof(uint32_t), outDataSize - sizeof(uint32_t), secureSignInfo,
+        sizeof(struct HksSecureSignAuthInfo)) != EOK) {
         HKS_LOG_E("memcpy secure sign auth info to outData failed!");
         HKS_FREE_PTR(outData);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    if (memcpy_s(outData + sizeof(struct HksSecureSignAuthInfo),
-        outDataBlob->size - sizeof(struct HksSecureSignAuthInfo), inData->data, inData->size) != EOK) {
+    if (memcpy_s(outData + sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo),
+        outDataSize - sizeof(uint32_t) - sizeof(struct HksSecureSignAuthInfo), inData->data,
+        inData->size) != EOK) {
         HKS_LOG_E("memcpy inData to outData failed!");
         HKS_FREE_PTR(outData);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -862,6 +872,7 @@ static int32_t DoAppendPrefixAuthInfoToUpdateInData(const struct HuksKeyNode *ke
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     outDataBlob->data = outData;
+    outDataBlob->size = outDataSize;
     return HKS_SUCCESS;
 }
 
@@ -924,22 +935,30 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
         return HKS_ERROR_BAD_STATE;
     }
 
-    uint32_t cacheOutDataSize = sizeof(struct HksSecureSignAuthInfo) + innerParams->inData->size;
+    uint32_t cacheOutDataSize = sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo) + innerParams->inData->size;
     uint8_t *cacheOutData = (uint8_t *)HksMalloc(cacheOutDataSize);
     if (cacheOutData == NULL) {
         HKS_LOG_E("malloc cacheOutData failed!");
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(cacheOutData, cacheOutDataSize, appendDataPrefixParam->blob.data,
+    const uint32_t version = SECURE_SIGN_VERSION;
+    if (memcpy_s(cacheOutData, cacheOutDataSize, &version, sizeof(uint32_t)) != EOK) {
+        HKS_LOG_E("memcpy secure sign auth info version to cacheOutData failed!");
+        HKS_FREE_PTR(cacheOutData);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (memcpy_s(cacheOutData + sizeof(uint32_t), cacheOutDataSize - sizeof(uint32_t), appendDataPrefixParam->blob.data,
         appendDataPrefixParam->blob.size) != EOK) {
         HKS_LOG_E("memcpy secure sign auth info to cacheOutData failed!");
         HKS_FREE_PTR(cacheOutData);
         return HKS_ERROR_BAD_STATE;
     }
 
-    if (memcpy_s(cacheOutData + appendDataPrefixParam->blob.size, cacheOutDataSize - appendDataPrefixParam->blob.size,
-        innerParams->inData->data, innerParams->inData->size) != 0) {
+    if (memcpy_s(cacheOutData + sizeof(uint32_t) + appendDataPrefixParam->blob.size,
+        cacheOutDataSize - appendDataPrefixParam->blob.size - sizeof(uint32_t), innerParams->inData->data,
+        innerParams->inData->size) != 0) {
         HKS_LOG_E("memcpy outData to cacheOutData failed!");
         HKS_FREE_PTR(cacheOutData);
         return HKS_ERROR_BAD_STATE;
@@ -950,6 +969,7 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
         HKS_FREE_PTR(cacheOutData);
         return HKS_ERROR_BAD_STATE;
     }
+    inOutData->size = cacheOutDataSize;
     HKS_FREE_PTR(cacheOutData);
     return HKS_SUCCESS;
 }
