@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,10 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-group("huks_3.0_test") {
-  if (ohos_kernel_type == "liteos_m") {
-    #deps = [ "unittest/src/liteos_m_adapter:huks_3.0_test" ]
+
+group("unittest") {
+  if (os_level == "standard") {
+    testonly = true
+    deps = [
+      "./unittest/huks_standard_test/crypto_engine_test:crypto_engine_unit_test",
+      "./unittest/huks_standard_test/interface_inner_test/alg_module_test:huks_mt_test",
+      "./unittest/huks_standard_test/interface_inner_test/sdk_test:hukssdk_test",
+      "./unittest/huks_standard_test/storage_multithread_test:huks_multithread_test",
+      "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
+    ]
   } else {
-    deps = [ "unittest/src/liteos_a_adapter:unittest" ]
+    if (ohos_kernel_type == "liteos_m") {
+      #deps = [ "./unittest/huks_lite_test/liteos_m_adapter:huks_3.0_test" ]
+    } else {
+      deps = [ "./unittest/huks_lite_test/liteos_a_adapter:huks_3.0_test" ]
+    }
+  }
+}
+
+group("reliability") {
+  testonly = true
+  if (os_level == "standard") {
+    deps = [ "./reliability:huks_stability_test" ]
   }
 }

@@ -238,7 +238,7 @@ if (ohos_kernel_type == "liteos_m") {
   }
   if (ohos_build_type == "debug") {
     group("huks_3.0_test") {
-      deps = [ "//base/security/huks/test:huks_3.0_test" ]
+      deps = [ "//base/security/huks/test:unittest" ]
     }
   }
 }
