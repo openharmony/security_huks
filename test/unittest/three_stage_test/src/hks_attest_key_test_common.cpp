@@ -140,7 +140,7 @@ int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     return 0;
 }
 
-int32_t GenerateParamSet(struct HksParamSet **paramSet, struct HksParam tmpParams[], uint32_t paramCount)
+int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
 {
     int32_t ret = HksInitParamSet(paramSet);
     if (ret != HKS_SUCCESS) {
@@ -164,7 +164,8 @@ int32_t GenerateParamSet(struct HksParamSet **paramSet, struct HksParam tmpParam
     return ret;
 }
 
-static int32_t ValidataAndCompareCertInfo(ParamType type, struct HksCertChain *certChain, struct HksParamSet *paramSet)
+static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertChain *certChain,
+    struct HksParamSet *paramSet)
 {
     if (certChain == nullptr || paramSet == nullptr) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -195,10 +196,8 @@ static int32_t ValidataAndCompareCertInfo(ParamType type, struct HksCertChain *c
     return ret;
 }
 
-int32_t ValidateCertChainTest(struct HksCertChain *certChain, struct HksParam tmpParam[], ParamType type)
+int32_t ValidateCertChainTest(const struct HksCertChain *certChain, const struct HksParam tmpParam[], ParamType type)
 {
-    HKS_LOG_E("validate cert chain test start");
-
     int32_t ret = HKS_ERROR_MALLOC_FAIL;
     struct HksParamSet *paramSet = nullptr;
     do {

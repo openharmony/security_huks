@@ -55,9 +55,10 @@ namespace Unittest::AttestKey {
     int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
         const struct HksTestCertChain *certChainParam);
 
-    int32_t GenerateParamSet(struct HksParamSet **paramSet, struct HksParam tmpParams[], uint32_t paramCount);
+    int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount);
 
-    int32_t ValidateCertChainTest(struct HksCertChain *certChain, struct HksParam tmpParam[], ParamType type);
+    int32_t ValidateCertChainTest(const struct HksCertChain *certChain, const struct HksParam tmpParam[],
+        ParamType type);
 }
 
 #endif
