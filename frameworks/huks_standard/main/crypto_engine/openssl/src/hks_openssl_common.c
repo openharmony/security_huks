@@ -84,6 +84,7 @@ int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *main
     (void)message;
 
 #ifndef _HARDWARE_ROOT_KEY_
+    (void)mainKey;
     return HKS_ERROR_NOT_SUPPORTED;
 #else
     /*

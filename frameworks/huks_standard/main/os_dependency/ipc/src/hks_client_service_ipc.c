@@ -291,7 +291,7 @@ int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *par
     return ret;
 }
 
-static int32_t AddAeTag(struct HksParamSet *paramSet, struct HksBlob *inText, bool isEncrypt)
+static int32_t AddAeTag(struct HksParamSet *paramSet, const struct HksBlob *inText, bool isEncrypt)
 {
     int32_t ret;
     if (!isEncrypt) {

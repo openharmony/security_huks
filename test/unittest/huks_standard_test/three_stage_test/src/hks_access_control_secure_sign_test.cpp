@@ -201,7 +201,7 @@ static int32_t CheckSignWithInfoTag(const struct HksBlob *alias, const struct Hk
     return ret;
 }
 
-static void TestGenerateKeyWithSecureSignTag(struct HksTestSecureSignGenParams *params)
+static void TestGenerateKeyWithSecureSignTag(const struct HksTestSecureSignGenParams *params)
 {
     struct HksParamSet *genParamSet = NULL;
     int32_t ret = InitParamSet(&genParamSet, params->inputParams, params->inputParamSize);
