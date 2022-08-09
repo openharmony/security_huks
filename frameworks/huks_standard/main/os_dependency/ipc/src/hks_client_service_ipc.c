@@ -662,7 +662,7 @@ int32_t HksClientGetCertificateChain(const struct HksBlob *keyAlias, const struc
 }
 
 int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksParamSet *paramSet, const struct HksBlob *wrappedData)
+    const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
 {
     int32_t ret = HksCheckIpcWrapUnwrapKey(HKS_MSG_WRAP_KEY, keyAlias, targetKeyAlias, paramSet, wrappedData);
     if (ret != HKS_SUCCESS) {
