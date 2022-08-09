@@ -93,10 +93,10 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
     const struct HksBlob keyAlias = { sizeof(alias), alias };
     AuthTokenImportKey();
     HksUserAuthToken *authTokenHal = NULL;
+    struct HksParamSet *hmacParamSet = nullptr;
     do {
         authTokenHal = (struct HksUserAuthToken *)HksMalloc(AUTH_TOKEN_LEN);
         if (authTokenHal == NULL) {
-            HKS_LOG_E("could not alloc memory");
             ret = HKS_FAILURE;
             break;
         }
@@ -112,7 +112,6 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
         }
         struct HksBlob inData = { AUTH_TOKEN_DATA_LEN, authTokenData };
 
-        struct HksParamSet *hmacParamSet = nullptr;
         ret = InitParamSet(&hmacParamSet, AuthToken_HMAC_Params, sizeof(AuthToken_HMAC_Params) / sizeof(HksParam));
         if (ret != HKS_SUCCESS) {
             break;
@@ -123,7 +122,6 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
 
         ret = HksInit(&keyAlias, hmacParamSet, &handleHMAC, nullptr);
         if (ret != HKS_SUCCESS) {
-            HksFreeParamSet(&hmacParamSet);
             break;
         }
         // Update & Finish
@@ -131,7 +129,6 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
 
         ret = TestUpdateFinish(&handleHMAC, hmacParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
         if (ret != HKS_SUCCESS) {
-            HksFreeParamSet(&hmacParamSet);
             break;
         }
 
@@ -145,6 +142,7 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
         return ret;
     } while (0);
     HKS_FREE_PTR(authTokenHal);
+    HksFreeParamSet(&hmacParamSet);
     return ret;
 }
 
@@ -246,7 +244,7 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
         return ret;
     }
     uint8_t authToken[AUTH_TOKEN_LEN] = {0};
-    for (int i = 0; i < AUTH_TOKEN_LEN; i++) {
+    for (uint32_t i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
     }
     tmpParams.tag = HKS_TAG_AUTH_TOKEN;
@@ -377,7 +375,6 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
 
     ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, testIDMParams);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksBuildAuthtoken failed, ret : %d", ret);
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
     }
@@ -395,12 +392,20 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksDeleteKey failed, ret : %d", ret);
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
     }
 
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
+}
+
+static int32_t UpdateForAgreeTest(const struct HksBlob *handle, struct HksParamSet *initParamSet,
+    struct HksBlob *publicKey)
+{
+    uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
+    struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
+    int32_t ret = HksUpdate(handle, initParamSet, publicKey, &outDataUpdate);
+    return ret;
 }
 
 int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
@@ -448,9 +453,7 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
         return ret;
     }
 
-    uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
-    struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
-    ret = HksUpdate((const struct HksBlob *)&handle, initParamSet, &publicKey, &outDataUpdate);
+    ret = UpdateForAgreeTest((const struct HksBlob *)&handle, initParamSet, &publicKey);
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
