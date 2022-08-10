@@ -150,7 +150,8 @@ static inline bool IsCipherPurpose(enum HksKeyPurpose purpose)
 
 static inline bool IsAgreementPurpose(enum HksKeyPurpose purpose)
 {
-    return (((uint32_t)purpose & HKS_KEY_PURPOSE_DERIVE) == HKS_KEY_PURPOSE_DERIVE);
+    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_DERIVE) == HKS_KEY_PURPOSE_DERIVE) ||
+        (((uint32_t)purpose & HKS_KEY_PURPOSE_AGREE) == HKS_KEY_PURPOSE_AGREE));
 }
 
 int32_t HksCreateHwAttestCert(struct HksBlob *attestCert, const struct HksKeyNode *attestKey,
