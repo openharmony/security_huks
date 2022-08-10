@@ -60,7 +60,7 @@ ohos_shared_library("huks_engine_core_standard") {
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
   ]
   if (enable_mock) {
-    deps += [ "//base/security/huks/test/unittest/systemapi_mock:libhuks_service_systemapi_mock_static" ]
+    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
   } else {
     deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
   }
