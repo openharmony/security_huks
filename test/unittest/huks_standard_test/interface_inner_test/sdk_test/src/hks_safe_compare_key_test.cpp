@@ -155,5 +155,7 @@ HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level0)
     ret = CompareKeyData(&keyAliasOne, &keyAliasTwo);
     HKS_TEST_ASSERT(ret != 0);
     ASSERT_TRUE(ret != 0);
+    (void)HksDeleteKey(&keyAliasOne, nullptr);
+    (void)HksDeleteKey(&keyAliasTwo, nullptr);
 }
 }

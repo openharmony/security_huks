@@ -92,12 +92,11 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
     uint8_t alias[] = "AuthToken_Sign_Verify_KeyAlias";
     const struct HksBlob keyAlias = { sizeof(alias), alias };
     AuthTokenImportKey();
-    HksUserAuthToken *authTokenHal = NULL;
+    HksUserAuthToken *authTokenHal = nullptr;
     struct HksParamSet *hmacParamSet = nullptr;
     do {
         authTokenHal = (struct HksUserAuthToken *)HksMalloc(AUTH_TOKEN_LEN);
-        if (authTokenHal == NULL) {
-            ret = HKS_FAILURE;
+        if (authTokenHal == nullptr) {
             break;
         }
 
@@ -141,6 +140,7 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
         HksFreeParamSet(&hmacParamSet);
         return ret;
     } while (0);
+    (void)HksDeleteKey(&keyAlias, nullptr);
     HKS_FREE_PTR(authTokenHal);
     HksFreeParamSet(&hmacParamSet);
     return ret;

@@ -211,6 +211,7 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
         HksFree(decryptedText.data);
     }
 
+    (void)HksDeleteKey(&authId, nullptr);
     EVP_PKEY_free(pkey);
     HksFree(cipherText.data);
     HksFree(x509Key.data);
@@ -333,6 +334,7 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
         HksFree(decryptedText.data);
     }
 
+    (void)HksDeleteKey(&authId, nullptr);
     HksFree(paramSetOut);
     HksFree(publicKey.data);
     HksFree(cipherText.data);
@@ -438,6 +440,8 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
             testCaseParams.verifyResult);
         HksFree(publicKey.data);
     }
+
+    (void)HksDeleteKey(&authId, nullptr);
     HksFree(paramSetOut);
     HksFree(signData.data);
     HksFreeParamSet(&paramInSet);
@@ -534,6 +538,8 @@ void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCa
     if (testCaseParams.signResult == HKS_SUCCESS) {
         EXPECT_EQ(HksVerify(&authId, paramInSet, &plainText, &signData), testCaseParams.verifyResult);
     }
+
+    (void)HksDeleteKey(&authId, nullptr);
     EVP_PKEY_free(pkey);
     HksFree(signData.data);
     HksFree(x509Key.data);

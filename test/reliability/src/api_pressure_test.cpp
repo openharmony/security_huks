@@ -838,6 +838,7 @@ void ApiPressureTest::CipherScene(uint32_t ii)
         HksBlob plainTextDecrypt = { .size = CIPHER_SIZE, .data = (uint8_t *)HksMalloc(CIPHER_SIZE) };
         ASSERT_NE(plainTextDecrypt.data, nullptr);
         EXPECT_EQ(HksDecrypt(&authId, paramInSet, &cipherText, &plainTextDecrypt), HKS_SUCCESS);
+        (void)HksDeleteKey(&authId, nullptr);
         HksFree(plainTextDecrypt.data);
         HksFree(cipherText.data);
         HksFreeParamSet(&paramInSet);
@@ -871,6 +872,7 @@ void ApiPressureTest::SignScene(uint32_t ii)
         ASSERT_NE(signature.data, nullptr);
         HksSign(&authId, paramInSet, &message, &signature);
         EXPECT_EQ(HksVerify(&authId, paramInSet, &message, &signature), HKS_SUCCESS);
+        (void)HksDeleteKey(&authId, nullptr);
         HksFree(signature.data);
         HksFreeParamSet(&paramInSet);
     } while (1);
@@ -906,6 +908,7 @@ void ApiPressureTest::AgreeScene(uint32_t ii)
         HksBlob agreeKey = { .size = TEST_KEY_SIZE, .data = (uint8_t *)HksMalloc(TEST_KEY_SIZE) };
         ASSERT_NE(agreeKey.data, nullptr);
         EXPECT_EQ(HksAgreeKey(agreeKeyParam, &authId, &pubKey, &agreeKey), HKS_SUCCESS);
+        (void)HksDeleteKey(&authId, nullptr);
         HksFree(agreeKey.data);
         HksFree(pubKey.data);
         HksFreeParamSet(&generateKeyParam);
@@ -987,6 +990,9 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00400, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+
+    struct HksBlob authId = { (uint32_t)strlen(GENERATE_KEY), (uint8_t *)GENERATE_KEY };
+    (void)HksDeleteKey(&authId, nullptr);
 }
 
 /**
@@ -1021,6 +1027,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00500, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1056,6 +1063,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00600, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1110,6 +1118,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00800, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1145,6 +1154,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00900, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1202,6 +1212,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01100, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1244,6 +1255,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01200, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFree(signature.data);
     HksFreeParamSet(&paramInSet);
 }
@@ -1285,6 +1297,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01300, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1333,6 +1346,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01400, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFree(cipherText.data);
     HksFreeParamSet(&paramInSet);
 }
@@ -1369,6 +1383,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01500, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1416,6 +1431,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01600, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
     HksFreeParamSet(&paramInSetHkdf);
 }
@@ -1452,6 +1468,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01700, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
+    (void)HksDeleteKey(&authId, nullptr);
     HksFreeParamSet(&paramInSet);
 }
 

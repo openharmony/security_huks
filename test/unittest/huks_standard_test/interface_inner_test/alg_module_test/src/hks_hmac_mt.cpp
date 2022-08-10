@@ -350,6 +350,7 @@ protected:
             EXPECT_EQ(HksMac(&authId, paramInSet, &message, &macForHuks), testCaseParams.hmacResult);
         }
 
+        (void)HksDeleteKey(&authId, nullptr);
         HksFreeParamSet(&paramInSet);
         HksFree(macForHuks.data);
     }
