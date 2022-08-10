@@ -487,6 +487,7 @@ protected:
         EXPECT_EQ(EcdsaSign(&priKey, digest, &message, &signature), testCaseParams.signResult);
         EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);
 
+        (void)HksDeleteKey(&authId, nullptr);
         HksFreeParamSet(&paramInSet);
         HksFree(localKey.blob.data);
         HksFreeParamSet(&paramOutSet);

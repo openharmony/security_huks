@@ -859,6 +859,7 @@ protected:
             struct HksBlob pubId = { (uint32_t)strlen(PUB_KEY), (uint8_t *)PUB_KEY };
             EXPECT_EQ(HksImportKey(&pubId, paramInSet, &x509Key), HKS_SUCCESS);
             EXPECT_EQ(HksVerify(&pubId, paramInSet, &message, &signature), testCaseParams.verifyResult);
+            (void)HksDeleteKey(&pubId, nullptr);
             HksFree(x509Key.data);
         }
 
