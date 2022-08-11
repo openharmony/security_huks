@@ -86,7 +86,7 @@ int32_t HksMbedtlsHmac(const struct HksBlob *key,
         return ret;
     }
 
-    ret = mbedtls_md_hmac(mbedtls_md_info_from_type(mbedtlsAlg),
+    ret = mbedtls_md_hmac(mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg),
         key->data, key->size, msg->data, msg->size, mac->data);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac failed! mbedtls ret = 0x%X", ret);
@@ -112,7 +112,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
         return ret;
     }
 
-    if (mbedtls_md_info_from_type(mbedtlsAlg) == NULL) {
+    if (mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg) == NULL) {
         HKS_LOG_E("Mbedtls hmac engine info failed!");
         return MBEDTLS_ERR_MD_BAD_INPUT_DATA;
     }
@@ -125,7 +125,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
 
     mbedtls_md_init(hmacCtx);
 
-    ret = mbedtls_md_setup(hmacCtx, mbedtls_md_info_from_type(mbedtlsAlg), 1);
+    ret = mbedtls_md_setup(hmacCtx, mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg), 1);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac setup failed! mbedtls ret = 0x%X", ret);
         mbedtls_md_free(hmacCtx);

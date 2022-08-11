@@ -629,10 +629,11 @@ HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain
     int32_t ret = HksClientValidateCertChain(certChain, paramSetOut);
     HKS_LOG_I("leave validate cert chain, result = %d", ret);
     return ret;
-#endif
+#else
     (void)certChain;
     (void)paramSetOut;
     return HKS_ERROR_NOT_SUPPORTED;
+#endif
 }
 
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
