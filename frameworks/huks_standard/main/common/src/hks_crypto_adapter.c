@@ -256,7 +256,7 @@ int32_t HksGetEncryptAeTag(
 #ifndef _CUT_AUTHENTICATE_
 static int32_t SetCurve25519KeyMaterial(bool isPubKey, const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    struct KeyMaterial25519 curve25519Km = {0};
+    struct KeyMaterial25519 curve25519Km = {HKS_ALG_RSA, 0, 0, 0, 0};
     curve25519Km.keySize = HKS_CURVE25519_KEY_SIZE_256;
     curve25519Km.reserved = 0;
 
