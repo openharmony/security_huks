@@ -768,9 +768,9 @@ static void TestGenerateKeyWithSecureSignTag(struct HksTestSecureSignGenParams *
     ret = CheckSignWithInfoTag(params->keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "CheckSignWithInfoTag rsa key failed.";
 
-        /**
-         * @tc.steps:step3. Delete key and free paramSet
-         */
+    /**
+     * @tc.steps:step3. Delete key and free paramSet
+     */
     HksDeleteKey(params->keyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
 }
