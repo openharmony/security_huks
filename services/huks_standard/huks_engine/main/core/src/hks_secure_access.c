@@ -462,8 +462,7 @@ static int32_t VerifyChallengeOrTimeStamp(const struct HuksKeyNode *keyNode, con
 static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
     const struct HksUserAuthToken *authToken, uint32_t userAuthType, uint32_t authAccessType)
 {
-    if ((userAuthType & HKS_USER_AUTH_TYPE_PIN) == 0 ||
-        (authAccessType & HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) == 0) {
+    if ((authAccessType & HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) == 0) {
         return HKS_SUCCESS;
     }
 

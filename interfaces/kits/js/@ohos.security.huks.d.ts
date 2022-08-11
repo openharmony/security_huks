@@ -591,15 +591,6 @@ declare namespace huks {
     }
 
     /**
-     * @name HuksSecureSignType
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     */
-    export enum HuksSecureSignType {
-        HUKS_SECURE_SIGN_WITH_AUTHINFO = 1,
-    }
-
-    /**
      * @name HuksSendType
      * @since 8
      * @syscap SystemCapability.Security.Huks
@@ -610,31 +601,6 @@ declare namespace huks {
     }
 
     /**
-     * @name HuksUserAuthType
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     * @permission N/A
-     */
-    export enum HuksUserAuthType {
-        HUKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
-        HUKS_USER_AUTH_TYPE_FACE = 1 << 1,
-        HUKS_USER_AUTH_TYPE_PIN = 1 << 2,
-    }
-
-
-    /**
-     * @name HuksSecureAccessType
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     * @permission N/A
-     */
-    export enum HuksSecureAccessType {
-        HUKS_SECURE_ACCESS_INVALID_CLEAR_PASSWORD = 1 << 0,
-        HUKS_SECURE_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1,
-    }
-
-
-    /**
      * @name HuksSecureSignType
      * @since 9
      * @syscap SystemCapability.Security.Huks
@@ -643,7 +609,6 @@ declare namespace huks {
     export enum HuksSecureSignType {
         HUKS_SECURE_SIGN_WITH_AUTHINFO = 1,
     }
-
 
     /**
      * @name HuksTagType
