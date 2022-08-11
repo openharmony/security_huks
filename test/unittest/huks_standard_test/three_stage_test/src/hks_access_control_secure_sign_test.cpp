@@ -63,6 +63,16 @@ static const std::string g_inDataLess64 = "Hks_SM4_Cipher_Test_00000000000000000
 
 static const uint32_t g_authHeadSize = 24;
 
+static const uint32_t g_secureUid = 1;
+
+static const uint32_t g_enrolledIdPin = 1;
+
+static const uint32_t g_enrolledIdFinger = 2;
+
+static const uint32_t g_credentialId = 0;
+
+static const uint32_t g_time = 0;
+
 static struct HksBlob g_genKeyAlias = {
     .size = strlen("TestGenKeyForSignWithInfo"),
     .data = (uint8_t *)"TestGenKeyForSignWithInfo"
@@ -609,48 +619,54 @@ static int32_t BuildImportKeyParamsForRsa(struct HksTestSecureSignImportParams *
     return ret;
 }
 
+static int32_t BuildImportKeyParamsForDSA(struct HksTestSecureSignImportParams *importParams, bool isAuth)
+{
+    importParams->inputParams = isAuth ? g_importDsaKeyParams : g_importDsaKeyParamsNoAuthInfo;
+    importParams->inputParamSize = isAuth ? sizeof(g_importDsaKeyParams)/sizeof(g_importDsaKeyParams[0]) :
+        sizeof(g_importDsaKeyParamsNoAuthInfo)/sizeof(g_importDsaKeyParamsNoAuthInfo[0]);
+    importParams->expectResult = HKS_SUCCESS;
+    uint8_t *keyBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    if (keyBuffer == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    importParams->importKey.data = keyBuffer;
+    importParams->importKey.size = MAX_KEY_SIZE;
+    struct HksBlob xData = { sizeof(g_xData), (uint8_t *)g_xData };
+    struct HksBlob yData = { sizeof(g_yData), (uint8_t *)g_yData };
+    struct HksBlob pData = { sizeof(g_pData), (uint8_t *)g_pData };
+    struct HksBlob qData = { sizeof(g_qData), (uint8_t *)g_qData };
+    struct HksBlob gData = { sizeof(g_gData), (uint8_t *)g_gData };
+    struct TestDsaKeyParams dsaKeyParams = {
+        .xData = &xData,
+        .yData = &yData,
+        .pData = &pData,
+        .qData = &qData,
+        .gData = &gData
+    };
+    ret = Unittest::HksAccessControlPartTest::ConstructDsaKeyPair(HKS_RSA_KEY_SIZE_2048, &dsaKeyParams,
+        &importParams->importKey);
+    if (ret != HKS_SUCCESS) {
+        HksFree(keyBuffer);
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t BuildImportKeyTestParams(struct HksTestSecureSignImportParams *importParams, uint32_t alg,
     bool isAuth, bool isClearPasswordInvalid)
 {
     importParams->keyAlias = isAuth ? &g_importKeyAlias : &g_importKeyNoAuthAlias;
     int32_t ret;
     switch (alg) {
-        case HKS_ALG_RSA:{
+        case HKS_ALG_RSA: {
             ret = BuildImportKeyParamsForRsa(importParams, isAuth, isClearPasswordInvalid);
             return ret;
         }
-        case HKS_ALG_DSA:{
-            importParams->inputParams = isAuth ? g_importDsaKeyParams : g_importDsaKeyParamsNoAuthInfo;
-            importParams->inputParamSize = isAuth ? sizeof(g_importDsaKeyParams)/sizeof(g_importDsaKeyParams[0]) :
-                sizeof(g_importDsaKeyParamsNoAuthInfo)/sizeof(g_importDsaKeyParamsNoAuthInfo[0]);
-            importParams->expectResult = HKS_SUCCESS;
-            uint8_t *keyBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-            if (keyBuffer == nullptr) {
-                return HKS_ERROR_MALLOC_FAIL;
-            }
-            importParams->importKey.data = keyBuffer;
-            importParams->importKey.size = MAX_KEY_SIZE;
-            struct HksBlob xData = { sizeof(g_xData), (uint8_t *)g_xData };
-            struct HksBlob yData = { sizeof(g_yData), (uint8_t *)g_yData };
-            struct HksBlob pData = { sizeof(g_pData), (uint8_t *)g_pData };
-            struct HksBlob qData = { sizeof(g_qData), (uint8_t *)g_qData };
-            struct HksBlob gData = { sizeof(g_gData), (uint8_t *)g_gData };
-            struct TestDsaKeyParams dsaKeyParams = {
-                .xData = &xData,
-                .yData = &yData,
-                .pData = &pData,
-                .qData = &qData,
-                .gData = &gData
-            };
-            ret = Unittest::HksAccessControlPartTest::ConstructDsaKeyPair(HKS_RSA_KEY_SIZE_2048, &dsaKeyParams,
-                &importParams->importKey);
-            if (ret != HKS_SUCCESS) {
-                HksFree(keyBuffer);
-            }
+        case HKS_ALG_DSA: {
+            ret = BuildImportKeyParamsForDSA(importParams, isAuth);
             return ret;
         }
             break;
-        case HKS_ALG_ED25519:{
+        case HKS_ALG_ED25519: {
             importParams->inputParams = isAuth ? g_importKeyEd25519Params : g_importKeyEd25519ParamsNoAuth;
             importParams->inputParamSize = isAuth ? sizeof(g_importKeyEd25519Params)/sizeof(g_importKeyEd25519Params[0])
                 : sizeof(g_importKeyEd25519ParamsNoAuth) / sizeof(g_importKeyEd25519ParamsNoAuth[0]);
@@ -687,8 +703,7 @@ static int32_t BuildUpdateFinishParams(struct HksTestSecureSignVerifyUpdateFinis
     g_outDataBlob.size = sizeof(g_outBuffer);
     updateFinishParams->outBuffer = &g_outDataBlob;
     updateFinishParams->inData = isThreeStage ? &g_inDataBlob : &g_inDataBlobTwoStage;
-    switch (alg)
-    {
+    switch (alg) {
         case HKS_ALG_RSA: {
             updateFinishParams->updateParams = g_signParamsTestRsa;
             updateFinishParams->inputParamSize = HKS_ARRAY_SIZE(g_signParamsTestRsa);
@@ -724,8 +739,7 @@ static int32_t BuildUpdateFinishVerifyParams(struct HksTestSecureSignVerifyUpdat
     updateFinishParams->outBuffer = &g_outDataBlob;
     updateFinishParams->inData = inData;
     updateFinishParams->signature = signature;
-    switch (alg)
-    {
+    switch (alg) {
         case HKS_ALG_RSA: {
             updateFinishParams->updateParams = g_verifyParamsTestRsa;
             updateFinishParams->inputParamSize = HKS_ARRAY_SIZE(g_verifyParamsTestRsa);
@@ -861,6 +875,28 @@ int32_t HksTestUpdateFinishSignAuthInfo(struct HksTestSecureSignVerifyUpdateFini
     return ret;
 }
 
+int32_t VerifyUpdateFinish(struct HksBlob *handle, struct HksParamSet *newParamSet, struct HksParam *purposeParam,
+    struct HksTestSecureSignVerifyUpdateFinishParams *updateFinishParams, bool isSign)
+{
+    int32_t ret;
+    if (isSign) {
+        if (updateFinishParams->isThreeStageUse) {
+            ret = TestUpdateFinish(handle, newParamSet, purposeParam->uint32Param, updateFinishParams->inData,
+                updateFinishParams->outBuffer);
+        } else {
+            ret = HksFinish(handle, newParamSet, updateFinishParams->inData, updateFinishParams->outBuffer);
+        }
+    } else {
+        if (updateFinishParams->isThreeStageUse) {
+            ret = TestUpdateFinish(handle, newParamSet, purposeParam->uint32Param, updateFinishParams->inData,
+                updateFinishParams->signature);
+        } else {
+            ret = HksFinish(handle, newParamSet, updateFinishParams->inData, updateFinishParams->signature);
+        }
+    }
+    return ret;
+}
+
 int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpdateFinishParams *updateFinishParams,
     struct HksTestGenAuthTokenParams *genAuthTokenParams, bool isSign)
 {
@@ -871,13 +907,11 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
 
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = InitParamSet(&paramSet, updateFinishParams->updateParams, updateFinishParams->inputParamSize);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
 
     ret = HksInit(updateFinishParams->keyAlias, paramSet, &handle, &challenge);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         return HKS_FAILURE;
@@ -887,14 +921,13 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
 
     struct HksParamSet *newParamSet = nullptr;
     ret = HksBuildAuthTokenSecure(paramSet, genAuthTokenParams, &newParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksBuildAuthTokenSecure failed.";
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         return HKS_FAILURE;
     }
 
-    struct HksParam *tmpParam = NULL;
-    ret = HksGetParam(newParamSet, HKS_TAG_PURPOSE, &tmpParam);
+    struct HksParam *purposeParam = NULL;
+    ret = HksGetParam(newParamSet, HKS_TAG_PURPOSE, &purposeParam);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         HksFreeParamSet(&newParamSet);
@@ -902,22 +935,8 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
         return HKS_FAILURE;
     }
 
-    if (isSign) {
-        if (updateFinishParams->isThreeStageUse) {
-            ret = TestUpdateFinish(&handle, newParamSet, tmpParam->uint32Param, updateFinishParams->inData,
-                updateFinishParams->outBuffer);
-        } else {
-            ret = HksFinish(&handle, newParamSet, updateFinishParams->inData, updateFinishParams->outBuffer);
-        }
-    } else {
-        if (updateFinishParams->isThreeStageUse) {
-            ret = TestUpdateFinish(&handle, newParamSet, tmpParam->uint32Param, updateFinishParams->inData,
-                updateFinishParams->signature);
-        } else {
-            ret = HksFinish(&handle, newParamSet, updateFinishParams->inData, updateFinishParams->signature);
-        }
-    }
-    
+    ret = VerifyUpdateFinish(&handle, newParamSet, purposeParam, updateFinishParams, isSign);
+
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
 
     if (ret != HKS_SUCCESS) {
