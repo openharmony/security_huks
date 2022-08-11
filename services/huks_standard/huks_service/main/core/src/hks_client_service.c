@@ -440,7 +440,7 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     (void)memset_s(buffer, totalSize, 0, totalSize);
 
     struct HksPubKeyInfo *curve25519Key = (struct HksPubKeyInfo *)buffer;
-    curve25519Key->keyAlg = (enum HksKeyFlag)alg;
+    curve25519Key->keyAlg = (enum HksKeyAlg)alg;
     curve25519Key->keySize = HKS_CURVE25519_KEY_SIZE_256;
     curve25519Key->nOrXSize = key->size; /* curve25519 public key */
 
