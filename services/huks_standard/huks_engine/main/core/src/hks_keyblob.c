@@ -542,7 +542,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
 {
     (void)keyAlias;
     struct HksParamSet *keyBlobParamSet = NULL;
-    int32_t ret = BuildClearKeyBlob(key, keyFlag, paramSet, &keyBlobParamSet);
+    int32_t ret = BuildClearKeyBlob(key, (enum HksKeyFlag)keyFlag, paramSet, &keyBlobParamSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }

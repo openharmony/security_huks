@@ -1074,7 +1074,7 @@ static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyTy
     (void)memset_s(buffer, totalSize, 0, totalSize);
 
     struct HksKeyMaterial25519 *curve25519Key = (struct HksKeyMaterial25519 *)buffer;
-    curve25519Key->keyAlg = alg;
+    curve25519Key->keyAlg = (enum HksKeyAlg)alg;
     curve25519Key->keySize = HKS_CURVE25519_KEY_SIZE_256;
     curve25519Key->priKeySize = key->size; /* curve25519 private key */
 

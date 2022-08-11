@@ -114,7 +114,7 @@ void HksCryptoHalHmacFreeCtx(void **ctx)
         return;
     }
 
-    return func(ctx);
+    func(ctx);
 }
 
 #ifndef _CUT_AUTHENTICATE_
@@ -403,7 +403,7 @@ void HksCryptoHalEncryptFreeCtx(void **ctx, const uint32_t algtype)
         return;
     }
 
-    return func(ctx);
+    func(ctx);
 }
 
 int32_t HksCryptoHalDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
@@ -496,5 +496,5 @@ void HksCryptoHalDecryptFreeCtx(void **ctx, const uint32_t algtype)
         return;
     }
 
-    return func(ctx);
+    func(ctx);
 }
