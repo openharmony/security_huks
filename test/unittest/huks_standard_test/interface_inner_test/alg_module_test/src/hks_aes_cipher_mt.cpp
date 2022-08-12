@@ -434,7 +434,7 @@ protected:
         HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size());
         HksBuildParamSet(&paramInSet);
 
-        EXPECT_EQ(HksGenerateKey(&authId, paramInSet, NULL), testCaseParams.generateKeyResult);
+        EXPECT_EQ(HksGenerateKey(&authId, paramInSet, nullptr), testCaseParams.generateKeyResult);
 
         HksBlob plainText = {
             .size = (uint32_t)testCaseParams.hexData.length(),
@@ -454,6 +454,7 @@ protected:
             HksFree(plainTextDecrypt.data);
         }
 
+        (void)HksDeleteKey(&authId, nullptr);
         HksFree(cipherText.data);
         HksFreeParamSet(&paramInSet);
     }

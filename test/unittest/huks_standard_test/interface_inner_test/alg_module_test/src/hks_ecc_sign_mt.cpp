@@ -863,6 +863,7 @@ protected:
         EXPECT_EQ(HksSign(&authId, paramInSet, &message, &signature), testCaseParams.signResult);
         EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);
 
+        (void)HksDeleteKey(&authId, nullptr);
         if (storage == HKS_STORAGE_TEMP) {
             HksFree(authId.data);
         }

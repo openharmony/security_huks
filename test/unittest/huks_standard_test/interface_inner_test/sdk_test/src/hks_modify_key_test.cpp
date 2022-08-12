@@ -338,6 +338,7 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
     ret = DecryptCipher(&testDecryptStruct);
 
     HKS_TEST_ASSERT(ret != g_testCipherParams[index].expectResult);
+    (void)HksDeleteKey(&keyAlias, NULL);
     TestFreeBlob(&plainData);
     TestFreeBlob(&cipherData);
     TestFreeBlob(&decryptedData);

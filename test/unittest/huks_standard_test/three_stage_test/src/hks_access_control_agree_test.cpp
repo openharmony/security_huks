@@ -250,6 +250,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest001, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal001, nullptr), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
@@ -273,6 +274,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest002, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal002, nullptr), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
@@ -296,5 +298,6 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest003, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_003_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal003, nullptr), HKS_SUCCESS);
 }
 }
