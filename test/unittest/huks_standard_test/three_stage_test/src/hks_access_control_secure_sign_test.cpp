@@ -951,16 +951,16 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
 static void BuildAuthTokenParams(struct HksTestGenAuthTokenParams *authTokenParams, bool isClearPasswordInvalid)
 {
     if (isClearPasswordInvalid) {
-        authTokenParams->secureUid = 1;
-        authTokenParams->enrolledId = 2;
-        authTokenParams->credentialId = 0;
-        authTokenParams->time = 0;
+        authTokenParams->secureUid = g_secureUid;
+        authTokenParams->enrolledId = g_enrolledIdFinger;
+        authTokenParams->credentialId = g_credentialId;
+        authTokenParams->time = g_time;
         return;
     }
-    authTokenParams->secureUid = 1;
-    authTokenParams->enrolledId = 1;
-    authTokenParams->credentialId = 0;
-    authTokenParams->time = 0;
+    authTokenParams->secureUid = g_secureUid;
+    authTokenParams->enrolledId = g_enrolledIdPin;
+    authTokenParams->credentialId = g_credentialId;
+    authTokenParams->time = g_time;
 }
 
 static int32_t BuildSigAndIndataBlob(struct HksBlob *sigBlob, struct HksBlob *inDataBlob,
