@@ -643,7 +643,7 @@ static int32_t BuildImportKeyParamsForDSA(struct HksTestSecureSignImportParams *
         .qData = &qData,
         .gData = &gData
     };
-    ret = Unittest::HksAccessControlPartTest::ConstructDsaKeyPair(HKS_RSA_KEY_SIZE_2048, &dsaKeyParams,
+    int32_t ret = Unittest::HksAccessControlPartTest::ConstructDsaKeyPair(HKS_RSA_KEY_SIZE_2048, &dsaKeyParams,
         &importParams->importKey);
     if (ret != HKS_SUCCESS) {
         HksFree(keyBuffer);
