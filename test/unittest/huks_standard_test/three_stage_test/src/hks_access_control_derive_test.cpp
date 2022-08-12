@@ -74,16 +74,19 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
         },
     .initResult = HKS_SUCCESS
 };
+
+static struct HksBlob g_keyAliasFinish001 = {
+    strlen("HksHKDFDeriveKeyAliasFinalTest001"),
+    (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest001"
+};
+
 static struct HksParam g_deriveAccessFinish001[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest001"),
-            (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest001"
-        }
+        .blob = g_keyAliasFinish001;
     }, {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -128,16 +131,18 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
         },
     .initResult = HKS_SUCCESS
 };
+static struct HksBlob g_keyAliasFinish002 = {
+    strlen("HksHKDFDeriveKeyAliasFinalTest002"),
+    (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest002"
+};
+
 static struct HksParam g_deriveAccessFinish002[] = {
     {
         .tag =  HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest002"),
-            (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest002"
-        }
+        .blob = g_keyAliasFinish002;
     }, {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -175,6 +180,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest001, TestSize.Level0
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish001, nullptr), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest002
@@ -198,5 +204,6 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest002, TestSize.Level0
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish002, nullptr), HKS_SUCCESS);
 }
 }

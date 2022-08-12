@@ -550,6 +550,7 @@ protected:
 
         EXPECT_EQ(HksAgreeKey(agreeKeyParams, &bob, &x509KeyAlise, agreeKeyBob), testCaseParams.agreeResult);
 
+        (void)HksDeleteKey(&bob, nullptr);
         HksFree(alise.data);
         HksFree(x509KeyAlise.data);
         HksFree(x509KeyBob.data);
@@ -583,6 +584,7 @@ protected:
                 testCaseParams.generateKeyResult);
             EXPECT_EQ(EcdhAgreeKey(keySize, &priKeyAlise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
             EXPECT_EQ(EcdhAgreeKey(keySize, &priKeyBob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
+            (void)HksDeleteKey(&bob, nullptr);
             HksFree(priKeyAlise.data);
             HksFree(priKeyBob.data);
         } else if (scenario == 1) {
@@ -654,6 +656,7 @@ protected:
                 testCaseParams.generateKeyResult);
             EXPECT_EQ(DhAgreeKey(keySize, &priKeyAlise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
             EXPECT_EQ(DhAgreeKey(keySize, &priKeyBob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
+            (void)HksDeleteKey(&bob, nullptr);
             HksFree(priKeyAlise.data);
             HksFree(priKeyBob.data);
         } else if (scenario == 1) {

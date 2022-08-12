@@ -798,6 +798,7 @@ protected:
             HksFree(signData.data);
         }
 
+        (void)HksDeleteKey(&authId, nullptr);
         HksFree(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
         HksFreeParamSet(&paramInSet);
@@ -906,6 +907,7 @@ protected:
 
         EXPECT_EQ(HksVerify(&authId, paramInSet, &plainText, &signData), testCaseParams.verifyResult);
 
+        (void)HksDeleteKey(&authId, nullptr);
         EVP_PKEY_free(pkey);
         HksFree(signData.data);
         HksFree(x509Key.data);
