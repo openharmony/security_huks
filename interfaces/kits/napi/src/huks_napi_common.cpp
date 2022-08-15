@@ -150,46 +150,6 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
     return result;
 }
 
-napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
-{
-    if (HksInitParamSet(&paramSet) != HKS_SUCCESS) {
-        napi_throw_error(env, NULL, "native error");
-        HKS_LOG_E("init paramset failed");
-        return nullptr;
-    }
-
-    size_t index = 0;
-    bool hasNextElement = false;
-    napi_value result = nullptr;
-    while ((napi_has_element(env, object, index, &hasNextElement) == napi_ok) && hasNextElement) {
-        napi_value element = nullptr;
-        NAPI_CALL(env, napi_get_element(env, object, index, &element));
-
-        HksParam param = {0};
-        result = GetHksParam(env, element, param);
-        if (result == nullptr) {
-            HKS_LOG_E("GetHksParam failed.");
-            HksFreeParamSet(&paramSet);
-            return nullptr;
-        }
-
-        if (HksAddParams(paramSet, &param, 1) != HKS_SUCCESS) {
-            HKS_LOG_E("HksAddParams failed.");
-            HksFreeParamSet(&paramSet);
-            return nullptr;
-        }
-        index++;
-    }
-
-    if (HksBuildParamSet(&paramSet) != HKS_SUCCESS) {
-        HKS_LOG_E("HksBuildParamSet failed.");
-        HksFreeParamSet(&paramSet);
-        return nullptr;
-    }
-
-    return GetInt32(env, 0);
-}
-
 void FreeParsedParams(std::vector<HksParam> &params)
 {
     HksParam *param = params.data();
@@ -227,6 +187,54 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
         index++;
     }
     return GetInt32(env, 0);
+}
+
+static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet *&paramSet)
+{
+    for (auto &param : params) {
+        int32_t ret = HksAddParams(paramSet, &param, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add param.tag[%x] failed", param.tag);
+            return ret;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
+{
+    std::vector<HksParam> params;
+    HksParamSet *outParamSet = nullptr;
+    do {
+        if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
+            napi_throw_error(env, NULL, "native error");
+            HKS_LOG_E("init paramset failed");
+            break;
+        }
+
+        if (ParseParams(env, object, params) == nullptr) {
+            HKS_LOG_E("parse params failed");
+            break;
+        }
+
+        if (AddParams(params, outParamSet) != HKS_SUCCESS) {
+            HKS_LOG_E("add params failed");
+            break;
+        }
+
+        if (HksBuildParamSet(&outParamSet) != HKS_SUCCESS) {
+            HKS_LOG_E("HksBuildParamSet failed");
+            break;
+        }
+
+        FreeParsedParams(params);
+        paramSet = outParamSet;
+        return GetInt32(env, 0);
+    } while (0);
+
+    HksFreeParamSet(&outParamSet);
+    FreeParsedParams(params);
+    return nullptr;
 }
 
 napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet, HksParam *addParam)
@@ -504,7 +512,6 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *
 
     uint64_t tempHandle = *(uint64_t *)(handle->data);
     uint32_t handleValue = (uint32_t)tempHandle; /* Temporarily only use 32 bit handle */
-    HKS_LOG_D("init handle:%u", handleValue);
 
     napi_value handlejs = nullptr;
     NAPI_CALL(env, napi_create_uint32(env, handleValue, &handlejs));

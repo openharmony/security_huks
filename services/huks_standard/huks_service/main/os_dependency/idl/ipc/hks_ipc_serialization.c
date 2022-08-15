@@ -113,7 +113,7 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
 static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     const struct HksBlob *srcBlob, uint32_t *srcOffset)
 {
-    if (*srcOffset > srcBlob->size) {
+    if (*srcOffset > srcBlob->size || ((srcBlob->size - *srcOffset) < sizeof(uint32_t))) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -177,7 +177,7 @@ static int32_t MallocParamSetFromBuffer(const struct HksBlob *srcData, struct Hk
         return ret;
     }
 
-    if (IsInvalidLength(paramSetOutSize)) {
+    if (IsInvalidLength(paramSetOutSize) || paramSetOutSize < sizeof(struct HksParamSet)) {
         HKS_LOG_E("get paramSetOutSize failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }

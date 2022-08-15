@@ -824,7 +824,7 @@ static int32_t ParseImportedKeyDecryptParams(const struct HksBlob *wrappedKeyDat
     }
 
     uint32_t keyMaterialSize = 0;
-    (void) memcpy_s((uint8_t *)&keyMaterialSize, sizeof(uint32_t), keyMatLenBlobPart.data, keyMatLenBlobPart.size);
+    (void)memcpy_s((uint8_t *)&keyMaterialSize, sizeof(uint32_t), keyMatLenBlobPart.data, keyMatLenBlobPart.size);
     if ((keyMaterialSize == 0) || (keyMaterialSize > MAX_KEY_SIZE)) {
         HKS_LOG_E("key material size is invalid!");
         return HKS_ERROR_INVALID_WRAPPED_FORMAT;
@@ -1556,6 +1556,11 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
+    int32_t ret = HksCheckParamSetTag(paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
     struct HuksKeyNode *keyNode = HksCreateKeyNode(key, paramSet);
     if (keyNode == NULL || handle == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
@@ -1565,7 +1570,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     handle->size = sizeof(uint64_t);
     (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
 
-    int32_t ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
+    ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
         return ret;
@@ -1588,16 +1593,10 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         }
     }
 
-    if (ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS || i == size) {
         HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("CoreInit failed, ret : %d", ret);
-        return ret;
-    }
-
-    if (i == size) {
-        HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("don't found purpose, pur : %u", pur);
-        return HKS_FAILURE;
+        HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
+        ret = ((i == size) ? HKS_FAILURE : ret);
     }
 
     HKS_LOG_D("HksCoreInit in Core end");
@@ -1640,10 +1639,15 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         return HKS_FAILURE;
     }
 
+    int32_t ret = HksCheckParamSetTag(paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
     uint64_t sessionId;
     struct HuksKeyNode *keyNode = NULL;
 
-    int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode, &pur, &alg);
+    ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode, &pur, &alg);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("GetParamsForCoreUpdate failed");
         return ret;
@@ -1675,17 +1679,12 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         }
     }
 
-    if (ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS || i == size) {
         HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("CoreUpdate failed, ret : %d", ret);
-        return ret;
+        HKS_LOG_E("CoreUpdate failed, pur : %u, ret : %d", pur, ret);
+        ret = ((i == size) ? HKS_FAILURE : ret);
     }
 
-    if (i == size) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("don't found purpose, pur : %u", pur);
-        return HKS_FAILURE;
-    }
     return ret;
 }
 
@@ -1696,7 +1695,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     uint32_t pur = 0;
     uint32_t alg = 0;
 
-    if (handle == NULL || paramSet == NULL || inData == NULL) {
+    if (handle == NULL || inData == NULL || paramSet == NULL || HksCheckParamSetTag(paramSet) != HKS_SUCCESS) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
@@ -1755,15 +1754,19 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
     HKS_LOG_D("HksCoreAbort in Core start");
     uint32_t pur = 0;
     uint32_t alg = 0;
-    int32_t ret;
 
     if (handle == NULL || paramSet == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_FAILURE;
     }
 
+    int32_t ret = HksCheckParamSetTag(paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
     uint64_t sessionId;
-    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size)) {
+    if (memcpy_s(&sessionId, sizeof(sessionId), handle->data, handle->size) != EOK) {
         HKS_LOG_E("memcpy handle fail");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }

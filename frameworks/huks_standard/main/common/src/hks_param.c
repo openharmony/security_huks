@@ -334,7 +334,7 @@ int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
             if (isCopy && memcpy_s((uint8_t *)paramSet + offset, size - offset,
-                paramSet->params[i].blob.data, paramSet->params[i].blob.size)) {
+                paramSet->params[i].blob.data, paramSet->params[i].blob.size) != EOK) {
                 HKS_LOG_E("copy param blob failed!");
                 return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
@@ -414,7 +414,8 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
         case HKS_TAG_TYPE_BOOL:
             return (baseParam->boolParam == param->boolParam) ? HKS_SUCCESS : HKS_ERROR_INVALID_ARGUMENT;
         case HKS_TAG_TYPE_BYTES:
-            if (baseParam->blob.size != param->blob.size) {
+            if (baseParam->blob.size != param->blob.size ||
+                baseParam->blob.data == NULL ||(param->blob.data == NULL)) {
                 HKS_LOG_E("unmatch byte type len!");
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
@@ -427,4 +428,18 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
             HKS_LOG_I("invalid tag type:%x", GetTagType(baseParam->tag));
             return HKS_ERROR_INVALID_ARGUMENT;
     }
+}
+
+int32_t HksCheckInvalidTag(const struct HksParam *params, uint32_t paramsCnt,
+    const struct HksParamSet *targetParamSet)
+{
+    for (uint32_t i = 0; i < targetParamSet->paramsCnt; ++i) {
+        for (uint32_t j = 0; j < paramsCnt; ++j) {
+            if (params[j].tag == targetParamSet->params[i].tag) {
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+
+    return HKS_SUCCESS;
 }

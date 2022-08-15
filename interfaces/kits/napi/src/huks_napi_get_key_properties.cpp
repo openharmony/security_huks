@@ -162,13 +162,10 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
         [](napi_env env, napi_status status, void *data) {
             GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
             napi_value result = GetKeyPropertiesWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteGetKeyPropertiesAsyncContext(env, context);
         },

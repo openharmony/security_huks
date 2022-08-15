@@ -200,13 +200,10 @@ namespace HuksNapi {
             [](napi_env env, napi_status status, void *data) {
                 ImportWrappedKeyAsyncContext context = static_cast<ImportWrappedKeyAsyncContext>(data);
                 napi_value result = ImportWrappedKeyWriteResult(env, context);
-                if (result == nullptr) {
-                    return;
-                }
-                if (context->callback != nullptr) {
-                    CallAsyncCallback(env, context->callback, context->result, result);
-                } else {
+                if (context->callback == nullptr) {
                     napi_resolve_deferred(env, context->deferred, result);
+                } else if (result != nullptr) {
+                    CallAsyncCallback(env, context->callback, context->result, result);
                 }
                 DeleteImportWrappedKeyAsyncContext(env, context);
             },

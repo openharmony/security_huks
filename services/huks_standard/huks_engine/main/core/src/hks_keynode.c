@@ -42,15 +42,6 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
         return ret;
     }
 
-    if (inParamSet != NULL) {
-        ret = HksAddParams(paramSet, inParamSet->params, inParamSet->paramsCnt);
-        if (ret != HKS_SUCCESS) {
-            HksFreeParamSet(&paramSet);
-            HKS_LOG_E("add in params fail");
-            return ret;
-        }
-    }
-
     struct HksParam params[] = {
         {
             .tag = HKS_TAG_ACCESS_TIME,
@@ -63,6 +54,22 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
             .uint64Param = 0
         },
     };
+
+    if (inParamSet != NULL) {
+        ret = HksCheckInvalidTag(params, HKS_ARRAY_SIZE(params), inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(&paramSet);
+            HKS_LOG_E("check params fail");
+            return ret;
+        }
+
+        ret = HksAddParams(paramSet, inParamSet->params, inParamSet->paramsCnt);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(&paramSet);
+            HKS_LOG_E("add in params fail");
+            return ret;
+        }
+    }
 
     ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(params[0]));
     if (ret != HKS_SUCCESS) {
