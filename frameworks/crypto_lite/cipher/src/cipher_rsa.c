@@ -15,6 +15,7 @@
 
 #include "cipher.h"
 
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
@@ -89,21 +90,21 @@ static char *RsaMallocPublicKey(const unsigned char *key, size_t *keyLen)
 
     (void)memset_s(pubKey, keyFinalLen, 0, keyFinalLen);
     ret = memcpy_s(pubKey, keyFinalLen, start, startLen);
-    if (ret) {
+    if (ret != EOK) {
         CIPHER_LOG_E("memcpy failed.");
         free(pubKey);
         return NULL;
     }
 
     ret = memcpy_s(pubKey + startLen, keyFinalLen - startLen, key, *keyLen);
-    if (ret) {
+    if (ret != EOK) {
         CIPHER_LOG_E("memcpy failed.");
         free(pubKey);
         return NULL;
     }
 
     ret = memcpy_s(pubKey + startLen + *keyLen, keyFinalLen - startLen - *keyLen, end, endLen);
-    if (ret) {
+    if (ret != EOK) {
         CIPHER_LOG_E("memcpy failed.");
         (void)memset_s(pubKey, keyFinalLen, 0, keyFinalLen);
         free(pubKey);
@@ -125,30 +126,31 @@ static int32_t RsaLoadPrivateKey(int32_t mode, mbedtls_pk_context *pk, const uns
         return ERROR_CODE_GENERAL;
     }
 
-    ret = mbedtls_pk_parse_key(pk, (const unsigned char *)finalKey, finalKeyLen, NULL, 0);
-    if (ret != 0) {
-        CIPHER_LOG_E("parse private key error, mode:%d ret:%d.", mode, ret);
-        goto ERROR;
-    }
+    do {
+        ret = mbedtls_pk_parse_key(pk, (const unsigned char *)finalKey, finalKeyLen, NULL, 0);
+        if (ret != 0) {
+            CIPHER_LOG_E("parse private key error, mode:%d ret:%d.", mode, ret);
+            break;
+        }
 
-    rsa = mbedtls_pk_rsa(*pk);
-    if (rsa == NULL) {
-        CIPHER_LOG_E("rsa error, mode:%d.", mode);
-        goto ERROR;
-    }
+        rsa = mbedtls_pk_rsa(*pk);
+        if (rsa == NULL) {
+            CIPHER_LOG_E("rsa error, mode:%d.", mode);
+            break;
+        }
 
-    if (mbedtls_rsa_check_privkey(rsa) != 0) {
-        CIPHER_LOG_E("check private key failed.");
-        goto ERROR;
-    }
+        if (mbedtls_rsa_check_privkey(rsa) != 0) {
+            CIPHER_LOG_E("check private key failed.");
+            break;
+        }
 
-    /* set padding as OAEPWITHSHA256 */
-    mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
-    free(finalKey);
-    return ERROR_SUCCESS;
+        /* set padding as OAEPWITHSHA256 */
+        mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
+        (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
+        free(finalKey);
+        return ERROR_SUCCESS;
+    } while (0);
 
-ERROR:
     (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_CODE_GENERAL;
@@ -165,29 +167,30 @@ static int32_t RsaLoadPublicKey(int32_t mode, mbedtls_pk_context *pk, const unsi
         return ERROR_CODE_GENERAL;
     }
 
-    ret = mbedtls_pk_parse_public_key(pk, (const unsigned char *)finalKey, finalKeyLen);
-    if (ret != 0) {
-        CIPHER_LOG_E("parse public key error, mode:%d ret:%d.", mode, ret);
-        goto ERROR;
-    }
+    do {
+        ret = mbedtls_pk_parse_public_key(pk, (const unsigned char *)finalKey, finalKeyLen);
+        if (ret != 0) {
+            CIPHER_LOG_E("parse public key error, mode:%d ret:%d.", mode, ret);
+            break;
+        }
 
-    rsa = mbedtls_pk_rsa(*pk);
-    if (rsa == NULL) {
-        CIPHER_LOG_E("pk rsa error, mode:%d.", mode);
-        goto ERROR;
-    }
+        rsa = mbedtls_pk_rsa(*pk);
+        if (rsa == NULL) {
+            CIPHER_LOG_E("pk rsa error, mode:%d.", mode);
+            break;
+        }
 
-    if (mbedtls_rsa_check_pubkey(rsa)) {
-        CIPHER_LOG_E("check public key failed.");
-        goto ERROR;
-    }
-    /* set padding as OAEPWITHSHA256 */
-    mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
-    free(finalKey);
-    return ERROR_SUCCESS;
+        if (mbedtls_rsa_check_pubkey(rsa)) {
+            CIPHER_LOG_E("check public key failed.");
+            break;
+        }
+        /* set padding as OAEPWITHSHA256 */
+        mbedtls_rsa_set_padding(rsa, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
+        (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
+        free(finalKey);
+        return ERROR_SUCCESS;
+    } while (0);
 
-ERROR:
     (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_CODE_GENERAL;
@@ -228,7 +231,7 @@ static int32_t RsaEncryptBase64Encode(int32_t cipherTotalLen, char *cipherText, 
     }
 
     int32_t ret = memcpy_s(tempBuf, cipherTotalLen, cipherText, cipherTotalLen);
-    if (ret) {
+    if (ret != EOK) {
         CIPHER_LOG_E("memcpy fail.");
         free(tempBuf);
         return ERROR_CODE_GENERAL;
@@ -245,7 +248,7 @@ static int32_t RsaEncryptBase64Encode(int32_t cipherTotalLen, char *cipherText, 
 
     ret = mbedtls_base64_encode((unsigned char *)cipherText, cipherTextLen, &dataLen,
         (const unsigned char *)tempBuf, cipherTotalLen);
-    if (ret) {
+    if (ret != 0) {
         CIPHER_LOG_E("base64_encode fail.");
         free(tempBuf);
         return ERROR_CODE_GENERAL;
@@ -272,40 +275,46 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
     if (buf == NULL) {
         return ERROR_CODE_GENERAL;
     }
-    RsaInit(&ctrDrbg, &entropy);
-    for (int32_t i = 0; i < count; i++) {
-        (void)memset_s(buf, rsaLen, 0, rsaLen);
-        if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
-            MBEDTLS_RSA_PUBLIC, rsaContentLen, (const unsigned char *)(plainText + i * rsaContentLen), buf)) {
-            goto ERROR;
+    int32_t ret = ERROR_CODE_GENERAL;
+    do {
+        RsaInit(&ctrDrbg, &entropy);
+        bool isBreak = false;
+        for (int32_t i = 0; i < count; i++) {
+            (void)memset_s(buf, rsaLen, 0, rsaLen);
+            if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
+                MBEDTLS_RSA_PUBLIC, rsaContentLen, (const unsigned char *)(plainText + i * rsaContentLen), buf)) {
+                isBreak = true;
+                break;
+            }
+            if (memcpy_s(cipherText + i * rsaLen, cipherTextLen - i * rsaLen, buf, rsaLen)) {
+                isBreak = true;
+                break;
+            }
+            cipherTotalLen += rsaLen;
         }
-        if (memcpy_s(cipherText + i * rsaLen, cipherTextLen - i * rsaLen, buf, rsaLen)) {
-            goto ERROR;
+        if (isBreak) {
+            break;
         }
-        cipherTotalLen += rsaLen;
-    }
-    if (remain > 0) {
-        (void)memset_s(buf, rsaLen, 0, rsaLen);
-        if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
-            MBEDTLS_RSA_PUBLIC, remain, (const unsigned char *)(plainText + count * rsaContentLen), buf)) {
-            goto ERROR;
+        if (remain > 0) {
+            (void)memset_s(buf, rsaLen, 0, rsaLen);
+            if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
+                MBEDTLS_RSA_PUBLIC, remain, (const unsigned char *)(plainText + count * rsaContentLen), buf)) {
+                break;
+            }
+            if (memcpy_s(cipherText + count * rsaLen, cipherTextLen - count * rsaLen, buf, rsaLen)) {
+                break;
+            }
+            cipherTotalLen += rsaLen;
         }
-        if (memcpy_s(cipherText + count * rsaLen, cipherTextLen - count * rsaLen, buf, rsaLen)) {
-            goto ERROR;
+        if (RsaEncryptBase64Encode(cipherTotalLen, cipherText, cipherTextLen)) {
+            break;
         }
-        cipherTotalLen += rsaLen;
-    }
-    if (RsaEncryptBase64Encode(cipherTotalLen, cipherText, cipherTextLen)) {
-        goto ERROR;
-    }
-    free(buf);
-    RsaDeinit(&ctrDrbg, &entropy);
-    return ERROR_SUCCESS;
+        ret = ERROR_SUCCESS;
+    } while (0);
 
-ERROR:
     free(buf);
     RsaDeinit(&ctrDrbg, &entropy);
-    return ERROR_CODE_GENERAL;
+    return ret;
 }
 
 static int32_t RsaEncrypt(RsaKeyData *key, const RsaData *plain, RsaData *cipher)
@@ -353,24 +362,34 @@ static int32_t RsaEncrypt(RsaKeyData *key, const RsaData *plain, RsaData *cipher
     return ERROR_SUCCESS;
 }
 
+static int32_t CheckParamAndMallocBuf(size_t rsaLen, RsaData *cipher, unsigned char **buf, unsigned char **tembuf)
+{
+    if ((rsaLen == 0) || (cipher->length == 0)) {
+        return ERROR_CODE_GENERAL;
+    }
+    *buf = (unsigned char*)malloc(rsaLen);
+    if (*buf == NULL) {
+        return ERROR_CODE_GENERAL;
+    }
+    *tembuf = (unsigned char*)malloc(cipher->length);
+    if (*tembuf == NULL) {
+        free(buf);
+        return ERROR_CODE_GENERAL;
+    }
+    return ERROR_SUCCESS;
+}
+
 static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData *cipher, RsaData *plain)
 {
     size_t plainLen = 0;
     int32_t totalPlainLen = 0;
 
-    if ((rsaLen == 0) || (cipher->length == 0)) {
-        return ERROR_CODE_GENERAL;
-    }
+    unsigned char *buf;
+    unsigned char *tembuf;
 
-    unsigned char *buf = (unsigned char*)malloc(rsaLen);
-    if (buf == NULL) {
-        return ERROR_CODE_GENERAL;
-    }
-
-    unsigned char *tembuf = (unsigned char*)malloc(cipher->length);
-    if (tembuf == NULL) {
-        free(buf);
-        return ERROR_CODE_GENERAL;
+    int32_t ret = CheckParamAndMallocBuf(rsaLen, cipher, &buf, &tembuf);
+    if (ret != ERROR_SUCCESS) {
+        return ret;
     }
 
     (void)memset_s(tembuf, cipher->length, 0, cipher->length);
@@ -378,28 +397,36 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
     mbedtls_entropy_context entropy;
     RsaInit(&ctrDrbg, &entropy);
     size_t dataLen;
-    if (mbedtls_base64_decode(tembuf, cipher->length, &dataLen, (const unsigned char *)cipher->data, cipher->length)) {
-        goto ERROR;
-    }
-    int32_t count = dataLen / rsaLen;
-    for (int32_t i = 0; i < count; i++) {
-        (void)memset_s(buf, rsaLen, 0, rsaLen);
-        if (mbedtls_rsa_pkcs1_decrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
-            MBEDTLS_RSA_PRIVATE, &plainLen, tembuf + i * rsaLen, buf, rsaLen)) {
-            goto ERROR;
-        }
-        if (memcpy_s(plain->data + totalPlainLen, plain->length - totalPlainLen, buf, plainLen)) {
-            goto ERROR;
-        }
-        totalPlainLen += plainLen;
-    }
-    plain->length = totalPlainLen;
-    RsaDeinit(&ctrDrbg, &entropy);
-    free(tembuf);
-    free(buf);
-    return ERROR_SUCCESS;
 
-ERROR:
+    do {
+        if (mbedtls_base64_decode(tembuf, cipher->length, &dataLen, (const unsigned char *)cipher->data, cipher->length)) {
+            break;
+        }
+        int32_t count = dataLen / rsaLen;
+        bool isBreak = false;
+        for (int32_t i = 0; i < count; i++) {
+            (void)memset_s(buf, rsaLen, 0, rsaLen);
+            if (mbedtls_rsa_pkcs1_decrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
+                MBEDTLS_RSA_PRIVATE, &plainLen, tembuf + i * rsaLen, buf, rsaLen)) {
+                isBreak = true;
+                break;
+            }
+            if (memcpy_s(plain->data + totalPlainLen, plain->length - totalPlainLen, buf, plainLen)) {
+                isBreak = true;
+                break;
+            }
+            totalPlainLen += plainLen;
+        }
+        if (isBreak) {
+            break;
+        }
+        plain->length = totalPlainLen;
+        RsaDeinit(&ctrDrbg, &entropy);
+        free(tembuf);
+        free(buf);
+        return ERROR_SUCCESS;
+    } while (0);
+
     RsaDeinit(&ctrDrbg, &entropy);
     free(tembuf);
     free(buf);
