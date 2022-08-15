@@ -177,10 +177,10 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
         HKS_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = TestGenerateKey(&g_keyAlias);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
+    ret = TestGenerateKey(&g_keyAlias);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, true, false, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
@@ -209,9 +209,9 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias);
     ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksCertChain *certChain = NULL;
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
-    HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, false, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);

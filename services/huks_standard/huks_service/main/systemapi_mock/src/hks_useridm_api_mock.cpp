@@ -23,6 +23,16 @@
 
 static constexpr const uint32_t g_paramSidMax = 2;
 
+static struct SecInfoWrap SecInfoParams[g_paramSidMax] = {
+    {
+        .secureUid = 1,
+        .enrolledInfoLen = 3
+    }, {
+        .secureUid = 2,
+        .enrolledInfoLen = 1
+    }
+};
+
 static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUserAuthType *hksAuthType)
 {
     switch (authType) {
@@ -41,16 +51,6 @@ static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUs
     }
     return HKS_SUCCESS;
 }
-
-static struct SecInfoWrap SecInfoParams[g_paramSidMax] = {
-    {
-        .secureUid = 1,
-        .enrolledInfoLen = 3
-    }, {
-        .secureUid = 2,
-        .enrolledInfoLen = 1
-    }
-};
 
 static struct EnrolledInfoWrap EnrolledInfoParams[g_paramSidMax][3] = {
     {
@@ -93,13 +93,13 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
     return HKS_SUCCESS;
 }
 
-int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue)
+int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType userIamType, uint32_t userIamValue, uint32_t *hksValue)
 {
     if (hksValue == nullptr) {
         return HKS_ERROR_NULL_POINTER;
     }
 
-    switch (type) {
+    switch (userIamType) {
         case HKS_AUTH_TYPE:
             return ConvertToHksAuthType((enum USER_IAM::AuthType)userIamValue, (enum HksUserAuthType *)hksValue);
         default:
