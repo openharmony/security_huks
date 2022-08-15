@@ -86,7 +86,7 @@ static struct HksParam g_deriveAccessFinish001[] = {
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = g_keyAliasFinish001;
+        .blob = g_keyAliasFinish001
     }, {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HKDF
@@ -142,7 +142,7 @@ static struct HksParam g_deriveAccessFinish002[] = {
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = g_keyAliasFinish002;
+        .blob = g_keyAliasFinish002
     }, {
         .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
