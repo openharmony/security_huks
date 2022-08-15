@@ -151,21 +151,16 @@ static void InitCertChain(struct HksCertChain *certChain)
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = (struct HksBlob *)HksMalloc(certChain->certsCount * sizeof(struct HksBlob));
     if (certChain->certs != nullptr) {
-        certChain->certs[INDEX_0].data = NULL;
-        certChain->certs[INDEX_1].data = NULL;
-        certChain->certs[INDEX_2].data = NULL;
-        certChain->certs[INDEX_3].data = NULL;
-        certChain->certs[INDEX_0].size = HKS_CERT_ROOT_SIZE;
+        certChain->certs[INDEX_0].size = HKS_CERT_APP_SIZE;
         certChain->certs[INDEX_0].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_0].size);
-        certChain->certs[INDEX_1].size = HKS_CERT_CA_SIZE;
+        certChain->certs[INDEX_1].size = HKS_CERT_DEVICE_SIZE;
         certChain->certs[INDEX_1].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_1].size);
-        certChain->certs[INDEX_2].size = HKS_CERT_DEVICE_SIZE;
+        certChain->certs[INDEX_2].size = HKS_CERT_CA_SIZE;
         certChain->certs[INDEX_2].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_2].size);
-        certChain->certs[INDEX_3].size = HKS_CERT_APP_SIZE;
+        certChain->certs[INDEX_3].size = HKS_CERT_ROOT_SIZE;
         certChain->certs[INDEX_3].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_3].size);
     }
 }
-
 
 static napi_value GetCertificateChainAsyncWork(napi_env env, GetCertificateChainAsyncContext context)
 {
