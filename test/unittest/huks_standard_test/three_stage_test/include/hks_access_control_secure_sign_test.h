@@ -23,6 +23,14 @@ namespace Unittest::AccessControlSecureSignTest {
     int HksAccessControlSecureSignTest002(void);
 
     int HksAccessControlSecureSignTest003(void);
+
+    int HksAccessControlSecureSignTest004(void);
+
+    int HksAccessControlSecureSignTest005(void);
+
+    int HksAccessControlSecureSignTest006(void);
+
+    int HksAccessControlSecureSignTest007(void);
 }
 #endif // HKS_ACCESS_CONTROL_SECURE_SIGN_TEST_H
 
