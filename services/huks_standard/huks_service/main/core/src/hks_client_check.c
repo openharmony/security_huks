@@ -213,6 +213,21 @@ int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, con
 #endif
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
+{
+    struct HksParam *authAccess = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccess);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get auth access type fail");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (authAccess->uint32Param < HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) {
+        HKS_LOG_E("auth access level is too low");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, uint32_t userAuthType,
     uint32_t authAccessType, uint32_t challengeType)
 {
@@ -246,6 +261,11 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
         ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
         if (ret != HKS_SUCCESS || (purposeParam->uint32Param & HKS_KEY_PURPOSE_SIGN) == 0) {
             HKS_LOG_E("secure sign tag only support sign-purpose alg");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        ret = CheckAuthAccessLevel(paramSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("check auth access level fail");
             return HKS_ERROR_INVALID_ARGUMENT;
         }
     }

@@ -187,7 +187,7 @@ const TestAuthCaseParams HKS_AUTH_TEST_005_PARAMS = {
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
-    .initResult = HKS_ERROR_INVALID_ARGUMENT
+    .initResult = HKS_SUCCESS
 };
 
 /* 006: gen ecc for sign; init for sign */
@@ -272,7 +272,7 @@ const TestAuthCaseParams HKS_AUTH_TEST_008_PARAMS = {
             { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
             { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
         },
-    .initResult = HKS_ERROR_INVALID_ARGUMENT
+    .initResult = HKS_SUCCESS
 };
 
 static int32_t getParamSetAuthTest(struct HksParamSet **paramOutSet, const struct HksParamSet *genParamSet)
@@ -442,14 +442,14 @@ HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest004, TestSize.Level0)
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest005
- * @tc.desc: alg-X25519 gen-pur-Agree.
+ * @tc.desc: alg-X25519 gen-pur-Agree with fingerprint and INVALID_CLEAR_PASSWORD.
  * @tc.type: FUNC
- * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ * @tc.result:HKS_SUCCESS
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest005, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest005");
-    EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_005_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_005_PARAMS), HKS_SUCCESS);
 }
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest006
@@ -477,12 +477,11 @@ HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest007, TestSize.Level0)
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest008
  * @tc.desc: alg-HKDF gen-pur-Derive.
  * @tc.type: FUNC
- * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ * @tc.result:HKS_SUCCESS
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest008, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest008");
-    EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_008_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_008_PARAMS), HKS_SUCCESS);
 }
 }
-
