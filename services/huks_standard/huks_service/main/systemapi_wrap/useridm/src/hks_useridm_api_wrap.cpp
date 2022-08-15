@@ -25,7 +25,6 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 
-
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 #include "user_idm_client.h"
 
