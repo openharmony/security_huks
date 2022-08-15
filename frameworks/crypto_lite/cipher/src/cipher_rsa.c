@@ -399,7 +399,8 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
     size_t dataLen;
 
     do {
-        if (mbedtls_base64_decode(tembuf, cipher->length, &dataLen, (const unsigned char *)cipher->data, cipher->length)) {
+        if (mbedtls_base64_decode(tembuf, cipher->length, &dataLen, (const unsigned char *)cipher->data,
+            cipher->length)) {
             break;
         }
         int32_t count = dataLen / rsaLen;
