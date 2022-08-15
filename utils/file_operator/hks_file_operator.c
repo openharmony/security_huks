@@ -139,7 +139,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     }
     (void)realpath(fileName, filePath);
     if (strstr(filePath, "../") != NULL) {
-        HKS_LOG_E("invalid filePath, path %s", filePath);
+        HKS_LOG_E("invalid filePath!");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -188,7 +188,7 @@ static int32_t FileRemove(const char *fileName)
     }
 
     if ((unlink(fileName) != 0) && (errno != ENOENT)) {
-        HKS_LOG_E("failed to remove file: filename = %s, errno = 0x%x", fileName, errno);
+        HKS_LOG_E("failed to remove file: errno = 0x%x", errno);
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 

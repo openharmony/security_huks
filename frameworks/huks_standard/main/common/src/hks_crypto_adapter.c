@@ -81,7 +81,6 @@ void HksFreeUsageSpec(struct HksUsageSpec **usageSpec)
         HKS_FREE_PTR((*usageSpec)->algParam);
     }
     HKS_FREE_PTR(*usageSpec);
-    *usageSpec = NULL;
 }
 
 void HksFillKeyDerivationParam(const struct HksParamSet *paramSet, struct HksKeyDerivationParam *param)
