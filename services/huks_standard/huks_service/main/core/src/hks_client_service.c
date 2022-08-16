@@ -482,7 +482,7 @@ static int32_t AddEnrolledInfoInPAramSet(struct SecInfoWrap *secInfo, struct Hks
 }
 
 static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t userId, uint32_t authAccessType,
-    uint32_t userAuthType, struct HksParamSet **outParamSet)
+    struct HksParamSet **outParamSet)
 {
     struct SecInfoWrap *secInfo = NULL;
     struct HksParamSet *newParamSet = NULL;
@@ -595,7 +595,7 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
         }
 
         struct HksParamSet *userAuthParamSet = NULL;
-        ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, userAuthType, &userAuthParamSet);
+        ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append secure access info failed!");
             return ret;
