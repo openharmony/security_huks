@@ -455,7 +455,7 @@ static int32_t ComputeEnrolledInfoLen(uint32_t enrolledInfoLen)
     return sizeof(uint32_t) + (sizeof(uint32_t) + sizeof(uint64_t)) * enrolledInfoLen;
 }
 
-static int32_t AddEnrolledInfoInPAramSet(struct SecInfoWrap *secInfo, struct HksBlob *enrolledInfo,
+static int32_t AddEnrolledInfoInParamSet(struct SecInfoWrap *secInfo, struct HksBlob *enrolledInfo,
     struct HksParamSet *paramSet)
 {
     int32_t ret;
@@ -513,9 +513,9 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
             break;
         }
 
-        ret = AddEnrolledInfoInPAramSet(secInfo, &enrolledInfo, newParamSet);
+        ret = AddEnrolledInfoInParamSet(secInfo, &enrolledInfo, newParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("AddEnrolledInfoInPAramSet failed!");
+            HKS_LOG_E("AddEnrolledInfoInParamSet failed!");
             break;
         }
 
