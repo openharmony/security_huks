@@ -946,8 +946,7 @@ int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct H
     enum HksStorageType storageType, const struct HksBlob *keyBlob)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
@@ -984,8 +983,7 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
@@ -1011,8 +1009,7 @@ int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
@@ -1036,8 +1033,7 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
@@ -1066,8 +1062,7 @@ int32_t HksStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const s
     uint32_t storageType, uint32_t *keyBlobSize)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
@@ -1126,9 +1121,9 @@ static int32_t GetFileNameList(const char *path, struct HksFileEntry *fileNameLi
         return HKS_SUCCESS;
     }
 
-    uint32_t count = 0;
     struct HksFileDirentInfo dire = {{0}};
     int32_t ret = HksGetDirFile(dir, &dire);
+    uint32_t count = 0;
     while (ret == HKS_SUCCESS) {
         count++;
         uint32_t nameLen = strlen(dire.fileName);
@@ -1291,8 +1286,7 @@ int32_t HksGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, st
     uint32_t *listCount)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
@@ -1321,8 +1315,7 @@ int32_t HksGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, st
 int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, uint32_t *fileCount)
 {
     /* params have been checked by caller functions */
-    struct HksStoreFileInfo fileInfo;
-    (void)memset_s(&fileInfo, sizeof(fileInfo), 0, sizeof(fileInfo));
+    struct HksStoreFileInfo fileInfo = { 0 };
 
     int32_t ret;
     do {
