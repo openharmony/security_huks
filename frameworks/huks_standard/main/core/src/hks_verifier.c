@@ -252,7 +252,7 @@ static int32_t VerifyAttestationCertChain(struct HksCertInfo *certs, uint32_t ce
     return ret;
 }
 
-static int32_t EncodeTlvAndGetLength(uint8_t **buf, uint32_t *outLength, uint32_t *inLen)
+static int32_t EncodeTlvAndGetLength(uint8_t **buf, uint32_t *outLength, uint32_t inLen)
 {
     uint32_t length = 0; /* length of the payload */
 
@@ -271,7 +271,7 @@ static int32_t EncodeTlvAndGetLength(uint8_t **buf, uint32_t *outLength, uint32_
                 HKS_ASN1_DECODE_BYTE(*buf, length);
                 break;
             case ASN_1_TAG_TYPE_2_BYTE_LEN: /* 2 byte length */
-                if (*inLen < (ASN_1_MIN_HEADER_LEN + 1)) {
+                if (inLen < (ASN_1_MIN_HEADER_LEN + 1)) {
                     HKS_LOG_E("invalid data to decode two bytes");
                     return HKS_ERROR_INVALID_ARGUMENT;
                 }
@@ -296,7 +296,7 @@ static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *hea
     uint8_t *buf = (uint8_t *)in;
     uint32_t length = 0; /* length of the payload */
 
-    int32_t ret = EncodeTlvAndGetLength(&buf, &length, &inLen);
+    int32_t ret = EncodeTlvAndGetLength(&buf, &length, inLen);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -325,7 +325,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     uint8_t *buf = (uint8_t *)in;
     uint32_t length = 0; /* length of the payload */
 
-    int32_t ret = EncodeTlvAndGetLength(&buf, &length, &inLen);
+    int32_t ret = EncodeTlvAndGetLength(&buf, &length, inLen);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
