@@ -252,6 +252,40 @@ static int32_t VerifyAttestationCertChain(struct HksCertInfo *certs, uint32_t ce
     return ret;
 }
 
+static int32_t EncodeTlvAndGetLength(uint8_t **buf, uint32_t *outLength, uint32_t inLen)
+{
+    uint32_t length = 0; /* length of the payload */
+
+    uint32_t tmp;
+    HKS_ASN1_DECODE_BYTE(*buf, tmp); /* get type */
+    if ((*buf)[0] < ASN_1_MIN_VAL_1_EXTRA_LEN_BYTE) {
+        /* Current byte tells the length */
+        HKS_ASN1_DECODE_BYTE(*buf, length);
+    } else {
+        /* now bit 8 is set */
+        uint32_t b;
+        HKS_ASN1_DECODE_BYTE(*buf, b);
+
+        switch (b) {
+            case ASN_1_TAG_TYPE_1_BYTE_LEN: /* 1 byte length */
+                HKS_ASN1_DECODE_BYTE(*buf, length);
+                break;
+            case ASN_1_TAG_TYPE_2_BYTE_LEN: /* 2 byte length */
+                if (inLen < (ASN_1_MIN_HEADER_LEN + 1)) {
+                    HKS_LOG_E("invalid data to decode two bytes");
+                    return HKS_ERROR_INVALID_ARGUMENT;
+                }
+                HKS_ASN1_DECODE_TWO_BYTE(*buf, length);
+                break;
+            default:
+                HKS_LOG_E("Object length does not make sense");
+                return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    *outLength = length;
+    return HKS_SUCCESS;
+}
+
 static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *headSize, uint32_t *outLen)
 {
     if ((in == NULL) || (inLen < ASN_1_MIN_HEADER_LEN) || (outLen == NULL)) {
@@ -262,31 +296,9 @@ static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *hea
     uint8_t *buf = (uint8_t *)in;
     uint32_t length = 0; /* length of the payload */
 
-    uint32_t tmp;
-    HKS_ASN1_DECODE_BYTE(buf, tmp); /* get type */
-    if (buf[0] < ASN_1_MIN_VAL_1_EXTRA_LEN_BYTE) {
-        /* Current byte tells the length */
-        HKS_ASN1_DECODE_BYTE(buf, length);
-    } else {
-        /* now bit 8 is set */
-        uint32_t b;
-        HKS_ASN1_DECODE_BYTE(buf, b);
-
-        switch (b) {
-            case ASN_1_TAG_TYPE_1_BYTE_LEN: /* 1 byte length */
-                HKS_ASN1_DECODE_BYTE(buf, length);
-                break;
-            case ASN_1_TAG_TYPE_2_BYTE_LEN: /* 2 byte length */
-                if (inLen < (ASN_1_MIN_HEADER_LEN + 1)) {
-                    HKS_LOG_E("invalid data to decode two bytes");
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-                HKS_ASN1_DECODE_TWO_BYTE(buf, length);
-                break;
-            default:
-                HKS_LOG_E("Object length does not make sense");
-                return HKS_ERROR_INVALID_ARGUMENT;
-        }
+    int32_t ret = EncodeTlvAndGetLength(&buf, &length, inLen);
+    if (ret != HKS_SUCCESS) {
+        return ret;
     }
 
     *headSize = buf - in;
@@ -313,31 +325,9 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     uint8_t *buf = (uint8_t *)in;
     uint32_t length = 0; /* length of the payload */
 
-    uint32_t tmp;
-    HKS_ASN1_DECODE_BYTE(buf, tmp); /* get type */
-    if (buf[0] < ASN_1_MIN_VAL_1_EXTRA_LEN_BYTE) {
-        /* Current byte tells the length */
-        HKS_ASN1_DECODE_BYTE(buf, length);
-    } else {
-        /* now bit 8 is set */
-        uint32_t b;
-        HKS_ASN1_DECODE_BYTE(buf, b);
-
-        switch (b) {
-            case ASN_1_TAG_TYPE_1_BYTE_LEN: /* 1 byte length */
-                HKS_ASN1_DECODE_BYTE(buf, length);
-                break;
-            case ASN_1_TAG_TYPE_2_BYTE_LEN: /* 2 byte length */
-                if (inLen < (ASN_1_MIN_HEADER_LEN + 1)) {
-                    HKS_LOG_E("invalid data to decode two bytes");
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-                HKS_ASN1_DECODE_TWO_BYTE(buf, length);
-                break;
-            default:
-                HKS_LOG_E("Object length does not make sense");
-                return HKS_ERROR_INVALID_ARGUMENT;
-        }
+    int32_t ret = EncodeTlvAndGetLength(&buf, &length, inLen);
+    if (ret != HKS_SUCCESS) {
+        return ret;
     }
 
     uint32_t headSize = buf - in;

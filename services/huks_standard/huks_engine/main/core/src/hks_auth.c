@@ -60,7 +60,7 @@ static int32_t CheckPurpose(const struct HksParam *authParam, const struct HksPa
     return HKS_SUCCESS;
 }
 
-static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksKeyNode *keyNode,
+static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *paramSet)
 {
     int32_t ret;
@@ -70,7 +70,7 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksKe
 
     for (uint32_t i = 0; i < policy->policyCnt; i++) {
         authTag = policy->policyTag[i];
-        ret = HksGetParam(keyNode->paramSet, authTag, &authParam);
+        ret = HksGetParam(keyBlobParamSet, authTag, &authParam);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("get auth param[0x%x] failed!", authTag);
             return ret;
@@ -96,46 +96,11 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksKe
     return HKS_SUCCESS;
 }
 
-static int32_t AuthThreeStagePolicy(const struct HksAuthPolicy *policy, const struct HuksKeyNode *keyNode)
-{
-    int32_t ret;
-    uint32_t authTag;
-    struct HksParam *authParam = NULL;
-    struct HksParam *requestParam = NULL;
-
-    for (uint32_t i = 0; i < policy->policyCnt; i++) {
-        authTag = policy->policyTag[i];
-        ret = HksGetParam(keyNode->keyBlobParamSet, authTag, &authParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get auth param[0x%x] failed!", authTag);
-            return ret;
-        }
-
-        ret = HksGetParam(keyNode->runtimeParamSet, authTag, &requestParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get request param[0x%x] failed!", authTag);
-            return ret;
-        }
-
-        if (authTag != HKS_TAG_PURPOSE) {
-            ret = HksCheckParamMatch((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
-        } else {
-            ret = CheckPurpose((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
-        }
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("unmatch policy[0x%x], [0x%x] != [0x%x]!", authTag, requestParam->uint32Param,
-                authParam->uint32Param);
-            return ret;
-        }
-    }
-    return HKS_SUCCESS;
-}
-
 int32_t HksAuth(uint32_t authId, const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_authPolicyList); i++) {
         if (authId == g_authPolicyList[i].authId) {
-            return AuthPolicy(&g_authPolicyList[i], keyNode, paramSet);
+            return AuthPolicy(&g_authPolicyList[i], keyNode->paramSet, paramSet);
         }
     }
     return HKS_ERROR_BAD_STATE;
@@ -145,7 +110,7 @@ int32_t HksThreeStageAuth(uint32_t authId, const struct HuksKeyNode *keyNode)
 {
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_authPolicyList); i++) {
         if (authId == g_authPolicyList[i].authId) {
-            return AuthThreeStagePolicy(&g_authPolicyList[i], keyNode);
+            return AuthPolicy(&g_authPolicyList[i], keyNode->keyBlobParamSet, keyNode->runtimeParamSet);
         }
     }
     return HKS_ERROR_BAD_STATE;
