@@ -19,6 +19,8 @@
 
 #include "hks_log.h"
 
+using namespace OHOS::HiviewDFX;
+
 static constexpr const char g_eventName[] = "HUKS_FAULT";
 static constexpr const char g_tagFunction[] = "FUNCTION";
 static constexpr const char g_tagUserId[] = "USER_ID";
@@ -26,23 +28,22 @@ static constexpr const char g_tagProcessUID[] = "PROCESS_UID";
 static constexpr const char g_tagKeyType[] = "KEY_TYPE";
 static constexpr const char g_tagErrorCode[] = "ERROR_CODE";
 static constexpr const char g_tagExtra[] = "EXTRA";
-static constexpr const char g_domain[] = "SECURITY_HUKS";
 
 static int32_t ConvertToHiSysEventType(enum EventType inEventType,
     int32_t *outEventTypeInt)
 {
     switch (inEventType) {
         case FAULT:
-            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::FAULT;
+            *outEventTypeInt = HiSysEvent::EventType::FAULT;
             break;
         case STATISTIC:
-            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::STATISTIC;
+            *outEventTypeInt = HiSysEvent::EventType::STATISTIC;
             break;
         case SECURITY:
-            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::SECURITY;
+            *outEventTypeInt = HiSysEvent::EventType::SECURITY;
             break;
         case BEHAVIOR:
-            *outEventTypeInt = OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR;
+            *outEventTypeInt = HiSysEvent::EventType::BEHAVIOR;
             break;
         default:
             HKS_LOG_E("Invalid inEventType!");
@@ -60,10 +61,11 @@ int WriteEvent(enum EventType eventType, const char *functionName, const struct 
         HKS_LOG_E("convert to hiSysEvent event type failed!");
         return ret;
     }
-    enum OHOS::HiviewDFX::HiSysEvent::EventType outEventType =
-        (enum OHOS::HiviewDFX::HiSysEvent::EventType)outEventTypeInt;
-    return OHOS::HiviewDFX::HiSysEvent::Write(g_domain, g_eventName,
+    enum HiSysEvent::EventType outEventType =
+        (enum HiSysEvent::EventType)outEventTypeInt;
+    ret = HiSysEventWrite(HiSysEvent::Domain::HUKS, g_eventName,
         outEventType, g_tagFunction, functionName, g_tagUserId, eventValues->userId, g_tagProcessUID,
         eventValues->processName, g_tagKeyType, eventValues->keyType, g_tagErrorCode, eventValues->errorCode,
         g_tagExtra, extra);
+    return ret;
 }
