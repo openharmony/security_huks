@@ -329,7 +329,12 @@ static int32_t CheckGenKeyMacDeriveParams(
 static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct ParamsValues *params)
 {
     uint32_t alg;
-    int32_t ret = CheckAndGetAlgorithm(paramSet, g_genKeyAlg, HKS_ARRAY_SIZE(g_genKeyAlg), &alg);
+    int32_t ret = HksCheckParamSetTag(paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    ret = CheckAndGetAlgorithm(paramSet, g_genKeyAlg, HKS_ARRAY_SIZE(g_genKeyAlg), &alg);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("check and get alg failed");
         return ret;
@@ -953,6 +958,9 @@ int32_t HksCoreCheckAgreeKeyParams(const struct HksParamSet *paramSet, const str
         }
 
         if (alg == HKS_ALG_DH || alg == HKS_ALG_ECC || alg == HKS_ALG_ECDH) {
+            if (privateKey->size < sizeof(struct HksKeyMaterialHeader)) {
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
             keySize = ((struct HksKeyMaterialHeader *)privateKey->data)->keySize;
         } else if (alg == HKS_ALG_ED25519) {
             keySize = privateKey->size * HKS_BITS_PER_BYTE;

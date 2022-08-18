@@ -23,7 +23,8 @@
 
 #define HKS_PARAM_SET_MAX_SIZE (4 * 1024 * 1024)
 #define HKS_DEFAULT_PARAM_SET_SIZE 512
-#define HKS_DEFAULT_PARAM_CNT ((uint32_t)(HKS_DEFAULT_PARAM_SET_SIZE / sizeof(struct HksParam)))
+#define HKS_DEFAULT_PARAM_CNT ((uint32_t)((HKS_DEFAULT_PARAM_SET_SIZE - sizeof(struct HksParamSet)) / \
+    sizeof(struct HksParam)))
 #define HKS_TAG_TYPE_MASK (0xF << 28)
 
 #ifdef __cplusplus
@@ -53,6 +54,11 @@ int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size);
 int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param);
 
 enum HksTagType GetTagType(enum HksTag tag);
+
+int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
+
+int32_t HksCheckInvalidTag(const struct HksParam *params, uint32_t paramsCnt,
+    const struct HksParamSet *targetParamSet);
 
 #ifdef __cplusplus
 }
