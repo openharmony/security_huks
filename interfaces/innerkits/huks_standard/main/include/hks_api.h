@@ -34,10 +34,8 @@ HKS_API_EXPORT int32_t HksGenerateKey(const struct HksBlob *keyAlias,
 HKS_API_EXPORT int32_t HksImportKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *key);
 
-#ifdef L2_STANDARD
 HKS_API_EXPORT int32_t HksImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
-#endif
 
 HKS_API_EXPORT int32_t HksExportPublicKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key);
@@ -93,11 +91,9 @@ HKS_API_EXPORT int32_t HksUnwrapKey(const struct HksBlob *keyAlias, const struct
 HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n);
 
-#ifdef L2_STANDARD
 HKS_API_EXPORT int32_t HcmIsDeviceKeyExist(const struct HksParamSet *paramSet);
 
 HKS_API_EXPORT int32_t HksValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut);
-#endif
 
 HKS_API_EXPORT int32_t HksInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *handle, struct HksBlob *token);

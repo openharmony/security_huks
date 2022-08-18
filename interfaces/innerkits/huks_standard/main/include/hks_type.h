@@ -58,13 +58,11 @@ extern "C" {
 #define HKS_WRAPPED_FORMAT_MAX_SIZE (1024 * 1024)
 #define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
 
-#ifdef L2_STANDARD
 #define TOKEN_CHALLENGE_LEN 32
 #define SHA256_SIGN_LEN 32
 #define TOKEN_SIZE 32
 #define MAX_AUTH_TIMEOUT_SECOND 60
 #define SECURE_SIGN_VERSION 0x01000001
-#endif
 
 #define HKS_CERT_COUNT 4
 #define HKS_CERT_ROOT_SIZE 2048
@@ -139,18 +137,14 @@ enum HksCipherMode {
 };
 
 enum HksKeySize {
-#ifdef L2_STANDARD
     HKS_RSA_KEY_SIZE_512 = 512,
     HKS_RSA_KEY_SIZE_768 = 768,
-#endif
     HKS_RSA_KEY_SIZE_1024 = 1024,
     HKS_RSA_KEY_SIZE_2048 = 2048,
     HKS_RSA_KEY_SIZE_3072 = 3072,
     HKS_RSA_KEY_SIZE_4096 = 4096,
 
-#ifdef L2_STANDARD
     HKS_ECC_KEY_SIZE_224 = 224,
-#endif
     HKS_ECC_KEY_SIZE_256 = 256,
     HKS_ECC_KEY_SIZE_384 = 384,
     HKS_ECC_KEY_SIZE_521 = 521,
@@ -162,11 +156,9 @@ enum HksKeySize {
 
     HKS_CURVE25519_KEY_SIZE_256 = 256,
 
-#ifdef L2_STANDARD
     HKS_DH_KEY_SIZE_2048 = 2048,
     HKS_DH_KEY_SIZE_3072 = 3072,
     HKS_DH_KEY_SIZE_4096 = 4096,
-#endif
 
     HKS_SM2_KEY_SIZE_256 = 256,
     HKS_SM4_KEY_SIZE_128 = 128,
@@ -175,10 +167,7 @@ enum HksKeySize {
 enum HksKeyAlg {
     HKS_ALG_RSA = 1,
     HKS_ALG_ECC = 2,
-
-#ifdef L2_STANDARD
     HKS_ALG_DSA = 3,
-#endif
 
     HKS_ALG_AES = 20,
     HKS_ALG_HMAC = 50,
@@ -188,10 +177,7 @@ enum HksKeyAlg {
     HKS_ALG_ECDH = 100,
     HKS_ALG_X25519 = 101,
     HKS_ALG_ED25519 = 102,
-
-#ifdef L2_STANDARD
     HKS_ALG_DH = 103,
-#endif
 
     HKS_ALG_SM2 = 150,
     HKS_ALG_SM3 = 151,
@@ -286,13 +272,11 @@ enum HksErrorCode {
     HKS_ERROR_VERIFICATION_FAILED = -38,
     HKS_ERROR_SESSION_REACHED_LIMIT = -39,
 
-#ifdef L2_STANDARD
     HKS_ERROR_GET_USERIAM_SECINFO_FAILED = -40,
     HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED = -41,
     HKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT = -42,
     HKS_ERROR_KEY_AUTH_FAILED = -43,
     HKS_ERROR_DEVICE_NO_CREDENTIAL = -44,
-#endif
 
     HKS_ERROR_CHECK_GET_ALG_FAIL = -100,
     HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL = -101,
@@ -341,7 +325,6 @@ enum HksSendType {
     HKS_SEND_TYPE_SYNC,
 };
 
-#ifdef L2_STANDARD
 enum HksUserAuthType {
     HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
     HKS_USER_AUTH_TYPE_FACE = 1 << 1,
@@ -369,7 +352,6 @@ enum HksChallengePosition {
 enum HksSecureSignType {
     HKS_SECURE_SIGN_WITH_AUTHINFO = 1,
 };
-#endif
 
 enum HksTag {
     /* Invalid TAG */
@@ -591,7 +573,6 @@ struct HksKeyMaterial25519 {
     uint32_t reserved;
 };
 
-#ifdef L2_STANDARD
 typedef struct __attribute__((__packed__)) HksUserAuthToken {
     uint32_t version;
     uint8_t challenge[TOKEN_SIZE];
@@ -611,7 +592,6 @@ typedef struct __attribute__((__packed__)) HksSecureSignAuthInfo {
     uint64_t authenticatorId;
     uint64_t credentialId;
 } __attribute__((__packed__)) HksSecureSignAuthInfo;
-#endif
 
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
