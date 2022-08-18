@@ -23,7 +23,7 @@
 #include "hks_client_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
 #include "securec.h"
 
 #ifndef HAS_OS_ACCOUNT_PART

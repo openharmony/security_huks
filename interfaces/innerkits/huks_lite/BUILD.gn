@@ -99,6 +99,8 @@ config("mbedtls_engine") {
       [ "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include" ]
 }
 
+include_dirs = [ "../../../interfaces/innerkits/huks_standard/main/include" ]
+
 config("soft_huks_config") {
   include_dirs = [
     "../../../frameworks/huks_standard/main/common/include",
