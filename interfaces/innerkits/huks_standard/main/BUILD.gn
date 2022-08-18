@@ -15,9 +15,6 @@ import("//build/ohos.gni")
 
 config("huks_config") {
   include_dirs = [ "include" ]
-  defines = [
-      "L2_STANDARD"
-  ]
 }
 
 if (os_level == "standard") {
