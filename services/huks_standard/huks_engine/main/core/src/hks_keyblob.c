@@ -178,7 +178,11 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
 
     struct HksKeyBlobInfo *keyBlobInfo = (struct HksKeyBlobInfo *)keyParam->blob.data;
     uint32_t keySize;
-    (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keySize));
+    if (memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keyBlobInfo->keySize)) != EOK) {
+        HKS_LOG_E("keySize memcpy failed!");
+        HksFree(aeadParam);
+        return HKS_ERROR_BAD_STATE;
+    }
     aeadParam->aad = *aad;
     aeadParam->payloadLen = keySize;
     aeadParam->nonce.data = keyBlobInfo->nonce;
@@ -343,7 +347,13 @@ static int32_t AddCoreServiceParams(const struct HksBlob *keyInfo, enum HksKeyFl
         },
     };
 
-    int32_t ret = HksAddParams(paramSet, tmpParam, sizeof(tmpParam) / sizeof(tmpParam[0]));
+    int32_t ret = HksCheckInvalidTag(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("add in params fail");
+        return ret;
+    }
+
+    ret = HksAddParams(paramSet, tmpParam, sizeof(tmpParam) / sizeof(tmpParam[0]));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("add sys params failed");
     }

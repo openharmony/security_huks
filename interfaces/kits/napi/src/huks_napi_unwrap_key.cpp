@@ -198,13 +198,10 @@ static napi_value UnwrapKeyAsyncWork(napi_env env, UnwrapKeyAsyncContext context
         [](napi_env env, napi_status status, void *data) {
             UnwrapKeyAsyncContext context = static_cast<UnwrapKeyAsyncContext>(data);
             napi_value result = UnwrapKeyWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteUnwrapKeyAsyncContext(env, context);
         },

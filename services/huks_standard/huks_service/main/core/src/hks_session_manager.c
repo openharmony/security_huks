@@ -44,6 +44,7 @@ static void DeleteKeyNode(uint64_t operationHandle)
 
     struct HksParamSet *paramSet = NULL;
     if (HksInitParamSet(&paramSet) != HKS_SUCCESS) {
+        HksFree(handle);
         return;
     }
 

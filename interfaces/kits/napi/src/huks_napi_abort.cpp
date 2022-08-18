@@ -95,7 +95,6 @@ static napi_value GetHandleValue(napi_env env, napi_value object, AbortAsyncCont
     }
 
     uint64_t handle = handle1;
-    HKS_LOG_D("abort handle:%u", handle1);
 
     context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
     if (context->handle == nullptr) {
@@ -182,11 +181,10 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
         [](napi_env env, napi_status status, void *data) {
             AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
             napi_value result = AbortWriteResult(env, context);
-
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteAbortAsyncContext(env, context);
         },
