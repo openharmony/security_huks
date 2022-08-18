@@ -14,7 +14,10 @@
 import("//build/ohos.gni")
 
 config("huks_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+  ]
 }
 
 ohos_static_library("libhuks_common_standard_static") {
@@ -28,7 +31,10 @@ ohos_static_library("libhuks_common_standard_static") {
   public_configs =
       [ ":huks_config" ]  # Share include files for other gn when deps.
 
-  include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+  include_dirs = [
+    "//commonlibrary/c_utils/base/include",
+    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+  ]
 
   sources = [
     "src/hks_ability.c",

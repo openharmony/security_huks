@@ -20,7 +20,7 @@
 #include <stdint.h>
 
 #include "hks_double_list.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
 
 struct HksOperation {
     struct DoubleList listHead;

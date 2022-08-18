@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-#include "hks_type.h"
+#include "hks_type_inner.h"
 
 enum HksStorageType {
     HKS_STORAGE_TYPE_KEY = 0,
