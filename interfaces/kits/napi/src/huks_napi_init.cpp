@@ -182,6 +182,7 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
+            (void)env;
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
             int32_t ret = InitOutParams(context);
             if (ret != HKS_SUCCESS) {
@@ -193,10 +194,10 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         [](napi_env env, napi_status status, void *data) {
             InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
             napi_value result = InitWriteResult(env, context);
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteInitAsyncContext(env, context);
         },

@@ -365,6 +365,17 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
+static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
+{
+    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
+        if (paramSet->params[i].tag == HKS_TAG_PROCESS_NAME) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static int32_t AppendProcessNameTag(const struct HksParamSet *paramSet, const struct HksBlob *processName,
     struct HksParamSet **outParamSet)
 {
@@ -380,6 +391,12 @@ static int32_t AppendProcessNameTag(const struct HksParamSet *paramSet, const st
 
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append client service tag failed");
+            break;
+        }
+
+        // process name only can be inserted by service
+        if (CheckProcessNameTagExist(newParamSet)) {
+            ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
 

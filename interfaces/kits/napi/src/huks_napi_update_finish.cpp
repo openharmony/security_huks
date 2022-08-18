@@ -119,7 +119,6 @@ static napi_value GetHandleValue(napi_env env, napi_value object, UpdateAsyncCon
     }
 
     uint64_t handle = handle1;
-    HKS_LOG_D("update handle:%u", handle1);
 
     context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
     if (context->handle == nullptr) {
@@ -425,10 +424,10 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context
         [](napi_env env, napi_status status, void *data) {
             UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
             napi_value result = UpdateWriteResult(env, context);
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteUpdateAsyncContext(env, context);
         },

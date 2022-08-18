@@ -39,17 +39,22 @@
 #include "hks_mem.h"
 #include "securec.h"
 
+#if defined(HKS_SUPPORT_DSA_C)
+typedef const BIGNUM* (*GetDsaInfoFunc)(const DSA *d);
+#endif
+
 #if defined(HKS_SUPPORT_RSA_C) || defined(HKS_SUPPORT_ECC_C) || defined(HKS_SUPPORT_DSA_C) || \
     defined(HKS_SUPPORT_DH_C) || defined(HKS_SUPPORT_SM2_C)
 static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
-    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, NULL);
-    if (length <= 0) {
+    int32_t length = i2d_PUBKEY(pkey, NULL);
+    if (length <= 0 || length > MAX_OUT_BLOB_SIZE) {
         HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    uint8_t *key = (uint8_t *)HksMalloc(length);
+    uint32_t keyLength = (uint32_t)length;
+    uint8_t *key = (uint8_t *)HksMalloc(keyLength);
     if (key == NULL) {
         HKS_LOG_E("malloc key fail");
         return HKS_ERROR_MALLOC_FAIL;
@@ -57,13 +62,13 @@ static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 
     /* tmp will be modified in i2d_PUBKEY */
     uint8_t *tmp = key;
-    if ((uint32_t)i2d_PUBKEY(pkey, &tmp) != length) {
+    if ((uint32_t)i2d_PUBKEY(pkey, &tmp) != keyLength) {
         HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
         HksFree(key);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
-    x509Key->size = length;
+    x509Key->size = keyLength;
     x509Key->data = key;
     return HKS_SUCCESS;
 }
@@ -204,6 +209,11 @@ static int32_t EccToX509PublicKey(
 static int32_t GetDsaPubKeyParam(
     const struct HksBlob *publicKey, struct HksBlob *y, struct HksBlob *p, struct HksBlob *q, struct HksBlob *g)
 {
+    if (publicKey->size < sizeof(struct KeyMaterialDsa)) {
+        HKS_LOG_E("Invaild dsa key material size!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)publicKey->data;
     uint32_t keyMaterialSize = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + keyMaterial->ySize +
         keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize;
@@ -465,8 +475,8 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
         return HKS_ERROR_NULL_POINTER;
     }
 
-    uint32_t nSize = (uint32_t)BN_num_bytes(RSA_get0_n(rsa));
-    uint32_t eSize = (uint32_t)BN_num_bytes(RSA_get0_e(rsa));
+    int nSize = BN_num_bytes(RSA_get0_n(rsa));
+    int eSize = BN_num_bytes(RSA_get0_e(rsa));
     if (nSize <= 0 || eSize <= 0) {
         HKS_LOG_E("X509PublicKeyToRsa BN_num_bytes failed");
         return HKS_ERROR_INTERNAL_ERROR;
@@ -483,8 +493,8 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
     struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
     pubKeyInfo->keyAlg = HKS_ALG_RSA;
     pubKeyInfo->keySize = ((uint32_t)RSA_size(rsa)) * HKS_BITS_PER_BYTE;
-    pubKeyInfo->nOrXSize = nSize;
-    pubKeyInfo->eOrYSize = eSize;
+    pubKeyInfo->nOrXSize = (uint32_t)nSize;
+    pubKeyInfo->eOrYSize = (uint32_t)eSize;
     pubKeyInfo->placeHolder = 0;
     if (BN_bn2bin(RSA_get0_n(rsa), keyBuffer + sizeof(struct HksPubKeyInfo)) == 0 ||
         BN_bn2bin(RSA_get0_e(rsa), keyBuffer + sizeof(struct HksPubKeyInfo) + nSize) == 0) {
@@ -570,6 +580,23 @@ static int32_t X509PublicKeyToEcc(const uint32_t alg, EVP_PKEY *pkey, struct Hks
 #endif
 
 #ifdef HKS_SUPPORT_DSA_C
+
+static int32_t GetDsaKeyInfo(const DSA *dsa, const BIGNUM **info, uint32_t *infoSize, GetDsaInfoFunc func)
+{
+    *info = func(dsa);
+    if (*info == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int size = BN_num_bytes(*info);
+    if (size <= 0) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    *infoSize = (uint32_t)size;
+    return HKS_SUCCESS;
+}
+
 static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
 {
     DSA *dsa = EVP_PKEY_get0_DSA(pkey);
@@ -578,14 +605,21 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
         return HKS_ERROR_NULL_POINTER;
     }
 
-    const BIGNUM *y = DSA_get0_pub_key(dsa);
-    const BIGNUM *p = DSA_get0_p(dsa);
-    const BIGNUM *q = DSA_get0_q(dsa);
-    const BIGNUM *g = DSA_get0_g(dsa);
-    uint32_t ySize = (uint32_t)BN_num_bytes(y);
-    uint32_t pSize = (uint32_t)BN_num_bytes(p);
-    uint32_t qSize = (uint32_t)BN_num_bytes(q);
-    uint32_t gSize = (uint32_t)BN_num_bytes(g);
+    const BIGNUM *y = NULL;
+    const BIGNUM *p = NULL;
+    const BIGNUM *q = NULL;
+    const BIGNUM *g = NULL;
+    uint32_t ySize = 0;
+    uint32_t pSize = 0;
+    uint32_t qSize = 0;
+    uint32_t gSize = 0;
+
+    if (GetDsaKeyInfo(dsa, &y, &ySize, DSA_get0_pub_key) != HKS_SUCCESS ||
+        GetDsaKeyInfo(dsa, &p, &pSize, DSA_get0_p) != HKS_SUCCESS ||
+        GetDsaKeyInfo(dsa, &q, &qSize, DSA_get0_q) != HKS_SUCCESS ||
+        GetDsaKeyInfo(dsa, &g, &gSize, DSA_get0_g) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     uint32_t totalSize = sizeof(struct KeyMaterialDsa) + ySize + pSize + qSize + gSize;
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
@@ -635,6 +669,11 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
     }
 
     const BIGNUM *pubKey = DH_get0_pub_key(dh);
+    if (pubKey == NULL) {
+        HKS_LOG_E("DH_get0_pub_key error", ERR_reason_error_string(ERR_get_error()));
+        return HKS_ERROR_NULL_POINTER;
+    }
+
     uint32_t pubKeySize = (uint32_t)BN_num_bytes(pubKey);
     if (pubKeySize > UINT32_MAX - sizeof(struct KeyMaterialDh)) {
         HKS_LOG_E("the size is too long, failed");

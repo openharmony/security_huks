@@ -153,13 +153,10 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
         [](napi_env env, napi_status status, void *data) {
             IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
             napi_value result = IsKeyExistWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteIsKeyExistAsyncContext(env, context);
         },
