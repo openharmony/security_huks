@@ -99,8 +99,6 @@ config("mbedtls_engine") {
       [ "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include" ]
 }
 
-include_dirs = [ "../../../interfaces/innerkits/huks_standard/main/include" ]
-
 config("soft_huks_config") {
   include_dirs = [
     "../../../frameworks/huks_standard/main/common/include",
@@ -188,6 +186,7 @@ if (ohos_kernel_type == "liteos_m") {
     include_dirs = [
       "//commonlibrary/c_utils/base/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     ]
 
@@ -218,6 +217,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//commonlibrary/c_utils/base/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
       "//frameworks/huks_standard/main/os_dependency/ipc/include",
     ]
     deps = []
