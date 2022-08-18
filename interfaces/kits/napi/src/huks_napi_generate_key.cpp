@@ -152,13 +152,10 @@ static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext con
         [](napi_env env, napi_status status, void *data) {
             GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(data);
             napi_value result = GenerateKeyWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteGenerateKeyAsyncContext(env, context);
         },

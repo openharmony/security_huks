@@ -136,6 +136,21 @@ static napi_value ExportKeyWriteResult(napi_env env, ExportKeyAsyncContext conte
         (context->result == HKS_SUCCESS && context->key != nullptr) ? context->key->size : 0);
 }
 
+static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
+{
+    context->key = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->key == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    context->key->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    if (context->key->data == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    context->key->size = MAX_KEY_SIZE;
+    return HKS_SUCCESS;
+}
+
 static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context)
 {
     napi_value promise = nullptr;
@@ -151,26 +166,22 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
+            (void)env;
             ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
-
-            context->key = (HksBlob *)HksMalloc(sizeof(HksBlob));
-            if (context->key != NULL) {
-                context->key->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-                context->key->size = MAX_KEY_SIZE;
+            int32_t ret = PrePareExportKeyContextBuffer(context);
+            if (ret == HKS_SUCCESS) {
+                context->result = HksExportPublicKey(context->keyAlias, context->paramSet, context->key);
+            } else {
+                context->result = ret;
             }
-
-            context->result = HksExportPublicKey(context->keyAlias, context->paramSet, context->key);
         },
         [](napi_env env, napi_status status, void *data) {
             ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
             napi_value result = ExportKeyWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteExportKeyAsyncContext(env, context);
         },

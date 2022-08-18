@@ -179,13 +179,10 @@ static napi_value WrapKeyAsyncWork(napi_env env, WrapKeyAsyncContext context)
         [](napi_env env, napi_status status, void *data) {
             WrapKeyAsyncContext context = static_cast<WrapKeyAsyncContext>(data);
             napi_value result = WrapKeyWriteResult(env, context);
-            if (result == nullptr) {
-                return;
-            }
-            if (context->callback != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            } else {
+            if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
+            } else if (result != nullptr) {
+                CallAsyncCallback(env, context->callback, context->result, result);
             }
             DeleteWrapKeyAsyncContext(env, context);
         },
