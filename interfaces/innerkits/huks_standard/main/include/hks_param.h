@@ -54,6 +54,8 @@ int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
 
 int32_t HksCheckInvalidTag(const struct HksParam *params, uint32_t paramsCnt,
     const struct HksParamSet *targetParamSet);
+    
+enum HksTagType GetTagType(enum HksTag tag);
 
 #ifdef __cplusplus
 }

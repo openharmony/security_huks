@@ -22,8 +22,10 @@ ohos_static_library("libhuks_utils_file_operator_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-  include_dirs =
-      [ "//base/security/huks/frameworks/huks_standard/main/common/include" ]
+  include_dirs = [
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+  ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",

@@ -116,4 +116,3 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     return ret;
 }
 #endif
-
