@@ -440,7 +440,7 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
     }
 }
 
-int32_t HksCheckInvalidTag(const struct HksParam *params, uint32_t paramsCnt,
+int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
     const struct HksParamSet *targetParamSet)
 {
     for (uint32_t i = 0; i < targetParamSet->paramsCnt; ++i) {

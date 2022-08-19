@@ -347,7 +347,7 @@ static int32_t AddCoreServiceParams(const struct HksBlob *keyInfo, enum HksKeyFl
         },
     };
 
-    int32_t ret = HksCheckInvalidTag(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSet);
+    int32_t ret = HksCheckIsTagAlreadyExist(tmpParam, HKS_ARRAY_SIZE(tmpParam), paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("add in params fail");
         return ret;

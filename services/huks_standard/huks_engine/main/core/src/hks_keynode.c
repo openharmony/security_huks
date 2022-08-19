@@ -56,7 +56,7 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
     };
 
     if (inParamSet != NULL) {
-        ret = HksCheckInvalidTag(params, HKS_ARRAY_SIZE(params), inParamSet);
+        ret = HksCheckIsTagAlreadyExist(params, HKS_ARRAY_SIZE(params), inParamSet);
         if (ret != HKS_SUCCESS) {
             HksFreeParamSet(&paramSet);
             HKS_LOG_E("check params fail");

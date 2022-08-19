@@ -60,33 +60,17 @@ static void DeleteWrapKeyAsyncContext(napi_env env, WrapKeyAsyncContext &context
         return;
     }
 
-    if (context->asyncWork != nullptr) {
-        napi_delete_async_work(env, context->asyncWork);
-        context->asyncWork = nullptr;
-    }
-
-    if (context->callback != nullptr) {
-        napi_delete_reference(env, context->callback);
-        context->callback = nullptr;
-    }
-
-    if (context->keyAlias != nullptr) {
-        FreeHksBlob(context->keyAlias);
-    }
-
-    if (context->targetKeyAlias != nullptr) {
-        FreeHksBlob(context->targetKeyAlias);
-    }
-
-    if (context->paramSet != nullptr) {
-        HksFreeParamSet(&context->paramSet);
-    }
+    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
 
     if (context->wrappedData != nullptr) {
         if (context->wrappedData->data != nullptr && context->wrappedData->size != 0) {
             (void)memset_s(context->wrappedData->data, context->wrappedData->size, 0, context->wrappedData->size);
         }
         FreeHksBlob(context->wrappedData);
+    }
+
+    if (context->targetKeyAlias != nullptr) {
+        FreeHksBlob(context->targetKeyAlias);
     }
 
     HksFree(context);
