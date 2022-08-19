@@ -154,7 +154,6 @@ HWTEST_F(HksAgreementTest, HksAgreementTest002, TestSize.Level0)
     struct HksBlob *peerPubKeyAlias = NULL;
     struct HksBlob *peerPublicKey = NULL;
     struct HksBlob *privateKey2 = NULL;
-    struct HksBlob *peerPubKeyAlias2 = NULL;
     struct HksBlob *peerPublicKey2 = NULL;
     int32_t ret;
 
