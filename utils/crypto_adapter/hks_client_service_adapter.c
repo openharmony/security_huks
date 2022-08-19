@@ -483,7 +483,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
     }
 
     /* n and e in RSA algorithm is small, will never overflow. */
-    uint32_t totalSize = nSize + eSize + sizeof(struct HksPubKeyInfo);
+    uint32_t totalSize = (uint32_t)nSize + (uint32_t)eSize + sizeof(struct HksPubKeyInfo);
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
     if (keyBuffer == NULL) {
         HKS_LOG_E("X509PublicKeyToRsa keyBuffer failed");
@@ -497,7 +497,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
     pubKeyInfo->eOrYSize = (uint32_t)eSize;
     pubKeyInfo->placeHolder = 0;
     if (BN_bn2bin(RSA_get0_n(rsa), keyBuffer + sizeof(struct HksPubKeyInfo)) == 0 ||
-        BN_bn2bin(RSA_get0_e(rsa), keyBuffer + sizeof(struct HksPubKeyInfo) + nSize) == 0) {
+        BN_bn2bin(RSA_get0_e(rsa), keyBuffer + sizeof(struct HksPubKeyInfo) + (uint32_t)nSize) == 0) {
         HKS_LOG_E("BN_bn2bin error %s", ERR_reason_error_string(ERR_get_error()));
         HKS_FREE_PTR(keyBuffer);
         return HKS_ERROR_INTERNAL_ERROR;

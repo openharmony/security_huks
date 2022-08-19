@@ -1314,7 +1314,10 @@ static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, cons
                 break;
             }
             outData->size = restoreData->size;
-            (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
+            if (memcpy_s(outData->data, outData->size, restoreData->data, outData->size) != EOK) {
+                HKS_LOG_E("memcpy cached data failed");
+                return HKS_ERROR_BAD_STATE;
+            }
             ret = HKS_SUCCESS;
         }
     } while (0);
