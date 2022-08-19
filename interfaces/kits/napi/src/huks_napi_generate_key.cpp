@@ -56,29 +56,10 @@ static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext 
     if (context == nullptr) {
         return;
     }
-
-    if (context->asyncWork != nullptr) {
-        napi_delete_async_work(env, context->asyncWork);
-        context->asyncWork = nullptr;
-    }
-
-    if (context->callback != nullptr) {
-        napi_delete_reference(env, context->callback);
-        context->callback = nullptr;
-    }
-
-    if (context->keyAlias != nullptr) {
-        FreeHksBlob(context->keyAlias);
-    }
-
-    if (context->paramSetIn != nullptr) {
-        HksFreeParamSet(&context->paramSetIn);
-    }
-
+    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSetIn);
     if (context->paramSetOut != nullptr) {
         HksFreeParamSet(&context->paramSetOut);
     }
-
     HksFree(context);
     context = nullptr;
 }

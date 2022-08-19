@@ -63,29 +63,8 @@ static void DeleteGetCertificateChainAsyncContext(napi_env env, GetCertificateCh
     if (context == nullptr) {
         return;
     }
-
-    if (context->asyncWork != nullptr) {
-        napi_delete_async_work(env, context->asyncWork);
-        context->asyncWork = nullptr;
-    }
-
-    if (context->callback != nullptr) {
-        napi_delete_reference(env, context->callback);
-        context->callback = nullptr;
-    }
-
-    if (context->keyAlias != nullptr) {
-        FreeHksBlob(context->keyAlias);
-    }
-
-    if (context->paramSet != nullptr) {
-        HksFreeParamSet(&context->paramSet);
-    }
-
-    if (context->certChain != nullptr) {
-        FreeHksCertChain(context->certChain);
-    }
-
+    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
+    FreeHksCertChain(context->certChain);
     HksFree(context);
     context = nullptr;
 }

@@ -58,26 +58,10 @@ static void DeleteUnwrapKeyAsyncContext(napi_env env, UnwrapKeyAsyncContext &con
         return;
     }
 
-    if (context->asyncWork != nullptr) {
-        napi_delete_async_work(env, context->asyncWork);
-        context->asyncWork = nullptr;
-    }
-
-    if (context->callback != nullptr) {
-        napi_delete_reference(env, context->callback);
-        context->callback = nullptr;
-    }
-
-    if (context->keyAlias != nullptr) {
-        FreeHksBlob(context->keyAlias);
-    }
+    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
 
     if (context->targetKeyAlias != nullptr) {
         FreeHksBlob(context->targetKeyAlias);
-    }
-
-    if (context->paramSet != nullptr) {
-        HksFreeParamSet(&context->paramSet);
     }
 
     if (context->wrappedData != nullptr) {

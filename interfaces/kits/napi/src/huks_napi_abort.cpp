@@ -55,61 +55,9 @@ static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context)
     if (context == nullptr) {
         return;
     }
-
-    if (context->asyncWork != nullptr) {
-        napi_delete_async_work(env, context->asyncWork);
-        context->asyncWork = nullptr;
-    }
-
-    if (context->callback != nullptr) {
-        napi_delete_reference(env, context->callback);
-        context->callback = nullptr;
-    }
-
-    if (context->handle != nullptr) {
-        FreeHksBlob(context->handle);
-    }
-
-    if (context->paramSet != nullptr) {
-        HksFreeParamSet(&context->paramSet);
-    }
-
+    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->handle, context->paramSet);
     HksFree(context);
     context = nullptr;
-}
-
-static napi_value GetHandleValue(napi_env env, napi_value object, AbortAsyncContext context)
-{
-    napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_typeof(env, object, &valueType);
-    if (valueType != napi_valuetype::napi_number) {
-        napi_throw_type_error(env, nullptr, "Parameter type does not match");
-        return nullptr;
-    }
-
-    uint32_t handle1 = 0;
-    napi_status status = napi_get_value_uint32(env, object, &handle1);
-    if (status != napi_ok) {
-        HKS_LOG_E("Retrieve field failed");
-        return nullptr;
-    }
-
-    uint64_t handle = handle1;
-
-    context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->handle == nullptr) {
-        HKS_LOG_E("could not alloc memory");
-        return nullptr;
-    }
-    context->handle->size = sizeof(uint64_t);
-    context->handle->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
-    if (context->handle->data == nullptr) {
-        HKS_LOG_E("could not alloc memory");
-        return nullptr;
-    }
-    (void)memcpy_s(context->handle->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
-
-    return GetInt32(env, 0);
 }
 
 static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortAsyncContext context)
@@ -126,7 +74,7 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
 
     size_t index = 0;
 
-    napi_value result = GetHandleValue(env, argv[index], context);
+    napi_value result = GetHandleValue(env, argv[index], &(context->handle));
     if (result == nullptr) {
         HKS_LOG_E("could not get handle value");
         return nullptr;

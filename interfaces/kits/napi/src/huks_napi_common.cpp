@@ -377,7 +377,8 @@ static napi_value GenerateHksParamArray(napi_env env, const HksParamSet &paramSe
     return paramArray;
 }
 
-napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size)
+static napi_value GenerateResult(napi_env env, int32_t error, uint8_t *data, uint32_t size,
+    const HksParamSet *paramSet)
 {
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_object(env, &result));
@@ -397,36 +398,25 @@ napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_
     }
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PROPERTY_OUTDATA.c_str(), outData));
 
-    napi_value properties = GetNull(env);
+    napi_value properties = nullptr;
+    if (paramSet == nullptr) {
+        properties = GetNull(env);
+    } else {
+        properties = GenerateHksParamArray(env, *paramSet);
+    }
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PRPPERTY_PROPERTIES.c_str(), properties));
 
     return result;
 }
 
+napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size)
+{
+    return GenerateResult(env, error, data, size, nullptr);
+}
+
 napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size, const HksParamSet &paramSet)
 {
-    napi_value result = nullptr;
-    NAPI_CALL(env, napi_create_object(env, &result));
-
-    napi_value errorCode = nullptr;
-    NAPI_CALL(env, napi_create_int32(env, error, &errorCode));
-    NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PROPERTY_ERRORCODE.c_str(), errorCode));
-
-    napi_value outData = nullptr;
-    if (data != nullptr && size != 0) {
-        napi_value outBuffer = GenerateAarrayBuffer(env, data, size);
-        if (outBuffer != nullptr) {
-            NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, size, outBuffer, 0, &outData));
-        }
-    } else {
-        outData = GetNull(env);
-    }
-    NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PROPERTY_OUTDATA.c_str(), outData));
-
-    napi_value properties = GenerateHksParamArray(env, paramSet);
-    NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PRPPERTY_PROPERTIES.c_str(), properties));
-
-    return result;
+    return GenerateResult(env, error, data, size, &paramSet);
 }
 
 static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
@@ -537,5 +527,67 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *
 
     return result;
 }
-}  // namespace HuksNapi
 
+napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob **handleBlob)
+{
+    if (handleBlob == nullptr || *handleBlob != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    napi_typeof(env, object, &valueType);
+    if (valueType != napi_valuetype::napi_number) {
+        napi_throw_type_error(env, nullptr, "Parameter type does not match");
+        return nullptr;
+    }
+
+    uint32_t handleTmp = 0;
+    napi_status status = napi_get_value_uint32(env, object, &handleTmp);
+    if (status != napi_ok) {
+        HKS_LOG_E("Retrieve field failed");
+        return nullptr;
+    }
+
+    uint64_t handle = (uint32_t)handleTmp;
+
+    *handleBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+    if (*handleBlob == nullptr) {
+        HKS_LOG_E("could not alloc memory");
+        return nullptr;
+    }
+
+    (*handleBlob)->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
+    if ((*handleBlob)->data == nullptr) {
+        HKS_FREE_PTR(*handleBlob);
+        HKS_LOG_E("could not alloc memory");
+        return nullptr;
+    }
+    (*handleBlob)->size = sizeof(uint64_t);
+    (void)memcpy_s((*handleBlob)->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
+
+    return GetInt32(env, 0);
+}
+
+void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref &callback,
+    struct HksBlob *&blob, struct HksParamSet *&paramSet)
+{
+    if (asyncWork != nullptr) {
+        napi_delete_async_work(env, asyncWork);
+        asyncWork = nullptr;
+    }
+
+    if (callback != nullptr) {
+        napi_delete_reference(env, callback);
+        callback = nullptr;
+    }
+
+    if (blob != nullptr) {
+        FreeHksBlob(blob);
+    }
+
+    if (paramSet != nullptr) {
+        HksFreeParamSet(&paramSet);
+    }
+}
+}  // namespace HuksNapi
