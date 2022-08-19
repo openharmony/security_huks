@@ -16,8 +16,6 @@
 #ifndef HKS_API_H
 #define HKS_API_H
 
-#include <stdint.h>
-
 #include "hks_type.h"
 
 #ifdef __cplusplus
