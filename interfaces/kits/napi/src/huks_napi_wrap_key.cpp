@@ -97,24 +97,9 @@ static napi_value WrapKeyParseParams(napi_env env, napi_callback_info info, Wrap
     }
 
     index++;
-    result = ParseKeyAlias(env, argv[index], context->targetKeyAlias);
+    result = ParseKeyAliasAndHksParamSet(env, argv, index, context->targetKeyAlias, context->paramSet);
     if (result == nullptr) {
-        HKS_LOG_E("could not get target alias");
-        return nullptr;
-    }
-
-    index++;
-    napi_value properties = nullptr;
-    napi_status status =
-        napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
-    if (status != napi_ok || properties == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
-        return nullptr;
-    }
-    result = ParseHksParamSet(env, properties, context->paramSet);
-    if (result == nullptr) {
-        HKS_LOG_E("could not get paramset");
+        HKS_LOG_E("wrapKey parse params failed");
         return nullptr;
     }
 

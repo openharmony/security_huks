@@ -76,26 +76,6 @@ static void DeleteImportWrappedKeyAsyncContext(napi_env env, ImportWrappedKeyAsy
     context = nullptr;
 }
 
-static napi_value ParseKeyAliasParams(napi_env env, napi_value *argv, size_t &index,
-    ImportWrappedKeyAsyncContext context)
-{
-    napi_value result = ParseKeyAlias(env, argv[index], context->keyAlias);
-    if (result == nullptr) {
-        HKS_LOG_E("could not get imported key alias");
-        return nullptr;
-    }
-
-    index++;
-    result = ParseKeyAlias(env, argv[index], context->wrappingKeyAlias);
-    if (result == nullptr) {
-        HKS_LOG_E("could not get wrapping key alias");
-        return nullptr;
-    }
-
-    index++;
-    return result;
-}
-
 static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info info,
     ImportWrappedKeyAsyncContext context)
 {
@@ -110,41 +90,22 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     }
 
     size_t index = 0;
-    napi_value result = ParseKeyAliasParams(env, argv, index, context);
+    napi_value result = ParseKeyAlias(env, argv[index], context->keyAlias);
     if (result == nullptr) {
-        HKS_LOG_E("could not get key alias");
+        HKS_LOG_E("importWrappedKey parse keyAlias failed");
         return nullptr;
     }
 
-    napi_value properties = nullptr;
-    napi_status status =
-            napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
-    if (status != napi_ok || properties == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get napi property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
-        return nullptr;
-    }
-    result = ParseHksParamSet(env, properties, context->paramSet);
+    index++;
+    result = ParseKeyAliasAndHksParamSet(env, argv, index, context->wrappingKeyAlias, context->paramSet);
     if (result == nullptr) {
-        HKS_LOG_E("could not get ParseHksparamset");
+        HKS_LOG_E("importWrappedKey parse params failed");
         return nullptr;
     }
-    napi_value inData = nullptr;
-    status = napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
-    if (status != napi_ok || inData == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get napi property %s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
-        return nullptr;
-    }
-    context->wrappedData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->wrappedData == nullptr) {
-        HKS_LOG_E("could not alloc memory");
-        return nullptr;
-    }
-    (void)memset_s(context->wrappedData, sizeof(HksBlob), 0, sizeof(HksBlob));
 
-    if (GetUint8Array(env, inData, *context->wrappedData) == nullptr) {
-        HKS_LOG_E("could not get indata");
+    result = ParseKeyData(env, argv[index], context->wrappedData);
+    if (result == nullptr) {
+        HKS_LOG_E("importWrappedKey parse keyData failed");
         return nullptr;
     }
 
