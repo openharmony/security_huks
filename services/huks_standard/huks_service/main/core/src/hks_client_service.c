@@ -467,7 +467,7 @@ static int32_t ConstructEnrolledInfoBlob(struct SecInfoWrap *secInfo, struct Hks
     return HKS_SUCCESS;
 }
 
-static int32_t ComputeEnrolledInfoLen(uint32_t enrolledInfoLen)
+static uint32_t ComputeEnrolledInfoLen(uint32_t enrolledInfoLen)
 {
     return sizeof(uint32_t) + (sizeof(uint32_t) + sizeof(uint64_t)) * enrolledInfoLen;
 }
