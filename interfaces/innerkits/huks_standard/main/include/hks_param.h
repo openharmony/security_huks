@@ -52,7 +52,7 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
 
 int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
 
-int32_t HksCheckInvalidTag(const struct HksParam *params, uint32_t paramsCnt,
+int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
     const struct HksParamSet *targetParamSet);
     
 enum HksTagType GetTagType(enum HksTag tag);

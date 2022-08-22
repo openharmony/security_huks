@@ -68,6 +68,8 @@ napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, const u
 napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *handle,
     const struct HksBlob *token);
 
+napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob **handleBlob);
+
 void CallAsyncCallback(napi_env env, napi_ref callback, int32_t error, napi_value data);
 
 inline napi_value GetNull(napi_env env)
@@ -101,6 +103,9 @@ inline void FreeHksBlob(HksBlob *&blob)
 }
 
 void FreeHksCertChain(HksCertChain *&certChain);
+
+void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref &callback,
+    struct HksBlob *&blob, struct HksParamSet *&paramSet);
 }  // namespace HuksNapi
 
 #endif
