@@ -304,9 +304,9 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     }
 
     size_t index = 0;
-    napi_value result = GetHandleValue(env, argv[index], &(context->handle));
+    napi_value result = GetHandleValue(env, argv[index], context->handle);
     if (result == nullptr) {
-        HKS_LOG_E("could not get handle value");
+        HKS_LOG_E("update could not get handle value");
         return nullptr;
     }
 
@@ -316,7 +316,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
     if (status != napi_ok || properties == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        HKS_LOG_E("update could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
 
