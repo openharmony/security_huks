@@ -424,6 +424,7 @@ static int32_t AppendProcessNameTag(const struct HksParamSet *paramSet, const st
     return ret;
 }
 
+#ifndef _CUT_AUTHENTICATE_
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 static int32_t AppendSecUid(struct HksParamSet *newParamSet, struct SecInfoWrap *secInfo)
 {
@@ -639,7 +640,6 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
 }
 #endif
 
-#ifndef _CUT_AUTHENTICATE_
 static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
