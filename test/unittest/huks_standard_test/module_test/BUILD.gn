@@ -20,9 +20,7 @@ module_output_path = "huks_standard/huks_module_test"
 ohos_unittest("huks_module_test") {
   module_out_path = module_output_path
 
-  sources = [
-    "framework_test/common_test/src/hks_check_paramset_test.cpp",
-  ]
+  sources = [ "framework_test/common_test/src/hks_check_paramset_test.cpp" ]
 
   defines = [
     "L2_STANDARD",

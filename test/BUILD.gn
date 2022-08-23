@@ -20,9 +20,9 @@ group("unittest") {
       "./unittest/huks_standard_test/crypto_engine_test:crypto_engine_unit_test",
       "./unittest/huks_standard_test/interface_inner_test/alg_module_test:huks_mt_test",
       "./unittest/huks_standard_test/interface_inner_test/sdk_test:hukssdk_test",
+      "./unittest/huks_standard_test/module_test:huks_module_test",
       "./unittest/huks_standard_test/storage_multithread_test:huks_multithread_test",
       "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
-      "./unittest/huks_standard_test/module_test:huks_module_test",
     ]
   } else {
     if (ohos_kernel_type == "liteos_m") {
