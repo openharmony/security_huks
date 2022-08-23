@@ -762,8 +762,8 @@ static void HksLocalCheckCipherParamsTest(struct HksLocalCheckCipherParamsInputP
     HksFreeParamSet(&paramSet);
 }
 
-#define HKS_CMD_ID_ENCRYPT 0x10E
-#define HKS_CMD_ID_DECRYPT 0x112
+const static uint32_t g_cmdIdEncrypt = 0x10E;
+const static uint32_t g_cmdIdDecrypt = 0x112;
 
 const static uint32_t g_inValidAesInLen = 1;
 const static uint32_t g_validAesInLen = 16;
@@ -779,7 +779,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest019, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest019");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_nonexistTag, g_normalTag, g_normalTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, 0, NULL, NULL };
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, 0, NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_CHECK_GET_ALG_FAIL);
 }
 
@@ -794,7 +794,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest020, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest020");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_invalidTag, g_normalTag, g_normalTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, 0, NULL, NULL };
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, 0, NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_ALGORITHM);
 }
 
@@ -809,7 +809,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest021, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest021");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_normalTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_RSA_KEY_SIZE_512,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_RSA_KEY_SIZE_512,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_KEY_SIZE);
 }
@@ -825,7 +825,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest022, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest022");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_normalTag, g_normalTag,
         g_normalTag, false, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_192,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_192,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_KEY_SIZE);
 }
@@ -841,7 +841,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest023, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest023");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_nonexistTag, g_normalTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_CHECK_GET_PADDING_FAIL);
 }
@@ -857,7 +857,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest024, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest024");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_nonexistTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_CHECK_GET_PURPOSE_FAIL);
 }
@@ -873,7 +873,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest025, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest025");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_normalTag, g_nonexistTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_CHECK_GET_MODE_FAIL);
 }
@@ -889,7 +889,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest026, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest026");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_normalTag, g_normalTag,
         g_nonexistTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_CHECK_GET_IV_FAIL);
 }
@@ -905,7 +905,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest027, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest027");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_invalidTag, g_normalTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_PADDING);
 }
@@ -921,7 +921,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest028, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest028");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_invalidTag, g_normalTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_PURPOSE);
 }
@@ -937,7 +937,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest029, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest029");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_normalTag, g_invalidTag,
         g_normalTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_MODE);
 }
@@ -953,7 +953,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest030, TestSize.Level0)
     HKS_LOG_I("enter HksCheckParamsetTest030");
     struct HksLocalCheckCipherParamsTagParam tagParam = { g_normalTag, g_normalTag, g_normalTag, g_normalTag,
         g_invalidTag, true, true };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         NULL, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_IV);
 }
@@ -971,7 +971,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest031, TestSize.Level0)
         g_normalTag, true, true };
     uint8_t inUint8[g_inValidAesInLen];
     struct HksBlob inData = { g_inValidAesInLen, inUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         &inData, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_ARGUMENT);
 }
@@ -991,7 +991,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest032, TestSize.Level0)
     struct HksBlob inData = { g_validAesInLen, inUint8 };
     uint8_t outUint8[g_validAesInLen - 1];
     struct HksBlob outData = { g_validAesInLen - 1, outUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         &inData, &outData };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_BUFFER_TOO_SMALL);
 }
@@ -1011,14 +1011,14 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest033, TestSize.Level0)
     struct HksBlob inData = { g_validAesInLen, inUint8 };
     uint8_t outUint8[g_validAesInLen];
     struct HksBlob outData = { g_validAesInLen, outUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         &inData, &outData };
     HksLocalCheckCipherParamsTest(&params, HKS_SUCCESS);
 }
 
 /**
  * @tc.name: HksCheckParamsetTest.HksCheckParamsetTest034
- * @tc.desc: tdd HksLocalCheckCipherParams, make test with invalid inData cause %16 != 0 for HKS_CMD_ID_DECRYPT,
+ * @tc.desc: tdd HksLocalCheckCipherParams, make test with invalid inData cause %16 != 0 for g_cmdIdDecrypt,
  *           expecting HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
@@ -1029,14 +1029,14 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest034, TestSize.Level0)
         g_normalTag, true, false };
     uint8_t inUint8[g_inValidAesInLen];
     struct HksBlob inData = { g_inValidAesInLen, inUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_DECRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdDecrypt, HKS_AES_KEY_SIZE_256,
         &inData, NULL };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksCheckParamsetTest.HksCheckParamsetTest035
- * @tc.desc: tdd HksLocalCheckCipherParams, make test with invalid outData cause too small for HKS_CMD_ID_DECRYPT,
+ * @tc.desc: tdd HksLocalCheckCipherParams, make test with invalid outData cause too small for g_cmdIdDecrypt,
  *           expecting HKS_ERROR_BUFFER_TOO_SMALL
  * @tc.type: FUNC
  */
@@ -1049,14 +1049,14 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest035, TestSize.Level0)
     struct HksBlob inData = { g_validAesInLen, inUint8 };
     uint8_t outUint8[g_validAesInLen - 1];
     struct HksBlob outData = { g_validAesInLen - 1, outUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_DECRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdDecrypt, HKS_AES_KEY_SIZE_256,
         &inData, &outData };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_BUFFER_TOO_SMALL);
 }
 
 /**
  * @tc.name: HksCheckParamsetTest.HksCheckParamsetTest036
- * @tc.desc: tdd HksLocalCheckCipherParams, make test with correct params for HKS_CMD_ID_DECRYPT, expecting
+ * @tc.desc: tdd HksLocalCheckCipherParams, make test with correct params for g_cmdIdDecrypt, expecting
  *           HKS_SUCCESS
  * @tc.type: FUNC
  */
@@ -1069,7 +1069,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest036, TestSize.Level0)
     struct HksBlob inData = { g_validAesInLen, inUint8 };
     uint8_t outUint8[g_validAesInLen];
     struct HksBlob outData = { g_validAesInLen, outUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_DECRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdDecrypt, HKS_AES_KEY_SIZE_256,
         &inData, &outData };
     HksLocalCheckCipherParamsTest(&params, HKS_SUCCESS);
 }
@@ -1089,14 +1089,14 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest037, TestSize.Level0)
     struct HksBlob inData = { g_validAesInLen, inUint8 };
     uint8_t outUint8[g_validAesInLen];
     struct HksBlob outData = { g_validAesInLen, outUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_ENCRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdEncrypt, HKS_AES_KEY_SIZE_256,
         &inData, &outData };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_PURPOSE);
 }
 
 /**
  * @tc.name: HksCheckParamsetTest.HksCheckParamsetTest038
- * @tc.desc: tdd HksLocalCheckCipherParams, make test with correct params  but wrong purpose for HKS_CMD_ID_DECRYPT,
+ * @tc.desc: tdd HksLocalCheckCipherParams, make test with correct params  but wrong purpose for g_cmdIdDecrypt,
  *           expecting HKS_ERROR_INVALID_PURPOSE
  * @tc.type: FUNC
  */
@@ -1109,7 +1109,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest038, TestSize.Level0)
     struct HksBlob inData = { g_validAesInLen, inUint8 };
     uint8_t outUint8[g_validAesInLen];
     struct HksBlob outData = { g_validAesInLen, outUint8 };
-    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, HKS_CMD_ID_DECRYPT, HKS_AES_KEY_SIZE_256,
+    struct HksLocalCheckCipherParamsInputParams params = { &tagParam, g_cmdIdDecrypt, HKS_AES_KEY_SIZE_256,
         &inData, &outData };
     HksLocalCheckCipherParamsTest(&params, HKS_ERROR_INVALID_PURPOSE);
 }
