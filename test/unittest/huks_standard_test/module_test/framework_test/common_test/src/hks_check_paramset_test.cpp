@@ -536,7 +536,6 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest015, TestSize.Level0)
     struct HksCoreCheckDeriveKeyParamsTagParam tagParam8 = { g_normalTag, g_normalTag, g_normalTag, g_invalidTag,
         g_normalTag };
     HksCoreCheckDeriveKeyParamsTest(&tagParam8, HKS_ERROR_INVALID_ITERATION);
-
 }
 
 /**
