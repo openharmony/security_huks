@@ -17,7 +17,23 @@
 #define HKS_CHECK_PARAMSET_TEST_H
 
 namespace Unittest::HksFrameworkCommonCheckParamsetTest {
-int HksFrameworkCommonCheckParamsetTest001(void);
-int HksFrameworkCommonCheckParamsetTest002(void);
+int HksCheckParamsetTest001(void);
+int HksCheckParamsetTest002(void);
+int HksCheckParamsetTest003(void);
+int HksCheckParamsetTest004(void);
+int HksCheckParamsetTest005(void);
+int HksCheckParamsetTest006(void);
+int HksCheckParamsetTest007(void);
+int HksCheckParamsetTest008(void);
+int HksCheckParamsetTest009(void);
+int HksCheckParamsetTest010(void);
+int HksCheckParamsetTest011(void);
+int HksCheckParamsetTest012(void);
+int HksCheckParamsetTest013(void);
+int HksCheckParamsetTest014(void);
+int HksCheckParamsetTest015(void);
+int HksCheckParamsetTest016(void);
+int HksCheckParamsetTest017(void);
+int HksCheckParamsetTest018(void);
 }
 #endif // HKS_CHECK_PARAMSET_TEST_H
