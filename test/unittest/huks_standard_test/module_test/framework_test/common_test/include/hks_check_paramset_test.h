@@ -17,6 +17,9 @@
 #define HKS_CHECK_PARAMSET_TEST_H
 
 namespace Unittest::HksFrameworkCommonCheckParamsetTest {
+/**
+ * HksCoreCheckMacParams
+ */
 int HksCheckParamsetTest001(void);
 int HksCheckParamsetTest002(void);
 int HksCheckParamsetTest003(void);
@@ -24,6 +27,10 @@ int HksCheckParamsetTest004(void);
 int HksCheckParamsetTest005(void);
 int HksCheckParamsetTest006(void);
 int HksCheckParamsetTest007(void);
+
+/**
+ * HksCoreCheckDeriveKeyParams
+ */
 int HksCheckParamsetTest008(void);
 int HksCheckParamsetTest009(void);
 int HksCheckParamsetTest010(void);
@@ -35,6 +42,10 @@ int HksCheckParamsetTest015(void);
 int HksCheckParamsetTest016(void);
 int HksCheckParamsetTest017(void);
 int HksCheckParamsetTest018(void);
+
+/**
+ * HksLocalCheckCipherParams
+ */
 int HksCheckParamsetTest019(void);
 int HksCheckParamsetTest020(void);
 int HksCheckParamsetTest021(void);
