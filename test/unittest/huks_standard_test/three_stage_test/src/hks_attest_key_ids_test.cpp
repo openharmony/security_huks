@@ -134,7 +134,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
  * @tc.desc: attest with permission and right param then validate suc.
  * @tc.type: FUNC
  * @tc.require: issueI5NY0L
-*/
+ */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
 {
     int32_t ret = SetIdsToken();
