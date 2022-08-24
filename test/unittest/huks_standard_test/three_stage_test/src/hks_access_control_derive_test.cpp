@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_access_control_agree_test.h"
+#include "hks_access_control_derive_test.h"
 #include "hks_access_control_test_common.h"
 #include "hks_api.h"
 
@@ -159,11 +159,12 @@ static struct HksParam g_deriveAccessFinish002[] = {
 };
 
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
+ * @tc.name: HksAccessControlDeriveTest.HksAccessDerivePartTest001
  * @tc.desc: alg-HKDF gen-pur-Derive.
  * @tc.type: FUNC
  * @tc.auth_type: FINGERPRINT
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest001, TestSize.Level0)
 {
@@ -182,12 +183,14 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest001, TestSize.Level0
         testIDMParams), HKS_SUCCESS);
     ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish001, nullptr), HKS_SUCCESS);
 }
+
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest002
+ * @tc.name: HksAccessControlDeriveTest.HksAccessDerivePartTest002
  * @tc.desc: alg-PBKDF2 gen-pur-Derive.
  * @tc.type: FUNC
  * @tc.auth_type: FACE
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest002, TestSize.Level0)
 {

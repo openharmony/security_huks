@@ -17,5 +17,7 @@
 #define HKS_ACCESS_CONTROL_TEST_H
 
 namespace Unittest::HksAccessControlPartTest {
+int HksAccessDerivePartTest001(void);
+int HksAccessDerivePartTest002(void);
 }
 #endif // HKS_ACCESS_CONTROL_TEST_H

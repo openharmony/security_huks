@@ -393,6 +393,7 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_007_PARAMS = {
  * @tc.desc: pin test.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest001, TestSize.Level0)
 {
@@ -412,6 +413,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest001, TestSize.
  * @tc.desc: fingerprint test.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest002, TestSize.Level0)
 {
@@ -431,6 +433,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest002, TestSize.
  * @tc.desc: wrong token auth type.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest003, TestSize.Level0)
 {
@@ -450,6 +453,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest003, TestSize.
  * @tc.desc: custom test.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest004, TestSize.Level0)
 {
@@ -469,6 +473,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest004, TestSize.
  * @tc.desc: time stamp test.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest005, TestSize.Level0)
 {
@@ -488,6 +493,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest005, TestSize.
  * @tc.desc: time out test.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest006, TestSize.Level0)
 {
@@ -507,6 +513,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest006, TestSize.
  * @tc.desc: fingerprint test, with access type as HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest007, TestSize.Level0)
 {
