@@ -16,18 +16,18 @@
 #ifndef HKS_ACCESS_CONTROL_RSA_SIGN_VERIFY_TEST_H
 #define HKS_ACCESS_CONTROL_RSA_SIGN_VERIFY_TEST_H
 namespace Unittest::AccessControlRsaSignVerify {
-int HksAcRsaSignVerifyAccessTest001(void);
+int HksAcRsaSignVerifyTest001(void);
 
-int HksAcRsaSignVerifyAccessTest002(void);
+int HksAcRsaSignVerifyTest002(void);
 
-int HksAcRsaSignVerifyAccessTest003(void);
+int HksAcRsaSignVerifyTest003(void);
 
-int HksAcRsaSignVerifyAccessTest004(void);
+int HksAcRsaSignVerifyTest004(void);
 
-int HksAcRsaSignVerifyAccessTest005(void);
+int HksAcRsaSignVerifyTest005(void);
 
-int HksAcRsaSignVerifyAccessTest006(void);
+int HksAcRsaSignVerifyTest006(void);
 
-int HksAcRsaSignVerifyAccessTest007(void);
+int HksAcRsaSignVerifyTest007(void);
 }
 #endif
