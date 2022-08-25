@@ -383,6 +383,7 @@ HWTEST_F(HksExportTest, HksExportTest01600, TestSize.Level0)
  * @tc.number    : HksExportTest01700
  * @tc.name      : HksExportTest01700
  * @tc.desc      : Test huks exportkey (SM2)
+ * @tc.require: issueI5NY2Y
  */
 HWTEST_F(HksExportTest, HksExportTest01700, TestSize.Level0)
 {

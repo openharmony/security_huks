@@ -50,6 +50,14 @@ void HksAccessControlPart1Test::TearDown()
 {
 }
 
+/**
+ * @tc.name: HksAccessControlPart1Test.HksAccessControlPart1Test001
+ * @tc.desc: alg-AES gen-pur-Encrypt.
+ * @tc.type: FUNC
+ * @tc.auth_type: FACE
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
+ */
 HWTEST_F(HksAccessControlPart1Test, HksAccessControlPart1Test001, TestSize.Level0)
 {
     std::vector<uint8_t> token;

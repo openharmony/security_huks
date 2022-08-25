@@ -28,6 +28,15 @@ struct TestAuthCaseParams {
 
 static const uint32_t IV_SIZE = 16;
 static uint8_t IV[IV_SIZE] = {0};
+
+int HksCheckAuthTest001(void);
+int HksCheckAuthTest002(void);
+int HksCheckAuthTest003(void);
+int HksCheckAuthTest004(void);
+int HksCheckAuthTest005(void);
+int HksCheckAuthTest006(void);
+int HksCheckAuthTest007(void);
+int HksCheckAuthTest008(void);
 }
 #endif // HKS_CHECK_AUTH_TEST_H
 

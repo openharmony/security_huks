@@ -1053,6 +1053,7 @@ static void TestImportKeyWithSignTagAndTestUseKeyCommonCase(uint32_t alg, bool i
  * @tc.desc: normal case to test generate a rsa key with sign_with_info tag and check paramSet
  *           has the tag
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest001, TestSize.Level0)
 {
@@ -1065,6 +1066,7 @@ HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest001, Test
  * @tc.desc: normal case to test generate a ed25519 key with sign_with_info tag and check paramSet
  *           has the tag
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest002, TestSize.Level0)
 {
@@ -1077,6 +1079,7 @@ HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest002, Test
  * @tc.desc: normal case to test generate a dsa key with sign_with_info tag and check paramSet
  *           has the tag
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest003, TestSize.Level0)
 {
@@ -1091,6 +1094,7 @@ HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest003, Test
  * @tc.desc: normal case to test import a rsa key with user auth type and use the key
  *           to sign data, check the signature whether equals the expected
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest004, TestSize.Level0)
 {
@@ -1103,6 +1107,7 @@ HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest004, Test
  * @tc.desc: normal case to test import a dsa key with user auth type and use the key
  *           to sign data, check the signature whether equals the expected
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest005, TestSize.Level0)
 {
@@ -1117,6 +1122,7 @@ HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest005, Test
  * @tc.desc: normal case to test import a rsa key with user auth type and use the key:init&finish
  *           to sign data, check the signature whether equals the expected
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest006, TestSize.Level0)
 {
@@ -1129,6 +1135,7 @@ HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest006, Test
  * @tc.desc: normal case to test import a rsa key with auth type as fingerprint and access type as invalid clear
  *           password, check the signature whether equals the expected
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlSecureSignTest, HksAccessControlSecureSignTest007, TestSize.Level0)
 {

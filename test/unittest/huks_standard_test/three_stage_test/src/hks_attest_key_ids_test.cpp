@@ -100,6 +100,7 @@ static const struct HksParam g_idsParams[] = {
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest001
  * @tc.desc: attest without permission and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
 {
@@ -112,7 +113,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     ret = ConstructDataToCertChain(&certChain, &certParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);;
+    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksAttestKey fail, ret is %d!", ret);
     }
@@ -132,6 +133,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest002
  * @tc.desc: attest with permission and right param then validate suc.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
 {
@@ -149,7 +151,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     ret = ConstructDataToCertChain(&certChain, &certParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);;
+    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksAttestKey fail, ret is %d!", ret);
     }
@@ -169,6 +171,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest003
  * @tc.desc: attest without cert data and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
 {
@@ -184,7 +187,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, true, false, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
-    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);;
+    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = NULL;
@@ -199,6 +202,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest004
  * @tc.desc: attest without cert count and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
 {
@@ -229,6 +233,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest005
  * @tc.desc: attest without cert chain and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
 {
@@ -245,7 +250,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { false, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
-    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);;
+    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
     if (certChain != NULL) {
         FreeCertChain(&certChain, certChain->certsCount);

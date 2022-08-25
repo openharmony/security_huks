@@ -17,11 +17,11 @@
 #define HKS_ATTEST_KEY_NONIDS_TEST_H
 
 namespace Unittest::AttestKey {
-    int HksAttestKeyNonIdsTest001(void);
-    int HksAttestKeyNonIdsTest002(void);
-    int HksAttestKeyNonIdsTest003(void);
-    int HksAttestKeyNonIdsTest004(void);
-    int HksAttestKeyNonIdsTest005(void);
+int HksAttestKeyNonIdsTest001(void);
+int HksAttestKeyNonIdsTest002(void);
+int HksAttestKeyNonIdsTest003(void);
+int HksAttestKeyNonIdsTest004(void);
+int HksAttestKeyNonIdsTest005(void);
 }
 
 #endif
