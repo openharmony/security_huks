@@ -110,11 +110,12 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
 };
 
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
+ * @tc.name: HksAccessControlCipherTest.HksAccessCipherPartTest001
  * @tc.desc: alg-AES gen-pur-Encrypt.
  * @tc.type: FUNC
  * @tc.authtype: FACE
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest001, TestSize.Level0)
 {
@@ -127,12 +128,14 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest001, TestSize.Level0
     };
     ASSERT_EQ(CheckAccessCipherTest(HKS_ACCESS_TEST_001_PARAMS, testIDMParams), HKS_SUCCESS);
 }
+
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
+ * @tc.name: HksAccessControlCipherTest.HksAccessCipherPartTest002
  * @tc.desc: alg-AES gen-pur-Encrypt.
  * @tc.type: FUNC
  * @tc.authtype: FINGERPRINT
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest002, TestSize.Level0)
 {
