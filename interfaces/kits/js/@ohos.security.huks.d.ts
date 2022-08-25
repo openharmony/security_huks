@@ -615,7 +615,7 @@ declare namespace huks {
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
-    declare enum HuksTagType {
+    export enum HuksTagType {
         HUKS_TAG_TYPE_INVALID = 0 << 28,
         HUKS_TAG_TYPE_INT = 1 << 28,
         HUKS_TAG_TYPE_UINT = 2 << 28,

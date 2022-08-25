@@ -246,10 +246,8 @@ int32_t HksMakeDir(const char *path)
         switch (errno) {
             case EEXIST:
                 return HKS_ERROR_ALREADY_EXISTS;
-                break;
             default:
                 return HKS_ERROR_MAKE_DIR_FAIL;
-                break;
         }
     }
 }
