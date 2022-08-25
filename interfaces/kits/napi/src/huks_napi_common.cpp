@@ -201,20 +201,30 @@ static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet
     return HKS_SUCCESS;
 }
 
-napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
+static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, HksParamSet *&paramSet,
+    HksParam *addParam)
 {
+    if (paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
     std::vector<HksParam> params;
     HksParamSet *outParamSet = nullptr;
     do {
         if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
             napi_throw_error(env, NULL, "native error");
-            HKS_LOG_E("init paramset failed");
+            HKS_LOG_E("paramset init failed");
             break;
         }
 
         if (ParseParams(env, object, params) == nullptr) {
             HKS_LOG_E("parse params failed");
             break;
+        }
+
+        if (addParam != nullptr) {
+            params.push_back(*addParam);
         }
 
         if (AddParams(params, outParamSet) != HKS_SUCCESS) {
@@ -237,47 +247,14 @@ napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&param
     return nullptr;
 }
 
+napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
+{
+    return ParseHksParamSetOrAddParam(env, object, paramSet, nullptr);
+}
+
 napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet, HksParam *addParam)
 {
-    if (HksInitParamSet(&paramSet) != HKS_SUCCESS) {
-        napi_throw_error(env, NULL, "native error");
-        HKS_LOG_E("init paramset failed");
-        return nullptr;
-    }
-    napi_value result = nullptr;
-    size_t index = 0;
-    bool hasNextElement = false;
-    if (HksAddParams(paramSet, addParam, 1) != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed.");
-        HksFreeParamSet(&paramSet);
-        return nullptr;
-    }
-    while ((napi_has_element(env, object, index, &hasNextElement) == napi_ok) && hasNextElement) {
-        napi_value element = nullptr;
-        NAPI_CALL(env, napi_get_element(env, object, index, &element));
-
-        HksParam param = {0};
-        result = GetHksParam(env, element, param);
-        if (result == nullptr) {
-            HKS_LOG_E("get huks param failed.");
-            HksFreeParamSet(&paramSet);
-            return nullptr;
-        }
-
-        if (HksAddParams(paramSet, &param, 1) != HKS_SUCCESS) {
-            HKS_LOG_E("add param failed.");
-            HksFreeParamSet(&paramSet);
-            return nullptr;
-        }
-        index++;
-    }
-    if (HksBuildParamSet(&paramSet) != HKS_SUCCESS) {
-        HKS_LOG_E("build param failed.");
-        HksFreeParamSet(&paramSet);
-        return nullptr;
-    }
-
-    return GetInt32(env, 0);
+    return ParseHksParamSetOrAddParam(env, object, paramSet, addParam);
 }
 
 napi_ref GetCallback(napi_env env, napi_value object)
@@ -528,9 +505,9 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *
     return result;
 }
 
-napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob **handleBlob)
+napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&handleBlob)
 {
-    if (handleBlob == nullptr || *handleBlob != nullptr) {
+    if (handleBlob != nullptr) {
         HKS_LOG_E("param input invalid");
         return nullptr;
     }
@@ -551,20 +528,20 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob **hand
 
     uint64_t handle = (uint32_t)handleTmp;
 
-    *handleBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    if (*handleBlob == nullptr) {
+    handleBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+    if (handleBlob == nullptr) {
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
 
-    (*handleBlob)->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
-    if ((*handleBlob)->data == nullptr) {
-        HKS_FREE_PTR(*handleBlob);
+    handleBlob->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
+    if (handleBlob->data == nullptr) {
+        HKS_FREE_PTR(handleBlob);
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    (*handleBlob)->size = sizeof(uint64_t);
-    (void)memcpy_s((*handleBlob)->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
+    handleBlob->size = sizeof(uint64_t);
+    (void)memcpy_s(handleBlob->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
 
     return GetInt32(env, 0);
 }
@@ -589,5 +566,105 @@ void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref
     if (paramSet != nullptr) {
         HksFreeParamSet(&paramSet);
     }
+}
+
+static napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSet *&paramSet)
+{
+    napi_value properties = nullptr;
+    napi_status status = napi_get_named_property(env, value,
+        HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
+    if (status != napi_ok || properties == nullptr) {
+        GET_AND_THROW_LAST_ERROR((env));
+        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        return nullptr;
+    }
+    napi_value result = ParseHksParamSet(env, properties, paramSet);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get paramset");
+        return nullptr;
+    }
+
+    return GetInt32(env, 0);
+}
+
+napi_value ParseHandleAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
+    HksBlob *&handleBlob, HksParamSet *&paramSet)
+{
+    // the index is controlled by the caller and needs to ensure that it does not overflow
+    if (argv == nullptr || handleBlob != nullptr || paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_value result = GetHandleValue(env, argv[index], handleBlob);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get handle value");
+        return nullptr;
+    }
+
+    index++;
+    result = ParseGetHksParamSet(env, argv[index], paramSet);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get hksParamSet");
+        return nullptr;
+    }
+
+    return GetInt32(env, 0);
+}
+
+napi_value ParseKeyAliasAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
+    HksBlob *&keyAliasBlob, HksParamSet *&paramSet)
+{
+    // the index is controlled by the caller and needs to ensure that it does not overflow
+    if (argv == nullptr || keyAliasBlob != nullptr || paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_value result = ParseKeyAlias(env, argv[index], keyAliasBlob);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get keyAlias");
+        return nullptr;
+    }
+
+    index++;
+    result = ParseGetHksParamSet(env, argv[index], paramSet);
+    if (result == nullptr) {
+        HKS_LOG_E("get hksParamSet failed");
+        return nullptr;
+    }
+
+    return GetInt32(env, 0);
+}
+
+napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob)
+{
+    if (keyDataBlob != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_value inData = nullptr;
+    napi_status status = napi_get_named_property(env, value, HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
+    if (status != napi_ok || inData == nullptr) {
+        GET_AND_THROW_LAST_ERROR((env));
+        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
+        return nullptr;
+    }
+
+    keyDataBlob = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (keyDataBlob== nullptr) {
+        HKS_LOG_E("could not alloc memory");
+        return nullptr;
+    }
+    (void)memset_s(keyDataBlob, sizeof(HksBlob), 0, sizeof(HksBlob));
+
+    if (GetUint8Array(env, inData, *keyDataBlob) == nullptr) {
+        FreeHksBlob(keyDataBlob);
+        HKS_LOG_E("could not get indata");
+        return nullptr;
+    }
+
+    return GetInt32(env, 0);
 }
 }  // namespace HuksNapi

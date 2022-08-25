@@ -60,15 +60,15 @@ static void DeleteUnwrapKeyAsyncContext(napi_env env, UnwrapKeyAsyncContext &con
 
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
 
-    if (context->targetKeyAlias != nullptr) {
-        FreeHksBlob(context->targetKeyAlias);
-    }
-
     if (context->wrappedData != nullptr) {
         if (context->wrappedData->data != nullptr && context->wrappedData->size != 0) {
             (void)memset_s(context->wrappedData->data, context->wrappedData->size, 0, context->wrappedData->size);
         }
         FreeHksBlob(context->wrappedData);
+    }
+
+    if (context->targetKeyAlias != nullptr) {
+        FreeHksBlob(context->targetKeyAlias);
     }
 
     HksFree(context);
@@ -83,30 +83,18 @@ static napi_value UnwrapKeyParseOptions(napi_env env, napi_value options, Unwrap
     napi_status status = napi_get_named_property(env, options, HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
     if (status != napi_ok || properties == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        HKS_LOG_E("unwrapKey could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
     result = ParseHksParamSet(env, properties, context->paramSet);
     if (result == nullptr) {
-        HKS_LOG_E("could not get paramset");
+        HKS_LOG_E("unwrapKey could not get paramset");
         return nullptr;
     }
-    napi_value inData = nullptr;
-    status = napi_get_named_property(env, options, HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
-    if (status != napi_ok || inData == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
-        return nullptr;
-    }
-    context->wrappedData = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (context->wrappedData == nullptr) {
-        HKS_LOG_E("could not alloc memory");
-        return nullptr;
-    }
-    (void)memset_s(context->wrappedData, sizeof(HksBlob), 0, sizeof(HksBlob));
 
-    if (GetUint8Array(env, inData, *context->wrappedData) == nullptr) {
-        HKS_LOG_E("could not get indata");
+    result = ParseKeyData(env, options, context->wrappedData);
+    if (result == nullptr) {
+        HKS_LOG_E("unwrapKey could not get keyData");
         return nullptr;
     }
 
