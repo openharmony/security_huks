@@ -100,6 +100,7 @@ static const struct HksParam g_idsParams[] = {
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest001
  * @tc.desc: attest without permission and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
 {
@@ -132,6 +133,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest002
  * @tc.desc: attest with permission and right param then validate suc.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
 {
@@ -169,6 +171,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest003
  * @tc.desc: attest without cert data and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
 {
@@ -199,6 +202,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest004
  * @tc.desc: attest without cert count and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
 {
@@ -229,6 +233,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
  * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest005
  * @tc.desc: attest without cert chain and fail.
  * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
 {

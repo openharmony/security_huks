@@ -229,11 +229,12 @@ static struct HksParam g_agreeAccessFinish003[] = {
 };
 
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
+ * @tc.name: HksAccessControlAgreeTest.HksAccessAgreePartTest001
  * @tc.desc: alg-ECDH gen-pur-Agree.
  * @tc.type: FUNC
  * @tc.auth_type: PIN
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest001, TestSize.Level0)
 {
@@ -252,12 +253,14 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest001, TestSize.Level0)
         testIDMParams), HKS_SUCCESS);
     ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal001, nullptr), HKS_SUCCESS);
 }
+
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
+ * @tc.name: HksAccessControlAgreeTest.HksAccessAgreePartTest002
  * @tc.desc: alg-DH gen-pur-Agree.
  * @tc.type: FUNC
  * @tc.auth_type: FACE
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest002, TestSize.Level0)
 {
@@ -276,12 +279,14 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest002, TestSize.Level0)
         testIDMParams), HKS_SUCCESS);
     ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal002, nullptr), HKS_SUCCESS);
 }
+
 /**
- * @tc.name: HksCheckAuthTest.HksCheckPurposeTest001
+ * @tc.name: HksAccessControlAgreeTest.HksAccessAgreePartTest003
  * @tc.desc: alg-X25519 gen-pur-Agree.
  * @tc.type: FUNC
  * @tc.auth_type: FINGERPRINT
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest003, TestSize.Level0)
 {
