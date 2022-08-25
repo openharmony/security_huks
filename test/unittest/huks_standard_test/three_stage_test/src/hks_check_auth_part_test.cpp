@@ -401,83 +401,98 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
  * @tc.desc: alg-AES gen-pur-Encrypt.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest001, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest001");
     EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_001_PARAMS), HKS_SUCCESS);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest002
  * @tc.desc: alg-SM4 gen-pur-Encrypt.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest002, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest002");
     EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_002_PARAMS), HKS_SUCCESS);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest003
  * @tc.desc: alg-HMAC gen-pur-Mac.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest003, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest003");
     EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_003_PARAMS), HKS_SUCCESS);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest004
  * @tc.desc: alg-SM3 gen-pur-mac.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest004, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest004");
     EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_004_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest005
  * @tc.desc: alg-X25519 gen-pur-Agree with fingerprint and INVALID_CLEAR_PASSWORD.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest005, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest005");
     EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_005_PARAMS), HKS_SUCCESS);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest006
  * @tc.desc: alg-ECC gen-pur-Sign.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest006, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest006");
     EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_006_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest009
  * @tc.desc: alg-ED25519 gen-pur-Sign.
  * @tc.type: FUNC
  * @tc.result:HKS_ERROR_INVALID_ARGUMENT
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest007, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest007");
     EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_007_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
 }
+
 /**
  * @tc.name: HksCheckAuthTest.HksCheckPurposeTest008
  * @tc.desc: alg-HKDF gen-pur-Derive.
  * @tc.type: FUNC
  * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest008, TestSize.Level0)
 {
