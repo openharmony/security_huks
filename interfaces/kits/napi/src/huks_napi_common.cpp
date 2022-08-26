@@ -653,7 +653,7 @@ napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob)
     }
 
     keyDataBlob = (HksBlob *)HksMalloc(sizeof(HksBlob));
-    if (keyDataBlob== nullptr) {
+    if (keyDataBlob == nullptr) {
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
