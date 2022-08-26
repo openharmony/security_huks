@@ -137,7 +137,7 @@ static int32_t BuildHksCoreCheckMacParamsTestParamSet(int32_t paramTagPurpose, i
 
 const static uint32_t g_sha256Len = 32;
 
-static void HksCoreCheckMacParamsTest(struct HksCoreCheckMacParamsParam *param)
+static void HksCoreCheckMacParamsTest(const struct HksCoreCheckMacParamsParam *param)
 {
     int32_t ret = HksCoreCheckMacParams(param->key, param->paramSet, param->srcData, param->mac, true);
     EXPECT_EQ(ret, param->expectResult) << "HksGetBlobFromWrappedDataTest failed, ret = " << ret;
@@ -409,7 +409,8 @@ static int32_t BuildHksCoreCheckDeriveKeyParamsTestParamSet(const struct HksCore
     return HKS_SUCCESS;
 }
 
-static void HksCoreCheckDeriveKeyParamsTest(struct HksCoreCheckDeriveKeyParamsTagParam *tagParam, int32_t expectResult)
+static void HksCoreCheckDeriveKeyParamsTest(const struct HksCoreCheckDeriveKeyParamsTagParam *tagParam,
+    int32_t expectResult)
 {
     struct HksParamSet *paramSet = NULL;
     int32_t ret = BuildHksCoreCheckDeriveKeyParamsTestParamSet(tagParam, &paramSet);
@@ -749,7 +750,7 @@ struct HksLocalCheckCipherParamsInputParams {
     const struct HksBlob *outData;
 };
 
-static void HksLocalCheckCipherParamsTest(struct HksLocalCheckCipherParamsInputParams *inputParams,
+static void HksLocalCheckCipherParamsTest(const struct HksLocalCheckCipherParamsInputParams *inputParams,
     int32_t expectResult)
 {
     struct HksParamSet *paramSet = NULL;
