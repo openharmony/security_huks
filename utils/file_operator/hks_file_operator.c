@@ -163,6 +163,25 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
+    if (fflush(fp) < 0) {
+        HKS_LOG_E("fflush file fail, errno = 0x%x", errno);
+        fclose(fp);
+        return HKS_ERROR_WRITE_FILE_FAIL;
+    }
+
+    int fd = fileno(fp);
+    if (fd < 0) {
+        HKS_LOG_E("fileno fail, errno = 0x%x", errno);
+        fclose(fp);
+        return HKS_ERROR_WRITE_FILE_FAIL;
+    }
+
+    if (fsync(fd) < 0) {
+        HKS_LOG_E("sync file fail, errno = 0x%x", errno);
+        fclose(fp);
+        return HKS_ERROR_WRITE_FILE_FAIL;
+    }
+
     if (fclose(fp) < 0) {
         HKS_LOG_E("failed to close file");
         return HKS_ERROR_CLOSE_FILE_FAIL;
