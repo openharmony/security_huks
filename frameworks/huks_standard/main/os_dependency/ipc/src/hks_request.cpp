@@ -28,23 +28,17 @@ sptr<IRemoteObject> GetHksProxy();
 namespace {
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
-static sptr<IRemoteObject> hksProxy = GetHksProxy();
 }
 
 sptr<IRemoteObject> GetHksProxy()
 {
-    if (hksProxy != nullptr) {
-        HKS_LOG_D("GetHksProxy hksProxy already exist.");
-        return hksProxy;
-    }
-
     auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (registry == nullptr) {
         HKS_LOG_E("GetHksProxy registry is null");
         return nullptr;
     }
 
-    hksProxy = registry->GetSystemAbility(SA_ID_KEYSTORE_SERVICE);
+    sptr<IRemoteObject> hksProxy = registry->GetSystemAbility(SA_ID_KEYSTORE_SERVICE);
     if (hksProxy == nullptr) {
         HKS_LOG_E("GetHksProxy GetSystemAbility %d is null", SA_ID_KEYSTORE_SERVICE);
         return nullptr;
@@ -92,11 +86,6 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
-    if (GetHksProxy() == nullptr) {
-        HKS_LOG_E("HwKeystoreProxy is null.");
-        return HKS_ERROR_BAD_STATE;
-    }
-
     enum HksSendType sendType = HKS_SEND_TYPE_SYNC;
     struct HksParam *sendTypeParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ASYNCHRONIZED, &sendTypeParam);
@@ -123,6 +112,12 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
 
     data.WriteUint32(inBlob->size);
     data.WriteBuffer(inBlob->data, (size_t)inBlob->size);
+
+    sptr<IRemoteObject> hksProxy = GetHksProxy();
+    if (hksProxy == nullptr) {
+        HKS_LOG_E("GetHksProxy registry is null");
+        return HKS_ERROR_BAD_STATE;
+    }
 
     int error = hksProxy->SendRequest(type, data, reply, option);
     if (error != 0) {
