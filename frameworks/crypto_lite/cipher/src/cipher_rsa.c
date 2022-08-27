@@ -362,7 +362,7 @@ static int32_t RsaEncrypt(RsaKeyData *key, const RsaData *plain, RsaData *cipher
     return ERROR_SUCCESS;
 }
 
-static int32_t CheckParamAndMallocBuf(size_t rsaLen, RsaData *cipher, unsigned char **buf, unsigned char **tembuf)
+static int32_t CheckParamAndMallocBuf(size_t rsaLen, const RsaData *cipher, unsigned char **buf, unsigned char **tembuf)
 {
     if ((rsaLen == 0) || (cipher->length == 0)) {
         return ERROR_CODE_GENERAL;
