@@ -100,7 +100,9 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     if (arrayBlob.data == nullptr) {
         return nullptr;
     }
-    (void)memcpy_s(arrayBlob.data, length, rawData, length);
+    if (memcpy_s(arrayBlob.data, length, rawData, length) != EOK) {
+        return nullptr;
+    }
     arrayBlob.size = (uint32_t)length;
 
     return GetInt32(env, 0);
@@ -290,7 +292,9 @@ static napi_value GenerateAarrayBuffer(napi_env env, uint8_t *data, uint32_t siz
     }
 
     napi_value outBuffer = nullptr;
-    (void)memcpy_s(buffer, size, data, size);
+    if (memcpy_s(buffer, size, data, size) != EOK) {
+        return nullptr;
+    }
 
     napi_status status = napi_create_external_arraybuffer(
         env, buffer, size, [](napi_env env, void *data, void *hint) { HksFree(data); }, nullptr, &outBuffer);
@@ -541,7 +545,9 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
     handleBlob->size = sizeof(uint64_t);
-    (void)memcpy_s(handleBlob->data, sizeof(uint64_t), &handle, sizeof(uint64_t));
+    if (memcpy_s(handleBlob->data, sizeof(uint64_t), &handle, sizeof(uint64_t)) != EOK) {
+        return nullptr;
+    }
 
     return GetInt32(env, 0);
 }
