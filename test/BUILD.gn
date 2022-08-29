@@ -17,8 +17,8 @@ group("unittest") {
   if (os_level == "standard") {
     testonly = true
     deps = [
-      "./unittest/huks_standard_test/crypto_engine_test:crypto_engine_unit_test",
       "./unittest/huks_standard_test/coverage_test:huks_coverage_test",
+      "./unittest/huks_standard_test/crypto_engine_test:crypto_engine_unit_test",
       "./unittest/huks_standard_test/interface_inner_test/alg_module_test:huks_mt_test",
       "./unittest/huks_standard_test/interface_inner_test/sdk_test:hukssdk_test",
       "./unittest/huks_standard_test/module_test:huks_module_test",
