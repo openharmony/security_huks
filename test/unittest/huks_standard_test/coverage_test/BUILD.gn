@@ -178,6 +178,6 @@ ohos_unittest("huks_coverage_test") {
   deps = [
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    "//base/security/huks/test/unittest/huks_standard_test/tdd_passthrough_test/inner_kits_passthrough:libhukssdk_static",
+    "//base/security/huks/test/unittest/huks_standard_test/coverage_test/inner_kits_passthrough:libhukssdk_static",
   ]
 }
