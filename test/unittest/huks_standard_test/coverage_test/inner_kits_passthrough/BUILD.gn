@@ -97,9 +97,7 @@ huks_core_sources = [
 config("soft_huks_config") {
   defines = [ "_FORTIFY_SOURCE = 2" ]
 
-  cflags = [
-    "-fvisibility=default",
-  ]
+  cflags = [ "-fvisibility=default" ]
 
   if (disable_authenticate == true) {
     cflags += [ "-D_CUT_AUTHENTICATE_" ]
