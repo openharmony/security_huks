@@ -834,7 +834,7 @@ static void SaveProcessInfo(uint8_t *processData, int32_t dataLen,
 {
     processInfo->processName.data = processData;
     processInfo->processName.size = (uint32_t)dataLen;
-    (void)memcpy_s(&processInfo->userId, sizeof(processInfo->userId), &userData, sizeof(processInfo->userId));
+    (void)memcpy_s(&processInfo->userId, sizeof(struct HksBlob), &userData, sizeof(struct HksBlob));
 }
 
 static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
