@@ -435,7 +435,7 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
             }
             return HKS_SUCCESS;
         default:
-            HKS_LOG_E("invalid tag type:%x", GetTagType(baseParam->tag));
+            HKS_LOG_E("invalid tag type:%x", GetTagType((enum HksTag)(baseParam->tag)));
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }
