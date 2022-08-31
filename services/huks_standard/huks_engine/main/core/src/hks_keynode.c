@@ -29,6 +29,11 @@
 #include "securec.h"
 
 #define S_TO_MS 1000
+#ifdef _SUPPORT_HKS_TEE_
+#define MAX_KEYNODE_COUNT 20
+#else
+#define MAX_KEYNODE_COUNT 100
+#endif
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
@@ -124,6 +129,26 @@ static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
     HksFreeParamSet(paramSet);
 }
 
+static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
+{
+    int32_t ret = HKS_SUCCESS;
+    HksMutexLock(HksCoreGetHuksMutex());
+    do {
+        if (g_keyNodeCount >= MAX_KEYNODE_COUNT) {
+            HKS_LOG_E("maximum number of keyNode reached");
+            ret = HKS_ERROR_SESSION_REACHED_LIMIT;
+            break;
+        }
+
+        AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
+        ++g_keyNodeCount;
+        HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
+    } while (0);
+
+    HksMutexUnlock(HksCoreGetHuksMutex());
+    return ret;
+}
+
 #ifdef _STORAGE_LITE_
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
@@ -161,7 +186,6 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     ret = HksTranslateKeyInfoBlobToParamSet(&rawKey, key, &keyBlobParamSet);
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE_BLOB(rawKey);
-
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("translate key info to paramset failed, ret = %d", ret);
         HksFreeParamSet(&runtimeParamSet);
@@ -169,27 +193,19 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         return NULL;
     }
 
+    ret = AddKeyNode(keyNode);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("add keyNode failed");
+        HksFreeParamSet(&runtimeParamSet);
+        HksFree((void *)keyNode);
+        return NULL;
+    }
+
     keyNode->keyBlobParamSet = keyBlobParamSet;
     keyNode->runtimeParamSet = runtimeParamSet;
-    HksMutexLock(HksCoreGetHuksMutex());
-    AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
-    ++g_keyNodeCount;
-    HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
-    HksMutexUnlock(HksCoreGetHuksMutex());
-
     return keyNode;
 }
 #else // _STORAGE_LITE_
-
-static void AddKeyNodeToList(struct HuksKeyNode *keyNode)
-{
-    HksMutexLock(HksCoreGetHuksMutex());
-    AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
-    ++g_keyNodeCount;
-    HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
-    HksMutexUnlock(HksCoreGetHuksMutex());
-}
-
 static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **runtimeParamSet,
     struct HksParamSet **keyblobParamSet, struct HuksKeyNode *keyNode)
 {
@@ -218,7 +234,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         return NULL;
     }
 
-    int32_t ret = -1;
+    int32_t ret;
     struct HksBlob aad = { 0, NULL };
     struct HksParamSet *runtimeParamSet = NULL;
     struct HksParamSet *keyBlobParamSet = NULL;
@@ -246,6 +262,12 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
             HKS_LOG_E("decrypt keyBlob failed");
             break;
         }
+
+        ret = AddKeyNode(keyNode);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add keyNode failed");
+            break;
+        }
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -257,7 +279,6 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     keyNode->runtimeParamSet = runtimeParamSet;
     keyNode->authRuntimeParamSet = NULL;
 
-    AddKeyNodeToList(keyNode);
     HKS_FREE_BLOB(aad);
     return keyNode;
 }
