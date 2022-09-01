@@ -48,28 +48,28 @@ void HksLog(uint32_t logLevel, const char *funcName, uint32_t lineNo, const char
             HILOG_INFO(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
 
 #else
-            HILOG_INFO(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
+            HILOG_INFO(HILOG_MODULE_SCY, "%{public}s[%{public}u]: %{public}s\n", funcName, lineNo, buf);
 #endif
             break;
         case HKS_LOG_LEVEL_E:
 #if defined(__LINUX__)
             HILOG_ERROR(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
 #else
-            HILOG_ERROR(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
+            HILOG_ERROR(HILOG_MODULE_SCY, "%{public}s[%{public}u]: %{public}s\n", funcName, lineNo, buf);
 #endif
             break;
         case HKS_LOG_LEVEL_W:
 #if defined(__LINUX__)
             HILOG_WARN(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
 #else
-            HILOG_WARN(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
+            HILOG_WARN(HILOG_MODULE_SCY, "%{public}s[%{public}u]: %{public}s\n", funcName, lineNo, buf);
 #endif
             break;
         case HKS_LOG_LEVEL_D:
 #if defined(__LINUX__)
             HILOG_DEBUG(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
 #else
-            HILOG_DEBUG(HILOG_MODULE_SCY, "%s[%u]: %s\n", funcName, lineNo, buf);
+            HILOG_DEBUG(HILOG_MODULE_SCY, "%{public}s[%{public}u]: %{private}s\n", funcName, lineNo, buf);
 #endif
             break;
         default:
