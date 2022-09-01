@@ -317,6 +317,10 @@ static int32_t CheckFormatCurve25519Key(const struct HksBlob *keyIn, struct HksP
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)keyIn->data;
     uint32_t offset = sizeof(struct HksParamSet) + (sizeof(struct HksParam) << 1);
+    if (keyMaterial->pubKeySize > MAX_KEY_SIZE || keyMaterial->priKeySize > MAX_KEY_SIZE) {
+        HKS_LOG_E("pubKey or priKey buffer too big");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     if (paramSetOut->paramSetSize < (offset + keyMaterial->pubKeySize + keyMaterial->priKeySize)) {
         HKS_LOG_E("pubKey or priKey buffer too small");
         return HKS_ERROR_BUFFER_TOO_SMALL;

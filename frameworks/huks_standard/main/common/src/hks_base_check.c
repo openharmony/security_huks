@@ -45,7 +45,7 @@
 #define HKS_ECC_SIGN_MAX_TL_SIZE    8
 
 #ifdef HKS_SUPPORT_RSA_C
-static uint32_t g_rsaKeySize[] = {
+static const uint32_t g_rsaKeySize[] = {
     HKS_RSA_KEY_SIZE_512,
     HKS_RSA_KEY_SIZE_768,
     HKS_RSA_KEY_SIZE_1024,
@@ -53,13 +53,13 @@ static uint32_t g_rsaKeySize[] = {
     HKS_RSA_KEY_SIZE_3072,
     HKS_RSA_KEY_SIZE_4096
 };
-static uint32_t g_rsaPadding[] = {
+static const uint32_t g_rsaPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_OAEP,
     HKS_PADDING_PSS,
     HKS_PADDING_PKCS1_V1_5
 };
-static uint32_t g_rsaDigest[] = {
+static const uint32_t g_rsaDigest[] = {
     HKS_DIGEST_MD5,
     HKS_DIGEST_NONE,
     HKS_DIGEST_SHA1,
@@ -68,11 +68,11 @@ static uint32_t g_rsaDigest[] = {
     HKS_DIGEST_SHA384,
     HKS_DIGEST_SHA512
 };
-static uint32_t g_rsaSignPadding[] = {
+static const uint32_t g_rsaSignPadding[] = {
     HKS_PADDING_PSS,
     HKS_PADDING_PKCS1_V1_5
 };
-static uint32_t g_rsaCipherPadding[] = {
+static const uint32_t g_rsaCipherPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_OAEP,
     HKS_PADDING_PKCS1_V1_5
@@ -80,81 +80,81 @@ static uint32_t g_rsaCipherPadding[] = {
 #endif
 
 #ifdef HKS_SUPPORT_AES_C
-static uint32_t g_aesKeySize[] = {
+static const uint32_t g_aesKeySize[] = {
     HKS_AES_KEY_SIZE_128,
     HKS_AES_KEY_SIZE_192,
     HKS_AES_KEY_SIZE_256
 };
-static uint32_t g_aesMacKeySize[] = {
+static const uint32_t g_aesMacKeySize[] = {
     HKS_AES_KEY_SIZE_256,
 };
-static uint32_t g_aesPadding[] = {
+static const uint32_t g_aesPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
 };
-static uint32_t g_aesMode[] = {
+static const uint32_t g_aesMode[] = {
     HKS_MODE_CBC,
     HKS_MODE_CCM,
     HKS_MODE_CTR,
     HKS_MODE_ECB,
     HKS_MODE_GCM
 };
-static uint32_t g_aesCbcPadding[] = {
+static const uint32_t g_aesCbcPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
 };
-static uint32_t g_aesAeadPadding[] = {
+static const uint32_t g_aesAeadPadding[] = {
     HKS_PADDING_NONE
 };
-static uint32_t g_aesCtrPadding[] = {
+static const uint32_t g_aesCtrPadding[] = {
     HKS_PADDING_NONE
 };
-static uint32_t g_aesEcbPadding[] = {
+static const uint32_t g_aesEcbPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
 };
 #endif
 
 #ifdef HKS_SUPPORT_SM4_C
-static uint32_t g_sm4KeySize[] = {
+static const uint32_t g_sm4KeySize[] = {
     HKS_SM4_KEY_SIZE_128,
 };
-static uint32_t g_sm4Padding[] = {
+static const uint32_t g_sm4Padding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
 };
-static uint32_t g_sm4Purpose[] = {
+static const uint32_t g_sm4Purpose[] = {
     HKS_KEY_PURPOSE_ENCRYPT,
     HKS_KEY_PURPOSE_DECRYPT,
     HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
 };
-static uint32_t g_sm4Mode[] = {
+static const uint32_t g_sm4Mode[] = {
     HKS_MODE_CBC,
     HKS_MODE_CTR,
     HKS_MODE_ECB
 };
-static uint32_t g_sm4CbcPadding[] = {
+static const uint32_t g_sm4CbcPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
 };
-static uint32_t g_sm4CtrPadding[] = {
+static const uint32_t g_sm4CtrPadding[] = {
     HKS_PADDING_NONE
 };
-static uint32_t g_sm4EcbPadding[] = {
+static const uint32_t g_sm4EcbPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
 };
 #endif
 
 #ifdef HKS_SUPPORT_ECC_C
-static uint32_t g_eccKeySize[] = {
+static const uint32_t g_eccKeySize[] = {
     HKS_ECC_KEY_SIZE_224,
     HKS_ECC_KEY_SIZE_256,
     HKS_ECC_KEY_SIZE_384,
     HKS_ECC_KEY_SIZE_521
 };
 
-static uint32_t g_eccDigest[] = {
+static const uint32_t g_eccDigest[] = {
     HKS_DIGEST_NONE,
     HKS_DIGEST_SHA1,
     HKS_DIGEST_SHA224,
@@ -165,33 +165,33 @@ static uint32_t g_eccDigest[] = {
 #endif
 
 #ifdef HKS_SUPPORT_SM2_C
-static uint32_t g_sm2KeySize[] = {
+static const uint32_t g_sm2KeySize[] = {
     HKS_SM2_KEY_SIZE_256
 };
 
-static uint32_t g_sm2Digest[] = {
+static const uint32_t g_sm2Digest[] = {
     HKS_DIGEST_SM3
 };
 #endif
 
 #ifdef HKS_SUPPORT_SM3_C
-static uint32_t g_sm3Digest[] = {
+static const uint32_t g_sm3Digest[] = {
     HKS_DIGEST_SM3
 };
 #endif
 
-static uint32_t g_digest[] = {
+static const uint32_t g_digest[] = {
     HKS_DIGEST_SHA256,
     HKS_DIGEST_SHA384,
     HKS_DIGEST_SHA512
 };
 
-static uint32_t g_macDigest[] = {
+static const uint32_t g_macDigest[] = {
     HKS_DIGEST_SHA256
 };
 
 #ifdef HKS_SUPPORT_ECDH_C
-static uint32_t g_ecdhKeySize[] = {
+static const uint32_t g_ecdhKeySize[] = {
     HKS_ECC_KEY_SIZE_224,
     HKS_ECC_KEY_SIZE_256,
     HKS_ECC_KEY_SIZE_384,
@@ -205,7 +205,7 @@ static const uint32_t g_curve25519KeySize[] = {
 };
 #endif
 #ifdef HKS_SUPPORT_HMAC_C
-static uint32_t g_hmacDigest[] = {
+static const uint32_t g_hmacDigest[] = {
     HKS_DIGEST_SHA1,
     HKS_DIGEST_SHA224,
     HKS_DIGEST_SHA256,
@@ -215,7 +215,7 @@ static uint32_t g_hmacDigest[] = {
 };
 #endif
 #ifdef HKS_SUPPORT_DSA_C
-static uint32_t g_dsaDigest[] = {
+static const uint32_t g_dsaDigest[] = {
     HKS_DIGEST_SHA1,
     HKS_DIGEST_SHA224,
     HKS_DIGEST_SHA256,
@@ -224,7 +224,7 @@ static uint32_t g_dsaDigest[] = {
 };
 #endif
 #ifdef HKS_SUPPORT_DH_C
-static uint32_t g_dhKeySize[] = {
+static const uint32_t g_dhKeySize[] = {
     HKS_DH_KEY_SIZE_2048,
     HKS_DH_KEY_SIZE_3072,
     HKS_DH_KEY_SIZE_4096
@@ -535,7 +535,7 @@ static const struct ExpectParamsValuesChecker g_expectEcdhParams[] = {
 #endif
 
 #ifndef _CUT_AUTHENTICATE_
-static uint32_t g_invalidPurpose[][2] = {
+static const uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_RSA_C
     {
         HKS_ALG_RSA,
