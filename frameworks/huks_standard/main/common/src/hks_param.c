@@ -166,7 +166,7 @@ static int32_t CheckBeforeAddParams(const struct HksParamSet *paramSet, const st
     uint32_t paramCnt)
 {
     if ((params == NULL) || (paramSet == NULL) || (paramSet->paramSetSize > HKS_PARAM_SET_MAX_SIZE) ||
-        (paramCnt > HKS_DEFAULT_PARAM_CNT) || ((paramSet->paramsCnt + paramCnt) > HKS_DEFAULT_PARAM_CNT)) {
+        (paramCnt > HKS_DEFAULT_PARAM_CNT) || (paramSet->paramsCnt > (HKS_DEFAULT_PARAM_CNT - paramCnt))) {
         HKS_LOG_E("invalid params or paramset!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -435,7 +435,7 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
             }
             return HKS_SUCCESS;
         default:
-            HKS_LOG_I("invalid tag type:%x", GetTagType(baseParam->tag));
+            HKS_LOG_E("invalid tag type:%x", GetTagType(baseParam->tag));
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }
