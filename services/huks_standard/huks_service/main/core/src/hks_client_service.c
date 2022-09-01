@@ -1729,7 +1729,7 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
 }
 
 static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksBlob *outData, bool isStorage)
-{   
+{
     output->data = (uint8_t *)HksMalloc(output->size);
     if (output->data == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
