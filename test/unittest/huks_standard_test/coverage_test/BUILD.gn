@@ -25,10 +25,14 @@ ohos_unittest("huks_coverage_test") {
     "//base/security/huks/test/unittest/huks_standard_test/crypto_engine_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/include",
   ]
 
+  sources = []
+
   # crypto_engine_test
-  sources = [
+  sources += [
     "//base/security/huks/test/unittest/huks_standard_test/crypto_engine_test/src/hks_crypto_hal_aes_cipher.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/crypto_engine_test/src/hks_crypto_hal_aes_decrypt.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/crypto_engine_test/src/hks_crypto_hal_aes_encrypt.cpp",
@@ -68,25 +72,22 @@ ohos_unittest("huks_coverage_test") {
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_generate_random_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_hash_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_mac_test.cpp",
-
-    # "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_modify_key_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_others_test.cpp",
-
-    # "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_safe_cipher_key_test.cpp",
-    # "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_safe_compare_key_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_session_max_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_aes.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_api_performance.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_cipher.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_common.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_curve25519.c",
-
-    # "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_file_operator.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_mem.c",
   ]
 
   # module_test
-  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_check_paramset_test.cpp" ]
+  sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_check_paramset_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
+  ]
 
   # storage_multithread_test
   sources += [

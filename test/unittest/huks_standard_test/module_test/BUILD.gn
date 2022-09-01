@@ -20,7 +20,13 @@ module_output_path = "huks_standard/huks_module_test"
 ohos_unittest("huks_module_test") {
   module_out_path = module_output_path
 
-  sources = [ "framework_test/common_test/src/hks_check_paramset_test.cpp" ]
+  sources = [
+    "framework_test/common_test/src/hks_check_paramset_test.cpp",
+    "interface_test/src/hks_get_key_info_list_test.cpp",
+    "interface_test/src/hks_refresh_key_info_test.cpp",
+    "service_test/huks_service/systemapi_wrap/src/hks_useridm_api_wrap_test.cpp",
+    "utils_test/src/hks_condition_test.cpp",
+  ]
 
   defines = [
     "L2_STANDARD",
@@ -30,10 +36,15 @@ ohos_unittest("huks_module_test") {
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "framework_test/common_test/include",
+    "utils_test/include",
+    "service_test/huks_service/systemapi_wrap/include",
+    "interface_test/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
   ]
 
   deps = [
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static",
+    "//base/security/huks/utils/condition:libhuks_utils_condition_static",
   ]
 }
