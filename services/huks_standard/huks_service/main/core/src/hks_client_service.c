@@ -1728,71 +1728,68 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
     return ret;
 }
 
+static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksBlob *outData, bool isStorage)
+{
+    output->data = (uint8_t *)HksMalloc(output->size);
+    if (output->data == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(output->data, output->size, 0, output->size);
+    if (!isStorage) {
+        if ((memcpy_s(output->data, output->size, outData->data, outData->size) != EOK)) {
+            HKS_FREE_PTR(output->data);
+            return HKS_ERROR_BAD_STATE;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
-
     struct HksParamSet *newParamSet = NULL;
-
     bool isStorage = false;
     uint32_t outSize = outData->size;
-
     struct HksParam *storageFlag = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
     if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
         isStorage = true;
         outSize = MAX_KEY_SIZE;
     }
-
-    uint8_t *outBuffer = (uint8_t *)HksMalloc(outSize);
-    if (outBuffer == NULL) {
-        HksHitraceEnd(&traceId);
-
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    struct HksBlob output = { outSize, outBuffer };
-    (void)memset_s(output.data, output.size, 0, output.size);
-
-    if (!isStorage) {
-        if ((outData->size != 0) && (memcpy_s(output.data, output.size, outData->data, outData->size) != EOK)) {
-            HKS_FREE_BLOB(output);
-            DeleteOperation(handle);
-
-            HksHitraceEnd(&traceId);
-
-            return HKS_ERROR_BAD_STATE;
-        }
-    }
-
+    struct HksBlob output = { outSize, NULL };
     do {
+        if (outSize != 0) {
+            ret = InitOutputDataForFinish(&output, outData, isStorage);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("init output data failed");
+                break;
+            }
+        }
         ret = AppendAndQueryInFinish(handle, processInfo, paramSet, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("AppendAndQueryInFinish fail, ret = %d", ret);
             break;
         }
-
         ret = HuksAccessFinish(handle, newParamSet, inData, &output);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessFinish fail, ret = %d", ret);
             break;
         }
-
         ret = StoreOrCopyKeyBlob(paramSet, processInfo, &output, outData, isStorage);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("StoreOrCopyKeyBlob fail, ret = %d", ret);
             break;
         }
     } while (0);
-    (void)memset_s(output.data, output.size, 0, output.size);
+    if (output.data != NULL) {
+        (void)memset_s(output.data, output.size, 0, output.size);
+    }
     HKS_FREE_BLOB(output);
     DeleteOperation(handle);
     HksFreeParamSet(&newParamSet);
-
     HksHitraceEnd(&traceId);
-
     HksReport(__func__, processInfo, paramSet, ret);
-
     return ret;
 }
 
