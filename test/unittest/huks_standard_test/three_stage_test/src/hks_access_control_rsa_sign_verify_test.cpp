@@ -388,6 +388,48 @@ const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_007_PARAMS = {
     .initResult = HKS_SUCCESS
 };
 
+/*
+mock:
+secureUid = 1
+enrollinfo: authtype = PIN, enrolledId = 1
+*/
+const TestAccessCaseRSAParams HKS_ACCESS_TEST_RSA_SIGN_008_PARAMS = {
+    .genParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_512 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+        },
+    .signParams =
+        {
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_512 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+        },
+    .verifyParams =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_512 },
+            { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
+            { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NORMAL },
+        },
+    .initResult = HKS_SUCCESS
+};
+
 /**
  * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest001
  * @tc.desc: pin test.
@@ -525,6 +567,26 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest007, TestSize.
         .authType = 4
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestNormalCase(HKS_ACCESS_TEST_RSA_SIGN_007_PARAMS, RSAIDMParams002),
+        HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest008
+ * @tc.desc: generate with pin, access with finger, expecting HKS_ERROR_KEY_AUTH_FAILED
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI5NY0M
+ */
+HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest008, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAcRsaSignVerifyTest008");
+    const IDMParams RSAIDMParams003 = {
+        .secureUid = 1,
+        .enrolledId = 2,
+        .time = 0,
+        .authType = 4
+    };
+    EXPECT_EQ(HksAcRsaSignVerifyTestAbnormalCase(HKS_ACCESS_TEST_RSA_SIGN_008_PARAMS, RSAIDMParams003),
         HKS_SUCCESS);
 }
 }
