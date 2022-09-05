@@ -43,6 +43,7 @@ void HksAgreementTest::SetUpTestCase(void)
 
 void HksAgreementTest::TearDownTestCase(void)
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksAgreementTest::SetUp()

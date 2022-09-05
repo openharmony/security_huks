@@ -17,11 +17,11 @@ group("unittest") {
   if (os_level == "standard") {
     testonly = true
     deps = [
-      "./unittest/huks_standard_test/coverage_test:huks_coverage_test",
       "./unittest/huks_standard_test/crypto_engine_test:crypto_engine_unit_test",
       "./unittest/huks_standard_test/interface_inner_test/alg_module_test:huks_mt_test",
       "./unittest/huks_standard_test/interface_inner_test/sdk_test:hukssdk_test",
       "./unittest/huks_standard_test/module_test:huks_module_test",
+      "./unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_wrap/useridm_test:huks_useridm_wrap_test",
       "./unittest/huks_standard_test/storage_multithread_test:huks_multithread_test",
       "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
     ]
