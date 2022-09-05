@@ -553,12 +553,6 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         return HKS_ERROR_BAD_STATE;
     }
 
-    ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param, authAccessType->uint32Param);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify sec uid failed!");
-        return ret;
-    }
-
     uint32_t authTokenAuthType = 0;
     ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &authTokenAuthType);
     if (ret != HKS_SUCCESS) {
@@ -569,6 +563,12 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     if ((authTokenAuthType & userAuthType->uint32Param) == 0) {
         HKS_LOG_E("current keyblob auth do not support current auth token auth type!");
         return HKS_ERROR_KEY_AUTH_FAILED;
+    }
+
+    ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param, authAccessType->uint32Param);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("verify sec uid failed!");
+        return ret;
     }
 
     ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param,
