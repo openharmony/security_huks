@@ -487,7 +487,7 @@ static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
 
 static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParamSet,
     const struct HksUserAuthToken *authToken, uint32_t blobAuthType, uint32_t authAccessType,
-        uint32_t authTokenAuthType)
+    uint32_t authTokenAuthType)
 {
     if ((blobAuthType & (HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT)) == 0 ||
         (authAccessType & HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL) == 0) {
