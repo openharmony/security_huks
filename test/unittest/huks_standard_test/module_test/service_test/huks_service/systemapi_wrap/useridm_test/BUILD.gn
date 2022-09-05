@@ -20,8 +20,7 @@ module_output_path = "huks_standard/huks_systemapi_wrap/huks_useridm_wrap_test"
 ohos_unittest("huks_useridm_wrap_test") {
   module_out_path = module_output_path
 
-  sources = [
-"src/hks_useridm_api_wrap_test.cpp"]
+  sources = [ "src/hks_useridm_api_wrap_test.cpp" ]
 
   defines = [
     "L2_STANDARD",
@@ -36,7 +35,7 @@ ohos_unittest("huks_useridm_wrap_test") {
 
   deps = [
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_systemapi_wrap_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
   ]
 }

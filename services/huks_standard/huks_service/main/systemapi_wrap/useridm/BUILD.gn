@@ -17,7 +17,7 @@ config("huks_config") {
   include_dirs = [ "inc" ]
 }
 
-ohos_static_library("libhuks_systemapi_wrap_static") {
+ohos_static_library("libhuks_service_systemapi_wrap_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
