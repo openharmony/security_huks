@@ -34,24 +34,21 @@ static string g_queryStr;
 
 namespace OHOS {
 namespace HiviewDFX {
-class HksHiSysEventCallBack : public OHOS::HiviewDFX::HiSysEventQueryCallBack {
+class HksHiSysEventCallBack : public OHOS::HiviewDFX::HiSysEventQueryCallback {
 public:
     HksHiSysEventCallBack() {}
     virtual ~HksHiSysEventCallBack() {}
-    void OnQuery(const ::std::vector<std::string>& sysEvent,
-        const std::vector<int64_t>& seq);
+    void OnQuery(std::shared_ptr<std::vector<HiSysEventRecord>> sysEvents);
     void OnComplete(int32_t reason, int32_t total);
 };
 
-void HksHiSysEventCallBack::OnQuery(const ::std::vector<std::string>& sysEvent,
-    const ::std::vector<int64_t>& seq)
+void HksHiSysEventCallBack::OnQuery(std::shared_ptr<std::vector<HiSysEventRecord>> sysEvents)
 {
-    if (g_queryStr.size() == 0) {
+    if (g_queryStr.size() == 0 || sysEvents == nullptr) {
         return;
     }
-
-    for_each(sysEvent.cbegin(), sysEvent.cend(), [](const std::string& tmp) {
-        string::size_type idx = tmp.find(g_queryStr);
+    for_each((*sysEvents).cbegin(), (*sysEvents).cend(), [](const HiSysEventRecord& tmp) {
+        string::size_type idx = tmp.AsJson().find(g_queryStr);
         if (idx != string::npos) {
             g_queryResult = true;
         }
@@ -107,7 +104,7 @@ int32_t HksHiSysEventQueryResult(const string funStr)
 
     // queryCallback
     auto queryCallBack = std::make_shared<HksHiSysEventCallBack>();
-    if (HiSysEventManager::QueryHiSysEvent(args, queryRules, queryCallBack) == 0) {
+    if (HiSysEventManager::Query(args, queryRules, queryCallBack) == 0) {
         if (g_queryResult) {
             return HKS_HISYSEVENT_QUERY_SUCCESS;
         }
