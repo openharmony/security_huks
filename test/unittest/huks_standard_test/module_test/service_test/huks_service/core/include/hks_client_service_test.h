@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef HKS_GET_KEY_INFO_LIST_TEST_H
-#define HKS_GET_KEY_INFO_LIST_TEST_H
+#ifndef HKS_USERIDM_API_WRAP_TEST_H
+#define HKS_USERIDM_API_WRAP_TEST_H
 
-namespace Unittest::HksGetKeyInfoListTest {
-int HksGetKeyInfoListTest001(void);
-int HksGetKeyInfoListTest002(void);
-int HksGetKeyInfoListTest003(void);
+namespace Unittest::HksClientServiceTest {
+int HksClientServiceTest001(void);
+int HksClientServiceTest002(void);
+int HksClientServiceTest003(void);
 }
 #endif

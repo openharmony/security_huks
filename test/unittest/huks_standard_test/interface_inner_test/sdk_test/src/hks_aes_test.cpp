@@ -44,6 +44,7 @@ void HksAesTest::TearDownTestCase(void)
 
 void HksAesTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksAesTest::TearDown()
