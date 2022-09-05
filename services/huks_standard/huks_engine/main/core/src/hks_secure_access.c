@@ -486,27 +486,16 @@ static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
 }
 
 static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParamSet,
-    const struct HksUserAuthToken *authToken, uint32_t blobAuthType, uint32_t authAccessType)
+    const struct HksUserAuthToken *authToken, uint32_t blobAuthType, uint32_t authAccessType,
+        uint32_t authTokenAuthType)
 {
     if ((blobAuthType & (HKS_USER_AUTH_TYPE_FACE | HKS_USER_AUTH_TYPE_FINGERPRINT)) == 0 ||
         (authAccessType & HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL) == 0) {
         return HKS_SUCCESS;
     }
 
-    uint32_t authTokenAuthType = 0;
-    int32_t ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &authTokenAuthType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid user iam auth type:not support!");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
-
-    if ((authTokenAuthType & blobAuthType) == 0) {
-        HKS_LOG_E("current keyblob auth do not support current auth token auth type!");
-        return HKS_ERROR_KEY_AUTH_FAILED;
-    }
-
     struct HksParam *enrolledIdInfo = NULL;
-    ret = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_ENROLL_ID_INFO, &enrolledIdInfo);
+    int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_ENROLL_ID_INFO, &enrolledIdInfo);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get enrolled info param failed!");
         return HKS_ERROR_BAD_STATE;
@@ -570,8 +559,20 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         return ret;
     }
 
+    uint32_t authTokenAuthType = 0;
+    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &authTokenAuthType);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("invalid user iam auth type:not support!");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    if ((authTokenAuthType & userAuthType->uint32Param) == 0) {
+        HKS_LOG_E("current keyblob auth do not support current auth token auth type!");
+        return HKS_ERROR_KEY_AUTH_FAILED;
+    }
+
     ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param,
-        authAccessType->uint32Param);
+        authAccessType->uint32Param, authTokenAuthType);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("verify enrolled id info failed!");
         return ret;

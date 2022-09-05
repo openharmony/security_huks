@@ -955,12 +955,14 @@ static void BuildAuthTokenParams(struct HksTestGenAuthTokenParams *authTokenPara
         authTokenParams->enrolledId = g_enrolledIdFinger;
         authTokenParams->credentialId = g_credentialId;
         authTokenParams->time = g_time;
+        authTokenParams->authType = 4;
         return;
     }
     authTokenParams->secureUid = g_secureUid;
     authTokenParams->enrolledId = g_enrolledIdPin;
     authTokenParams->credentialId = g_credentialId;
     authTokenParams->time = g_time;
+    authTokenParams->authType = 1;
 }
 
 static int32_t BuildSigAndIndataBlob(struct HksBlob *sigBlob, struct HksBlob *inDataBlob,

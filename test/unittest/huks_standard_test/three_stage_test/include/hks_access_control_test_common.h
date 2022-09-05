@@ -86,6 +86,7 @@ struct HksTestGenAuthTokenParams {
     uint64_t enrolledId;
     uint64_t credentialId;
     uint64_t time;
+    uint32_t authType;
 };
 
 int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle, struct HksParamSet *initParamSet, uint32_t posNum);
