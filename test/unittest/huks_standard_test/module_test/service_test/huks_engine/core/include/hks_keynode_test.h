@@ -13,14 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef HKS_USERIDM_API_WRAP_TEST_H
-#define HKS_USERIDM_API_WRAP_TEST_H
+#ifndef HKS_KEY_NODE_TEST_H
+#define HKS_KEY_NODE_TEST_H
 
-namespace Unittest::HksClientServiceTest {
-int HksClientServiceTest001(void);
-int HksClientServiceTest002(void);
-int HksClientServiceTest003(void);
-int HksClientServiceTest004(void);
-int HksClientServiceTest005(void);
+namespace Unittest::HksKeyNodeTest {
+int HksKeyNodeTest001(void);
 }
 #endif

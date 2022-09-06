@@ -30,6 +30,8 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/utils/condition",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/include",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/include",
   ]
 
   sources = []
@@ -140,7 +142,11 @@ ohos_unittest("huks_module_test") {
   sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_condition_test.cpp" ]
 
   # service test
-  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp" ]
+  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp",
+  "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/src/huks_core_dynamic_hal_test.cpp", ]
+
+  # engine test
+  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keynode_test.cpp", ]
 
   defines = [
     "L2_STANDARD",
