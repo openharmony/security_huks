@@ -227,7 +227,6 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
     return ret;
 }
 
-
 int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     struct HksTestGenAuthTokenParams *genAuthTokenParams, struct HksParamSet **outParamSet)
 {
@@ -237,7 +236,7 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     struct HksParam tmpParams;
     std::vector<uint8_t> token;
     struct IDMParams testIDMParams = {genAuthTokenParams->secureUid,
-        genAuthTokenParams->enrolledId, genAuthTokenParams->time, 1};
+        genAuthTokenParams->enrolledId, genAuthTokenParams->time, genAuthTokenParams->authType};
     int32_t ret = AuthTokenSign(genAuthTokenParams->authChallenge, testIDMParams, token);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AuthToeknSign Failed.");
