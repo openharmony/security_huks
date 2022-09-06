@@ -156,8 +156,9 @@ static int32_t CovertData(struct Curve25519Structure *curve25519, uint8_t *pubke
         }
     } while (0);
 
-    if (ret != HKS_SUCCESS)
+    if (ret != HKS_SUCCESS) {
         Curve25519Destroy(curve25519);
+    }
 
     return ret;
 }
@@ -231,8 +232,9 @@ static int32_t Curve25519LocalVar(struct Curve25519Var *var)
         ret = HKS_SUCCESS;
     } while (0);
 
-    if (ret != HKS_SUCCESS)
+    if (ret != HKS_SUCCESS) {
         FreeLocalBigVar(var);
+    }
 
     return ret;
 }
