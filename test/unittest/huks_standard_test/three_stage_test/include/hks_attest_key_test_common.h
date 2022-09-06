@@ -40,25 +40,25 @@ static uint32_t g_size = 4096;
 static uint32_t CERT_COUNT = 4;
 
 namespace Unittest::AttestKey {
-    #define SEC_INFO_DATA "hi_security_level_info"
-    #define CHALLENGE_DATA "hi_challenge_data"
-    #define VERSION_DATA "hi_os_version_data"
-    #define ALIAS "testKey"
-    #define UDID_DATA "hi_udid_data"
-    #define SN_DATA "hi_sn_data"
-    #define DEVICE_ID "test_device_id"
+#define SEC_INFO_DATA "hi_security_level_info"
+#define CHALLENGE_DATA "hi_challenge_data"
+#define VERSION_DATA "hi_os_version_data"
+#define ALIAS "testKey"
+#define UDID_DATA "hi_udid_data"
+#define SN_DATA "hi_sn_data"
+#define DEVICE_ID "test_device_id"
 
-    void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos);
+void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos);
 
-    int32_t TestGenerateKey(const struct HksBlob *keyAlias);
+int32_t TestGenerateKey(const struct HksBlob *keyAlias);
 
-    int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
-        const struct HksTestCertChain *certChainParam);
+int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
+    const struct HksTestCertChain *certChainParam);
 
-    int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount);
+int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount);
 
-    int32_t ValidateCertChainTest(const struct HksCertChain *certChain, const struct HksParam tmpParam[],
-        ParamType type);
+int32_t ValidateCertChainTest(const struct HksCertChain *certChain, const struct HksParam tmpParam[],
+    ParamType type);
 }
 
 #endif

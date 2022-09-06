@@ -13,14 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef HKS_USERIDM_API_WRAP_TEST_H
-#define HKS_USERIDM_API_WRAP_TEST_H
+#ifndef HKS_IPC_CORE_STATIC_HAL_TEST_H
+#define HKS_IPC_CORE_STATIC_HAL_TEST_H
 
-namespace Unittest::HksClientServiceTest {
-int HksClientServiceTest001(void);
-int HksClientServiceTest002(void);
-int HksClientServiceTest003(void);
-int HksClientServiceTest004(void);
-int HksClientServiceTest005(void);
+namespace Unittest::HksIpcCoreDynamicHalTest {
+int HksIpcCoreDynamicHalTest001(void);
+int HksIpcCoreDynamicHalTest002(void);
+int HksIpcCoreDynamicHalTest003(void);
+int HksIpcCoreDynamicHalTest004(void);
 }
 #endif
