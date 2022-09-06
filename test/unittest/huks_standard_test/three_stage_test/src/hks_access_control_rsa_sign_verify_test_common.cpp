@@ -171,6 +171,7 @@ int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParam
     ret = HksTestUpdate(&handle, newParamSet, &inData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Update failed, ret : %d", ret);
+        HksAbort(&handle, newParamSet);
         HksFreeParamSet(&newParamSet);
         return ret;
     }

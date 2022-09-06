@@ -948,6 +948,9 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
     return ret;
 }
 
+static const uint32_t g_fingerPrintInUserIam = 4;
+static const uint32_t g_pinInUserIam = 1;
+
 static void BuildAuthTokenParams(struct HksTestGenAuthTokenParams *authTokenParams, bool isClearPasswordInvalid)
 {
     if (isClearPasswordInvalid) {
@@ -955,12 +958,14 @@ static void BuildAuthTokenParams(struct HksTestGenAuthTokenParams *authTokenPara
         authTokenParams->enrolledId = g_enrolledIdFinger;
         authTokenParams->credentialId = g_credentialId;
         authTokenParams->time = g_time;
+        authTokenParams->authType = g_fingerPrintInUserIam;
         return;
     }
     authTokenParams->secureUid = g_secureUid;
     authTokenParams->enrolledId = g_enrolledIdPin;
     authTokenParams->credentialId = g_credentialId;
     authTokenParams->time = g_time;
+    authTokenParams->authType = g_pinInUserIam;
 }
 
 static int32_t BuildSigAndIndataBlob(struct HksBlob *sigBlob, struct HksBlob *inDataBlob,
