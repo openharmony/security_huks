@@ -67,7 +67,7 @@ huks_sources = [
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_file_lock.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_storage_data.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
-  "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_dynamic_hal.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
   "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock/src/hks_useridm_api_mock.cpp",
   "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper/src/hitrace_meter_wrapper.cpp",
