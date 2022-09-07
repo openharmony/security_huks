@@ -51,7 +51,6 @@
 
 #define USER_ID_ROOT_DEFAULT          "0"
 
-#define MAX_KEY_COUNT 256
 #define MAX_STORAGE_SIZE (2 * 1024 * 1024)
 
 #ifndef _CUT_AUTHENTICATE_
@@ -173,10 +172,6 @@ static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const
     ret = HksGetKeyCountByProcessName(processInfo, &fileCount);
     if (ret != HKS_SUCCESS) {
         return ret;
-    }
-    if (fileCount >= MAX_KEY_COUNT) {
-        HKS_LOG_E("fileCount is no less than max count");
-        ret = HKS_ERROR_STORAGE_FAILURE;
     }
 
     return ret;
