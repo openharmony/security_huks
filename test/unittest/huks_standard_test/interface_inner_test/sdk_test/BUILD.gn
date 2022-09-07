@@ -42,6 +42,8 @@ ohos_unittest("hukssdk_test") {
     "./src/hks_test_curve25519.c",
     "./src/hks_test_file_operator.c",
     "./src/hks_test_mem.c",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
   include_dirs = [
@@ -49,6 +51,7 @@ ohos_unittest("hukssdk_test") {
     "//third_party/bounds_checking_function/include",
     "./include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/include",
   ]
   cflags_cc = [
     "-Wall",
