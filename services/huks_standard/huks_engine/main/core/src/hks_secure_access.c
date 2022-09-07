@@ -327,8 +327,8 @@ static int32_t HksVerifyKeyTimestamp(const struct HuksKeyNode *keyNode, const st
     
     // ms to s
     uint32_t authTokenTime = token->time / 1000;
-    if (accessTime->uint32Param - authTokenTime > timeOutInt ||
-        authTokenTime - accessTime->uint32Param > timeOutInt) {
+    if ((accessTime->uint32Param > authTokenTime && accessTime->uint32Param - authTokenTime > timeOutInt) || 
+        (authTokenTime > accessTime->uint32Param && authTokenTime - accessTime->uint32Param > timeOutInt)) {
         HKS_LOG_E("auth token time out!");
         return HKS_ERROR_KEY_AUTH_FAILED;
     }
