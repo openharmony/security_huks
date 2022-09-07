@@ -371,7 +371,7 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
         return HKS_ERROR_NOT_EXIST;
     }
     if (totalLen > storageBuf.size) {
-        HKS_LOG_E("keyCount invalid, or storageBuf size invalid");
+        HKS_LOG_E("storageBuf size invalid");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -846,7 +846,7 @@ static int32_t GetAndCheckKeyCount(uint32_t *inputCount, uint32_t *keyCount)
     }
 
     if (storageBuf.size < keyInfoHead->totalLen) {
-        HKS_LOG_E("keyCount invalid, or storageBuf size invalid");
+        HKS_LOG_E("storageBuf size invalid");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
