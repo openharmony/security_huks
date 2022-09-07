@@ -18,5 +18,8 @@
 
 namespace Unittest::HksServiceUseridmMockTest {
 int HksServiceUseridmMockTest001(void);
+int HksServiceUseridmMockTest002(void);
+int HksServiceUseridmMockTest003(void);
+int HksServiceUseridmMockTest004(void);
 }
 #endif
