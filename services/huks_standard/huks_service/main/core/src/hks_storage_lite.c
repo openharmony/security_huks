@@ -370,7 +370,7 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
     if (keyCount == 0) {
         return HKS_ERROR_NOT_EXIST;
     }
-    if ((totalLen > storageBuf.size)) {
+    if (totalLen > storageBuf.size) {
         HKS_LOG_E("keyCount invalid, or storageBuf size invalid");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
