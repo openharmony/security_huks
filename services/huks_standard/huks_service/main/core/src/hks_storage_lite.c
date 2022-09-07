@@ -30,7 +30,6 @@
 #define HKS_FILE_OFFSET_BASE 0
 #define MAX_STORAGE_SIZE 5120
 #define MAX_BUF_SIZE 65536
-#define MAX_KEY_COUNT 256
 #define BUF_SIZE_ADDEND_PER_TIME 1024
 #define HKS_STORAGE_VERSION 1
 #define HKS_STORAGE_RESERVED_SEALING_ALG 0xFEDCBA98
@@ -371,8 +370,8 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
     if (keyCount == 0) {
         return HKS_ERROR_NOT_EXIST;
     }
-    if ((keyCount > MAX_KEY_COUNT) || (totalLen > storageBuf.size)) {
-        HKS_LOG_E("keyCount invalid, or storageBuf size invalid");
+    if (totalLen > storageBuf.size) {
+        HKS_LOG_E("storageBuf size invalid");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -846,8 +845,8 @@ static int32_t GetAndCheckKeyCount(uint32_t *inputCount, uint32_t *keyCount)
         return HKS_SUCCESS;
     }
 
-    if ((*keyCount > MAX_KEY_COUNT) || (storageBuf.size < keyInfoHead->totalLen)) {
-        HKS_LOG_E("keyCount invalid, or storageBuf size invalid");
+    if (storageBuf.size < keyInfoHead->totalLen) {
+        HKS_LOG_E("storageBuf size invalid");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
