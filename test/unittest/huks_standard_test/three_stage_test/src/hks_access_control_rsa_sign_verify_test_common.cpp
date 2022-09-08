@@ -14,6 +14,7 @@
  */
 
 #include <gtest/gtest.h>
+#include <unistd.h>
 #include <vector>
 
 #include "hks_access_control_rsa_sign_verify_test_common.h"
@@ -57,7 +58,6 @@ int32_t AddAuthTokenParam(struct HksParamSet **paramSet, const struct HksParam *
     return HKS_SUCCESS;
 }
 
-
 static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
@@ -97,6 +97,8 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
+static const uint32_t g_sleepTime = 1;
+
 int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
 {
@@ -109,6 +111,9 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
     int32_t ret = HksInit(keyAlias, paramSet, &handle, &challengeBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
+    // sleep 1 sec for time out test
+    sleep(g_sleepTime);
+    
     // Update loop
     struct HksParam Params;
     ret = RSAAuthTokenSign(&challengeBlob, testIDMParams, &Params);
