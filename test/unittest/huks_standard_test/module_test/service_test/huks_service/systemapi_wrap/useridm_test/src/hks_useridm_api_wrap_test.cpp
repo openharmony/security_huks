@@ -143,7 +143,8 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest007, TestSize.Level0)
     uint32_t hksValue = 0;
     int32_t ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, g_useriamFingerPrint, &hksValue);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest007 failed, ret = " << ret;
-    EXPECT_EQ(hksValue, HKS_USER_AUTH_TYPE_FINGERPRINT) << "HksConvertUserIamTypeToHksType failed, hksValue = " << hksValue;
+    EXPECT_EQ(hksValue, HKS_USER_AUTH_TYPE_FINGERPRINT) <<
+        "HksConvertUserIamTypeToHksType failed, hksValue = " << hksValue;
 }
 
 /**

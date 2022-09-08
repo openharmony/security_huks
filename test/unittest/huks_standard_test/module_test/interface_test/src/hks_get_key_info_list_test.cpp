@@ -65,9 +65,9 @@ void HksGetKeyInfoListTest::TearDown()
 HWTEST_F(HksGetKeyInfoListTest, HksGetKeyInfoListTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksGetKeyInfoListTest001");
-    struct HksKeyInfo keyInfoList = { { 0 }, NULL };
+    struct HksKeyInfo keyInfoList = { { 0 }, nullptr };
     uint32_t listCount = 1;
-    int32_t ret = HksGetKeyInfoList(NULL, &keyInfoList, &listCount);
+    int32_t ret = HksGetKeyInfoList(nullptr, &keyInfoList, &listCount);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksGetKeyInfoListTest001 failed, ret = " << ret;
 }
 
@@ -80,11 +80,11 @@ HWTEST_F(HksGetKeyInfoListTest, HksGetKeyInfoListTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksGetKeyInfoListTest002");
     uint32_t listCount = 0;
-    int32_t ret = HksGetKeyInfoList(NULL, NULL, &listCount);
+    int32_t ret = HksGetKeyInfoList(nullptr, nullptr, &listCount);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksGetKeyInfoListTest002 failed, ret = " << ret;
 }
 
-static const char *alias = "key_alias";
+static const char *g_alias = "key_alias";
 
 static int32_t BuildParamSetForGenerateKey(struct HksParamSet **outParamSet)
 {
@@ -122,11 +122,11 @@ static int32_t BuildParamSetForGenerateKey(struct HksParamSet **outParamSet)
 static void FreeKeyInfoList(struct HksKeyInfo **keyInfoList, uint32_t listCount)
 {
     for (uint32_t i = 0; i < listCount; ++i) {
-        if((*keyInfoList)[i].alias.data == NULL) {
+        if ((*keyInfoList)[i].alias.data == nullptr) {
             break;
         }
         HKS_FREE_PTR((*keyInfoList)[i].alias.data);
-        if ((*keyInfoList)[i].paramSet == NULL) {
+        if ((*keyInfoList)[i].paramSet == nullptr) {
             break;
         }
         HksFreeParamSet(&((*keyInfoList)[i].paramSet));
@@ -137,14 +137,14 @@ static void FreeKeyInfoList(struct HksKeyInfo **keyInfoList, uint32_t listCount)
 static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t listCount)
 {
     struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * listCount);
-    if (keyInfoList == NULL) {
+    if (keyInfoList == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(keyInfoList, sizeof(struct HksKeyInfo) * listCount, 0, sizeof(struct HksKeyInfo) * listCount);
     int32_t ret = HKS_SUCCESS;
     for (uint32_t i = 0; i < listCount; ++i) {
         keyInfoList[i].alias.data = (uint8_t *)HksMalloc(HKS_MAX_KEY_ALIAS_LEN);
-        if (keyInfoList[i].alias.data == NULL) {
+        if (keyInfoList[i].alias.data == nullptr) {
             FreeKeyInfoList(&keyInfoList, listCount);
             return HKS_ERROR_MALLOC_FAIL;
         }
@@ -170,7 +170,7 @@ static const uint32_t g_initKeyInfoListNum = 64;
 HWTEST_F(HksGetKeyInfoListTest, HksGetKeyInfoListTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksGetKeyInfoListTest003");
-    struct HksBlob keyAlias = { sizeof(alias), (uint8_t *)alias };
+    struct HksBlob keyAlias = { sizeof(g_alias), (uint8_t *)g_alias };
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = BuildParamSetForGenerateKey(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSetForGenerateKey failed, ret = " << ret;
@@ -178,10 +178,10 @@ HWTEST_F(HksGetKeyInfoListTest, HksGetKeyInfoListTest003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed, ret = " << ret;
     HksFreeParamSet(&paramSet);
     uint32_t listCount = g_initKeyInfoListNum;
-    struct HksKeyInfo *keyInfoList = NULL;
+    struct HksKeyInfo *keyInfoList = nullptr;
     ret = BuildKeyInfoList(&keyInfoList, g_initKeyInfoListNum);
     ASSERT_EQ(ret, HKS_SUCCESS) << "BuildKeyInfoList failed, ret = " << ret;
-    ret = HksGetKeyInfoList(NULL, keyInfoList, &listCount);
+    ret = HksGetKeyInfoList(nullptr, keyInfoList, &listCount);
     FreeKeyInfoList(&keyInfoList, g_initKeyInfoListNum);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetKeyInfoList failed, ret = " << ret;
     EXPECT_EQ(listCount >= 1, true) << "HksGetKeyInfoList failed, listCount = " << listCount;
