@@ -18,10 +18,13 @@
 #include <gtest/gtest.h>
 
 #include "hks_log.h"
+#include "hks_mem.h"
 #include "hks_type.h"
 #include "hks_useridm_api_wrap.h"
+#include "user_idm_client.h"
 
 using namespace testing::ext;
+using namespace OHOS::UserIam::UserAuth;
 namespace Unittest::HksServiceUseridmWrapTest {
 class HksUseridmWrapTest : public testing::Test {
 public:
@@ -170,5 +173,71 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest009, TestSize.Level0)
     uint32_t num = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(0, HKS_USER_AUTH_TYPE_FACE, &num);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest009 failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest010
+ * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_SUCCESS and num > 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksUseridmWrapTest010");
+    ChangeGetCredentialInfoReturn(true);
+    uint32_t num = 0;
+    int32_t ret = HksUserIdmGetAuthInfoNum(1, (enum HksUserAuthType)HKS_USER_AUTH_TYPE_FINGERPRINT, &num);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest010 HksUserIdmGetAuthInfoNum failed, ret = " << ret;
+    EXPECT_EQ(num > 0, true) << "HksUseridmWrapTest010 HksUserIdmGetAuthInfoNum failed, num = " << num;
+}
+
+/**
+ * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest011
+ * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_SUCCESS and num == 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksUseridmWrapTest011");
+    ChangeGetCredentialInfoReturn(false);
+    uint32_t num = 0;
+    int32_t ret = HksUserIdmGetAuthInfoNum(1, (enum HksUserAuthType)HKS_USER_AUTH_TYPE_FINGERPRINT, &num);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest011 HksUserIdmGetAuthInfoNum failed, ret = " << ret;
+    EXPECT_EQ(num == 0, true) << "HksUseridmWrapTest011 HksUserIdmGetAuthInfoNum failed, num = " << num;
+}
+
+static const uint32_t g_enrolledIdForPin = 1;
+
+/**
+ * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest012
+ * @tc.desc: tdd HksUserIdmGetSecInfo, expecting HKS_SUCCESS and num > 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksUseridmWrapTest012");
+    ChangeGetSecUserInfoReturn(true);
+    struct SecInfoWrap *secInfo = NULL;
+    int32_t ret = HksUserIdmGetSecInfo(1, &secInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest012 HksUserIdmGetSecInfo failed, ret = " << ret;
+    EXPECT_EQ(secInfo->enrolledInfoLen > 0, true);
+    EXPECT_EQ(secInfo->enrolledInfo[0].authType, HKS_USER_AUTH_TYPE_PIN);
+    EXPECT_EQ(secInfo->enrolledInfo[0].enrolledId, g_enrolledIdForPin);
+    HKS_FREE_PTR(secInfo);
+}
+
+/**
+ * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest013
+ * @tc.desc: tdd HksUserIdmGetSecInfo, expecting HKS_SUCCESS and num == 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksUseridmWrapTest013");
+    ChangeGetSecUserInfoReturn(false);
+    struct SecInfoWrap *secInfo = NULL;
+    int32_t ret = HksUserIdmGetSecInfo(1, &secInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest013 HksUserIdmGetSecInfo failed, ret = " << ret;
+    EXPECT_EQ(secInfo->enrolledInfoLen, 0);
+    HKS_FREE_PTR(secInfo);
 }
 }

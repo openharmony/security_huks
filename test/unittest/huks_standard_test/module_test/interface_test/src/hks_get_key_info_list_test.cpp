@@ -16,6 +16,7 @@
 #include "hks_refresh_key_info_test.h"
 
 #include <gtest/gtest.h>
+#include <string.h>
 #include <thread>
 #include <unistd.h>
 
@@ -83,8 +84,6 @@ HWTEST_F(HksGetKeyInfoListTest, HksGetKeyInfoListTest002, TestSize.Level0)
     int32_t ret = HksGetKeyInfoList(NULL, NULL, &listCount);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksGetKeyInfoListTest002 failed, ret = " << ret;
 }
-
-static const char *alias = "key_alias";
 
 static int32_t BuildParamSetForGenerateKey(struct HksParamSet **outParamSet)
 {
@@ -170,7 +169,8 @@ static const uint32_t g_initKeyInfoListNum = 64;
 HWTEST_F(HksGetKeyInfoListTest, HksGetKeyInfoListTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksGetKeyInfoListTest003");
-    struct HksBlob keyAlias = { sizeof(alias), (uint8_t *)alias };
+    const char *alias = "key_alias";
+    struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = BuildParamSetForGenerateKey(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSetForGenerateKey failed, ret = " << ret;
