@@ -35,8 +35,8 @@ ohos_static_library("libhuks_service_systemapi_wrap_static") {
   ]
 
   external_deps = [
+    "c_utils:utils",
     "ipc:ipc_core",
-    "utils_base:utils",
   ]
   cflags_cc = [
     "-Wall",
