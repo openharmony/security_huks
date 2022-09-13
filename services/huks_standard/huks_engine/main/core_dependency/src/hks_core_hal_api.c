@@ -29,6 +29,10 @@ int32_t HksCoreHalElapsedRealTime(uint64_t *timestampMs)
         return ret;
     }
 
-    *timestampMs = curTime.tv_sec * S_TO_MS + curTime.tv_nsec / MS_TO_NS;
+    if ((curTime.tv_sec >= ((UINT64_MAX - S_TO_MS) / S_TO_MS)) || (curTime.tv_nsec / MS_TO_NS >= S_TO_MS)) {
+        return -1;
+    }
+
+    *timestampMs = (uint64_t)(curTime.tv_sec * S_TO_MS + curTime.tv_nsec / MS_TO_NS);
     return ret;
 }
