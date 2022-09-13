@@ -164,8 +164,8 @@ static int32_t AddKeyAccessTimeParams(struct HksParamSet *paramSet)
     }
 
     struct HksParam accessTimeParam;
-    accessTimeParam.tag = HKS_TAG_ACCESS_TIME;
-    accessTimeParam.uint32Param = curTime / S_TO_MS;
+    accessTimeParam.tag = HKS_TAG_KEY_ACCESS_TIME;
+    accessTimeParam.uint64Param = curTime / S_TO_MS;
     ret = HksAddParams(paramSet, &accessTimeParam, 1);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("add access time param fail");
@@ -319,16 +319,16 @@ static int32_t HksVerifyKeyTimestamp(const struct HuksKeyNode *keyNode, const st
     }
 
     struct HksParam *accessTime = NULL;
-    ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_ACCESS_TIME, &accessTime);
+    ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_ACCESS_TIME, &accessTime);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get access time failed!");
         return HKS_ERROR_BAD_STATE;
     }
     
     // ms to s
-    uint32_t authTokenTime = token->time / 1000;
-    if ((accessTime->uint32Param > authTokenTime && accessTime->uint32Param - authTokenTime > timeOutInt) ||
-        (authTokenTime > accessTime->uint32Param && authTokenTime - accessTime->uint32Param > timeOutInt)) {
+    uint64_t authTokenTime = token->time / S_TO_MS;
+    if ((accessTime->uint64Param > authTokenTime && accessTime->uint64Param - authTokenTime > timeOutInt) ||
+        (authTokenTime > accessTime->uint64Param && authTokenTime - accessTime->uint64Param > timeOutInt)) {
         HKS_LOG_E("auth token time out!");
         return HKS_ERROR_KEY_AUTH_FAILED;
     }
@@ -460,7 +460,7 @@ static int32_t VerifyChallengeOrTimeStamp(const struct HuksKeyNode *keyNode, con
 }
 
 static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
-    const struct HksUserAuthToken *authToken, uint32_t userAuthType, uint32_t authAccessType)
+    const struct HksUserAuthToken *authToken, uint32_t authAccessType)
 {
     if ((authAccessType & HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) == 0) {
         return HKS_SUCCESS;
@@ -565,7 +565,7 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         return HKS_ERROR_KEY_AUTH_FAILED;
     }
 
-    ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param, authAccessType->uint32Param);
+    ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("verify sec uid failed!");
         return ret;
