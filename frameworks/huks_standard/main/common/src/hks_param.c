@@ -111,8 +111,6 @@ static uint32_t g_validTags[] = {
     HKS_TAG_PACKAGE_NAME,
     HKS_TAG_PAYLOAD_LEN,
     HKS_TAG_AE_TAG,
-    HKS_TAG_ACCESS_TIME,
-    HKS_TAG_USES_TIME,
     HKS_TAG_CRYPTO_CTX,
     HKS_TAG_KEY,
     HKS_TAG_KEY_VERSION,
@@ -120,6 +118,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_SYMMETRIC_KEY_DATA,
     HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
     HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA,
+    HKS_TAG_KEY_ACCESS_TIME,
 };
 
 enum HksTagType GetTagType(enum HksTag tag)
