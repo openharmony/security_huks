@@ -15,7 +15,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
 
-module_output_path = "huks_standard/huks_systemapi_wrap/huks_useridm_wrap_test"
+module_output_path = "huks_standard/huks_systemapi_wrap"
 
 ohos_unittest("huks_useridm_wrap_test") {
   module_out_path = module_output_path
@@ -31,11 +31,17 @@ ohos_unittest("huks_useridm_wrap_test") {
     "//commonlibrary/c_utils/base/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "include",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm/inc",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_wrap/useridm_test/user_iam_api_mock",
+  ]
+
+  sources += [
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm/src/hks_useridm_api_wrap.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_wrap/useridm_test/user_iam_api_mock/user_idm_client.cpp",
   ]
 
   deps = [
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
   ]
 }

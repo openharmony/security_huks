@@ -26,5 +26,9 @@ int HksUseridmWrapTest006(void);
 int HksUseridmWrapTest007(void);
 int HksUseridmWrapTest008(void);
 int HksUseridmWrapTest009(void);
+int HksUseridmWrapTest010(void);
+int HksUseridmWrapTest011(void);
+int HksUseridmWrapTest012(void);
+int HksUseridmWrapTest013(void);
 }
 #endif
