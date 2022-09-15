@@ -122,7 +122,10 @@ config("soft_huks_config") {
     defines = [ "_FORTIFY_SOURCE = 2" ]
   }
   if (board_toolchain_type == "iccarm") {
-    cflags = []
+    cflags = [
+      "--diag_suppress",
+      "Pe370",
+    ]
   } else {
     cflags = [
       "-fvisibility=hidden",
