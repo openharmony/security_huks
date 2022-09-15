@@ -203,6 +203,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
     int32_t ret = ConvertFromHksAuthType(hksAuthType, &authType);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("ConvertFromHksAuthType failed: %d!", ret);
+        HksConditionDestroy(condition);
         return ret;
     }
 
