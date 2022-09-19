@@ -29,8 +29,6 @@
 #include "huks_napi_import_key.h"
 #include "huks_napi_import_wrapped_key.h"
 #include "huks_napi_is_key_exist.h"
-#include "huks_napi_unwrap_key.h"
-#include "huks_napi_wrap_key.h"
 
 #include "huks_napi_abort.h"
 #include "huks_napi_init.h"
@@ -587,8 +585,6 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),
         DECLARE_NAPI_FUNCTION("attestKey", HuksNapiAttestKey),
         DECLARE_NAPI_FUNCTION("getCertificateChain", HuksNapiGetCertificateChain),
-        DECLARE_NAPI_FUNCTION("wrapKey", HuksNapiWrapKey),
-        DECLARE_NAPI_FUNCTION("unwrapKey", HuksNapiUnwrapKey),
         DECLARE_NAPI_FUNCTION("init", HuksNapiInit),
         DECLARE_NAPI_FUNCTION("update", HuksNapiUpdate),
         DECLARE_NAPI_FUNCTION("finish", HuksNapiFinish),

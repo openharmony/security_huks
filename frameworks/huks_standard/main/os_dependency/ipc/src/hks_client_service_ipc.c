@@ -661,69 +661,6 @@ int32_t HksClientGetCertificateChain(const struct HksBlob *keyAlias, const struc
     return CertificateChainGetOrAttest(HKS_MSG_GET_CERTIFICATE_CHAIN, keyAlias, paramSet, certChain);
 }
 
-int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
-{
-    int32_t ret = HksCheckIpcWrapUnwrapKey(HKS_MSG_WRAP_KEY, keyAlias, targetKeyAlias, paramSet, wrappedData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcWrapUnwrapKey fail");
-        return ret;
-    }
-
-    struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-        sizeof(targetKeyAlias->size) + ALIGN_SIZE(targetKeyAlias->size) + sizeof(wrappedData->size);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    do {
-        ret = HksWrapKeyPack(&inBlob, keyAlias, targetKeyAlias, paramSet, wrappedData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksWrapKeyPack fail");
-            break;
-        }
-
-        ret = HksSendRequest(HKS_MSG_WRAP_KEY, &inBlob, wrappedData, paramSet);
-    } while (0);
-
-    HKS_FREE_BLOB(inBlob);
-    return ret;
-}
-
-int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksBlob *wrappedData, const struct HksParamSet *paramSet)
-{
-    int32_t ret = HksCheckIpcWrapUnwrapKey(HKS_MSG_UNWRAP_KEY, keyAlias, targetKeyAlias, paramSet, wrappedData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcWrapUnwrapKey fail");
-        return ret;
-    }
-
-    struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-        sizeof(targetKeyAlias->size) + ALIGN_SIZE(targetKeyAlias->size) +
-        sizeof(wrappedData->size) + ALIGN_SIZE(wrappedData->size);
-    inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-
-    do {
-        ret = HksUnwrapKeyPack(&inBlob, keyAlias, targetKeyAlias, wrappedData, paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksWrapKeyPack fail");
-            break;
-        }
-
-        ret = HksSendRequest(HKS_MSG_UNWRAP_KEY, &inBlob, NULL, paramSet);
-    } while (0);
-
-    HKS_FREE_BLOB(inBlob);
-    return ret;
-}
-
 static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob *out)
 {
     if (size == 0) {

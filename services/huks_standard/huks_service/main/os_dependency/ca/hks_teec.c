@@ -455,46 +455,6 @@ int32_t HksTeeDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob
     return ret;
 }
 
-int32_t HksTeeWrapKey(const struct HksBlob *wrapKey, const struct HksBlob *wrappedKey,
-    const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
-{
-    uint32_t paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT, TEEC_MEMREF_TEMP_INPUT,
-        TEEC_MEMREF_TEMP_INPUT, TEEC_MEMREF_TEMP_OUTPUT);
-    struct HksParam params[MAX_TEE_PARAMS_NUMS];
-    InitializeBlob(&params[0].blob, wrapKey->size, wrapKey->data);
-    InitializeBlob(&params[1].blob, wrappedKey->size, wrappedKey->data);
-    InitializeBlob(&params[2].blob, paramSet->paramSetSize, (uint8_t *)paramSet); /* 2 is array index */
-    InitializeBlob(&params[3].blob, wrappedData->size, wrappedData->data); /* 3 is array index */
-
-    TEEC_Operation operation;
-    int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_WRAP, &operation);
-    if (ret == HKS_SUCCESS) {
-        wrappedData->size = operation.params[3].tmpref.size; /* 3 is array index */
-    }
-
-    return ret;
-}
-
-int32_t HksTeeUnwrapKey(const struct HksBlob *wrapKey, const struct HksBlob *wrappedData,
-    const struct HksParamSet *paramSet, struct HksBlob *output)
-{
-    uint32_t paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT, TEEC_MEMREF_TEMP_INPUT,
-        TEEC_MEMREF_TEMP_INPUT, TEEC_MEMREF_TEMP_OUTPUT);
-    struct HksParam params[MAX_TEE_PARAMS_NUMS];
-    InitializeBlob(&params[0].blob, wrapKey->size, wrapKey->data);
-    InitializeBlob(&params[1].blob, wrappedData->size, wrappedData->data);
-    InitializeBlob(&params[2].blob, paramSet->paramSetSize, (uint8_t *)paramSet); /* 2 is array index */
-    InitializeBlob(&params[3].blob, output->size, output->data); /* 3 is array index */
-
-    TEEC_Operation operation;
-    int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_UNWRAP, &operation);
-    if (ret == HKS_SUCCESS) {
-        output->size = operation.params[3].tmpref.size; /* 3 is array index */
-    }
-
-    return ret;
-}
-
 int32_t HksTeeAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *certChain)
 {
