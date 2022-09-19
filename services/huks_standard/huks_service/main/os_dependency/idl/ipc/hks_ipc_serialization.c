@@ -544,60 +544,6 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
     return ret;
 }
 
-static int32_t WrapUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
-    struct HksBlob *targetKeyAlias, struct HksParamSet **paramSet, uint32_t *offset)
-{
-    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyAlias failed");
-        return ret;
-    }
-
-    ret = GetBlobFromBuffer(targetKeyAlias, srcData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get targetKeyAlias failed");
-        return ret;
-    }
-
-    ret = GetParamSetFromBuffer(paramSet, srcData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get paramSet failed");
-    }
-
-    return ret;
-}
-
-int32_t HksWrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksBlob *targetKeyAlias,
-    struct HksParamSet **paramSet, struct HksBlob *wrappedData)
-{
-    uint32_t offset = 0;
-    int32_t ret = WrapUnwrapKeyUnpack(srcData, keyAlias, targetKeyAlias, paramSet, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("WrapUnwrapKeyUnpack failed");
-        return ret;
-    }
-
-    ret = MallocBlobFromBuffer(srcData, wrappedData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("malloc wrappedData data failed");
-    }
-
-    return ret;
-}
-
-int32_t HksUnwrapKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
-    struct HksBlob *targetKeyAlias, struct HksBlob *wrappedData, struct HksParamSet **paramSet)
-{
-    uint32_t offset = 0;
-    int32_t ret = WrapUnwrapKeyUnpack(srcData, keyAlias, targetKeyAlias, paramSet, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("WrapUnwrapKeyUnpack failed");
-        return ret;
-    }
-
-    return GetBlobFromBuffer(wrappedData, srcData, &offset);
-}
-
 int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certChainBlob)
 {
     uint32_t offset = 0;

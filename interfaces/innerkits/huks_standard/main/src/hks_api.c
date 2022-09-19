@@ -51,8 +51,6 @@
 #undef HKS_SUPPORT_API_GET_KEY_INFO_LIST
 #undef HKS_SUPPORT_API_ATTEST_KEY
 #undef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-#undef HKS_SUPPORT_API_WRAP_KEY
-#undef HKS_SUPPORT_API_UNWRAP_KEY
 #endif
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
@@ -553,41 +551,21 @@ HKS_API_EXPORT int32_t HksGetCertificateChain(const struct HksBlob *keyAlias, co
 HKS_API_EXPORT int32_t HksWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
 {
-#ifdef HKS_SUPPORT_API_WRAP_KEY
-    HKS_LOG_I("enter wrap key");
-    if ((keyAlias == NULL) || (targetKeyAlias == NULL) || (paramSet == NULL) || (wrappedData == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientWrapKey(keyAlias, targetKeyAlias, paramSet, wrappedData);
-    HKS_LOG_I("leave wrap key, result = %d", ret);
-    return ret;
-#else
     (void)keyAlias;
     (void)targetKeyAlias;
     (void)paramSet;
     (void)wrappedData;
     return HKS_ERROR_NOT_SUPPORTED;
-#endif
 }
 
 HKS_API_EXPORT int32_t HksUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
     const struct HksBlob *wrappedData, const struct HksParamSet *paramSet)
 {
-#ifdef HKS_SUPPORT_API_UNWRAP_KEY
-    HKS_LOG_I("enter unwrap key");
-    if ((keyAlias == NULL) || (targetKeyAlias == NULL) || (wrappedData == NULL) || (paramSet == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientUnwrapKey(keyAlias, targetKeyAlias, wrappedData, paramSet);
-    HKS_LOG_I("leave unwrap key, result = %d", ret);
-    return ret;
-#else
     (void)keyAlias;
     (void)targetKeyAlias;
     (void)paramSet;
     (void)wrappedData;
     return HKS_ERROR_NOT_SUPPORTED;
-#endif
 }
 
 HKS_API_EXPORT int32_t HksBnExpMod(struct HksBlob *x, const struct HksBlob *a,
