@@ -47,7 +47,7 @@ ohos_shared_library("huks_native") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
   ]
-  
+
   cflags_cc = [
     "-Wall",
     "-Werror",
