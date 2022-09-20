@@ -75,12 +75,6 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 int32_t HksClientGetCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain);
 
-int32_t HksClientWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *wrappedData);
-
-int32_t HksClientUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksBlob *wrappedData, const struct HksParamSet *paramSet);
-
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *handle,
     struct HksBlob *token);
 

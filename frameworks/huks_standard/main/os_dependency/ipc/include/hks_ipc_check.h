@@ -48,9 +48,6 @@ int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, uint32_t
 int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksCertChain *certChain);
 
-int32_t HksCheckIpcWrapUnwrapKey(bool isWrapKey, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedData);
-
 #ifdef __cplusplus
 }
 #endif

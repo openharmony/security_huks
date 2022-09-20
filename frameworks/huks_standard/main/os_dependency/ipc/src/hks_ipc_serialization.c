@@ -540,53 +540,6 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
     return HKS_SUCCESS;
 }
 
-static int32_t WrapUnwrapKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksParamSet *paramSet, uint32_t *offset)
-{
-    int32_t ret = CopyBlobToBuffer(keyAlias, destData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy keyAlias failed");
-        return ret;
-    }
-
-    ret = CopyBlobToBuffer(targetKeyAlias, destData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy targetKeyAlias failed");
-        return ret;
-    }
-
-    ret = CopyParamSetToBuffer(paramSet, destData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy paramSet failed");
-    }
-    return ret;
-}
-
-int32_t HksWrapKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksParamSet *paramSet, const struct HksBlob *wrappedData)
-{
-    uint32_t offset = 0;
-    int32_t ret = WrapUnwrapKeyPack(destData, keyAlias, targetKeyAlias, paramSet, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("WrapUnwrapKeyPack failed");
-        return ret;
-    }
-    return CopyUint32ToBuffer(wrappedData->size, destData, &offset);
-}
-
-int32_t HksUnwrapKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksBlob *wrappedData, const struct HksParamSet *paramSet)
-{
-    uint32_t offset = 0;
-    int32_t ret = WrapUnwrapKeyPack(destData, keyAlias, targetKeyAlias, paramSet, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("WrapUnwrapKeyPack failed");
-        return ret;
-    }
-
-    return CopyBlobToBuffer(wrappedData, destData, &offset);
-}
-
 static int32_t SignVerifyWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const struct HksParamSet *paramSet,
     const struct HksBlob *unsignedData, uint32_t *offset)
 {
