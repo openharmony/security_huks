@@ -218,36 +218,3 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
     }
     return HKS_SUCCESS;
 }
-
-int32_t HksCheckIpcWrapUnwrapKey(bool isWrapKey, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedData)
-{
-    int32_t ret = HksCheckBlob3AndParamSet(keyAlias, targetKeyAlias, wrappedData, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key or paramSetIn failed");
-        return ret;
-    }
-
-    if ((keyAlias->size > MAX_PROCESS_SIZE) || (targetKeyAlias->size > MAX_PROCESS_SIZE)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-        ALIGN_SIZE(targetKeyAlias->size) > MAX_PROCESS_SIZE) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    uint32_t totalBufSize = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-        sizeof(targetKeyAlias->size) + ALIGN_SIZE(targetKeyAlias->size);
-    if (isWrapKey) {
-        totalBufSize += sizeof(wrappedData->size);
-    } else {
-        if (wrappedData->size > MAX_PROCESS_SIZE) {
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-        totalBufSize += sizeof(wrappedData->size) + ALIGN_SIZE(wrappedData->size);
-    }
-    if (totalBufSize > MAX_PROCESS_SIZE) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    return HKS_SUCCESS;
-}

@@ -41,9 +41,7 @@ ohos_shared_library("huks") {
     "src/huks_napi_import_wrapped_key.cpp",
     "src/huks_napi_init.cpp",
     "src/huks_napi_is_key_exist.cpp",
-    "src/huks_napi_unwrap_key.cpp",
     "src/huks_napi_update_finish.cpp",
-    "src/huks_napi_wrap_key.cpp",
   ]
 
   external_deps = [
