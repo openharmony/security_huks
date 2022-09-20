@@ -26,8 +26,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifndef _NATIVE_HUKS_TYPE_H_
-#define _NATIVE_HUKS_TYPE_H_
+#ifndef NATIVE_HUKS_TYPE_H
+#define NATIVE_HUKS_TYPE_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -379,6 +379,8 @@ enum  OH_Huks_ErrCode {
     OH_HUKS_ERR_CODE_ITEM_NOT_EXIST = 12000011,
     /** 内部错误。 */
     OH_HUKS_ERR_CODE_INTERNAL_ERROR = 12000012,
+    /** 缺失所需凭据。 */
+    OH_HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST = 12000013,
 };
 
 /**

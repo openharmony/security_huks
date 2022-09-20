@@ -45,8 +45,8 @@
  * @vee OH_Huks_Abort
  */
 
-#ifndef _NATIVE_HUKS_API_H_
-#define _NATIVE_HUKS_API_H_
+#ifndef NATIVE_HUKS_API_H
+#define NATIVE_HUKS_API_H
 
 #include "native_huks_type.h"
 

@@ -42,6 +42,7 @@ ohos_static_library("libhuks_common_standard_static") {
     "src/hks_check_paramset.c",
     "src/hks_common_check.c",
     "src/hks_crypto_adapter.c",
+    "src/hks_errcode_adapter.c",
     "src/hks_param.c",
   ]
 
