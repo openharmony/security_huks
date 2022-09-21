@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,6 +11,20 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+#ifndef NATIVE_OH_HUKS_TYPE_H
+#define NATIVE_OH_HUKS_TYPE_H
+
+/**
+ * @addtogroup HuksTypeApi
+ * @{
+ *
+ * @brief 描述HUKS类型定义的头文件，声明了HUKS API需要的各种宏、枚举、数据结构、错误码等。
+ *
+ * @syscap SystemCapability.Security.Huks
+ * @since 9
+ * @version 1.0
  */
 
 /**
@@ -26,20 +40,13 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#ifndef NATIVE_HUKS_TYPE_H
-#define NATIVE_HUKS_TYPE_H
-
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-/**
- * @brief Align to 4-tuple。
- *
+/*
+ * Align to 4-tuple
  * Before calling this function, ensure that the size does not overflow after 3 is added.
- *
- * @since 9
- * @version 1.0
  */
 #define OH_HUKS_DEFAULT_ALIGN_MASK_SIZE 3
 
@@ -61,7 +68,7 @@ extern "C" {
 #define SECURE_SIGN_VERSION 0x01000001
 
 /**
- * @brief 表示密钥用途。
+ * @brief 密钥用途类型。
  *
  * @since 9
  * @version 1.0
@@ -88,7 +95,7 @@ enum OH_Huks_KeyPurpose {
 };
 
 /**
- * @brief 表示摘要算法类型。
+ * @brief 摘要算法类型。
  *
  * @since 9
  * @version 1.0
@@ -113,7 +120,7 @@ enum OH_Huks_KeyDigest {
 };
 
 /**
- * @brief 表示补齐算法。
+ * @brief 补齐算法类型。
  *
  * @since 9
  * @version 1.0
@@ -134,7 +141,7 @@ enum OH_Huks_KeyPadding {
 };
 
 /**
- * @brief 表示加密工作模式。
+ * @brief 加解密算法工作模式。
  *
  * @since 9
  * @version 1.0
@@ -155,7 +162,7 @@ enum OH_Huks_CipherMode {
 };
 
 /**
- * @brief 表示密钥长度。
+ * @brief 算法密钥长度。
  *
  * @since 9
  * @version 1.0
@@ -209,7 +216,7 @@ enum OH_Huks_KeySize {
 };
 
 /**
- * @brief 表示密钥使用的算法。
+ * @brief 密钥使用的算法。
  *
  * @since 9
  * @version 1.0
@@ -249,7 +256,7 @@ enum OH_Huks_KeyAlg {
 };
 
 /**
- * @brief 表示导入加密密钥的算法套件。
+ * @brief 密文导入所需的算法套件类型
  *
  * @since 9
  * @version 1.0
@@ -280,7 +287,7 @@ enum OH_Huks_AlgSuite {
 };
 
 /**
- * @brief 表示生成的密钥类型。
+ * @brief 生成的密钥类型。
  *
  * @since 9
  * @version 1.0
@@ -295,7 +302,7 @@ enum OH_Huks_KeyGenerateType {
 };
 
 /**
- * @brief 表示密钥的产生方式。
+ * @brief 密钥的产生方式。
  *
  * @since 9
  * @version 1.0
@@ -312,7 +319,7 @@ enum OH_Huks_KeyFlag {
 };
 
 /**
- * @brief 表示密钥的存储方式。
+ * @brief 密钥的存储方式。
  *
  * @since 9
  * @version 1.0
@@ -340,7 +347,7 @@ enum OH_Huks_ImportKeyType {
 };
 
 /**
- * @brief 表示状态返回码。
+ * @brief 错误码。
  *
  * @since 9
  * @version 1.0
@@ -379,12 +386,13 @@ enum  OH_Huks_ErrCode {
     OH_HUKS_ERR_CODE_ITEM_NOT_EXIST = 12000011,
     /** 内部错误。 */
     OH_HUKS_ERR_CODE_INTERNAL_ERROR = 12000012,
-    /** 缺失所需凭据。 */
+    /** 认证凭据不存在。 */
     OH_HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST = 12000013,
 };
 
 /**
- * @brief 表示Tag的数据类型。
+ * @brief 参数集中参数类型的掩码值。
+ * @see OH_Huks_Param
  *
  * @since 9
  * @version 1.0
@@ -405,20 +413,7 @@ enum OH_Huks_TagType {
 };
 
 /**
- * @brief 表示发送Tag的方式
- *
- * @since 9
- * @version 1.0
- */
-enum OH_Huks_SendType {
-    /** 表示异步发送TAG。 */
-    OH_HUKS_SEND_TYPE_ASYNC = 0,
-    /** 表示同步发送TAG。 */
-    OH_HUKS_SEND_TYPE_SYNC,
-};
-
-/**
- * @brief 表示用户认证类型
+ * @brief 密钥访问控制中的用户认证类型
  *
  * @since 9
  * @version 1.0
@@ -433,7 +428,7 @@ enum OH_Huks_UserAuthType {
 };
 
 /**
- * @brief 表示安全访问控制类型
+ * @brief 安全访问控制类型，表示密钥失效的原则
  *
  * @since 9
  * @version 1.0
@@ -447,6 +442,7 @@ enum OH_Huks_AuthAccessType {
 
 /**
  * @brief 密钥使用时生成challenge的类型
+ * @see OH_Huks_ChallengePosition
  *
  * @since 9
  * @version 1.0
@@ -478,7 +474,7 @@ enum OH_Huks_ChallengePosition {
 };
 
 /**
- * @brief 生成或导入密钥时，指定该密钥的签名类型。
+ * @brief 生成或导入密钥时，指定该密钥的安全签名类型。
  *
  * @since 9
  * @version 1.0
@@ -489,7 +485,7 @@ enum OH_Huks_SecureSignType {
 };
 
 /**
- * @brief 表示调用参数的Tag。
+ * @brief 参数集所用的TAG值枚举
  *
  * @since 9
  * @version 1.0
@@ -668,7 +664,7 @@ enum OH_Huks_Tag {
 
 /**
  * @brief 表示状态返回数据，包括返回码和消息。
- * 
+ *
  * @since 9
  * @version 1.0
  */
