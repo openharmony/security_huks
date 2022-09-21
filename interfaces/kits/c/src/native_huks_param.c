@@ -50,7 +50,6 @@ struct OH_Huks_Result OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet)
 
 void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet)
 {
-    // TODO: how to determine paramSet is actually freed
     HksFreeParamSet((struct HksParamSet **) paramSet);
 }
 
