@@ -27,5 +27,5 @@ ohos_ndk_headers("huks_header") {
     "./include/native_huks_api.h",
     "./include/native_huks_param.h",
     "./include/native_huks_type.h",
-    ]
+  ]
 }

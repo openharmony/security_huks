@@ -25,9 +25,7 @@ ohos_shared_library("huks_ndk") {
     "native_huks_param.c",
   ]
 
-  external_deps = [
-    "huks:libhukssdk",
-  ]
+  external_deps = [ "huks:libhukssdk" ]
 
   install_images = [ system_base_dir ]
   relative_install_dir = "ndk"
