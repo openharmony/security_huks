@@ -16,7 +16,7 @@
 #include "hks_client_service_test.h"
 
 #include <gtest/gtest.h>
-#include <string.h>
+#include <string>
 
 #include "hks_api.h"
 #include "hks_attest_key_test_common.h"
