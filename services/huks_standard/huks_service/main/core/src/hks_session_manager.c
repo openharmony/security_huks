@@ -209,7 +209,7 @@ struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, co
     struct HksOperation *operation = NULL;
     pthread_mutex_lock(&g_lock);
     HKS_DLIST_ITER(operation, &g_operationList) {
-        if ((operation->handle == handle) && IsSameProcessName(processInfo, operation) &&
+        if ((operation != NULL) && (operation->handle == handle) && IsSameProcessName(processInfo, operation) &&
             IsSameUserId(processInfo, operation)) {
             pthread_mutex_unlock(&g_lock);
             return operation;
