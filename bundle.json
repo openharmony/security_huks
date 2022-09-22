@@ -55,9 +55,15 @@
         ]
       },
       "build": {
-        "sub_component": [
-          "//base/security/huks:huks_components"
-        ],
+        "group_type": {
+          "base_group": [],
+          "fwk_group": [
+            "//base/security/huks:fwk_group"
+          ],
+          "service_group": [
+            "//base/security/huks:service_group"
+          ]
+        },
         "inner_kits": [
           {
             "name": "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",

@@ -1590,28 +1590,6 @@ int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, 
 #endif
 }
 
-int32_t HksServiceWrapKey(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksParamSet *paramSet, struct HksBlob *wrappedData)
-{
-    (void)processName;
-    (void)keyAlias;
-    (void)targetKeyAlias;
-    (void)paramSet;
-    (void)wrappedData;
-    return 0;
-}
-
-int32_t HksServiceUnwrapKey(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksBlob *wrappedData, const struct HksParamSet *paramSet)
-{
-    (void)processName;
-    (void)keyAlias;
-    (void)targetKeyAlias;
-    (void)paramSet;
-    (void)wrappedData;
-    return 0;
-}
-
 int32_t HksServiceProvision(const struct HksBlob *srcData, const struct HksBlob *challengeIn)
 {
     (void)srcData;
