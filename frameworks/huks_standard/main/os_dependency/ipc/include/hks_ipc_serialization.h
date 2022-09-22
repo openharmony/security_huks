@@ -67,12 +67,6 @@ int32_t HksCertificateChainPack(struct HksBlob *destData, const struct HksBlob *
 int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool needEncode,
     struct HksCertChain *certChain);
 
-int32_t HksWrapKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,
-    const struct HksParamSet *paramSet, const struct HksBlob *wrappedData);
-
-int32_t HksUnwrapKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
-    const struct HksBlob *targetKeyAlias, const struct HksBlob *wrappedData, const struct HksParamSet *paramSet);
-
 int32_t HksSignWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const struct HksParamSet *paramSet,
     const struct HksBlob *unsignedData, const struct HksBlob *signature);
 

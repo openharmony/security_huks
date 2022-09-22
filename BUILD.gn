@@ -39,15 +39,12 @@ group("cipher_napi") {
   }
 }
 
-group("huks_components") {
+group("fwk_group") {
   if (os_level == "standard") {
     deps = [
       "//base/security/huks:cipher_napi",
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
-      "//base/security/huks/services/huks_standard:huks_service",
-      "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
     ]
   } else if (os_level == "small") {
     deps = [
@@ -58,4 +55,21 @@ group("huks_components") {
   } else {
     deps = [ "//base/security/huks/frameworks/huks_lite:huks_sdk" ]
   }
+}
+
+group("service_group") {
+  if (os_level == "standard") {
+    deps = [
+      "//base/security/huks/services/huks_standard:huks_service",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
+    ]
+  }
+}
+
+group("huks_components") {
+  deps = [
+    "//base/security/huks:fwk_group",
+    "//base/security/huks:service_group",
+  ]
 }

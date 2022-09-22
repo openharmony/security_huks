@@ -59,12 +59,6 @@ int32_t HksTeeAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob 
 
 int32_t HksTeeDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey, struct HksBlob *derivedKey);
 
-int32_t HksTeeWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *wrappedData);
-
-int32_t HksTeeUnwrapKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappedData,
-    const struct HksParamSet *paramSet, struct HksBlob *output);
-
 int32_t HksTeeMac(const struct HksBlob *keyBlob, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac);
 
