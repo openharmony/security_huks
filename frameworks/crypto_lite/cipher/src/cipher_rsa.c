@@ -373,7 +373,8 @@ static int32_t CheckParamAndMallocBuf(size_t rsaLen, const RsaData *cipher, unsi
     }
     *tembuf = (unsigned char*)malloc(cipher->length);
     if (*tembuf == NULL) {
-        free(buf);
+        free(*buf);
+        *buf = NULL
         return ERROR_CODE_GENERAL;
     }
     return ERROR_SUCCESS;
@@ -384,8 +385,8 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
     size_t plainLen = 0;
     int32_t totalPlainLen = 0;
 
-    unsigned char *buf;
-    unsigned char *tembuf;
+    unsigned char *buf = NULL;
+    unsigned char *tembuf = NULL;
 
     int32_t ret = CheckParamAndMallocBuf(rsaLen, cipher, &buf, &tembuf);
     if (ret != ERROR_SUCCESS) {
