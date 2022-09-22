@@ -250,7 +250,8 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
             break;
         }
 
-        struct HksAeadParam aeadParam = {0};
+        struct HksAeadParam aeadParam;
+        (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
         struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
         ret = InitMkCryptUsageSpec((uint8_t *)ksfData->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
         if (ret != HKS_SUCCESS) {
