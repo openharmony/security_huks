@@ -374,7 +374,7 @@ static int32_t CheckParamAndMallocBuf(size_t rsaLen, const RsaData *cipher, unsi
     *tembuf = (unsigned char*)malloc(cipher->length);
     if (*tembuf == NULL) {
         free(*buf);
-        *buf = NULL
+        *buf = NULL;
         return ERROR_CODE_GENERAL;
     }
     return ERROR_SUCCESS;
