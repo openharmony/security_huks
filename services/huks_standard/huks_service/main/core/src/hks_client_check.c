@@ -153,28 +153,7 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
     }
 
     return HKS_SUCCESS;
-}
-
-int32_t HksCheckInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, const uint64_t *operationHandle)
-{
-    int32_t ret = HksCheckBlob2AndParamSet(processName, keyAlias, paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-
-    ret = CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-
-    if (operationHandle == NULL) {
-        HKS_LOG_E("operation handle invalid.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    return HKS_SUCCESS;
-}
+} 
 #endif /* _CUT_AUTHENTICATE_ */
 
 int32_t HksCheckGenerateRandomParams(const struct HksBlob *processName, const struct HksBlob *random)

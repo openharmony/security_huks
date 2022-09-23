@@ -16,7 +16,7 @@
 #include "huks_core_dynamic_hal_test.h"
 
 #include <gtest/gtest.h>
-#include <string.h>
+#include <string>
 
 #include "hks_api.h"
 #include "hks_log.h"
