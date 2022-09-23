@@ -18,7 +18,7 @@ ohos_ndk_library("libhuks_ndk") {
   output_extension = "z.so"
   ndk_description_file = "./libhuks.ndk.json"
   min_compact_version = "1"
-  system_capability = "SystemCapability.Security.Huks"
+  # system_capability = "SystemCapability.Security.Huks"
 }
 
 ohos_ndk_headers("huks_header") {
@@ -28,4 +28,22 @@ ohos_ndk_headers("huks_header") {
     "./include/native_huks_param.h",
     "./include/native_huks_type.h",
   ]
+}
+
+ohos_shared_library("huks_ndk") { 
+  include_dirs = [
+    "//base/security/huks/interfaces/kits/c/include",
+    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+  ]
+
+  sources = [
+    "src/native_huks_api.c",
+    "src/native_huks_param.c",
+  ]
+
+  deps = [ "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk", ]
+
+  part_name = "huks"
+  subsystem_name = "security"
 }

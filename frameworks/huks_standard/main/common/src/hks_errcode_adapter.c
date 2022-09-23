@@ -650,4 +650,3 @@ struct HksResult ConvertErrCode(int32_t ret) {
     }
     return result;
 }
-

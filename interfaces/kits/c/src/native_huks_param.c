@@ -20,12 +20,8 @@
 
 static struct OH_Huks_Result ConvertParamResult(int32_t ret)
 {
-    struct OH_Huks_Result result = {0};
-    struct HksResult convertedRet = ConvertErrCode(ret);
-    result.errorCode = convertedRet.errorCode;
-    result.errorMsg = convertedRet.errorMsg;
-    result.data = convertedRet.data;
-    return result; 
+    struct HksResult result = ConvertErrCode(ret);
+    return *((struct OH_Huks_Result *)(&result));
 }
 
 struct OH_Huks_Result OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet)
