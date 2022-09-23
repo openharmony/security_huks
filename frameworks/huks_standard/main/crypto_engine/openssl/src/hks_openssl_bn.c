@@ -89,7 +89,7 @@ static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
             break;
         }
 
-        uint32_t i = x->size - 1;
+        int32_t i = (int32_t)(x->size - 1);
         int32_t j = realOutLen - 1; /* realOutLen is greater than 0; x->size is no less than realOutLen */
         for (; j >= 0; --i, --j) {  /* i is no less than j */
             x->data[i] = bnOutput[j];

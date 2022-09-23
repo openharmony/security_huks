@@ -116,6 +116,9 @@ config("hilog_dir") {
       [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
 }
 ohos_static_library("libhukssdk_static") {
+  sanitize = {
+    integer_overflow = true
+  }
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":public_huks_config" ]
