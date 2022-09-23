@@ -264,16 +264,3 @@ int32_t HksGetPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info, c
         return HKS_ERROR_NOT_SUPPORTED;
     }
 }
-
-uint32_t ConvertTag(enum HksTag tag)
-{
-    switch (tag) {
-        case HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO:
-            return KM_TAG_ATTESTATION_ID_SEC_LEVEL_INFO;
-        case HKS_TAG_ATTESTATION_ID_UDID:
-            return KM_TAG_ATTESTATION_ID_UDID;
-        default:
-            break;
-    }
-    return HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO;
-}

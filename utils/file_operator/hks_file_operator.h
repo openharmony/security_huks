@@ -72,7 +72,7 @@ int32_t HksGetDirFile(void *dirp, struct HksFileDirentInfo *direntInfo);
 
 int32_t HksRemoveDir(const char *dirPath);
 
-int32_t HksDeleteDir(const char *dirPath);
+int32_t HksDeleteDir(const char *path);
 
 /* return < 0 error; > 0 realFileSize; == 0 no data */
 int32_t HksOldVersionFileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len);
