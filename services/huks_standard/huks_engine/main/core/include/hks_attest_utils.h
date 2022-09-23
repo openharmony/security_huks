@@ -69,8 +69,6 @@ int32_t HksInsertClaim (struct HksBlob *out, const struct HksBlob *oid, const st
 
 int32_t HksGetPublicKey (struct HksBlob *key, const struct HksPubKeyInfo *info, const struct HksUsageSpec *usageSpec);
 
-uint32_t ConvertTag(enum HksTag tag);
-
 #ifdef __cplusplus
 }
 #endif

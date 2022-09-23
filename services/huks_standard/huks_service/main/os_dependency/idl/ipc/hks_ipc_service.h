@@ -64,13 +64,13 @@ void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8
 
 void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceInit(const struct HksBlob *paramSet, struct HksBlob *outData, const uint8_t *context);
+void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 
-void HksIpcServiceUpdate(const struct HksBlob *paramSet, struct HksBlob *outData, const uint8_t *context);
+void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 
-void HksIpcServiceFinish(const struct HksBlob *paramSet, struct HksBlob *outData, const uint8_t *context);
+void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 
-void HksIpcServiceAbort(const struct HksBlob *paramSet, struct HksBlob *outData, const uint8_t *context);
+void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 
 #ifdef __cplusplus
 }

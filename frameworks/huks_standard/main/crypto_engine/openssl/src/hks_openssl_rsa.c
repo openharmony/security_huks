@@ -122,7 +122,7 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
 
         rsa = RSA_new();
         if (rsa != NULL) {
-            int32_t ret = RSA_set0_key(rsa, n, e, d);
+            ret = RSA_set0_key(rsa, n, e, d);
             if (ret != HKS_OPENSSL_SUCCESS) {
                 RSA_free(rsa);
                 rsa = NULL;

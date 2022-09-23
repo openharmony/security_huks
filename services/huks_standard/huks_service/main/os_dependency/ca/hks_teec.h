@@ -28,22 +28,22 @@ int32_t HksTeeOpen(void);
 int32_t HksTeeGenerateKey(const struct HksBlob *keyBlob, const struct HksParamSet *paramSetIn,
     struct HksBlob *keyOut);
 
-int32_t HksTeeProcessInit(uint32_t msgId, const struct HksBlob *key, const struct HksParamSet *paramSet,
+int32_t HksTeeProcessInit(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     uint64_t *operationHandle);
 
-int32_t HksTeeProcessMultiUpdate(uint32_t msgId, uint64_t operationHandle, const struct HksBlob *inData,
+int32_t HksTeeProcessMultiUpdate(uint32_t cmdId, uint64_t operationHandle, const struct HksBlob *inData,
     struct HksBlob *outData);
 
-int32_t HksTeeSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
+int32_t HksTeeSign(const struct HksBlob *keyBlob, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature);
 
-int32_t HksTeeVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
+int32_t HksTeeVerify(const struct HksBlob *keyBlob, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature);
 
-int32_t HksTeeEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+int32_t HksTeeEncrypt(const struct HksBlob *keyBlob, const struct HksParamSet *paramSet,
     const struct HksBlob *plainText, struct HksBlob *cipherText);
 
-int32_t HksTeeDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
+int32_t HksTeeDecrypt(const struct HksBlob *keyBlob, const struct HksParamSet *paramSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText);
 
 int32_t HksTeeCheckKeyLegality(const struct HksParamSet *paramSet, const struct HksBlob *key);

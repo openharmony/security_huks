@@ -53,7 +53,7 @@ static void ConstructCredentialInfo()
 }
 
 int32_t UserIdmClient::GetCredentialInfo(int32_t userId, AuthType authType,
-        const std::shared_ptr<GetCredentialInfoCallback>& callback)
+    const std::shared_ptr<GetCredentialInfoCallback>& callback)
 {
     if (userId == 0) {
         return FAIL;
