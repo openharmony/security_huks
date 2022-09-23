@@ -55,9 +55,6 @@ int32_t HksCheckDeriveKeyParams(const struct HksBlob *processName, const struct 
 int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const struct HksKeyInfo *keyInfoList,
     const uint32_t *listCount);
 
-int32_t HksCheckInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, const uint64_t *operationHandle);
-
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 int32_t HksCheckAttestKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain);

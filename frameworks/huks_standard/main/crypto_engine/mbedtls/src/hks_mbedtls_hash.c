@@ -219,6 +219,7 @@ static int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const stru
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls Hash sha1 finish fail");
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
         }
 
         ret = HKS_SUCCESS;
