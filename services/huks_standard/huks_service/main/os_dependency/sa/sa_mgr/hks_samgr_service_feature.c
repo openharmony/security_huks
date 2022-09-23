@@ -19,7 +19,7 @@
 static const char *FEATURE_GetName(Feature *feature);
 static void FEATURE_OnInitialize(Feature *feature, Service *parent, Identity identity);
 static void FEATURE_OnStop(Feature *feature, Identity identity);
-static BOOL FEATURE_OnMessage(Feature *feature, Request *request);
+static BOOL FEATURE_OnMessage(Feature *feature, Request *msg);
 static int32 Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply);
 
 static HksMgrFeature g_hksMgrFeature = {
