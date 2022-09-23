@@ -19,6 +19,9 @@ config("huks_config") {
 }
 
 ohos_shared_library("huks_engine_core_standard") {
+  sanitize = {
+    integer_overflow = true
+  }
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
