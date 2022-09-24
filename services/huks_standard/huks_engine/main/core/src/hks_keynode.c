@@ -49,12 +49,6 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 
     struct HksParam params[] = {
         {
-            .tag = HKS_TAG_ACCESS_TIME,
-            .uint32Param = 0
-        }, {
-            .tag = HKS_TAG_USES_TIME,
-            .uint32Param = 0
-        }, {
             .tag = HKS_TAG_CRYPTO_CTX,
             .uint64Param = 0
         },
