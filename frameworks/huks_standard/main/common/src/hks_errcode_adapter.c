@@ -17,8 +17,6 @@
 
 #include <stddef.h>
 
-#include "hks_type.h"
-
 static const char *g_convertErrMsg = "ConvertErrCode Failed.";
 
 static struct HksError g_errCodeTable[] = {
@@ -639,7 +637,7 @@ static struct HksError g_errCodeTable[] = {
  * Convert internal error code to formal error code and return.
  * Return HUKS_ERR_CODE_INTERNAL_ERROR in case of converting failed.
  */
-struct HksResult ConvertErrCode(int32_t ret) {
+HKS_API_EXPORT struct HksResult ConvertErrCode(int32_t ret) {
     struct HksResult result = {HUKS_ERR_CODE_INTERNAL_ERROR, g_convertErrMsg, NULL};
     uint32_t i = 0;
     uint32_t uErrCodeCount = sizeof(g_errCodeTable) / sizeof(g_errCodeTable[0]);

@@ -20,6 +20,8 @@
 #ifndef HKS_ERRCODE_ADAPTER_H
 #define HKS_ERRCODE_ADAPTER_H
 
+#include "hks_type.h"
+
 struct HksResult {
     int32_t errorCode;
     const char *errorMsg;
@@ -35,7 +37,7 @@ struct HksError {
 extern "C" {
 #endif
 
-struct HksResult ConvertErrCode(int32_t result);
+HKS_API_EXPORT struct HksResult ConvertErrCode(int32_t result);
 #ifdef __cplusplus
 }
 #endif
