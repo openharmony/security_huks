@@ -18,6 +18,7 @@ ohos_ndk_library("libhuks_ndk") {
   output_extension = "z.so"
   ndk_description_file = "./libhuks.ndk.json"
   min_compact_version = "1"
+
   # system_capability = "SystemCapability.Security.Huks"
 }
 
@@ -48,7 +49,7 @@ ohos_shared_library("huks_ndk") {
     "src/native_huks_param.c",
   ]
 
-  external_deps = [ "huks:libhukssdk", ]
+  external_deps = [ "huks:libhukssdk" ]
 
   cflags_cc = [
     "-Wall",

@@ -49,8 +49,8 @@ group("huks_components") {
   if (os_level == "standard") {
     deps = [
       "//base/security/huks:cipher_napi",
-      "//base/security/huks:huks_napi",
       "//base/security/huks:huks_capi",
+      "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
       "//base/security/huks/services/huks_standard:huks_service",
       "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
