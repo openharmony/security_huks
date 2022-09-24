@@ -30,7 +30,13 @@ ohos_ndk_headers("huks_header") {
   ]
 }
 
-ohos_shared_library("huks_ndk") { 
+ohos_shared_library("huks_ndk") {
+  defines = [
+    "L2_STANDARD",
+    "_HARDWARE_ROOT_KEY_",
+    "_HUKS_LOG_ENABLE_",
+  ]
+
   include_dirs = [
     "//base/security/huks/interfaces/kits/c/include",
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
@@ -42,7 +48,12 @@ ohos_shared_library("huks_ndk") {
     "src/native_huks_param.c",
   ]
 
-  deps = [ "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk", ]
+  external_deps = [ "huks:libhukssdk", ]
+
+  cflags_cc = [
+    "-Wall",
+    "-Werror",
+  ]
 
   part_name = "huks"
   subsystem_name = "security"

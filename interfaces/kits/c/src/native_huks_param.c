@@ -20,7 +20,7 @@
 
 static struct OH_Huks_Result ConvertParamResult(int32_t ret)
 {
-    struct HksResult result = ConvertErrCode(ret);
+    struct HksResult result = HksConvertErrCode(ret);
     return *((struct OH_Huks_Result *)(&result));
 }
 
