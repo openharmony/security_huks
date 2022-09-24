@@ -37,7 +37,8 @@ struct HksError {
 extern "C" {
 #endif
 
-HKS_API_EXPORT struct HksResult ConvertErrCode(int32_t result);
+struct HksResult HksConvertErrCode(int32_t result);
+
 #ifdef __cplusplus
 }
 #endif
