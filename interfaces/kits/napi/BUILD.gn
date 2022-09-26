@@ -16,6 +16,8 @@ import("//build/ohos.gni")
 ohos_shared_library("huks") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = true
   }
   defines = [
     "L2_STANDARD",

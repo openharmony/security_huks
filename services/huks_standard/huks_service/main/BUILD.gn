@@ -16,6 +16,8 @@ import("//build/ohos.gni")
 ohos_static_library("libhuks_service_standard_static") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = true
   }
   subsystem_name = "security"
   part_name = "huks"

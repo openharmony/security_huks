@@ -21,6 +21,8 @@ if (os_level == "standard") {
   ohos_shared_library("libhukssdk") {
     sanitize = {
       integer_overflow = true
+      cfi = true
+      debug = true
     }
     subsystem_name = "security"
     part_name = "huks"
