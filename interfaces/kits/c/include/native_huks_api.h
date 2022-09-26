@@ -163,66 +163,66 @@ struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
  *
  * @param keyAlias 操作的密钥的别名。
  * @param paramSet 初始化操作的密钥参数集合。
- * @param handle 密钥会话的句柄，后续其他操作时传入该句柄，包括{@link OH_Huks_DoUpdate},
- *               {@link OH_Huks_DoFinish}, {@link OH_Huks_DoAbort}。
+ * @param handle 密钥会话的句柄，后续其他操作时传入该句柄，包括{@link OH_Huks_UpdateSession},
+ *               {@link OH_Huks_FinishSession}, {@link OH_Huks_AbortSession}。
  * @param challenge 存放安全访问控制时传回的challenge
  * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时接口使用成功，其他时为错误。
  * @since 9
  * @version 1.0
- * @see OH_Huks_DoUpdate
- * @see OH_Huks_DoFinish
- * @see OH_Huks_DoAbort
+ * @see OH_Huks_UpdateSession
+ * @see OH_Huks_FinishSession
+ * @see OH_Huks_AbortSession
  */
-struct OH_Huks_Result OH_Huks_DoInit(const struct OH_Huks_Blob *keyAlias,
-    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *handle, struct OH_Huks_Blob *token);
+struct OH_Huks_Result OH_Huks_InitSession(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *handle, struct OH_Huks_Blob *challenge);
 
 /**
  * @brief 分段添加密钥操作的数据并进行相应的密钥操作，输出处理数据。
  *
- * @param handle 密钥会话句柄，通过{@link OH_Huks_DoInit}接口生成的。
+ * @param handle 密钥会话句柄，通过{@link OH_Huks_InitSession}接口生成的。
  * @param paramSet 密钥操作对应的输入参数集。
  * @param inData 要处理的输入数据，如果数据过大，可分片多次调用。
  * @param outData 经过对应的密钥操作后输出的数据。
  * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时接口使用成功，其他时为错误。
  * @since 9
  * @version 1.0
- * @see OH_Huks_DoInit
- * @see OH_Huks_DoFinish
- * @see OH_Huks_DoAbort
+ * @see OH_Huks_InitSession
+ * @see OH_Huks_FinishSession
+ * @see OH_Huks_AbortSession
  */
-struct OH_Huks_Result OH_Huks_DoUpdate(const struct OH_Huks_Blob *handle,
+struct OH_Huks_Result OH_Huks_UpdateSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData, struct OH_Huks_Blob *outData);
 
 /**
  * @brief 结束密钥会话并进行相应的密钥操作，输出处理数据。
  *
- * @param handle 密钥会话句柄，通过{@link OH_Huks_DoInit}接口生成的。
+ * @param handle 密钥会话句柄，通过{@link OH_Huks_InitSession}接口生成的。
  * @param paramSet 密钥操作对应的输入参数集。
  * @param inData 要处理的输入数据。
  * @param outData 经过对应的密钥操作后输出的数据。
  * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时接口使用成功，其他时为错误。
  * @since 9
  * @version 1.0
- * @see OH_Huks_DoInit
- * @see OH_Huks_DoUpdate
- * @see OH_Huks_DoAbort
+ * @see OH_Huks_InitSession
+ * @see OH_Huks_UpdateSession
+ * @see OH_Huks_AbortSession
  */
-struct OH_Huks_Result OH_Huks_DoFinish(const struct OH_Huks_Blob *handle,
+struct OH_Huks_Result OH_Huks_FinishSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData, struct OH_Huks_Blob *outData);
 
 /**
  * @brief 取消密钥会话。
  *
- * @param handle 密钥会话句柄，通过{@link OH_Huks_DoInit}接口生成的。
+ * @param handle 密钥会话句柄，通过{@link OH_Huks_InitSession}接口生成的。
  * @param paramSet 取消密钥会话需要的输入参数集（默认传空）。
  * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时接口使用成功，其他时为错误。
  * @since 9
  * @version 1.0
- * @see OH_Huks_DoInit
- * @see OH_Huks_DoUpdate
- * @see OH_Huks_DoFinish
+ * @see OH_Huks_InitSession
+ * @see OH_Huks_UpdateSession
+ * @see OH_Huks_FinishSession
  */
-struct OH_Huks_Result OH_Huks_DoAbort(const struct OH_Huks_Blob *handle,
+struct OH_Huks_Result OH_Huks_AbortSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet);
 
 #ifdef __cplusplus

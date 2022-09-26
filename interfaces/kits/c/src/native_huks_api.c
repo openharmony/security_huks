@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -94,7 +94,7 @@ struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     return ConvertApiResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_DoInit(const struct OH_Huks_Blob *keyAlias,
+struct OH_Huks_Result OH_Huks_InitSession(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *handle, struct OH_Huks_Blob *token)
 {
     int32_t result = HksInit((const struct HksBlob *) keyAlias,
@@ -102,7 +102,7 @@ struct OH_Huks_Result OH_Huks_DoInit(const struct OH_Huks_Blob *keyAlias,
     return ConvertApiResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_DoUpdate(const struct OH_Huks_Blob *handle,
+struct OH_Huks_Result OH_Huks_UpdateSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData, struct OH_Huks_Blob *outData)
 {
     int32_t result = HksUpdate((const struct HksBlob *) handle,
@@ -110,7 +110,7 @@ struct OH_Huks_Result OH_Huks_DoUpdate(const struct OH_Huks_Blob *handle,
     return ConvertApiResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_DoFinish(const struct OH_Huks_Blob *handle,
+struct OH_Huks_Result OH_Huks_FinishSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet, const struct OH_Huks_Blob *inData, struct OH_Huks_Blob *outData)
 {
     int32_t result = HksFinish((const struct HksBlob *) handle,
@@ -118,7 +118,7 @@ struct OH_Huks_Result OH_Huks_DoFinish(const struct OH_Huks_Blob *handle,
     return ConvertApiResult(result);
 }
 
-struct OH_Huks_Result OH_Huks_DoAbort(const struct OH_Huks_Blob *handle,
+struct OH_Huks_Result OH_Huks_AbortSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet)
 {
     int32_t result = HksAbort((const struct HksBlob *) handle, (const struct HksParamSet *) paramSet);
