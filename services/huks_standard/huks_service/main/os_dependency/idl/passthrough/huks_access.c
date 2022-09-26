@@ -29,7 +29,7 @@
 static struct HuksHdi *g_hksHalDevicePtr = NULL;
 
 #ifndef _CUT_AUTHENTICATE_
-int32_t HuksAccessModuleInit(void)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessModuleInit(void)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -41,7 +41,7 @@ int32_t HuksAccessModuleInit(void)
     return g_hksHalDevicePtr->HuksHdiModuleInit();
 }
 
-int32_t HuksAccessRefresh(void)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessRefresh(void)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -53,8 +53,8 @@ int32_t HuksAccessRefresh(void)
     return g_hksHalDevicePtr->HuksHdiRefresh();
 }
 
-int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
-    const struct HksBlob *keyIn, struct HksBlob *keyOut)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSetIn, const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -66,8 +66,8 @@ int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const struct HksPa
     return g_hksHalDevicePtr->HuksHdiGenerateKey(keyAlias, paramSetIn, keyIn, keyOut);
 }
 
-int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessImportKey(const struct HksBlob *keyAlias,
+    const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -79,8 +79,9 @@ int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const struct HksBlob
     return g_hksHalDevicePtr->HuksHdiImportKey(keyAlias, key, paramSet, keyOut);
 }
 
-int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
-    const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias,
+    const struct HksBlob *key, const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet,
+    struct HksBlob *keyOut)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -92,8 +93,8 @@ int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const
     return g_hksHalDevicePtr->HuksHdiImportWrappedKey(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut);
 }
 
-int32_t HuksAccessExportPublicKey(const struct HksBlob *key,  const struct HksParamSet *paramSet,
-    struct HksBlob *keyOut)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessExportPublicKey(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -105,8 +106,8 @@ int32_t HuksAccessExportPublicKey(const struct HksBlob *key,  const struct HksPa
     return g_hksHalDevicePtr->HuksHdiExportPublicKey(key, paramSet, keyOut);
 }
 
-int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
-    struct HksBlob *token)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessInit(const struct  HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -118,8 +119,8 @@ int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *par
     return g_hksHalDevicePtr->HuksHdiInit(key, paramSet, handle, token);
 }
 
-int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessUpdate(const struct HksBlob *handle,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -131,8 +132,8 @@ int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct HksParamSet 
     return g_hksHalDevicePtr->HuksHdiUpdate(handle, paramSet, inData, outData);
 }
 
-int32_t HuksAccessFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessFinish(const struct HksBlob *handle,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -144,7 +145,8 @@ int32_t HuksAccessFinish(const struct HksBlob *handle, const struct HksParamSet 
     return g_hksHalDevicePtr->HuksHdiFinish(handle, paramSet, inData, outData);
 }
 
-int32_t HuksAccessAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessAbort(const struct HksBlob *handle,
+    const struct HksParamSet *paramSet)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -156,7 +158,8 @@ int32_t HuksAccessAbort(const struct HksBlob *handle, const struct HksParamSet *
     return g_hksHalDevicePtr->HuksHdiAbort(handle, paramSet);
 }
 
-int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet,
+    const struct HksBlob *key)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -168,7 +171,7 @@ int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet, const str
     return g_hksHalDevicePtr->HuksHdiGetKeyProperties(paramSet, key);
 }
 
-int32_t HuksAccessGetAbility(int funcType)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessGetAbility(int funcType)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -180,7 +183,7 @@ int32_t HuksAccessGetAbility(int funcType)
     return g_hksHalDevicePtr->HuksHdiGetAbility(funcType);
 }
 
-int32_t HuksAccessGetHardwareInfo(void)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessGetHardwareInfo(void)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -192,8 +195,8 @@ int32_t HuksAccessGetHardwareInfo(void)
     return g_hksHalDevicePtr->HuksHdiGetHardwareInfo();
 }
 
-int32_t HuksAccessSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *signature)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessSign(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *signature)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -205,8 +208,8 @@ int32_t HuksAccessSign(const struct HksBlob *key, const struct HksParamSet *para
     return g_hksHalDevicePtr->HuksHdiSign(key, paramSet, srcData, signature);
 }
 
-int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, const struct HksBlob *signature)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessVerify(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksBlob *srcData, const struct HksBlob *signature)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -218,8 +221,8 @@ int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksParamSet *pa
     return g_hksHalDevicePtr->HuksHdiVerify(key, paramSet, srcData, signature);
 }
 
-int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *plainText, struct HksBlob *cipherText)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessEncrypt(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksBlob *plainText, struct HksBlob *cipherText)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -231,8 +234,8 @@ int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct HksParamSet *p
     return g_hksHalDevicePtr->HuksHdiEncrypt(key, paramSet, plainText, cipherText);
 }
 
-int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *cipherText, struct HksBlob *plainText)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessDecrypt(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksBlob *cipherText, struct HksBlob *plainText)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -244,8 +247,8 @@ int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct HksParamSet *p
     return g_hksHalDevicePtr->HuksHdiDecrypt(key, paramSet, cipherText, plainText);
 }
 
-int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
-    const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet,
+    const struct HksBlob *privateKey, const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -257,8 +260,8 @@ int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const struct HksB
     return g_hksHalDevicePtr->HuksHdiAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
 }
 
-int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
-    struct HksBlob *derivedKey)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet,
+    const struct HksBlob *kdfKey, struct HksBlob *derivedKey)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -270,8 +273,8 @@ int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct Hks
     return g_hksHalDevicePtr->HuksHdiDeriveKey(paramSet, kdfKey, derivedKey);
 }
 
-int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *mac)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessMac(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *mac)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -284,8 +287,8 @@ int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *param
 }
 
 #ifdef _STORAGE_LITE_
-int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
-    const struct HksBlob *srcData, struct HksBlob *mac)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet,
+    const struct HksBlob *salt, const struct HksBlob *srcData, struct HksBlob *mac)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -299,8 +302,8 @@ int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, const struct
 #endif
 
 #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo,
-    struct HksBlob *keyOut)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias,
+    const struct HksBlob *keyInfo, struct HksBlob *keyOut)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -314,8 +317,8 @@ int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct Hk
 #endif
 
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
-int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *certChain)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessAttestKey(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
@@ -330,7 +333,8 @@ int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct HksParamSet 
 
 #endif /* _CUT_AUTHENTICATE_ */
 
-int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
+__attribute__((no_sanitize("cfi"))) int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet,
+    struct HksBlob *random)
 {
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
