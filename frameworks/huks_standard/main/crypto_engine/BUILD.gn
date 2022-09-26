@@ -15,6 +15,9 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 ohos_static_library("libhuks_crypto_engine_standard_static") {
+  sanitize = {
+    integer_overflow = true
+  }
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",

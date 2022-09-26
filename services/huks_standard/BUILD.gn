@@ -21,6 +21,9 @@ ohos_prebuilt_etc("huks_service.rc") {
 }
 
 ohos_shared_library("huks_service") {
+  sanitize = {
+    integer_overflow = true
+  }
   subsystem_name = "security"
   part_name = "huks"
   defines = [

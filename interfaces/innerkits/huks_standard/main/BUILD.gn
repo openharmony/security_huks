@@ -19,6 +19,9 @@ config("huks_config") {
 
 if (os_level == "standard") {
   ohos_shared_library("libhukssdk") {
+    sanitize = {
+      integer_overflow = true
+    }
     subsystem_name = "security"
     part_name = "huks"
     public_configs = [ ":huks_config" ]
