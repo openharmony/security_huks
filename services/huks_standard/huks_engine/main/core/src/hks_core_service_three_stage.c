@@ -1338,17 +1338,14 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
 
     void *ctx = GetCryptoCtx(keyNode);
     if (ctx == NULL) {
+        HKS_LOG_E("ctx is NULL!");
         return HKS_ERROR_NULL_POINTER;
     }
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
-    if (restoreData == NULL) {
-        HKS_LOG_E("derive restoreData is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
 
     ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_DERIVE_KEY);
-    
+
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);
     return ret;
@@ -1362,14 +1359,11 @@ int32_t HksCoreDeriveThreeStageAbort(const struct HuksKeyNode *keyNode, const st
 
     void *ctx = GetCryptoCtx(keyNode);
     if (ctx == NULL) {
+        HKS_LOG_E("ctx is NULL!");
         return HKS_ERROR_NULL_POINTER;
     }
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
-    if (restoreData == NULL) {
-        HKS_LOG_E("restoreData is NULL");
-        return HKS_FAILURE;
-    }
 
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);
@@ -1469,14 +1463,11 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
 
     void *ctx = GetCryptoCtx(keyNode);
     if (ctx == NULL) {
+        HKS_LOG_E("ctx is NULL!");
         return HKS_ERROR_NULL_POINTER;
     }
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
-    if (restoreData == NULL) {
-        HKS_LOG_E("agree restoreData is NULL!");
-        return HKS_FAILURE;
-    }
 
     ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_AGREE_KEY);
 
@@ -1492,14 +1483,11 @@ int32_t HksCoreAgreeThreeStageAbort(const struct HuksKeyNode *keyNode, const str
 
     void *ctx = GetCryptoCtx(keyNode);
     if (ctx == NULL) {
+        HKS_LOG_E("ctx is NULL!");
         return HKS_ERROR_NULL_POINTER;
     }
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
-    if (restoreData == NULL) {
-        HKS_LOG_E("restoreData is NULL");
-        return HKS_FAILURE;
-    }
 
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);

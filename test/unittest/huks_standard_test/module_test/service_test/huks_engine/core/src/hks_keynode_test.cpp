@@ -16,7 +16,7 @@
 #include "hks_client_service_test.h"
 
 #include <gtest/gtest.h>
-#include <string.h>
+#include <string>
 
 #include "hks_keynode.h"
 #include "hks_log.h"
@@ -55,12 +55,6 @@ void HksKeyNodeTest::TearDown()
 
 static const struct HksParam g_params[] = {
     {
-        .tag = HKS_TAG_ACCESS_TIME,
-        .uint32Param = 0
-    }, {
-        .tag = HKS_TAG_USES_TIME,
-        .uint32Param = 0
-    }, {
         .tag = HKS_TAG_CRYPTO_CTX,
         .uint64Param = 0
     },
@@ -75,15 +69,15 @@ static const struct HksParam g_params[] = {
 HWTEST_F(HksKeyNodeTest, HksKeyNodeTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksKeyNodeTest001");
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksKeyNodeTest001 HksInitParamSet failed";
     ret = HksAddParams(paramSet, g_params, sizeof(g_params) / sizeof(g_params[0]));
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksKeyNodeTest001 HksAddParams failed";
     ret = HksBuildParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksKeyNodeTest001 HksBuildParamSet failed";
-    struct HuksKeyNode *keyNode = HksCreateKeyNode(NULL, paramSet);
+    struct HuksKeyNode *keyNode = HksCreateKeyNode(nullptr, paramSet);
 
-    EXPECT_EQ(keyNode == NULL, true) << "HksKeyNodeTest001 HksCreateKeyNode not failed";
+    EXPECT_EQ(keyNode == nullptr, true) << "HksKeyNodeTest001 HksCreateKeyNode not failed";
 }
 }
