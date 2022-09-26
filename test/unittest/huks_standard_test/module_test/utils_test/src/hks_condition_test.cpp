@@ -90,7 +90,7 @@ HWTEST_F(HksConditionTest, HksConditionTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksConditionTest002");
     HksCondition *condition = HksConditionCreate();
-    EXPECT_EQ(condition == NULL, false) << "HksConditionCreate failed";
+    EXPECT_EQ(condition == nullptr, false) << "HksConditionCreate failed";
     std::thread thObj(NotifyCondition, condition);
     int32_t ret = HksConditionWait(condition);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksConditionTest002 failed, ret = " << ret;

@@ -16,7 +16,7 @@
 #include "huks_core_dynamic_hal_test.h"
 
 #include <gtest/gtest.h>
-#include <string.h>
+#include <string>
 
 #include "hks_api.h"
 #include "hks_log.h"
@@ -74,7 +74,7 @@ HWTEST_F(HksIpcCoreDynamicHalTest, HksIpcCoreDynamicHalTest001, TestSize.Level0)
 HWTEST_F(HksIpcCoreDynamicHalTest, HksIpcCoreDynamicHalTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcCoreDynamicHalTest002");
-    struct HuksHdi *hdi = NULL;
+    struct HuksHdi *hdi = nullptr;
     int32_t ret = HksCreateHuksHdiDevice(&hdi);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCreateHuksHdiDevice failed, ret = " << ret;
     ret = HksCreateHuksHdiDevice(&hdi);
@@ -91,7 +91,7 @@ HWTEST_F(HksIpcCoreDynamicHalTest, HksIpcCoreDynamicHalTest002, TestSize.Level0)
 HWTEST_F(HksIpcCoreDynamicHalTest, HksIpcCoreDynamicHalTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcCoreDynamicHalTest003");
-    struct HuksHdi *hdi = NULL;
+    struct HuksHdi *hdi = nullptr;
     int32_t ret = HksCreateHuksHdiDevice(&hdi);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCreateHuksHdiDevice failed, ret = " << ret;
     ret = HksDestroyHuksHdiDevice(&hdi);
@@ -106,7 +106,7 @@ HWTEST_F(HksIpcCoreDynamicHalTest, HksIpcCoreDynamicHalTest003, TestSize.Level0)
 HWTEST_F(HksIpcCoreDynamicHalTest, HksIpcCoreDynamicHalTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksIpcCoreDynamicHalTest004");
-    struct HuksHdi *hdi = NULL;
+    struct HuksHdi *hdi = nullptr;
     int32_t ret = HksDestroyHuksHdiDevice(&hdi);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDestroyHuksHdiDevice failed, ret = " << ret;
 }

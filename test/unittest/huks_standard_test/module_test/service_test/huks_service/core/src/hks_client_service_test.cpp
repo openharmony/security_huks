@@ -16,7 +16,7 @@
 #include "hks_client_service_test.h"
 
 #include <gtest/gtest.h>
-#include <string.h>
+#include <string>
 
 #include "hks_api.h"
 #include "hks_attest_key_test_common.h"
@@ -90,7 +90,7 @@ static int32_t TestGenerateKey(const struct HksBlob *keyAlias, const struct HksP
         return ret;
     }
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, NULL);
+    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksServiceDeleteProcessInfo HksGenerateKey failed");
     }
@@ -143,7 +143,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest002, TestSize.Level0)
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
 
-    struct HksBlob processName2 = { 0, NULL };
+    struct HksBlob processName2 = { 0, nullptr };
     struct HksProcessInfo processInfo2 = { userId, processName2, userIdInt };
     HksServiceDeleteProcessInfo(&processInfo2);
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
@@ -162,11 +162,11 @@ static void FreeCertChainBlob(struct HksBlob *certChain)
 static int32_t ConstructCertChainBlob(struct HksBlob **outCertChain)
 {
     struct HksBlob *certChain = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob) * HKS_CERT_COUNT);
-    if (certChain == NULL) {
+    if (certChain == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
     certChain->data = (uint8_t *)HksMalloc(g_defaultCertSize);
-    if (certChain->data == NULL) {
+    if (certChain->data == nullptr) {
         FreeCertChainBlob(certChain);
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -205,9 +205,9 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest003, TestSize.Level0)
     struct HksProcessInfo processInfo = { userId, processName, userIdInt };
     int32_t ret = TestGenerateKey(&keyAliasBlob, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "TestGenerateKey failed, ret = " << ret;
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
-    struct HksBlob *certChain = NULL;
+    struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ConstructCertChainBlob failed, ret = " << ret;
     ret = HksServiceAttestKey(&processInfo, &keyAliasBlob, paramSet, certChain);
@@ -236,12 +236,12 @@ static const struct HksParam g_generateX25519Params[] = {
 
 static int32_t GenerateX25519(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
 {
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     int32_t ret = GenerateParamSet(&paramSet, g_generateX25519Params, sizeof(g_generateX25519Params) /
         sizeof(g_generateX25519Params[0]));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateParamSet failed, ret = " << ret;
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, NULL);
+    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed, ret = " << ret;
     return ret;
 }
@@ -272,9 +272,9 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest004, TestSize.Level0)
     struct HksProcessInfo processInfo = { userId, processName, userIdInt };
     int32_t ret = GenerateX25519(&g_keyAlias, &processInfo);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateX25519 failed, ret = " << ret;
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     GenerateParamSet(&paramSet, g_attestParams, sizeof(g_attestParams) / sizeof(g_attestParams[0]));
-    struct HksBlob *certChain = NULL;
+    struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ConstructCertChainBlob failed, ret = " << ret;
     ret = HksServiceAttestKey(&processInfo, &g_keyAlias, paramSet, certChain);
@@ -297,12 +297,12 @@ static const struct HksParam g_generateECCParams[] = {
 
 static int32_t GenerateECC(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
 {
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     int32_t ret = GenerateParamSet(&paramSet, g_generateECCParams, sizeof(g_generateECCParams) /
         sizeof(g_generateECCParams[0]));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateParamSet failed, ret = " << ret;
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, NULL);
+    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed, ret = " << ret;
     return ret;
 }
@@ -333,9 +333,9 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest005, TestSize.Level0)
     struct HksProcessInfo processInfo = { userId, processName, userIdInt };
     int32_t ret = GenerateECC(&g_keyAlias, &processInfo);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest005 GenerateECC failed, ret = " << ret;
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     GenerateParamSet(&paramSet, g_attestParams, sizeof(g_attestParams) / sizeof(g_attestParams[0]));
-    struct HksBlob *certChain = NULL;
+    struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "HksClientServiceTest005 ConstructCertChainBlob failed, ret = " << ret;
     ret = HksServiceAttestKey(&processInfo, &g_keyAlias, paramSet, certChain);
