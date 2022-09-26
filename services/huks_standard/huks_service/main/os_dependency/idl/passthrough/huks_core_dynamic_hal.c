@@ -30,7 +30,7 @@ typedef void (*HalDestroyHandle)(struct HuksHdi *);
 
 void *g_halDeviceHandle = NULL;
 
-int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
+__attribute__((no_sanitize("cfi"))) int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if (halDevice == NULL) {
         HKS_LOG_E("invalid input halDevice");
@@ -63,7 +63,7 @@ int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
     return HKS_SUCCESS;
 }
 
-int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
+__attribute__((no_sanitize("cfi"))) int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
 {
     if ((halDevice == NULL) || (*halDevice == NULL)) {
         return HKS_SUCCESS;

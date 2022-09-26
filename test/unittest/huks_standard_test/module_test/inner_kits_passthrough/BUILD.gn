@@ -118,8 +118,6 @@ config("hilog_dir") {
 ohos_static_library("libhukssdk_static") {
   sanitize = {
     integer_overflow = true
-    cfi = true
-    debug = true
   }
   subsystem_name = "security"
   part_name = "huks"
