@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,46 +13,49 @@
 
 import("//build/ohos.gni")
 
-config("huks_config") {
-  include_dirs = [
-    "include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+ohos_ndk_library("libhuks_ndk") {
+  output_name = "huks_ndk"
+  output_extension = "z.so"
+  ndk_description_file = "./libhuks.ndk.json"
+  min_compact_version = "1"
+
+  # system_capability = "SystemCapability.Security.Huks"
+}
+
+ohos_ndk_headers("huks_header") {
+  dest_dir = "$ndk_headers_out_dir/huks"
+  sources = [
+    "./include/native_huks_api.h",
+    "./include/native_huks_param.h",
+    "./include/native_huks_type.h",
   ]
 }
 
-ohos_static_library("libhuks_common_standard_static") {
-  sanitize = {
-    integer_overflow = true
-  }
-  subsystem_name = "security"
-  part_name = "huks"
+ohos_shared_library("huks_ndk") {
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
-  public_configs =
-      [ ":huks_config" ]  # Share include files for other gn when deps.
 
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
+    "//base/security/huks/interfaces/kits/c/include",
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
 
   sources = [
-    "src/hks_ability.c",
-    "src/hks_base_check.c",
-    "src/hks_check_paramset.c",
-    "src/hks_common_check.c",
-    "src/hks_crypto_adapter.c",
-    "src/hks_errcode_adapter.c",
-    "src/hks_param.c",
+    "src/native_huks_api.c",
+    "src/native_huks_param.c",
   ]
 
-  cflags = [
-    "-DHILOG_ENABLE",
+  external_deps = [ "huks:libhukssdk" ]
+
+  cflags_cc = [
     "-Wall",
     "-Werror",
   ]
-  complete_static_lib = true
+
+  part_name = "huks"
+  subsystem_name = "security"
 }

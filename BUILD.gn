@@ -22,6 +22,12 @@ group("huks_sdk_test") {
   }
 }
 
+group("huks_capi") {
+  if (os_level == "standard") {
+    deps = [ "//base/security/huks/interfaces/kits/c:huks_ndk" ]
+  }
+}
+
 group("huks_napi") {
   if (os_level == "standard") {
     if (support_jsapi) {
@@ -43,6 +49,7 @@ group("fwk_group") {
   if (os_level == "standard") {
     deps = [
       "//base/security/huks:cipher_napi",
+      "//base/security/huks:huks_capi",
       "//base/security/huks:huks_napi",
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     ]
