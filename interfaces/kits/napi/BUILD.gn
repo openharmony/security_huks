@@ -14,6 +14,9 @@
 import("//build/ohos.gni")
 
 ohos_shared_library("huks") {
+  sanitize = {
+    integer_overflow = true
+  }
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
