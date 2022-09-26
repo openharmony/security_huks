@@ -27,16 +27,16 @@
         "name": "OH_Huks_AttestKeyItem"
     },
     {
-        "name": "OH_Huks_DoInit"
+        "name": "OH_Huks_InitSession"
     },
     {
-        "name": "OH_Huks_DoUpdate"
+        "name": "OH_Huks_UpdateSession"
     },
     {
-        "name": "OH_Huks_DoFinish"
+        "name": "OH_Huks_FinishSession"
     },
     {
-        "name": "OH_Huks_DoAbort"
+        "name": "OH_Huks_AbortSession"
     },
     {
         "name": "OH_Huks_InitParamSet"
