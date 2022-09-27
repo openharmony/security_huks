@@ -17,7 +17,7 @@ ohos_shared_library("huks") {
   sanitize = {
     integer_overflow = true
     cfi = true
-    debug = true
+    debug = false
   }
   defines = [
     "L2_STANDARD",
