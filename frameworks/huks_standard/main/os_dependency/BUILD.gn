@@ -24,7 +24,7 @@ ohos_static_library("libhuks_os_dependency_standard_static") {
   sanitize = {
     integer_overflow = true
     cfi = true
-    debug = true
+    debug = false
   }
   subsystem_name = "security"
   part_name = "huks"
