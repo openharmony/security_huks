@@ -173,7 +173,7 @@ int32_t HksMbedtlsGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
 
     if (memcpy_s(output->data, output->size, input->data, sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize) !=
         EOK) {
-        return HKS_ERROR_INVALID_OPERATION;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     ((struct KeyMaterialDh *)output->data)->priKeySize = 0;
     ((struct KeyMaterialDh *)output->data)->reserved = 0;

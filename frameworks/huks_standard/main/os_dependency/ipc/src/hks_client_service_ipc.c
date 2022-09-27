@@ -674,7 +674,7 @@ static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob
     }
     if (memcpy_s(out->data, out->size, data, size) != EOK) {
         HKS_LOG_E("copy failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     out->size = size;
     return HKS_SUCCESS;
@@ -700,7 +700,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
 
         if (outBlob.size < HANDLE_SIZE) {
             HKS_LOG_E("invalid out size[%u]", outBlob.size);
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
         ret = CopyData(outBlob.data, HANDLE_SIZE, handle);

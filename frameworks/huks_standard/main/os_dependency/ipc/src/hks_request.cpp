@@ -68,7 +68,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 
     const uint8_t *outData = reply.ReadBuffer(outLen);
     if (outData == nullptr) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_IPC_MSG_FAIL;
     }
 
     if (outBlob->size < outLen) {
@@ -77,7 +77,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     }
 
     if (memcpy_s(outBlob->data, outBlob->size, outData, outLen) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     outBlob->size = outLen;
     return HKS_SUCCESS;

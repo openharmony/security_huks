@@ -124,7 +124,7 @@ int32_t HksMbedtlsGetMainKey(const struct HksBlob *message, struct HksBlob *main
 
     if (memcpy_s(mainKey->data, mainKey->size, stubBuf, sizeof(stubBuf)) != EOK) {
         HKS_LOG_E("memcpy failed, get stub main key failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return HKS_SUCCESS;
 #endif

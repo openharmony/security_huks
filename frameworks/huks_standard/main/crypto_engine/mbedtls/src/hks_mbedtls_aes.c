@@ -197,7 +197,7 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
     do {
         if (message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
             HKS_LOG_E("AesCbcNoPaddingCryptUpdate data size invalid!");
-            ret = HKS_FAILURE;
+            ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
 
@@ -244,7 +244,7 @@ static int32_t AesCbcNoPaddingCryptFinal(void **cryptoCtx,
     do {
         if (message->size % HKS_AES_CBC_DATA_BLOB_SIZE != 0) {
             HKS_LOG_E("AesCbcNoPaddingCryptFinal data size invalid!");
-            ret = HKS_FAILURE;
+            ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
 
@@ -1232,7 +1232,7 @@ static int32_t AesEcbNoPaddingData(mbedtls_cipher_context_t *ecbNoPadingctx, siz
             if (memcpy_s(tmpMessage, blockSize, message->data + point, tmpSize)) {
                 HKS_LOG_E("copy data failed");
                 HksFree(tmpMessage);
-                return HKS_ERROR_BAD_STATE;
+                return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
             size_t olen;
             ret = mbedtls_cipher_update(ecbNoPadingctx, tmpMessage, tmpSize, cipherText->data + point, &olen);
@@ -1272,7 +1272,7 @@ static mbedtls_cipher_context_t *GetAesEcbNoPaddingCtx(void *cryptoCtx, const st
             HKS_LOG_E("Ecb No padding update!message.size[%d] blockSize[%d]", message->size, blockSize);
             if (blockSize == 0 || (message->size % blockSize != 0)) {
                 HKS_LOG_E("The size of message is invalid.");
-                ret = HKS_FAILURE;
+                ret = HKS_ERROR_INVALID_ARGUMENT;
                 break;
             }
 

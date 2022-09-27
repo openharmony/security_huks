@@ -43,7 +43,7 @@ static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey,
     if (EVP_PKEY_get_raw_public_key(pKey, buffer + offset, &tmpPubKeyLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         HksFree(buffer);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     uint32_t pubKeyLen = (uint32_t)tmpPubKeyLen;
 
@@ -51,7 +51,7 @@ static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey,
     if (EVP_PKEY_get_raw_private_key(pKey, buffer + offset, &tmpPriKeyLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         HksFree(buffer);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     uint32_t priKeyLen = (uint32_t)tmpPriKeyLen;
 
@@ -83,19 +83,19 @@ int32_t HksOpensslCurve25519GenerateKey(const struct HksKeySpec *spec, struct Hk
     do {
         if ((pctx = EVP_PKEY_CTX_new_id(GetCurve25519Id(spec->algType), NULL)) == NULL) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
         if (EVP_PKEY_keygen_init(pctx) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
         if (EVP_PKEY_keygen(pctx, &pkey) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
@@ -124,7 +124,7 @@ static int32_t ImportX25519EvpKey(EVP_PKEY **ours, EVP_PKEY **theirs, const stru
     if (*ours == NULL) {
         HKS_LOG_E("invalid private key");
         HksLogOpensslError();
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     struct KeyMaterial25519 *kmPub = (struct KeyMaterial25519 *)pubKey->data;
@@ -136,7 +136,7 @@ static int32_t ImportX25519EvpKey(EVP_PKEY **ours, EVP_PKEY **theirs, const stru
         HksLogOpensslError();
         EVP_PKEY_free(*ours);
         *ours = NULL;
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     return HKS_SUCCESS;
@@ -160,22 +160,22 @@ int32_t HksOpensslX25519AgreeKey(const struct HksBlob *nativeKey, const struct H
         ctx = EVP_PKEY_CTX_new(ours, NULL);
         if (ctx == NULL) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
         if (EVP_PKEY_derive_init(ctx) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
         if (EVP_PKEY_derive_set_peer(ctx, theirs) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
         if (EVP_PKEY_derive(ctx, sharedKey->data, &tmpSharedKeySize) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
         sharedKey->size = (uint32_t)tmpSharedKeySize;
     } while (0);
@@ -264,14 +264,14 @@ int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksUsageSp
     EVP_PKEY *edKey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, key->data + offset, km->priKeySize);
     if (edKey == NULL) {
         HksLogOpensslError();
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if (mdctx == NULL) {
         HksLogOpensslError();
         EVP_PKEY_free(edKey);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -310,14 +310,14 @@ int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsage
         km->pubKeySize);
     if (edKey == NULL) {
         HksLogOpensslError();
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if (mdctx == NULL) {
         HksLogOpensslError();
         EVP_PKEY_free(edKey);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -347,7 +347,7 @@ int32_t HksOpensslGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *
     uint32_t outLen = sizeof(struct KeyMaterial25519) + key->pubKeySize;
     if (memcpy_s(output->data, output->size, key, outLen) != EOK) {
         HKS_LOG_E("memcpy_s ed25519 pub key Fail!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     ((struct KeyMaterial25519 *)output->data)->priKeySize = 0;

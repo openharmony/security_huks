@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_NAPI_GET_CERTIFICATE_CHAIN_H
-#define HUKS_NAPI_GET_CERTIFICATE_CHAIN_H
+#ifndef HUKS_NAPI_ATTEST_KEY_ITEM_H
+#define HUKS_NAPI_ATTEST_KEY_ITEM_H
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-namespace HuksNapi {
-napi_value HuksNapiGetCertificateChain(napi_env env, napi_callback_info info);
-}  // namespace HuksNapi
+namespace HuksNapiItem {
+napi_value HuksNapiAttestKeyItem(napi_env env, napi_callback_info info);
+}  // namespace HuksNapiItem
 
-#endif  // HUKS_NAPI_GET_CERTIFICATE_CHAIN_H
+#endif  // HUKS_NAPI_ATTEST_KEY_ITEM_H

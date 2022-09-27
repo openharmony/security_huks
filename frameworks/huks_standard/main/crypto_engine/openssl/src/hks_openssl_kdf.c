@@ -46,7 +46,7 @@ int32_t HksOpensslPbkdf2(const struct HksBlob *mainKey, const struct HksKeySpec 
     if (PKCS5_PBKDF2_HMAC((char *)mainKey->data, mainKey->size, deriveParam->salt.data, deriveParam->salt.size,
         deriveParam->iterations, md, derivedKey->size, derivedKey->data) != 1) {
         HKS_LOG_E("derive pbkdf2 key using openssl interface failed");
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
 }
@@ -58,7 +58,7 @@ int32_t HksOpensslHkdf(const struct HksBlob *mainKey, const struct HksKeySpec *d
     const EVP_MD *md = GetDeriveDigestType(deriveParam->digestAlg);
     EVP_PKEY_CTX *pctx;
     pctx = EVP_PKEY_CTX_new_id(EVP_PKEY_HKDF, NULL);
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
         if (EVP_PKEY_derive_init(pctx) <= 0) {
             HksLogOpensslError();

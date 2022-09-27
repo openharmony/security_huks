@@ -51,7 +51,7 @@ static int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t
     /* Extract file flag. */
     if (memcpy_s(fileFlag, HKS_RKC_KSF_FLAG_LEN, ksfFromFile->data + *ksfBufOffset, HKS_RKC_KSF_FLAG_LEN) != EOK) {
         HKS_LOG_E("Memcpy file flag failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     /* Check file flag. */
@@ -67,32 +67,32 @@ static int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t
 static int32_t RkcExtractTime(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset, struct HksTime *time)
 {
     if (memcpy_s(&(time->hksYear), sizeof(uint16_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint16_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint16_t);
 
     if (memcpy_s(&(time->hksMon), sizeof(uint8_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint8_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(&(time->hksDay), sizeof(uint8_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint8_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(&(time->hksHour), sizeof(uint8_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint8_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(&(time->hksMin), sizeof(uint8_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint8_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(&(time->hksSec), sizeof(uint8_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint8_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
@@ -104,7 +104,7 @@ static int32_t RkcExtractKsfRk(const struct HksBlob *ksfFromFile,
 {
     /* Extract version */
     if (memcpy_s(&(ksfData->version), sizeof(uint16_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint16_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint16_t);
 
@@ -123,40 +123,40 @@ static int32_t RkcExtractKsfRk(const struct HksBlob *ksfFromFile,
     /* Extract the first material */
     if (memcpy_s(&(ksfData->rkMaterial1), HKS_RKC_MATERIAL_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
     /* Extract the second material */
     if (memcpy_s(&(ksfData->rkMaterial2), HKS_RKC_MATERIAL_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
     /* Extract iterator number */
     if (memcpy_s(&(ksfData->rmkIter), sizeof(uint32_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Extract salt */
     if (memcpy_s(&(ksfData->rmkSalt), HKS_RKC_SALT_LEN, ksfFromFile->data + *ksfBufOffset, HKS_RKC_SALT_LEN) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_SALT_LEN;
 
     /* Extract hash algorithm */
     if (memcpy_s(&(ksfData->rmkHashAlg), sizeof(uint32_t),
         ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Extract reserve field */
     if (memcpy_s(&(ksfData->rkRsv), HKS_RKC_KSF_DATA_RSV_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_KSF_DATA_RSV_LEN;
 
@@ -184,14 +184,14 @@ static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
     if (memcpy_s(&(ksfData->mkEncryptAlg), sizeof(uint32_t),
         ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy mkEncryptAlg failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Fill IV */
     if (memcpy_s(&(ksfData->mkIv), HKS_RKC_MK_IV_LEN, ksfFromFile->data + *ksfBufOffset, HKS_RKC_MK_IV_LEN) != EOK) {
         HKS_LOG_E("Memcpy mkIv failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MK_IV_LEN;
 
@@ -199,7 +199,7 @@ static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
     if (memcpy_s(&(ksfData->mkCiphertext), HKS_RKC_MK_CIPHER_TEXT_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_MK_CIPHER_TEXT_LEN) != EOK) {
         HKS_LOG_E("Memcpy mkCiphertext failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MK_CIPHER_TEXT_LEN;
 
@@ -207,7 +207,7 @@ static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
     if (memcpy_s(&(ksfData->mkRsv), HKS_RKC_KSF_DATA_RSV_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
         HKS_LOG_E("Memcpy mkRsv failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_KSF_DATA_RSV_LEN;
 
@@ -231,7 +231,7 @@ static int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ks
     uint8_t ksfHash[HKS_RKC_HASH_LEN] = {0};
     if (memcpy_s(&ksfHash, HKS_RKC_HASH_LEN, ksfFromFile->data + *ksfBufOffset, HKS_RKC_HASH_LEN) != EOK) {
         HKS_LOG_E("Memcpy ksfHash failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_HASH_LEN;
 
@@ -330,37 +330,37 @@ static int32_t RkcFillKsfTime(const struct HksTime *time, struct HksBlob *ksfBuf
 {
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint16_t), &(time->hksYear), sizeof(uint16_t)) != EOK) {
         HKS_LOG_E("Memcpy hksYear failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint16_t);
 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint8_t), &(time->hksMon), sizeof(uint8_t)) != EOK) {
         HKS_LOG_E("Memcpy hksMon failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint8_t), &(time->hksDay), sizeof(uint8_t)) != EOK) {
         HKS_LOG_E("Memcpy hksDay failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint8_t), &(time->hksHour), sizeof(uint8_t)) != EOK) {
         HKS_LOG_E("Memcpy hksHour failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint8_t), &(time->hksMin), sizeof(uint8_t)) != EOK) {
         HKS_LOG_E("Memcpy hksMin failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint8_t), &(time->hksSec), sizeof(uint8_t)) != EOK) {
         HKS_LOG_E("Memcpy hksSec failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint8_t);
 
@@ -371,7 +371,7 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 {
     /* Fill version */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint16_t), &(ksfData->version), sizeof(uint16_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint16_t);
 
@@ -391,7 +391,7 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN,
         ksfData->rkMaterial1, HKS_RKC_MATERIAL_LEN) != EOK) {
         HKS_LOG_E("Memcpy first material to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
@@ -399,28 +399,28 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN,
         ksfData->rkMaterial2, HKS_RKC_MATERIAL_LEN) != EOK) {
         HKS_LOG_E("Memcpy second material to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
     /* Fill iterator number */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->rmkIter), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy iterator number to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Fill salt */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_SALT_LEN, ksfData->rmkSalt, HKS_RKC_SALT_LEN) != EOK) {
         HKS_LOG_E("Memcpy salt to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_SALT_LEN;
 
     /* Fill hash algorithm */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->rmkHashAlg), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy hash algorithm to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
@@ -428,7 +428,7 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN,
         ksfData->rkRsv, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
         HKS_LOG_E("Memcpy reserve field to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_KSF_DATA_RSV_LEN;
 
@@ -454,14 +454,14 @@ static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     /* Fill encrption algorithm */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->mkEncryptAlg), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy encrption algorithm to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Fill IV */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MK_IV_LEN, ksfData->mkIv, HKS_RKC_MK_IV_LEN) != EOK) {
         HKS_LOG_E("Memcpy iv to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MK_IV_LEN;
 
@@ -469,7 +469,7 @@ static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MK_CIPHER_TEXT_LEN,
         ksfData->mkCiphertext, HKS_RKC_MK_CIPHER_TEXT_LEN) != EOK) {
         HKS_LOG_E("Memcpy ciphertext to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MK_CIPHER_TEXT_LEN;
 
@@ -477,7 +477,7 @@ static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN,
         ksfData->mkRsv, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
         HKS_LOG_E("Memcpy reserve field to ksf buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_KSF_DATA_RSV_LEN;
 
@@ -511,7 +511,7 @@ static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob
     /* Fill file flag */
     if (memcpy_s(ksfBuf->data, HKS_RKC_KSF_FLAG_LEN, g_hksRkcKsfFlag, HKS_RKC_KSF_FLAG_LEN) != EOK) {
         HKS_LOG_E("Memcpy file flag to ksd buf failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     ksfBufOffset += HKS_RKC_KSF_FLAG_LEN;
 

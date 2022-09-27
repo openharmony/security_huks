@@ -25,7 +25,7 @@ static int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob
     }
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(value), sizeof(value)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     *destOffset += sizeof(value);
@@ -45,14 +45,14 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
         &(blob->size), sizeof(blob->size)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     *destOffset += sizeof(blob->size);
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size) != EOK) {
         *destOffset -= sizeof(blob->size);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     *destOffset += ALIGN_SIZE(blob->size);
@@ -71,7 +71,7 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
         paramSet, paramSet->paramSetSize) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     *destOffset += ALIGN_SIZE(paramSet->paramSetSize);
@@ -85,7 +85,7 @@ static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlo
     }
 
     if (memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(uint32_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     *srcOffset += sizeof(uint32_t);

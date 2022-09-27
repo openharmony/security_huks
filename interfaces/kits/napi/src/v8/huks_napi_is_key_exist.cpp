@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *    http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_abort.h"
+#include "huks_napi_is_key_exist.h"
 
 #include "securec.h"
 
@@ -26,56 +26,56 @@
 
 namespace HuksNapi {
 namespace {
-constexpr int HUKS_NAPI_ABORT_MIN_ARGS = 2;
-constexpr int HUKS_NAPI_ABORT_MAX_ARGS = 3;
+constexpr int HUKS_NAPI_IS_KEY_EXIST_MIN_ARGS = 2;
+constexpr int HUKS_NAPI_IS_KEY_EXIST_MAX_ARGS = 3;
 }  // namespace
 
-struct AbortAsyncContextT {
+struct IsKeyExistAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
 
     int32_t result = 0;
-    struct HksBlob *handle = nullptr;
+    struct HksBlob *keyAlias = nullptr;
     struct HksParamSet *paramSet = nullptr;
 };
-using AbortAsyncContext = AbortAsyncContextT *;
+using IsKeyExistAsyncContext = IsKeyExistAsyncContextT *;
 
-static AbortAsyncContext CreateAbortAsyncContext()
+static IsKeyExistAsyncContext CreateIsKeyExistAsyncContext()
 {
-    AbortAsyncContext context = (AbortAsyncContext)HksMalloc(sizeof(AbortAsyncContextT));
+    IsKeyExistAsyncContext context = (IsKeyExistAsyncContext)HksMalloc(sizeof(IsKeyExistAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(AbortAsyncContextT), 0, sizeof(AbortAsyncContextT));
+        (void)memset_s(context, sizeof(IsKeyExistAsyncContextT), 0, sizeof(IsKeyExistAsyncContextT));
     }
     return context;
 }
 
-static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context)
+static void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext &context)
 {
     if (context == nullptr) {
         return;
     }
-    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->handle, context->paramSet);
+    DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
     HksFree(context);
     context = nullptr;
 }
 
-static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortAsyncContext context)
+static napi_value IsKeyExistParseParams(napi_env env, napi_callback_info info, IsKeyExistAsyncContext context)
 {
-    size_t argc = HUKS_NAPI_ABORT_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_ABORT_MAX_ARGS] = {0};
+    size_t argc = HUKS_NAPI_IS_KEY_EXIST_MAX_ARGS;
+    napi_value argv[HUKS_NAPI_IS_KEY_EXIST_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
-    if (argc < HUKS_NAPI_ABORT_MIN_ARGS) {
+    if (argc < HUKS_NAPI_IS_KEY_EXIST_MIN_ARGS) {
         napi_throw_error(env, NULL, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
 
     size_t index = 0;
-    napi_value result = ParseHandleAndHksParamSet(env, argv, index, context->handle, context->paramSet);
+    napi_value result = ParseKeyAliasAndHksParamSet(env, argv, index, context->keyAlias, context->paramSet);
     if (result == nullptr) {
-        HKS_LOG_E("abort parse failed");
+        HKS_LOG_E("isKeyExist parse params failed");
         return nullptr;
     }
 
@@ -87,38 +87,45 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
     return GetInt32(env, 0);
 }
 
-static napi_value AbortWriteResult(napi_env env, AbortAsyncContext context)
+static napi_value IsKeyExistWriteResult(napi_env env, IsKeyExistAsyncContext context)
 {
-    return GenerateHksResult(env, context->result, nullptr, 0);
+    napi_value isKeyExist = nullptr;
+    if (context->result == HKS_SUCCESS) {
+        NAPI_CALL(env, napi_get_boolean(env, true, &isKeyExist));
+    } else {
+        NAPI_CALL(env, napi_get_boolean(env, false, &isKeyExist));
+    }
+    return isKeyExist;
 }
 
-static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
+static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
         NAPI_CALL(env, napi_create_promise(env, &context->deferred, &promise));
     }
 
-    napi_value resourceName;
-    napi_create_string_latin1(env, "AbortAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_value resourceName = nullptr;
+    napi_create_string_latin1(env, "isKeyExistAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
     napi_create_async_work(
         env,
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
-            context->result = HksAbort(context->handle, context->paramSet);
+            IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
+
+            context->result = HksKeyExist(context->keyAlias, context->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
-            napi_value result = AbortWriteResult(env, context);
+            IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
+            napi_value result = IsKeyExistWriteResult(env, context);
             if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
             } else if (result != nullptr) {
                 CallAsyncCallback(env, context->callback, context->result, result);
             }
-            DeleteAbortAsyncContext(env, context);
+            DeleteIsKeyExistAsyncContext(env, context);
         },
         (void *)context,
         &context->asyncWork);
@@ -126,7 +133,7 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
-        DeleteAbortAsyncContext(env, context);
+        DeleteIsKeyExistAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
@@ -138,25 +145,25 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
     }
 }
 
-napi_value HuksNapiAbort(napi_env env, napi_callback_info info)
+napi_value HuksNapiIsKeyExist(napi_env env, napi_callback_info info)
 {
-    AbortAsyncContext context = CreateAbortAsyncContext();
+    IsKeyExistAsyncContext context = CreateIsKeyExistAsyncContext();
     if (context == nullptr) {
         HKS_LOG_E("could not create context");
         return nullptr;
     }
 
-    napi_value result = ParseAbortParams(env, info, context);
+    napi_value result = IsKeyExistParseParams(env, info, context);
     if (result == nullptr) {
         HKS_LOG_E("could not parse params");
-        DeleteAbortAsyncContext(env, context);
+        DeleteIsKeyExistAsyncContext(env, context);
         return nullptr;
     }
 
-    result = AbortAsyncWork(env, context);
+    result = IsKeyExistAsyncWork(env, context);
     if (result == nullptr) {
         HKS_LOG_E("could not start async work");
-        DeleteAbortAsyncContext(env, context);
+        DeleteIsKeyExistAsyncContext(env, context);
         return nullptr;
     }
     return result;
