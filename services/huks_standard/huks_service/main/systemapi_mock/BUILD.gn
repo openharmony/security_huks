@@ -20,6 +20,8 @@ config("libhuks_service_systemapi_mock_config") {
 ohos_static_library("libhuks_service_systemapi_mock_static") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = false
   }
   subsystem_name = "security"
   part_name = "huks"
