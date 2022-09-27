@@ -833,7 +833,7 @@ static int32_t InitInputParams(enum CheckKeyType checkType, struct ParamsValues 
             if (memcpy_s(inputParams, sizeof(*inputParams), &checkSet[i].paramValues,
                 sizeof(checkSet[i].paramValues)) != EOK) {
                 HKS_LOG_E("init input params: memcpy failed");
-                return HKS_ERROR_BAD_STATE;
+                return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
             return HKS_SUCCESS;
         }
@@ -902,7 +902,7 @@ static int32_t InitExpectParams(enum CheckKeyType checkType, struct ExpectParams
             if (memcpy_s(expectValues, sizeof(*expectValues), &checkSet[i].paramValues,
                 sizeof(checkSet[i].paramValues)) != EOK) {
                 HKS_LOG_E("init expect params: memcpy failed");
-                return HKS_ERROR_BAD_STATE;
+                return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
             return HKS_SUCCESS;
         }
@@ -1823,12 +1823,12 @@ int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, u
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
     int32_t ret = HksCheckValue(userAuthType, g_supportUserAuthTypes, HKS_ARRAY_SIZE(g_supportUserAuthTypes));
     if (ret != HKS_SUCCESS) {
-        return ret;
+        return HKS_ERROR_INVALID_AUTH_TYPE;
     }
 
     ret = HksCheckValue(challengeType, g_userAuthChallengeType, HKS_ARRAY_SIZE(g_userAuthChallengeType));
     if (ret != HKS_SUCCESS) {
-        return ret;
+        return HKS_ERROR_INVALID_CHALLENGE_TYPE;
     }
 
     return HksCheckAuthAccessTypeByUserAuthType(userAuthType, authAccessType);

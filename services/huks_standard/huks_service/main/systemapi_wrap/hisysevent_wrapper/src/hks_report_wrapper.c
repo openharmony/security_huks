@@ -73,7 +73,7 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
     }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, tag->data, tag->size) != EOK) {
         HKS_LOG_E("copy extra tag failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *index += tag->size;
 
@@ -83,7 +83,7 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
     }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *index += sizeof(char);
 
@@ -102,7 +102,7 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
     }
     if (memcpy_s(extraOut + *index, EXTRA_DATA_SIZE - *index, &split, sizeof(char)) != EOK) {
         HKS_LOG_E("copy split failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *index += sizeof(char);
     return HKS_SUCCESS;
@@ -180,13 +180,13 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
             if (memcpy_s(&userId, sizeof(userId), processInfo->userId.data,
                 processInfo->userId.size) != EOK) {
                 HKS_LOG_E("copy user id failed!");
-                ret = HKS_ERROR_BAD_STATE;
+                ret = HKS_ERROR_INSUFFICIENT_MEMORY;
                 break;
             }
             if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data,
                 processInfo->processName.size) != EOK) {
                 HKS_LOG_E("copy process name failed!");
-                ret = HKS_ERROR_BAD_STATE;
+                ret = HKS_ERROR_INSUFFICIENT_MEMORY;
                 break;
             }
         }

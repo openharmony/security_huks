@@ -89,7 +89,7 @@ static int32_t CalcHeaderMac(const struct HksBlob *salt, const uint8_t *buf,
     struct HksParamSet *paramSet = NULL;
     do {
         if (memcpy_s(srcData.data, srcData.size, buf, srcSize) != EOK) {
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 
@@ -419,14 +419,14 @@ static int32_t AdjustImageBuffer(uint32_t totalLenAdded, const struct HksBlob *k
     /* copy old imagebuf to new malloc buf */
     if (memcpy_s(buf, newBufLen, g_storageImageBuffer.data, keyInfoHead->totalLen) != EOK) {
         HKS_FREE_PTR(buf);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     /* append new add key buffer to the end */
     if (memcpy_s(buf + keyInfoHead->totalLen, newBufLen - keyInfoHead->totalLen,
         keyBlob->data, keyBlob->size) != EOK) {
         HKS_FREE_PTR(buf);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     struct HksStoreHeaderInfo *newHead = (struct HksStoreHeaderInfo *)buf;
@@ -452,7 +452,7 @@ static int32_t AppendNewKey(const struct HksBlob *keyBlob)
     struct HksStoreHeaderInfo *keyInfoHead = (struct HksStoreHeaderInfo *)storageBuf.data;
 
     if (IsAdditionOverflow(keyInfoHead->totalLen, keyBlob->size)) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t totalLenAdded = keyInfoHead->totalLen + keyBlob->size;
@@ -465,7 +465,7 @@ static int32_t AppendNewKey(const struct HksBlob *keyBlob)
     if (storageBuf.size >= totalLenAdded) {
         if (memcpy_s(storageBuf.data + keyInfoHead->totalLen, storageBuf.size - keyInfoHead->totalLen,
             keyBlob->data, keyBlob->size) != EOK) {
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         keyInfoHead->totalLen = totalLenAdded;
         keyInfoHead->keyCount += 1;
@@ -479,7 +479,7 @@ static int32_t AppendNewKey(const struct HksBlob *keyBlob)
 static int32_t GetLenAfterAddKey(const struct HksBlob *keyBlob, uint32_t totalLen, uint32_t *totalLenAdded)
 {
     if (IsAdditionOverflow(totalLen, keyBlob->size)) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t newTotalLen = totalLen + keyBlob->size;
@@ -510,7 +510,7 @@ static int32_t DeleteKey(uint32_t keyOffset)
         if (memmove_s(keyInfo, keyInfoHead->totalLen - keyOffset, g_storageImageBuffer.data + nextKeyOffset,
             keyInfoHead->totalLen - nextKeyOffset) != EOK) {
             HKS_LOG_E("memmove image buffer failed");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         /* clear the last buffer */
         (void)memset_s(g_storageImageBuffer.data + keyInfoHead->totalLen - keyInfoLen, keyInfoLen, 0, keyInfoLen);
@@ -528,7 +528,7 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
 
     struct HksStoreHeaderInfo newkeyInfoHead;
     if (memcpy_s(&newkeyInfoHead, sizeof(newkeyInfoHead), keyInfoHead, sizeof(*keyInfoHead)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t totalLenAdded;
@@ -569,7 +569,7 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
     /* 5. replace header */
     if (memcpy_s(g_storageImageBuffer.data, sizeof(newkeyInfoHead), &newkeyInfoHead, sizeof(newkeyInfoHead)) != EOK) {
         HKS_LOG_E("replace header memcpy failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return HKS_SUCCESS;
 }
@@ -680,7 +680,7 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
     struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)(g_storageImageBuffer.data + offset);
     struct HksStoreHeaderInfo newkeyInfoHead;
     if (memcpy_s(&newkeyInfoHead, sizeof(newkeyInfoHead), keyInfoHead, sizeof(*keyInfoHead)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     newkeyInfoHead.totalLen -= keyInfo->keyInfoLen;
     newkeyInfoHead.keyCount -= 1;
@@ -698,7 +698,7 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
 
     /* 4. replace header */
     if (memcpy_s(keyInfoHead, sizeof(*keyInfoHead), &newkeyInfoHead, sizeof(newkeyInfoHead)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t fileOffset = HksGetStoreFileOffset();
@@ -745,7 +745,7 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
     if (memcpy_s(keyBlob->data, keyBlob->size, tmpBuf, keyInfo->keyInfoLen) != EOK) {
         HKS_LOG_E("memcpy to key blob failed.");
         HKS_FREE_PTR(keyBlob->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     return HKS_SUCCESS;
@@ -805,7 +805,7 @@ static int32_t GetKeyInfoList(struct HksKeyInfo *keyInfoList, const struct HksBl
     if (memcpy_s(keyInfoList->alias.data, keyInfoList->alias.size,
         keyInfoBlob->data + sizeof(*keyInfo), keyInfo->aliasSize) != EOK) {
         HKS_LOG_E("memcpy keyAlias failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     keyInfoList->alias.size = keyInfo->aliasSize;
 
@@ -823,7 +823,7 @@ static int32_t GetKeyInfoList(struct HksKeyInfo *keyInfoList, const struct HksBl
         paramSet, paramSet->paramSetSize) != EOK) {
         HKS_LOG_E("memcpy paramSet failed.");
         HksFreeParamSet(&paramSet);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     HksFreeParamSet(&paramSet);

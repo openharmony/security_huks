@@ -70,7 +70,7 @@ static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &con
 static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, AttestKeyAsyncContext context)
 {
     size_t argc = HUKS_NAPI_ATTEST_KEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_ATTEST_KEY_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_ATTEST_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_ATTEST_KEY_MIN_ARGS) {

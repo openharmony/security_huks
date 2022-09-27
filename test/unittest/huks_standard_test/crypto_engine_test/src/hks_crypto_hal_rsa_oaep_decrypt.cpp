@@ -1052,7 +1052,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_043_PARAMS = {
     .hexData = "0000000000000000000000000000000050e79855555500000000000010000000000000000000000000000000200"
         "0000000000000000000000000000000000000",
 #if defined(_USE_OPENSSL_)
-    .decryptResult = HKS_FAILURE,
+    .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1079,7 +1079,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_044_PARAMS = {
         "d28a725fbe4b240aba0b2d8c9bf4d024c3044bdb3c505905ebeff937f628b3f1c8d236b411592f4d32f0f8575293db2d3cdc6a35ca14af"
         "029a1d6204ff8c804d5621f5732e2d70fd80c714568592b38bcffb875dc7cf428033121a16838f80c0",
 #if defined(_USE_OPENSSL_)
-    .decryptResult = HKS_FAILURE,
+    .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1108,7 +1108,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_045_PARAMS = {
         "aedc5b51ff16dbc2f5b4e064fccb345c8ee7f64cb87015d5e753e399d6f891f7f79d3b017f237a08837795c4744"
         "4d3ec649a636e5968f217e524a9fc1a47eb5da4f18c8dbcdcaa3a3cefd6b4ef09eb15d805f",
 #if defined(_USE_OPENSSL_)
-    .decryptResult = HKS_FAILURE,
+    .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1147,7 +1147,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_046_PARAMS = {
         "23f082f27239ce509e4434e555b61b4bc4be22834cd8e9164d86dd20f06e3fab308ca19f33a8b3fc4c931f208c4bf28548e5346014bbfb"
         "afda034a173ef3523302ee1605ab6a9e50e1514d780a8791f2c9afaa4f7701017bacc665",
 #if defined(_USE_OPENSSL_)
-    .decryptResult = HKS_FAILURE,
+    .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1195,7 +1195,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_047_PARAMS = {
         "818a104fd4a1791957c14b345d53ca1e22e387ac33c7b8b3e457b1ed92642280c9ad712a55a5fa1f621726ece801b97fc1c53c18c4894f"
         "0c5c34d4fb4322570f29a0d35ad3870d33605e07536d80f51c6e2a2862198c01ff84ed985f109865817c4f8937dd44cdf36e9623a6cd",
 #if defined(_USE_OPENSSL_)
-    .decryptResult = HKS_FAILURE,
+    .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1253,7 +1253,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_048_PARAMS = {
         "a731a5b2cc0231b4189b9c2780256568cd166cf88dc8a67e7980e2ea29871f078ebd92b1ef1570f28171ef61ed1ea7b69abb3aa8abf6f7"
         "a8f600f191e2edbaf8d21785903f47cd19",
 #if defined(_USE_OPENSSL_)
-    .decryptResult = HKS_FAILURE,
+    .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .decryptResult = HKS_ERROR_INVALID_DIGEST,

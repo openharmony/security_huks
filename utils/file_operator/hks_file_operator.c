@@ -135,7 +135,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     (void)offset;
     char filePath[PATH_MAX + 1] = {0};
     if (memcpy_s(filePath, sizeof(filePath) - 1, fileName, strlen(fileName)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     (void)realpath(fileName, filePath);
     if (strstr(filePath, "../") != NULL) {
@@ -294,7 +294,7 @@ int32_t HksGetDirFile(void *dirp, struct HksFileDirentInfo *direntInfo)
 
         uint32_t len = strlen(dire->d_name);
         if (memcpy_s(direntInfo->fileName, sizeof(direntInfo->fileName) - 1, dire->d_name, len) != EOK) {
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         direntInfo->fileName[len] = '\0';
         return HKS_SUCCESS;
@@ -321,7 +321,7 @@ int32_t HksGetStoragePath(enum HksStoragePathType pathType, char *path, uint32_t
     }
     if (ret != EOK) {
         HKS_LOG_E("memcpy failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     path[pathLen] = '\0';
     *len = pathLen + 1;

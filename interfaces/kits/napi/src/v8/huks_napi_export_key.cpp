@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_delete_key.h"
+#include "huks_napi_export_key.h"
 
 #include "securec.h"
 
@@ -26,11 +26,11 @@
 
 namespace HuksNapi {
 namespace {
-constexpr int HUKS_NAPI_DELETE_KEY_MIN_ARGS = 2;
-constexpr int HUKS_NAPI_DELETE_KEY_MAX_ARGS = 3;
+constexpr int HUKS_NAPI_EXPORT_KEY_MIN_ARGS = 2;
+constexpr int HUKS_NAPI_EXPORT_KEY_MAX_ARGS = 3;
 }  // namespace
 
-struct DeleteKeyAsyncContextT {
+struct ExportKeyAsyncContextT {
     napi_async_work asyncWork = nullptr;
     napi_deferred deferred = nullptr;
     napi_ref callback = nullptr;
@@ -38,35 +38,42 @@ struct DeleteKeyAsyncContextT {
     int32_t result = 0;
     struct HksBlob *keyAlias = nullptr;
     struct HksParamSet *paramSet = nullptr;
+    struct HksBlob *key = nullptr;
 };
-using DeleteKeyAsyncContext = DeleteKeyAsyncContextT *;
+using ExportKeyAsyncContext = ExportKeyAsyncContextT *;
 
-static DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
+static ExportKeyAsyncContext CreateExportKeyAsyncContext()
 {
-    DeleteKeyAsyncContext context = (DeleteKeyAsyncContext)HksMalloc(sizeof(DeleteKeyAsyncContextT));
+    ExportKeyAsyncContext context = (ExportKeyAsyncContext)HksMalloc(sizeof(ExportKeyAsyncContextT));
     if (context != nullptr) {
-        (void)memset_s(context, sizeof(DeleteKeyAsyncContextT), 0, sizeof(DeleteKeyAsyncContextT));
+        (void)memset_s(context, sizeof(ExportKeyAsyncContextT), 0, sizeof(ExportKeyAsyncContextT));
     }
     return context;
 }
 
-static void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext &context)
+static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
+    }
+    if (context->key != nullptr) {
+        if (context->key->data != nullptr && context->key->size != 0) {
+            (void)memset_s(context->key->data, context->key->size, 0, context->key->size);
+        }
+        FreeHksBlob(context->key);
     }
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
     HksFree(context);
     context = nullptr;
 }
 
-static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, DeleteKeyAsyncContext context)
+static napi_value ExportKeyParseParams(napi_env env, napi_callback_info info, ExportKeyAsyncContext context)
 {
-    size_t argc = HUKS_NAPI_DELETE_KEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_DELETE_KEY_MAX_ARGS] = {0};
+    size_t argc = HUKS_NAPI_EXPORT_KEY_MAX_ARGS;
+    napi_value argv[HUKS_NAPI_EXPORT_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
-    if (argc < HUKS_NAPI_DELETE_KEY_MIN_ARGS) {
+    if (argc < HUKS_NAPI_EXPORT_KEY_MIN_ARGS) {
         napi_throw_error(env, NULL, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
@@ -75,7 +82,7 @@ static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, De
     size_t index = 0;
     napi_value result = ParseKeyAliasAndHksParamSet(env, argv, index, context->keyAlias, context->paramSet);
     if (result == nullptr) {
-        HKS_LOG_E("deleteKey parse params failed");
+        HKS_LOG_E("exportKey parse params failed");
         return nullptr;
     }
 
@@ -87,12 +94,30 @@ static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, De
     return GetInt32(env, 0);
 }
 
-static napi_value DeleteKeyWriteResult(napi_env env, DeleteKeyAsyncContext context)
+static napi_value ExportKeyWriteResult(napi_env env, ExportKeyAsyncContext context)
 {
-    return GenerateHksResult(env, context->result, nullptr, 0);
+    return GenerateHksResult(env,
+        context->result,
+        ((context->result == HKS_SUCCESS && context->key != nullptr) ? context->key->data : nullptr),
+        (context->result == HKS_SUCCESS && context->key != nullptr) ? context->key->size : 0);
 }
 
-static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context)
+static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
+{
+    context->key = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    if (context->key == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    context->key->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    if (context->key->data == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    context->key->size = MAX_KEY_SIZE;
+    return HKS_SUCCESS;
+}
+
+static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
@@ -100,26 +125,31 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context
     }
 
     napi_value resourceName = nullptr;
-    napi_create_string_latin1(env, "deleteKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
+    napi_create_string_latin1(env, "exportKeyAsyncWork", NAPI_AUTO_LENGTH, &resourceName);
 
     napi_create_async_work(
         env,
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            DeleteKeyAsyncContext context = static_cast<DeleteKeyAsyncContext>(data);
-
-            context->result = HksDeleteKey(context->keyAlias, context->paramSet);
+            (void)env;
+            ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
+            int32_t ret = PrePareExportKeyContextBuffer(context);
+            if (ret == HKS_SUCCESS) {
+                context->result = HksExportPublicKey(context->keyAlias, context->paramSet, context->key);
+            } else {
+                context->result = ret;
+            }
         },
         [](napi_env env, napi_status status, void *data) {
-            DeleteKeyAsyncContext context = static_cast<DeleteKeyAsyncContext>(data);
-            napi_value result = DeleteKeyWriteResult(env, context);
+            ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
+            napi_value result = ExportKeyWriteResult(env, context);
             if (context->callback == nullptr) {
                 napi_resolve_deferred(env, context->deferred, result);
             } else if (result != nullptr) {
                 CallAsyncCallback(env, context->callback, context->result, result);
             }
-            DeleteDeleteKeyAsyncContext(env, context);
+            DeleteExportKeyAsyncContext(env, context);
         },
         (void *)context,
         &context->asyncWork);
@@ -127,7 +157,7 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
         GET_AND_THROW_LAST_ERROR((env));
-        DeleteDeleteKeyAsyncContext(env, context);
+        DeleteExportKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
     }
@@ -139,25 +169,25 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context
     }
 }
 
-napi_value HuksNapiDeleteKey(napi_env env, napi_callback_info info)
+napi_value HuksNapiExportKey(napi_env env, napi_callback_info info)
 {
-    DeleteKeyAsyncContext context = CreateDeleteKeyAsyncContext();
+    ExportKeyAsyncContext context = CreateExportKeyAsyncContext();
     if (context == nullptr) {
         HKS_LOG_E("could not create context");
         return nullptr;
     }
 
-    napi_value result = DeleteKeyParseParams(env, info, context);
+    napi_value result = ExportKeyParseParams(env, info, context);
     if (result == nullptr) {
         HKS_LOG_E("could not parse params");
-        DeleteDeleteKeyAsyncContext(env, context);
+        DeleteExportKeyAsyncContext(env, context);
         return nullptr;
     }
 
-    result = DeleteKeyAsyncWork(env, context);
+    result = ExportKeyAsyncWork(env, context);
     if (result == nullptr) {
         HKS_LOG_E("could not start async work");
-        DeleteDeleteKeyAsyncContext(env, context);
+        DeleteExportKeyAsyncContext(env, context);
         return nullptr;
     }
     return result;

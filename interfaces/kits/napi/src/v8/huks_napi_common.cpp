@@ -176,7 +176,7 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
         napi_value element = nullptr;
         NAPI_CALL(env, napi_get_element(env, object, index, &element));
 
-        HksParam param = {0};
+        HksParam param = { 0 };
         result = GetHksParam(env, element, param);
         if (result == nullptr) {
             HKS_LOG_E("get param failed when parse input params.");

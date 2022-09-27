@@ -23,6 +23,7 @@ import {AsyncCallback} from './basic';
 declare namespace huks {
     /**
      * Generate Key.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -32,7 +33,19 @@ declare namespace huks {
     function generateKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Generate Key.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function generateKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>) : void;
+    function generateKeyItem(keyAlias: string, options: HuksOptions) : Promise<void>;
+
+    /**
      * Delete Key.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -42,7 +55,19 @@ declare namespace huks {
     function deleteKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Delete Key. 
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function deleteKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>) : void;
+    function deleteKeyItem(keyAlias: string, options: HuksOptions) : Promise<void>;
+
+    /**
      * Import Key.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -52,7 +77,19 @@ declare namespace huks {
     function importKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Import Key.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function importKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<void>) : void;
+    function importKeyItem(keyAlias: string, options: HuksOptions) : Promise<void>;
+
+    /**
      * Import Wrapped Key.
+     * @Deprecated
      * @since 9
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the name of key to be imported.
@@ -63,7 +100,20 @@ declare namespace huks {
     function importWrappedKey(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Import Wrapped Key.
+     * @param {string} keyAlias - Indicates the name of key to be imported.
+     * @param {string} wrappingKeyAlias - Indicates the name of key for wrapping the key to be imported
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function importWrappedKeyItem(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions, callback: AsyncCallback<void>) : void;
+    function importWrappedKeyItem(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions) : Promise<void>;
+
+    /**
      * Export Key.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -73,7 +123,19 @@ declare namespace huks {
     function exportKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Export Key.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function exportKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>) : void;
+    function exportKeyItem(keyAlias: string, options: HuksOptions) : Promise<HuksReturnResult>;
+
+    /**
      * Get properties of the key.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -83,7 +145,19 @@ declare namespace huks {
     function getKeyProperties(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Get properties of the key.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function getKeyItemProperties(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>) : void;
+    function getKeyItemProperties(keyAlias: string, options: HuksOptions) : Promise<HuksReturnResult>;
+
+    /**
      * Check whether the key exists.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -93,7 +167,19 @@ declare namespace huks {
     function isKeyExist(keyAlias: string, options: HuksOptions) : Promise<boolean>;
 
     /**
+     * Check whether the key exists.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function isKeyItemExist(keyAlias: string, options: HuksOptions, callback: AsyncCallback<boolean>) : void;
+    function isKeyItemExist(keyAlias: string, options: HuksOptions) : Promise<boolean>;
+
+    /**
      * Init Operation.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -104,19 +190,20 @@ declare namespace huks {
     function init(keyAlias: string, options: HuksOptions) : Promise<HuksHandle>;
 
     /**
-     * Update Operation.
-     * @since 8
+     * Init Operation.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key.
+     * @throws {BusinessError} if the type of params is wrong.
      * @syscap SystemCapability.Security.Huks
-     * @param handle Indicates the handle of the init operation.
-     * @param token Indicates the value of token.
-     * @param options Indicates the properties of the update operation.
+     * @since 9
      */
-    function update(handle: number, token?: Uint8Array, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
-    function update(handle: number, token?: Uint8Array, options: HuksOptions) : Promise<HuksResult>;
+    function initSession(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksSessionHandle>) : void;
+    function initSession(keyAlias: string, options: HuksOptions) : Promise<HuksSessionHandle>;
 
     /**
      * Update Operation.
-     * @since 9
+     * @Deprecated
+     * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
      * @param options Indicates the properties of the update operation.
@@ -127,7 +214,21 @@ declare namespace huks {
     function update(handle: number, options: HuksOptions, token?: Uint8Array) : Promise<HuksResult>;
 
     /**
+     * Update Operation.
+     * @param {number} handle - Indicates the handle of the init operation.
+     * @param {HuksOptions} options - Indicates the properties of the update operation.
+     * @param {Uint8Array} token - Indicates the value of AuthToken from USER IAM service.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function updateSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>) : void;
+    function updateSession(handle: number, options: HuksOptions, token: Uint8Array, callback: AsyncCallback<HuksReturnResult>) : void;
+    function updateSession(handle: number, options: HuksOptions, token?: Uint8Array) : Promise<HuksReturnResult>;
+
+    /**
      * Finish Operation.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
@@ -138,6 +239,7 @@ declare namespace huks {
 
     /**
      * Finish Operation.
+     * @Deprecated
      * @since 9
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
@@ -148,7 +250,21 @@ declare namespace huks {
      function finish(handle: number, options: HuksOptions, token?: Uint8Array) : Promise<HuksResult>;
 
     /**
+     * Finish Operation.
+     * @param {number} handle - Indicates the handle of the init operation.
+     * @param {HuksOptions} options - Indicates the properties of the finish operation.
+     * @param {Uint8Array} token - Indicates the value of AuthToken from USER IAM service.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+     function finishSession(handle: number, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>) : void;
+     function finishSession(handle: number, options: HuksOptions, token: Uint8Array, callback: AsyncCallback<HuksReturnResult>) : void;
+     function finishSession(handle: number, options: HuksOptions, token?: Uint8Array) : Promise<HuksReturnResult>;
+
+    /**
      * Abort Operation.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
@@ -158,7 +274,19 @@ declare namespace huks {
     function abort(handle: number, options: HuksOptions) : Promise<HuksResult>;
 
     /**
+     * Abort Operation.
+     * @param {number} handle - Indicates the handle of the init operation.
+     * @param {HuksOptions} options - Indicates the properties of the abort operation.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+    function abortSession(handle: number, options: HuksOptions, callback: AsyncCallback<void>) : void;
+    function abortSession(handle: number, options: HuksOptions) : Promise<void>;
+
+    /**
      * Key Attestation.
+     * @Deprecated
      * @since 9
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -166,7 +294,18 @@ declare namespace huks {
      */
     function attestKey(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
     function attestKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
-
+    
+    /**
+     * Key Attestation.
+     * @param {string} keyAlias - Indicates the key's name.
+     * @param {HuksOptions} options - Indicates the properties of the key attestation operation.
+     * @throws {BusinessError} if the type of params is wrong.
+     * @syscap SystemCapability.Security.Huks
+     * @since 9
+     */
+     function attestKeyItem(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksReturnResult>) : void;
+     function attestKeyItem(keyAlias: string, options: HuksOptions) : Promise<HuksReturnResult>;
+     
     /**
      * Get the sdk version.
      * @since 8
@@ -188,6 +327,7 @@ declare namespace huks {
 
     /**
      * Interface of huks handle.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
@@ -195,6 +335,16 @@ declare namespace huks {
         errorCode: number;
         handle: number;
         token?: Uint8Array;
+    }
+
+    /**
+     * Interface of huks handle.
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     */
+     export interface HuksSessionHandle {
+        handle: number;
+        challenge?: Uint8Array;
     }
 
     /**
@@ -209,6 +359,7 @@ declare namespace huks {
 
     /**
      * Interface of huks result.
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
@@ -220,7 +371,19 @@ declare namespace huks {
     }
 
     /**
+     * Interface of huks result.
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     */
+    export interface HuksReturnResult {
+        outData?: Uint8Array;
+        properties?: Array<HuksParam>;
+        certChains?: Array<string>;
+    }
+
+    /**
      * @name HuksErrorCode
+     * @Deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
@@ -341,6 +504,33 @@ declare namespace huks {
 
         HUKS_ERROR_INTERNAL_ERROR = -999,
         HUKS_ERROR_UNKNOWN_ERROR = -1000,
+    }
+
+    /**
+     * @name HuksExceptionErrCode
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     */
+     export enum HuksExceptionErrCode {
+        HUKS_ERR_CODE_PERMISSION_FAIL = 201,
+        HUKS_ERR_CODE_ILLEGAL_ARGUMENT = 401,
+        HUKS_ERR_CODE_NOT_SUPPORTED_API = 801,
+
+        HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED = 12000001,
+        HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT = 12000002,
+        HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT = 12000003,
+        HUKS_ERR_CODE_FILE_OPERATION_FAIL = 12000004,
+        HUKS_ERR_CODE_COMMUNICATION_FAIL = 12000005,
+        HUKS_ERR_CODE_CRYPTO_FAIL = 12000006,
+        HUKS_ERR_CODE_KEY_AUTH_PERMANENTLY_INVALIDATED = 12000007,
+        HUKS_ERR_CODE_KEY_AUTH_VERIFY_FAILED = 12000008,
+        HUKS_ERR_CODE_KEY_AUTH_TIME_OUT = 12000009,
+        HUKS_ERR_CODE_SESSION_LIMIT = 12000010,
+        HUKS_ERR_CODE_ITEM_NOT_EXIST = 12000011,
+        HUKS_ERR_CODE_EXTERNAL_ERROR = 12000012,
+        HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST = 12000013,
+        HUKS_ERR_CODE_INSUFFICIENT_MEMORY = 12000014,
+        HUKS_ERR_CODE_CALL_SERVICE_FAILED = 12000015,
     }
 
     /**
@@ -591,6 +781,15 @@ declare namespace huks {
     }
 
     /**
+     * @name HuksSecureSignType
+     * @since 9
+     * @syscap SystemCapability.Security.Huks
+     */
+    export enum HuksSecureSignType {
+        HUKS_SECURE_SIGN_WITH_AUTHINFO = 1,
+    }
+
+    /**
      * @name HuksSendType
      * @since 8
      * @syscap SystemCapability.Security.Huks
@@ -598,16 +797,6 @@ declare namespace huks {
     export enum HuksSendType {
         HUKS_SEND_TYPE_ASYNC = 0,
         HUKS_SEND_TYPE_SYNC = 1,
-    }
-
-    /**
-     * @name HuksSecureSignType
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     * @permission N/A
-     */
-    export enum HuksSecureSignType {
-        HUKS_SECURE_SIGN_WITH_AUTHINFO = 1,
     }
 
     /**
@@ -707,28 +896,28 @@ declare namespace huks {
          * @since 9
          * @syscap SystemCapability.Security.Huks
          */
-         HUKS_TAG_KEY_AUTH_ACCESS_TYPE = HUKS_TAG_TYPE_UINT | 307,
+         HUKS_TAG_KEY_AUTH_ACCESS_TYPE = HuksTagType.HUKS_TAG_TYPE_UINT | 307,
 
         /**
          * @name HUKS_TAG_KEY_SECURE_SIGN_TYPE
          * @since 9
          * @syscap SystemCapability.Security.Huks
          */
-        HUKS_TAG_KEY_SECURE_SIGN_TYPE = HUKS_TAG_TYPE_UINT | 308,
+        HUKS_TAG_KEY_SECURE_SIGN_TYPE = HuksTagType.HUKS_TAG_TYPE_UINT | 308,
 
         /**
          * @name HUKS_TAG_CHALLENGE_TYPE
          * @since 9
          * @syscap SystemCapability.Security.Huks
          */
-        HUKS_TAG_CHALLENGE_TYPE = HUKS_TAG_TYPE_UINT | 309,
+        HUKS_TAG_CHALLENGE_TYPE = HuksTagType.HUKS_TAG_TYPE_UINT | 309,
 
         /**
          * @name HUKS_TAG_CHALLENGE_POS
          * @since 9
          * @syscap SystemCapability.Security.Huks
          */
-        HUKS_TAG_CHALLENGE_POS = HUKS_TAG_TYPE_UINT | 310,
+        HUKS_TAG_CHALLENGE_POS = HuksTagType.HUKS_TAG_TYPE_UINT | 310,
 
         /* Attestation related TAG: 501 - 600 */
         HUKS_TAG_ATTESTATION_CHALLENGE = HuksTagType.HUKS_TAG_TYPE_BYTES | 501,

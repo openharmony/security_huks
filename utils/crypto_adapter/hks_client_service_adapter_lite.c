@@ -68,7 +68,7 @@ static int32_t PkCtxToX509(mbedtls_pk_context *ctx, struct HksBlob *x509Key)
         if (memcpy_s(x509KeyData, x509Size, tmpBuf + MAX_KEY_SIZE - x509Size, x509Size) != EOK) {
             HKS_LOG_E("public key to x509 memcpy to x509key failed!");
             HKS_FREE_PTR(x509KeyData);
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 
@@ -237,7 +237,7 @@ static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct
     if (memcpy_s(x509Key->data, publicKey->size, publicKey->data, publicKey->size) != EOK) {
         HKS_LOG_E("X25519/Ed25519 to x509 public key memcpy to x509 key data failed!");
         HKS_FREE_PTR(x509Key->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     x509Key->size = publicKey->size;
 

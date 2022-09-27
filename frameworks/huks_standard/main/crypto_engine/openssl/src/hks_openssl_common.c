@@ -26,7 +26,7 @@
 int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 {
     uint32_t keySizeByte = keySize / BIT_NUM_OF_UINT8;
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
 
     uint8_t *tmpKey = (uint8_t *)HksMalloc(keySizeByte);
     if (tmpKey == NULL) {
@@ -57,7 +57,7 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
     int ret = RAND_bytes(randomData->data, randomData->size);
     if (ret <= 0) {
         HKS_LOG_E("generate random failed, ret = 0x%x", ret);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (randomData->size == 1) {
@@ -73,7 +73,7 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
     }
     if (j == randomData->size) {
         HKS_LOG_E("fill random failed, size %x", randomData->size);
-        return HKS_ERROR_UNKNOWN_ERROR;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     HKS_LOG_D("generate random success");
     return HKS_SUCCESS;
@@ -100,7 +100,7 @@ int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *main
 
     if (memcpy_s(mainKey->data, mainKey->size, stubBuf, sizeof(stubBuf)) != EOK) {
         HKS_LOG_E("memcpy failed, get stub main key failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return HKS_SUCCESS;
 #endif

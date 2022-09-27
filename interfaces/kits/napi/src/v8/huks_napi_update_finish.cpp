@@ -294,7 +294,7 @@ static int32_t GetInputParamSet(napi_env env, napi_value object, struct HksBlob 
 static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, UpdateAsyncContext context)
 {
     size_t argc = HUKS_NAPI_UPDATE_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_UPDATE_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_UPDATE_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_UPDATE_MIN_ARGS) {
