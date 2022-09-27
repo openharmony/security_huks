@@ -142,6 +142,9 @@
 #define HKS_SUPPORT_SM4_ECB_NOPADDING
 #define HKS_SUPPORT_SM4_ECB_PKCS7
 
+/* enable cfi */
+#define HKS_SUPPORT_CFI
+
 #if defined(_SUPPORT_HKS_TEE_) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY)
 #define HKS_SUPPORT_GET_AT_KEY
 #endif
