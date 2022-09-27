@@ -23,6 +23,7 @@
 
 #include <dlfcn.h>
 
+#include "hks_cfi.h"
 #include "hks_log.h"
 
 typedef struct HuksHdi *(*HalCreateHandle)(void);
@@ -30,7 +31,7 @@ typedef void (*HalDestroyHandle)(struct HuksHdi *);
 
 void *g_halDeviceHandle = NULL;
 
-__attribute__((no_sanitize("cfi"))) int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
+ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
 {
     if (halDevice == NULL) {
         HKS_LOG_E("invalid input halDevice");
@@ -63,7 +64,7 @@ __attribute__((no_sanitize("cfi"))) int32_t HksCreateHuksHdiDevice(struct HuksHd
     return HKS_SUCCESS;
 }
 
-__attribute__((no_sanitize("cfi"))) int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
+ENABLE_CFI(int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice))
 {
     if ((halDevice == NULL) || (*halDevice == NULL)) {
         return HKS_SUCCESS;
