@@ -89,18 +89,6 @@ declare namespace huks {
 
     /**
      * Import Wrapped Key.
-     * @Deprecated
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     * @param keyAlias Indicates the name of key to be imported.
-     * @param wrappingKeyAlias Indicates the name of key for wrapping the key to be imported
-     * @param options Indicates the properties of the key.
-     */
-    function importWrappedKey(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
-    function importWrappedKey(keyAlias: string, wrappingKeyAlias: string, options: HuksOptions) : Promise<HuksResult>;
-
-    /**
-     * Import Wrapped Key.
      * @param {string} keyAlias - Indicates the name of key to be imported.
      * @param {string} wrappingKeyAlias - Indicates the name of key for wrapping the key to be imported
      * @param {HuksOptions} options - Indicates the properties of the key.
@@ -239,18 +227,6 @@ declare namespace huks {
 
     /**
      * Finish Operation.
-     * @Deprecated
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     * @param handle Indicates the handle of the init operation.
-     * @param options Indicates the properties of the finish operation.
-     * @param token Indicates the value of token.
-     */
-     function finish(handle: number, options: HuksOptions, token: Uint8Array, callback: AsyncCallback<HuksResult>) : void;
-     function finish(handle: number, options: HuksOptions, token?: Uint8Array) : Promise<HuksResult>;
-
-    /**
-     * Finish Operation.
      * @param {number} handle - Indicates the handle of the init operation.
      * @param {HuksOptions} options - Indicates the properties of the finish operation.
      * @param {Uint8Array} token - Indicates the value of AuthToken from USER IAM service.
@@ -284,17 +260,6 @@ declare namespace huks {
     function abortSession(handle: number, options: HuksOptions, callback: AsyncCallback<void>) : void;
     function abortSession(handle: number, options: HuksOptions) : Promise<void>;
 
-    /**
-     * Key Attestation.
-     * @Deprecated
-     * @since 9
-     * @syscap SystemCapability.Security.Huks
-     * @param keyAlias Indicates the key's name.
-     * @param options Indicates the properties of the key attestation operation.
-     */
-    function attestKey(keyAlias: string, options: HuksOptions, callback: AsyncCallback<HuksResult>) : void;
-    function attestKey(keyAlias: string, options: HuksOptions) : Promise<HuksResult>;
-    
     /**
      * Key Attestation.
      * @param {string} keyAlias - Indicates the key's name.
