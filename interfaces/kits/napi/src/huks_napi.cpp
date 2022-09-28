@@ -21,7 +21,6 @@
 #include "hks_type.h"
 #include "huks_napi_abort.h"
 #include "huks_napi_abort_session.h"
-#include "huks_napi_attest_key.h"
 #include "huks_napi_attest_key_item.h"
 #include "huks_napi_delete_key.h"
 #include "huks_napi_delete_key_item.h"
@@ -34,7 +33,6 @@
 #include "huks_napi_get_sdk_version.h"
 #include "huks_napi_import_key.h"
 #include "huks_napi_import_key_item.h"
-#include "huks_napi_import_wrapped_key.h"
 #include "huks_napi_import_wrapped_key_item.h"
 #include "huks_napi_init.h"
 #include "huks_napi_init_session.h"
@@ -634,11 +632,9 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
         DECLARE_NAPI_FUNCTION("getSdkVersion", HuksNapiGetSdkVersion),
         DECLARE_NAPI_FUNCTION("importKey", HuksNapiImportKey),
-        DECLARE_NAPI_FUNCTION("importWrappedKey", HuksNapiImportWrappedKey),
         DECLARE_NAPI_FUNCTION("exportKey", HuksNapiExportKey),
         DECLARE_NAPI_FUNCTION("getKeyProperties", HuksNapiGetKeyProperties),
         DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),
-        DECLARE_NAPI_FUNCTION("attestKey", HuksNapiAttestKey),
         DECLARE_NAPI_FUNCTION("init", HuksNapiInit),
         DECLARE_NAPI_FUNCTION("update", HuksNapiUpdate),
         DECLARE_NAPI_FUNCTION("finish", HuksNapiFinish),
