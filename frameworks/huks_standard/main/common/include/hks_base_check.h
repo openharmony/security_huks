@@ -57,6 +57,7 @@ struct ExpectParamsValues {
     const struct ExpectParams digest;
     const struct ExpectParams mode;
 };
+#define EXPECT_PARAMS_VALUES_INIT {{0}, {0}, {0}, {0}, {0}}
 
 struct ExpectParamsValuesChecker {
     enum CheckKeyType checkType;
