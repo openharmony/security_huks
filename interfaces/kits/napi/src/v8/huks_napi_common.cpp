@@ -526,7 +526,7 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
 
-    uint64_t handle = (uint32_t)handleTmp;
+    uint64_t handle = (uint64_t)handleTmp;
 
     handleBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
     if (handleBlob == nullptr) {
@@ -542,6 +542,7 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
     }
     handleBlob->size = sizeof(uint64_t);
     if (memcpy_s(handleBlob->data, sizeof(uint64_t), &handle, sizeof(uint64_t)) != EOK) {
+        // the memory of handleBlob free by finalize callback
         return nullptr;
     }
 

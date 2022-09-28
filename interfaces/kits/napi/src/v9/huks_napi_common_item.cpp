@@ -95,10 +95,10 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     void *rawData = nullptr;
 
     NAPI_CALL(
-        env, napi_get_typedarray_info(env, object, &arrayType, &length, (void **)&rawData, &arrayBuffer, &offset));
+        env, napi_get_typedarray_info(env, object, &arrayType, &length, &rawData, &arrayBuffer, &offset));
     if (arrayType != napi_uint8_array) {
         napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
-            "the type of  data is not Uint8Array");
+            "the type of data is not Uint8Array");
         HKS_LOG_E("the type of  data is not Uint8Array");
         return nullptr;
     }
@@ -490,7 +490,7 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
 
-    uint64_t handle = static_cast<uint32_t>(handleTmp);
+    uint64_t handle = static_cast<uint64_t>(handleTmp);
 
     handleBlob = static_cast<struct HksBlob *>(HksMalloc(sizeof(struct HksBlob)));
     if (handleBlob == nullptr) {
@@ -505,7 +505,9 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
     handleBlob->size = sizeof(uint64_t);
+
     if (memcpy_s(handleBlob->data, sizeof(uint64_t), &handle, sizeof(uint64_t)) != EOK) {
+        // the memory of handleBlob free by finalize callback
         return nullptr;
     }
 

@@ -38,7 +38,6 @@ struct HksSuccessReturnResult {
 
 #define DATA_SIZE_64KB  (1024 * 64)
 
-static const size_t HKS_HANDLE_OFFSET32 = 32;
 static const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
 static const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
 
