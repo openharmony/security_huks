@@ -80,8 +80,7 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    void *aliasData = static_cast<void *>(data);
-    alias->data = static_cast<uint8_t *>(aliasData);
+    alias->data = reinterpret_cast<uint8_t *>(data);
     alias->size = static_cast<uint32_t>(length & UINT32_MAX);
 
     return GetInt32(env, 0);
