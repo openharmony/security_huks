@@ -197,6 +197,8 @@ if (ohos_kernel_type == "liteos_m") {
       deps = [ "//third_party/mbedtls" ]
       configs += [ ":mbedtls_engine" ]
     }
+    
+    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
 
     if (huks_enable_log == true) {
       sources += [ "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c" ]
@@ -232,6 +234,8 @@ if (ohos_kernel_type == "liteos_m") {
       ]
       configs += [ ":mbedtls_engine" ]
     }
+    
+    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
 
     configs += [ ":hilog_dir" ]
     deps += [

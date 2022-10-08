@@ -32,6 +32,8 @@
 #define RSA_KEY_BYTE   66
 #define NUM_FOUR       4
 #define NUM_THREE      3
+#define MBEDTLS_RSA_PUBLIC	0 /**< Request private key operation. */
+#define MBEDTLS_RSA_PRIVATE	1 /**< Request public key operation. */
 
 static char *RsaMallocPrivateKey(const unsigned char *key, size_t *keyLen)
 {

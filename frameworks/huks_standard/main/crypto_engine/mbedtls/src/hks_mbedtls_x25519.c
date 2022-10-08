@@ -357,7 +357,8 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
             break;
         }
 
-        ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)), &(ctx.MBEDTLS_PRIVATE(Qp)), &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
+        ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)), &(ctx.MBEDTLS_PRIVATE(Qp)),
+                                          &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls x25519 shared key failed! mbedtls ret = 0x%X", ret);
             break;
