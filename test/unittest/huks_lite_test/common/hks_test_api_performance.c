@@ -28,10 +28,9 @@
 int32_t HksGenerateKeyRun(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     struct HksParamSet *paramSetOut, uint32_t performTimes)
 {
-    int32_t ret;
     /* if keyAlias exist, the key will be generated and refreshed */
     for (uint32_t i = 0; i < performTimes; ++i) {
-        ret = HksGenerateKey(keyAlias, paramSetIn, paramSetOut);
+        int32_t ret = HksGenerateKey(keyAlias, paramSetIn, paramSetOut);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -42,7 +41,6 @@ int32_t HksGenerateKeyRun(const struct HksBlob *keyAlias, const struct HksParamS
 int32_t HksEncryptRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *plainText, struct HksBlob *cipherText, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriCipherTestSize = 0;
     if (cipherText != NULL) {
         oriCipherTestSize = cipherText->size;
@@ -54,7 +52,7 @@ int32_t HksEncryptRun(const struct HksBlob *key, const struct HksParamSet *param
             cipherText->size = oriCipherTestSize;
         }
 
-        ret = HksEncrypt(key, paramSet, plainText, cipherText);
+        int32_t ret = HksEncrypt(key, paramSet, plainText, cipherText);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -65,7 +63,6 @@ int32_t HksEncryptRun(const struct HksBlob *key, const struct HksParamSet *param
 int32_t HksDecryptRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriPlainTextSize = 0;
     if (plainText != NULL) {
         oriPlainTextSize = plainText->size;
@@ -76,7 +73,7 @@ int32_t HksDecryptRun(const struct HksBlob *key, const struct HksParamSet *param
             (void)memset_s(plainText->data, oriPlainTextSize, 0, oriPlainTextSize);
             plainText->size = oriPlainTextSize;
         }
-        ret = HksDecrypt(key, paramSet, cipherText, plainText);
+        int32_t ret = HksDecrypt(key, paramSet, cipherText, plainText);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -87,7 +84,6 @@ int32_t HksDecryptRun(const struct HksBlob *key, const struct HksParamSet *param
 int32_t HksMacRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriMacSize = 0;
     if (mac != NULL) {
         oriMacSize = mac->size;
@@ -98,7 +94,7 @@ int32_t HksMacRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
             (void)memset_s(mac->data, oriMacSize, 0, oriMacSize);
             mac->size = oriMacSize;
         }
-        ret = HksMac(key, paramSet, srcData, mac);
+        int32_t ret = HksMac(key, paramSet, srcData, mac);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -109,7 +105,6 @@ int32_t HksMacRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
 int32_t HksDeriveKeyRun(const struct HksParamSet *paramSet, const struct HksBlob *masterKey,
     struct HksBlob *derivedKey, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriDerivedKeySize = 0;
     if (derivedKey != NULL) {
         oriDerivedKeySize = derivedKey->size;
@@ -120,7 +115,7 @@ int32_t HksDeriveKeyRun(const struct HksParamSet *paramSet, const struct HksBlob
             (void)memset_s(derivedKey->data, oriDerivedKeySize, 0, oriDerivedKeySize);
             derivedKey->size = oriDerivedKeySize;
         }
-        ret = HksDeriveKey(paramSet, masterKey, derivedKey);
+        int32_t ret = HksDeriveKey(paramSet, masterKey, derivedKey);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -136,9 +131,8 @@ int32_t HksDeleteKeyRun(const struct HksBlob *keyAlias, uint32_t performTimes)
 
 int32_t HksKeyExistRun(const struct HksBlob *keyAlias, uint32_t performTimes)
 {
-    int32_t ret;
     for (uint32_t i = 0; i < performTimes; ++i) {
-        ret = HksKeyExist(keyAlias, NULL);
+        int32_t ret = HksKeyExist(keyAlias, NULL);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -148,7 +142,6 @@ int32_t HksKeyExistRun(const struct HksBlob *keyAlias, uint32_t performTimes)
 
 int32_t HksGenerateRandomRun(struct HksBlob *random, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriRandomSize = 0;
     if (random != NULL) {
         oriRandomSize = random->size;
@@ -159,7 +152,7 @@ int32_t HksGenerateRandomRun(struct HksBlob *random, uint32_t performTimes)
             (void)memset_s(random->data, oriRandomSize, 0, oriRandomSize);
             random->size = oriRandomSize;
         }
-        ret = HksGenerateRandom(NULL, random);
+        int32_t ret = HksGenerateRandom(NULL, random);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -170,7 +163,6 @@ int32_t HksGenerateRandomRun(struct HksBlob *random, uint32_t performTimes)
 int32_t HksAgreeKeyRun(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriAgreedKeySize = 0;
     if (agreedKey != NULL) {
         oriAgreedKeySize = agreedKey->size;
@@ -181,7 +173,7 @@ int32_t HksAgreeKeyRun(const struct HksParamSet *paramSet, const struct HksBlob 
             (void)memset_s(agreedKey->data, oriAgreedKeySize, 0, oriAgreedKeySize);
             agreedKey->size = oriAgreedKeySize;
         }
-        ret = HksAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
+        int32_t ret = HksAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -192,7 +184,6 @@ int32_t HksAgreeKeyRun(const struct HksParamSet *paramSet, const struct HksBlob 
 int32_t HksHashRun(const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *hash, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriHashSize = 0;
     if (hash != NULL) {
         oriHashSize = hash->size;
@@ -204,7 +195,7 @@ int32_t HksHashRun(const struct HksParamSet *paramSet,
             hash->size = oriHashSize;
         }
 
-        ret = HksHash(paramSet, srcData, hash);
+        int32_t ret = HksHash(paramSet, srcData, hash);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -215,7 +206,6 @@ int32_t HksHashRun(const struct HksParamSet *paramSet,
 int32_t HksBnExpModRun(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n, uint32_t performTimes)
 {
-    int32_t ret;
     uint32_t oriXSize = 0;
     if (x != NULL) {
         oriXSize = x->size;
@@ -226,7 +216,7 @@ int32_t HksBnExpModRun(struct HksBlob *x, const struct HksBlob *a,
             (void)memset_s(x->data, oriXSize, 0, oriXSize);
             x->size = oriXSize;
         }
-        ret = HksBnExpMod(x, a, e, n);
+        int32_t ret = HksBnExpMod(x, a, e, n);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
