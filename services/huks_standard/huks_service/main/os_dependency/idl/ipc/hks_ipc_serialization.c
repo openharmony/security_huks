@@ -600,10 +600,9 @@ static int32_t GetNormalParam(const struct HksParam *param, struct HksParamOut *
 
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt)
 {
-    int32_t ret;
     struct HksParam *param = NULL;
     for (uint32_t i = 0; i < cnt; i++) {
-        ret = HksGetParam(paramSet, outParams[i].tag, &param);
+        int32_t ret = HksGetParam(paramSet, outParams[i].tag, &param);
         if (ret == HKS_SUCCESS) {
             ret = GetNormalParam(param, &outParams[i]);
         } else {
