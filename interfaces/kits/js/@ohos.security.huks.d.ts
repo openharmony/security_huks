@@ -23,7 +23,7 @@ import {AsyncCallback} from './basic';
 declare namespace huks {
     /**
      * Generate Key.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -56,7 +56,7 @@ declare namespace huks {
 
     /**
      * Delete Key.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -84,7 +84,7 @@ declare namespace huks {
 
     /**
      * Import Key.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -142,7 +142,7 @@ declare namespace huks {
 
     /**
      * Export Key.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -174,7 +174,7 @@ declare namespace huks {
 
     /**
      * Get properties of the key.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -206,7 +206,7 @@ declare namespace huks {
 
     /**
      * Check whether the key exists.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -236,7 +236,7 @@ declare namespace huks {
 
     /**
      * Init Operation.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
@@ -270,7 +270,7 @@ declare namespace huks {
 
     /**
      * Update Operation.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
@@ -309,7 +309,7 @@ declare namespace huks {
 
     /**
      * Finish Operation.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
@@ -346,7 +346,7 @@ declare namespace huks {
 
     /**
      * Abort Operation.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
@@ -415,7 +415,7 @@ declare namespace huks {
 
     /**
      * Interface of huks handle.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
@@ -447,7 +447,7 @@ declare namespace huks {
 
     /**
      * Interface of huks result.
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
@@ -471,7 +471,7 @@ declare namespace huks {
 
     /**
      * @name HuksErrorCode
-     * @Deprecated
+     * @deprecated
      * @since 8
      * @syscap SystemCapability.Security.Huks
      */
