@@ -93,7 +93,6 @@ int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     struct HksParam *modeParam = nullptr;
     HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
     if (modeParam->uint32Param == HKS_MODE_ECB) {
-
         inData.size = strlen(tmpInData);
         inData.data = (uint8_t *)tmpInData;
     }
