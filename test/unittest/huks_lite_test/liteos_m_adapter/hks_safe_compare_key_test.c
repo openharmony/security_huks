@@ -131,7 +131,6 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
     /* 1. get imageBuffer total Len */
     struct HksStoreHeaderInfo *keyInfoHead = (struct HksStoreHeaderInfo *)storageBuf.data;
     uint32_t keyCount = keyInfoHead->keyCount;
-    uint32_t totalLen = keyInfoHead->totalLen;
 
     /* 2. traverse imageBuffer to search for keyAlias */
     uint32_t offset = sizeof(*keyInfoHead);

@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef HKS_CFI_H
+#define HKS_CFI_H
+
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -24,3 +27,4 @@
 #else
 #define ENABLE_CFI(function) function
 #endif
+#endif // HKS_CFI_H
