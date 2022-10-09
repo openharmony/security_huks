@@ -84,6 +84,7 @@ int32_t HksAesCipherTestDecrypt(const struct HksBlob *keyAlias,
 int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
+    char tmpInData[] = "AES_ECB_INDATA_1";
     struct HksBlob inData = {
         g_inData.length(),
         (uint8_t *)g_inData.c_str()
@@ -92,7 +93,7 @@ int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     struct HksParam *modeParam = nullptr;
     HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
     if (modeParam->uint32Param == HKS_MODE_ECB) {
-        char tmpInData[] = "AES_ECB_INDATA_1";
+
         inData.size = strlen(tmpInData);
         inData.data = (uint8_t *)tmpInData;
     }

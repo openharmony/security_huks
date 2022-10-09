@@ -700,15 +700,15 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_025, Function | SmallTes
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
     ASSERT_NE(ctx, nullptr);
-    ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
+    ret = HksCryptoHalEncryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     out = { .size = 1, .data = buff };
-    ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
+    ret = HksCryptoHalEncryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
-    ret = HksCryptoHalEncryptUpdate(&message, &ctx, &out, spec.algType);
+    ret = HksCryptoHalEncryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
     HksFree(ctx);
     ctx = nullptr;
@@ -811,15 +811,15 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_028, Function | SmallTes
 
     void *ctx = (void *)HksMalloc(HKS_CONTEXT_DATA_MAX);
     ASSERT_NE(ctx, nullptr);
-    ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
+    ret = HksCryptoHalDecryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     out = { .size = 1, .data = buff };
-    ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
+    ret = HksCryptoHalDecryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
-    ret = HksCryptoHalDecryptUpdate(&message, &ctx, &out, spec.algType);
+    ret = HksCryptoHalDecryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
     HksFree(ctx);
     ctx = nullptr;
