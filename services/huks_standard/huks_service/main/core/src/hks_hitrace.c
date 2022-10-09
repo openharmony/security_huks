@@ -23,7 +23,7 @@ static const uint64_t huksLabel = (1ULL << 25);
 struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 {
 #ifdef L2_STANDARD
-    HiTraceIdStruct traceId = HiTraceBegin(name, flag);
+    HiTraceIdStruct traceId = HiTraceChainBegin(name, flag);
     struct HksHitraceId hitraceId = {
         .traceId = traceId,
     };
@@ -40,7 +40,7 @@ struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 void HksHitraceEnd(struct HksHitraceId *hitraceId)
 {
 #ifdef L2_STANDARD
-    HiTraceEnd(&hitraceId->traceId);
+    HiTraceChainEnd(&hitraceId->traceId);
     HksTraceMeterFinish(huksLabel);
 #else
     (void)hitraceId;
