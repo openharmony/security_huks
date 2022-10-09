@@ -23,8 +23,9 @@ import {AsyncCallback} from './basic';
 declare namespace huks {
     /**
      * Generate Key.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.generateKeyItem
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -56,8 +57,9 @@ declare namespace huks {
 
     /**
      * Delete Key.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.deleteKeyItem
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -84,8 +86,9 @@ declare namespace huks {
 
     /**
      * Import Key.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.importKeyItem
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -142,8 +145,9 @@ declare namespace huks {
 
     /**
      * Export Key.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.exportKeyItem
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -174,8 +178,9 @@ declare namespace huks {
 
     /**
      * Get properties of the key.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.getKeyItemProperties
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -206,8 +211,9 @@ declare namespace huks {
 
     /**
      * Check whether the key exists.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.isKeyItemExist
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -236,8 +242,9 @@ declare namespace huks {
 
     /**
      * Init Operation.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.initSession
      * @syscap SystemCapability.Security.Huks
      * @param keyAlias Indicates the key's name.
      * @param options Indicates the properties of the key.
@@ -270,8 +277,9 @@ declare namespace huks {
 
     /**
      * Update Operation.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.updateSession
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
      * @param options Indicates the properties of the update operation.
@@ -309,8 +317,9 @@ declare namespace huks {
 
     /**
      * Finish Operation.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.finishSession
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
      * @param options Indicates the properties of the finish operation.
@@ -346,8 +355,9 @@ declare namespace huks {
 
     /**
      * Abort Operation.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.abortSession
      * @syscap SystemCapability.Security.Huks
      * @param handle Indicates the handle of the init operation.
      * @param options Indicates the properties of the abort operation.
@@ -415,8 +425,9 @@ declare namespace huks {
 
     /**
      * Interface of huks handle.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.HuksSessionHandle
      * @syscap SystemCapability.Security.Huks
      */
     export interface HuksHandle {
@@ -447,8 +458,9 @@ declare namespace huks {
 
     /**
      * Interface of huks result.
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.HuksReturnResult
      * @syscap SystemCapability.Security.Huks
      */
     export interface HuksResult {
@@ -471,8 +483,9 @@ declare namespace huks {
 
     /**
      * @name HuksErrorCode
-     * @deprecated
      * @since 8
+     * @deprecated since 9
+     * @useinstead ohos.security.huks.HuksExceptionErrCode
      * @syscap SystemCapability.Security.Huks
      */
     export enum HuksErrorCode {
