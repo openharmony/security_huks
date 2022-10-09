@@ -46,6 +46,11 @@ ohos_unittest("hukssdk_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
+  # native api test
+  sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_native_api_compatibility_test.cpp",
+  ]
+
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
@@ -61,6 +66,7 @@ ohos_unittest("hukssdk_test") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/kits/c:huks_ndk",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
   ]
