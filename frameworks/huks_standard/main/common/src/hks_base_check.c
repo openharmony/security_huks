@@ -1488,8 +1488,7 @@ int32_t HksGetInputParmasByAlg(uint32_t alg, enum CheckKeyType checkType, const 
 
 int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const struct ParamsValues *inputParams)
 {
-    struct ExpectParamsValues expectValues;
-    (void)memset_s(&expectValues, sizeof(expectValues), 0, sizeof(expectValues));
+    struct ExpectParamsValues expectValues = EXPECT_PARAMS_VALUES_INIT;
     int32_t ret = GetExpectParams(alg, checkType, &expectValues);
     if (ret != HKS_SUCCESS) {
         return ret;

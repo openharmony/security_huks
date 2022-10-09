@@ -65,7 +65,7 @@ static char *MallocDecodeData(const char *text, size_t *olen)
         return NULL;
     }
 
-    if ((decodeLen + 1) <= 0) {
+    if (decodeLen == 0) {
         return NULL;
     }
     char *decData = (char *)malloc(decodeLen + 1);
@@ -91,7 +91,7 @@ static char *MallocEncodeData(const unsigned char *text, size_t *olen)
         return NULL;
     }
 
-    if ((dataLen + 1) <= 0) {
+    if (dataLen == 0) {
         return NULL;
     }
     char *encData = (char *)malloc(dataLen + 1);

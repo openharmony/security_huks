@@ -66,7 +66,6 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
     BN_bn2bin(pubKey, rawMaterial + offset);
     offset += keyMaterial->pubKeySize;
     BN_bn2bin(privKey, rawMaterial + offset);
-    offset += keyMaterial->priKeySize;
 
     key->size = rawMaterialLen;
     if (memcpy_s(key->data, key->size, rawMaterial, rawMaterialLen) != 0) {
