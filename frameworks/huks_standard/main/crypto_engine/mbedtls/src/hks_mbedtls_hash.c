@@ -44,7 +44,7 @@ struct HksMbedtlsHashCtx {
 
 static int32_t HksMbedtlsHashMd5Init(void **ctx, uint32_t alg)
 {
-    int32_t ret;
+    int32_t ret = 0;
     mbedtls_md5_context *context = (mbedtls_md5_context *)HksMalloc(sizeof(mbedtls_md5_context));
     if (context == NULL) {
         HKS_LOG_E("malloc fail");
@@ -81,7 +81,7 @@ static int32_t HksMbedtlsHashMd5Init(void **ctx, uint32_t alg)
 
 static int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsigned char *input, size_t ilen)
 {
-    int32_t ret;
+    int32_t ret = 0;
     mbedtls_md5_context *context = (mbedtls_md5_context *)ctx->append;
 
     if (context == NULL) {
@@ -99,7 +99,7 @@ static int32_t HksMbedtlsHashMd5Update(struct HksMbedtlsHashCtx *ctx, const unsi
 
 static int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    int32_t ret;
+    int32_t ret = 0;
     mbedtls_md5_context *context = (mbedtls_md5_context *)ctx->append;
 
     if (context == NULL) {
@@ -135,7 +135,7 @@ static int32_t HksMbedtlsHashMd5Final(struct HksMbedtlsHashCtx *ctx, const struc
 
 static int32_t HksMbedtlsHashSha1Init(void **ctx, uint32_t alg)
 {
-    int32_t ret;
+    int32_t ret = 0;
     mbedtls_sha1_context *context = (mbedtls_sha1_context *)HksMalloc(sizeof(mbedtls_sha1_context));
     if (context == NULL) {
         HKS_LOG_E("malloc fail");
@@ -198,7 +198,7 @@ static int32_t HksMbedtlsHashSha1Final(struct HksMbedtlsHashCtx *ctx, const stru
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret;
+    int32_t ret = 0;
     do {
         if (hash->data == NULL) {
             HKS_LOG_E("Mbedtls Hash sha1 output param error");
@@ -302,7 +302,7 @@ static int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const st
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret;
+    int32_t ret = 0;
     do {
         if (hash->data == NULL) {
             HKS_LOG_E("Mbedtls Hash sha256 output param error");
@@ -408,7 +408,7 @@ static int32_t HksMbedtlsHashSha512Final(struct HksMbedtlsHashCtx *ctx, const st
         return HKS_ERROR_NULL_POINTER;
     }
 
-    int32_t ret;
+    int32_t ret = 0;
     do {
         if (hash->data == NULL) {
             HKS_LOG_E("Mbedtls Hash sha512 output param error");
@@ -491,7 +491,7 @@ static void HksMbedtlsSha384Sha512HashFreeCtx(void **cryptoCtx)
 
 int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
 {
-    int32_t ret;
+    int32_t ret = 0;
     switch (digestAlg) {
         case HKS_DIGEST_MD5:
             ret = HksMbedtlsHashMd5Init(cryptoCtx, digestAlg);
@@ -525,7 +525,7 @@ int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
 
 int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
-    int32_t ret;
+    int32_t ret = 0;
     struct HksMbedtlsHashCtx *hashCtx = (struct HksMbedtlsHashCtx *)cryptoCtx;
 
     switch (hashCtx->mAlg) {
@@ -557,7 +557,7 @@ int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 
 int32_t HksMbedtlsHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    int32_t ret;
+    int32_t ret = 0;
     struct HksMbedtlsHashCtx *hashCtx = (struct HksMbedtlsHashCtx *)*cryptoCtx;
     if (hashCtx == NULL) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -638,7 +638,7 @@ void HksMbedtlsHashFreeCtx(void **cryptoCtx)
 
 int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    int32_t ret;
+    int32_t ret = 0;
     switch (alg) {
 #ifdef HKS_SUPPORT_HASH_MD5
         case HKS_DIGEST_MD5:

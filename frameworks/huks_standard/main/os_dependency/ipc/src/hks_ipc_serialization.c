@@ -24,6 +24,8 @@
 #include "hks_param.h"
 #include "securec.h"
 
+#define NUM_TWO        2
+
 static const uint8_t g_base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
@@ -431,7 +433,7 @@ static int32_t CheckAndCalculateSize(const uint32_t inSize, const uint32_t extra
      * 2: fill it up to a multiple of three
      * 3 and 4: every three original characters is converted to four base64 characters
      */
-    if (inSize > UINT32_MAX - 2) {
+    if (inSize > UINT32_MAX - NUM_TWO) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     /* 3 and 4: every three original characters is converted to four base64 characters */

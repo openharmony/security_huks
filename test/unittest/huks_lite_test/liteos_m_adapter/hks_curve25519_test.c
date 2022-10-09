@@ -104,6 +104,7 @@ LITE_TEST_CASE(HksCurve25519Test, HksCurve25519Test002, Level1)
     attr.priority = g_setPriority;
     id = osThreadNew((osThreadFunc_t)LocalHksCurve25519Test002, NULL, &attr);
 
+    (void)id;
     sleep(WAIT_TO_TEST_DONE);
 
     LiteTestPrint("HksCurve25519Test002 End2!\n");

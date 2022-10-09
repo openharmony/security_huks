@@ -135,7 +135,7 @@ int32_t X509ToRsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
 
     uint32_t nSize = (uint32_t)BN_num_bytes(RSA_get0_n(rsa));
     uint32_t eSize = (uint32_t)BN_num_bytes(RSA_get0_e(rsa));
-    if ((nSize <= 0) || (eSize <= 0)) {
+    if ((nSize == 0) || (eSize == 0)) {
         EVP_PKEY_free(pkey);
         return RSA_FAILED;
     }
