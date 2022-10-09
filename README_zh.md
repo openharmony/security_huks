@@ -41,6 +41,6 @@ base/security/huks/
 
 **安全子系统**
 
-**security_huks**
+**[security_huks](https://gitee.com/openharmony/security_huks)**
 
 
