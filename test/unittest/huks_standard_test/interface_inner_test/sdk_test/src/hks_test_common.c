@@ -81,7 +81,6 @@ int32_t TestConstuctBlob(struct HksBlob **blob, bool blobExist, uint32_t blobSiz
 
         HKS_TEST_ASSERT(HksGenerateRandom(NULL, &tmp) == 0);
         HKS_TEST_ASSERT(memcpy_s((*blob)->data + offset, remainSize, tmp.data, tmp.size) == EOK);
-        offset += tmp.size;
         HksTestFree(tmp.data);
     } else {
         (*blob)->data = NULL;
