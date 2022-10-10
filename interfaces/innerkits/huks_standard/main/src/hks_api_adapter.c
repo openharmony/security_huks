@@ -104,7 +104,7 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
         }
 
         if ((CheckBlob(key) != HKS_SUCCESS) || (memcpy_s(key->data, key->size, x509Key.data, x509Key.size) != EOK)) {
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_DATA;
             HKS_LOG_E("x509 format memcpy failed");
         } else {
             key->size = x509Key.size;

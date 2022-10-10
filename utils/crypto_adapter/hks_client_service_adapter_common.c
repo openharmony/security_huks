@@ -75,7 +75,7 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
         HKS_LOG_E("copy pub key failed!");
         HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     publicKey->data = buffer;
     publicKey->size = totalSize;

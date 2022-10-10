@@ -28,7 +28,7 @@ struct HksResult {
 };
 
 struct HksError {
-    int32_t oldErrCode;
+    int32_t innerErrCode;
     struct HksResult hksResult;
 };
 

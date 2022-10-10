@@ -179,7 +179,7 @@ static int32_t AssignToken(struct HksBlob *token, const struct HksBlob *challeng
     if (token->size >= TOKEN_SIZE) {
         if (memcpy_s(token->data, token->size, challenge->data, challenge->size) != EOK) {
             HKS_LOG_E("copy token failed");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         token->size = challenge->size;
         return HKS_SUCCESS;
@@ -330,7 +330,7 @@ static int32_t HksVerifyKeyTimestamp(const struct HuksKeyNode *keyNode, const st
     if ((accessTime->uint64Param > authTokenTime && accessTime->uint64Param - authTokenTime > timeOutInt) ||
         (authTokenTime > accessTime->uint64Param && authTokenTime - accessTime->uint64Param > timeOutInt)) {
         HKS_LOG_E("auth token time out!");
-        return HKS_ERROR_KEY_AUTH_FAILED;
+        return HKS_ERROR_KEY_AUTH_TIME_OUT;
     }
     return HKS_SUCCESS;
 }
@@ -363,7 +363,7 @@ static int32_t ParseAuthToken(const struct HksBlob *inAuthTokenParam, struct Hks
         if (memcpy_s(authToken, sizeof(struct HksUserAuthToken), inAuthTokenParam->data,
             inAuthTokenParam->size) != EOK) {
             HKS_LOG_E("memcpy for authToken failed!");
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 
@@ -381,13 +381,13 @@ static int32_t GetAuthToken(const struct HksParamSet *paramSet, struct HksUserAu
     int32_t ret = HksGetParam(paramSet, HKS_TAG_AUTH_TOKEN, &authTokenParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get auth token param failed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_CHECK_GET_AUTH_TOKEN_FAILED;
     }
 
     ret = ParseAuthToken(&authTokenParam->blob, authToken);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("parse auth token failed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_INVALID_AUTH_TOKEN;
     }
     return HKS_SUCCESS;
 }
@@ -480,7 +480,7 @@ static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
 
     if (HksMemCmp(secUid->blob.data, &authToken->secureUid, sizeof(uint64_t)) != 0) {
         HKS_LOG_E("check sec uid failed!");
-        return HKS_ERROR_KEY_AUTH_FAILED;
+        return HKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED;
     }
     return HKS_SUCCESS;
 }
@@ -510,7 +510,7 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
     uint32_t enrolledIdNum = 0;
     if (memcpy_s(&enrolledIdNum, sizeof(uint32_t), enrolledIdInfoBlob.data, sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("copy enrolled id len failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     uint32_t index = sizeof(uint32_t);
 
@@ -518,14 +518,14 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
         uint32_t authType = 0;
         if (memcpy_s(&authType, sizeof(uint32_t), enrolledIdInfoBlob.data + index, sizeof(uint32_t)) != EOK) {
             HKS_LOG_E("copy authType failed!");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         index += sizeof(uint32_t);
 
         uint64_t enrolledId = 0;
         if (memcpy_s(&enrolledId, sizeof(uint64_t), enrolledIdInfoBlob.data + index, sizeof(uint64_t)) != EOK) {
             HKS_LOG_E("copy enrolledId failed!");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         index += sizeof(uint64_t);
         if (authType == authTokenAuthType && enrolledId == authToken->enrolledId) {
@@ -533,7 +533,7 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
         }
     }
     HKS_LOG_E("match enrolled id failed!");
-    return HKS_ERROR_KEY_AUTH_FAILED;
+    return HKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED;
 }
 
 static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const struct HksUserAuthToken *authToken)
@@ -562,7 +562,7 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
 
     if ((authTokenAuthType & userAuthType->uint32Param) == 0) {
         HKS_LOG_E("current keyblob auth do not support current auth token auth type!");
-        return HKS_ERROR_KEY_AUTH_FAILED;
+        return HKS_ERROR_KEY_AUTH_VERIFY_FAILED;
     }
 
     ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
@@ -670,12 +670,13 @@ static int32_t CheckIfNeedVerifyParams(const struct HuksKeyNode *keyNode, bool *
     return HKS_SUCCESS;
 }
 
-static int32_t AssignVerifyResultAndFree(bool isSuccess, struct HksParam *authResult, struct HuksKeyNode *keyNode,
+static int32_t AssignVerifyResultAndFree(int32_t outRet, struct HksParam *authResult, struct HuksKeyNode *keyNode,
     struct HksUserAuthToken *authToken)
 {
-    if (isSuccess) {
+    int32_t ret = outRet;
+    if (ret == HKS_SUCCESS) {
         authResult->uint32Param = HKS_AUTH_RESULT_SUCCESS;
-        int32_t ret = HksAddVerifiedAuthTokenIfNeed(keyNode, authToken);
+        ret = HksAddVerifiedAuthTokenIfNeed(keyNode, authToken);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("add verified auth token failed!");
             HKS_FREE_PTR(authToken);
@@ -684,12 +685,10 @@ static int32_t AssignVerifyResultAndFree(bool isSuccess, struct HksParam *authRe
     } else {
         authResult->uint32Param = HKS_AUTH_RESULT_FAILED;
         HKS_FREE_PTR(authToken);
-        return HKS_ERROR_KEY_AUTH_FAILED;
     }
     HKS_FREE_PTR(authToken);
-    return HKS_SUCCESS;
+    return ret;
 }
-
 
 static int32_t GetUserAuthResult(const struct HuksKeyNode *keyNode, int32_t *authResult)
 {
@@ -946,14 +945,14 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
     if (memcpy_s(cacheOutData, cacheOutDataSize, &version, sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("memcpy secure sign auth info version to cacheOutData failed!");
         HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(cacheOutData + sizeof(uint32_t), cacheOutDataSize - sizeof(uint32_t), appendDataPrefixParam->blob.data,
         appendDataPrefixParam->blob.size) != EOK) {
         HKS_LOG_E("memcpy secure sign auth info to cacheOutData failed!");
         HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(cacheOutData + sizeof(uint32_t) + appendDataPrefixParam->blob.size,
@@ -961,13 +960,13 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
         innerParams->inData->size) != 0) {
         HKS_LOG_E("memcpy outData to cacheOutData failed!");
         HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(inOutData->data, inOutDataOriginSize, cacheOutData, cacheOutDataSize) != 0) {
         HKS_LOG_E("memcpy cacheOutData to inOutData failed!");
         HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     inOutData->size = cacheOutDataSize;
     HKS_FREE_PTR(cacheOutData);
@@ -1056,7 +1055,7 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
         }
     } while (0);
 
-    return AssignVerifyResultAndFree(ret == HKS_SUCCESS, authResult, keyNode, authToken);
+    return AssignVerifyResultAndFree(ret, authResult, keyNode, authToken);
 }
 
 int32_t HksCoreAppendAuthInfoBeforeUpdate(struct HuksKeyNode *keyNode, uint32_t pur,

@@ -71,7 +71,7 @@ static napi_value GetKeyPropertiesParseParams(
     napi_env env, napi_callback_info info, GetKeyPropertiesAsyncContext context)
 {
     size_t argc = HUKS_NAPI_GET_KEY_PROPERTIES_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_GET_KEY_PROPERTIES_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_GET_KEY_PROPERTIES_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_GET_KEY_PROPERTIES_MIN_ARGS) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_export_key.h"
+#include "huks_napi_export_key_item.h"
 
 #include "securec.h"
 
@@ -22,9 +22,9 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
-#include "huks_napi_common.h"
+#include "huks_napi_common_item.h"
 
-namespace HuksNapi {
+namespace HuksNapiItem {
 namespace {
 constexpr int HUKS_NAPI_EXPORT_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_EXPORT_KEY_MAX_ARGS = 3;
@@ -44,7 +44,7 @@ using ExportKeyAsyncContext = ExportKeyAsyncContextT *;
 
 static ExportKeyAsyncContext CreateExportKeyAsyncContext()
 {
-    ExportKeyAsyncContext context = (ExportKeyAsyncContext)HksMalloc(sizeof(ExportKeyAsyncContextT));
+    ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(HksMalloc(sizeof(ExportKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(ExportKeyAsyncContextT), 0, sizeof(ExportKeyAsyncContextT));
     }
@@ -70,11 +70,11 @@ static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &con
 static napi_value ExportKeyParseParams(napi_env env, napi_callback_info info, ExportKeyAsyncContext context)
 {
     size_t argc = HUKS_NAPI_EXPORT_KEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_EXPORT_KEY_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_EXPORT_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_EXPORT_KEY_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -94,22 +94,14 @@ static napi_value ExportKeyParseParams(napi_env env, napi_callback_info info, Ex
     return GetInt32(env, 0);
 }
 
-static napi_value ExportKeyWriteResult(napi_env env, ExportKeyAsyncContext context)
-{
-    return GenerateHksResult(env,
-        context->result,
-        ((context->result == HKS_SUCCESS && context->key != nullptr) ? context->key->data : nullptr),
-        (context->result == HKS_SUCCESS && context->key != nullptr) ? context->key->size : 0);
-}
-
 static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
 {
-    context->key = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->key = static_cast<struct HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->key == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    context->key->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    context->key->data = static_cast<uint8_t *>(HksMalloc(MAX_KEY_SIZE));
     if (context->key->data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -143,20 +135,17 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context
         },
         [](napi_env env, napi_status status, void *data) {
             ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
-            napi_value result = ExportKeyWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
-            } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            }
+            HksSuccessReturnResult resultData;
+            SuccessReturnResultInit(resultData);
+            resultData.outData = context->key;
+            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
             DeleteExportKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
-        GET_AND_THROW_LAST_ERROR((env));
         DeleteExportKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
@@ -169,7 +158,7 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context
     }
 }
 
-napi_value HuksNapiExportKey(napi_env env, napi_callback_info info)
+napi_value HuksNapiExportKeyItem(napi_env env, napi_callback_info info)
 {
     ExportKeyAsyncContext context = CreateExportKeyAsyncContext();
     if (context == nullptr) {
@@ -192,4 +181,4 @@ napi_value HuksNapiExportKey(napi_env env, napi_callback_info info)
     }
     return result;
 }
-}  // namespace HuksNapi
+}  // namespace HuksNapiItem

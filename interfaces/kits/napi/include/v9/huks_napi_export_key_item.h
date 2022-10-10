@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_NAPI_IMPORT_WRAPPED_KEY_H
-#define HUKS_NAPI_IMPORT_WRAPPED_KEY_H
+#ifndef HUKS_NAPI_EXPORT_KEY_ITEM_H
+#define HUKS_NAPI_EXPORT_KEY_ITEM_H
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-namespace HuksNapi {
-    napi_value HuksNapiImportWrappedKey(napi_env env, napi_callback_info info);
-}  // namespace HuksNapi
+namespace HuksNapiItem {
+napi_value HuksNapiExportKeyItem(napi_env env, napi_callback_info info);
+}  // namespace HuksNapiItem
 
-#endif // HUKS_NAPI_IMPORT_WRAPPED_KEY_H
+#endif  // HUKS_NAPI_EXPORT_KEY_ITEM_H

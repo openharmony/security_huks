@@ -150,7 +150,7 @@ int32_t SensitivePermissionCheck()
         return HKS_SUCCESS;
     } else {
         HKS_LOG_E("Check Permission failed!");
-        return HKS_FAILURE;
+        return HKS_ERROR_NO_PERMISSION;
     }
 }
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_attest_key.h"
+#include "huks_napi_attest_key_item.h"
 
 #include "securec.h"
 
@@ -22,9 +22,9 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
-#include "huks_napi_common.h"
+#include "huks_napi_common_item.h"
 
-namespace HuksNapi {
+namespace HuksNapiItem {
 namespace {
 constexpr int HUKS_NAPI_ATTEST_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_ATTEST_KEY_MAX_ARGS = 3;
@@ -49,7 +49,7 @@ using AttestKeyAsyncContext = AttestKeyAsyncContextT *;
 
 static AttestKeyAsyncContext CreateAttestKeyAsyncContext()
 {
-    AttestKeyAsyncContext context = (AttestKeyAsyncContext)HksMalloc(sizeof(AttestKeyAsyncContextT));
+    AttestKeyAsyncContext context = static_cast<AttestKeyAsyncContext>(HksMalloc(sizeof(AttestKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(AttestKeyAsyncContextT), 0, sizeof(AttestKeyAsyncContextT));
     }
@@ -70,11 +70,11 @@ static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &con
 static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, AttestKeyAsyncContext context)
 {
     size_t argc = HUKS_NAPI_ATTEST_KEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_ATTEST_KEY_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_ATTEST_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_ATTEST_KEY_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -87,16 +87,13 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
     }
 
     index++;
-    napi_value properties = nullptr;
-    napi_status status =
-        napi_get_named_property(env, argv[index], HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
-    if (status != napi_ok || properties == nullptr) {
-        GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+    napi_value property = GetPropertyFromOptions(env, argv[index], HKS_OPTIONS_PROPERTY_PROPERTIES);
+    if (property == nullptr) {
+        HKS_LOG_E("attestKey get property failed");
         return nullptr;
     }
     HksParam param = { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true };
-    result = ParseHksParamSetAndAddParam(env, properties, context->paramSet, &param);
+    result = ParseHksParamSetAndAddParam(env, property, context->paramSet, &param);
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
@@ -110,31 +107,19 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
     return GetInt32(env, 0);
 }
 
-static napi_value AttestKeyWriteResult(napi_env env, AttestKeyAsyncContext context)
-{
-    napi_value result = GenerateHksResult(env, context->result, nullptr, 0);
-    if (result != nullptr) {
-        napi_value certChains = GenerateStringArray(env, context->certChain->certs, context->certChain->certsCount);
-        if (certChains != nullptr) {
-            napi_set_named_property(env, result, HKS_RESULT_PRPPERTY_CERTCHAINS.c_str(), certChains);
-        }
-    }
-    return result;
-}
-
 static void InitCertChain(struct HksCertChain *certChain)
 {
     certChain->certsCount = HKS_CERT_COUNT;
-    certChain->certs = (struct HksBlob *)HksMalloc(certChain->certsCount * sizeof(struct HksBlob));
+    certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
     if (certChain->certs != nullptr) {
         certChain->certs[INDEX_0].size = HKS_CERT_APP_SIZE;
-        certChain->certs[INDEX_0].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_0].size);
+        certChain->certs[INDEX_0].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_0].size));
         certChain->certs[INDEX_1].size = HKS_CERT_DEVICE_SIZE;
-        certChain->certs[INDEX_1].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_1].size);
+        certChain->certs[INDEX_1].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_1].size));
         certChain->certs[INDEX_2].size = HKS_CERT_CA_SIZE;
-        certChain->certs[INDEX_2].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_2].size);
+        certChain->certs[INDEX_2].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_2].size));
         certChain->certs[INDEX_3].size = HKS_CERT_ROOT_SIZE;
-        certChain->certs[INDEX_3].data = (uint8_t *)HksMalloc(certChain->certs[INDEX_3].size);
+        certChain->certs[INDEX_3].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_3].size));
     }
 }
 
@@ -155,7 +140,7 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
         [](napi_env env, void *data) {
             AttestKeyAsyncContext context = static_cast<AttestKeyAsyncContext>(data);
 
-            context->certChain = (struct HksCertChain *)HksMalloc(sizeof(struct HksCertChain));
+            context->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (context->certChain != nullptr) {
                 InitCertChain(context->certChain);
             }
@@ -164,20 +149,17 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
         },
         [](napi_env env, napi_status status, void *data) {
             AttestKeyAsyncContext context = static_cast<AttestKeyAsyncContext>(data);
-            napi_value result = AttestKeyWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
-            } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            }
+            HksSuccessReturnResult resultData;
+            SuccessReturnResultInit(resultData);
+            resultData.certChain = context->certChain;
+            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
             DeleteAttestKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
-        GET_AND_THROW_LAST_ERROR((env));
         DeleteAttestKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
@@ -190,7 +172,7 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
     }
 }
 
-napi_value HuksNapiAttestKey(napi_env env, napi_callback_info info)
+napi_value HuksNapiAttestKeyItem(napi_env env, napi_callback_info info)
 {
     AttestKeyAsyncContext context = CreateAttestKeyAsyncContext();
     if (context == nullptr) {
@@ -213,4 +195,4 @@ napi_value HuksNapiAttestKey(napi_env env, napi_callback_info info)
     }
     return result;
 }
-}  // namespace HuksNapi
+}  // namespace HuksNapiItem

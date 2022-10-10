@@ -59,7 +59,7 @@ static int32_t SaveEd25519KeyMaterial(const struct HksBlob *pubKey, const struct
         HKS_LOG_E("copy ed25519 public key failed");
         (void)memset_s(buffer, totalSize, 0, totalSize);
         HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     offset += pubKey->size;
@@ -67,7 +67,7 @@ static int32_t SaveEd25519KeyMaterial(const struct HksBlob *pubKey, const struct
         HKS_LOG_E("copy ed25519 private key failed");
         (void)memset_s(buffer, totalSize, 0, totalSize);
         HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     keyOut->data = buffer;
@@ -161,7 +161,7 @@ int32_t HksGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
     uint32_t outLen = sizeof(struct KeyMaterial25519) + key->pubKeySize;
     if (memcpy_s(output->data, output->size, key, outLen) != EOK) {
         HKS_LOG_E("memcpy_s ed25519 pub key failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     ((struct KeyMaterial25519 *)output->data)->priKeySize = 0;

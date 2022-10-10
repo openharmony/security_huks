@@ -175,7 +175,7 @@ static int32_t Curve25519Initialize(struct Curve25519Structure *curve25519,
     uint8_t pubKey[P_BYTES] = {0};
     if (memcpy_s(pubKey, P_BYTES - 1, source, sourceLen - 1) != EOK) { // the 0-30 bit assignment
         HKS_LOG_E("copy source data to pubKey failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     pubKey[P_BYTES - 1] = source[P_BYTES - 1] & 0x7f; // the last bit assignment
     SwapEndianThirtyTwoByte(pubKey, sizeof(pubKey), isBigEndian);
@@ -243,25 +243,25 @@ static int32_t CheckEd25519PubkeyPart(const struct Curve25519Structure *curve255
     BN_CTX *ctx, BIGNUM *tmpOne)
 {
     if (BN_set_word(tmpOne, 1) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (BN_mod_add(var->b, var->b, tmpOne, curve25519->p, ctx) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (BN_mod_exp(var->c, var->b, curve25519->negativeTwo, curve25519->p, ctx) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (BN_mod_add(var->b, var->a, curve25519->negativeOne, curve25519->p, ctx) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (BN_mod_mul(var->a, var->b, var->c, curve25519->p, ctx) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (BN_mod_add(var->a, var->a, curve25519->p, curve25519->p, ctx) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (BN_mod_exp(var->b, var->a, curve25519->negativeOneDivideTwo, curve25519->p, ctx) <= 0) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
 }
@@ -269,7 +269,7 @@ static int32_t CheckEd25519PubkeyPart(const struct Curve25519Structure *curve255
 static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, struct Curve25519Var *var,
     uint8_t flag, BN_CTX *ctx)
 {
-    int32_t res = HKS_FAILURE;
+    int32_t res = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     uint32_t result = (uint32_t)(BN_cmp(curve25519->ed25519Pubkey, curve25519->p) < 0);
     BIGNUM *tmpOne = BN_new();
     if (tmpOne == NULL) {
@@ -312,11 +312,11 @@ static int32_t FillPubKeyByZero(uint8_t *pubKey, uint32_t *pubKeySize)
         int baseAddr = P_BYTES - *pubKeySize;
         if (memcpy_s(tmpKey + baseAddr, P_BYTES - baseAddr, pubKey, *pubKeySize) != EOK) {
             HKS_LOG_E("memcpy_s pubKey to buf failed");
-            return HKS_FAILURE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         if (memcpy_s(pubKey, P_BYTES, tmpKey, P_BYTES) != EOK) {
             HKS_LOG_E("memcpy_s buf to pubKey failed");
-            return HKS_FAILURE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         *pubKeySize = P_BYTES;
     }
@@ -333,7 +333,7 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    ret = HKS_FAILURE;
+    ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
         if (CheckEd25519Pubkey(&curve25519, var, keyIn->data[keyIn->size - 1], ctx) != HKS_SUCCESS) {
             break;
@@ -379,7 +379,7 @@ int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBl
 {
     BN_CTX *ctx = BN_CTX_new();
     if (ctx == NULL) {
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     struct Curve25519Var var = { NULL, NULL, NULL };
     int32_t ret = Curve25519LocalVar(&var);
@@ -412,14 +412,14 @@ int32_t ConvertPrivX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob
 
     if (EVP_Digest(input, inputLen, digest, &digestLen, EVP_sha512(), NULL) <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (memcpy_s(keyOut->data + offset, keyMaterialOut->priKeySize, digest,
         digestLen / 2) != EOK) { // 2 : used to calculate half of the digest length
         (void)memset_s(digest, digestLen, 0, digestLen);
         HKS_LOG_E("copy digest data to output key failed");
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     // 248 127 64 are the constant value of x25 to ed25 algorithm

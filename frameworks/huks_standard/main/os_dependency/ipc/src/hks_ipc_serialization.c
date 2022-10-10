@@ -35,7 +35,7 @@ int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint3
     }
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value, sizeof(value)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *destOffset += sizeof(value);
 
@@ -51,13 +51,13 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
         &(blob->size), sizeof(blob->size)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *destOffset += sizeof(blob->size);
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size) != EOK) {
         *destOffset -= sizeof(blob->size);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *destOffset += ALIGN_SIZE(blob->size);
 
@@ -73,7 +73,7 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
         paramSet, paramSet->paramSetSize) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *destOffset += ALIGN_SIZE(paramSet->paramSetSize);
 
@@ -492,7 +492,7 @@ static int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *out
 
         if (memcpy_s(outBlob->data, outBlob->size, tmpBlob.data, tmpBlob.size) != EOK) {
             HKS_LOG_E("copy certs encoded fail");
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
             break;
         }
         outBlob->size = tmpBlob.size;
@@ -507,12 +507,12 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
 {
     if (srcData->size < sizeof(certChain->certsCount)) {
         HKS_LOG_E("invalid certs buffer");
-        return HKS_FAILURE;
+        return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     uint32_t certsCount = *(uint32_t *)(srcData->data);
     if (certsCount > certChain->certsCount) {
         HKS_LOG_E("not enough output certs, real count %u, output count %u", certsCount, certChain->certsCount);
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_DATA;
     }
     uint32_t offset = sizeof(certsCount);
 
@@ -520,11 +520,11 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
     for (uint32_t i = 0; i < certsCount; ++i) {
         if (GetBlobFromBuffer(&tmp, srcData, &offset) != HKS_SUCCESS) {
             HKS_LOG_E("get certs %d fail", i);
-            return HKS_FAILURE;
+            return HKS_ERROR_IPC_MSG_FAIL;
         }
         if (memcpy_s(certChain->certs[i].data, certChain->certs[i].size, tmp.data, tmp.size)) {
             HKS_LOG_E("copy certs %d fail", i);
-            return HKS_FAILURE;
+            return HKS_ERROR_INSUFFICIENT_DATA;
         }
 
         if (needEncode) {
@@ -532,7 +532,7 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
             int32_t ret = EncodeCertChain(&inBlob, &certChain->certs[i]);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("EncodeCertChain fail, ret = %d", ret);
-                return HKS_FAILURE;
+                return ret;
             }
         } else {
             certChain->certs[i].size = tmp.size;

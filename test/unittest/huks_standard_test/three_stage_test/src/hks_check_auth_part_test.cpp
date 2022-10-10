@@ -445,7 +445,7 @@ HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest003, TestSize.Level0)
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest004, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest004");
-    EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_004_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_004_PARAMS), HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED);
 }
 
 /**
@@ -484,7 +484,7 @@ HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest006, TestSize.Level0)
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest007, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest007");
-    EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_007_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_007_PARAMS), HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED);
 }
 
 /**

@@ -190,7 +190,7 @@ int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const st
     }
     if (obj->header.type != expectedTag) {
         HKS_LOG_E("tag %u does not match expected: %u\n", obj->header.type, expectedTag);
-        return HKS_FAILURE;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
 }

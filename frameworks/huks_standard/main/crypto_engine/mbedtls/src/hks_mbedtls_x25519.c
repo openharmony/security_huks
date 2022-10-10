@@ -280,7 +280,7 @@ static int32_t X25519KeyMaterialToPub(const struct HksBlob *pubKey, mbedtls_ecp_
     int32_t ret;
     do {
         if (memcpy_s(tmpPubKey, keyMaterial->pubKeySize, pubKey->data + offset, keyMaterial->pubKeySize) != EOK) {
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 
@@ -415,7 +415,7 @@ int32_t HksMbedtlsGetX25519PubKey(const struct HksBlob *keyIn, struct HksBlob *k
     const uint32_t outLen = sizeof(struct KeyMaterial25519) + keyMaterial->pubKeySize;
     if (memcpy_s(keyOut->data, keyOut->size, (void *)keyMaterial, outLen) != EOK) {
         HKS_LOG_E("Memcpy x25519 pub key failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     ((struct KeyMaterial25519 *)(keyOut->data))->priKeySize = 0;
     keyOut->size = outLen;
@@ -762,7 +762,7 @@ static int32_t ConvertPrivateKey(const struct HksBlob *privateKeyIn, struct HksB
     do {
         /* Get the first 32 bytes of the hash value (little endian) */
         if (memcpy_s(x25519PrivateKey->data, x25519PrivateKey->size, hash512.data, CURVE25519_KEY_BYTE_SIZE) != EOK) {
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 

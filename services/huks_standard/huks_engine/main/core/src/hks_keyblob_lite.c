@@ -62,7 +62,7 @@ static int32_t GetSalt(enum DeriveType type, const struct HksBlob *random, struc
     if ((memcpy_s(salt->data, salt->size, random->data, random->size) != EOK) ||
         (memcpy_s(salt->data + random->size, salt->size - random->size, tag.data, tag.size) != EOK)) {
         HKS_FREE_PTR(salt->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
 }
@@ -214,7 +214,7 @@ static int32_t CopyKey(const struct HksBlob *key, struct HksBlob *adjustedKey)
     }
     if (memcpy_s(adjustedKey->data, adjustedKey->size, key->data, key->size) != EOK) {
         HKS_FREE_PTR(adjustedKey->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
 }
@@ -246,7 +246,7 @@ static int32_t Ed25519BlobToKeyMaterial(const struct HksBlob *key, struct HksBlo
         HKS_LOG_E("copy ed25519 public and private value failed");
         (void)memset_s(adjustedKey->data, adjustedKey->size, 0, adjustedKey->size);
         HKS_FREE_PTR(adjustedKey->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
 }
@@ -277,7 +277,7 @@ static int32_t Ed25519KeyMaterialToBlob(const struct HksBlob *key, struct HksBlo
         keyMaterial->pubKeySize + keyMaterial->priKeySize) != EOK) {
         HKS_LOG_E("copy pubKey and private key failed.");
         HKS_FREE_PTR(adjustedKey->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
 }
@@ -403,7 +403,7 @@ static int32_t FillBaseInfo(const struct HksParamSet *paramSet, struct HksBlob *
                 if (memcpy_s(keyOut->data + sizeof(*keyInfo) + keyInfo->aliasSize, HKS_MAX_KEY_AUTH_ID_LEN,
                     paramSet->params[i].blob.data, paramSet->params[i].blob.size) != EOK) {
                     HKS_LOG_E("memcpy key auth id failed");
-                    return HKS_ERROR_BAD_STATE;
+                    return HKS_ERROR_INSUFFICIENT_MEMORY;
                 }
                 keyInfo->authIdSize = paramSet->params[i].blob.size;
                 break;
@@ -429,7 +429,7 @@ static int32_t FillStoreKeyInfo(const struct HksBlob *keyAlias, uint8_t keyFlag,
     /* 1. copy keyAlias */
     if (memcpy_s(keyOut->data + sizeof(*keyInfo), HKS_MAX_KEY_ALIAS_LEN, keyAlias->data, keyAlias->size) != EOK) {
         HKS_LOG_E("memcpy keyAlias failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     keyInfo->aliasSize = keyAlias->size;
 
@@ -485,7 +485,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     uint8_t *data = HksMalloc(keyParam->blob.size);
     if (data == NULL) {
         HKS_LOG_E("fail to malloc raw key");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memcpy_s(data, keyParam->blob.size, keyParam->blob.data, keyParam->blob.size);
 
@@ -523,7 +523,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
 
         if (memcpy_s(keyOut->data, keyOut->size, tmpOut.data, tmpOut.size) != EOK) {
             HKS_LOG_E("copy keyblob out failed!");
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
         keyOut->size = tmpOut.size;
