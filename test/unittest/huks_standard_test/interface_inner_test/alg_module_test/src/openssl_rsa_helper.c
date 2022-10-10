@@ -133,12 +133,15 @@ int32_t X509ToRsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
         return RSA_FAILED;
     }
 
-    uint32_t nSize = (uint32_t)BN_num_bytes(RSA_get0_n(rsa));
-    uint32_t eSize = (uint32_t)BN_num_bytes(RSA_get0_e(rsa));
-    if ((nSize == 0) || (eSize == 0)) {
+    int32_t nSizeTemp = BN_num_bytes(RSA_get0_n(rsa));
+    int32_t eSizeTemp = BN_num_bytes(RSA_get0_e(rsa));
+    if ((nSizeTemp <= 0) || (eSizeTemp <= 0)) {
         EVP_PKEY_free(pkey);
         return RSA_FAILED;
     }
+
+    uint32_t nSize = (uint32_t)nSizeTemp;
+    uint32_t eSize = (uint32_t)eSizeTemp;
 
     struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)publicKey->data;
     pubKeyInfo->keyAlg = HKS_ALG_RSA;
