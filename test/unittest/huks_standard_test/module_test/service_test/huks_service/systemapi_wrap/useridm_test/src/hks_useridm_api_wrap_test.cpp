@@ -67,7 +67,7 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest002
- * @tc.desc: tdd HksUserIdmGetSecInfo, with user id 0, expecting HKS_FAILURE
+ * @tc.desc: tdd HksUserIdmGetSecInfo, with user id 0, expecting HKS_ERROR_GET_USERIAM_SECINFO_FAILED
  * @tc.type: FUNC
  */
 HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest002, TestSize.Level0)
@@ -75,7 +75,7 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest002, TestSize.Level0)
     HKS_LOG_I("enter HksUseridmWrapTest002");
     struct SecInfoWrap *secInfoWrap = NULL;
     int32_t ret = HksUserIdmGetSecInfo(0, &secInfoWrap);
-    EXPECT_EQ(ret, HKS_FAILURE) << "HksUseridmWrapTest002 failed, ret = " << ret;
+    EXPECT_EQ(ret, HKS_ERROR_GET_USERIAM_SECINFO_FAILED) << "HksUseridmWrapTest002 failed, ret = " << ret;
 }
 
 /**
@@ -110,7 +110,7 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest004, TestSize.Level0)
 
 /**
  * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest005
- * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_SUCCESS
+ * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED
  * @tc.type: FUNC
  */
 HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest005, TestSize.Level0)
@@ -118,7 +118,7 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest005, TestSize.Level0)
     HKS_LOG_I("enter HksUseridmWrapTest005");
     uint32_t num = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(0, HKS_USER_AUTH_TYPE_FINGERPRINT, &num);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest005 failed, ret = " << ret;
+    EXPECT_EQ(ret, HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED) << "HksUseridmWrapTest005 failed, ret = " << ret;
 }
 
 /**
@@ -152,7 +152,7 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest007, TestSize.Level0)
 
 /**
  * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest008
- * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_SUCCESS
+ * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED
  * @tc.type: FUNC
  */
 HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest008, TestSize.Level0)
@@ -160,12 +160,12 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest008, TestSize.Level0)
     HKS_LOG_I("enter HksUseridmWrapTest008");
     uint32_t num = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(0, HKS_USER_AUTH_TYPE_PIN, &num);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest008 failed, ret = " << ret;
+    EXPECT_EQ(ret, HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED) << "HksUseridmWrapTest008 failed, ret = " << ret;
 }
 
 /**
  * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest009
- * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_SUCCESS
+ * @tc.desc: tdd HksUserIdmGetAuthInfoNum, expecting HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED
  * @tc.type: FUNC
  */
 HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest009, TestSize.Level0)
@@ -173,7 +173,7 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest009, TestSize.Level0)
     HKS_LOG_I("enter HksUseridmWrapTest009");
     uint32_t num = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(0, HKS_USER_AUTH_TYPE_FACE, &num);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest009 failed, ret = " << ret;
+    EXPECT_EQ(ret, HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED) << "HksUseridmWrapTest009 failed, ret = " << ret;
 }
 
 /**

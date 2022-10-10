@@ -78,7 +78,7 @@ static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context)
 static napi_value ParseInitParams(napi_env env, napi_callback_info info, InitAsyncCtxPtr context)
 {
     size_t argc = HUKS_NAPI_INIT_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_INIT_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_INIT_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_INIT_MIN_ARGS) {

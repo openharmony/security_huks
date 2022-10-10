@@ -1,10 +1,10 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_NAPI_ATTEST_KEY_H
-#define HUKS_NAPI_ATTEST_KEY_H
+#ifndef HUKS_NAPI_INIT_SESSION_H
+#define HUKS_NAPI_INIT_SESSION_H
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
-namespace HuksNapi {
-napi_value HuksNapiAttestKey(napi_env env, napi_callback_info info);
-}  // namespace HuksNapi
+namespace HuksNapiItem {
+napi_value HuksNapiInitSession(napi_env env, napi_callback_info info);
+}  // namespace HuksNapiItem
 
-#endif  // HUKS_NAPI_ATTEST_KEY_H
+#endif  // HUKS_NAPI_INIT_SESSION_H

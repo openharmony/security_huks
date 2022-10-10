@@ -290,7 +290,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_008, Function | SmallTes
 
     spec.algType = HKS_ALG_RSA;
     ret = HksCryptoHalDecrypt(&key, &spec, &message, &cipherText);
-    EXPECT_EQ(HKS_FAILURE, ret);
+    EXPECT_EQ(HKS_ERROR_CRYPTO_ENGINE_ERROR, ret);
 }
 
 /**
@@ -524,10 +524,10 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_018, Function | SmallTes
     EXPECT_EQ(HksCryptoHalAgreeKey(&key, &pubKey, &spec, &agreeKey), HKS_ERROR_INVALID_ARGUMENT);
 
     spec.keyLen = HKS_ECC_KEY_SIZE_256;
-    EXPECT_EQ(HksCryptoHalAgreeKey(&key, &pubKey, &spec, &agreeKey), HKS_FAILURE);
+    EXPECT_EQ(HksCryptoHalAgreeKey(&key, &pubKey, &spec, &agreeKey), HKS_ERROR_CRYPTO_ENGINE_ERROR);
 
     HksCryptoHalGenerateKey(&keySpec, &key);
-    EXPECT_EQ(HksCryptoHalAgreeKey(&key, &pubKey, &spec, &agreeKey), HKS_FAILURE);
+    EXPECT_EQ(HksCryptoHalAgreeKey(&key, &pubKey, &spec, &agreeKey), HKS_ERROR_CRYPTO_ENGINE_ERROR);
     HKS_FREE_BLOB(key);
 }
 

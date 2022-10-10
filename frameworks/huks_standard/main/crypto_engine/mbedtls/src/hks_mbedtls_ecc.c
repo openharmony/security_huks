@@ -286,7 +286,7 @@ int32_t HksMbedtlsGetEccPubKey(const struct HksBlob *keyIn, struct HksBlob *keyO
     if (memcpy_s(keyOut->data, keyOut->size, (void *)keyMaterial, outLen) != EOK) {
         HKS_LOG_E("Memcpy ecc public key fail!");
         (void)memset_s(keyOut->data, keyOut->size, 0, keyOut->size);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     ((struct KeyMaterialEcc *)(keyOut->data))->zSize = 0;
     keyOut->size = outLen;

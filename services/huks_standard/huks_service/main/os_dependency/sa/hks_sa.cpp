@@ -242,12 +242,12 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     const uint8_t *pdata = data.ReadBuffer((size_t)srcData.size);
     if (pdata == nullptr) {
         HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_IPC_MSG_FAIL;
     }
     if (memcpy_s(srcData.data, srcData.size, pdata, srcData.size) != EOK) {
         HKS_LOG_E("copy remote data failed!");
         HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (ProcessMessage(code, outSize, srcData, reply) != NO_ERROR) {

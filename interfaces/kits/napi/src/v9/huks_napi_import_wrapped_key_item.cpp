@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_import_wrapped_key.h"
+#include "huks_napi_import_wrapped_key_item.h"
 
 #include "securec.h"
 
@@ -22,9 +22,9 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
-#include "huks_napi_common.h"
+#include "huks_napi_common_item.h"
 
-namespace HuksNapi {
+namespace HuksNapiItem {
 namespace {
     constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MIN_ARGS = 3;
     constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MAX_ARGS = 4;
@@ -46,7 +46,7 @@ using ImportWrappedKeyAsyncContext = ImportWrappedKeyAsyncContextT *;
 static ImportWrappedKeyAsyncContext CreateImportWrappedKeyAsyncContext()
 {
     ImportWrappedKeyAsyncContext context =
-        (ImportWrappedKeyAsyncContext)HksMalloc(sizeof(ImportWrappedKeyAsyncContextT));
+        static_cast<ImportWrappedKeyAsyncContext>(HksMalloc(sizeof(ImportWrappedKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(ImportWrappedKeyAsyncContextT), 0, sizeof(ImportWrappedKeyAsyncContextT));
     }
@@ -80,11 +80,11 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     ImportWrappedKeyAsyncContext context)
 {
     size_t argc = HUKS_NAPI_IMPORT_WRAPPED_KEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_IMPORT_WRAPPED_KEY_MAX_ARGS] = {0};
+    napi_value argv[HUKS_NAPI_IMPORT_WRAPPED_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_IMPORT_WRAPPED_KEY_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -117,11 +117,6 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     return GetInt32(env, 0);
 }
 
-static napi_value ImportWrappedKeyWriteResult(napi_env env, ImportWrappedKeyAsyncContext context)
-{
-    return GenerateHksResult(env, context->result, nullptr, 0);
-}
-
 static napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext context)
 {
     napi_value promise = nullptr;
@@ -144,20 +139,16 @@ static napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncC
         },
         [](napi_env env, napi_status status, void *data) {
             ImportWrappedKeyAsyncContext context = static_cast<ImportWrappedKeyAsyncContext>(data);
-            napi_value result = ImportWrappedKeyWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
-            } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
-            }
+            HksSuccessReturnResult resultData;
+            SuccessReturnResultInit(resultData);
+            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
             DeleteImportWrappedKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
     if (status != napi_ok) {
-        GET_AND_THROW_LAST_ERROR((env));
         DeleteImportWrappedKeyAsyncContext(env, context);
         HKS_LOG_E("could not queue async work");
         return nullptr;
@@ -170,7 +161,7 @@ static napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncC
     }
 }
 
-napi_value HuksNapiImportWrappedKey(napi_env env, napi_callback_info info)
+napi_value HuksNapiImportWrappedKeyItem(napi_env env, napi_callback_info info)
 {
     ImportWrappedKeyAsyncContext context = CreateImportWrappedKeyAsyncContext();
     if (context == nullptr) {
@@ -193,4 +184,4 @@ napi_value HuksNapiImportWrappedKey(napi_env env, napi_callback_info info)
     }
     return result;
 }
-}  // namespace HuksNapi
+}  // namespace HuksNapiItem

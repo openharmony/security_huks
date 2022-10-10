@@ -103,14 +103,14 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
     if (memcpy_s(salt->data, salt->size, appIdParam->blob.data, appIdParam->blob.size) != EOK) {
         HKS_LOG_E("memcpy appid failed");
         HKS_FREE_PTR(salt->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(salt->data + appIdParam->blob.size, salt->size - appIdParam->blob.size,
         keyBlobInfo->salt, HKS_KEY_BLOB_DERIVE_SALT_SIZE) != EOK) {
         HKS_LOG_E("memcpy salt failed");
         HKS_FREE_PTR(salt->data);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
 }
@@ -181,7 +181,7 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
     if (memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keyBlobInfo->keySize)) != EOK) {
         HKS_LOG_E("keySize memcpy failed!");
         HksFree(aeadParam);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     aeadParam->aad = *aad;
     aeadParam->payloadLen = keySize;
@@ -314,7 +314,7 @@ static int32_t InitKeyBlobInfo(const struct HksBlob *key, struct HksBlob *keyInf
 
         if (memcpy_s(keyInfo->data + sizeof(*keyBlobInfo), keyInfo->size - sizeof(*keyBlobInfo),
             key->data, key->size) != EOK) {
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             HKS_LOG_E("memcpy failed");
         }
     } while (0);
@@ -513,7 +513,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     uint8_t *data = HksMalloc(keySize);
     if (data == NULL) {
         HKS_LOG_E("fail to malloc raw key");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_MALLOC_FAIL;
     }
 
     (void)memcpy_s(data, keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keySize);
@@ -551,7 +551,7 @@ int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
     ret = HksMemCmp(computedMac, (uint8_t *)authToken + authTokenDataSize, SHA256_SIGN_LEN);
     if (ret != 0) {
         HKS_LOG_E("compute authtoken data mac failed!");
-        return HKS_ERROR_KEY_AUTH_FAILED;
+        return HKS_ERROR_KEY_AUTH_VERIFY_FAILED;
     }
     return HKS_SUCCESS;
 }

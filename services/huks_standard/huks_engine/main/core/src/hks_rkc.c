@@ -96,13 +96,13 @@ static int32_t RkcRecoverRkTime(const struct HksRkcKsfData *ksfData)
     if (memcpy_s(&(g_hksRkcCfg.rkCreatedTime), sizeof(g_hksRkcCfg.rkCreatedTime),
         &(ksfData->rkCreatedTime), sizeof(ksfData->rkCreatedTime)) != EOK) {
         HKS_LOG_E("Memcpy rkCreatedTime failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(&(g_hksRkcCfg.rkExpiredTime), sizeof(g_hksRkcCfg.rkExpiredTime),
         &(ksfData->rkExpiredTime), sizeof(ksfData->rkExpiredTime)) != EOK) {
         HKS_LOG_E("Memcpy rkExpiredTime failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     return HKS_SUCCESS;
@@ -120,7 +120,7 @@ static int32_t RkcGetFixedMaterial(struct HksBlob *material)
 
     if (memcpy_s(material->data, material->size, fixedMaterial, HKS_RKC_MATERIAL_LEN) != EOK) {
         HKS_LOG_E("Memcpy fiexd material failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     return HKS_SUCCESS;
@@ -296,13 +296,13 @@ static int32_t RkcRecoverMkTime(const struct HksRkcKsfData *ksfData)
     if (memcpy_s(&(g_hksRkcMk.mkCreatedTime), sizeof(g_hksRkcMk.mkCreatedTime),
         &(ksfData->mkCreatedTime), sizeof(ksfData->mkCreatedTime)) != EOK) {
         HKS_LOG_E("Memcpy mkCreatedTime failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(&(g_hksRkcMk.mkExpiredTime), sizeof(g_hksRkcMk.mkExpiredTime),
         &(ksfData->mkExpiredTime), sizeof(ksfData->mkExpiredTime)) != EOK) {
         HKS_LOG_E("Memcpy mkExpiredTime failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     struct HksBlob mk;
@@ -442,14 +442,14 @@ static int32_t RkcCalculateMaterial(const struct HksBlob *random1, const struct 
         /* 1: sn is 0x01 or 0x02 */
         if (memcpy_s(hashSrc.data + 1, HKS_RKC_MATERIAL_LEN, random1->data, random1->size) != EOK) {
             HKS_LOG_E("Memcpy random1 failed!");
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 
         if (memcpy_s(hashSrc.data + 1 + HKS_RKC_MATERIAL_LEN, HKS_RKC_MATERIAL_LEN,
             random2->data, random2->size) != EOK) {
             HKS_LOG_E("Memcpy random2 failed!");
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
 

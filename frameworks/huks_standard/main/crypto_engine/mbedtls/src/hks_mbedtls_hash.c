@@ -306,7 +306,7 @@ static int32_t HksMbedtlsHashSha256Final(struct HksMbedtlsHashCtx *ctx, const st
     do {
         if (hash->data == NULL) {
             HKS_LOG_E("Mbedtls Hash sha256 output param error");
-            ret = HKS_FAILURE;
+            ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
 
@@ -348,7 +348,7 @@ static int32_t HksMbedtlsHashSha512Init(void **ctx, int is384, uint32_t alg)
         if (context != NULL) {
             HksFree(context);
         }
-        return HKS_FAILURE;
+        return HKS_ERROR_BAD_STATE;
     }
 
     mbedtls_sha512_init(context);
@@ -676,7 +676,7 @@ int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
 
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hash failed! mbedtls ret = 0x%X", ret);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     ret = HksGetDigestLen(alg, &(hash->size));
