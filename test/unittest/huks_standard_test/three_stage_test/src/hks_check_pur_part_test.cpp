@@ -116,6 +116,8 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_003_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ARGUMENT
 };
 
+#ifdef _USE_OPENSSL_
+/* mbedtls engine don't support DSA alg */
 /* 004: gen hmac for hmac; init for cipher */
 const TestPurposeCaseParams HKS_PURPOE_TEST_004_PARAMS = {
     .genParams =
@@ -138,6 +140,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_004_PARAMS = {
         },
     .initResult = HKS_ERROR_INVALID_ALGORITHM
 };
+#endif
 
 /* 005: gen ecc for sign; init for agree */
 const TestPurposeCaseParams HKS_PURPOE_TEST_005_PARAMS = {
@@ -162,6 +165,8 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_005_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ARGUMENT
 };
 
+#ifdef _USE_OPENSSL_
+/* mbedtls engine don't support DSA alg */
 /* 006: gen dsa for sign; init for agree */
 const TestPurposeCaseParams HKS_PURPOE_TEST_006_PARAMS = {
     .genParams =
@@ -184,6 +189,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_006_PARAMS = {
         },
     .initResult = HKS_ERROR_INVALID_ALGORITHM
 };
+#endif
 
 /* 007: gen hmac for mac; init for mac */
 const TestPurposeCaseParams HKS_PURPOE_TEST_007_PARAMS = {
@@ -313,8 +319,11 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest003, TestSize.Level0)
  */
 HWTEST_F(HksCheckPurPartTest, HksCheckPurTest004, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    /* mbedtls engine don't support DSA alg */
     HKS_LOG_I("Enter HksCheckPurposeTest004");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_004_PARAMS), HKS_SUCCESS);
+#endif
 }
 
 /**
@@ -337,8 +346,11 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest005, TestSize.Level0)
  */
 HWTEST_F(HksCheckPurPartTest, HksCheckPurTest006, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    /* mbedtls engine don't support DSA alg */
     HKS_LOG_I("Enter HksCheckPurposeTest006");
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_006_PARAMS), HKS_SUCCESS);
+#endif
 }
 
 /**

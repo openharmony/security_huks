@@ -84,7 +84,6 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_cross_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_cross_test_common.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_dh_agree_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_dsa_sign_verify_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_ecc_sign_verify_part1_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_ecc_sign_verify_part2_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_ecc_sign_verify_part3_test.cpp",
@@ -161,7 +160,9 @@ ohos_unittest("huks_module_test") {
     "_HUKS_LOG_ENABLE_",
   ]
 
-  defines += [ "_USE_OPENSSL_" ]
+  if (use_crypto_lib == "openssl") {
+    defines += [ "_USE_OPENSSL_" ]
+  }
 
   include_dirs += [
     "//commonlibrary/c_utils/base/include",

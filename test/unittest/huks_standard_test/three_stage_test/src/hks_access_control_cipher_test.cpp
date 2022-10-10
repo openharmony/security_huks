@@ -79,6 +79,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
     .initResult = HKS_SUCCESS
 };
 
+#ifdef _USE_OPENSSL_
+/* mbedtls engine don't support SM4 alg */
 /* 002: gen sm4 for cipher; init for cipher */
 const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
     .genParams =
@@ -108,6 +110,7 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
         },
     .initResult = HKS_SUCCESS
 };
+#endif
 
 /**
  * @tc.name: HksAccessControlCipherTest.HksAccessCipherPartTest001
@@ -139,6 +142,8 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest001, TestSize.Level0
  */
 HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest002, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    /* mbedtls engine don't support SM4 alg */
     HKS_LOG_I("Enter HksAccessCipherPartTest002");
     const IDMParams testIDMParams = {
         .secureUid = 1,
@@ -147,5 +152,6 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest002, TestSize.Level0
         .authType = 4
     };
     ASSERT_EQ(CheckAccessCipherTest(HKS_ACCESS_TEST_002_PARAMS, testIDMParams), HKS_SUCCESS);
+#endif
 }
 }
