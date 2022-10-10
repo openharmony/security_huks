@@ -187,6 +187,8 @@ static struct HksParam g_genEd25519WithSignAuthParams[] = {
 }
 };
 
+#ifdef _USE_OPENSSL_
+// mbedtls engine don't support DSA alg
 static struct HksParam g_genDsaWithSignAuthParams[] = {
 {
     .tag = HKS_TAG_ALGORITHM,
@@ -214,6 +216,7 @@ static struct HksParam g_genDsaWithSignAuthParams[] = {
     .uint32Param = HKS_SECURE_SIGN_WITH_AUTHINFO
 }
 };
+#endif
 
 static struct HksTestSecureSignGenParams g_testRsaGenParams = {
     .keyAlias = &g_genKeyAlias,
@@ -229,12 +232,14 @@ static struct HksTestSecureSignGenParams g_testEd25519GenParams = {
     .expectResult = HKS_SUCCESS
 };
 
+#ifdef _USE_OPENSSL_
 static struct HksTestSecureSignGenParams g_testDsaGenParams = {
     .keyAlias = &g_genKeyAlias,
     .inputParams = g_genDsaWithSignAuthParams,
     .inputParamSize = HKS_ARRAY_SIZE(g_genDsaWithSignAuthParams),
     .expectResult = HKS_SUCCESS
 };
+#endif
 
 static struct HksParam g_importDsaKeyParams[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
