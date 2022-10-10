@@ -466,6 +466,291 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest024, TestSi
 }
 
 /**
+ * @tc.name: HksNativeApiCompatibilityTest025
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_UserAuthType equal to HksUserAuthType
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest025, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_USER_AUTH_TYPE_FINGERPRINT == (uint32_t)HKS_USER_AUTH_TYPE_FINGERPRINT, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_USER_AUTH_TYPE_FACE == (uint32_t)HKS_USER_AUTH_TYPE_FACE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_USER_AUTH_TYPE_PIN == (uint32_t)HKS_USER_AUTH_TYPE_PIN, true);
+}
+
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest026
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_UserAuthType value compatibility
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest026, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_USER_AUTH_TYPE_FINGERPRINT == 1 << 0, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_USER_AUTH_TYPE_FACE == 1 << 1, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_USER_AUTH_TYPE_PIN == 1 << 2, true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest027
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_AuthAccessType equal to HksAuthAccessType
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest027, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD ==
+        (uint32_t)HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL ==
+        (uint32_t)HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL, true);
+}
+
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest028
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_AuthAccessType value compatibility
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest028, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD == 1 << 0, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL == 1 << 1, true);
+}
+
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest029
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_ChallengeType equal to HksChallengeType
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest029, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_TYPE_NORMAL == (uint32_t)HKS_CHALLENGE_TYPE_NORMAL, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_TYPE_CUSTOM == (uint32_t)HKS_CHALLENGE_TYPE_CUSTOM, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_TYPE_NONE == (uint32_t)HKS_CHALLENGE_TYPE_NONE, true);
+}
+
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest030
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_ChallengeType value compatibility
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest030, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_TYPE_NORMAL == 0, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_TYPE_CUSTOM == 1, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_TYPE_NONE == 2, true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest031
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_ChallengePosition equal to HksChallengeType
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest031, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_0 == (uint32_t)HKS_CHALLENGE_POS_0, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_1 == (uint32_t)HKS_CHALLENGE_POS_1, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_2 == (uint32_t)HKS_CHALLENGE_POS_2, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_3 == (uint32_t)HKS_CHALLENGE_POS_3, true);
+}
+
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest032
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_ChallengePosition value compatibility
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest032, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_0 == 0, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_1 == 1, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_2 == 2, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_CHALLENGE_POS_3 == 3, true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest033
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_SecureSignType equal to HksSecureSignType
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest033, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_SECURE_SIGN_WITH_AUTHINFO == (uint32_t)HKS_SECURE_SIGN_WITH_AUTHINFO, true);
+}
+
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest034
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_SecureSignType value compatibility
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest034, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_SECURE_SIGN_WITH_AUTHINFO == 1, true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest035
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_Tag equal to HksTag
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest035, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_INVALID == (uint32_t)HKS_TAG_INVALID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ALGORITHM == (uint32_t)HKS_TAG_ALGORITHM, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_PURPOSE == (uint32_t)HKS_TAG_PURPOSE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_SIZE == (uint32_t)HKS_TAG_KEY_SIZE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DIGEST == (uint32_t)HKS_TAG_DIGEST, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_PADDING == (uint32_t)HKS_TAG_PADDING, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_BLOCK_MODE == (uint32_t)HKS_TAG_BLOCK_MODE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_TYPE == (uint32_t)HKS_TAG_KEY_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASSOCIATED_DATA == (uint32_t)HKS_TAG_ASSOCIATED_DATA, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_NONCE == (uint32_t)HKS_TAG_NONCE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IV == (uint32_t)HKS_TAG_IV, true);
+    
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_INFO == (uint32_t)HKS_TAG_INFO, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SALT == (uint32_t)HKS_TAG_SALT, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_PWD == (uint32_t)HKS_TAG_PWD, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ITERATION == (uint32_t)HKS_TAG_ITERATION, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_GENERATE_TYPE == (uint32_t)HKS_TAG_KEY_GENERATE_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_MAIN_KEY == (uint32_t)HKS_TAG_DERIVE_MAIN_KEY, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_FACTOR == (uint32_t)HKS_TAG_DERIVE_FACTOR, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_ALG == (uint32_t)HKS_TAG_DERIVE_ALG, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_ALG == (uint32_t)HKS_TAG_AGREE_ALG, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS ==
+        (uint32_t)HKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_PRIVATE_KEY_ALIAS == (uint32_t)HKS_TAG_AGREE_PRIVATE_KEY_ALIAS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_PUBLIC_KEY == (uint32_t)HKS_TAG_AGREE_PUBLIC_KEY, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_ALIAS == (uint32_t)HKS_TAG_KEY_ALIAS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_KEY_SIZE == (uint32_t)HKS_TAG_DERIVE_KEY_SIZE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IMPORT_KEY_TYPE == (uint32_t)HKS_TAG_IMPORT_KEY_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE == (uint32_t)HKS_TAG_UNWRAP_ALGORITHM_SUITE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ALL_USERS == (uint32_t)HKS_TAG_ALL_USERS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_USER_ID == (uint32_t)HKS_TAG_USER_ID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_NO_AUTH_REQUIRED == (uint32_t)HKS_TAG_NO_AUTH_REQUIRED, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_USER_AUTH_TYPE == (uint32_t)HKS_TAG_USER_AUTH_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AUTH_TIMEOUT == (uint32_t)HKS_TAG_AUTH_TIMEOUT, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AUTH_TOKEN == (uint32_t)HKS_TAG_AUTH_TOKEN, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE == (uint32_t)HKS_TAG_KEY_AUTH_ACCESS_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_SECURE_SIGN_TYPE == (uint32_t)HKS_TAG_KEY_SECURE_SIGN_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_TYPE == (uint32_t)HKS_TAG_CHALLENGE_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_POS == (uint32_t)HKS_TAG_CHALLENGE_POS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_CHALLENGE == (uint32_t)HKS_TAG_ATTESTATION_CHALLENGE, true);
+
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_APPLICATION_ID == (uint32_t)HKS_TAG_ATTESTATION_APPLICATION_ID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_BRAND == (uint32_t)HKS_TAG_ATTESTATION_ID_BRAND, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_DEVICE == (uint32_t)HKS_TAG_ATTESTATION_ID_DEVICE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_PRODUCT == (uint32_t)HKS_TAG_ATTESTATION_ID_PRODUCT, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_SERIAL == (uint32_t)HKS_TAG_ATTESTATION_ID_SERIAL, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_IMEI == (uint32_t)HKS_TAG_ATTESTATION_ID_IMEI, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_MEID == (uint32_t)HKS_TAG_ATTESTATION_ID_MEID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_MANUFACTURER ==
+        (uint32_t)HKS_TAG_ATTESTATION_ID_MANUFACTURER, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_MODEL == (uint32_t)HKS_TAG_ATTESTATION_ID_MODEL, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_ALIAS == (uint32_t)HKS_TAG_ATTESTATION_ID_ALIAS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_SOCID == (uint32_t)HKS_TAG_ATTESTATION_ID_SOCID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_UDID == (uint32_t)HKS_TAG_ATTESTATION_ID_UDID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO ==
+        (uint32_t)HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_VERSION_INFO ==
+        (uint32_t)HKS_TAG_ATTESTATION_ID_VERSION_INFO, true);
+
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_KEY_ALIAS == (uint32_t)HKS_TAG_IS_KEY_ALIAS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_STORAGE_FLAG == (uint32_t)HKS_TAG_KEY_STORAGE_FLAG, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_ALLOWED_WRAP == (uint32_t)HKS_TAG_IS_ALLOWED_WRAP, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_WRAP_TYPE == (uint32_t)HKS_TAG_KEY_WRAP_TYPE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_ID == (uint32_t)HKS_TAG_KEY_AUTH_ID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_ROLE == (uint32_t)HKS_TAG_KEY_ROLE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_FLAG == (uint32_t)HKS_TAG_KEY_FLAG, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_ASYNCHRONIZED == (uint32_t)HKS_TAG_IS_ASYNCHRONIZED, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SECURE_KEY_ALIAS == (uint32_t)HKS_TAG_SECURE_KEY_ALIAS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SECURE_KEY_UUID == (uint32_t)HKS_TAG_SECURE_KEY_UUID, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_DOMAIN == (uint32_t)HKS_TAG_KEY_DOMAIN, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SYMMETRIC_KEY_DATA == (uint32_t)HKS_TAG_SYMMETRIC_KEY_DATA, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA == (uint32_t)HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA ==
+        (uint32_t)HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest036
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_Tag value compatibility
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest036, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_INVALID == (OH_HUKS_TAG_TYPE_INVALID | 0), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ALGORITHM == (OH_HUKS_TAG_TYPE_UINT | 1), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_PURPOSE == (OH_HUKS_TAG_TYPE_UINT | 2), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_SIZE == (OH_HUKS_TAG_TYPE_UINT | 3), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DIGEST == (OH_HUKS_TAG_TYPE_UINT | 4), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_PADDING == (OH_HUKS_TAG_TYPE_UINT | 5), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_BLOCK_MODE == (OH_HUKS_TAG_TYPE_UINT | 6), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_TYPE == (OH_HUKS_TAG_TYPE_UINT | 7), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASSOCIATED_DATA == (OH_HUKS_TAG_TYPE_BYTES | 8), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_NONCE == (OH_HUKS_TAG_TYPE_BYTES | 9), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IV == (OH_HUKS_TAG_TYPE_BYTES | 10), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_INFO == (OH_HUKS_TAG_TYPE_BYTES | 11), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SALT == (OH_HUKS_TAG_TYPE_BYTES | 12), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_PWD == (OH_HUKS_TAG_TYPE_BYTES | 13), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ITERATION == (OH_HUKS_TAG_TYPE_UINT | 14), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_GENERATE_TYPE == (OH_HUKS_TAG_TYPE_UINT | 15), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_MAIN_KEY == (OH_HUKS_TAG_TYPE_BYTES | 16), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_FACTOR == (OH_HUKS_TAG_TYPE_BYTES | 17), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_ALG == (OH_HUKS_TAG_TYPE_UINT | 18), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_ALG == (OH_HUKS_TAG_TYPE_UINT | 19), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS == (OH_HUKS_TAG_TYPE_BOOL | 20), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_PRIVATE_KEY_ALIAS == (OH_HUKS_TAG_TYPE_BYTES | 21), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AGREE_PUBLIC_KEY == (OH_HUKS_TAG_TYPE_BYTES | 22), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_ALIAS == (OH_HUKS_TAG_TYPE_BYTES | 23), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_KEY_SIZE == (OH_HUKS_TAG_TYPE_UINT | 24), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IMPORT_KEY_TYPE == (OH_HUKS_TAG_TYPE_UINT | 25), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE == (OH_HUKS_TAG_TYPE_UINT | 26), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ALL_USERS == (OH_HUKS_TAG_TYPE_BOOL | 301), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_USER_ID == (OH_HUKS_TAG_TYPE_UINT | 302), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_NO_AUTH_REQUIRED == (OH_HUKS_TAG_TYPE_BOOL | 303), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_USER_AUTH_TYPE == (OH_HUKS_TAG_TYPE_UINT | 304), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AUTH_TIMEOUT == (OH_HUKS_TAG_TYPE_UINT | 305), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_AUTH_TOKEN == (OH_HUKS_TAG_TYPE_BYTES | 306), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE == (OH_HUKS_TAG_TYPE_UINT | 307), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_SECURE_SIGN_TYPE == (OH_HUKS_TAG_TYPE_UINT | 308), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_TYPE == (OH_HUKS_TAG_TYPE_UINT | 309), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_POS == (OH_HUKS_TAG_TYPE_UINT | 310), true);
+    
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_CHALLENGE == (OH_HUKS_TAG_TYPE_BYTES | 501), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_APPLICATION_ID == (OH_HUKS_TAG_TYPE_BYTES | 502), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_BRAND == (OH_HUKS_TAG_TYPE_BYTES | 503), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_DEVICE == (OH_HUKS_TAG_TYPE_BYTES | 504), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_PRODUCT == (OH_HUKS_TAG_TYPE_BYTES | 505), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_SERIAL == (OH_HUKS_TAG_TYPE_BYTES | 506), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_IMEI == (OH_HUKS_TAG_TYPE_BYTES | 507), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_MEID == (OH_HUKS_TAG_TYPE_BYTES | 508), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_MANUFACTURER == (OH_HUKS_TAG_TYPE_BYTES | 509), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_MODEL == (OH_HUKS_TAG_TYPE_BYTES | 510), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_ALIAS == (OH_HUKS_TAG_TYPE_BYTES | 511), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_SOCID == (OH_HUKS_TAG_TYPE_BYTES | 512), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_UDID == (OH_HUKS_TAG_TYPE_BYTES | 513), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO == (OH_HUKS_TAG_TYPE_BYTES | 514), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_VERSION_INFO == (OH_HUKS_TAG_TYPE_BYTES | 515), true);
+
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_KEY_ALIAS == (OH_HUKS_TAG_TYPE_BOOL | 1001), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_STORAGE_FLAG == (OH_HUKS_TAG_TYPE_UINT | 1002), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_ALLOWED_WRAP == (OH_HUKS_TAG_TYPE_BOOL | 1003), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_WRAP_TYPE == (OH_HUKS_TAG_TYPE_UINT | 1004), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_ID == (OH_HUKS_TAG_TYPE_BYTES | 1005), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_ROLE == (OH_HUKS_TAG_TYPE_UINT | 1006), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_FLAG == (OH_HUKS_TAG_TYPE_UINT | 1007), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_ASYNCHRONIZED == (OH_HUKS_TAG_TYPE_UINT | 1008), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SECURE_KEY_ALIAS == (OH_HUKS_TAG_TYPE_BOOL | 1009), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SECURE_KEY_UUID == (OH_HUKS_TAG_TYPE_BYTES | 1010), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_DOMAIN == (OH_HUKS_TAG_TYPE_UINT | 1011), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_SYMMETRIC_KEY_DATA == (OH_HUKS_TAG_TYPE_BYTES | 20001), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA == (OH_HUKS_TAG_TYPE_BYTES | 20002), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA == (OH_HUKS_TAG_TYPE_BYTES | 20003), true);
+}
+
+
+/**
  * @tc.name: HksNativeApiCompatibilityTest060
  * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_Result member and size
  * @tc.require: issueI5UONG
@@ -477,6 +762,10 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest060, TestSi
     ASSERT_EQ(sizeof(result.errorCode) == sizeof(int32_t), true);
     ASSERT_EQ(sizeof(result.errorMsg) == sizeof(const char *), true);
     ASSERT_EQ(sizeof(result.data) == sizeof(uint8_t *), true);
+    struct HksResult hksResult;
+    ASSERT_EQ(sizeof(hksResult.errorCode) == sizeof(int32_t), true);
+    ASSERT_EQ(sizeof(hksResult.errorMsg) == sizeof(const char *), true);
+    ASSERT_EQ(sizeof(hksResult.data) == sizeof(uint8_t *), true);
 }
 
 /**
@@ -490,5 +779,219 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest061, TestSi
     struct OH_Huks_Blob blob;
     ASSERT_EQ(sizeof(blob.size) == sizeof(uint32_t), true);
     ASSERT_EQ(sizeof(blob.data) == sizeof(uint8_t *), true);
+    struct HksBlob hksBlob;
+    ASSERT_EQ(sizeof(hksBlob.size) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksBlob.data) == sizeof(uint8_t *), true);
 }
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest062
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_Param member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest062, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_Param) == sizeof(struct HksParam), true);
+    struct OH_Huks_Param param;
+    ASSERT_EQ(sizeof(param.tag) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(param.boolParam) == sizeof(bool), true);
+    ASSERT_EQ(sizeof(param.int32Param) == sizeof(int32_t), true);
+    ASSERT_EQ(sizeof(param.uint32Param) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(param.uint64Param) == sizeof(uint64_t), true);
+    ASSERT_EQ(sizeof(param.blob) == sizeof(struct OH_Huks_Blob), true);
+    struct HksParam hksParam;
+    ASSERT_EQ(sizeof(hksParam.tag) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksParam.boolParam) == sizeof(bool), true);
+    ASSERT_EQ(sizeof(hksParam.int32Param) == sizeof(int32_t), true);
+    ASSERT_EQ(sizeof(hksParam.uint32Param) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksParam.uint64Param) == sizeof(uint64_t), true);
+    ASSERT_EQ(sizeof(hksParam.blob) == sizeof(struct HksBlob), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest063
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_ParamSet member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest063, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_ParamSet) == sizeof(struct HksParamSet), true);
+    struct OH_Huks_ParamSet paramset;
+    ASSERT_EQ(sizeof(paramset.paramSetSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(paramset.paramsCnt) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(paramset.params[0]) == sizeof(struct OH_Huks_Param), true);
+    struct HksParamSet hksParamSet;
+    ASSERT_EQ(sizeof(hksParamSet.paramSetSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksParamSet.paramsCnt) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksParamSet.params[0]) == sizeof(struct HksParam), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest064
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_CertChain member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest064, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_CertChain) == sizeof(struct HksCertChain), true);
+    struct OH_Huks_CertChain certChain;
+    ASSERT_EQ(sizeof(certChain.certs) == sizeof(struct OH_Huks_Blob *), true);
+    ASSERT_EQ(sizeof(certChain.certsCount) == sizeof(uint32_t), true);
+    struct HksCertChain hksCertChain;
+    ASSERT_EQ(sizeof(hksCertChain.certs) == sizeof(struct HksBlob *), true);
+    ASSERT_EQ(sizeof(hksCertChain.certsCount) == sizeof(uint32_t), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest065
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_KeyInfo member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest065, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_KeyInfo) == sizeof(struct HksKeyInfo), true);
+    struct OH_Huks_KeyInfo keyInfo;
+    ASSERT_EQ(sizeof(keyInfo.alias) == sizeof(struct OH_Huks_Blob), true);
+    ASSERT_EQ(sizeof(keyInfo.paramSet) == sizeof(struct OH_Huks_ParamSet *), true);
+    struct HksKeyInfo hksKeyInfo;
+    ASSERT_EQ(sizeof(hksKeyInfo.alias) == sizeof(struct HksBlob), true);
+    ASSERT_EQ(sizeof(hksKeyInfo.paramSet) == sizeof(struct HksParamSet *), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest066
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_PubKeyInfo member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest066, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_PubKeyInfo) == sizeof(struct HksPubKeyInfo), true);
+    struct OH_Huks_PubKeyInfo pubKeyInfo;
+    ASSERT_EQ(sizeof(pubKeyInfo.keyAlg) == sizeof(OH_Huks_KeyAlg), true);
+    ASSERT_EQ(sizeof(pubKeyInfo.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(pubKeyInfo.nOrXSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(pubKeyInfo.eOrYSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(pubKeyInfo.placeHolder) == sizeof(uint32_t), true);
+    struct HksPubKeyInfo hksPubKeyInfo;
+    ASSERT_EQ(sizeof(hksPubKeyInfo.keyAlg) == sizeof(HksKeyAlg), true);
+    ASSERT_EQ(sizeof(hksPubKeyInfo.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksPubKeyInfo.nOrXSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksPubKeyInfo.eOrYSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksPubKeyInfo.placeHolder) == sizeof(uint32_t), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest067
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_KeyMaterialRsa member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest067, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_KeyMaterialRsa) == sizeof(struct HksKeyMaterialRsa), true);
+    struct OH_Huks_KeyMaterialRsa keyMaterialRsa;
+    ASSERT_EQ(sizeof(keyMaterialRsa.keyAlg) == sizeof(OH_Huks_KeyAlg), true);
+    ASSERT_EQ(sizeof(keyMaterialRsa.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialRsa.nSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialRsa.eSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialRsa.dSize) == sizeof(uint32_t), true);
+    struct HksKeyMaterialRsa hksKeyMaterialRsa;
+    ASSERT_EQ(sizeof(hksKeyMaterialRsa.keyAlg) == sizeof(HksKeyAlg), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialRsa.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialRsa.nSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialRsa.eSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialRsa.dSize) == sizeof(uint32_t), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest068
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_KeyMaterialEcc member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest068, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_KeyMaterialEcc) == sizeof(struct HksKeyMaterialEcc), true);
+    struct OH_Huks_KeyMaterialEcc keyMaterialEcc;
+    ASSERT_EQ(sizeof(keyMaterialEcc.keyAlg) == sizeof(OH_Huks_KeyAlg), true);
+    ASSERT_EQ(sizeof(keyMaterialEcc.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialEcc.xSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialEcc.ySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialEcc.zSize) == sizeof(uint32_t), true);
+    struct HksKeyMaterialEcc hksKeyMaterialEcc;
+    ASSERT_EQ(sizeof(hksKeyMaterialEcc.keyAlg) == sizeof(HksKeyAlg), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialEcc.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialEcc.xSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialEcc.ySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialEcc.zSize) == sizeof(uint32_t), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest069
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_KeyMaterialDsa member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest069, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_KeyMaterialDsa) == sizeof(struct HksKeyMaterialDsa), true);
+    struct OH_Huks_KeyMaterialDsa keyMaterialDsa;
+    ASSERT_EQ(sizeof(keyMaterialDsa.keyAlg) == sizeof(OH_Huks_KeyAlg), true);
+    ASSERT_EQ(sizeof(keyMaterialDsa.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDsa.xSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDsa.ySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDsa.pSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDsa.qSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDsa.gSize) == sizeof(uint32_t), true);
+    struct HksKeyMaterialDsa hksKeyMaterialDsa;
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.keyAlg) == sizeof(HksKeyAlg), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.xSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.ySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.pSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.qSize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDsa.gSize) == sizeof(uint32_t), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest070
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_KeyMaterialDh member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest070, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_KeyMaterialDh) == sizeof(struct HksKeyMaterialDh), true);
+    struct OH_Huks_KeyMaterialDh keyMaterialDh;
+    ASSERT_EQ(sizeof(keyMaterialDh.keyAlg) == sizeof(OH_Huks_KeyAlg), true);
+    ASSERT_EQ(sizeof(keyMaterialDh.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDh.pubKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDh.priKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterialDh.reserved) == sizeof(uint32_t), true);
+    struct HksKeyMaterialDh hksKeyMaterialDh;
+    ASSERT_EQ(sizeof(hksKeyMaterialDh.keyAlg) == sizeof(HksKeyAlg), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDh.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDh.pubKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDh.priKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterialDh.reserved) == sizeof(uint32_t), true);
+}
+
+/**
+ * @tc.name: HksNativeApiCompatibilityTest071
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:struct OH_Huks_KeyMaterial25519 member and size
+ * @tc.require: issueI5UONG
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest071, TestSize.Level0)
+{
+    ASSERT_EQ(sizeof(struct OH_Huks_KeyMaterial25519) == sizeof(struct HksKeyMaterial25519), true);
+    struct OH_Huks_KeyMaterial25519 keyMaterial25519;
+    ASSERT_EQ(sizeof(keyMaterial25519.keyAlg) == sizeof(OH_Huks_KeyAlg), true);
+    ASSERT_EQ(sizeof(keyMaterial25519.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterial25519.pubKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterial25519.priKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(keyMaterial25519.reserved) == sizeof(uint32_t), true);
+    struct HksKeyMaterial25519 hksKeyMaterial25519;
+    ASSERT_EQ(sizeof(hksKeyMaterial25519.keyAlg) == sizeof(HksKeyAlg), true);
+    ASSERT_EQ(sizeof(hksKeyMaterial25519.keySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterial25519.pubKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterial25519.priKeySize) == sizeof(uint32_t), true);
+    ASSERT_EQ(sizeof(hksKeyMaterial25519.reserved) == sizeof(uint32_t), true);
+}
+
 }

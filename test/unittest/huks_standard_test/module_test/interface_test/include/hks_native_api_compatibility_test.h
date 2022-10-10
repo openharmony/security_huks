@@ -41,8 +41,30 @@ int HksNativeApiCompatibilityTest021(void);
 int HksNativeApiCompatibilityTest022(void);
 int HksNativeApiCompatibilityTest023(void);
 int HksNativeApiCompatibilityTest024(void);
+int HksNativeApiCompatibilityTest025(void);
+int HksNativeApiCompatibilityTest026(void);
+int HksNativeApiCompatibilityTest027(void);
+int HksNativeApiCompatibilityTest028(void);
+int HksNativeApiCompatibilityTest029(void);
+int HksNativeApiCompatibilityTest030(void);
+int HksNativeApiCompatibilityTest031(void);
+int HksNativeApiCompatibilityTest032(void);
+int HksNativeApiCompatibilityTest033(void);
+int HksNativeApiCompatibilityTest034(void);
+int HksNativeApiCompatibilityTest035(void);
+int HksNativeApiCompatibilityTest036(void);
 
 int HksNativeApiCompatibilityTest060(void);
 int HksNativeApiCompatibilityTest061(void);
+int HksNativeApiCompatibilityTest062(void);
+int HksNativeApiCompatibilityTest063(void);
+int HksNativeApiCompatibilityTest064(void);
+int HksNativeApiCompatibilityTest065(void);
+int HksNativeApiCompatibilityTest066(void);
+int HksNativeApiCompatibilityTest067(void);
+int HksNativeApiCompatibilityTest068(void);
+int HksNativeApiCompatibilityTest069(void);
+int HksNativeApiCompatibilityTest070(void);
+int HksNativeApiCompatibilityTest071(void);
 }
 #endif
