@@ -464,7 +464,6 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest024, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_TYPE_BOOL == 4 << 28, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_TYPE_BYTES == 5 << 28, true);
 }
-
 /**
  * @tc.name: HksNativeApiCompatibilityTest025
  * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_UserAuthType equal to HksUserAuthType
@@ -759,6 +758,11 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest060, TestSi
 {
     ASSERT_EQ(sizeof(struct OH_Huks_Result) == sizeof(struct HksResult), true);
     struct OH_Huks_Result result;
+    struct HksResult hksResult;
+    ASSERT_EQ(sizeof(hksResult.errorCode) == sizeof(result.errorCode), true);
+    ASSERT_EQ(sizeof(hksResult.errorMsg) == sizeof(result.errorMsg), true);
+    ASSERT_EQ(sizeof(hksResult.data) == sizeof(result.data), true);
+    
     ASSERT_EQ(sizeof(result.errorCode) == sizeof(int32_t), true);
     ASSERT_EQ(sizeof(result.errorMsg) == sizeof(const char *), true);
     ASSERT_EQ(sizeof(result.data) == sizeof(uint8_t *), true);
@@ -777,6 +781,10 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest061, TestSi
 {
     ASSERT_EQ(sizeof(struct OH_Huks_Blob) == sizeof(struct HksBlob), true);
     struct OH_Huks_Blob blob;
+    struct HksBlob hksBlob;
+    ASSERT_EQ(sizeof(blob.size) == sizeof(hksBlob.size), true);
+    ASSERT_EQ(sizeof(blob.data) == sizeof(hksBlob.data), true);
+
     ASSERT_EQ(sizeof(blob.size) == sizeof(uint32_t), true);
     ASSERT_EQ(sizeof(blob.data) == sizeof(uint8_t *), true);
     struct HksBlob hksBlob;
