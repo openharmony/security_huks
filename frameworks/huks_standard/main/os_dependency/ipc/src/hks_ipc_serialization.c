@@ -34,9 +34,7 @@ int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint3
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value, sizeof(value)) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value, sizeof(value));
     *destOffset += sizeof(value);
 
     return HKS_SUCCESS;
@@ -49,16 +47,10 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
-        &(blob->size), sizeof(blob->size)) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size), sizeof(blob->size));
     *destOffset += sizeof(blob->size);
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size) != EOK) {
-        *destOffset -= sizeof(blob->size);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size);
     *destOffset += ALIGN_SIZE(blob->size);
 
     return HKS_SUCCESS;
@@ -71,10 +63,7 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
-        paramSet, paramSet->paramSetSize) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, paramSet, paramSet->paramSetSize);
     *destOffset += ALIGN_SIZE(paramSet->paramSetSize);
 
     return HKS_SUCCESS;

@@ -545,10 +545,7 @@ static uint32_t EncodeUtcTime(const uint8_t *time, uint8_t *buf)
     tmp++;
     tmp[0] = (uint8_t)UTCTIME_LEN;
     tmp++;
-    if (memcpy_s(tmp, UTCTIME_LEN, time, UTCTIME_LEN) != EOK) {
-        HKS_LOG_E("memcpy_s fail.");
-        return 0;
-    }
+    (void)memcpy_s(tmp, UTCTIME_LEN, time, UTCTIME_LEN);
     tmp += UTCTIME_LEN;
     return tmp - buf;
 }
@@ -1298,11 +1295,7 @@ static int32_t ReadCertOrKey(const uint8_t *inData, uint32_t size, struct HksBlo
         HKS_LOG_E("malloc data fail\n");
         return HKS_ERROR_MALLOC_FAIL;
     }
-    if (memcpy_s(data, size, inData, size) != EOK) {
-        HKS_LOG_E("memcpy cert or key failed");
-        HKS_FREE_PTR(data);
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    (void)memcpy_s(data, size, inData, size);
     out->size = size;
     out->data = data;
     return HKS_SUCCESS;
@@ -1454,14 +1447,10 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, struct HksBlob *buf)
     if (buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size)) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size)) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size));
     buf->data += sizeof(blob->size);
     buf->size -= sizeof(blob->size);
-    if (memcpy_s(buf->data, buf->size, blob->data, blob->size) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(buf->data, buf->size, blob->data, blob->size);
     buf->data += ALIGN_SIZE(blob->size);
     buf->size -= ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;

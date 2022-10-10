@@ -72,11 +72,7 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     curve25519Key->nOrXSize = key->size; /* curve25519 public key */
 
     uint32_t offset = sizeof(struct HksPubKeyInfo);
-    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
-        HKS_LOG_E("copy pub key failed!");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(buffer + offset, totalSize - offset, key->data, key->size);
     publicKey->data = buffer;
     publicKey->size = totalSize;
     return HKS_SUCCESS;

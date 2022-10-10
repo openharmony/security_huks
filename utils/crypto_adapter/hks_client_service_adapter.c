@@ -396,11 +396,7 @@ static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(x509Key->data, publicKey->size, publicKey->data, publicKey->size) != EOK) {
-        HKS_LOG_E("X25519/Ed25519 to x509 public key memcpy to x509 key data failed!");
-        HKS_FREE_PTR(x509Key->data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(x509Key->data, publicKey->size, publicKey->data, publicKey->size);
     x509Key->size = publicKey->size;
 
     return HKS_SUCCESS;

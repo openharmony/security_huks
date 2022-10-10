@@ -241,12 +241,8 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->eSize = keyMaterial->eSize;
     publickeyMaterial->dSize = 0;
 
-    if (memcpy_s(output->data + sizeof(struct KeyMaterialRsa),
-        output->size - sizeof(struct KeyMaterialRsa),
-        input->data + sizeof(struct KeyMaterialRsa),
-        keyMaterial->nSize + keyMaterial->eSize) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(output->data + sizeof(struct KeyMaterialRsa), output->size - sizeof(struct KeyMaterialRsa),
+        input->data + sizeof(struct KeyMaterialRsa), keyMaterial->nSize + keyMaterial->eSize);
 
     return HKS_SUCCESS;
 }
