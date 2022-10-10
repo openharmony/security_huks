@@ -66,10 +66,7 @@ int32_t HksInsertClaim(struct HksBlob *out, const struct HksBlob *oid, const str
 
     uint8_t *buf = out->data + ASN_1_MAX_HEADER_LEN;
     buf += EncodeSecurityLevel(buf, secLevel);
-    if (memcpy_s(buf, out->size - ASN_1_MAX_HEADER_LEN - ENCODED_SEC_LEVEL_SIZE, oid->data, oid->size) != EOK) {
-        HKS_LOG_E("copy oid fail");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    (void)memcpy_s(buf, out->size - ASN_1_MAX_HEADER_LEN - ENCODED_SEC_LEVEL_SIZE, oid->data, oid->size);
     buf += oid->size;
 
     uint32_t offset = buf - out->data;
@@ -115,21 +112,12 @@ static int32_t GetEcPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *i
     key->size = totalSize;
 
     uint8_t *p = key->data;
-    if (memcpy_s(p, spkiHeaderLen, spkiHeader, spkiHeaderLen) != EOK) {
-        HKS_LOG_E("copy ecc header fail\n");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(p, spkiHeaderLen, spkiHeader, spkiHeaderLen);
     p += spkiHeaderLen;
     uint8_t *publicKey = (uint8_t *)(info + 1);
-    if (memcpy_s(p, totalSize - spkiHeaderLen, publicKey, info->nOrXSize) != EOK) {
-        HKS_LOG_E("copy x value fail\n");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(p, totalSize - spkiHeaderLen, publicKey, info->nOrXSize);
     p += info->nOrXSize;
-    if (memcpy_s(p, totalSize - spkiHeaderLen - info->nOrXSize, publicKey + info->nOrXSize, info->eOrYSize) != EOK) {
-        HKS_LOG_E("copy y value fail\n");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(p, totalSize - spkiHeaderLen - info->nOrXSize, publicKey + info->nOrXSize, info->eOrYSize);
     return HKS_SUCCESS;
 }
 

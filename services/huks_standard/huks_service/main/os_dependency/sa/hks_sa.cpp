@@ -244,11 +244,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         HKS_FREE_BLOB(srcData);
         return HKS_ERROR_IPC_MSG_FAIL;
     }
-    if (memcpy_s(srcData.data, srcData.size, pdata, srcData.size) != EOK) {
-        HKS_LOG_E("copy remote data failed!");
-        HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
 
     if (ProcessMessage(code, outSize, srcData, reply) != NO_ERROR) {
         HKS_LOG_E("process message!");

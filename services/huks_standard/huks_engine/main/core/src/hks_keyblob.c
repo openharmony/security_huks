@@ -100,18 +100,10 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(salt->data, salt->size, appIdParam->blob.data, appIdParam->blob.size) != EOK) {
-        HKS_LOG_E("memcpy appid failed");
-        HKS_FREE_PTR(salt->data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(salt->data, salt->size, appIdParam->blob.data, appIdParam->blob.size);
 
-    if (memcpy_s(salt->data + appIdParam->blob.size, salt->size - appIdParam->blob.size,
-        keyBlobInfo->salt, HKS_KEY_BLOB_DERIVE_SALT_SIZE) != EOK) {
-        HKS_LOG_E("memcpy salt failed");
-        HKS_FREE_PTR(salt->data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(salt->data + appIdParam->blob.size, salt->size - appIdParam->blob.size,
+        keyBlobInfo->salt, HKS_KEY_BLOB_DERIVE_SALT_SIZE);
     return ret;
 }
 
@@ -178,11 +170,7 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
 
     struct HksKeyBlobInfo *keyBlobInfo = (struct HksKeyBlobInfo *)keyParam->blob.data;
     uint32_t keySize;
-    if (memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keyBlobInfo->keySize)) != EOK) {
-        HKS_LOG_E("keySize memcpy failed!");
-        HksFree(aeadParam);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keyBlobInfo->keySize));
     aeadParam->aad = *aad;
     aeadParam->payloadLen = keySize;
     aeadParam->nonce.data = keyBlobInfo->nonce;
@@ -312,11 +300,8 @@ static int32_t InitKeyBlobInfo(const struct HksBlob *key, struct HksBlob *keyInf
             break;
         }
 
-        if (memcpy_s(keyInfo->data + sizeof(*keyBlobInfo), keyInfo->size - sizeof(*keyBlobInfo),
-            key->data, key->size) != EOK) {
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            HKS_LOG_E("memcpy failed");
-        }
+        (void)memcpy_s(keyInfo->data + sizeof(*keyBlobInfo), keyInfo->size - sizeof(*keyBlobInfo),
+            key->data, key->size);
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -635,10 +620,7 @@ int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size) != EOK) {
-        HKS_LOG_E("copy memory failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size);
     authTokenKey->size = g_cachedAuthTokenKey.size;
 
     return HKS_SUCCESS;
@@ -712,10 +694,7 @@ int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size) != EOK) {
-        HKS_LOG_E("copy memory failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size);
     authTokenKey->size = g_cachedAuthTokenKey.size;
     return HKS_SUCCESS;
 }

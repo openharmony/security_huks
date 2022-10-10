@@ -64,9 +64,7 @@ HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if (memcpy_s(sdkVersion->data, sdkVersion->size, HKS_SDK_VERSION, versionLen) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(sdkVersion->data, sdkVersion->size, HKS_SDK_VERSION, versionLen);
 
     sdkVersion->data[versionLen] = '\0';
     sdkVersion->size = versionLen;

@@ -830,11 +830,8 @@ static int32_t InitInputParams(enum CheckKeyType checkType, struct ParamsValues 
 {
     for (uint32_t i = 0; i < checkSetSize; ++i) {
         if (checkType == checkSet[i].checkType) {
-            if (memcpy_s(inputParams, sizeof(*inputParams), &checkSet[i].paramValues,
-                sizeof(checkSet[i].paramValues)) != EOK) {
-                HKS_LOG_E("init input params: memcpy failed");
-                return HKS_ERROR_INSUFFICIENT_MEMORY;
-            }
+            (void)memcpy_s(inputParams, sizeof(*inputParams), &checkSet[i].paramValues,
+                sizeof(checkSet[i].paramValues));
             return HKS_SUCCESS;
         }
     }
@@ -899,11 +896,8 @@ static int32_t InitExpectParams(enum CheckKeyType checkType, struct ExpectParams
 {
     for (uint32_t i = 0; i < checkSetSize; ++i) {
         if (checkType == checkSet[i].checkType) {
-            if (memcpy_s(expectValues, sizeof(*expectValues), &checkSet[i].paramValues,
-                sizeof(checkSet[i].paramValues)) != EOK) {
-                HKS_LOG_E("init expect params: memcpy failed");
-                return HKS_ERROR_INSUFFICIENT_MEMORY;
-            }
+            (void)memcpy_s(expectValues, sizeof(*expectValues), &checkSet[i].paramValues,
+                sizeof(checkSet[i].paramValues));
             return HKS_SUCCESS;
         }
     }
