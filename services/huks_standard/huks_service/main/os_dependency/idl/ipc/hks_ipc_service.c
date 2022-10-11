@@ -825,10 +825,7 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(outData->data, outData->size, handle.data, handle.size) != EOK) {
-        HKS_LOG_E("copy handle failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(outData->data, outData->size, handle.data, handle.size);
 
     if (token.size != 0 &&
         memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != EOK) {

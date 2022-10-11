@@ -173,10 +173,7 @@ static int32_t Curve25519Initialize(struct Curve25519Structure *curve25519,
 
     int32_t ret;
     uint8_t pubKey[P_BYTES] = {0};
-    if (memcpy_s(pubKey, P_BYTES - 1, source, sourceLen - 1) != EOK) { // the 0-30 bit assignment
-        HKS_LOG_E("copy source data to pubKey failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(pubKey, P_BYTES - 1, source, sourceLen - 1); // the 0-30 bit assignment
     pubKey[P_BYTES - 1] = source[P_BYTES - 1] & 0x7f; // the last bit assignment
     SwapEndianThirtyTwoByte(pubKey, sizeof(pubKey), isBigEndian);
 
@@ -310,14 +307,8 @@ static int32_t FillPubKeyByZero(uint8_t *pubKey, uint32_t *pubKeySize)
     if (*pubKeySize < P_BYTES) {
         uint8_t tmpKey[P_BYTES] = {0};
         int baseAddr = P_BYTES - *pubKeySize;
-        if (memcpy_s(tmpKey + baseAddr, P_BYTES - baseAddr, pubKey, *pubKeySize) != EOK) {
-            HKS_LOG_E("memcpy_s pubKey to buf failed");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
-        if (memcpy_s(pubKey, P_BYTES, tmpKey, P_BYTES) != EOK) {
-            HKS_LOG_E("memcpy_s buf to pubKey failed");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        (void)memcpy_s(tmpKey + baseAddr, P_BYTES - baseAddr, pubKey, *pubKeySize);
+        (void)memcpy_s(pubKey, P_BYTES, tmpKey, P_BYTES);
         *pubKeySize = P_BYTES;
     }
     return HKS_SUCCESS;

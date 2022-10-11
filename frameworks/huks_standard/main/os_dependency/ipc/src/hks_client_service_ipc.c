@@ -672,10 +672,7 @@ static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob
         HKS_LOG_E("out size[%u] smaller than [%u]", out->size, size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(out->data, out->size, data, size) != EOK) {
-        HKS_LOG_E("copy failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(out->data, out->size, data, size);
     out->size = size;
     return HKS_SUCCESS;
 }

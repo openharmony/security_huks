@@ -360,13 +360,7 @@ static int32_t ParseAuthToken(const struct HksBlob *inAuthTokenParam, struct Hks
             break;
         }
 
-        if (memcpy_s(authToken, sizeof(struct HksUserAuthToken), inAuthTokenParam->data,
-            inAuthTokenParam->size) != EOK) {
-            HKS_LOG_E("memcpy for authToken failed!");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
-
+        (void)memcpy_s(authToken, sizeof(struct HksUserAuthToken), inAuthTokenParam->data, inAuthTokenParam->size);
         *outAuthToken = authToken;
         return HKS_SUCCESS;
     } while (0);
@@ -508,25 +502,16 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
     }
 
     uint32_t enrolledIdNum = 0;
-    if (memcpy_s(&enrolledIdNum, sizeof(uint32_t), enrolledIdInfoBlob.data, sizeof(uint32_t)) != EOK) {
-        HKS_LOG_E("copy enrolled id len failed!");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(&enrolledIdNum, sizeof(uint32_t), enrolledIdInfoBlob.data, sizeof(uint32_t));
     uint32_t index = sizeof(uint32_t);
 
     for (uint32_t i = 0; i < enrolledIdNum && index < enrolledIdInfoBlob.size; ++i) {
         uint32_t authType = 0;
-        if (memcpy_s(&authType, sizeof(uint32_t), enrolledIdInfoBlob.data + index, sizeof(uint32_t)) != EOK) {
-            HKS_LOG_E("copy authType failed!");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        (void)memcpy_s(&authType, sizeof(uint32_t), enrolledIdInfoBlob.data + index, sizeof(uint32_t));
         index += sizeof(uint32_t);
 
         uint64_t enrolledId = 0;
-        if (memcpy_s(&enrolledId, sizeof(uint64_t), enrolledIdInfoBlob.data + index, sizeof(uint64_t)) != EOK) {
-            HKS_LOG_E("copy enrolledId failed!");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        (void)memcpy_s(&enrolledId, sizeof(uint64_t), enrolledIdInfoBlob.data + index, sizeof(uint64_t));
         index += sizeof(uint64_t);
         if (authType == authTokenAuthType && enrolledId == authToken->enrolledId) {
             return HKS_SUCCESS;
@@ -835,26 +820,13 @@ static int32_t DoAppendPrefixAuthInfoToUpdateInData(const struct HuksKeyNode *ke
     }
 
     uint32_t version = SECURE_SIGN_VERSION;
-    if (memcpy_s(outData, outDataSize, (uint8_t *)&version, sizeof(uint32_t)) != EOK) {
-        HKS_LOG_E("memcpy secure sign auth info version to outData failed!");
-        HKS_FREE_PTR(outData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(outData, outDataSize, (uint8_t *)&version, sizeof(uint32_t));
 
-    if (memcpy_s(outData + sizeof(uint32_t), outDataSize - sizeof(uint32_t), secureSignInfo,
-        sizeof(struct HksSecureSignAuthInfo)) != EOK) {
-        HKS_LOG_E("memcpy secure sign auth info to outData failed!");
-        HKS_FREE_PTR(outData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(outData + sizeof(uint32_t), outDataSize - sizeof(uint32_t), secureSignInfo,
+        sizeof(struct HksSecureSignAuthInfo));
 
-    if (memcpy_s(outData + sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo),
-        outDataSize - sizeof(uint32_t) - sizeof(struct HksSecureSignAuthInfo), inData->data,
-        inData->size) != EOK) {
-        HKS_LOG_E("memcpy inData to outData failed!");
-        HKS_FREE_PTR(outData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(outData + sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo),
+        outDataSize - sizeof(uint32_t) - sizeof(struct HksSecureSignAuthInfo), inData->data, inData->size);
 
     struct HksParam *appendDataPrefixParam = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_APPENDED_DATA_PREFIX, &appendDataPrefixParam);
@@ -942,26 +914,14 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
     }
 
     const uint32_t version = SECURE_SIGN_VERSION;
-    if (memcpy_s(cacheOutData, cacheOutDataSize, &version, sizeof(uint32_t)) != EOK) {
-        HKS_LOG_E("memcpy secure sign auth info version to cacheOutData failed!");
-        HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(cacheOutData, cacheOutDataSize, &version, sizeof(uint32_t));
 
-    if (memcpy_s(cacheOutData + sizeof(uint32_t), cacheOutDataSize - sizeof(uint32_t), appendDataPrefixParam->blob.data,
-        appendDataPrefixParam->blob.size) != EOK) {
-        HKS_LOG_E("memcpy secure sign auth info to cacheOutData failed!");
-        HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(cacheOutData + sizeof(uint32_t), cacheOutDataSize - sizeof(uint32_t),
+        appendDataPrefixParam->blob.data, appendDataPrefixParam->blob.size);
 
-    if (memcpy_s(cacheOutData + sizeof(uint32_t) + appendDataPrefixParam->blob.size,
+    (void)memcpy_s(cacheOutData + sizeof(uint32_t) + appendDataPrefixParam->blob.size,
         cacheOutDataSize - appendDataPrefixParam->blob.size - sizeof(uint32_t), innerParams->inData->data,
-        innerParams->inData->size) != 0) {
-        HKS_LOG_E("memcpy outData to cacheOutData failed!");
-        HKS_FREE_PTR(cacheOutData);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+        innerParams->inData->size);
 
     if (memcpy_s(inOutData->data, inOutDataOriginSize, cacheOutData, cacheOutDataSize) != 0) {
         HKS_LOG_E("memcpy cacheOutData to inOutData failed!");
