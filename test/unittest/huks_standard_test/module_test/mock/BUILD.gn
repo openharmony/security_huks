@@ -31,9 +31,7 @@ ohos_unittest("huks_mock_test") {
 
   sources = []
 
-  sources += [
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/ipc/src/huks_access_test.cpp",
-  ]
+  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/ipc/src/huks_access_test.cpp" ]
 
   defines = [
     "L2_STANDARD",
@@ -48,9 +46,9 @@ ohos_unittest("huks_mock_test") {
   ]
 
   sources += [
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/log/hks_log.c",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/common/src/huks_core_hal_mock.c",
   ]
 
