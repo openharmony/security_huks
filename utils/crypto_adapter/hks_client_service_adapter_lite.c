@@ -346,7 +346,8 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
         return ret;
     }
 
-    ret = mbedtls_mpi_write_binary(&rsaCtx->MBEDTLS_PRIVATE(E), keyBuffer + sizeof(struct HksPubKeyInfo) + nSize, eSize);
+    ret = mbedtls_mpi_write_binary(&rsaCtx->MBEDTLS_PRIVATE(E),
+        keyBuffer + sizeof(struct HksPubKeyInfo) + nSize, eSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("X509 public key to rsa write E failed! mbedtls ret = 0x%X", ret);
         HKS_FREE_PTR(keyBuffer);
