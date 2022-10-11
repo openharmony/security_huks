@@ -37,6 +37,7 @@ ohos_static_library("libhuks_utils_client_service_adapter_static") {
     "hks_client_service_adapter.c",
     "hks_client_service_adapter_common.c",
   ]
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   cflags = [
     "-Wall",
     "-Werror",

@@ -33,6 +33,7 @@ ohos_shared_library("huks_service") {
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   deps = [
     ":huks_service.rc",
     "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_standard_static",

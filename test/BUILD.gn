@@ -24,6 +24,7 @@ group("unittest") {
       "./unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_wrap/useridm_test:huks_useridm_wrap_test",
       "./unittest/huks_standard_test/storage_multithread_test:huks_multithread_test",
       "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
+      "./unittest/huks_standard_test/module_test/mock:huks_mock_test",
     ]
   } else {
     if (ohos_kernel_type == "liteos_m") {

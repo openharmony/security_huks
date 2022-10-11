@@ -1604,13 +1604,6 @@ int32_t HksServiceProvisionVerify(const struct HksBlob *srcData, const struct Hk
     return 0;
 }
 
-int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct HksBlob *certChain)
-{
-    (void)processName;
-    (void)certChain;
-    return 0;
-}
-
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
 {
