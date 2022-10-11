@@ -167,11 +167,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
 
     uint8_t *tmp = isPubKey ? (keyIn->data + sizeof(*keyPair)) :
         (keyIn->data + sizeof(*keyPair) + keyPair->publicBufferSize);
-    if (memcpy_s(buffer, size, tmp, size) != EOK) {
-        HKS_LOG_E("memcpy failed");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(buffer, size, tmp, size);
 
     if (isPlainPubKey) { /* public key is plain key, only copy */
         keyOut->data = buffer;
@@ -1006,35 +1002,19 @@ static int32_t AppendRsaPublicExponent(const struct HksBlob *key, struct HksBlob
     int32_t ret = HKS_SUCCESS;
     uint32_t offset = 0;
     do {
-        if (memcpy_s(out + offset, size - offset, key->data, sizeof(struct HksKeyMaterialRsa)) != EOK) {
-            HKS_LOG_E("copy keymaterial header failed");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
+        (void)memcpy_s(out + offset, size - offset, key->data, sizeof(struct HksKeyMaterialRsa));
         offset += sizeof(struct HksKeyMaterialRsa);
 
         struct HksKeyMaterialRsa *newkeyMaterial = (struct HksKeyMaterialRsa *)out;
         newkeyMaterial->eSize = sizeof(g_defaultRsaPubExponent);
 
-        if (memcpy_s(out + offset, size - offset, key->data + offset, keyMaterial->nSize) != EOK) {
-            HKS_LOG_E("copy material n failed");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
+        (void)memcpy_s(out + offset, size - offset, key->data + offset, keyMaterial->nSize);
         offset += keyMaterial->nSize;
 
-        if (memcpy_s(out + offset, size - offset, g_defaultRsaPubExponent, sizeof(g_defaultRsaPubExponent)) != EOK) {
-            HKS_LOG_E("copy material e failed");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
+        (void)memcpy_s(out + offset, size - offset, g_defaultRsaPubExponent, sizeof(g_defaultRsaPubExponent));
 
-        if (memcpy_s(out + offset + sizeof(g_defaultRsaPubExponent), size - offset - sizeof(g_defaultRsaPubExponent),
-            key->data + offset, keyMaterial->dSize) != EOK) {
-            HKS_LOG_E("copy material d failed");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
+        (void)memcpy_s(out + offset + sizeof(g_defaultRsaPubExponent), size - offset - sizeof(g_defaultRsaPubExponent),
+            key->data + offset, keyMaterial->dSize);
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -1087,11 +1067,7 @@ static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyTy
     curve25519Key->priKeySize = key->size; /* curve25519 private key */
 
     uint32_t offset = sizeof(struct HksKeyMaterial25519);
-    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
-        HKS_LOG_E("copy pub key failed!");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(buffer + offset, totalSize - offset, key->data, key->size);
     outKey->data = buffer;
     outKey->size = totalSize;
     return HKS_SUCCESS;

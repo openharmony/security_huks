@@ -256,10 +256,7 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
         if (paramSet->paramSetSize < key->size) {
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
-        if (memcpy_s(paramSet, paramSet->paramSetSize, key->data, key->size) != EOK) {
-            HKS_LOG_E("memcpy key failed");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+        (void)memcpy_s(paramSet, paramSet->paramSetSize, key->data, key->size);
         return HKS_SUCCESS;
     }
 
@@ -272,10 +269,7 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
         HksFreeParamSet(&outParamSet);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize) != EOK) {
-        HKS_LOG_E("memcpy outParamSet failed");
-        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize);
 
     HksFreeParamSet(&outParamSet);
     return ret;
@@ -694,11 +688,7 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     curve25519Key->nOrXSize = key->size; /* curve25519 public key */
 
     uint32_t offset = sizeof(struct HksPubKeyInfo);
-    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
-        HKS_LOG_E("copy pub key failed!");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    (void)memcpy_s(buffer + offset, totalSize - offset, key->data, key->size);
     publicKey->data = buffer;
     publicKey->size = totalSize;
     return HKS_SUCCESS;
@@ -740,29 +730,18 @@ static int32_t ConbineIntoKeyPair(const struct HksBlob *privateKey,
 
     struct Hks25519KeyPair keyPairStruct = { publicKey->size, privateKey->size };
     uint32_t offset = 0;
-    int32_t ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-    do {
-        if (memcpy_s(buffer + offset, size, &keyPairStruct, sizeof(keyPairStruct)) != EOK) {
-            break;
-        }
-        offset += sizeof(keyPairStruct);
 
-        if (memcpy_s(buffer  + offset, size - offset, publicKey->data, publicKey->size) != EOK) {
-            break;
-        }
-        offset += publicKey->size;
+    (void)memcpy_s(buffer + offset, size, &keyPairStruct, sizeof(keyPairStruct));
+    offset += sizeof(keyPairStruct);
 
-        if (memcpy_s(buffer  + offset, size - offset, privateKey->data, privateKey->size) != EOK) {
-            break;
-        }
+    (void)memcpy_s(buffer  + offset, size - offset, publicKey->data, publicKey->size);
+    offset += publicKey->size;
 
-        keyPair->data = buffer;
-        keyPair->size = size;
-        return HKS_SUCCESS;
-    } while (0);
+    (void)memcpy_s(buffer  + offset, size - offset, privateKey->data, privateKey->size) ;
 
-    HKS_FREE_PTR(buffer);
-    return ret;
+    keyPair->data = buffer;
+    keyPair->size = size;
+    return HKS_SUCCESS;
 }
 
 static int32_t GetAgreeKeyPair(const uint32_t alg, const struct HksProcessInfo *processInfo,
