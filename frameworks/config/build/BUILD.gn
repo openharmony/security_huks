@@ -14,8 +14,8 @@
 import("//base/security/huks/huks.gni")
 
 config("coverage_flag") {
-    if (enable_coverage) {
-        cflags = [ "--coverage" ]
-        ldflags = [ "--coverage" ]
-    }
+  if (enable_coverage) {
+    cflags = [ "--coverage" ]
+    ldflags = [ "--coverage" ]
+  }
 }
