@@ -88,7 +88,6 @@ static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
     { HKS_MSG_GET_CERTIFICATE_CHAIN, HksIpcServiceGetCertificateChain },
     { HKS_MSG_PROVISION, HksIpcServiceProvision },
     { HKS_MSG_PROVISION_VERIFY, HksIpcServiceProvisionVerify },
-    { HKS_MSG_EXPORT_TRUST_CERTS, HksIpcServiceExportTrustCerts },
 };
 
 #ifdef SUPPORT_COMMON_EVENT

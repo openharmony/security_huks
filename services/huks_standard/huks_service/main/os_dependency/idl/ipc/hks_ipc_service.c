@@ -766,41 +766,6 @@ void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8
     AttestOrGetCertChain(srcData, context, false);
 }
 
-void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t *context)
-{
-    struct HksBlob certChainBlob = { 0, NULL };
-    struct HksBlob processName = { 0, NULL };
-    int32_t ret;
-
-    do {
-        ret = HksTrustCertsUnpack(srcData, &certChainBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksTrustCertsUnpack Ipc fail");
-            break;
-        }
-
-        ret = HksGetProcessNameForIPC(context, &processName);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
-            break;
-        }
-
-        ret = HksServiceExportTrustCerts(&processName, &certChainBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceExportTrustCerts fail, ret = %d", ret);
-            break;
-        }
-        HksSendResponse(context, ret, &certChainBlob);
-    } while (0);
-
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
-
-    HKS_FREE_BLOB(processName);
-    HKS_FREE_BLOB(certChainBlob);
-}
-
 static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *outData)
 {
