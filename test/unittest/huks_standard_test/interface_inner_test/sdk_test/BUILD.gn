@@ -43,8 +43,8 @@ ohos_unittest("hukssdk_test") {
     "./src/hks_test_file_operator.c",
     "./src/hks_test_mem.c",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_native_api_compatibility_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
   include_dirs = [
