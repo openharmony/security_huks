@@ -704,7 +704,7 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
     return HKS_SUCCESS;
 }
 
-static void AttestOrGetCertChain(const struct HksBlob *srcData, const uint8_t *context, bool isAttest)
+void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
@@ -725,23 +725,15 @@ static void AttestOrGetCertChain(const struct HksBlob *srcData, const uint8_t *c
             break;
         }
 
-        if (isAttest) {
-            ret = HksAttestAccessControl(inParamSet);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksAttestAccessControl fail, ret = %d", ret);
-                break;
-            }
-            ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksServiceAttestKey fail, ret = %d", ret);
-                break;
-            }
-        } else {
-            ret = HksServiceGetCertificateChain(&processInfo, &keyAlias, inParamSet, &certChainBlob);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksServiceGetCertificateChain fail, ret = %d", ret);
-                break;
-            }
+        ret = HksAttestAccessControl(inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAttestAccessControl fail, ret = %d", ret);
+            break;
+        }
+        ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceAttestKey fail, ret = %d", ret);
+            break;
         }
         
         HksSendResponse(context, ret, &certChainBlob);
@@ -754,16 +746,6 @@ static void AttestOrGetCertChain(const struct HksBlob *srcData, const uint8_t *c
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(certChainBlob);
-}
-
-void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
-{
-    AttestOrGetCertChain(srcData, context, true);
-}
-
-void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8_t *context)
-{
-    AttestOrGetCertChain(srcData, context, false);
 }
 
 static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,

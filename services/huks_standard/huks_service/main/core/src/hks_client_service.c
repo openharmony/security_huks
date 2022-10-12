@@ -1553,43 +1553,6 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 #endif
 }
 
-int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
-
-    int32_t ret = HksCheckGetCertificateChainParams(&processInfo->processName, keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-
-    struct HksBlob certFromFile = { 0, NULL };
-    ret = GetKeyData(processInfo, keyAlias, &certFromFile, HKS_STORAGE_TYPE_CERTCHAIN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksGetKeyData fail, ret = %d.", ret);
-        return ret;
-    }
-    if (memcpy_s(certChain->data, certChain->size, certFromFile.data, certFromFile.size) != EOK) {
-        HKS_LOG_E("memcpy certChain fail.");
-        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    certChain->size = certFromFile.size;
-    HKS_FREE_BLOB(certFromFile);
-    HksHitraceEnd(&traceId);
-
-    HksReport(__func__, processInfo, paramSet, ret);
-
-    return ret;
-#else
-    (void)processInfo;
-    (void)keyAlias;
-    (void)paramSet;
-    (void)certChain;
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
-}
-
 int32_t HksServiceProvision(const struct HksBlob *srcData, const struct HksBlob *challengeIn)
 {
     (void)srcData;
