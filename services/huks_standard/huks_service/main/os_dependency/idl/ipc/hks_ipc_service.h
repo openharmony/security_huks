@@ -60,8 +60,6 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
 
 void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 
 void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
