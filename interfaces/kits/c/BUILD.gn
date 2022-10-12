@@ -31,7 +31,12 @@ ohos_ndk_headers("huks_header") {
   ]
 }
 
+config("huks_config") {
+  include_dirs = [ "include" ]
+}
+
 ohos_shared_library("huks_ndk") {
+  public_configs = [ ":huks_config" ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
