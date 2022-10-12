@@ -153,6 +153,7 @@ ohos_static_library("libhukssdk_static") {
   deps = []
 
   configs += [ ":hilog_dir" ]
+  configs += [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   deps += [
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",

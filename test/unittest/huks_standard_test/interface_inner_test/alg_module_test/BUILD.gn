@@ -57,7 +57,7 @@ ohos_moduletest("huks_mt_test") {
     "src/openssl_hmac_helper.c",
     "src/openssl_rsa_helper.c",
   ]
-
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   if (use_crypto_lib == "openssl") {
     defines = [ "_USE_OPENSSL_" ]
   }

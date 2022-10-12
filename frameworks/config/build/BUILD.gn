@@ -1,4 +1,4 @@
-# Copyright (c) 2021 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,14 +11,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-use_crypto_lib = "openssl"
-non_rwlock_support = false
-enable_mock = false
-enable_coverage = false
+import("//base/security/huks/huks.gni")
 
-if (!defined(global_parts_info) ||
-    defined(global_parts_info.account_os_account)) {
-  has_os_account_part = true
-} else {
-  has_os_account_part = false
+config("coverage_flag") {
+  if (enable_coverage) {
+    cflags = [ "--coverage" ]
+    ldflags = [ "--coverage" ]
+  }
 }

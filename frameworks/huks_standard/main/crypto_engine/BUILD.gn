@@ -33,5 +33,6 @@ ohos_static_library("libhuks_crypto_engine_standard_static") {
   if (use_crypto_lib == "mbedtls") {
     public_deps = [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/mbedtls:libhuks_mbedtls_standard_static" ]
   }
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   complete_static_lib = true
 }

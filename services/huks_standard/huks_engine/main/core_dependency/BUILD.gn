@@ -26,7 +26,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",

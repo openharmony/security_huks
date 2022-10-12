@@ -40,7 +40,7 @@ ohos_unittest("huks_multithread_test") {
     "-Werror",
   ]
   cflags = cflags_cc
-
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",

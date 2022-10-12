@@ -655,12 +655,6 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
     return CertificateChainGetOrAttest(HKS_MSG_ATTEST_KEY, keyAlias, paramSet, certChain);
 }
 
-int32_t HksClientGetCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain)
-{
-    return CertificateChainGetOrAttest(HKS_MSG_GET_CERTIFICATE_CHAIN, keyAlias, paramSet, certChain);
-}
-
 static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob *out)
 {
     if (size == 0) {

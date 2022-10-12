@@ -27,6 +27,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   include_dirs = [
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
