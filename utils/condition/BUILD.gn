@@ -31,6 +31,7 @@ ohos_static_library("libhuks_utils_condition_static") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
   ]
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",

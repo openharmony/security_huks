@@ -530,20 +530,10 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
 HKS_API_EXPORT int32_t HksGetCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain)
 {
-#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-    HKS_LOG_I("enter get certificate chain");
-    if ((keyAlias == NULL) || (paramSet == NULL) || (certChain == NULL)) {
-        return HKS_ERROR_NULL_POINTER;
-    }
-    int32_t ret = HksClientGetCertificateChain(keyAlias, paramSet, certChain);
-    HKS_LOG_I("leave get certificate chain, result = %d", ret);
-    return ret;
-#else
     (void)keyAlias;
     (void)paramSet;
     (void)certChain;
     return HKS_ERROR_API_NOT_SUPPORTED;
-#endif
 }
 
 HKS_API_EXPORT int32_t HksWrapKey(const struct HksBlob *keyAlias, const struct HksBlob *targetKeyAlias,

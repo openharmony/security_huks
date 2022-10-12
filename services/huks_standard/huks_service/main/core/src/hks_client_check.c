@@ -183,14 +183,6 @@ int32_t HksCheckAttestKeyParams(const struct HksBlob *processName, const struct 
 }
 #endif
 
-#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-    return HksCheckGenAndImportKeyParams(processName, keyAlias, paramSet, certChain);
-}
-#endif
-
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
 {

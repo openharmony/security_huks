@@ -80,11 +80,6 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain);
 
-int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain);
-
-int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct HksBlob *certChain);
-
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token);
 

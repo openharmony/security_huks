@@ -167,7 +167,7 @@ ohos_unittest("huks_module_test") {
     "//commonlibrary/c_utils/base/include",
     "//test/xts/acts/security_lite/huks/common/include",
   ]
-
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_attest_key_test_common.cpp",
     "//base/security/huks/utils/condition/hks_condition.c",

@@ -13,25 +13,21 @@
  * limitations under the License.
  */
 
-#ifndef HKS_HISYSEVENT_TEST_COMMON_H
-#define HKS_HISYSEVENT_TEST_COMMON_H
+#ifndef HUKS_CORE_HAL_H
+#define HUKS_CORE_HAL_H
 
-#include <stdint.h>
-#include <string>
+#include "stdint.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#define HKS_HISYSEVENT_QUERY_SUCCESS 0
-#define HKS_HISYSEVENT_QUERY_FAILED (-1)
+void HksEnableCreateOrDestroy(bool isEnable);
 
-void HksHiSysEventQueryStart(void);
-
-int32_t HksHiSysEventQueryResult(const std::string funStr);
+void HksEnableSetHid(bool isEnable);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HKS_HISYSEVENT_TEST_COMMON_H
+#endif
