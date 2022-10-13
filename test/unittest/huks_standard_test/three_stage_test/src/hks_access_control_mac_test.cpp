@@ -79,6 +79,8 @@ const TestAccessCaseParams HKS_ACCESS_TEST_001_PARAMS = {
     .initResult = HKS_SUCCESS
 };
 
+#ifdef _USE_OPENSSL_
+/* mbedtls engine don't support SM3 alg */
 /* 002: gen sm3 for mac; init for mac */
 const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
     .genParams =
@@ -105,6 +107,7 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
         },
     .initResult = HKS_SUCCESS
 };
+#endif
 
 /**
  * @tc.name: HksAccessControlMacTest.HksAccessMacPartTest001
@@ -136,6 +139,8 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest001, TestSize.Level0)
  */
 HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest002, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    /* mbedtls engine don't support SM3 alg */
     HKS_LOG_I("Enter HksAccessMacPartTest002");
     const IDMParams testIDMParams = {
         .secureUid = 1,
@@ -144,5 +149,6 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest002, TestSize.Level0)
         .authType = 1
     };
     ASSERT_EQ(CheckAccessHmacTest(HKS_ACCESS_TEST_002_PARAMS, testIDMParams), HKS_SUCCESS);
+#endif
 }
 }

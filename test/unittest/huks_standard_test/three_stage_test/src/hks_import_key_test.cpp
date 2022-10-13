@@ -520,6 +520,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_034_PARAMS = {
 };
 
 #ifdef _USE_OPENSSL_
+/* mbedtls engine don't support DSA alg */
 /* 035: dsa-invalid-keysize */
 const ImportKeyCaseParams HKS_IMPORT_TEST_035_PARAMS = {
     .params =
@@ -534,6 +535,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_035_PARAMS = {
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
 };
 
+/* mbedtls engine don't support DSA alg */
 /* 036: dsa-invalid-keysize2 */
 const ImportKeyCaseParams HKS_IMPORT_TEST_036_PARAMS = {
     .params =
@@ -854,12 +856,12 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest034, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_034_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef _USE_OPENSSL_
 HWTEST_F(HksImportKeyTest, HksImportKeyTest035, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_035_PARAMS), HKS_SUCCESS);
 }
 
-#ifdef _USE_OPENSSL_
 HWTEST_F(HksImportKeyTest, HksImportKeyTest036, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_036_PARAMS), HKS_SUCCESS);
