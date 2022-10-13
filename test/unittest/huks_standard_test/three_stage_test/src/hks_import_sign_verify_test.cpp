@@ -930,7 +930,6 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest001, TestSize.Level0)
 {
     ImportPlainKeyTest(HKS_ALG_DSA, HKS_RSA_KEY_SIZE_2048, HKS_DIGEST_SHA256);
 }
-#endif
 
 /**
  * @tc.name: HksImportSignVerifyTest.HksImportSignVerifyTest002
@@ -941,6 +940,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest002, TestSize.Level0)
 {
     ImportPlainKeyTest(HKS_ALG_ED25519, HKS_CURVE25519_KEY_SIZE_256, HKS_DIGEST_SHA256);
 }
+#endif
 
 /**
  * @tc.name: HksImportSignVerifyTest.HksImportSignVerifyTest003
@@ -982,6 +982,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest006, TestSize.Level0)
     ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_521, HKS_DIGEST_SHA224);
 }
 
+#ifdef _USE_OPENSSL_
 /**
  * @tc.name: HksImportSignVerifyTest.HksImportSignVerifyTest007
  * @tc.desc: import SM2-256
@@ -991,4 +992,5 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest007, TestSize.Level0)
 {
     ImportPlainKeyTest(HKS_ALG_SM2, HKS_SM2_KEY_SIZE_256, HKS_DIGEST_SM3);
 }
+#endif
 } // namespace Unittest::ImportSignVerifyTest

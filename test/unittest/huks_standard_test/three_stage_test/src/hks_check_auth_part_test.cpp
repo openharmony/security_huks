@@ -78,6 +78,8 @@ const TestAuthCaseParams HKS_AUTH_TEST_001_PARAMS = {
     .initResult = HKS_SUCCESS
 };
 
+#ifdef _USE_OPENSSL_
+/* mbedtls engine don't support SM4 alg */
 /* 002: gen sm4 for cipher; init for cipher */
 const TestAuthCaseParams HKS_AUTH_TEST_002_PARAMS = {
     .genParams =
@@ -104,6 +106,7 @@ const TestAuthCaseParams HKS_AUTH_TEST_002_PARAMS = {
         },
     .initResult = HKS_SUCCESS
 };
+#endif
 
 /* 003: gen hmac for mac; init for mac */
 const TestAuthCaseParams HKS_AUTH_TEST_003_PARAMS = {
@@ -418,8 +421,11 @@ HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest001, TestSize.Level0)
  */
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest002, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    /* mbedtls engine don't support SM4 alg */
     HKS_LOG_I("Enter HksCheckAuthTest002");
     EXPECT_EQ(CheckGenAuthTest(HKS_AUTH_TEST_002_PARAMS), HKS_SUCCESS);
+#endif
 }
 
 /**
