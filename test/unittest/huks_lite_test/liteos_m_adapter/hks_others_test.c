@@ -84,7 +84,7 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest002, Level1)
 LITE_TEST_CASE(HksOthersTest, HksOthersTest003, Level1)
 {
     int32_t ret = HksAttestKey(NULL, NULL, NULL);
-    TEST_ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
+    TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 
 /**
