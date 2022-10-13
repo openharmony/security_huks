@@ -1208,7 +1208,9 @@ static void ImportAgreeTest(uint32_t alg, uint32_t keySize)
  */
 HWTEST_F(HksImportAgreeTest, HksImportAgreeTest001, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
     ImportAgreeTest(HKS_ALG_X25519, HKS_CURVE25519_KEY_SIZE_256);
+#endif
 }
 
 /**

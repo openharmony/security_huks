@@ -28,7 +28,9 @@
 using namespace testing::ext;
 namespace Unittest::ExportKey {
 const int SET_SIZE_4096 = 4096;
+#ifdef _USE_OPENSSL_
 const uint32_t DSA_COMMON_SIZE = 1024;
+#endif
 
 struct TestCaseParams {
     std::vector<HksParam> params;
@@ -180,6 +182,8 @@ const TestCaseParams g_huksExportKey01200Params = {
     },
 };
 
+#ifdef _USE_OPENSSL_
+// mbedtls engine don't support DSA alg
 const TestCaseParams g_huksExportKey01300Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
@@ -188,6 +192,7 @@ const TestCaseParams g_huksExportKey01300Params = {
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
     },
 };
+#endif
 
 const TestCaseParams g_huksExportKey01400Params = {
     .params = {
@@ -213,6 +218,8 @@ const TestCaseParams g_huksExportKey01600Params = {
     },
 };
 
+#ifdef _USE_OPENSSL_
+/* mbedtls engine don't support SM2 alg */
 const TestCaseParams g_huksExportKey01700Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM2 },
@@ -221,6 +228,7 @@ const TestCaseParams g_huksExportKey01700Params = {
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SM3 },
     },
 };
+#endif
 
 /**
  * @tc.number    : HksExportTest00100
@@ -346,7 +354,10 @@ HWTEST_F(HksExportTest, HksExportTest01200, TestSize.Level0)
  */
 HWTEST_F(HksExportTest, HksExportTest01300, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    // mbedtls engine don't support DSA alg
     EXPECT_EQ(RunTestCase(g_huksExportKey01300Params), HKS_SUCCESS);
+#endif
 }
 
 /**
@@ -387,6 +398,9 @@ HWTEST_F(HksExportTest, HksExportTest01600, TestSize.Level0)
  */
 HWTEST_F(HksExportTest, HksExportTest01700, TestSize.Level0)
 {
+#ifdef _USE_OPENSSL_
+    // mbedtls engine don't support SM2 alg
     EXPECT_EQ(RunTestCase(g_huksExportKey01700Params), HKS_SUCCESS);
+#endif
 }
 }
