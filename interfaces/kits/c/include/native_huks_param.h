@@ -52,7 +52,7 @@ extern "C" {
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
+struct OH_Huks_Result OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
 
 /**
  * @brief Adds parameters to a parameter set.
@@ -64,7 +64,7 @@ int32_t OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
+struct OH_Huks_Result OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
     const struct OH_Huks_Param *params, uint32_t paramCnt);
 
 /**
@@ -75,7 +75,7 @@ int32_t OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet);
+struct OH_Huks_Result OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet);
 
 /**
  * @brief Destroys a parameter set.
@@ -96,7 +96,7 @@ void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet);
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromParamSet,
+struct OH_Huks_Result OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromParamSet,
     uint32_t fromParamSetSize, struct OH_Huks_ParamSet **paramSet);
 
 /**
@@ -109,7 +109,7 @@ int32_t OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromParamSet,
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, uint32_t tag,
+struct OH_Huks_Result OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, uint32_t tag,
     struct OH_Huks_Param **param);
 
 /**
@@ -122,7 +122,7 @@ int32_t OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, uint32_t tag,
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, bool isCopy);
+struct OH_Huks_Result OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, bool isCopy);
 
 /**
  * @brief Checks whether the parameters in a parameter set are valid.
@@ -132,7 +132,7 @@ int32_t OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, bool isCopy);
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_isParamSetTagValid(const struct OH_Huks_ParamSet *paramSet);
+struct OH_Huks_Result OH_Huks_IsParamSetTagValid(const struct OH_Huks_ParamSet *paramSet);
 
 /**
  * @brief Checks whether a parameter set is of the valid size.
@@ -143,7 +143,7 @@ int32_t OH_Huks_isParamSetTagValid(const struct OH_Huks_ParamSet *paramSet);
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_isParamSetValid(const struct OH_Huks_ParamSet *paramSet, uint32_t size);
+struct OH_Huks_Result OH_Huks_IsParamSetValid(const struct OH_Huks_ParamSet *paramSet, uint32_t size);
 
 /**
  * @brief Checks whether two parameters are the same.
@@ -154,7 +154,7 @@ int32_t OH_Huks_isParamSetValid(const struct OH_Huks_ParamSet *paramSet, uint32_
  * @since 9
  * @version 1.0
  */
-int32_t OH_Huks_CheckParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
+struct OH_Huks_Result OH_Huks_CheckParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
 
 #ifdef __cplusplus
 }
