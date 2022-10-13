@@ -20,8 +20,9 @@
  * @addtogroup HuksParamSetApi
  * @{
  *
- * @brief 描述HUKS参数集的能力，支持HUKS密钥管理接口的使用，包括初始化参数集、添加参数、构造参数集、释放参数集等HUKS参数集生命周期管理函数，
- * 还包括获取参数、复制参数集、查询参数集、检查是否有效等函数。
+ * @brief Defines the capabilities of OpenHarmony Universal KeyStore (HUKS) parameter sets. The HUKS APIs can be used to perform parameter set lifecycle management, 
+ * including initializing a parameter set, adding parameters to a parameter set, constructing a parameter set, and destroying a parameter set.
+ * They can also be used to obtain parameters, copy parameter sets, and check parameter validity.
  *
  * @syscap SystemCapability.Security.Huks
  * @since 9
@@ -31,7 +32,7 @@
 /**
  * @file native_huks_param.h
  *
- * @brief 提供参数集构造、使用和销毁的API。
+ * @brief Provides APIs for constructing, using, and destroying parameter sets.
  *
  * @since 9
  * @version 1.0
@@ -44,115 +45,116 @@ extern "C" {
 #endif
 
 /**
- * @brief 初始化参数集。
+ * @brief Initializes a parameter set.
  *
- * @param paramSet 指向要初始化的参数集的指针地址。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示初始化成功，其他时为错误。
+ * @param paramSet Indicates the double pointer to the parameter set to initialize.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the initialization is successful; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
+int32_t OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
 
 /**
- * @brief 添加参数到参数集里面。
+ * @brief Adds parameters to a parameter set.
  *
- * @param paramSet 指向要被添加参数的参数集的指针。
- * @param params 指向要添加的参数数组的指针。
- * @param paramCnt 待添加参数数组的参数个数。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示添加成功，其他时为错误。
+ * @param paramSet Indicates the pointer to the parameter set to which parameters are to be added.
+ * @param params Indicates the pointer to the array of parameters to add.
+ * @param paramCnt Indicates the number of parameters to add.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
+int32_t OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
     const struct OH_Huks_Param *params, uint32_t paramCnt);
 
 /**
- * @brief 构造正式的参数集。
+ * @brief Constructs a parameter set.
  *
- * @param paramSet 指向要被正式构造的参数集的指针地址。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示构建成功，其他时为错误。
+ * @param paramSet Indicates the double pointer to the parameter set to construct.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet);
+int32_t OH_Huks_BuildParamSet(struct OH_Huks_ParamSet **paramSet);
 
 /**
- * @brief 销毁参数集。
+ * @brief Destroys a parameter set.
  *
- * @param paramSet 指向要被销毁的参数集的指针地址。
+ * @param paramSet Indicates the double pointer to the parameter set to destroy.
  * @since 9
  * @version 1.0
  */
 void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet);
 
 /**
- * @brief 复制参数集（深拷贝）。
+ * @brief Copies a parameter set (deep copy).
  *
- * @param fromParamSet 指向要被复制的参数集的指针。
- * @param fromParamSetSize 被复制的参数集占用内存的大小。
- * @param paramSet 指向生成新的参数集的指针地址。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示复制成功，其他时为错误。
+ * @param fromParamSet Indicates the pointer to the parameter set to copy.
+ * @param fromParamSetSize Indicates the memory size occupied by the source parameter set.
+ * @param paramSet Indicates the double pointer to the new parameter set generated.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromParamSet,
+int32_t OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromParamSet,
     uint32_t fromParamSetSize, struct OH_Huks_ParamSet **paramSet);
 
 /**
- * @brief 从参数集中获取参数。
+ * @brief Obtains parameters from a parameter set.
  *
- * @param paramSet 指向参数集的指针。
- * @param tag 要获取的对应参数的值。
- * @param param 指向获取到的参数的指针地址。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示获取成功，其他时为错误。
+ * @param paramSet Indicates the pointer to the target parameter set.
+ * @param tag Indicates the value of the parameter to be obtained.
+ * @param param Indicates the double pointer to the parameter obtained.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful, returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, uint32_t tag,
+int32_t OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, uint32_t tag,
     struct OH_Huks_Param **param);
 
 /**
- * @brief 刷新（复制）参数集内Blob类型的数据到参数集内。
+ * @brief Refreshes data of the <b>Blob</b> type in a parameter set.
  *
- * @param paramSet 指向参数集的指针。
- * @param isCopy 是否要刷新参数集内存中的struct HksBlob型的参数数据。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示成功，其他时为错误。
+ * @param paramSet Indicates the pointer to the target parameter set.
+ * @param isCopy Specifies whether to copy the data of the <b>Blob</b> type to the parameter set.
+ * If yes, the data of the <b>Blob</b> type will be copied to the parameter set. Otherwise, only the address of the <b>Blob</b> data will be refreshed.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if operation is successful; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, bool isCopy);
+int32_t OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, bool isCopy);
 
 /**
- * @brief 检查参数集中的参数是否有效、是否有重复。
+ * @brief Checks whether the parameters in a parameter set are valid.
  *
- * @param paramSet 指向参数集的指针。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示有效，其他时为无效或者错误。
+ * @param paramSet Indicates the pointer to the parameter set to check.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the parameters in the parameter set are valid; returns other values if the parameter set has invalid, duplicate, or incorrect parameters.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_IsParamSetTagValid(const struct OH_Huks_ParamSet *paramSet);
+int32_t OH_Huks_isParamSetTagValid(const struct OH_Huks_ParamSet *paramSet);
 
 /**
- * @brief 检查参数集大小是否有效。
+ * @brief Checks whether a parameter set is of the valid size.
  *
- * @param paramSet 指向参数集的指针。
- * @param size 参数集占用的内存大小。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示有效，其他时为无效或者错误。
+ * @param paramSet Indicates the pointer to the parameter set to check.
+ * @param size Indicates the memory size occupied by the parameter set.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the parameter set is of the valid size; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_IsParamSetValid(const struct OH_Huks_ParamSet *paramSet, uint32_t size);
+int32_t OH_Huks_isParamSetValid(const struct OH_Huks_ParamSet *paramSet, uint32_t size);
 
 /**
- * @brief 比较两个参数是否相同
+ * @brief Checks whether two parameters are the same.
  *
- * @param baseParam 指向被比较的参数的指针。
- * @param param 指向比较的参数的指针。
- * @return 返回{@link OH_Huks_ErrCode#OH_HUKS_SUCCESS}时表示相同，其他时为不同或者错误。
+ * @param baseParam Indicates the pointer to the first parameter.
+ * @param param Indicates the pointer to the second parameter.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the two parameters are the same; returns an error code otherwise.
  * @since 9
  * @version 1.0
  */
-struct OH_Huks_Result OH_Huks_CheckParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
+int32_t OH_Huks_CheckParamMatch(const struct OH_Huks_Param *baseParam, const struct OH_Huks_Param *param);
 
 #ifdef __cplusplus
 }
