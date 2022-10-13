@@ -25,7 +25,7 @@ static int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob
     }
 
     if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(value), sizeof(value)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     *destOffset += sizeof(value);
@@ -43,17 +43,11 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
-        &(blob->size), sizeof(blob->size)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size), sizeof(blob->size));
 
     *destOffset += sizeof(blob->size);
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size) != EOK) {
-        *destOffset -= sizeof(blob->size);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size);
 
     *destOffset += ALIGN_SIZE(blob->size);
     return HKS_SUCCESS;
@@ -69,10 +63,7 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset,
-        paramSet, paramSet->paramSetSize) != EOK) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, paramSet, paramSet->paramSetSize);
 
     *destOffset += ALIGN_SIZE(paramSet->paramSetSize);
     return HKS_SUCCESS;
@@ -84,9 +75,7 @@ static int32_t GetUint32FromBuffer(uint32_t *value, const struct HksBlob *srcBlo
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(uint32_t)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(value, sizeof(*value), srcBlob->data + *srcOffset, sizeof(uint32_t));
 
     *srcOffset += sizeof(uint32_t);
     return HKS_SUCCESS;
@@ -600,10 +589,9 @@ static int32_t GetNormalParam(const struct HksParam *param, struct HksParamOut *
 
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt)
 {
-    int32_t ret;
     struct HksParam *param = NULL;
     for (uint32_t i = 0; i < cnt; i++) {
-        ret = HksGetParam(paramSet, outParams[i].tag, &param);
+        int32_t ret = HksGetParam(paramSet, outParams[i].tag, &param);
         if (ret == HKS_SUCCESS) {
             ret = GetNormalParam(param, &outParams[i]);
         } else {

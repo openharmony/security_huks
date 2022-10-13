@@ -704,7 +704,7 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
     return HKS_SUCCESS;
 }
 
-static void AttestOrGetCertChain(const struct HksBlob *srcData, const uint8_t *context, bool isAttest)
+void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
@@ -725,23 +725,15 @@ static void AttestOrGetCertChain(const struct HksBlob *srcData, const uint8_t *c
             break;
         }
 
-        if (isAttest) {
-            ret = HksAttestAccessControl(inParamSet);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksAttestAccessControl fail, ret = %d", ret);
-                break;
-            }
-            ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksServiceAttestKey fail, ret = %d", ret);
-                break;
-            }
-        } else {
-            ret = HksServiceGetCertificateChain(&processInfo, &keyAlias, inParamSet, &certChainBlob);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksServiceGetCertificateChain fail, ret = %d", ret);
-                break;
-            }
+        ret = HksAttestAccessControl(inParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAttestAccessControl fail, ret = %d", ret);
+            break;
+        }
+        ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksServiceAttestKey fail, ret = %d", ret);
+            break;
         }
         
         HksSendResponse(context, ret, &certChainBlob);
@@ -753,51 +745,6 @@ static void AttestOrGetCertChain(const struct HksBlob *srcData, const uint8_t *c
 
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(certChainBlob);
-}
-
-void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
-{
-    AttestOrGetCertChain(srcData, context, true);
-}
-
-void HksIpcServiceGetCertificateChain(const struct HksBlob *srcData, const uint8_t *context)
-{
-    AttestOrGetCertChain(srcData, context, false);
-}
-
-void HksIpcServiceExportTrustCerts(const struct HksBlob *srcData, const uint8_t *context)
-{
-    struct HksBlob certChainBlob = { 0, NULL };
-    struct HksBlob processName = { 0, NULL };
-    int32_t ret;
-
-    do {
-        ret = HksTrustCertsUnpack(srcData, &certChainBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksTrustCertsUnpack Ipc fail");
-            break;
-        }
-
-        ret = HksGetProcessNameForIPC(context, &processName);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
-            break;
-        }
-
-        ret = HksServiceExportTrustCerts(&processName, &certChainBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceExportTrustCerts fail, ret = %d", ret);
-            break;
-        }
-        HksSendResponse(context, ret, &certChainBlob);
-    } while (0);
-
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
-
-    HKS_FREE_BLOB(processName);
     HKS_FREE_BLOB(certChainBlob);
 }
 
@@ -825,15 +772,12 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(outData->data, outData->size, handle.data, handle.size) != EOK) {
-        HKS_LOG_E("copy handle failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(outData->data, outData->size, handle.data, handle.size);
 
     if (token.size != 0 &&
         memcpy_s(outData->data + handle.size, outData->size - handle.size, token.data, token.size) != EOK) {
         HKS_LOG_E("copy token failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     outData->size = handle.size + token.size;
 

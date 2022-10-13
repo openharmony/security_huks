@@ -277,15 +277,9 @@ static int32_t SetCurve25519KeyMaterial(bool isPubKey, const struct HksBlob *key
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(keyOut->data, keyOut->size, &curve25519Km, sizeof(struct KeyMaterial25519)) != EOK) {
-        HKS_FREE_PTR(keyOut->data);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(keyOut->data, keyOut->size, &curve25519Km, sizeof(struct KeyMaterial25519));
 
-    if (memcpy_s(keyOut->data + offset, keyOut->size - offset, keyIn->data, keyIn->size) != EOK) {
-        HKS_FREE_PTR(keyOut->data);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(keyOut->data + offset, keyOut->size - offset, keyIn->data, keyIn->size);
 
     return HKS_SUCCESS;
 }
@@ -357,7 +351,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
     if (memcpy_s(paramSetOut, paramSetOut->paramSetSize, tmpParamSetOut, tmpParamSetOut->paramSetSize) != EOK) {
         HksFreeParamSet(&tmpParamSetOut);
         HKS_LOG_E("memcpy paramSet out failed, paramSetOut size = %u", paramSetOut->paramSetSize);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     paramSetOut->paramSetSize = tmpParamSetOut->paramSetSize;
@@ -411,11 +405,7 @@ int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *
 
     uint32_t offset = sizeof(struct KeyMaterial25519);
     uint8_t *tmp = (isPubKey ? (keyMaterial->data + offset) : (keyMaterial->data + offset + km->pubKeySize));
-    if (memcpy_s(buffer, size, tmp, size) != EOK) {
-        (void)memset_s(buffer, size, 0, size);
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(buffer, size, tmp, size);
 
     keyOut->data = buffer;
     keyOut->size = size;
@@ -509,18 +499,10 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    if (memcpy_s(publicKey, publicKeySize, keyIn->data, sizeof(struct KeyMaterialDsa)) != EOK) {
-        HKS_FREE_PTR(publicKey);
-        return HKS_ERROR_INVALID_OPERATION;
-    }
+    (void)memcpy_s(publicKey, publicKeySize, keyIn->data, sizeof(struct KeyMaterialDsa));
     uint32_t inOffset = sizeof(struct KeyMaterialDsa);
     uint32_t outOffset = sizeof(struct KeyMaterialDsa) + keyMaterial->xSize;
-    if (memcpy_s(publicKey + inOffset, publicKeySize - inOffset, keyIn->data + outOffset, publicKeySize - inOffset) !=
-        EOK) {
-        (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
-        HKS_FREE_PTR(publicKey);
-        return HKS_ERROR_INVALID_OPERATION;
-    }
+    (void)memcpy_s(publicKey + inOffset, publicKeySize - inOffset, keyIn->data + outOffset, publicKeySize - inOffset);
     ((struct KeyMaterialDsa *)publicKey)->xSize = 0;
 
     struct HksParam params[] = {
@@ -635,10 +617,7 @@ int32_t HksSetKeyToMaterial(uint32_t alg, bool isPubKey, const struct HksBlob *k
             keyMaterial->size = key->size;
             keyMaterial->data = (uint8_t *)HksMalloc(keyMaterial->size);
             if (keyMaterial->data != NULL) {
-                if (memcpy_s(keyMaterial->data, keyMaterial->size, key->data, key->size) != EOK) {
-                    HKS_FREE_PTR(keyMaterial->data);
-                    return HKS_ERROR_INVALID_OPERATION;
-                }
+                (void)memcpy_s(keyMaterial->data, keyMaterial->size, key->data, key->size);
                 return HKS_SUCCESS;
             } else {
                 return HKS_ERROR_MALLOC_FAIL;

@@ -101,7 +101,7 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
     }
     if (memcpy_s(paramSet, paramSet->paramSetSize, tmpParamSet, tmpParamSet->paramSetSize) != EOK) {
         HKS_LOG_E("memcpy paramSet failed");
-        ret = HKS_ERROR_BAD_STATE;
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     HksFreeParamSet(&tmpParamSet);
@@ -256,10 +256,7 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
         if (paramSet->paramSetSize < key->size) {
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
-        if (memcpy_s(paramSet, paramSet->paramSetSize, key->data, key->size) != EOK) {
-            HKS_LOG_E("memcpy key failed");
-            return HKS_ERROR_BAD_STATE;
-        }
+        (void)memcpy_s(paramSet, paramSet->paramSetSize, key->data, key->size);
         return HKS_SUCCESS;
     }
 
@@ -272,10 +269,7 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
         HksFreeParamSet(&outParamSet);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize) != EOK) {
-        HKS_LOG_E("memcpy outParamSet failed");
-        ret = HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize);
 
     HksFreeParamSet(&outParamSet);
     return ret;
@@ -439,7 +433,7 @@ static int32_t ConstructEnrolledInfoBlob(struct SecInfoWrap *secInfo, struct Hks
     if (memcpy_s(enrolledInfo->data, enrolledInfo->size, &secInfo->enrolledInfoLen,
         sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("copy enrolledInfoLen failed!");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     index += sizeof(secInfo->enrolledInfoLen);
     for (uint32_t i = 0; i < secInfo->enrolledInfoLen; ++i) {
@@ -447,13 +441,13 @@ static int32_t ConstructEnrolledInfoBlob(struct SecInfoWrap *secInfo, struct Hks
         if (memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index, &authTypeInt,
             sizeof(uint32_t)) != EOK) {
             HKS_LOG_E("copy authType failed!");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         index += sizeof(authTypeInt);
         if (memcpy_s(enrolledInfo->data + index, enrolledInfo->size - index,
             &((secInfo->enrolledInfo[i]).enrolledId), sizeof(uint64_t)) != EOK) {
             HKS_LOG_E("copy enrolledId failed!");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         index += sizeof(secInfo->enrolledInfo[i].enrolledId);
     }
@@ -552,15 +546,13 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
 static int32_t CheckIfEnrollAuthInfo(int32_t userId, enum HksUserAuthType authType)
 {
     uint32_t numOfAuthInfo = 0;
-    if (HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo) != HKS_SUCCESS) {
-        HKS_LOG_E("HksUserIdmGetAuthInfoNum failed.");
-        return HKS_FAILURE;
-    }
-    if (numOfAuthInfo == 0) {
+    int32_t ret = HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo);
+    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST) {
         HKS_LOG_E("have not enroll the auth info.");
-        return HKS_FAILURE;
+        return HKS_ERROR_CREDENTIAL_NOT_EXIST;
     }
-    return HKS_SUCCESS;
+
+    return ret;
 }
 
 static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthType)
@@ -570,14 +562,15 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
         HKS_USER_AUTH_TYPE_FACE,
         HKS_USER_AUTH_TYPE_PIN
     };
+    int32_t ret;
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(userAuthTypes); ++i) {
         if ((userAuthType & userAuthTypes[i]) == 0) {
             continue;
         }
-
-        if (CheckIfEnrollAuthInfo(userId, userAuthTypes[i]) != HKS_SUCCESS) {
+        ret = CheckIfEnrollAuthInfo(userId, userAuthTypes[i]);
+        if (ret != HKS_SUCCESS) {
             HKS_LOG_E("no enrolled info of the user auth type: %d.", userAuthTypes[i]);
-            return HKS_ERROR_INVALID_ARGUMENT;
+            return ret;
         }
     }
     return HKS_SUCCESS;
@@ -602,9 +595,10 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
 
     if (ret == HKS_SUCCESS) {
         HKS_LOG_I("support secure access");
-        if (CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType) != HKS_SUCCESS) {
+        ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType);
+        if (ret != HKS_SUCCESS) {
             HKS_LOG_E("UserIAM do not support current user auth or not enrolled cur auth info");
-            return HKS_ERROR_NOT_SUPPORTED;
+            return ret;
         }
 
         struct HksParamSet *userAuthParamSet = NULL;
@@ -694,11 +688,7 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     curve25519Key->nOrXSize = key->size; /* curve25519 public key */
 
     uint32_t offset = sizeof(struct HksPubKeyInfo);
-    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
-        HKS_LOG_E("copy pub key failed!");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(buffer + offset, totalSize - offset, key->data, key->size);
     publicKey->data = buffer;
     publicKey->size = totalSize;
     return HKS_SUCCESS;
@@ -740,29 +730,18 @@ static int32_t ConbineIntoKeyPair(const struct HksBlob *privateKey,
 
     struct Hks25519KeyPair keyPairStruct = { publicKey->size, privateKey->size };
     uint32_t offset = 0;
-    int32_t ret = HKS_ERROR_BAD_STATE;
-    do {
-        if (memcpy_s(buffer + offset, size, &keyPairStruct, sizeof(keyPairStruct)) != EOK) {
-            break;
-        }
-        offset += sizeof(keyPairStruct);
 
-        if (memcpy_s(buffer  + offset, size - offset, publicKey->data, publicKey->size) != EOK) {
-            break;
-        }
-        offset += publicKey->size;
+    (void)memcpy_s(buffer + offset, size, &keyPairStruct, sizeof(keyPairStruct));
+    offset += sizeof(keyPairStruct);
 
-        if (memcpy_s(buffer  + offset, size - offset, privateKey->data, privateKey->size) != EOK) {
-            break;
-        }
+    (void)memcpy_s(buffer  + offset, size - offset, publicKey->data, publicKey->size);
+    offset += publicKey->size;
 
-        keyPair->data = buffer;
-        keyPair->size = size;
-        return HKS_SUCCESS;
-    } while (0);
+    (void)memcpy_s(buffer  + offset, size - offset, privateKey->data, privateKey->size) ;
 
-    HKS_FREE_PTR(buffer);
-    return ret;
+    keyPair->data = buffer;
+    keyPair->size = size;
+    return HKS_SUCCESS;
 }
 
 static int32_t GetAgreeKeyPair(const uint32_t alg, const struct HksProcessInfo *processInfo,
@@ -869,7 +848,7 @@ static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const stru
     if (!isStorage) {
         if ((outData->size != 0) && (memcpy_s(outData->data, outData->size, output->data, output->size) != EOK)) {
             HKS_LOG_E("copy keyblob data fail");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         outData->size = output->size;
         return HKS_SUCCESS;
@@ -1553,43 +1532,6 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 #endif
 }
 
-int32_t HksServiceGetCertificateChain(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-    struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
-
-    int32_t ret = HksCheckGetCertificateChainParams(&processInfo->processName, keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-
-    struct HksBlob certFromFile = { 0, NULL };
-    ret = GetKeyData(processInfo, keyAlias, &certFromFile, HKS_STORAGE_TYPE_CERTCHAIN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksGetKeyData fail, ret = %d.", ret);
-        return ret;
-    }
-    if (memcpy_s(certChain->data, certChain->size, certFromFile.data, certFromFile.size) != EOK) {
-        HKS_LOG_E("memcpy certChain fail.");
-        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    certChain->size = certFromFile.size;
-    HKS_FREE_BLOB(certFromFile);
-    HksHitraceEnd(&traceId);
-
-    HksReport(__func__, processInfo, paramSet, ret);
-
-    return ret;
-#else
-    (void)processInfo;
-    (void)keyAlias;
-    (void)paramSet;
-    (void)certChain;
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
-}
-
 int32_t HksServiceProvision(const struct HksBlob *srcData, const struct HksBlob *challengeIn)
 {
     (void)srcData;
@@ -1601,13 +1543,6 @@ int32_t HksServiceProvisionVerify(const struct HksBlob *srcData, const struct Hk
 {
     (void)srcData;
     (void)challengeIn;
-    return 0;
-}
-
-int32_t HksServiceExportTrustCerts(const struct HksBlob *processName, struct HksBlob *certChain)
-{
-    (void)processName;
-    (void)certChain;
     return 0;
 }
 
@@ -1711,7 +1646,7 @@ static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksB
     if (!isStorage) {
         if ((memcpy_s(output->data, output->size, outData->data, outData->size) != EOK)) {
             HKS_FREE_PTR(output->data);
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
     return HKS_SUCCESS;

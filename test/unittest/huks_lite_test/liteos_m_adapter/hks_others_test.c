@@ -95,7 +95,7 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest003, Level1)
 LITE_TEST_CASE(HksOthersTest, HksOthersTest004, Level1)
 {
     int32_t ret = HksGetCertificateChain(NULL, NULL, NULL);
-    TEST_ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
+    TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 
 /**
@@ -106,7 +106,7 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest004, Level1)
 LITE_TEST_CASE(HksOthersTest, HksOthersTest005, Level1)
 {
     int32_t ret = HksWrapKey(NULL, NULL, NULL, NULL);
-    TEST_ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
+    TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 
 /**
@@ -117,7 +117,7 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest005, Level1)
 LITE_TEST_CASE(HksOthersTest, HksOthersTest006, Level1)
 {
     int32_t ret = HksUnwrapKey(NULL, NULL, NULL, NULL);
-    TEST_ASSERT_TRUE(ret == HKS_ERROR_NOT_SUPPORTED);
+    TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 
 /**

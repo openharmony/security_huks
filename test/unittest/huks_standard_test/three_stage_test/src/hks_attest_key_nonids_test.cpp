@@ -61,6 +61,8 @@ static const struct HksParam g_commonParams[] = {
     { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
 };
 
+static const uint32_t g_keyParamsetSize = 1024;
+
 /**
  * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest001
  * @tc.desc: attest with right params and validate success.
@@ -71,9 +73,9 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
 {
     int32_t ret = TestGenerateKey(&g_keyAlias);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
-    HksCertChain *certChain = NULL;
+    HksCertChain *certChain = nullptr;
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
@@ -82,15 +84,34 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     HKS_LOG_I("Attest key success!");
+
+    struct HksParam g_getParam = {
+        .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
+        .blob = { .size = g_keyParamsetSize, .data = (uint8_t *)HksMalloc(g_keyParamsetSize) }
+    };
+    ASSERT_TRUE(g_getParam.blob.data != nullptr);
+
+    struct HksParamSet *paramOutSet = nullptr;
+    HksInitParamSet(&paramOutSet);
+    HksAddParams(paramOutSet, &g_getParam, 1);
+    HksBuildParamSet(&paramOutSet);
+    HksFree(g_getParam.blob.data);
+    ret = HksGetKeyParamSet(&g_keyAlias, nullptr, paramOutSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    struct HksParam *keySizeParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
+    HksFreeParamSet(&paramOutSet);
+
     ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     HKS_LOG_I("Validate key success!");
     FreeCertChain(&certChain, certChain->certsCount);
-    certChain = NULL;
+    certChain = nullptr;
 
     HksFreeParamSet(&paramSet);
 
-    ret = HksDeleteKey(&g_keyAlias, NULL);
+    ret = HksDeleteKey(&g_keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 

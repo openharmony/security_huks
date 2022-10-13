@@ -27,7 +27,7 @@ extern "C" {
 
 #define KEY_LEN              32
 #define AES_BLOCK_SIZE       16
-#define ERROR_CODE_GENERAL   -1
+#define ERROR_CODE_GENERAL   (-1)
 #define ERROR_SUCCESS         0
 
 typedef enum {

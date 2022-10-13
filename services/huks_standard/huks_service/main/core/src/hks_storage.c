@@ -180,10 +180,7 @@ static int32_t ConstructBlob(const char *src, struct HksBlob *blob)
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    if (memcpy_s(blob->data, blob->size, outputBlob, count) != EOK) {
-        HKS_LOG_E("memcpy failed");
-        ret = HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(blob->data, blob->size, outputBlob, count);
 
     blob->size = count;
     HKS_FREE_PTR(outputBlob);
@@ -691,7 +688,7 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
 
     if (memcpy_s(userProcess, processLen, user, strlen(user)) != EOK) {
         HksFree(user);
-        return HKS_ERROR_INTERNAL_ERROR;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     HksFree(user);
 
@@ -748,7 +745,7 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
         (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, sizeof(USER_ID_ROOT)) == 0)) {
         if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
-            return HKS_ERROR_INTERNAL_ERROR;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
         if (MakeSubPath(bakRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {
@@ -800,7 +797,7 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
         (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, strlen(USER_ID_ROOT)) == 0)) {
         if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
-            return HKS_ERROR_INTERNAL_ERROR;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
         if (MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {

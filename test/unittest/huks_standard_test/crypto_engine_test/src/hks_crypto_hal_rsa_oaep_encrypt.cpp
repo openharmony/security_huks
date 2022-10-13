@@ -948,7 +948,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_043_PARAMS = {
     .hexData = "001122334455",
     .keySize = HKS_RSA_KEY_SIZE_512,
 #if defined(_USE_OPENSSL_)
-    .encryptResult = HKS_FAILURE,
+    .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -974,7 +974,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_044_PARAMS = {
     .hexData = "00112233445566778899aabbccdd",
     .keySize = HKS_RSA_KEY_SIZE_768,
 #if defined(_USE_OPENSSL_)
-    .encryptResult = HKS_FAILURE,
+    .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1002,7 +1002,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_045_PARAMS = {
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
     .keySize = HKS_RSA_KEY_SIZE_1024,
 #if defined(_USE_OPENSSL_)
-    .encryptResult = HKS_FAILURE,
+    .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1037,7 +1037,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_046_PARAMS = {
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
     .keySize = HKS_RSA_KEY_SIZE_2048,
 #if defined(_USE_OPENSSL_)
-    .encryptResult = HKS_FAILURE,
+    .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1079,7 +1079,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_047_PARAMS = {
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
     .keySize = HKS_RSA_KEY_SIZE_3072,
 #if defined(_USE_OPENSSL_)
-    .encryptResult = HKS_FAILURE,
+    .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,
@@ -1128,7 +1128,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_048_PARAMS = {
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
     .keySize = HKS_RSA_KEY_SIZE_4096,
 #if defined(_USE_OPENSSL_)
-    .encryptResult = HKS_FAILURE,
+    .encryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 #endif
 #if defined(_USE_MBEDTLS_)
     .encryptResult = HKS_ERROR_INVALID_DIGEST,

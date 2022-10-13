@@ -167,11 +167,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
 
     uint8_t *tmp = isPubKey ? (keyIn->data + sizeof(*keyPair)) :
         (keyIn->data + sizeof(*keyPair) + keyPair->publicBufferSize);
-    if (memcpy_s(buffer, size, tmp, size) != EOK) {
-        HKS_LOG_E("memcpy failed");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(buffer, size, tmp, size);
 
     if (isPlainPubKey) { /* public key is plain key, only copy */
         keyOut->data = buffer;
@@ -1006,35 +1002,19 @@ static int32_t AppendRsaPublicExponent(const struct HksBlob *key, struct HksBlob
     int32_t ret = HKS_SUCCESS;
     uint32_t offset = 0;
     do {
-        if (memcpy_s(out + offset, size - offset, key->data, sizeof(struct HksKeyMaterialRsa)) != EOK) {
-            HKS_LOG_E("copy keymaterial header failed");
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
+        (void)memcpy_s(out + offset, size - offset, key->data, sizeof(struct HksKeyMaterialRsa));
         offset += sizeof(struct HksKeyMaterialRsa);
 
         struct HksKeyMaterialRsa *newkeyMaterial = (struct HksKeyMaterialRsa *)out;
         newkeyMaterial->eSize = sizeof(g_defaultRsaPubExponent);
 
-        if (memcpy_s(out + offset, size - offset, key->data + offset, keyMaterial->nSize) != EOK) {
-            HKS_LOG_E("copy material n failed");
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
+        (void)memcpy_s(out + offset, size - offset, key->data + offset, keyMaterial->nSize);
         offset += keyMaterial->nSize;
 
-        if (memcpy_s(out + offset, size - offset, g_defaultRsaPubExponent, sizeof(g_defaultRsaPubExponent)) != EOK) {
-            HKS_LOG_E("copy material e failed");
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
+        (void)memcpy_s(out + offset, size - offset, g_defaultRsaPubExponent, sizeof(g_defaultRsaPubExponent));
 
-        if (memcpy_s(out + offset + sizeof(g_defaultRsaPubExponent), size - offset - sizeof(g_defaultRsaPubExponent),
-            key->data + offset, keyMaterial->dSize) != EOK) {
-            HKS_LOG_E("copy material d failed");
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
+        (void)memcpy_s(out + offset + sizeof(g_defaultRsaPubExponent), size - offset - sizeof(g_defaultRsaPubExponent),
+            key->data + offset, keyMaterial->dSize);
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -1087,11 +1067,7 @@ static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyTy
     curve25519Key->priKeySize = key->size; /* curve25519 private key */
 
     uint32_t offset = sizeof(struct HksKeyMaterial25519);
-    if (memcpy_s(buffer + offset, totalSize - offset, key->data, key->size) != EOK) {
-        HKS_LOG_E("copy pub key failed!");
-        HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(buffer + offset, totalSize - offset, key->data, key->size);
     outKey->data = buffer;
     outKey->size = totalSize;
     return HKS_SUCCESS;
@@ -1398,7 +1374,7 @@ int32_t HksCoreModuleInit(void)
     g_huksMutex = HksMutexCreate();
     if (g_huksMutex == NULL) {
         HKS_LOG_E("Hks mutex init failed, null pointer!");
-        ret = HKS_FAILURE;
+        ret = HKS_ERROR_NULL_POINTER;
         return ret;
     }
 
@@ -1498,7 +1474,7 @@ int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur
     uint32_t i;
     if (paramSet == NULL) {
         HKS_LOG_E("paramSet == NULL");
-        return HKS_FAILURE;
+        return HKS_ERROR_NULL_POINTER;
     }
 
     HKS_LOG_D("Get paramSet->paramsCnt %u", paramSet->paramsCnt);
@@ -1519,7 +1495,7 @@ int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur
 
     if (i == paramSet->paramsCnt) {
         HKS_LOG_E("don't found purpose or algrithm");
-        return HKS_FAILURE;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (*alg == HKS_ALG_HMAC || *alg == HKS_ALG_SM3 || *pur == HKS_KEY_PURPOSE_SIGN || *pur == HKS_KEY_PURPOSE_VERIFY) {
@@ -1532,7 +1508,7 @@ int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur
 
         if (i == paramSet->paramsCnt) {
             HKS_LOG_E("don't found digest");
-            return HKS_FAILURE;
+            return HKS_ERROR_INVALID_ARGUMENT;
         }
     }
 
@@ -1548,7 +1524,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
 
     if (key == NULL || paramSet == NULL || handle == NULL || token == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_FAILURE;
+        return HKS_ERROR_NULL_POINTER;
     }
 
     if (handle->size < sizeof(uint64_t)) {
@@ -1596,7 +1572,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     if (ret != HKS_SUCCESS || i == size) {
         HksDeleteKeyNode(keyNode->handle);
         HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
-        ret = ((i == size) ? HKS_FAILURE : ret);
+        ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
 
     HKS_LOG_D("HksCoreInit in Core end");
@@ -1612,7 +1588,7 @@ static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_
     }
     if (memcpy_s(sessionId, sizeof(*sessionId), handle->data, handle->size) != EOK) {
         HKS_LOG_E("memcpy handle value fail");
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *keyNode = HksQueryKeyNode(*sessionId);
     if (*keyNode == NULL) {
@@ -1636,7 +1612,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
 
     if (handle == NULL || paramSet == NULL || inData == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_FAILURE;
+        return HKS_ERROR_NULL_POINTER;
     }
 
     int32_t ret = HksCheckParamSetTag(paramSet);
@@ -1682,7 +1658,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     if (ret != HKS_SUCCESS || i == size) {
         HksDeleteKeyNode(keyNode->handle);
         HKS_LOG_E("CoreUpdate failed, pur : %u, ret : %d", pur, ret);
-        ret = ((i == size) ? HKS_FAILURE : ret);
+        ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
 
     return ret;
@@ -1697,7 +1673,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
 
     if (handle == NULL || inData == NULL || paramSet == NULL || HksCheckParamSetTag(paramSet) != HKS_SUCCESS) {
         HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_FAILURE;
+        return HKS_ERROR_NULL_POINTER;
     }
 
     uint64_t sessionId;
@@ -1742,7 +1718,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
 
     if (i == size) {
         HKS_LOG_E("don't found purpose, pur : %d", pur);
-        ret = HKS_FAILURE;
+        ret = HKS_ERROR_INVALID_ARGUMENT;
     }
     HksDeleteKeyNode(sessionId);
     HKS_LOG_D("HksCoreFinish in Core end");
@@ -1757,7 +1733,7 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     if (handle == NULL || paramSet == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_FAILURE;
+        return HKS_ERROR_NULL_POINTER;
     }
 
     int32_t ret = HksCheckParamSetTag(paramSet);
@@ -1795,7 +1771,7 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
     if (i == size) {
         HksDeleteKeyNode(sessionId);
         HKS_LOG_E("don't found purpose, pur : %d", pur);
-        return HKS_FAILURE;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     HksDeleteKeyNode(sessionId);

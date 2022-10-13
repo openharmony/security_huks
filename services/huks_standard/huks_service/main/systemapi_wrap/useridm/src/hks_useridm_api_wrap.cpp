@@ -46,7 +46,7 @@ static int32_t ConvertFromHksAuthType(enum HksUserAuthType hksAuthType, enum USE
             break;
         default:
             HKS_LOG_E("Invalid hksAuthType!");
-            return HKS_FAILURE;
+            return HKS_ERROR_NOT_SUPPORTED;
     }
     return HKS_SUCCESS;
 }
@@ -65,7 +65,7 @@ static int32_t ConvertToHksAuthType(enum USER_IAM::AuthType authType, enum HksUs
             break;
         default:
             HKS_LOG_E("Invalid authType!");
-            return HKS_FAILURE;
+            return HKS_ERROR_NOT_SUPPORTED;
     }
     return HKS_SUCCESS;
 }
@@ -152,9 +152,9 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
     
     HksConditionDestroy(condition);
     
-    if (*outSecInfo == NULL) {
+    if (ret != USER_IAM::ResultCode::SUCCESS || *outSecInfo == NULL) {
         HKS_LOG_E("get sec info failed!");
-        return HKS_FAILURE;
+        return HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
     }
     return HKS_SUCCESS;
 }
@@ -192,7 +192,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
     HksCondition *condition = HksConditionCreate();
     if (condition == NULL) {
         HKS_LOG_E("create condition failed!");
-        return HKS_FAILURE;
+        return HKS_ERROR_BAD_STATE;
     }
     
     auto huksCallback = std::make_shared<GetCredentialInfoCallbackImplHuks>(numOfAuthInfo, condition);
@@ -212,12 +212,17 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
         while (!(*huksCallback).isCallbacked) {
             HksConditionWait(condition);
         }
+        ret = HKS_SUCCESS;
+    } else if (ret == USER_IAM::ResultCode::NOT_ENROLLED) { // follow userIam errorCode
+        HKS_LOG_E("no credential enrolled");
+        ret = HKS_ERROR_CREDENTIAL_NOT_EXIST;
     } else {
         HKS_LOG_E("GetAuthInfo failed: %d!", ret);
+        ret = HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED;
     }
     
     HksConditionDestroy(condition);
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue)

@@ -76,7 +76,7 @@ static int32_t TransEccKeyToKeyBlob(
     int retCode = EC_POINT_get_affine_coordinates_GFp(ecGroup, EC_KEY_get0_public_key(eccKey), pubX, pubY, NULL);
     if (retCode <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     const BIGNUM *priv = EC_KEY_get0_private_key(eccKey);
@@ -85,21 +85,21 @@ static int32_t TransEccKeyToKeyBlob(
     retCode = BN_bn2binpad(pubX, rawMaterial + offset, keyMaterial->xSize);
     if (retCode <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     offset += keyMaterial->xSize;
 
     retCode = BN_bn2binpad(pubY, rawMaterial + offset, keyMaterial->ySize);
     if (retCode <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     offset += keyMaterial->ySize;
 
     retCode = BN_bn2binpad(priv, rawMaterial + offset, keyMaterial->zSize);
     if (retCode <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     return HKS_SUCCESS;
@@ -189,7 +189,7 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     }
 
     EC_KEY *eccKey = NULL;
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
         eccKey = EC_KEY_new_by_curve_name(curveId);
         if (eccKey == NULL) {
@@ -238,12 +238,8 @@ int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->ySize = keyMaterial->ySize;
     publickeyMaterial->zSize = 0;
 
-    if (memcpy_s(output->data + sizeof(struct KeyMaterialEcc),
-        output->size - sizeof(struct KeyMaterialEcc),
-        input->data + sizeof(struct KeyMaterialEcc),
-        keyMaterial->xSize + keyMaterial->ySize) != EOK) {
-        return HKS_ERROR_INVALID_OPERATION;
-    }
+    (void)memcpy_s(output->data + sizeof(struct KeyMaterialEcc), output->size - sizeof(struct KeyMaterialEcc),
+        input->data + sizeof(struct KeyMaterialEcc), keyMaterial->xSize + keyMaterial->ySize);
 
     return HKS_SUCCESS;
 }
@@ -269,7 +265,7 @@ static int32_t EccInitPublicKey(EC_KEY *eccKey, const uint8_t *keyPair, uint32_t
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     uint32_t offset = sizeof(struct KeyMaterialEcc);
     EC_POINT *pub = EC_POINT_new(ecGroup);
     BIGNUM *pubX = BN_bin2bn(keyPair + offset, xSize, NULL);
@@ -363,13 +359,13 @@ static int32_t GetEvpKey(const struct HksBlob *keyBlob, EVP_PKEY *key, bool priv
     EC_KEY *eccKey = EccInitKey(keyBlob, private);
     if (eccKey == NULL) {
         HKS_LOG_E("initialize ecc key failed\n");
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (EVP_PKEY_assign_EC_KEY(key, eccKey) <= 0) {
         HksLogOpensslError();
         EC_KEY_free(eccKey);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
 }
@@ -389,7 +385,7 @@ static int32_t GetPeerKey(const struct HksBlob *pubKey, EVP_PKEY *key)
     int32_t ret = GetEvpKey(pubKey, key, false);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get peer evp key failed");
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return ret;
 }
@@ -399,15 +395,15 @@ static int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *
     size_t tmpSharedKeySize = (size_t)sharedKey->size;
     if (EVP_PKEY_derive_init(ctx) != 1) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (EVP_PKEY_derive_set_peer(ctx, peerKey) != 1) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (EVP_PKEY_derive(ctx, NULL, &tmpSharedKeySize) != 1) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (tmpSharedKeySize > sharedKey->size) {
@@ -416,7 +412,7 @@ static int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *
 
     if (EVP_PKEY_derive(ctx, sharedKey->data, &tmpSharedKeySize) != 1) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     sharedKey->size = tmpSharedKeySize;
 
@@ -425,7 +421,7 @@ static int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *
 
 static int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlob *pubKey, struct HksBlob *sharedKey)
 {
-    int32_t res = HKS_FAILURE;
+    int32_t res = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     EVP_PKEY *pKey = EVP_PKEY_new();
     EVP_PKEY *peerKey = EVP_PKEY_new();
     EVP_PKEY_CTX *ctx = NULL;

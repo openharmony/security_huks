@@ -19,20 +19,27 @@
 #include "napi/native_node_api.h"
 
 #include "hks_type.h"
-#include "huks_napi_attest_key.h"
+#include "huks_napi_abort.h"
+#include "huks_napi_abort_session.h"
+#include "huks_napi_attest_key_item.h"
 #include "huks_napi_delete_key.h"
+#include "huks_napi_delete_key_item.h"
 #include "huks_napi_export_key.h"
+#include "huks_napi_export_key_item.h"
 #include "huks_napi_generate_key.h"
-#include "huks_napi_get_certificate_chain.h"
+#include "huks_napi_generate_key_item.h"
 #include "huks_napi_get_key_properties.h"
+#include "huks_napi_get_key_item_properties.h"
 #include "huks_napi_get_sdk_version.h"
 #include "huks_napi_import_key.h"
-#include "huks_napi_import_wrapped_key.h"
-#include "huks_napi_is_key_exist.h"
-
-#include "huks_napi_abort.h"
+#include "huks_napi_import_key_item.h"
+#include "huks_napi_import_wrapped_key_item.h"
 #include "huks_napi_init.h"
+#include "huks_napi_init_session.h"
+#include "huks_napi_is_key_exist.h"
+#include "huks_napi_is_key_item_exist.h"
 #include "huks_napi_update_finish.h"
+#include "huks_napi_update_finish_session.h"
 
 namespace HuksNapi {
 inline void AddInt32Property(napi_env env, napi_value object, const char *name, int32_t value)
@@ -324,18 +331,13 @@ static void AddHuksErrorCodePart1(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERROR_INSUFFICIENT_DATA", HKS_ERROR_INSUFFICIENT_DATA);
     AddInt32Property(env, errorCode, "HUKS_ERROR_BUFFER_TOO_SMALL", HKS_ERROR_BUFFER_TOO_SMALL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INSUFFICIENT_MEMORY", HKS_ERROR_INSUFFICIENT_MEMORY);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_COMMUNICATION_FAILURE", HKS_ERROR_COMMUNICATION_FAILURE);
     AddInt32Property(env, errorCode, "HUKS_ERROR_STORAGE_FAILURE", HKS_ERROR_STORAGE_FAILURE);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_HARDWARE_FAILURE", HKS_ERROR_HARDWARE_FAILURE);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_ALREADY_EXISTS", HKS_ERROR_ALREADY_EXISTS);
     AddInt32Property(env, errorCode, "HUKS_ERROR_NOT_EXIST", HKS_ERROR_NOT_EXIST);
     AddInt32Property(env, errorCode, "HUKS_ERROR_NULL_POINTER", HKS_ERROR_NULL_POINTER);
     AddInt32Property(env, errorCode, "HUKS_ERROR_FILE_SIZE_FAIL", HKS_ERROR_FILE_SIZE_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_READ_FILE_FAIL", HKS_ERROR_READ_FILE_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_PUBLIC_KEY", HKS_ERROR_INVALID_PUBLIC_KEY);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_PRIVATE_KEY", HKS_ERROR_INVALID_PRIVATE_KEY);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_KEY_INFO", HKS_ERROR_INVALID_KEY_INFO);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_HASH_NOT_EQUAL", HKS_ERROR_HASH_NOT_EQUAL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_MALLOC_FAIL", HKS_ERROR_MALLOC_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_WRITE_FILE_FAIL", HKS_ERROR_WRITE_FILE_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_REMOVE_FILE_FAIL", HKS_ERROR_REMOVE_FILE_FAIL);
@@ -344,17 +346,11 @@ static void AddHuksErrorCodePart1(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERROR_MAKE_DIR_FAIL", HKS_ERROR_MAKE_DIR_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_KEY_FILE", HKS_ERROR_INVALID_KEY_FILE);
     AddInt32Property(env, errorCode, "HUKS_ERROR_IPC_MSG_FAIL", HKS_ERROR_IPC_MSG_FAIL);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_REQUEST_OVERFLOWS", HKS_ERROR_REQUEST_OVERFLOWS);
     AddInt32Property(env, errorCode, "HUKS_ERROR_PARAM_NOT_EXIST", HKS_ERROR_PARAM_NOT_EXIST);
     AddInt32Property(env, errorCode, "HUKS_ERROR_CRYPTO_ENGINE_ERROR", HKS_ERROR_CRYPTO_ENGINE_ERROR);
     AddInt32Property(env, errorCode, "HUKS_ERROR_COMMUNICATION_TIMEOUT", HKS_ERROR_COMMUNICATION_TIMEOUT);
     AddInt32Property(env, errorCode, "HUKS_ERROR_IPC_INIT_FAIL", HKS_ERROR_IPC_INIT_FAIL);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_IPC_DLOPEN_FAIL", HKS_ERROR_IPC_DLOPEN_FAIL);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_EFUSE_READ_FAIL", HKS_ERROR_EFUSE_READ_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_NEW_ROOT_KEY_MATERIAL_EXIST", HKS_ERROR_NEW_ROOT_KEY_MATERIAL_EXIST);
-    AddInt32Property(
-        env, errorCode, "HUKS_ERROR_UPDATE_ROOT_KEY_MATERIAL_FAIL", HKS_ERROR_UPDATE_ROOT_KEY_MATERIAL_FAIL);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_VERIFICATION_FAILED", HKS_ERROR_VERIFICATION_FAILED);
 }
 
 static void AddHuksErrorCodePart2(napi_env env, napi_value errorCode)
@@ -362,8 +358,12 @@ static void AddHuksErrorCodePart2(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERROR_GET_USERIAM_SECINFO_FAILED", HKS_ERROR_GET_USERIAM_SECINFO_FAILED);
     AddInt32Property(env, errorCode, "HUKS_ERROR_GET_USERIAM_AUTHINFO_FAILED", HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED);
     AddInt32Property(env, errorCode, "HUKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT", HKS_ERROR_USER_AUTH_TYPE_NOT_SUPPORT);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_KEY_AUTH_FAILED", HKS_ERROR_KEY_AUTH_FAILED);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_DEVICE_NO_CREDENTIAL", HKS_ERROR_DEVICE_NO_CREDENTIAL);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_API_NOT_SUPPORTED", HKS_ERROR_API_NOT_SUPPORTED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED",
+        HKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_KEY_AUTH_VERIFY_FAILED", HKS_ERROR_KEY_AUTH_VERIFY_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_KEY_AUTH_TIME_OUT", HKS_ERROR_KEY_AUTH_TIME_OUT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST", HKS_ERROR_CREDENTIAL_NOT_EXIST);
 
     AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_ALG_FAIL", HKS_ERROR_CHECK_GET_ALG_FAIL);
     AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_KEY_SIZE_FAIL", HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL);
@@ -390,12 +390,27 @@ static void AddHuksErrorCodePart2(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_AE_TAG", HKS_ERROR_INVALID_AE_TAG);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_SALT", HKS_ERROR_INVALID_SALT);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_ITERATION", HKS_ERROR_INVALID_ITERATION);
-    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_OPERATION", HKS_ERROR_INVALID_OPERATION);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_WRAPPED_FORMAT", HKS_ERROR_INVALID_WRAPPED_FORMAT);
     AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_USAGE_OF_KEY", HKS_ERROR_INVALID_USAGE_OF_KEY);
 
     AddInt32Property(env, errorCode, "HUKS_ERROR_INTERNAL_ERROR", HKS_ERROR_INTERNAL_ERROR);
     AddInt32Property(env, errorCode, "HUKS_ERROR_UNKNOWN_ERROR", HKS_ERROR_UNKNOWN_ERROR);
+}
+
+static void AddHuksErrorCodePart3(napi_env env, napi_value errorCode)
+{
+    AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_AUTH_TYP_FAILED", HKS_ERROR_CHECK_GET_AUTH_TYP_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED",
+        HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED",
+        HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_CHECK_GET_AUTH_TOKEN_FAILED", HKS_ERROR_CHECK_GET_AUTH_TOKEN_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_TIME_OUT", HKS_ERROR_INVALID_TIME_OUT);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_AUTH_TYPE", HKS_ERROR_INVALID_AUTH_TYPE);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_CHALLENGE_TYPE", HKS_ERROR_INVALID_CHALLENGE_TYPE);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_ACCESS_TYPE", HKS_ERROR_INVALID_ACCESS_TYPE);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_AUTH_TOKEN", HKS_ERROR_INVALID_AUTH_TOKEN);
+    AddInt32Property(env, errorCode, "HUKS_ERROR_INVALID_SECURE_SIGN_TYPE", HKS_ERROR_INVALID_SECURE_SIGN_TYPE);
 }
 
 static napi_value CreateHuksErrorCode(napi_env env)
@@ -405,6 +420,42 @@ static napi_value CreateHuksErrorCode(napi_env env)
 
     AddHuksErrorCodePart1(env, errorCode);
     AddHuksErrorCodePart2(env, errorCode);
+    AddHuksErrorCodePart3(env, errorCode);
+
+    return errorCode;
+}
+
+static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
+{
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PERMISSION_FAIL", HUKS_ERR_CODE_PERMISSION_FAIL);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_ILLEGAL_ARGUMENT", HUKS_ERR_CODE_ILLEGAL_ARGUMENT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_NOT_SUPPORTED_API", HUKS_ERR_CODE_NOT_SUPPORTED_API);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_FEATURE_NOT_SUPPORT", HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT",
+        HUKS_ERR_CODE_MISSING_CRYPTO_ALG_ARGUMENT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT",
+        HUKS_ERR_CODE_INVALID_CRYPTO_ALG_ARGUMENT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_FILE_OPERATION_FAIL", HUKS_ERR_CODE_FILE_OPERATION_FAIL);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_COMMUNICATION_FAIL", HUKS_ERR_CODE_COMMUNICATION_FAIL);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CRYPTO_FAIL", HUKS_ERR_CODE_CRYPTO_FAIL);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_KEY_AUTH_PERMANENTLY_INVALIDATED",
+        HUKS_ERR_CODE_KEY_AUTH_PERMANENTLY_INVALIDATED);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_KEY_AUTH_VERIFY_FAILED", HUKS_ERR_CODE_KEY_AUTH_VERIFY_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_KEY_AUTH_TIME_OUT", HUKS_ERR_CODE_KEY_AUTH_TIME_OUT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_SESSION_LIMIT", HUKS_ERR_CODE_SESSION_LIMIT);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_ITEM_NOT_EXIST", HUKS_ERR_CODE_ITEM_NOT_EXIST);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_EXTERNAL_ERROR", HUKS_ERR_CODE_EXTERNAL_ERROR);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST", HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INSUFFICIENT_MEMORY", HUKS_ERR_CODE_INSUFFICIENT_MEMORY);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CALL_SERVICE_FAILED", HUKS_ERR_CODE_CALL_SERVICE_FAILED);
+}
+
+static napi_value CreateHuksErrCode(napi_env env)
+{
+    napi_value errorCode = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &errorCode));
+
+    AddHuksErrCodePart(env, errorCode);
 
     return errorCode;
 }
@@ -549,11 +600,13 @@ static napi_value CreateHuksSecureSignType(napi_env env)
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
+using namespace HuksNapiItem;
 
 extern "C" {
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
 {
     napi_property_descriptor desc[] = {
+        DECLARE_NAPI_PROPERTY("HuksErrCode", CreateHuksErrCode(env)),
         DECLARE_NAPI_PROPERTY("HuksErrorCode", CreateHuksErrorCode(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyPurpose", CreateHuksKeyPurpose(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyDigest", CreateHuksKeyDigest(env)),
@@ -579,16 +632,27 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
         DECLARE_NAPI_FUNCTION("getSdkVersion", HuksNapiGetSdkVersion),
         DECLARE_NAPI_FUNCTION("importKey", HuksNapiImportKey),
-        DECLARE_NAPI_FUNCTION("importWrappedKey", HuksNapiImportWrappedKey),
         DECLARE_NAPI_FUNCTION("exportKey", HuksNapiExportKey),
         DECLARE_NAPI_FUNCTION("getKeyProperties", HuksNapiGetKeyProperties),
         DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),
-        DECLARE_NAPI_FUNCTION("attestKey", HuksNapiAttestKey),
-        DECLARE_NAPI_FUNCTION("getCertificateChain", HuksNapiGetCertificateChain),
         DECLARE_NAPI_FUNCTION("init", HuksNapiInit),
         DECLARE_NAPI_FUNCTION("update", HuksNapiUpdate),
         DECLARE_NAPI_FUNCTION("finish", HuksNapiFinish),
         DECLARE_NAPI_FUNCTION("abort", HuksNapiAbort),
+
+        DECLARE_NAPI_FUNCTION("generateKeyItem", HuksNapiItemGenerateKey),
+        DECLARE_NAPI_FUNCTION("deleteKeyItem", HuksNapiDeleteKeyItem),
+        DECLARE_NAPI_FUNCTION("importKeyItem", HuksNapiImportKeyItem),
+        DECLARE_NAPI_FUNCTION("importWrappedKeyItem", HuksNapiImportWrappedKeyItem),
+        DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
+        DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
+        DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
+        DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
+        DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
+        DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
+        DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
+        DECLARE_NAPI_FUNCTION("abortSession", HuksNapiAbortSession),
+
     };
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
@@ -601,7 +665,7 @@ static napi_module g_module = {
     .nm_register_func = HuksNapiRegister,
     .nm_modname = "security.huks",
     .nm_priv = ((void *)0),
-    .reserved = {0},
+    .reserved = { 0 },
 };
 
 __attribute__((constructor)) void RegisterModule(void)

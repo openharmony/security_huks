@@ -161,28 +161,28 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
     uint8_t tmp_buff[keyByteLen];
     if (memset_s(tmp_buff, keyByteLen, 0, keyByteLen) != EOK) {
         HksFree(rawMaterial);
-        return HKS_ERROR_INVALID_OPERATION;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t offset = sizeof(*keyMaterial);
     keyMaterial->nSize = (uint32_t)BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize) != EOK) {
         HksFree(rawMaterial);
-        return HKS_ERROR_INVALID_OPERATION;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     offset += keyMaterial->nSize;
     keyMaterial->eSize = (uint32_t)BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize) != EOK) {
         HksFree(rawMaterial);
-        return HKS_ERROR_INVALID_OPERATION;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     offset += keyMaterial->eSize;
     keyMaterial->dSize = (uint32_t)BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize) != EOK) {
         HksFree(rawMaterial);
-        return HKS_ERROR_INVALID_OPERATION;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     key->data = rawMaterial;
@@ -241,12 +241,8 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->eSize = keyMaterial->eSize;
     publickeyMaterial->dSize = 0;
 
-    if (memcpy_s(output->data + sizeof(struct KeyMaterialRsa),
-        output->size - sizeof(struct KeyMaterialRsa),
-        input->data + sizeof(struct KeyMaterialRsa),
-        keyMaterial->nSize + keyMaterial->eSize) != EOK) {
-        return HKS_ERROR_INVALID_OPERATION;
-    }
+    (void)memcpy_s(output->data + sizeof(struct KeyMaterialRsa), output->size - sizeof(struct KeyMaterialRsa),
+        input->data + sizeof(struct KeyMaterialRsa), keyMaterial->nSize + keyMaterial->eSize);
 
     return HKS_SUCCESS;
 }
@@ -274,7 +270,7 @@ static int32_t GetRsaCryptPadding(uint32_t padding, uint32_t *rsaPadding)
             return HKS_SUCCESS;
 #endif
         default:
-            return HKS_FAILURE;
+            return HKS_ERROR_NOT_SUPPORTED;
     }
 }
 
@@ -336,13 +332,13 @@ static int32_t HksOpensslRsaCryptInit(EVP_PKEY_CTX *ctx, const struct HksUsageSp
     uint32_t padding = 0;
     if (GetRsaCryptPadding(usageSpec->padding, &padding) != HKS_SUCCESS) {
         HKS_LOG_E("Unsupport padding.");
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     ret = EVP_PKEY_CTX_set_rsa_padding(ctx, padding);
     if (ret <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (usageSpec->padding == HKS_PADDING_OAEP) {
@@ -362,12 +358,12 @@ static int32_t HksOpensslRsaCrypt(const struct HksBlob *key, const struct HksUsa
     EVP_PKEY_CTX *ctx = InitEvpPkeyCtx(key, encrypt);
     if (ctx == NULL) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     if (HksOpensslRsaCryptInit(ctx, usageSpec) != HKS_SUCCESS) {
         EVP_PKEY_CTX_free(ctx);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     size_t outLen;
@@ -429,7 +425,7 @@ static int32_t GetRsaSignPadding(uint32_t padding, uint32_t *rsaPadding)
             *rsaPadding = RSA_PKCS1_PSS_PADDING;
             return HKS_SUCCESS;
         default:
-            return HKS_FAILURE;
+            return HKS_ERROR_NOT_SUPPORTED;
     }
 }
 
@@ -488,7 +484,7 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
 
     EVP_PKEY *pkey = NULL;
     EVP_PKEY_CTX *ctx = NULL;
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
         pkey = InitRsaEvpKey(key, signing);
         if (pkey == NULL) {
@@ -509,7 +505,7 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
             break;
         }
 
-        ret = HKS_FAILURE;
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         if (SetRsaPadding(ctx, usageSpec) != HKS_SUCCESS) {
             break;
         }

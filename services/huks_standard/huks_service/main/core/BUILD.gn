@@ -21,10 +21,13 @@ config("huks_config") {
 ohos_static_library("libhuks_service_core_standard_static") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = false
   }
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   include_dirs = [
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
@@ -71,7 +74,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
   }
   external_deps = [
     "c_utils:utils",
-    "hitrace_native:libhitrace",
+    "hitrace_native:libhitracechain",
   ]
   complete_static_lib = true
 }

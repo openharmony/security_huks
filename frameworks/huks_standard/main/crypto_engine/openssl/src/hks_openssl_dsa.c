@@ -51,18 +51,18 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
     uint8_t *buff = (uint8_t *)HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
     if (buff == NULL) {
-        return HKS_FAILURE;
+        return HKS_ERROR_MALLOC_FAIL;
     }
 
     BIGNUM *x = NULL;
     if (needPrivateExponent) {
         if (keyMaterial->xSize == 0) {
             HksFree(buff);
-            return HKS_FAILURE;
+            return HKS_ERROR_INVALID_ARGUMENT;
         } else {
             if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->xSize) != EOK) {
                 HksFree(buff);
-                return HKS_FAILURE;
+                return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
             x = BN_bin2bn(buff, keyMaterial->xSize, NULL);
         }
@@ -71,14 +71,14 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->ySize) != EOK) {
         HksFree(buff);
         SELF_FREE_PTR(x, BN_free);
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     BIGNUM *y = BN_bin2bn(buff, keyMaterial->ySize, NULL);
     *offset += keyMaterial->ySize;
     if (DSA_set0_key(dsa, y, x) != HKS_OPENSSL_SUCCESS) {
         SELF_FREE_PTR(x, BN_free);
         SELF_FREE_PTR(y, BN_free);
-        ret = HKS_FAILURE;
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     } else {
         ret = HKS_SUCCESS;
     }
@@ -94,19 +94,19 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
     uint8_t *buff = HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
     if (buff == NULL) {
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->pSize) != EOK) {
         HksFree(buff);
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     BIGNUM *p = BN_bin2bn(buff, keyMaterial->pSize, NULL);
     *offset += keyMaterial->pSize;
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->qSize) != EOK) {
         HksFree(buff);
         SELF_FREE_PTR(p, BN_free);
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     BIGNUM *q = BN_bin2bn(buff, keyMaterial->qSize, NULL);
     *offset += keyMaterial->qSize;
@@ -115,7 +115,7 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
         HksFree(buff);
         SELF_FREE_PTR(p, BN_free);
         SELF_FREE_PTR(q, BN_free);
-        return HKS_FAILURE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     BIGNUM *g = BN_bin2bn(buff, keyMaterial->gSize, NULL);
 
@@ -123,7 +123,7 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
         SELF_FREE_PTR(p, BN_free);
         SELF_FREE_PTR(q, BN_free);
         SELF_FREE_PTR(g, BN_free);
-        ret = HKS_FAILURE;
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     } else {
         ret = HKS_SUCCESS;
     }
@@ -216,31 +216,31 @@ static int32_t DsaKeyMaterialData(uint8_t *rawMaterial, const DSA *dsa)
     ret = BN_bn2bin(x, rawMaterial + offset + (keyMaterial->xSize - (uint32_t)BN_num_bytes(x)));
     if (ret <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     offset += keyMaterial->xSize;
     ret = BN_bn2bin(y, rawMaterial + offset + (keyMaterial->ySize - (uint32_t)BN_num_bytes(y)));
     if (ret <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     offset += keyMaterial->ySize;
     ret = BN_bn2bin(p, rawMaterial + offset + (keyMaterial->pSize - (uint32_t)BN_num_bytes(p)));
     if (ret <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     offset += keyMaterial->pSize;
     ret = BN_bn2bin(q, rawMaterial + offset + (keyMaterial->qSize - (uint32_t)BN_num_bytes(q)));
     if (ret <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     offset += keyMaterial->qSize;
     ret = BN_bn2bin(g, rawMaterial + offset + (keyMaterial->gSize - (uint32_t)BN_num_bytes(g)));
     if (ret <= 0) {
         HksLogOpensslError();
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
 }
@@ -259,11 +259,11 @@ static int32_t DsaSaveKeyMaterial(const DSA *dsa, const uint32_t keySize, uint8_
 
     if (DsaKeyMaterialParam(rawMaterial, dsa, keyLen) != HKS_SUCCESS) {
         HksFree(rawMaterial);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (DsaKeyMaterialData(rawMaterial, dsa) != HKS_SUCCESS) {
         HksFree(rawMaterial);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     *output = rawMaterial;
@@ -335,7 +335,7 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
         output->size - (sizeof(struct KeyMaterialDsa) + publickeyMaterial->xSize),
         input->data + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize,
         keyMaterial->ySize + keyMaterial->pSize + keyMaterial->qSize + keyMaterial->gSize) != EOK) {
-        return HKS_ERROR_INVALID_OPERATION;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     return HKS_SUCCESS;

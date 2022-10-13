@@ -85,10 +85,8 @@ static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
     { HKS_MSG_MAC, HksIpcServiceMac },
     { HKS_MSG_GET_KEY_INFO_LIST, HksIpcServiceGetKeyInfoList },
     { HKS_MSG_ATTEST_KEY, HksIpcServiceAttestKey },
-    { HKS_MSG_GET_CERTIFICATE_CHAIN, HksIpcServiceGetCertificateChain },
     { HKS_MSG_PROVISION, HksIpcServiceProvision },
     { HKS_MSG_PROVISION_VERIFY, HksIpcServiceProvisionVerify },
-    { HKS_MSG_EXPORT_TRUST_CERTS, HksIpcServiceExportTrustCerts },
 };
 
 #ifdef SUPPORT_COMMON_EVENT
@@ -242,13 +240,9 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     const uint8_t *pdata = data.ReadBuffer((size_t)srcData.size);
     if (pdata == nullptr) {
         HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_IPC_MSG_FAIL;
     }
-    if (memcpy_s(srcData.data, srcData.size, pdata, srcData.size) != EOK) {
-        HKS_LOG_E("copy remote data failed!");
-        HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
 
     if (ProcessMessage(code, outSize, srcData, reply) != NO_ERROR) {
         HKS_LOG_E("process message!");
