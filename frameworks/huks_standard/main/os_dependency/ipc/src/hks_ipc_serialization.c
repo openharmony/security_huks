@@ -531,40 +531,6 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
     return HKS_SUCCESS;
 }
 
-static int32_t SignVerifyWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const struct HksParamSet *paramSet,
-    const struct HksBlob *unsignedData, uint32_t *offset)
-{
-    int32_t ret = CopyUint32ToBuffer(keyId, destData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy keyId failed");
-        return ret;
-    }
-
-    ret = CopyParamSetToBuffer(paramSet, destData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy paramSet failed");
-        return ret;
-    }
-
-    ret = CopyBlobToBuffer(unsignedData, destData, offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy unsignedData failed");
-    }
-    return ret;
-}
-
-int32_t HksSignWithDeviceKeyPack(struct HksBlob *destData, uint32_t keyId, const struct HksParamSet *paramSet,
-    const struct HksBlob *unsignedData, const struct HksBlob *signature)
-{
-    uint32_t offset = 0;
-    int32_t ret = SignVerifyWithDeviceKeyPack(destData, keyId, paramSet, unsignedData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("SignVerifyWithDeviceKeyPack failed");
-        return ret;
-    }
-    return CopyUint32ToBuffer(signature->size, destData, &offset);
-}
-
 static int32_t AddParams(struct HksParam *params, uint32_t cnt, struct HksParamSet *paramSet)
 {
     uint8_t tmpData = 0;
