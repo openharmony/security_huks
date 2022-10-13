@@ -183,14 +183,16 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
     int32_t ret;
     do {
         uint32_t offset = sizeof(struct KeyMaterialEcc);
-        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X)), rawMaterial + offset, keyMaterial->xSize);
+        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X)), rawMaterial + offset,
+            keyMaterial->xSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Save ecc keyMaterial write X failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
         offset = offset + keyMaterial->xSize;
-        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y)), rawMaterial + offset, keyMaterial->ySize);
+        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y)), rawMaterial + offset,
+            keyMaterial->ySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Save ecc keyMaterial write Y failed! mbedtls ret = 0x%X", ret);
             break;
