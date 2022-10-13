@@ -130,7 +130,7 @@ static int32_t CopyBlobBuffer(const uint8_t *buffer, uint32_t len, struct HksBlo
     }
     if (memcpy_s(blob->data, blob->size, buffer, len) != EOK) {
         HKS_LOG_E("construct paramSet out blob buffer failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     blob->size = len;
     return HKS_SUCCESS;
@@ -342,7 +342,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     }
     if (memcpy_s(out, *outLen, buf, length) != EOK) {
         HKS_LOG_E("extract tlv data memcpy_s failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *outLen = length;
     return HKS_SUCCESS;
@@ -448,7 +448,7 @@ static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t
         (void)memset_s(*data, *len, 0, *len);
         HKS_FREE_PTR(*data);
         HKS_LOG_E("the length of extension data is too long");
-        ret = HKS_FAILURE;
+        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
 EXIT:
@@ -496,7 +496,7 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
             if (claimSize >= MAX_ATTEST_CLAIM_BUF_LEN) {
                 HKS_LOG_E("the length of claim is too long");
                 HKS_FREE_PTR(claimData);
-                return HKS_FAILURE;
+                return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
 
             ret = ConstructParamSetOut(g_oidParams[i].tag, claimData, claimSize, paramSetOut);
@@ -538,7 +538,7 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
         if (valueLength >= MAX_ATTEST_CLAIM_BUF_LEN) {
             HKS_LOG_E("the length of claim is too long");
             HKS_FREE_PTR(value);
-            return HKS_FAILURE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
         ret = GetClaimDataParamSet(value, valueLength, paramSetOut);

@@ -60,11 +60,6 @@ int32_t HksCheckAttestKeyParams(const struct HksBlob *processName, const struct 
     const struct HksParamSet *paramSet, struct HksBlob *certChain);
 #endif
 
-#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain);
-#endif
-
 int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet);
 

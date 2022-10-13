@@ -12,13 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef HKS_ERRCODE_ADAPTER_H
+#define HKS_ERRCODE_ADAPTER_H
 
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
-
-#ifndef HKS_ERRCODE_ADAPTER_H
-#define HKS_ERRCODE_ADAPTER_H
 
 #include "hks_type.h"
 
@@ -29,7 +28,7 @@ struct HksResult {
 };
 
 struct HksError {
-    int32_t oldErrCode;
+    int32_t innerErrCode;
     struct HksResult hksResult;
 };
 

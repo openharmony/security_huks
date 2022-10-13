@@ -157,7 +157,7 @@ static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *u
     const uint32_t padding = usageSpec->padding;
     const uint32_t mode = usageSpec->mode;
     const uint32_t alg = usageSpec->algType;
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_NOT_SUPPORTED;
     if (((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM4)) &&
         ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB))) {
         ret = CheckBlockCipherOther(isEncrypt, padding, inData, outData);
@@ -307,13 +307,13 @@ static int32_t CopyNewCachedData(const struct HksBlob *cachedBlob, const struct 
     if (cachedBlob->size != 0) {
         if (memcpy_s(newData, newSize, cachedBlob->data, cachedBlob->size) != EOK) {
             HKS_LOG_E("memcpy cached data failed");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
     if (inData->size != 0) {
         if (memcpy_s(newData + cachedBlob->size, newSize - cachedBlob->size, inData->data, inData->size) != EOK) {
             HKS_LOG_E("memcpy in data failed");
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
     return HKS_SUCCESS;
@@ -1314,10 +1314,7 @@ static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, cons
                 break;
             }
             outData->size = restoreData->size;
-            if (memcpy_s(outData->data, outData->size, restoreData->data, outData->size) != EOK) {
-                HKS_LOG_E("memcpy cached data failed");
-                return HKS_ERROR_BAD_STATE;
-            }
+            (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
             ret = HKS_SUCCESS;
         }
     } while (0);

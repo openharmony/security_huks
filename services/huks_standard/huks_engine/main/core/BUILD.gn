@@ -21,10 +21,13 @@ config("huks_config") {
 ohos_shared_library("huks_engine_core_standard") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = false
   }
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",

@@ -183,14 +183,6 @@ int32_t HksCheckAttestKeyParams(const struct HksBlob *processName, const struct 
 }
 #endif
 
-#ifdef HKS_SUPPORT_API_GET_CERTIFICATE_CHAIN
-int32_t HksCheckGetCertificateChainParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-    return HksCheckGenAndImportKeyParams(processName, keyAlias, paramSet, certChain);
-}
-#endif
-
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
 {
@@ -198,7 +190,7 @@ static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccess);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get auth access type fail");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED;
     }
     if (authAccess->uint32Param < HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) {
         HKS_LOG_E("auth access level is too low");
@@ -222,7 +214,7 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
         if (ret == HKS_SUCCESS) {
             if (authTimeout->uint32Param > MAX_AUTH_TIMEOUT_SECOND || authTimeout->uint32Param == 0) {
                 HKS_LOG_E("invalid auth timeout param");
-                return HKS_ERROR_INVALID_ARGUMENT;
+                return HKS_ERROR_INVALID_TIME_OUT;
             }
         }
     }
@@ -233,7 +225,7 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
         ret = HksCheckSecureSignParams(secureSignType->uint32Param);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("secure sign type is invalid");
-            return HKS_ERROR_INVALID_ARGUMENT;
+            return HKS_ERROR_INVALID_SECURE_SIGN_TYPE;
         }
         /* secure sign ability only support sign-purpose algorithm */
         struct HksParam *purposeParam = NULL;
@@ -280,14 +272,14 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get auth access type param failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED;
     }
 
     struct HksParam *challengeTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &challengeTypeParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get challenge type param failed");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED;
     }
 
     ret = CheckUserAuthParamsValidity(paramSet, userAuthTypeParam->uint32Param, accessTypeParam->uint32Param,

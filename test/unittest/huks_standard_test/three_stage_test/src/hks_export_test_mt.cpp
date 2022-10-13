@@ -163,7 +163,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0070, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKeyMt100Params), HKS_SUCCESS);
     HksBlob publicKey = { 0, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&authId, nullptr, &publicKey), HKS_ERROR_BAD_STATE);
+        EXPECT_EQ(HksExportPublicKey(&authId, nullptr, &publicKey), HKS_ERROR_INSUFFICIENT_DATA);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
     HksFree(publicKey.data);

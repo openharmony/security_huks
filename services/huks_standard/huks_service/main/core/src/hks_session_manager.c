@@ -140,7 +140,7 @@ static int32_t ConstructOperationHandle(const struct HksBlob *operationHandle, u
     }
     if (memcpy_s(handle, sizeof(*handle), operationHandle->data, operationHandle->size) != EOK) {
         HKS_LOG_E("copy handle failed");
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     return HKS_SUCCESS;

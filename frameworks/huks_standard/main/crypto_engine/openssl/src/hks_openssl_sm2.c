@@ -69,7 +69,7 @@ static int32_t Sm2InitPublicKey(EC_KEY *sm2Key, const uint8_t *keyPair, uint32_t
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    int32_t ret = HKS_FAILURE;
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     uint32_t offset = sizeof(struct KeyMaterialEcc);
     EC_POINT *pub = EC_POINT_new(ecGroup);
     BIGNUM *pubX = BN_bin2bn(keyPair + offset, xSize, NULL);

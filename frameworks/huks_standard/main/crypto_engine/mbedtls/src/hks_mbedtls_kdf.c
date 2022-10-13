@@ -92,7 +92,7 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
     const mbedtls_md_info_t *info = mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg);
     if (info == NULL) {
         HKS_LOG_E("Mbedtls get md info failed! mbedtls ret = 0x%X", ret);
-        return HKS_FAILURE;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     switch (derivationSpec->algType) {

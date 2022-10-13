@@ -23,6 +23,8 @@ config("huks_config") {
 ohos_static_library("libhuks_common_standard_static") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = false
   }
   subsystem_name = "security"
   part_name = "huks"
@@ -33,6 +35,8 @@ ohos_static_library("libhuks_common_standard_static") {
   ]
   public_configs =
       [ ":huks_config" ]  # Share include files for other gn when deps.
+
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",

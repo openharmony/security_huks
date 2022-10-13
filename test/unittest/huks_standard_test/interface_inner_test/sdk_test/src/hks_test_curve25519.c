@@ -196,6 +196,7 @@ int32_t TestImportEd25519(struct HksBlob alias, struct HksBlob *pubKeyInfo)
 static int32_t TestExportImportEd25519SignVerify(struct HksBlob alias)
 {
     int32_t ret = TestGenerateEd25519Key(alias);
+    HKS_TEST_ASSERT(ret == 0);
     uint8_t pubKey[32] = {0};
     uint32_t pubKeyLen = 32;
     struct HksBlob pubKeyInfo = { pubKeyLen, pubKey };
@@ -320,6 +321,7 @@ int32_t TestEd25519SignTeeVerifyLocal()
     struct HksParamSet *paramSetVerify = NULL;
 
     int32_t ret = TestGenerateEd25519Key(ed25519Alias);
+    HKS_TEST_ASSERT(ret == 0);
 
     uint8_t pubKey[TEST_CURVE_512] = {0};
     uint32_t pubKeyLen = TEST_CURVE_512;

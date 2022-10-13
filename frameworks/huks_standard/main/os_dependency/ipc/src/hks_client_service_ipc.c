@@ -655,12 +655,6 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
     return CertificateChainGetOrAttest(HKS_MSG_ATTEST_KEY, keyAlias, paramSet, certChain);
 }
 
-int32_t HksClientGetCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain)
-{
-    return CertificateChainGetOrAttest(HKS_MSG_GET_CERTIFICATE_CHAIN, keyAlias, paramSet, certChain);
-}
-
 static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob *out)
 {
     if (size == 0) {
@@ -672,10 +666,7 @@ static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob
         HKS_LOG_E("out size[%u] smaller than [%u]", out->size, size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(out->data, out->size, data, size) != EOK) {
-        HKS_LOG_E("copy failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    (void)memcpy_s(out->data, out->size, data, size);
     out->size = size;
     return HKS_SUCCESS;
 }
@@ -700,7 +691,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
 
         if (outBlob.size < HANDLE_SIZE) {
             HKS_LOG_E("invalid out size[%u]", outBlob.size);
-            ret = HKS_ERROR_BAD_STATE;
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
         ret = CopyData(outBlob.data, HANDLE_SIZE, handle);

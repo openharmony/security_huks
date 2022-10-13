@@ -21,11 +21,13 @@ config("huks_config") {
 ohos_static_library("libhuks_utils_list_static") {
   sanitize = {
     integer_overflow = true
+    cfi = true
+    debug = false
   }
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   sources = [ "hks_double_list.c" ]
   cflags = [
     "-Wall",

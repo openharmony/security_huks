@@ -79,10 +79,7 @@ static int32_t Asn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, cons
         HKS_LOG_E("memmove_s failed");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    if (memcpy_s(buf->data, buf->size, header.data, header.size) != EOK) {
-        HKS_LOG_E("memcpy head failed");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    (void)memcpy_s(buf->data, buf->size, header.data, header.size);
     buf->data += outSize;
     buf->size -= outSize;
     if (obj != NULL) {
@@ -190,7 +187,7 @@ int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const st
     }
     if (obj->header.type != expectedTag) {
         HKS_LOG_E("tag %u does not match expected: %u\n", obj->header.type, expectedTag);
-        return HKS_FAILURE;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
 }

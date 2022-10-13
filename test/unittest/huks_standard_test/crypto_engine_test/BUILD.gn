@@ -68,7 +68,10 @@ ohos_unittest("crypto_engine_unit_test") {
     defines = [ "_USE_MBEDTLS_" ]
   }
 
-  configs = [ "//commonlibrary/c_utils/base:utils_config" ]
+  configs = [
+    "//commonlibrary/c_utils/base:utils_config",
+    "//base/security/huks/frameworks/config/build:coverage_flag",
+  ]
 
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",

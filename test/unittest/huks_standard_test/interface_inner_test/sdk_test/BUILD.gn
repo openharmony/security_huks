@@ -43,6 +43,7 @@ ohos_unittest("hukssdk_test") {
     "./src/hks_test_file_operator.c",
     "./src/hks_test_mem.c",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_native_api_compatibility_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
@@ -61,11 +62,12 @@ ohos_unittest("hukssdk_test") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/kits/c:huks_ndk",
     "//third_party/bounds_checking_function:libsec_static",
     "//third_party/googletest:gtest_main",
   ]
   external_deps = [ "c_utils:utils" ]
-
+  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   if (support_jsapi) {
     deps += [
       "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",

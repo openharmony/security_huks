@@ -190,7 +190,7 @@ static int32_t GetNonce(const struct HksBlob *keyInfo, struct HksBlob *nonce)
     if (memcpy_s(tmp, HKS_SEALING_NONCE_SIZE, keyInfo->data + offset, HKS_SEALING_NONCE_SIZE) != EOK) {
         HKS_LOG_E("memcpy nonce failed");
         HKS_FREE_PTR(tmp);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     nonce->data = tmp;
@@ -323,7 +323,7 @@ static int32_t ConvertEd25519ToNewFormat(uint8_t flag, const struct HksBlob *pub
         HKS_LOG_E("copy ed25519 public key failed");
         (void)memset_s(buffer, totalSize, 0, totalSize);
         HKS_FREE_PTR(buffer);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (flag == HKS_SLOT_KEYPAIR_OCCUPY) {
@@ -332,7 +332,7 @@ static int32_t ConvertEd25519ToNewFormat(uint8_t flag, const struct HksBlob *pub
             HKS_LOG_E("copy ed25519 private key failed");
             (void)memset_s(buffer, totalSize, 0, totalSize);
             HKS_FREE_PTR(buffer);
-            return HKS_ERROR_BAD_STATE;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
 
