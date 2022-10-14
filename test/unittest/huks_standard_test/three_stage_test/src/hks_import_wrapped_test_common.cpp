@@ -68,13 +68,13 @@ namespace Unittest::ImportWrappedKey {
 
         /* copy data */
         for (uint32_t i = 0; i < size; ++i) {
-            if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t *) &blobArray[i]->size,
+            if (memcpy_s(outBlob.data + offset, totalLength - offset, reinterpret_cast<uint8_t *>(&blobArray[i]->size),
                 sizeof(blobArray[i]->size)) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
             offset += sizeof(blobArray[i]->size);
 
-            if (memcpy_s(outBlob.data + offset, totalLength - offset, (uint8_t *) blobArray[i]->data,
+            if (memcpy_s(outBlob.data + offset, totalLength - offset, blobArray[i]->data,
                 blobArray[i]->size) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
@@ -107,14 +107,17 @@ namespace Unittest::ImportWrappedKey {
     static void GenerateAndExportHuksPublicKey(const struct HksImportWrappedKeyTestParams *params,
         struct HksBlob *huksPublicKey)
     {
-        HKS_TEST_LOG_I("-------------1. Test_GenerateHuks[%s]Key1\n", (char *)(params->agreeKeyAlgName->data));
+        HKS_TEST_LOG_I("-------------1. Test_GenerateHuks[%s]Key1\n",
+            reinterpret_cast<char *>(params->agreeKeyAlgName->data));
         int32_t ret = HksGenerateKey(params->wrappingKeyAlias, params->genWrappingKeyParamSet, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Generate huks key failed.";
 
-        HKS_TEST_LOG_I("-------------2. Test_ExportHuks[%s]Key1\n", (char *)(params->agreeKeyAlgName->data));
+        HKS_TEST_LOG_I("-------------2. Test_ExportHuks[%s]Key1\n",
+            reinterpret_cast<char *>(params->agreeKeyAlgName->data));
         huksPublicKey->size = params->publicKeySize;
 
-        EXPECT_EQ(MallocAndCheckBlobData(huksPublicKey, huksPublicKey->size), HKS_SUCCESS) << "Malloc pub key failed.";
+        EXPECT_EQ(MallocAndCheckBlobData(huksPublicKey, huksPublicKey->size),
+            HKS_SUCCESS) << "Malloc pub key failed.";
         ret = HksExportPublicKey(params->wrappingKeyAlias, nullptr, huksPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Export huks public key failed.";
     }
@@ -122,12 +125,14 @@ namespace Unittest::ImportWrappedKey {
     static void GenerateAndExportCallerPublicKey(const struct HksImportWrappedKeyTestParams *params,
         struct HksBlob *callerSelfPublicKey)
     {
-        HKS_TEST_LOG_I("-------------3. Test_GenerateCallerSelf[%s]Key!\n", (char *)(params->agreeKeyAlgName->data));
+        HKS_TEST_LOG_I("-------------3. Test_GenerateCallerSelf[%s]Key!\n",
+            reinterpret_cast<char *>(params->agreeKeyAlgName->data));
         int32_t ret = HksGenerateKey(params->callerKeyAlias, params->genCallerKeyParamSet, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Generate caller key failed.";
 
         callerSelfPublicKey->size = params->publicKeySize;
-        EXPECT_EQ(MallocAndCheckBlobData(callerSelfPublicKey, callerSelfPublicKey->size), HKS_SUCCESS) << "malloc fail";
+        EXPECT_EQ(MallocAndCheckBlobData(callerSelfPublicKey,
+            callerSelfPublicKey->size), HKS_SUCCESS) << "malloc fail";
         ret = HksExportPublicKey(params->callerKeyAlias, params->genWrappingKeyParamSet, callerSelfPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Export caller public key failed.";
     }
@@ -140,7 +145,7 @@ namespace Unittest::ImportWrappedKey {
         EXPECT_EQ(ret, HKS_SUCCESS) << "ImportCallerSelfKek failed.";
 
         HKS_TEST_LOG_I("-------------5. Test_CallerAgree[%s]Key and Import To Huks!\n",
-                       (char *)(params->agreeKeyAlgName->data));
+                       reinterpret_cast<char *>(params->agreeKeyAlgName->data));
         EXPECT_EQ(MallocAndCheckBlobData(outSharedKey, outSharedKey->size), HKS_SUCCESS) << "Malloc sharedKey failed.";
 
         ret = HksAgreeKey(params->agreeParamSet, params->callerKeyAlias, huksPublicKey, outSharedKey);
@@ -178,9 +183,9 @@ namespace Unittest::ImportWrappedKey {
     {
         HKS_TEST_LOG_I("-------------8. Test_ImportWrappedKey!\n");
         struct HksBlob commonAad = {.size = Unittest::ImportWrappedKey::AAD_SIZE,
-                                    .data = (uint8_t *) Unittest::ImportWrappedKey::AAD};
+                                    .data = reinterpret_cast<uint8_t *>(Unittest::ImportWrappedKey::AAD)};
         struct HksBlob commonNonce = {.size = Unittest::ImportWrappedKey::NONCE_SIZE,
-                                      .data = (uint8_t *) Unittest::ImportWrappedKey::NONCE};
+                                      .data = reinterpret_cast<uint8_t *>(Unittest::ImportWrappedKey::NONCE)};
         struct HksBlob keyMaterialLen = {.size = sizeof(uint32_t), .data = (uint8_t *)&params->keyMaterialLen };
 
         /* copy AEAD tag from cipher text and decrease its size */

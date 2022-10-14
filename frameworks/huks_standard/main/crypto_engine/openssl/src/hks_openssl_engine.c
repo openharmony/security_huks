@@ -49,7 +49,7 @@ inline int32_t HksOpensslCheckBlob(const struct HksBlob *blob)
     return HKS_SUCCESS;
 }
 
-static int32_t GenKeyCheckParam(const struct HksKeySpec *spec, struct HksBlob *key)
+static int32_t GenKeyCheckParam(const struct HksKeySpec *spec, const struct HksBlob *key)
 {
     if ((spec == NULL) || (key == NULL)) {
         HKS_LOG_E("Invalid params!");
@@ -85,7 +85,7 @@ static int32_t SignVerifyCheckParam(const struct HksBlob *key, const struct HksU
 }
 
 static int32_t DeriveKeyCheckParam(
-    const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec, struct HksBlob *derivedKey)
+    const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec, const struct HksBlob *derivedKey)
 {
     if (HksOpensslCheckBlob(mainKey) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid mainKey params!");
@@ -105,7 +105,7 @@ static int32_t DeriveKeyCheckParam(
 }
 
 static int32_t AgreeKeyCheckParam(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
-    const struct HksKeySpec *spec, struct HksBlob *sharedKey)
+    const struct HksKeySpec *spec, const struct HksBlob *sharedKey)
 {
     if (HksOpensslCheckBlob(nativeKey) != HKS_SUCCESS) {
         HKS_LOG_E("Invalid nativeKey params!");

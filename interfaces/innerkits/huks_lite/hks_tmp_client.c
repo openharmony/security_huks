@@ -16,7 +16,6 @@
 #include "hks_api.h"
 
 struct hks_blob {
-    uint8_t type;
     uint8_t *data;
     uint32_t size;
 };

@@ -72,7 +72,7 @@ static bool DeleteFirstAbortableOperation(void)
     struct HksOperation *operation = NULL;
 
     HKS_DLIST_ITER(operation, &g_operationList) {
-        if (operation->abortable) {
+        if (operation != NULL && operation->abortable) {
             DeleteKeyNode(operation->handle);
             FreeOperation(&operation);
             --g_operationCount;
@@ -232,7 +232,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
     struct HksOperation *operation = NULL;
     pthread_mutex_lock(&g_lock);
     HKS_DLIST_ITER(operation, &g_operationList) {
-        if (operation->handle == handle) {
+        if (operation != NULL && operation->handle == handle) {
             FreeOperation(&operation);
             --g_operationCount;
             HKS_LOG_I("delete operation count:%u", g_operationCount);

@@ -24,7 +24,7 @@ int32_t HksPbkdf2DeriveTestNormalCase(const struct HksBlob keyAlias,
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     int32_t ret = HKS_FAILURE;
 
@@ -59,7 +59,7 @@ int32_t HksPbkdf2DeriveTestCmpCase(const struct HksBlob keyAlias,
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     int32_t ret = HKS_FAILURE;
 

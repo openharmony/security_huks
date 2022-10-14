@@ -28,12 +28,12 @@ constexpr uint32_t MAX_SDK_VERSION_SIZE = 64;
 
 napi_value HuksNapiGetSdkVersion(napi_env env, napi_callback_info info)
 {
-    HksBlob *sdkVersion = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    HksBlob *sdkVersion = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (sdkVersion == nullptr) {
         return nullptr;
     }
 
-    sdkVersion->data = (uint8_t *)HksMalloc(MAX_SDK_VERSION_SIZE);
+    sdkVersion->data = static_cast<uint8_t *>(HksMalloc(MAX_SDK_VERSION_SIZE));
     if (sdkVersion->data == nullptr) {
         HksFree(sdkVersion);
         return nullptr;
@@ -49,7 +49,7 @@ napi_value HuksNapiGetSdkVersion(napi_env env, napi_callback_info info)
     }
 
     napi_value version = nullptr;
-    NAPI_CALL(env, napi_create_string_latin1(env, (const char *)sdkVersion->data, NAPI_AUTO_LENGTH, &version));
+    NAPI_CALL(env, napi_create_string_latin1(env, reinterpret_cast<const char *>(sdkVersion->data), NAPI_AUTO_LENGTH, &version));
     HksFree(sdkVersion->data);
     HksFree(sdkVersion);
     return version;
