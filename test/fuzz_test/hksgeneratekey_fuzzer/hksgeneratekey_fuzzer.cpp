@@ -38,16 +38,13 @@ namespace OHOS {
 
         (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
-        struct HksParamSet *paramSetIn = (struct HksParamSet *)(myData + BLOB_SIZE);
+        struct HksBlob keyAlias = { BLOB_SIZE, myData };
+        struct HksParamSet *paramSetIn = reinterpret_cast<struct HksParamSet *>(myData + BLOB_SIZE);
         paramSetIn->paramSetSize = size - BLOB_SIZE;
 
         (void)HksGenerateKey(&keyAlias, paramSetIn, NULL);
 
-        if (myData != nullptr) {
-            HksFree(myData);
-        }
-
+        HksFree(myData);
         return true;
     }
 }
