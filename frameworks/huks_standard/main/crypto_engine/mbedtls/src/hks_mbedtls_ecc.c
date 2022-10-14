@@ -121,21 +121,21 @@ int32_t HksEccKeyMaterialToPub(const struct HksBlob *key, mbedtls_ecp_point *pub
     const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(key->data);
 
     uint32_t offset = sizeof(*keyMaterial);
-    int32_t ret = mbedtls_mpi_read_binary(&(pub->X), key->data + offset, keyMaterial->xSize);
+    int32_t ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(X)), key->data + offset, keyMaterial->xSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Ecc keyMaterial to public key read X failed! mbedtls ret = 0x%X", ret);
         return ret;
     }
 
     offset = offset + keyMaterial->xSize;
-    ret = mbedtls_mpi_read_binary(&(pub->Y), key->data + offset, keyMaterial->ySize);
+    ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(Y)), key->data + offset, keyMaterial->ySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Ecc keyMaterial to public key read Y failed! mbedtls ret = 0x%X", ret);
         return ret;
     }
 
     /* Z = 1, X and Y are its standard (affine) coordinates */
-    ret = mbedtls_mpi_lset(&(pub->Z), 1);
+    ret = mbedtls_mpi_lset(&(pub->MBEDTLS_PRIVATE(Z)), 1);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Ecc keyMaterial to public key set Z failed! mbedtls ret = 0x%X", ret);
         return ret;
@@ -183,21 +183,23 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
     int32_t ret;
     do {
         uint32_t offset = sizeof(struct KeyMaterialEcc);
-        ret = mbedtls_mpi_write_binary(&(ecp->Q.X), rawMaterial + offset, keyMaterial->xSize);
+        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X)), rawMaterial + offset,
+            keyMaterial->xSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Save ecc keyMaterial write X failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
         offset = offset + keyMaterial->xSize;
-        ret = mbedtls_mpi_write_binary(&(ecp->Q.Y), rawMaterial + offset, keyMaterial->ySize);
+        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y)), rawMaterial + offset,
+            keyMaterial->ySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Save ecc keyMaterial write Y failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
         offset = offset + keyMaterial->ySize;
-        ret = mbedtls_mpi_write_binary(&(ecp->d), rawMaterial + offset, keyMaterial->zSize);
+        ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(d)), rawMaterial + offset, keyMaterial->zSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Save ecc keyMaterial write D failed! mbedtls ret = 0x%X", ret);
             break;

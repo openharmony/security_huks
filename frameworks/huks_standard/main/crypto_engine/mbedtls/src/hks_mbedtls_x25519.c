@@ -193,7 +193,7 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
 
     /* mbedtls mbedtls_ecp_point.X is x25519's public key */
     uint32_t offset = sizeof(struct KeyMaterial25519);
-    int32_t ret = mbedtls_mpi_write_binary(&(pub->X), rawMaterial + offset, keyMaterial->pubKeySize);
+    int32_t ret = mbedtls_mpi_write_binary(&(pub->MBEDTLS_PRIVATE(X)), rawMaterial + offset, keyMaterial->pubKeySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls mpi write to x25519 public key failed! mbedtls ret = 0x%X", ret);
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
@@ -289,14 +289,14 @@ static int32_t X25519KeyMaterialToPub(const struct HksBlob *pubKey, mbedtls_ecp_
             break;
         }
 
-        ret = mbedtls_mpi_read_binary(&(pub->X), tmpPubKey, keyMaterial->pubKeySize);
+        ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(X)), tmpPubKey, keyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls mpi read from x25519 public key failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
         /* set initial coordinates. Z = 1, X and Y are its standard(affine) coordinates. */
-        ret = mbedtls_mpi_lset(&(pub->Z), 1);
+        ret = mbedtls_mpi_lset(&(pub->MBEDTLS_PRIVATE(Z)), 1);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls mpi set Z = 1 failed! mbedtls ret = 0x%X", ret);
         }
@@ -341,29 +341,30 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
     }
 
     do {
-        ret = mbedtls_ecp_group_load(&(ctx.grp), MBEDTLS_ECP_DP_CURVE25519);
+        ret = mbedtls_ecp_group_load(&(ctx.MBEDTLS_PRIVATE(grp)), MBEDTLS_ECP_DP_CURVE25519);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls load x25519 group failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
-        ret = X25519KeyMaterialToPub(pubKey, &(ctx.Qp));
+        ret = X25519KeyMaterialToPub(pubKey, &(ctx.MBEDTLS_PRIVATE(Qp)));
         if (ret != HKS_SUCCESS) {
             break;
         }
 
-        ret = X25519KeyMaterialToPri(nativeKey, &(ctx.d));
+        ret = X25519KeyMaterialToPri(nativeKey, &(ctx.MBEDTLS_PRIVATE(d)));
         if (ret != HKS_SUCCESS) {
             break;
         }
 
-        ret = mbedtls_ecdh_compute_shared(&(ctx.grp), &(ctx.z), &(ctx.Qp), &(ctx.d), mbedtls_ctr_drbg_random, &ctrDrbg);
+        ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)),
+            &(ctx.MBEDTLS_PRIVATE(Qp)), &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls x25519 shared key failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
-        ret = mbedtls_mpi_write_binary(&(ctx.z), sharedKey->data, HKS_X25519_KEY_BYTES);
+        ret = mbedtls_mpi_write_binary(&(ctx.MBEDTLS_PRIVATE(z)), sharedKey->data, HKS_X25519_KEY_BYTES);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls mpi write to shared key failed! mbedtls ret = 0x%X", ret);
             (void)memset_s(sharedKey->data, sharedKey->size, 0, sharedKey->size);

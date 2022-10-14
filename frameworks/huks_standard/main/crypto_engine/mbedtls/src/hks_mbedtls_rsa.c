@@ -38,6 +38,8 @@
 
 #define HKS_RSA_PUBLIC_EXPONENT 65537
 #define HKS_RSA_KEYPAIR_CNT 3
+#define MBEDTLS_RSA_PUBLIC	0
+#define MBEDTLS_RSA_PRIVATE	1
 
 static int32_t RsaCheckKeySize(const uint32_t keySize)
 {
@@ -116,21 +118,21 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
     int32_t ret;
     do {
         uint32_t offset = sizeof(*keyMaterial);
-        ret = mbedtls_mpi_write_binary(&(ctx->N), rawMaterial + offset, keyMaterial->nSize);
+        ret = mbedtls_mpi_write_binary(&(ctx->MBEDTLS_PRIVATE(N)), rawMaterial + offset, keyMaterial->nSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Rsa save keyMaterial mpi write N failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
         offset = offset + keyMaterial->nSize;
-        ret = mbedtls_mpi_write_binary(&(ctx->E), rawMaterial + offset, keyMaterial->eSize);
+        ret = mbedtls_mpi_write_binary(&(ctx->MBEDTLS_PRIVATE(E)), rawMaterial + offset, keyMaterial->eSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Rsa save keyMaterial mpi write E failed! mbedtls ret = 0x%X", ret);
             break;
         }
 
         offset = offset + keyMaterial->eSize;
-        ret = mbedtls_mpi_write_binary(&(ctx->D), rawMaterial + offset, keyMaterial->dSize);
+        ret = mbedtls_mpi_write_binary(&(ctx->MBEDTLS_PRIVATE(D)), rawMaterial + offset, keyMaterial->dSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Rsa save keyMaterial mpi write D failed! mbedtls ret = 0x%X", ret);
             break;
@@ -152,9 +154,9 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
 int32_t HksMbedtlsRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
     mbedtls_rsa_context ctx;
-    mbedtls_rsa_init(&ctx, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
-    ctx.padding = 0;
-    ctx.hash_id = 0;
+    mbedtls_rsa_init(&ctx);
+    ctx.MBEDTLS_PRIVATE(padding) = 0;
+    ctx.MBEDTLS_PRIVATE(hash_id) = 0;
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
@@ -289,7 +291,7 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
     }
 
     mbedtls_rsa_context ctx;
-    mbedtls_rsa_init(&ctx, padding, mbedtlsAlg); /* only support oaep padding */
+    mbedtls_rsa_init(&ctx); /* only support oaep padding */
 
     do {
         ret = RsaKeyMaterialToCtx(key, !encrypt, &ctx); /* encrypt don't need private exponent (d) */
@@ -300,10 +302,10 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
         size_t outlen;
         if (encrypt) {
             ret = mbedtls_rsa_pkcs1_encrypt(&ctx, mbedtls_ctr_drbg_random,
-                &ctrDrbg, MBEDTLS_RSA_PUBLIC, (size_t)message->size, message->data, cipherText->data);
+                &ctrDrbg, (size_t)message->size, message->data, cipherText->data);
             outlen = mbedtls_rsa_get_len(&ctx);
         } else {
-            ret = mbedtls_rsa_pkcs1_decrypt(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg, MBEDTLS_RSA_PRIVATE,
+            ret = mbedtls_rsa_pkcs1_decrypt(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
                 &outlen, message->data, cipherText->data, (size_t)cipherText->size);
         }
         if (ret != HKS_SUCCESS) {
@@ -374,7 +376,7 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     }
 
     mbedtls_rsa_context ctx;
-    mbedtls_rsa_init(&ctx, padding, (mbedtls_md_type_t)mbedtlsAlg);
+    mbedtls_rsa_init(&ctx);
 
     do {
         ret = RsaKeyMaterialToCtx(key, sign, &ctx); /* sign need private exponent (d) */
@@ -383,10 +385,10 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
         }
 
         if (sign) {
-            ret = mbedtls_rsa_pkcs1_sign(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg, MBEDTLS_RSA_PRIVATE,
+            ret = mbedtls_rsa_pkcs1_sign(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
                 (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
         } else {
-            ret = mbedtls_rsa_pkcs1_verify(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg, MBEDTLS_RSA_PUBLIC,
+            ret = mbedtls_rsa_pkcs1_verify(&ctx,
                 (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
         }
         if (ret != HKS_MBEDTLS_SUCCESS) {

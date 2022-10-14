@@ -32,6 +32,8 @@
 #define RSA_KEY_BYTE   66
 #define NUM_FOUR       4
 #define NUM_THREE      3
+#define MBEDTLS_RSA_PUBLIC	0 /**< Request private key operation. */
+#define MBEDTLS_RSA_PRIVATE	1 /**< Request public key operation. */
 
 static char *RsaMallocPrivateKey(const unsigned char *key, size_t *keyLen)
 {
@@ -115,7 +117,14 @@ static char *RsaMallocPublicKey(const unsigned char *key, size_t *keyLen)
     return pubKey;
 }
 
-static int32_t RsaLoadPrivateKey(int32_t mode, mbedtls_pk_context *pk, const unsigned char *key, size_t keyLen)
+static void RsaInit(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_context *entropy)
+{
+    mbedtls_ctr_drbg_init(ctrDrbg);
+    mbedtls_entropy_init(entropy);
+    (void)mbedtls_ctr_drbg_seed(ctrDrbg, mbedtls_entropy_func, entropy, NULL, 0);
+}
+
+static int32_t RsaLoadPrivateKey(mbedtls_pk_context *pk, const unsigned char *key, size_t keyLen)
 {
     int32_t ret;
     size_t finalKeyLen = keyLen;
@@ -126,16 +135,21 @@ static int32_t RsaLoadPrivateKey(int32_t mode, mbedtls_pk_context *pk, const uns
         return ERROR_CODE_GENERAL;
     }
 
+    mbedtls_ctr_drbg_context ctrDrbg;
+    mbedtls_entropy_context entropy;
+    RsaInit(&ctrDrbg, &entropy);
+
     do {
-        ret = mbedtls_pk_parse_key(pk, (const unsigned char *)finalKey, finalKeyLen, NULL, 0);
+        ret = mbedtls_pk_parse_key(pk, (const unsigned char *)finalKey, finalKeyLen, NULL, 0,
+            mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != 0) {
-            CIPHER_LOG_E("parse private key error, mode:%d ret:%d.", mode, ret);
+            CIPHER_LOG_E("parse private key error, ret:%d.", ret);
             break;
         }
 
         rsa = mbedtls_pk_rsa(*pk);
         if (rsa == NULL) {
-            CIPHER_LOG_E("rsa error, mode:%d.", mode);
+            CIPHER_LOG_E("rsa error");
             break;
         }
 
@@ -153,10 +167,12 @@ static int32_t RsaLoadPrivateKey(int32_t mode, mbedtls_pk_context *pk, const uns
 
     (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
+    mbedtls_ctr_drbg_free(&ctrDrbg);
+    mbedtls_entropy_free(&entropy);
     return ERROR_CODE_GENERAL;
 }
 
-static int32_t RsaLoadPublicKey(int32_t mode, mbedtls_pk_context *pk, const unsigned char *key, size_t keyLen)
+static int32_t RsaLoadPublicKey(mbedtls_pk_context *pk, const unsigned char *key, size_t keyLen)
 {
     int32_t ret;
     size_t finalKeyLen = keyLen;
@@ -170,13 +186,13 @@ static int32_t RsaLoadPublicKey(int32_t mode, mbedtls_pk_context *pk, const unsi
     do {
         ret = mbedtls_pk_parse_public_key(pk, (const unsigned char *)finalKey, finalKeyLen);
         if (ret != 0) {
-            CIPHER_LOG_E("parse public key error, mode:%d ret:%d.", mode, ret);
+            CIPHER_LOG_E("parse public key error, ret:%d.", ret);
             break;
         }
 
         rsa = mbedtls_pk_rsa(*pk);
         if (rsa == NULL) {
-            CIPHER_LOG_E("pk rsa error, mode:%d.", mode);
+            CIPHER_LOG_E("pk rsa error");
             break;
         }
 
@@ -194,22 +210,6 @@ static int32_t RsaLoadPublicKey(int32_t mode, mbedtls_pk_context *pk, const unsi
     (void)memset_s(finalKey, finalKeyLen, 0, finalKeyLen);
     free(finalKey);
     return ERROR_CODE_GENERAL;
-}
-
-static int32_t RsaLoadKey(int32_t mode, mbedtls_pk_context *pk, const unsigned char *key, size_t keyLen)
-{
-    if (mode == MBEDTLS_RSA_PUBLIC) {
-        return RsaLoadPublicKey(mode, pk, key, keyLen);
-    } else {
-        return RsaLoadPrivateKey(mode, pk, key, keyLen);
-    }
-}
-
-static void RsaInit(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_context *entropy)
-{
-    mbedtls_ctr_drbg_init(ctrDrbg);
-    mbedtls_entropy_init(entropy);
-    (void)mbedtls_ctr_drbg_seed(ctrDrbg, mbedtls_entropy_func, entropy, NULL, 0);
 }
 
 static void RsaDeinit(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_context *entropy)
@@ -282,7 +282,7 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
         for (int32_t i = 0; i < count; i++) {
             (void)memset_s(buf, rsaLen, 0, rsaLen);
             if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
-                MBEDTLS_RSA_PUBLIC, rsaContentLen, (const unsigned char *)(plainText + i * rsaContentLen), buf)) {
+                rsaContentLen, (const unsigned char *)(plainText + i * rsaContentLen), buf)) {
                 isBreak = true;
                 break;
             }
@@ -298,7 +298,7 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
         if (remain > 0) {
             (void)memset_s(buf, rsaLen, 0, rsaLen);
             if (mbedtls_rsa_pkcs1_encrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
-                MBEDTLS_RSA_PUBLIC, remain, (const unsigned char *)(plainText + count * rsaContentLen), buf)) {
+                remain, (const unsigned char *)(plainText + count * rsaContentLen), buf)) {
                 break;
             }
             if (memcpy_s(cipherText + count * rsaLen, cipherTextLen - count * rsaLen, buf, rsaLen)) {
@@ -325,7 +325,7 @@ static int32_t RsaEncrypt(RsaKeyData *key, const RsaData *plain, RsaData *cipher
 
     mbedtls_pk_context pk;
     mbedtls_pk_init(&pk);
-    if (RsaLoadKey(MBEDTLS_RSA_PUBLIC, &pk, (const unsigned char *)key->key, key->keyLen) != 0) {
+    if (RsaLoadPublicKey(&pk, (const unsigned char *)key->key, key->keyLen) != 0) {
         mbedtls_pk_free(&pk);
         return ERROR_CODE_GENERAL;
     }
@@ -409,7 +409,7 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
         for (int32_t i = 0; i < count; i++) {
             (void)memset_s(buf, rsaLen, 0, rsaLen);
             if (mbedtls_rsa_pkcs1_decrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
-                MBEDTLS_RSA_PRIVATE, &plainLen, tembuf + i * rsaLen, buf, rsaLen)) {
+                &plainLen, tembuf + i * rsaLen, buf, rsaLen)) {
                 isBreak = true;
                 break;
             }
@@ -448,7 +448,7 @@ static int32_t RsaDecrypt(RsaKeyData *key, RsaData *cipher, RsaData *plain)
 
     mbedtls_pk_context pk;
     mbedtls_pk_init(&pk);
-    if (RsaLoadKey(MBEDTLS_RSA_PRIVATE, &pk, (const unsigned char *)key->key, key->keyLen) != 0) {
+    if (RsaLoadPrivateKey(&pk, (const unsigned char *)key->key, key->keyLen) != 0) {
         mbedtls_pk_free(&pk);
         return ERROR_CODE_GENERAL;
     }
