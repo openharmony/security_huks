@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "mbedtls/compat-2.x.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
