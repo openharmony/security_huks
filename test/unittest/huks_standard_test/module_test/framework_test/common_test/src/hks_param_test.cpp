@@ -23,7 +23,7 @@
 #include "hks_mem.h"
 #include "hks_type.h"
 
-#include <string.h>
+#include <cstring>
 
 using namespace testing::ext;
 namespace Unittest::HksFrameworkCommonCheckParamsetTest {
