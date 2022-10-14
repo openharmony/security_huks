@@ -104,7 +104,7 @@ static int32_t FillContextInDataAndOutData(napi_env env, napi_value *argv, Updat
     }
 
     context->outData->size = context->inData->size + DATA_SIZE_64KB;
-    context->outData->data = (uint8_t *)HksMalloc(context->outData->size);
+    context->outData->data = static_cast<uint8_t *>(HksMalloc(context->outData->size));
     if (context->outData->data == nullptr) {
         HKS_LOG_E("malloc memory failed");
         return HKS_ERROR_MALLOC_FAIL;
@@ -115,14 +115,14 @@ static int32_t FillContextInDataAndOutData(napi_env env, napi_value *argv, Updat
 
 static int32_t FillContextInDataAndOutBlob(napi_env env, napi_value *argv, UpdateAsyncContext context, size_t index)
 {
-    context->outData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->outData = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->outData == nullptr) {
         HKS_LOG_E("could not alloc out blob memory");
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(context->outData, sizeof(HksBlob), 0, sizeof(HksBlob));
 
-    context->inData = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->inData = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->inData == nullptr) {
         HKS_LOG_E("could not alloc in blob memory");
         return HKS_ERROR_MALLOC_FAIL;
@@ -166,7 +166,7 @@ static int32_t GetCallBackFunction(napi_env env, napi_value object, UpdateAsyncC
 
 static int32_t GetToken(napi_env env, napi_value object, UpdateAsyncContext context)
 {
-    context->token = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->token = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->token == nullptr) {
         HKS_LOG_E("could not alloc token blob memory");
         return HKS_ERROR_MALLOC_FAIL;
@@ -380,7 +380,7 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context
             }
             DeleteUpdateAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);

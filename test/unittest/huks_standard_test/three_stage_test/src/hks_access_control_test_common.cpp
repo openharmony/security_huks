@@ -56,7 +56,10 @@ int32_t AuthTokenImportKey()
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    struct HksBlob key = { SHA256_KEY_LEN, (uint8_t*)HKS_DEFAULT_USER_AT_KEY };
+    struct HksBlob key = {
+        SHA256_KEY_LEN,
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(HKS_DEFAULT_USER_AT_KEY))
+    };
 
     uint8_t alias[] = "AuthToken_Sign_Verify_KeyAlias";
     struct HksBlob keyAlias = { sizeof(alias), alias };
@@ -95,7 +98,7 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
     HksUserAuthToken *authTokenHal = nullptr;
     struct HksParamSet *hmacParamSet = nullptr;
     do {
-        authTokenHal = (struct HksUserAuthToken *)HksMalloc(AUTH_TOKEN_LEN);
+        authTokenHal = static_cast<struct HksUserAuthToken *>(HksMalloc(AUTH_TOKEN_LEN));
         if (authTokenHal == nullptr) {
             break;
         }
@@ -158,7 +161,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
             break;
         }
 
-        ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+        ret = HksFreshParamSet(const_cast<struct HksParamSet *>(paramSet), false);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append fresh paramset failed");
             break;
@@ -277,7 +280,7 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
 int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle,
     struct HksParamSet *initParamSet, uint32_t posNum)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t outDataS[DATA_COMMON_SIZE] = {0};
     struct HksBlob outDataSign = { DATA_COMMON_SIZE, outDataS };
     (void)posNum;
@@ -378,7 +381,7 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
         return ret;
     }
 
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t out[HMAC_COMMON_SIZE] = {0};
     struct HksBlob outData = { HMAC_COMMON_SIZE, out };
     ret = TestUpdateFinish(&handleHMAC, initParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
@@ -430,7 +433,7 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
         return HKS_FAILURE;
     }
 
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     struct HksParamSet *initParamSet = nullptr;
     ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
     if (ret != HKS_SUCCESS) {
@@ -470,7 +473,7 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
 int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
@@ -537,7 +540,7 @@ int32_t ConstructRsaKeyPair(const struct HksBlob *nDataBlob, const struct HksBlo
     material.dSize = dDataBlob->size;
 
     uint32_t size = sizeof(material) + material.nSize + material.eSize + material.dSize;
-    uint8_t *data = (uint8_t *)HksMalloc(size);
+    uint8_t *data = static_cast<uint8_t *>(HksMalloc(size));
     if (data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -585,7 +588,7 @@ int32_t ConstructEd25519KeyPair(uint32_t keySize, uint32_t alg, struct HksBlob *
     material.reserved = 0;
 
     uint32_t size = sizeof(material) + material.pubKeySize + material.priKeySize;
-    uint8_t *data = (uint8_t *)HksMalloc(size);
+    uint8_t *data = static_cast<uint8_t *>(HksMalloc(size));
     if (data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -629,7 +632,7 @@ int32_t ConstructDsaKeyPair(uint32_t keySize, const struct TestDsaKeyParams *par
 
     uint32_t size = sizeof(material) + material.xSize + material.ySize +
         material.pSize + material.qSize + material.gSize;
-    uint8_t *data = (uint8_t *)HksMalloc(size);
+    uint8_t *data = static_cast<uint8_t *>(HksMalloc(size));
     if (data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -684,7 +687,7 @@ int32_t GenParamSetAuthTest(struct HksParamSet **paramOutSet, const struct HksPa
 {
     struct HksParam localSecureKey = {
         .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
-        .blob = { .size = KEY_PARAMSET_SIZE, .data = (uint8_t *)HksMalloc(KEY_PARAMSET_SIZE) }
+        .blob = { .size = KEY_PARAMSET_SIZE, .data = static_cast<uint8_t *>(HksMalloc(KEY_PARAMSET_SIZE)) }
     };
     if (localSecureKey.blob.data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;

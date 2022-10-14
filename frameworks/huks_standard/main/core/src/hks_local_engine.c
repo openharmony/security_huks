@@ -102,7 +102,7 @@ int32_t HksLocalBnExpMod(struct HksBlob *x, const struct HksBlob *a, const struc
 }
 
 #ifndef _CUT_AUTHENTICATE_
-static int32_t CheckLocalGenerateKeyParams(const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
+static int32_t CheckLocalGenerateKeyParams(const struct HksParamSet *paramSetIn, const struct HksParamSet *paramSetOut)
 {
     int32_t ret;
     if ((HksCheckParamSetValidity(paramSetIn) != HKS_SUCCESS) || (paramSetOut == NULL)) {

@@ -142,7 +142,7 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
                     HKS_LOG_E("outData size is invalid, size:%u", outData.size);
                     return HW_SYSTEM_ERROR;
                 }
-                outData.data = (uint8_t *)HksMalloc(outData.size);
+                outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
                 if (outData.data == nullptr) {
                     HKS_LOG_E("Malloc outData failed.");
                     return HW_SYSTEM_ERROR;
@@ -222,16 +222,16 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 
-    uint32_t outSize = (uint32_t)data.ReadUint32();
+    uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
 
     struct HksBlob srcData = { 0, nullptr };
-    srcData.size = (uint32_t)data.ReadUint32();
+    srcData.size = static_cast<uint32_t>(data.ReadUint32());
     if (IsInvalidLength(srcData.size)) {
         HKS_LOG_E("srcData size is invalid, size:%u", srcData.size);
         return HW_SYSTEM_ERROR;
     }
 
-    srcData.data = (uint8_t *)HksMalloc(srcData.size);
+    srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
     if (srcData.data == nullptr) {
         HKS_LOG_E("Malloc srcData failed.");
         return HW_SYSTEM_ERROR;

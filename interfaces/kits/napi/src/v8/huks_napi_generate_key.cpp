@@ -125,7 +125,7 @@ static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext con
             }
             DeleteGenerateKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);

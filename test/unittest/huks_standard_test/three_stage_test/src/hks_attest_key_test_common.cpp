@@ -107,7 +107,7 @@ int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     if (!certChainParam->certChainExist) {
         return 0;
     }
-    *certChain = (struct HksCertChain *)HksMalloc(sizeof(struct HksCertChain));
+    *certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
     if (*certChain == nullptr) {
         HKS_LOG_E("malloc fail");
         return HKS_ERROR_MALLOC_FAIL;
@@ -122,14 +122,16 @@ int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
         (*certChain)->certs = nullptr;
         return 0;
     }
-    (*certChain)->certs = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob) * ((*certChain)->certsCount));
+    (*certChain)->certs = static_cast<struct HksBlob *>(HksMalloc(sizeof(struct HksBlob) *
+    ((*certChain)->certsCount)));
     if ((*certChain)->certs == nullptr) {
         HksFree(*certChain);
         *certChain = nullptr;
+        return HKS_ERROR_MALLOC_FAIL;
     }
     for (uint32_t i = 0; i < (*certChain)->certsCount; i++) {
         (*certChain)->certs[i].size = certChainParam->certDataSize;
-        (*certChain)->certs[i].data = (uint8_t *)HksMalloc((*certChain)->certs[i].size);
+        (*certChain)->certs[i].data = static_cast<uint8_t *>(HksMalloc((*certChain)->certs[i].size));
         if ((*certChain)->certs[i].data == nullptr) {
             HKS_LOG_E("malloc fail");
             FreeCertChain(certChain, i);
@@ -173,24 +175,24 @@ static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertCh
     int32_t ret = HksValidateCertChain(certChain, paramSet);
     HKS_LOG_I("validate cert chain result is %x", ret);
     HKS_LOG_I("paramsSet count is : %d", paramSet->paramsCnt);
-    HKS_LOG_I("secinfo is %s\n", (char *)paramSet->params[g_index0].blob.data);
-    HKS_LOG_I("challenge is %s\n", (char *)paramSet->params[g_index1].blob.data);
-    HKS_LOG_I("version is %s\n", (char *)paramSet->params[g_index2].blob.data);
-    HKS_LOG_I("alias is %s\n", (char *)paramSet->params[g_index3].blob.data);
+    HKS_LOG_I("secinfo is %s\n", reinterpret_cast<char *>(paramSet->params[g_index0].blob.data));
+    HKS_LOG_I("challenge is %s\n", reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
+    HKS_LOG_I("version is %s\n", reinterpret_cast<char *>(paramSet->params[g_index2].blob.data));
+    HKS_LOG_I("alias is %s\n", reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
     if (ret == HKS_SUCCESS) {
-        ret |= strcmp(SEC_INFO_DATA, (char *)paramSet->params[g_index0].blob.data);
-        ret |= strcmp(CHALLENGE_DATA, (char *)paramSet->params[g_index1].blob.data);
-        ret |= strcmp(VERSION_DATA, (char *)paramSet->params[g_index2].blob.data);
-        ret |= strcmp(ALIAS, (char *)paramSet->params[g_index3].blob.data);
+        ret |= strcmp(SEC_INFO_DATA, reinterpret_cast<char *>(paramSet->params[g_index0].blob.data));
+        ret |= strcmp(CHALLENGE_DATA, reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
+        ret |= strcmp(VERSION_DATA, reinterpret_cast<char *>(paramSet->params[g_index2].blob.data));
+        ret |= strcmp(ALIAS, reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
     }
     if (type == IDS_PARAM) {
-        HKS_LOG_I("udid is %s\n", (char *)paramSet->params[g_index4].blob.data);
-        HKS_LOG_I("sn is %s\n", (char *)paramSet->params[g_index5].blob.data);
-        HKS_LOG_I("device id is %s\n", (char *)paramSet->params[g_index6].blob.data);
+        HKS_LOG_I("udid is %s\n", reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
+        HKS_LOG_I("sn is %s\n", reinterpret_cast<char *>(paramSet->params[g_index5].blob.data));
+        HKS_LOG_I("device id is %s\n", reinterpret_cast<char *>(paramSet->params[g_index6].blob.data));
         if (ret == HKS_SUCCESS) {
-            ret |= strcmp(UDID_DATA, (char *)paramSet->params[g_index4].blob.data);
-            ret |= strcmp(SN_DATA, (char *)paramSet->params[g_index5].blob.data);
-            ret |= strcmp(DEVICE_ID, (char *)paramSet->params[g_index6].blob.data);
+            ret |= strcmp(UDID_DATA, reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
+            ret |= strcmp(SN_DATA, reinterpret_cast<char *>(paramSet->params[g_index5].blob.data));
+            ret |= strcmp(DEVICE_ID, reinterpret_cast<char *>(paramSet->params[g_index6].blob.data));
         }
     }
     return ret;
