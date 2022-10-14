@@ -28,10 +28,6 @@ int32_t HksServiceInitialize(void);
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName);
 
-int32_t HksServiceProvision(const struct HksBlob *keybox, const struct HksBlob *challengeIn);
-
-int32_t HksServiceProvisionVerify(const struct HksBlob *srcData, const struct HksBlob *challengeIn);
-
 int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSetIn, struct HksBlob *keyOut);
 
