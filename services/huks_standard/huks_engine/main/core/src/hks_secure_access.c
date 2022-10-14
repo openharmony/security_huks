@@ -740,7 +740,7 @@ static int32_t GetSupportAppendAuthInfoParams(const struct HuksKeyNode *keyNode,
 }
 
 static int32_t CheckIfNeedAppendUpdateData(const struct HksAppendDataInnerParams *innerParams, bool *outIsNeedAppend,
-    int32_t *outAuthResult, struct HksBlob *appendedData, struct HksParam **isAppendDataParam)
+    int32_t *outAuthResult, const struct HksBlob *appendedData, struct HksParam **isAppendDataParam)
 {
     bool isNeedAppend = false;
     int32_t authResult = HKS_AUTH_RESULT_NONE;

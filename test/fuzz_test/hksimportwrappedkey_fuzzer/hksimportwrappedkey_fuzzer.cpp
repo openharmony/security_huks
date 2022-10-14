@@ -33,26 +33,23 @@ namespace OHOS {
             return false;
         }
         
-        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;
         }
 
         (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
-        struct HksBlob wrappingKeyAlias = { BLOB_SIZE, (uint8_t *)(myData + BLOB_SIZE) };
-        struct HksBlob wrappedKeyData = { BLOB_SIZE, (uint8_t *)(myData + DOUBLE_BLOB_SIZE) };
+        struct HksBlob keyAlias = { BLOB_SIZE, myData };
+        struct HksBlob wrappingKeyAlias = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
+        struct HksBlob wrappedKeyData = { BLOB_SIZE, static_cast<uint8_t *>(myData + DOUBLE_BLOB_SIZE) };
 
-        struct HksParamSet *paramSet = (struct HksParamSet *)(myData + TRIPLE_BLOB_SIZE);
+        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + TRIPLE_BLOB_SIZE);
         paramSet->paramSetSize = size - TRIPLE_BLOB_SIZE;
 
         (void)HksImportWrappedKey(&keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
 
-        if (myData != nullptr) {
-            HksFree(myData);
-        }
-
+        HksFree(myData);
         return true;
     }
 }

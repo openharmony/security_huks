@@ -68,14 +68,14 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     char tmpInData[] = "SM4_ECB_INDATA_1";
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
     struct HksParam *modeParam = nullptr;
     HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
     if (modeParam->uint32Param == HKS_MODE_ECB) {
         inData.size = strlen(tmpInData);
-        inData.data = (uint8_t *)tmpInData;
+        inData.data = reinterpret_cast<uint8_t *>(tmpInData);
     }
 
     /* 1. Generate Key */

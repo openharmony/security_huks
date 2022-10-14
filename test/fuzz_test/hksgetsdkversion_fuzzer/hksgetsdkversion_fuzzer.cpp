@@ -28,21 +28,18 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;
         }
 
         (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob sdkVersion = { size, (uint8_t *)myData };
+        struct HksBlob sdkVersion = { size, myData };
 
         (void)HksGetSdkVersion(&sdkVersion);
 
-        if (myData != nullptr) {
-            HksFree(myData);
-        }
-
+        HksFree(myData);
         return true;
     }
 }
