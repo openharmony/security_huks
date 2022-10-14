@@ -132,7 +132,10 @@ ohos_unittest("huks_module_test") {
   ]
 
   # framework test
-  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_check_paramset_test.cpp" ]
+  sources += [ 
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_check_paramset_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_param_test.cpp"
+  ]
 
   # interface test
   sources += [

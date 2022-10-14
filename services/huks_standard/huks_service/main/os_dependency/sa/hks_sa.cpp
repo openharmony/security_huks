@@ -85,8 +85,6 @@ static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
     { HKS_MSG_MAC, HksIpcServiceMac },
     { HKS_MSG_GET_KEY_INFO_LIST, HksIpcServiceGetKeyInfoList },
     { HKS_MSG_ATTEST_KEY, HksIpcServiceAttestKey },
-    { HKS_MSG_PROVISION, HksIpcServiceProvision },
-    { HKS_MSG_PROVISION_VERIFY, HksIpcServiceProvisionVerify },
 };
 
 #ifdef SUPPORT_COMMON_EVENT

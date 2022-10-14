@@ -65,8 +65,6 @@ int32_t HksGetKeyInfoListPackFromService(struct HksBlob *destData, uint32_t list
 int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksParamSet **paramSet, struct HksBlob *certChainBlob);
 
-int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certChainBlob);
-
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt);
 
 #ifdef __cplusplus

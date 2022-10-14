@@ -20,11 +20,12 @@
 
 #include "hks_api.h"
 #include "hks_attest_key_test_common.h"
+#include "hks_client_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_session_manager.h"
 #include "hks_type_inner.h"
-#include "hks_client_service.h"
 
 using namespace testing::ext;
 using namespace Unittest::AttestKey;
@@ -117,7 +118,9 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 TestGenerateKey failed, ret = " << ret;
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
-
+    uint64_t handle = 111;
+    struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
+    CreateOperation(&processInfo, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo);
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
