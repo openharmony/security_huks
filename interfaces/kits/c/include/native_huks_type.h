@@ -21,7 +21,7 @@
  * @{
  *
  * @brief Defines the macros, enumerated values, data structures,
- * and error codes used by OpenHarmony Universal KeyStore (HUKS) APIs.
+ *    and error codes used by OpenHarmony Universal KeyStore (HUKS) APIs.
  *
  * @syscap SystemCapability.Security.Huks
  * @since 9
@@ -325,7 +325,7 @@ enum OH_Huks_KeyStorageType {
 
 /**
  * @brief Enumerates the types of keys to import. By default,
- *     a public key is imported. This field is not required when a symmetric key is imported.
+ *    a public key is imported. This field is not required when a symmetric key is imported.
  *
  * @since 9
  * @version 1.0
