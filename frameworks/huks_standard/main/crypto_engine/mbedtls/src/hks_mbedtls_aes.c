@@ -806,7 +806,8 @@ static int32_t AesDecryptGcmFinal(void **cryptoCtx, const struct HksBlob *messag
         cipherText->size = message->size;
 
         uint8_t check_tag[16];
-        ret =  mbedtls_gcm_finish(gcmCtx, check_tag, tagAead->size, 0, check_tag, tagAead->size);
+        size_t size = 0;
+        ret =  mbedtls_gcm_finish(gcmCtx, check_tag, tagAead->size, &size, check_tag, tagAead->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls aes gcm decrypt failed! mbedtls ret = 0x%X", ret);
             (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
