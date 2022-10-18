@@ -76,8 +76,8 @@ HWTEST_F(HksParamTest, HksParamTest001, TestSize.Level0)
 HWTEST_F(HksParamTest, HksParamTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksParamTest002");
-    struct HksParam baseParam = { .tag = HKS_TAG_KEY_ACCESS_TIME, .uint64Param = (ulong)1 };
-    struct HksParam otherParam = { .tag = HKS_TAG_KEY_ACCESS_TIME, .uint64Param = (ulong)2 };
+    struct HksParam baseParam = { .tag = HKS_TAG_KEY_ACCESS_TIME, .uint64Param = (uint64_t)1 };
+    struct HksParam otherParam = { .tag = HKS_TAG_KEY_ACCESS_TIME, .uint64Param = (uint64_t)2 };
     int32_t ret = HksCheckParamMatch(&baseParam, &otherParam);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckParamMatch failed, ret = " << ret;
 }
