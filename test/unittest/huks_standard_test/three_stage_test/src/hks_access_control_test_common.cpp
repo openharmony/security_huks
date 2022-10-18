@@ -496,7 +496,6 @@ static int32_t UpdateAndFinishForDeriveTest(const struct HksBlob *handleDerive, 
 int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams)
 {
-    
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
