@@ -22,10 +22,6 @@
 extern "C" {
 #endif
 
-void HksIpcServiceProvision(const struct HksBlob *srcData, const uint8_t *context);
-
-void HksIpcServiceProvisionVerify(const struct HksBlob *srcData, const uint8_t *context);
-
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *context);
