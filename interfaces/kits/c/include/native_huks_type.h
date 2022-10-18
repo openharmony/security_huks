@@ -562,7 +562,7 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_AUTH_TIMEOUT = OH_HUKS_TAG_TYPE_UINT | 305,
     /** Authentication token for the key. */
     OH_HUKS_TAG_AUTH_TOKEN = OH_HUKS_TAG_TYPE_BYTES | 306,
-    /** 
+    /**
      *  Access control type. For details, see {@link OH_Huks_AuthAccessType}.
      *  This parameter must be set together with the user authentication type.
      */
@@ -571,7 +571,7 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_KEY_SECURE_SIGN_TYPE = OH_HUKS_TAG_TYPE_UINT | 308,
     /** Challenge type. For details, see {@link OH_Huks_ChallengeType}. */
     OH_HUKS_TAG_CHALLENGE_TYPE = OH_HUKS_TAG_TYPE_UINT | 309,
-    /** 
+    /**
      *  Position of the 8-byte valid value in a custom challenge.
      *  For details, see {@link OH_Huks_ChallengePosition}.
      */
