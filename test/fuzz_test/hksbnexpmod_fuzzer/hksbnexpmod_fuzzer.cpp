@@ -33,24 +33,21 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;
         }
 
         (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob x = { BLOB_SIZE, (uint8_t *)myData };
-        struct HksBlob a = { BLOB_SIZE, (uint8_t *)(myData + BLOB_SIZE) };
-        struct HksBlob e = { BLOB_SIZE, (uint8_t *)(myData + DOUBLE_BLOB_SIZE) };
-        struct HksBlob n = { BLOB_SIZE, (uint8_t *)(myData + TRIPLE_BLOB_SIZE) };
+        struct HksBlob x = { BLOB_SIZE, myData };
+        struct HksBlob a = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
+        struct HksBlob e = { BLOB_SIZE, static_cast<uint8_t *>(myData + DOUBLE_BLOB_SIZE) };
+        struct HksBlob n = { BLOB_SIZE, static_cast<uint8_t *>(myData + TRIPLE_BLOB_SIZE) };
 
         (void)HksBnExpMod(&x, &a, &e, &n);
 
-        if (myData != nullptr) {
-            HksFree(myData);
-        }
-
+        HksFree(myData);
         return true;
     }
 }

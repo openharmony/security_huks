@@ -105,24 +105,24 @@ static napi_value ParseInitParams(napi_env env, napi_callback_info info, InitAsy
 static int32_t InitOutParams(InitAsyncCtxPtr context)
 {
     /* free buffer use DeleteInitAsyncContext */
-    context->handle = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->handle = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->handle == nullptr) {
         HKS_LOG_E("malloc handle failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
-    context->handle->data = (uint8_t *)HksMalloc(HKS_MAX_TOKEN_SIZE);
+    context->handle->data = static_cast<uint8_t *>(HksMalloc(HKS_MAX_TOKEN_SIZE));
     if (context->handle->data == nullptr) {
         HKS_LOG_E("malloc handle data failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
     context->handle->size = HKS_MAX_TOKEN_SIZE;
 
-    context->token = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->token = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->token == nullptr) {
         HKS_LOG_E("malloc token failed");
         return HKS_ERROR_MALLOC_FAIL;
     }
-    context->token->data = (uint8_t *)HksMalloc(HKS_MAX_TOKEN_SIZE);
+    context->token->data = static_cast<uint8_t *>(HksMalloc(HKS_MAX_TOKEN_SIZE));
     if (context->token->data == nullptr) {
         HKS_LOG_E("malloc token data failed");
         return HKS_ERROR_MALLOC_FAIL;
@@ -170,7 +170,7 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
             }
             DeleteInitAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);

@@ -127,7 +127,7 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
             }
             DeleteIsKeyExistAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);

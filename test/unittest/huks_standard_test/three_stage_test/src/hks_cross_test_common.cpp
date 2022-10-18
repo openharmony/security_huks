@@ -32,7 +32,7 @@ int32_t HksCrossTestImportKey(const struct HksBlob *keyAlias, struct HksParamSet
     struct HksParamSet *secondParamSet, struct HksBlob *newKeyAlias)
 {
     uint8_t tmpPublicKey[CROSS_COMMON_SIZE] = {0};
-    struct HksBlob publicKey = { CROSS_COMMON_SIZE, (uint8_t *)tmpPublicKey };
+    struct HksBlob publicKey = { CROSS_COMMON_SIZE, tmpPublicKey };
     if (HksExportPublicKey(keyAlias, firstParamSet, &publicKey) != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
@@ -81,7 +81,8 @@ int32_t HksCrossTestAesDecrypt(const struct HksBlob *keyAlias,
         return HKS_FAILURE;
     }
 
-    ret = HksMemCmp((uint8_t *)g_inData.c_str(), plainText->data, plainText->size);
+    ret = HksMemCmp(const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())),
+        plainText->data, plainText->size);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AesEncry inData not equals plainText.");
     }
@@ -131,7 +132,8 @@ int32_t HksCrossTestRsaDecrypt(const struct HksBlob *keyAlias,
         return HKS_FAILURE;
     }
 
-    ret = HksMemCmp((uint8_t *)g_inData.c_str(), plainText->data, plainText->size);
+    ret = HksMemCmp(const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())),
+        plainText->data, plainText->size);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("RsaDecry inData not equals plainText.");
     }
@@ -170,7 +172,7 @@ int32_t HksCrossTestHmac(const struct HksBlob *keyAlias, const struct HksParamSe
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
     uint8_t tmpMac[CROSS_COMMON_SIZE] = {0};
@@ -270,7 +272,7 @@ int32_t HksCrossTestAgree(const struct HksBlob *keyAlias, const struct HksBlob *
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
@@ -302,7 +304,7 @@ int32_t HksCrossTestDerive(const struct HksBlob *keyAlias, const struct HksParam
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
