@@ -45,20 +45,6 @@ static enum HksTag g_idList[] = {
 };
 #endif
 
-void HksIpcServiceProvision(const struct HksBlob *srcData, const uint8_t *context)
-{
-    (void)srcData;
-    (void)context;
-    return;
-}
-
-void HksIpcServiceProvisionVerify(const struct HksBlob *srcData, const uint8_t *context)
-{
-    (void)srcData;
-    (void)context;
-    return;
-}
-
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };

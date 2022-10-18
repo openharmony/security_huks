@@ -533,16 +533,6 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
     return ret;
 }
 
-int32_t HksTrustCertsUnpack(const struct HksBlob *srcData, struct HksBlob *certChainBlob)
-{
-    uint32_t offset = 0;
-    int32_t ret = MallocBlobFromBuffer(srcData, certChainBlob, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("malloc certChainBlob data failed");
-    }
-    return ret;
-}
-
 static int32_t GetNullBlobParam(const struct HksParamSet *paramSet, struct HksParamOut *outParams)
 {
     if (GetTagType(outParams->tag) != HKS_TAG_TYPE_BYTES) {
