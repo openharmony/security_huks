@@ -639,7 +639,7 @@ static void FreeCertChainInfo(struct HksCertInfo **certs, uint32_t certNum)
 {
     if (*certs != NULL) {
         for (uint32_t i = 0; i < certNum; ++i) {
-            if ((*certs[i]).x509 != NULL) {
+            if ((*certs)[i].x509 != NULL) {
                 X509_free((*certs)[i].x509);
             }
         }
