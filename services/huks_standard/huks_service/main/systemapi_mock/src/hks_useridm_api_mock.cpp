@@ -78,7 +78,8 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
 {
     if (outSecInfo == nullptr)
         return HKS_ERROR_INVALID_ARGUMENT;
-    *outSecInfo = (struct SecInfoWrap *)HksMalloc(sizeof(struct SecInfoWrap) + sizeof(struct EnrolledInfoWrap));
+    *outSecInfo = static_cast<struct SecInfoWrap *>(HksMalloc(sizeof(struct SecInfoWrap) +
+        sizeof(struct EnrolledInfoWrap)));
     (*outSecInfo)->secureUid = SecInfoParams[g_ParamsId].secureUid;
     (*outSecInfo)->enrolledInfoLen = SecInfoParams[g_ParamsId].enrolledInfoLen;
     for (uint32_t i = 0; i < SecInfoParams[g_ParamsId].enrolledInfoLen; i++) {

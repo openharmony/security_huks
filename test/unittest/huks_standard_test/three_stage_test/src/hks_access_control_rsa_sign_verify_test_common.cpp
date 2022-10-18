@@ -70,7 +70,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
             break;
         }
 
-        ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+        ret = HksFreshParamSet(const_cast<struct HksParamSet *>(paramSet), false);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append fresh paramset failed");
             break;
@@ -102,7 +102,8 @@ static const uint32_t g_sleepTime = 1;
 int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleS };
@@ -146,7 +147,8 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
 int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleS };
@@ -187,7 +189,7 @@ int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParam
     return ret;
 }
 
-int32_t AddAuthToeknParamCustomCase(struct HksBlob &challengeBlob1, struct HksBlob &challengeBlob2,
+int32_t AddAuthToeknParamCustomCase(const struct HksBlob challengeBlob1, const struct HksBlob challengeBlob2,
     struct HksParam *signParams, const IDMParams &testIDMParams)
 {
     uint8_t challenge[TOKEN_CHALLENGE_LEN] = {0};
@@ -234,7 +236,8 @@ struct HksBlob outData2 = { RSA_COMMON_SIZE, outDataS2 };
 int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *paramSet1,
     struct HksBlob *keyAlias2, struct HksParamSet *paramSet2, const IDMParams &testIDMParams)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t handleS1[sizeof(uint64_t)] = {0};
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
@@ -284,7 +287,8 @@ int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksPa
 int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *paramSet1,
     struct HksBlob *keyAlias2, struct HksParamSet *paramSet2, const IDMParams &testIDMParams)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t handleS1[sizeof(uint64_t)] = {0};
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
@@ -365,7 +369,7 @@ int32_t HksAcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &testCase
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
 
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
     
@@ -423,7 +427,7 @@ int32_t HksAcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &testCa
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
 
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
     
@@ -516,7 +520,7 @@ int32_t HksAcRsaVerifyTestCustomCase (const TestAccessCaseRSAParams &testCasePar
         testCaseParams1.verifyParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
     char newKey1[] = "RSA_Sign_Verify_Import_KeyAlia1";
-    struct HksBlob newKeyAlias1 = { .size = strlen(newKey1), .data = (uint8_t *)newKey1 };
+    struct HksBlob newKeyAlias1 = { .size = strlen(newKey1), .data = reinterpret_cast<uint8_t *>(newKey1) };
     ret = HksImportKey(&newKeyAlias1, verifyParamSet1, publicKey1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
@@ -524,7 +528,7 @@ int32_t HksAcRsaVerifyTestCustomCase (const TestAccessCaseRSAParams &testCasePar
     ret = InitParamSet(&verifyParamSet2, testCaseParams2.verifyParams.data(), testCaseParams2.verifyParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
     char newKey2[] = "RSA_Sign_Verify_Import_KeyAlia2";
-    struct HksBlob newKeyAlias2 = { .size = strlen(newKey2), .data = (uint8_t *)newKey2 };
+    struct HksBlob newKeyAlias2 = { .size = strlen(newKey2), .data = reinterpret_cast<uint8_t *>(newKey2) };
     ret = HksImportKey(&newKeyAlias2, verifyParamSet2, publicKey2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 

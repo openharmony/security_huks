@@ -44,7 +44,7 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
         return nullptr;
     }
 
-    char *data = (char *)HksMalloc(length + 1);
+    char *data = static_cast<char *>(HksMalloc(length + 1));
     if (data == nullptr) {
         napi_throw_error(env, NULL, "could not alloc memory");
         HKS_LOG_E("could not alloc memory");
@@ -61,15 +61,15 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
         return nullptr;
     }
 
-    alias = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    alias = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (alias == nullptr) {
         HksFree(data);
         napi_throw_error(env, NULL, "could not alloc memory");
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
-    alias->data = (uint8_t *)data;
-    alias->size = (uint32_t)(length & UINT32_MAX);
+    alias->data = reinterpret_cast<uint8_t *>(data);
+    alias->size = static_cast<uint32_t>(length & UINT32_MAX);
 
     return GetInt32(env, 0);
 }
@@ -93,15 +93,15 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     if (length == 0) {
         HKS_LOG_I("the created memory length just 1 Byte");
         // the created memory length just 1 Byte
-        arrayBlob.data = (uint8_t *)HksMalloc(1);
+        arrayBlob.data = static_cast<uint8_t *>(HksMalloc(1));
     } else {
-        arrayBlob.data = (uint8_t *)HksMalloc(length);
+        arrayBlob.data = static_cast<uint8_t *>(HksMalloc(length));
     }
     if (arrayBlob.data == nullptr) {
         return nullptr;
     }
     (void)memcpy_s(arrayBlob.data, length, rawData, length);
-    arrayBlob.size = (uint32_t)length;
+    arrayBlob.size = static_cast<uint32_t>(length);
 
     return GetInt32(env, 0);
 }
@@ -127,7 +127,7 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             result = GetInt32(env, 0);
             break;
         case HKS_TAG_TYPE_ULONG:
-            NAPI_CALL(env, napi_get_value_int64(env, value, (int64_t *)&param.uint64Param));
+            NAPI_CALL(env, napi_get_value_int64(env, value, reinterpret_cast<int64_t *>(&param.uint64Param)));
             result = GetInt32(env, 0);
             break;
         case HKS_TAG_TYPE_BOOL:
@@ -284,7 +284,7 @@ napi_ref GetCallback(napi_env env, napi_value object)
 
 static napi_value GenerateAarrayBuffer(napi_env env, uint8_t *data, uint32_t size)
 {
-    uint8_t *buffer = (uint8_t *)HksMalloc(size);
+    uint8_t *buffer = static_cast<uint8_t *>(HksMalloc(size));
     if (buffer == nullptr) {
         return nullptr;
     }
@@ -432,7 +432,7 @@ napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, const u
     NAPI_CALL(env, napi_create_array(env, &array));
     for (uint32_t i = 0; i < blobCount; i++) {
         napi_value element = nullptr;
-        napi_create_string_latin1(env, (const char *)blob[i].data, blob[i].size, &element);
+        napi_create_string_latin1(env, reinterpret_cast<const char *>(blob[i].data), blob[i].size, &element);
         napi_set_element(env, array, i, element);
     }
     return array;
@@ -477,8 +477,8 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *
         return result;
     }
 
-    uint64_t tempHandle = *(uint64_t *)(handle->data);
-    uint32_t handleValue = (uint32_t)tempHandle; /* Temporarily only use 32 bit handle */
+    uint64_t tempHandle = *reinterpret_cast<uint64_t *>(handle->data);
+    uint32_t handleValue = static_cast<uint32_t>(tempHandle); /* Temporarily only use 32 bit handle */
 
     napi_value handlejs = nullptr;
     NAPI_CALL(env, napi_create_uint32(env, handleValue, &handlejs));
@@ -526,15 +526,15 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
         return nullptr;
     }
 
-    uint64_t handle = (uint64_t)handleTmp;
+    uint64_t handle = static_cast<uint64_t>(handleTmp);
 
-    handleBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
+    handleBlob = static_cast<struct HksBlob *>(HksMalloc(sizeof(struct HksBlob)));
     if (handleBlob == nullptr) {
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
 
-    handleBlob->data = (uint8_t *)HksMalloc(sizeof(uint64_t));
+    handleBlob->data = static_cast<uint8_t *>(HksMalloc(sizeof(uint64_t)));
     if (handleBlob->data == nullptr) {
         HKS_FREE_PTR(handleBlob);
         HKS_LOG_E("could not alloc memory");
@@ -655,7 +655,7 @@ napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob)
         return nullptr;
     }
 
-    keyDataBlob = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    keyDataBlob = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (keyDataBlob == nullptr) {
         HKS_LOG_E("could not alloc memory");
         return nullptr;

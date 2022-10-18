@@ -1216,7 +1216,7 @@ static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t key
     return ret;
 }
 
-static int32_t GetAndCheckFileCount(const char *path, uint32_t *fileCount, uint32_t *inputCount)
+static int32_t GetAndCheckFileCount(const char *path, uint32_t *fileCount, const uint32_t *inputCount)
 {
     int32_t ret = GetFileCount(path, fileCount);
     if (ret != HKS_SUCCESS) {
