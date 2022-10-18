@@ -475,7 +475,7 @@ enum OH_Huks_ChallengePosition {
  * @version 1.0
  */
 enum OH_Huks_SecureSignType {
-    /** 
+    /**
      *  The signature carries authentication information. This field is specified when a key
      *  is generated or imported. When the key is used to sign data, the data will be added with
      *  the authentication information and then be signed.
@@ -563,7 +563,7 @@ enum OH_Huks_Tag {
     /** Authentication token for the key. */
     OH_HUKS_TAG_AUTH_TOKEN = OH_HUKS_TAG_TYPE_BYTES | 306,
     /** 
-	 *  Access control type. For details, see {@link OH_Huks_AuthAccessType}.
+     *  Access control type. For details, see {@link OH_Huks_AuthAccessType}.
      *  This parameter must be set together with the user authentication type.
      */
     OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE = OH_HUKS_TAG_TYPE_UINT | 307,
@@ -572,7 +572,7 @@ enum OH_Huks_Tag {
     /** Challenge type. For details, see {@link OH_Huks_ChallengeType}. */
     OH_HUKS_TAG_CHALLENGE_TYPE = OH_HUKS_TAG_TYPE_UINT | 309,
     /** 
-	 *  Position of the 8-byte valid value in a custom challenge.
+     *  Position of the 8-byte valid value in a custom challenge.
      *  For details, see {@link OH_Huks_ChallengePosition}.
      */
     OH_HUKS_TAG_CHALLENGE_POS = OH_HUKS_TAG_TYPE_UINT | 310,

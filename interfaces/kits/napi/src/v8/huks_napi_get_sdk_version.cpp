@@ -49,7 +49,8 @@ napi_value HuksNapiGetSdkVersion(napi_env env, napi_callback_info info)
     }
 
     napi_value version = nullptr;
-    NAPI_CALL(env, napi_create_string_latin1(env, reinterpret_cast<const char *>(sdkVersion->data), NAPI_AUTO_LENGTH, &version));
+    NAPI_CALL(env, napi_create_string_latin1(env, reinterpret_cast<const char *>(sdkVersion->data),
+        NAPI_AUTO_LENGTH, &version));
     HksFree(sdkVersion->data);
     HksFree(sdkVersion);
     return version;
