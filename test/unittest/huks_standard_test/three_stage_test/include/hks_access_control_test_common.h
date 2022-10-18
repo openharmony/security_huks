@@ -97,10 +97,10 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
 int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
     const IDMParams &testIDMParams);
 
-int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
+int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams);
 
-int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
+int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams);
 
 int32_t AuthTokenImportKey();

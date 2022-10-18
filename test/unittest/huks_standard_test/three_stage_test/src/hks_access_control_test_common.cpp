@@ -403,16 +403,26 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
 }
 
-static int32_t UpdateForAgreeTest(const struct HksBlob *handle, struct HksParamSet *initParamSet,
-    struct HksBlob *publicKey)
+static int32_t UpdateAndFinishForAgreeTest(const struct HksBlob *handle, struct HksParamSet *initParamSet,
+    struct HksParamSet *finishParamSet, struct HksBlob *publicKey)
 {
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+
     uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
     struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
     int32_t ret = HksUpdate(handle, initParamSet, publicKey, &outDataUpdate);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint8_t outDataF[ECDH_COMMON_SIZE] = {0};
+    struct HksBlob outDataFinish = { ECDH_COMMON_SIZE, outDataF };
+    ret = HksFinish(handle, finishParamSet, (const struct HksBlob *)&inData, &outDataFinish);
     return ret;
 }
 
-int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
+int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams)
 {
     struct HksParamSet *genParamSet = nullptr;
@@ -434,9 +444,6 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
-
-    struct HksBlob inData = { g_inData.length(),
-        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     struct HksParamSet *initParamSet = nullptr;
     ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
     if (ret != HKS_SUCCESS) {
@@ -458,14 +465,7 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
         return ret;
     }
 
-    ret = UpdateForAgreeTest((const struct HksBlob *)&handle, initParamSet, &publicKey);
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
-
-    uint8_t outDataF[ECDH_COMMON_SIZE] = {0};
-    struct HksBlob outDataFinish = { ECDH_COMMON_SIZE, outDataF };
-    ret = HksFinish(&handle, finishParamSet, (const struct HksBlob *)&inData, &outDataFinish);
+    ret = UpdateAndFinishForAgreeTest((const struct HksBlob *)&handle, initParamSet, finishParamSet, &publicKey);
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
@@ -473,11 +473,30 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
 }
 
-int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
-    const IDMParams &testIDMParams)
+static int32_t UpdateAndFinishForDeriveTest(const struct HksBlob *handleDerive, struct HksParamSet *initParamSet,
+    struct HksParamSet *finishParamSet)
 {
     struct HksBlob inData = { g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+
+    uint8_t tmpOut[DERIVE_COMMON_SIZE] = {0};
+    struct HksBlob outData = { DERIVE_COMMON_SIZE, tmpOut };
+    int32_t ret = HksUpdate(handleDerive, initParamSet, &inData, &outData);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    uint8_t outDataD[DERIVE_COMMON_SIZE] = {0};
+    struct HksBlob outDataDerive = { DERIVE_COMMON_SIZE, outDataD };
+    ret = HksFinish(handleDerive, finishParamSet, &inData, &outDataDerive);
+    return ret;
+}
+
+
+int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
+    const IDMParams &testIDMParams)
+{
+    
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
@@ -512,23 +531,13 @@ int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const 
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
     }
-    // Update
-    uint8_t tmpOut[DERIVE_COMMON_SIZE] = {0};
-    struct HksBlob outData = { DERIVE_COMMON_SIZE, tmpOut };
-    ret = HksUpdate(&handleDerive, initParamSet, &inData, &outData);
+
+    ret = UpdateAndFinishForDeriveTest((const struct HksBlob *)&handleDerive, initParamSet, finishParamSet);
     if (ret != HKS_SUCCESS) {
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
     }
-    // Finish
-    uint8_t outDataD[DERIVE_COMMON_SIZE] = {0};
-    struct HksBlob outDataDerive = { DERIVE_COMMON_SIZE, outDataD };
-    ret = HksFinish(&handleDerive, finishParamSet, &inData, &outDataDerive);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKey(&keyAlias, genParamSet);
-        return ret;
-    }
-    
+
     HksDeleteKey(&keyAlias, genParamSet);
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
 }
