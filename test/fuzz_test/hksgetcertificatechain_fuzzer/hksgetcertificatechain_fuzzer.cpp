@@ -42,7 +42,8 @@ namespace OHOS {
 
         struct HksBlob keyAlias = { BLOB_SIZE, myData };
 
-        struct HksCertChain *certChain = reinterpret_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
+        struct HksCertChain *certChain =
+            reinterpret_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
         certChain->certsCount = CERT_COUNT;
         certChain->certs = reinterpret_cast<struct HksBlob *>(myData + BLOB_SIZE);
 

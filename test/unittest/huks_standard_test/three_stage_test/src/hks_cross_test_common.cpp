@@ -81,7 +81,8 @@ int32_t HksCrossTestAesDecrypt(const struct HksBlob *keyAlias,
         return HKS_FAILURE;
     }
 
-    ret = HksMemCmp(const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())), plainText->data, plainText->size);
+    ret = HksMemCmp(const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())),
+        plainText->data, plainText->size);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AesEncry inData not equals plainText.");
     }
@@ -131,7 +132,8 @@ int32_t HksCrossTestRsaDecrypt(const struct HksBlob *keyAlias,
         return HKS_FAILURE;
     }
 
-    ret = HksMemCmp(const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())), plainText->data, plainText->size);
+    ret = HksMemCmp(const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())),
+        plainText->data, plainText->size);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("RsaDecry inData not equals plainText.");
     }

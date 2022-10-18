@@ -102,7 +102,8 @@ static const uint32_t g_sleepTime = 1;
 int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
 {
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleS };
@@ -146,7 +147,8 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
 int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
 {
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleS };
@@ -234,7 +236,8 @@ struct HksBlob outData2 = { RSA_COMMON_SIZE, outDataS2 };
 int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *paramSet1,
     struct HksBlob *keyAlias2, struct HksParamSet *paramSet2, const IDMParams &testIDMParams)
 {
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t handleS1[sizeof(uint64_t)] = {0};
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
@@ -284,7 +287,8 @@ int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksPa
 int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *paramSet1,
     struct HksBlob *keyAlias2, struct HksParamSet *paramSet2, const IDMParams &testIDMParams)
 {
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t handleS1[sizeof(uint64_t)] = {0};
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
