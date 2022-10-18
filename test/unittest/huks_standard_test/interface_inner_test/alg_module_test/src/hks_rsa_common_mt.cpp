@@ -186,7 +186,8 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
     HksBlob cipherText = { .size = inLen, .data = static_cast<uint8_t *>(HksMalloc(inLen)) };
     ASSERT_NE(cipherText.data, nullptr);
 
-    struct HksBlob opensslRsaKeyInfo = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
+    struct HksBlob opensslRsaKeyInfo = { .size = SET_SIZE_4096,
+        .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(opensslRsaKeyInfo.data, nullptr);
 
     struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
@@ -306,13 +307,12 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
     EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
     EXPECT_EQ(HksGenerateKey(&authId, paramInSet, paramSetOut), HKS_SUCCESS);
     uint8_t opensslRsaKey[SET_SIZE_4096] = {0};
-    uint32_t opensslRsaKeyLen = SET_SIZE_4096;
-    struct HksBlob opensslRsaKeyInfo = { opensslRsaKeyLen, opensslRsaKey };
+    uint32_t rsaKeyLen = SET_SIZE_4096;
+    struct HksBlob opensslRsaKeyInfo = { rsaKeyLen, opensslRsaKey };
     EXPECT_EQ(HksExportPublicKey(&authId, paramInSet, &opensslRsaKeyInfo), HKS_SUCCESS);
 
     uint8_t rsaPublicKey[SET_SIZE_4096] = {0};
-    uint32_t rsaPublicKeyLen = SET_SIZE_4096;
-    struct HksBlob rsaPublicKeyInfo = { rsaPublicKeyLen, rsaPublicKey };
+    struct HksBlob rsaPublicKeyInfo = { rsaKeyLen, rsaPublicKey };
     EXPECT_EQ(X509ToRsaPublicKey(&opensslRsaKeyInfo, &rsaPublicKeyInfo), 0);
     HksBlob publicKey = { .size = rsaPublicKeyInfo.size,
         .data = static_cast<uint8_t *>(HksMalloc(rsaPublicKeyInfo.size)) };
@@ -396,8 +396,8 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
         ASSERT_NE(publicKey.data, nullptr);
         (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
-            testCaseParams.verifyResult);
+        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding,
+            testCaseParams.keyDigest), testCaseParams.verifyResult);
         HksFree(publicKey.data);
     }
 

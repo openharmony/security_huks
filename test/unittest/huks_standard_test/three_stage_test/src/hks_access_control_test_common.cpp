@@ -280,7 +280,8 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
 int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle,
     struct HksParamSet *initParamSet, uint32_t posNum)
 {
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t outDataS[DATA_COMMON_SIZE] = {0};
     struct HksBlob outDataSign = { DATA_COMMON_SIZE, outDataS };
     (void)posNum;
@@ -381,7 +382,8 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
         return ret;
     }
 
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     uint8_t out[HMAC_COMMON_SIZE] = {0};
     struct HksBlob outData = { HMAC_COMMON_SIZE, out };
     ret = TestUpdateFinish(&handleHMAC, initParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
@@ -433,7 +435,8 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
         return HKS_FAILURE;
     }
 
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     struct HksParamSet *initParamSet = nullptr;
     ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
     if (ret != HKS_SUCCESS) {
@@ -473,7 +476,8 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, const s
 int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, const struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams)
 {
-    struct HksBlob inData = { g_inData.length(), const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksBlob inData = { g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *initParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
