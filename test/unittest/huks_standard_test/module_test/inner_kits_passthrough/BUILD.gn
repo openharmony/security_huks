@@ -38,6 +38,8 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper/include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
+    "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
   ]
 }
 
@@ -69,6 +71,7 @@ huks_sources = [
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_dynamic_hal.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/hks_event_observer.cpp",
   "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock/src/hks_useridm_api_mock.cpp",
   "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper/src/hitrace_meter_wrapper.cpp",
   "//base/security/huks/utils/crypto_adapter/hks_client_service_adapter.c",
@@ -95,7 +98,11 @@ huks_core_sources = [
 ]
 
 config("soft_huks_config") {
-  defines = [ "_FORTIFY_SOURCE = 2" ]
+  defines = [
+    "_FORTIFY_SOURCE = 2",
+    "HAS_OS_ACCOUNT_PART",
+    "SUPPORT_COMMON_EVENT",
+  ]
 
   cflags = [ "-fvisibility=default" ]
 
@@ -167,5 +174,15 @@ ohos_static_library("libhukssdk_static") {
     "hitrace_native:hitrace_meter",
     "hitrace_native:libhitracechain",
     "hiviewdfx_hilog_native:libhilog",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_proxy",
   ]
+  if (support_jsapi) {
+    external_deps += [ "os_account:os_account_innerkits" ]
+    external_deps += [
+      "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
+      "ipc:ipc_core",
+    ]
+  }
 }
