@@ -114,10 +114,8 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
     ret = ConstructDataToCertChain(&certChain, &certParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksAttestKey fail, ret is %d!", ret);
-    }
-    ASSERT_TRUE(ret == HKS_FAILURE);
+
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
     ret = ValidateCertChainTest(certChain, g_idsParams, IDS_PARAM);
     ASSERT_TRUE(ret != HKS_SUCCESS);
     FreeCertChain(&certChain, certChain->certsCount);
