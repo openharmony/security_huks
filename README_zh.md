@@ -71,12 +71,12 @@ HUKS部件包含密钥管理及密钥的密码学操作等功能，如果仅需�
 
 ## 相关仓
 
-[加解密算法库框架](https://gitee.com/openharmony/security_crypto_framework)
+[security_crypto_framework](https://gitee.com/openharmony/security_crypto_framework)
 
-[证书管理](https://gitee.com/openharmony/security_certificate_manager)
+[security_certificate_manager](https://gitee.com/openharmony/security_certificate_manager)
 
-[**HUKS**](https://gitee.com/openharmony/security_huks)
+[**security_huks**](https://gitee.com/openharmony/security_huks)
 
-[OpenSSL](https://gitee.com/openharmony/third_party_openssl)
+[third_party_openssl](https://gitee.com/openharmony/third_party_openssl)
 
-[Mbed TLS](https://gitee.com/openharmony/third_party_mbedtls)
+[third_party_mbedtls](https://gitee.com/openharmony/third_party_mbedtls)
