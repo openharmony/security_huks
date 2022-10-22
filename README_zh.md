@@ -71,8 +71,6 @@ HUKS部件包含密钥管理及密钥的密码学操作等功能，如果仅需�
 
 ## 相关仓
 
-**安全基础子系统**
-
 [加解密算法库框架](https://gitee.com/openharmony/security_crypto_framework)
 
 [证书管理](https://gitee.com/openharmony/security_certificate_manager)
