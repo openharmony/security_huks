@@ -61,7 +61,7 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     int32_t ret = HKS_FAILURE;
 
@@ -84,7 +84,7 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
 
     /* 4. Import Key */
     char newKey[] = "ECC_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 

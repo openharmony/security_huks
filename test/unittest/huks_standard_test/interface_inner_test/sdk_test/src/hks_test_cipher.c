@@ -622,6 +622,10 @@ int32_t BaseTestCipher(uint32_t times, uint32_t index, uint32_t performTimes)
     ret = DecryptCipher(&testDecryptStruct);
     HKS_TEST_ASSERT(ret == g_testCipherParams[index].expectResult);
 
+    if (decryptedData == NULL || plainData == NULL) {
+        return HKS_FAILURE;
+    }
+
     HKS_TEST_ASSERT(plainData->size == decryptedData->size);
     HKS_TEST_ASSERT(memcmp(plainData->data, decryptedData->data, plainData->size) == 0);
     if (!((g_testCipherParams[index].genKeyParamSetParams.setKeyStorageFlag) &&

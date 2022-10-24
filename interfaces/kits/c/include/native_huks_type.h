@@ -20,7 +20,8 @@
  * @addtogroup HuksTypeApi
  * @{
  *
- * @brief Defines the macros, enumerated values, data structures, and error codes used by OpenHarmony Universal KeyStore (HUKS) APIs.
+ * @brief Defines the macros, enumerated values, data structures,
+ *    and error codes used by OpenHarmony Universal KeyStore (HUKS) APIs.
  *
  * @syscap SystemCapability.Security.Huks
  * @since 9
@@ -258,7 +259,8 @@ enum OH_Huks_KeyAlg {
 enum OH_Huks_AlgSuite {
     /** Key material format (Length-Value format), X25519 key agreement, and AES-256-GCM encryption and decryption.
      *  | x25519_plain_pubkey_length  (4 Byte) | x25519_plain_pubkey |  agreekey_aad_length (4 Byte) | agreekey_aad
-     *  |   agreekey_nonce_length     (4 Byte) |   agreekey_nonce    | agreekey_aead_tag_len(4 Byte) | agreekey_aead_tag
+     *  |   agreekey_nonce_length     (4 Byte) |   agreekey_nonce    |
+     *  |   agreekey_aead_tag_len     (4 Byte) |  agreekey_aead_tag  |
      *  |    kek_enc_data_length      (4 Byte) |    kek_enc_data     |    kek_aad_length    (4 Byte) | kek_aad
      *  |      kek_nonce_length       (4 Byte) |      kek_nonce      |   kek_aead_tag_len   (4 Byte) | kek_aead_tag
      *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
@@ -267,7 +269,8 @@ enum OH_Huks_AlgSuite {
 
     /** Key material format (Length-Value format), ECDH-p256 key agreement, and AES-256-GCM encryption and decryption.
      *  |  ECC_plain_pubkey_length    (4 Byte) |  ECC_plain_pubkey   |  agreekey_aad_length (4 Byte) | agreekey_aad
-     *  |   agreekey_nonce_length     (4 Byte) |   agreekey_nonce    | agreekey_aead_tag_len(4 Byte) | agreekey_aead_tag
+     *  |   agreekey_nonce_length     (4 Byte) |   agreekey_nonce    |
+     *  |   agreekey_aead_tag_len     (4 Byte) | agreekey_aead_tag   |
      *  |    kek_enc_data_length      (4 Byte) |    kek_enc_data     |    kek_aad_length    (4 Byte) | kek_aad
      *  |      kek_nonce_length       (4 Byte) |      kek_nonce      |   kek_aead_tag_len   (4 Byte) | kek_aead_tag
      *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
@@ -321,7 +324,8 @@ enum OH_Huks_KeyStorageType {
 };
 
 /**
- * @brief Enumerates the types of keys to import. By default, a public key is imported. This field is not required when a symmetric key is imported.
+ * @brief Enumerates the types of keys to import. By default,
+ *    a public key is imported. This field is not required when a symmetric key is imported.
  *
  * @since 9
  * @version 1.0
@@ -439,7 +443,9 @@ enum OH_Huks_AuthAccessType {
 enum OH_Huks_ChallengeType {
     /** Normal challenge, which is of 32 bytes by default. */
     OH_HUKS_CHALLENGE_TYPE_NORMAL = 0,
-    /** Custom challenge, which supports only one authentication for multiple keys. The valid value of a custom challenge is of 8 bytes. */
+    /** Custom challenge, which supports only one authentication for multiple keys.
+     *  The valid value of a custom challenge is of 8 bytes.
+     */
     OH_HUKS_CHALLENGE_TYPE_CUSTOM = 1,
     /** Challenge is not required. */
     OH_HUKS_CHALLENGE_TYPE_NONE = 2,
@@ -469,7 +475,11 @@ enum OH_Huks_ChallengePosition {
  * @version 1.0
  */
 enum OH_Huks_SecureSignType {
-    /** The signature carries authentication information. This field is specified when a key is generated or imported. When the key is used to sign data, the data will be added with the authentication information and then be signed. */
+    /**
+     *  The signature carries authentication information. This field is specified when a key
+     *  is generated or imported. When the key is used to sign data, the data will be added with
+     *  the authentication information and then be signed.
+     */
     OH_HUKS_SECURE_SIGN_WITH_AUTHINFO = 1,
 };
 
@@ -552,13 +562,19 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_AUTH_TIMEOUT = OH_HUKS_TAG_TYPE_UINT | 305,
     /** Authentication token for the key. */
     OH_HUKS_TAG_AUTH_TOKEN = OH_HUKS_TAG_TYPE_BYTES | 306,
-    /** Access control type. For details, see {@link OH_Huks_AuthAccessType}. This parameter must be set together with the user authentication type. */
+    /**
+     *  Access control type. For details, see {@link OH_Huks_AuthAccessType}.
+     *  This parameter must be set together with the user authentication type.
+     */
     OH_HUKS_TAG_KEY_AUTH_ACCESS_TYPE = OH_HUKS_TAG_TYPE_UINT | 307,
     /** Signature type for the key to be generated or imported. */
     OH_HUKS_TAG_KEY_SECURE_SIGN_TYPE = OH_HUKS_TAG_TYPE_UINT | 308,
     /** Challenge type. For details, see {@link OH_Huks_ChallengeType}. */
     OH_HUKS_TAG_CHALLENGE_TYPE = OH_HUKS_TAG_TYPE_UINT | 309,
-    /** Position of the 8-byte valid value in a custom challenge. For details, see {@link OH_Huks_ChallengePosition}. */
+    /**
+     *  Position of the 8-byte valid value in a custom challenge.
+     *  For details, see {@link OH_Huks_ChallengePosition}.
+     */
     OH_HUKS_TAG_CHALLENGE_POS = OH_HUKS_TAG_TYPE_UINT | 310,
 
     /** Tags for key attestation. The value range is 501 to 600. */
