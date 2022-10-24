@@ -120,7 +120,7 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
             }
             DeleteAbortAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);

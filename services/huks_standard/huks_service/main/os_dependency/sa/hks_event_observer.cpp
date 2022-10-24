@@ -37,7 +37,7 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
     uint32_t userSize = sizeof(userId);
-    uint8_t *userData = (uint8_t *)HksMalloc(userSize);
+    uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
     if (userData == nullptr) {
         HKS_LOG_E("user id malloc failed.");
         return;
@@ -47,7 +47,7 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
     processInfo->userId.data = userData;
 
     uint32_t uidSize = sizeof(uid);
-    uint8_t *uidData = (uint8_t *)HksMalloc(uidSize);
+    uint8_t *uidData = static_cast<uint8_t *>(HksMalloc(uidSize));
     if (uidData == nullptr) {
         HKS_LOG_E("uid malloc failed.");
         HksFree(userData);
@@ -62,7 +62,7 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
 static void GetUserId(int userId, struct HksBlob *userIdBlob)
 {
     uint32_t userIdSize = sizeof(userId);
-    uint8_t *userIdData = (uint8_t *)HksMalloc(userIdSize);
+    uint8_t *userIdData = static_cast<uint8_t *>(HksMalloc(userIdSize));
     if (userIdData == nullptr) {
         HKS_LOG_E("uid malloc failed.");
         return;

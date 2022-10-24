@@ -39,10 +39,8 @@ int32_t RSAAuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMPara
 int32_t AddAuthTokenParam(struct HksParamSet *paramSet, const struct HksParam *tmpParams);
 int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *ParamSet,
     const IDMParams &testIDMParams, struct HksBlob *inDataSign, struct HksBlob *outDataSign);
-int32_t AddAuthToeknParamCustomCase(struct HksBlob &challengeBlob1, struct HksBlob &challengeBlob2,
+int32_t AddAuthToeknParamCustomCase(const struct HksBlob challengeBlob1, const struct HksBlob challengeBlob2,
     struct HksParam *signParams, const IDMParams &testIDMParams);
-int32_t AddPosParamCustomCase(struct HksParam *signParams, struct HksParamSet *ParamSet,
-    struct HksParamSet *newParamSet, int32_t pos, const IDMParams &testIDMParams);
 int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *ParamSet1,
     struct HksBlob *keyAlias2, struct HksParamSet *ParamSet2, const IDMParams &testIDMParams);
 int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, struct HksParamSet *ParamSet1,

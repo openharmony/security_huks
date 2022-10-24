@@ -118,12 +118,12 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestCase(const struct HksBlob *keyAlias
 
     /* 2. Export Public Key */
     uint8_t tmpPublicKey[HKS_RSA_KEY_SIZE_1024] = {0};
-    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, (uint8_t *)tmpPublicKey };
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, tmpPublicKey };
     ret = HksExportPublicKey(keyAlias, genParamSet, &publicKey);
 
     /* 3. Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = (uint8_t *)tmpKey };
+    struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = reinterpret_cast<uint8_t *>(tmpKey) };
     ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
 
     /* 4. Encrypt Three Stage */
@@ -154,12 +154,12 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestCaseAbnormal(const struct HksBlob *
 
     /* 2. Export Public Key */
     uint8_t tmpPublicKey[HKS_RSA_KEY_SIZE_1024] = {0};
-    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, (uint8_t *)tmpPublicKey };
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, tmpPublicKey };
     ret = HksExportPublicKey(keyAlias, genParamSet, &publicKey);
 
     /* 3. Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = (uint8_t *)tmpKey };
+    struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = reinterpret_cast<uint8_t *>(tmpKey) };
     ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
 
     /* 4. Encrypt Three Stage */

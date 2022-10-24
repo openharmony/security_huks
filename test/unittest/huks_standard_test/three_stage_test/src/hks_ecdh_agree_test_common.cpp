@@ -24,7 +24,7 @@ int32_t HksEcdhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob 
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
     uint8_t handleU[sizeof(uint64_t)] = {0};

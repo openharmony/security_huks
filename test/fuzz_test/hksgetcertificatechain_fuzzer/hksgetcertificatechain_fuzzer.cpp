@@ -33,21 +33,22 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;
         }
 
         (void)memcpy_s(myData, size, data, size);
 
-        struct HksBlob keyAlias = { BLOB_SIZE, (uint8_t *)myData };
+        struct HksBlob keyAlias = { BLOB_SIZE, myData };
 
-        struct HksCertChain *certChain = (struct HksCertChain *)HksMalloc(sizeof(struct HksCertChain));
+        struct HksCertChain *certChain =
+            reinterpret_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
         certChain->certsCount = CERT_COUNT;
-        certChain->certs = (struct HksBlob *)(myData + BLOB_SIZE);
+        certChain->certs = reinterpret_cast<struct HksBlob *>(myData + BLOB_SIZE);
 
         struct HksParamSet *paramSet =
-        (struct HksParamSet *)(myData + BLOB_SIZE + sizeof(struct HksBlob) * CERT_COUNT);
+            reinterpret_cast<struct HksParamSet *>(myData + BLOB_SIZE + sizeof(struct HksBlob) * CERT_COUNT);
         paramSet->paramSetSize = size - BLOB_SIZE - sizeof(struct HksBlob) * CERT_COUNT;
 
         (void)HksGetCertificateChain(&keyAlias, paramSet, certChain);
@@ -56,10 +57,7 @@ namespace OHOS {
             HksFree(certChain);
         }
 
-        if (myData != nullptr) {
-            HksFree(myData);
-        }
-
+        HksFree(myData);
         return true;
     }
 }

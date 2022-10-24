@@ -121,7 +121,7 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context
             }
             DeleteDeleteKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
