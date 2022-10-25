@@ -95,7 +95,7 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
         uint32_t secInfoSize = sizeof(struct SecInfoWrap) + ((info.enrolledInfo.size() >
             DEFAULT_ENROLLED_INFO_LEN) ? sizeof(struct EnrolledInfoWrap) * (info.enrolledInfo.size() -
             DEFAULT_ENROLLED_INFO_LEN) : 0);
-        *outSecInfo = (struct SecInfoWrap *)HksMalloc(secInfoSize);
+        *outSecInfo = static_cast<struct SecInfoWrap *>(HksMalloc(secInfoSize));
         if (*outSecInfo == NULL) {
             HKS_LOG_E("Malloc enrolledInfo failed!");
             ret = HKS_ERROR_MALLOC_FAIL;

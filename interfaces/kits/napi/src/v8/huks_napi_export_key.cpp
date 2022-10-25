@@ -104,12 +104,12 @@ static napi_value ExportKeyWriteResult(napi_env env, ExportKeyAsyncContext conte
 
 static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
 {
-    context->key = (HksBlob *)HksMalloc(sizeof(HksBlob));
+    context->key = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->key == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
 
-    context->key->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    context->key->data = static_cast<uint8_t *>(HksMalloc(MAX_KEY_SIZE));
     if (context->key->data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -151,7 +151,7 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context
             }
             DeleteExportKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
