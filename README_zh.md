@@ -61,14 +61,15 @@ HUKS部件架构如下图所示：
 
 ### 接口说明
 
-[api接口文档](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-huks.md)
+[接口文档](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis/js-apis-huks.md)
 
 ### 使用说明
 
 [开发指导](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/security/huks-guidelines.md)
 
-HUKS部件包含密钥管理及密钥的密码学操作等功能，如果仅需要进行密钥的密码学操作而不需要密钥管理，建议使用[加解密算法库框架](https://gitee.com/openharmony/security_crypto_framework)。
-
+```
+注：HUKS部件包含密钥管理及密钥的密码学操作等功能，如果仅需要进行密钥的密码学操作而不需要密钥管理，建议使用[加解密算法库框架](https://gitee.com/openharmony/security_crypto_framework)。
+```
 ## 相关仓
 
 [security_crypto_framework](https://gitee.com/openharmony/security_crypto_framework)
