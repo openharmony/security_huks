@@ -1093,7 +1093,7 @@ static int32_t AesCtrCryptFinal(void **cryptoCtx, const struct HksBlob *message,
     mbedtls_cipher_free(ctrCtx);
     HKS_FREE_PTR(aesCtx->append);
     HKS_FREE_PTR(*cryptoCtx);
-    return HKS_SUCCESS;
+    return ret;
 }
 #endif
 

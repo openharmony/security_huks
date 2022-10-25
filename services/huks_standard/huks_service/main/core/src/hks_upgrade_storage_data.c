@@ -356,7 +356,7 @@ static int32_t UpgradeSingleKeyInfo(const struct HksBlob *keyInfo)
     return ret;
 }
 
-static bool IsBufferAllZero(uint8_t *buf, uint32_t len)
+static bool IsBufferAllZero(const uint8_t *buf, uint32_t len)
 {
     for (uint32_t i = 0; i < len; i++) {
         if (buf[i] != 0) {

@@ -195,7 +195,7 @@ int32_t HksStorageFileUnlockWrite(HksStorageFileLock *lock)
     return HksLockUnlockWrite(lock->lock);
 }
 
-static bool IsLockInList(HksStorageFileLock *lock)
+static bool IsLockInList(const HksStorageFileLock *lock)
 {
     HksStorageFileLock *iter = g_lockListFirst;
     while (iter != NULL) {

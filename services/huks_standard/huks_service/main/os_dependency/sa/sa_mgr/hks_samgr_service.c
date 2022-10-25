@@ -33,7 +33,7 @@ static BOOL Initialize(Service *service, Identity identity)
     return true;
 }
 
-static BOOL MessageHandle(Service *service, Request *request)
+static BOOL MessageHandle(Service *service, const Request *request)
 {
     (void)service;
     if (request == NULL) {

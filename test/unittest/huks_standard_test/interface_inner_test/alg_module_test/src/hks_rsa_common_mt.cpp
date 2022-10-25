@@ -38,7 +38,7 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = reinterpret_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
@@ -49,13 +49,15 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
 
     HksParam *pubKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
-    HksBlob publicKey = { .size = pubKeyExport->blob.size, .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+    HksBlob publicKey = { .size = pubKeyExport->blob.size, .data =
+        static_cast<uint8_t *>(HksMalloc(pubKeyExport->blob.size)) };
     ASSERT_NE(publicKey.data, nullptr);
     (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
     HksParam *priKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
-    HksBlob privateKey = { .size = priKeyExport->blob.size, .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+    HksBlob privateKey = { .size = priKeyExport->blob.size, .data =
+        static_cast<uint8_t *>(HksMalloc(priKeyExport->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
@@ -67,14 +69,14 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
     uint32_t inLength = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
-    HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
+    HksBlob cipherText = { .size = inLength, .data = static_cast<uint8_t *>(HksMalloc(inLength)) };
     ASSERT_NE(cipherText.data, nullptr);
 
     EXPECT_EQ(EncryptRsa(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
         testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
-        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
         ASSERT_NE(decryptedText.data, nullptr);
 
         EXPECT_EQ(
@@ -98,7 +100,7 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = reinterpret_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
@@ -112,32 +114,35 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
     HksParam *pubKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
-    HksBlob publicKey = { .size = pubKeyExport->blob.size, .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+    HksBlob publicKey = { .size = pubKeyExport->blob.size,
+        .data = static_cast<uint8_t *>(HksMalloc(pubKeyExport->blob.size)) };
     ASSERT_NE(publicKey.data, nullptr);
     (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
     HksParam *priKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
-    HksBlob privateKey = { .size = priKeyExport->blob.size, .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+    HksBlob privateKey = { .size = priKeyExport->blob.size,
+        .data = static_cast<uint8_t *>(HksMalloc(priKeyExport->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
-    (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
+    static_cast<void>(memcpy_s(privateKey.data, priKeyExport->blob.size,
+        priKeyExport->blob.data, priKeyExport->blob.size));
 
     HksBlob plainText = {
-        .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0]
+        .size = testCaseParams.hexData.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.hexData[0]))
     };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
     uint32_t inLength = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
-    HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
+    HksBlob cipherText = { .size = inLength, .data = static_cast<uint8_t *>(HksMalloc(inLength)) };
     ASSERT_NE(cipherText.data, nullptr);
 
     EXPECT_EQ(HksEncrypt(&publicKey, paramInSet, &plainText, &cipherText), testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
-        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
         ASSERT_NE(decryptedText.data, nullptr);
 
         EXPECT_EQ(
@@ -158,8 +163,8 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
 void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &testCaseParams)
 {
     struct HksBlob authId = {
-        .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0]
+        .size = testCaseParams.alias.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
     };
 
     struct HksParamSet *paramInSet = NULL;
@@ -171,20 +176,21 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
     EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
 
     HksBlob plainText = {
-        .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0]
+        .size = testCaseParams.hexData.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.hexData[0]))
     };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
     uint32_t inLen = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
-    HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+    HksBlob cipherText = { .size = inLen, .data = static_cast<uint8_t *>(HksMalloc(inLen)) };
     ASSERT_NE(cipherText.data, nullptr);
 
-    struct HksBlob opensslRsaKeyInfo = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    struct HksBlob opensslRsaKeyInfo = { .size = SET_SIZE_4096,
+        .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(opensslRsaKeyInfo.data, nullptr);
 
-    struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(x509Key.data, nullptr);
 
     EVP_PKEY *pkey = GenerateRsaKey(testCaseParams.keySize);
@@ -198,7 +204,7 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
 
     EXPECT_EQ(HksEncrypt(&authId, paramInSet, &plainText, &cipherText), testCaseParams.encryptResult);
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
-        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
         ASSERT_NE(decryptedText.data, nullptr);
 
         EXPECT_EQ(
@@ -225,7 +231,7 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
@@ -239,33 +245,35 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
     HksParam *pubKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
-    HksBlob publicKey = { .size = pubKeyExport->blob.size, .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+    HksBlob publicKey = { .size = pubKeyExport->blob.size, .data =
+        static_cast<uint8_t *>(HksMalloc(pubKeyExport->blob.size)) };
     ASSERT_NE(publicKey.data, nullptr);
     (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
     HksParam *priKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
-    HksBlob privateKey = { .size = priKeyExport->blob.size, .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+    HksBlob privateKey = { .size = priKeyExport->blob.size, .data =
+        static_cast<uint8_t *>(HksMalloc(priKeyExport->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
     HksBlob plainText = {
-        .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0]
+        .size = testCaseParams.hexData.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.hexData[0]))
     };
 
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
     uint32_t inLength = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
-    HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
+    HksBlob cipherText = { .size = inLength, .data = static_cast<uint8_t *>(HksMalloc(inLength)) };
     ASSERT_NE(cipherText.data, nullptr);
 
     EXPECT_EQ(EncryptRsa(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
         testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
-        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
         ASSERT_NE(decryptedText.data, nullptr);
         EXPECT_EQ(HksDecrypt(&privateKey, paramInSet, &cipherText, &decryptedText), testCaseParams.decryptResult);
         if (testCaseParams.decryptResult == HKS_SUCCESS) {
@@ -283,14 +291,14 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
 void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &testCaseParams)
 {
     struct HksBlob authId = {
-        .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0]
+        .size = testCaseParams.alias.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
     };
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
@@ -299,32 +307,32 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
     EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
     EXPECT_EQ(HksGenerateKey(&authId, paramInSet, paramSetOut), HKS_SUCCESS);
     uint8_t opensslRsaKey[SET_SIZE_4096] = {0};
-    uint32_t opensslRsaKeyLen = SET_SIZE_4096;
-    struct HksBlob opensslRsaKeyInfo = { opensslRsaKeyLen, opensslRsaKey };
+    uint32_t rsaKeyLen = SET_SIZE_4096;
+    struct HksBlob opensslRsaKeyInfo = { rsaKeyLen, opensslRsaKey };
     EXPECT_EQ(HksExportPublicKey(&authId, paramInSet, &opensslRsaKeyInfo), HKS_SUCCESS);
 
     uint8_t rsaPublicKey[SET_SIZE_4096] = {0};
-    uint32_t rsaPublicKeyLen = SET_SIZE_4096;
-    struct HksBlob rsaPublicKeyInfo = { rsaPublicKeyLen, rsaPublicKey };
+    struct HksBlob rsaPublicKeyInfo = { rsaKeyLen, rsaPublicKey };
     EXPECT_EQ(X509ToRsaPublicKey(&opensslRsaKeyInfo, &rsaPublicKeyInfo), 0);
-    HksBlob publicKey = { .size = rsaPublicKeyInfo.size, .data = (uint8_t *)HksMalloc(rsaPublicKeyInfo.size) };
+    HksBlob publicKey = { .size = rsaPublicKeyInfo.size,
+        .data = static_cast<uint8_t *>(HksMalloc(rsaPublicKeyInfo.size)) };
     ASSERT_NE(publicKey.data, nullptr);
     ASSERT_EQ(memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size), 0);
 
     HksBlob plainText = {
-        .size = (uint32_t)testCaseParams.hexData.length(),
-        .data = (uint8_t *)&testCaseParams.hexData[0]
+        .size = testCaseParams.hexData.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.hexData[0]))
     };
     HksParam *cipherLenBit = NULL;
     HksGetParam(paramInSet, HKS_TAG_KEY_SIZE, &cipherLenBit);
     uint32_t inLength = (cipherLenBit->uint32Param) / BIT_NUM_OF_UINT8;
-    HksBlob cipherText = { .size = inLength, .data = (uint8_t *)HksMalloc(inLength) };
+    HksBlob cipherText = { .size = inLength, .data = static_cast<uint8_t *>(HksMalloc(inLength)) };
     ASSERT_NE(cipherText.data, nullptr);
     EXPECT_EQ(EncryptRsa(&plainText, &cipherText, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
         testCaseParams.encryptResult);
 
     if (testCaseParams.encryptResult == HKS_SUCCESS) {
-        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+        HksBlob decryptedText = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
         ASSERT_NE(decryptedText.data, nullptr);
         EXPECT_EQ(HksDecrypt(&authId, paramInSet, &cipherText, &decryptedText), testCaseParams.decryptResult);
 
@@ -347,7 +355,7 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
@@ -361,15 +369,19 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
     HksParam *priKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
-    HksBlob privateKey = { .size = priKeyExport->blob.size, .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+    HksBlob privateKey = { .size = priKeyExport->blob.size,
+        .data = static_cast<uint8_t *>(HksMalloc(priKeyExport->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
-    HksBlob plainText = { .size = (uint32_t)strlen(hexData), .data = (uint8_t *)hexData };
+    HksBlob plainText = {
+        .size = strlen(hexData),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
+    };
 
-    HksBlob signData = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(signData.data, nullptr);
 
     EXPECT_EQ(HksSign(&privateKey, paramInSet, &plainText, &signData), testCaseParams.signResult);
@@ -377,12 +389,15 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
         HksParam *pubKeyExport = NULL;
         EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
-        HksBlob publicKey = { .size = pubKeyExport->blob.size, .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+        HksBlob publicKey = {
+            .size = pubKeyExport->blob.size,
+            .data = static_cast<uint8_t *>(HksMalloc(pubKeyExport->blob.size))
+        };
         ASSERT_NE(publicKey.data, nullptr);
         (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
-            testCaseParams.verifyResult);
+        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding,
+            testCaseParams.keyDigest), testCaseParams.verifyResult);
         HksFree(publicKey.data);
     }
 
@@ -395,8 +410,8 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
 void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCaseParams)
 {
     struct HksBlob authId = {
-        .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0]
+        .size = testCaseParams.alias.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
     };
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
@@ -415,9 +430,12 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
-    HksBlob plainText = { .size = (uint32_t)strlen(hexData), .data = (uint8_t *)hexData };
+    HksBlob plainText = {
+        .size =strlen(hexData),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
+    };
 
-    HksBlob signData = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(signData.data, nullptr);
 
     EXPECT_EQ(HksSign(&authId, paramInSet, &plainText, &signData), testCaseParams.signResult);
@@ -432,11 +450,13 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
         struct HksBlob rsaPublicKeyInfo = { rsaPublicKeyLen, rsaPublicKey };
         EXPECT_EQ(X509ToRsaPublicKey(&opensslRsaKeyInfo, &rsaPublicKeyInfo), 0);
 
-        HksBlob publicKey = { .size = rsaPublicKeyInfo.size, .data = (uint8_t *)HksMalloc(rsaPublicKeyInfo.size) };
+        HksBlob publicKey = { .size = rsaPublicKeyInfo.size,
+            .data = static_cast<uint8_t *>(HksMalloc(rsaPublicKeyInfo.size)) };
         ASSERT_NE(publicKey.data, nullptr);
         ASSERT_EQ(memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size), 0);
 
-        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
+        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData,
+            &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
             testCaseParams.verifyResult);
         HksFree(publicKey.data);
     }
@@ -453,7 +473,7 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
@@ -467,15 +487,19 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
     HksParam *priKeyExport = NULL;
     EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
-    HksBlob privateKey = { .size = priKeyExport->blob.size, .data = (uint8_t *)HksMalloc(priKeyExport->blob.size) };
+    HksBlob privateKey = { .size = priKeyExport->blob.size,
+        .data = static_cast<uint8_t *>(HksMalloc(priKeyExport->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
     (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
-    HksBlob plainText = { .size = (uint32_t)strlen(hexData), .data = (uint8_t *)hexData };
+    HksBlob plainText = {
+        .size = strlen(hexData),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
+    };
 
-    HksBlob signData = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(signData.data, nullptr);
 
     EXPECT_EQ(OpensslSignRsa(&plainText, &signData, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
@@ -484,7 +508,8 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
         HksParam *pubKeyExport = NULL;
         EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
-        HksBlob publicKey = { .size = pubKeyExport->blob.size, .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size) };
+        HksBlob publicKey = { .size = pubKeyExport->blob.size,
+            .data = static_cast<uint8_t *>(HksMalloc(pubKeyExport->blob.size)) };
         ASSERT_NE(publicKey.data, nullptr);
         (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
         EXPECT_EQ(HksVerify(&publicKey, paramInSet, &plainText, &signData), testCaseParams.verifyResult);
@@ -499,8 +524,8 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
 void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCaseParams)
 {
     struct HksBlob authId = {
-        .size = (uint32_t)testCaseParams.alias.length(),
-        .data = (uint8_t *)&testCaseParams.alias[0]
+        .size = testCaseParams.alias.length(),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
     };
 
     struct HksParamSet *paramInSet = NULL;
@@ -513,15 +538,19 @@ void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCa
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
-    HksBlob plainText = { .size = (uint32_t)strlen(hexData), .data = (uint8_t *)hexData };
+    HksBlob plainText = {
+        .size = static_cast<uint32_t>(strlen(hexData)),
+        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
+    };
 
-    HksBlob signData = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(signData.data, nullptr);
 
-    struct HksBlob opensslRsaKeyInfo = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    struct HksBlob opensslRsaKeyInfo = { .size = SET_SIZE_4096,
+        .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(opensslRsaKeyInfo.data, nullptr);
 
-    struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
+    struct HksBlob x509Key = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(x509Key.data, nullptr);
 
     EVP_PKEY *pkey = GenerateRsaKey(testCaseParams.keySize);

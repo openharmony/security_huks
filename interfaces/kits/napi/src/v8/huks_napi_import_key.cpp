@@ -134,7 +134,7 @@ static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context
             }
             DeleteImportKeyAsyncContext(env, context);
         },
-        (void *)context,
+        static_cast<void *>(context),
         &context->asyncWork);
 
     napi_status status = napi_queue_async_work(env, context->asyncWork);
