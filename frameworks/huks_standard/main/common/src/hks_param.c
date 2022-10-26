@@ -121,7 +121,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_KEY_ACCESS_TIME,
 };
 
-enum HksTagType GetTagType(enum HksTag tag)
+HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
 {
     return (enum HksTagType)((uint32_t)tag & (uint32_t)HKS_TAG_TYPE_MASK);
 }
@@ -137,7 +137,7 @@ static bool IsValidTag(uint32_t tag)
     return false;
 }
 
-int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
+HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
 {
     if (paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -247,7 +247,7 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
+HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
 {
     if (paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
@@ -381,12 +381,16 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
     return HKS_ERROR_PARAM_NOT_EXIST;
 }
 
-int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
+HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
     uint32_t inParamSetSize, struct HksParamSet **outParamSet)
 {
     int32_t ret = HksCheckParamSet(inParamSet, inParamSetSize);
     if (ret != HKS_SUCCESS) {
         return ret;
+    }
+
+    if (outParamSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
     }
 
     uint32_t size = inParamSet->paramSetSize;
@@ -406,8 +410,12 @@ int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param)
+HKS_API_EXPORT int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param)
 {
+    if (baseParam == NULL || param == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
     if (baseParam->tag != param->tag) {
         HKS_LOG_E("unmatch param type!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -439,9 +447,18 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
     }
 }
 
-int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
+HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
     const struct HksParamSet *targetParamSet)
 {
+    if (params == NULL || targetParamSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksCheckParamSet(targetParamSet, targetParamSet->paramSetSize);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    
     for (uint32_t i = 0; i < targetParamSet->paramsCnt; ++i) {
         for (uint32_t j = 0; j < paramsCnt; ++j) {
             if (params[j].tag == targetParamSet->params[i].tag) {

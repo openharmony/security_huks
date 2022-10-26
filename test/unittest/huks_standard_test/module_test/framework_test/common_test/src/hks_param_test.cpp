@@ -199,6 +199,23 @@ HWTEST_F(HksParamTest, HksParamTest009, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HksParamTest.HksParamTest010
+ * @tc.desc: tdd HksGetParamSet, expecting HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksParamTest, HksParamTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksParamTest010");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS)<< "HksInitParamSet failed, ret = " << ret;
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS)<< "HksBuildParamSet failed, ret = " << ret;
+    ret = HksGetParamSet(paramSet, paramSet->paramSetSize, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER)<< "HksGetParamSet failed, ret = " << ret;
+}
+
+/**
  * @tc.name: HksParamTest.HksParamTest011
  * @tc.desc: tdd HksFreeParamSet
  * @tc.type: FUNC
@@ -291,5 +308,48 @@ HWTEST_F(HksParamTest, HksParamTest017, TestSize.Level0)
     paramSet->paramSetSize = 0;
     ret = HksFreshParamSet(nullptr, true);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER)<< "HksFreshParamSet failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksParamTest.HksParamTest018
+ * @tc.desc: tdd HksCheckIsTagAlreadyExist, expecting HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksParamTest, HksParamTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksParamTest018");
+    int32_t ret = HksCheckIsTagAlreadyExist(nullptr, 0, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER)<< "HksCheckIsTagAlreadyExist failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksParamTest.HksParamTest019
+ * @tc.desc: tdd HksCheckIsTagAlreadyExist, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksParamTest, HksParamTest019, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksParamTest019");
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS)<< "HksInitParamSet failed, ret = " << ret;
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS)<< "HksBuildParamSet failed, ret = " << ret;
+    paramSet->paramSetSize = 0;
+    struct HksParam param = { 0 };
+    ret = HksCheckIsTagAlreadyExist(&param, 0, paramSet);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT)<< "HksCheckIsTagAlreadyExist failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksParamTest.HksParamTest020
+ * @tc.desc: tdd HksCheckParamMatch, expecting HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksParamTest, HksParamTest020, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksParamTest020");
+    int32_t ret = HksCheckParamMatch(nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER)<< "HksCheckParamMatch failed, ret = " << ret;
 }
 }
