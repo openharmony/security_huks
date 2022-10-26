@@ -184,7 +184,7 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
 {
     struct HksBlob inData = {
         g_inData.length(),
-        (uint8_t *)g_inData.c_str()
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
     /* 1. Generate Key */
