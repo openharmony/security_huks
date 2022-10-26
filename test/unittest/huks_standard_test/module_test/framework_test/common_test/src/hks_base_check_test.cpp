@@ -298,6 +298,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest016, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksCheckCipherMaterialParams(HKS_ALG_AES, &values, paramSet);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_AAD) << "HksCheckCipherMaterialParams failed, ret = " << ret;
+    HksFreeParamSet(&paramSet);
 }
 
 /**
@@ -328,6 +329,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest017, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksCheckCipherMaterialParams(HKS_ALG_AES, &values, paramSet);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_NONCE) << "HksCheckCipherMaterialParams failed, ret = " << ret;
+    HksFreeParamSet(&paramSet);
 }
 
 /**
@@ -350,5 +352,6 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest018, TestSize.Level0)
     uint32_t keySize = 0;
     ret = HksGetKeySize( HKS_ALG_RSA, &key, &keySize);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_FILE) << "HksGetKeySize failed, ret = " << ret;
+    HksFreeParamSet(&paramSet);
 }
 }

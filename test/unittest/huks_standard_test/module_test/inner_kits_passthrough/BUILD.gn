@@ -49,6 +49,7 @@ huks_sources = [
   "//base/security/huks/frameworks/huks_standard/main/common/src/hks_check_paramset.c",
   "//base/security/huks/frameworks/huks_standard/main/common/src/hks_common_check.c",
   "//base/security/huks/frameworks/huks_standard/main/common/src/hks_crypto_adapter.c",
+  "//base/security/huks/frameworks/huks_standard/main/common/src/hks_errcode_adapter.c",
   "//base/security/huks/frameworks/huks_standard/main/common/src/hks_param.c",
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_local_engine.c",
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_verifier.c",
