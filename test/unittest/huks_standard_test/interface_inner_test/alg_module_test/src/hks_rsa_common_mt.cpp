@@ -417,7 +417,7 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
     HksInitParamSet(&paramInSet);
     ASSERT_NE(paramInSet, nullptr);
 
-    struct HksParamSet *paramSetOut = (struct HksParamSet *)HksMalloc(SET_SIZE_4096);
+    struct HksParamSet *paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;

@@ -33,7 +33,7 @@ int32_t RSAAuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMPara
         HKS_LOG_E("AuthTokenSign Failed.");
         return ret;
     }
-    uint8_t *authToken = (uint8_t *)HksMalloc(AUTH_TOKEN_LEN);
+    uint8_t *authToken = static_cast<uint8_t *>(HksMalloc(AUTH_TOKEN_LEN));
     for (uint32_t i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
     }
