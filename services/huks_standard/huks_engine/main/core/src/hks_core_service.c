@@ -1469,7 +1469,7 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
     return ret;
 }
 
-int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur, uint32_t *alg)
+static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur, uint32_t *alg)
 {
     uint32_t i;
     if (paramSet == NULL) {

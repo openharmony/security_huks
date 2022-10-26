@@ -266,7 +266,7 @@ HKS_API_EXPORT int32_t HksInitParamSet(struct HksParamSet **paramSet)
 {
     if (paramSet == NULL) {
         HKS_LOG_E("invalid init params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_ERROR_NULL_POINTER;
     }
 
     *paramSet = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_PARAM_SET_SIZE);
@@ -327,7 +327,7 @@ HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet)
     HKS_FREE_PTR(*paramSet);
 }
 
-int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
+static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
 {
     uint32_t size = paramSet->paramSetSize;
     uint32_t offset = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramSet->paramsCnt;
