@@ -13,26 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef HKS_PARAM_TEST_H
-#define HKS_PARAM_TEST_H
+#ifndef HKS_CORE_SERVICE_TEST_H
+#define HKS_CORE_SERVICE_TEST_H
 
-namespace Unittest::HksFrameworkCommonParamTest {
-int HksParamTest001(void);
-int HksParamTest002(void);
-int HksParamTest003(void);
-int HksParamTest004(void);
-int HksParamTest005(void);
-int HksParamTest006(void);
-int HksParamTest007(void);
-int HksParamTest008(void);
-int HksParamTest009(void);
-int HksParamTest010(void);
-int HksParamTest011(void);
-int HksParamTest012(void);
-int HksParamTest013(void);
-int HksParamTest014(void);
-int HksParamTest015(void);
-int HksParamTest016(void);
-int HksParamTest017(void);
+namespace Unittest::HksCoreServiceTest {
+int HksCoreServiceTest001(void);
+int HksCoreServiceTest002(void);
+int HksCoreServiceTest003(void);
+int HksCoreServiceTest004(void);
+int HksCoreServiceTest005(void);
+int HksCoreServiceTest006(void);
+int HksCoreServiceTest007(void);
+int HksCoreServiceTest008(void);
+int HksCoreServiceTest009(void);
 }
-#endif // HKS_PARAM_TEST_H
+#endif

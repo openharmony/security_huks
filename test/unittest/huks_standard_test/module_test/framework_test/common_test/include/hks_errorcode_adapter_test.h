@@ -13,26 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef HKS_PARAM_TEST_H
-#define HKS_PARAM_TEST_H
+#ifndef HKS_ERROR_CODE_ADAPTER_TEST_H
+#define HKS_ERROR_CODE_ADAPTER_TEST_H
 
-namespace Unittest::HksFrameworkCommonParamTest {
-int HksParamTest001(void);
-int HksParamTest002(void);
-int HksParamTest003(void);
-int HksParamTest004(void);
-int HksParamTest005(void);
-int HksParamTest006(void);
-int HksParamTest007(void);
-int HksParamTest008(void);
-int HksParamTest009(void);
-int HksParamTest010(void);
-int HksParamTest011(void);
-int HksParamTest012(void);
-int HksParamTest013(void);
-int HksParamTest014(void);
-int HksParamTest015(void);
-int HksParamTest016(void);
-int HksParamTest017(void);
+namespace Unittest::HksErrorCodeAdapterTest {
+int HksErrorCodeAdapterTest001(void);
+int HksErrorCodeAdapterTest002(void);
+int HksErrorCodeAdapterTest003(void);
 }
-#endif // HKS_PARAM_TEST_H
+#endif // HKS_ERROR_CODE_ADAPTER_TEST_H
