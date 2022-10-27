@@ -81,7 +81,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest002, TestSize.Level0)
     struct ParamsValues values;
     struct Params param = { true, HKS_MODE_OFB };
     values.mode = param;
-    int32_t ret = HksCheckCihperData( 0, HKS_ALG_SM4, &values, nullptr, nullptr);
+    int32_t ret = HksCheckCihperData(0, HKS_ALG_SM4, &values, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_MODE) << "HksCheckCihperData failed, ret = " << ret;
 }
 
@@ -93,7 +93,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest002, TestSize.Level0)
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest003");
-    int32_t ret = HksCheckCihperData( 0, HKS_ALG_PBKDF2, nullptr, nullptr, nullptr);
+    int32_t ret = HksCheckCihperData(0, HKS_ALG_PBKDF2, nullptr, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ALGORITHM) << "HksCheckCihperData failed, ret = " << ret;
 }
 
@@ -105,7 +105,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest003, TestSize.Level0)
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest004");
-    int32_t ret = HksCheckCipherMutableParams( 0, HKS_ALG_SM4, nullptr);
+    int32_t ret = HksCheckCipherMutableParams(0, HKS_ALG_SM4, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckCipherMutableParams failed, ret = " << ret;
 }
 
@@ -124,7 +124,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest005, TestSize.Level0)
     values.mode = modeParam;
     struct Params paddingParam = { true, HKS_PADDING_NONE };
     values.padding = paddingParam;
-    int32_t ret = HksCheckCipherMutableParams( HKS_CMD_ID_ENCRYPT, HKS_ALG_SM4, &values);
+    int32_t ret = HksCheckCipherMutableParams(HKS_CMD_ID_ENCRYPT, HKS_ALG_SM4, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "HksCheckCipherMutableParams failed, ret = " << ret;
 }
 
@@ -137,7 +137,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest006");
     
-    int32_t ret = HksCheckSignature( 0, HKS_ALG_RSA, HKS_ECC_KEY_SIZE_256, nullptr);
+    int32_t ret = HksCheckSignature(0, HKS_ALG_RSA, HKS_ECC_KEY_SIZE_256, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckSignature failed, ret = " << ret;
 }
 
@@ -150,7 +150,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest007, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest007");
     
-    int32_t ret = HksCheckSignature( 0, HKS_ALG_ECC, HKS_RSA_KEY_SIZE_1024, nullptr);
+    int32_t ret = HksCheckSignature(0, HKS_ALG_ECC, HKS_RSA_KEY_SIZE_1024, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckSignature failed, ret = " << ret;
 }
 
@@ -162,7 +162,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest007, TestSize.Level0)
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest008, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest008");
-    int32_t ret = HksCheckSignature( 0, HKS_ALG_SM2, HKS_RSA_KEY_SIZE_1024, nullptr);
+    int32_t ret = HksCheckSignature(0, HKS_ALG_SM2, HKS_RSA_KEY_SIZE_1024, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckSignature failed, ret = " << ret;
 }
 
@@ -177,7 +177,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest009, TestSize.Level0)
     struct ParamsValues values;
     struct Params param = { true, HKS_KEY_PURPOSE_ENCRYPT };
     values.purpose = param;
-    int32_t ret = CheckImportMutableParams( HKS_ALG_SM2, &values);
+    int32_t ret = CheckImportMutableParams(HKS_ALG_SM2, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "CheckImportMutableParams failed, ret = " << ret;
 }
 
@@ -192,7 +192,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest010, TestSize.Level0)
     struct ParamsValues values;
     struct Params param = { true, HKS_KEY_PURPOSE_ENCRYPT };
     values.purpose = param;
-    int32_t ret = CheckImportMutableParams( HKS_ALG_ECC, &values);
+    int32_t ret = CheckImportMutableParams(HKS_ALG_ECC, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "CheckImportMutableParams failed, ret = " << ret;
 }
 
@@ -207,7 +207,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest011, TestSize.Level0)
     struct ParamsValues values;
     struct Params param = { true, HKS_KEY_PURPOSE_DERIVE };
     values.purpose = param;
-    int32_t ret = CheckImportMutableParams( HKS_ALG_RSA, &values);
+    int32_t ret = CheckImportMutableParams(HKS_ALG_RSA, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "CheckImportMutableParams failed, ret = " << ret;
 }
 
@@ -224,7 +224,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest012, TestSize.Level0)
     values.purpose = purParam;
     struct Params paddingParam = { true, HKS_PADDING_PSS };
     values.padding = paddingParam;
-    int32_t ret = HksCheckGenKeyMutableParams( HKS_ALG_RSA, &values);
+    int32_t ret = HksCheckGenKeyMutableParams(HKS_ALG_RSA, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "CheckImportMutableParams failed, ret = " << ret;
 }
 
@@ -243,7 +243,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest013, TestSize.Level0)
     values.purpose = purParam;
     struct Params paddingParam = { true, HKS_PADDING_PSS };
     values.padding = paddingParam;
-    int32_t ret = HksCheckGenKeyMutableParams( HKS_ALG_AES, &values);
+    int32_t ret = HksCheckGenKeyMutableParams(HKS_ALG_AES, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "CheckImportMutableParams failed, ret = " << ret;
 }
 
@@ -257,7 +257,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest014, TestSize.Level0)
     HKS_LOG_I("enter HksBaseCheckTest014");
     struct HksBlob key = { .size = 0, .data = nullptr};
     uint32_t keySize = 0;
-    int32_t ret = HksGetKeySize( HKS_ALG_RSA, &key, &keySize);
+    int32_t ret = HksGetKeySize(HKS_ALG_RSA, &key, &keySize);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_FILE) << "HksGetKeySize failed, ret = " << ret;
 }
 
@@ -271,7 +271,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest015, TestSize.Level0)
     HKS_LOG_I("enter HksBaseCheckTest015");
     struct HksBlob key = { .size = sizeof(struct HksParamSet), .data = nullptr};
     uint32_t keySize = 0;
-    int32_t ret = HksGetKeySize( HKS_ALG_RSA, &key, &keySize);
+    int32_t ret = HksGetKeySize(HKS_ALG_RSA, &key, &keySize);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_FILE) << "HksGetKeySize failed, ret = " << ret;
 }
 
@@ -350,7 +350,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest018, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob key = { .size = sizeof(paramSet), .data = (uint8_t *)paramSet};
     uint32_t keySize = 0;
-    ret = HksGetKeySize( HKS_ALG_RSA, &key, &keySize);
+    ret = HksGetKeySize(HKS_ALG_RSA, &key, &keySize);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_FILE) << "HksGetKeySize failed, ret = " << ret;
     HksFreeParamSet(&paramSet);
 }

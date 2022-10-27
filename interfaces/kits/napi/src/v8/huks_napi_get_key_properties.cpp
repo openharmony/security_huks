@@ -117,7 +117,7 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
         [](napi_env env, void *data) {
             GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
 
-            context->paramSetOut = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE);
+            context->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
             if (context->paramSetOut != nullptr) {
                 context->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
                 context->paramSetOut->paramsCnt = 0;

@@ -438,7 +438,7 @@ static napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, 
     NAPI_CALL(env, napi_create_array(env, &array));
     for (uint32_t i = 0; i < blobCount; i++) {
         napi_value element = nullptr;
-        napi_create_string_latin1(env, (const char *)blob[i].data, blob[i].size, &element);
+        napi_create_string_latin1(env, reinterpret_cast<const char *>(blob[i].data), blob[i].size, &element);
         napi_set_element(env, array, i, element);
     }
     return array;
