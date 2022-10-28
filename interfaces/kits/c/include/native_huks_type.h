@@ -637,6 +637,9 @@ enum OH_Huks_Tag {
     /** Key domain. */
     OH_HUKS_TAG_KEY_DOMAIN = OH_HUKS_TAG_TYPE_UINT | 1011,
 
+    /** Authenticated Encryption. */
+    OH_HUKS_TAG_AE_TAG = OH_HUKS_TAG_TYPE_BYTES | 10009,
+
     /**
      * 11000 to 12000 are reserved.
      *
