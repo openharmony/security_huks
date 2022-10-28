@@ -363,7 +363,7 @@ int32_t HksRemoveDir(const char *dirPath)
     return HKS_SUCCESS;
 }
 
-int32_t HksDeletDirPartTwo(const char *path)
+static int32_t HksDeletDirPartTwo(const char *path)
 {
     int32_t ret;
     char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
@@ -401,7 +401,7 @@ int32_t HksDeletDirPartTwo(const char *path)
     return ret;
 }
 
-int32_t HksDeletDirPartOne(const char *path)
+static int32_t HksDeletDirPartOne(const char *path)
 {
     int32_t ret;
     char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
