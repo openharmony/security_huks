@@ -47,6 +47,8 @@ namespace Unittest::AttestKey {
 #define UDID_DATA "hi_udid_data"
 #define SN_DATA "hi_sn_data"
 #define DEVICE_ID "test_device_id"
+#define APP_ID "test_app_id"
+#define ATTEST_BRAND "brand"
 
 void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos);
 
