@@ -50,6 +50,7 @@ ohos_shared_library("huks_ndk") {
   ]
 
   sources = [
+    "//base/security/huks/interfaces/kits/c/src/native_huks_api_adapter.c",
     "src/native_huks_api.c",
     "src/native_huks_param.c",
   ]
