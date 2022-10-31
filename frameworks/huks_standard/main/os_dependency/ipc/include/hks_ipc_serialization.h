@@ -67,7 +67,7 @@ int32_t HksCertificateChainPack(struct HksBlob *destData, const struct HksBlob *
 int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool needEncode,
     struct HksCertChain *certChain);
 
-int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet);
+int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet);
 
 #ifdef __cplusplus
 }
