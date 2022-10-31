@@ -531,7 +531,7 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
     return HKS_SUCCESS;
 }
 
-int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet)
+int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet)
 {
     struct HksParamSet *newParamSet = NULL;
 
