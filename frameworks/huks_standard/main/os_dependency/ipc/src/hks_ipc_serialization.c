@@ -531,22 +531,7 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
     return HKS_SUCCESS;
 }
 
-static int32_t AddParams(struct HksParam *params, uint32_t cnt, struct HksParamSet *paramSet)
-{
-    uint8_t tmpData = 0;
-    struct HksBlob tmpBlob = { sizeof(tmpData), &tmpData };
-
-    for (uint32_t i = 0; i < cnt; ++i) {
-        if ((GetTagType(params[i].tag) == HKS_TAG_TYPE_BYTES) &&
-            (params[i].blob.size == 0 || params[i].blob.data == NULL)) {
-            params[i].tag += HKS_PARAM_BUFFER_NULL_INTERVAL;
-            params[i].blob = tmpBlob;
-        }
-    }
-    return HksAddParams(paramSet, params, cnt);
-}
-
-int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet)
+int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet)
 {
     struct HksParamSet *newParamSet = NULL;
 
@@ -557,7 +542,17 @@ int32_t HksParamsToParamSet(const struct HksParam *params, uint32_t cnt, struct 
     }
 
     do {
-        ret = AddParams((struct HksParam *)params, cnt, newParamSet);
+        uint8_t tmpData = 0;
+        struct HksBlob tmpBlob = { sizeof(tmpData), &tmpData };
+
+        for (uint32_t i = 0; i < cnt; ++i) {
+            if ((GetTagType(params[i].tag) == HKS_TAG_TYPE_BYTES) &&
+                (params[i].blob.size == 0 || params[i].blob.data == NULL)) {
+                params[i].tag += HKS_PARAM_BUFFER_NULL_INTERVAL;
+                params[i].blob = tmpBlob;
+            }
+        }
+        ret = HksAddParams(newParamSet, params, cnt);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("add in params failed");
             break;
