@@ -100,6 +100,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParam *keySizeParam = nullptr;
     ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
     ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
     HksFreeParamSet(&paramOutSet);
 

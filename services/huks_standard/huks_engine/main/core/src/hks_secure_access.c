@@ -1152,5 +1152,43 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
     (void)inOutData;
     return HKS_SUCCESS;
 }
-
 #endif
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamSet,
+    const struct HksParamSet *runtimeParamSet)
+{
+    struct HksParam *blobAccessTokenId = NULL;
+    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_ACCESS_TOKEN_ID, &blobAccessTokenId);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("no access token id in keyblob");
+        return HKS_SUCCESS;
+    }
+    struct HksParam *runtimeAccessTokenId = NULL;
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_ACCESS_TOKEN_ID, &runtimeAccessTokenId);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get access token id form runtime paramSet failed");
+        return HKS_ERROR_BAD_STATE;
+    }
+    ret = (blobAccessTokenId->uint64Param == runtimeAccessTokenId->uint64Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
+    return ret;
+}
+
+#else
+static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamSet,
+    const struct HksParamSet *runtimeParamSet)
+{
+    (void)blobParamSet;
+    (void)runtimeParamSet;
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t HksAccessControl(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
+{
+    int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("access token compare failed");
+    }
+    return ret;
+}

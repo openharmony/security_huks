@@ -406,6 +406,15 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const st
     return HKS_SUCCESS;
 }
 
+static int32_t SignVerifyPreCheck(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksAccessControl(keyNode->paramSet, paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    return SignVerifyAuth(keyNode, paramSet);
+}
+
 static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
@@ -424,7 +433,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
     bool needFree = true;
     struct HksBlob message = { 0, NULL };
     do {
-        ret = SignVerifyAuth(keyNode, paramSet);
+        ret = SignVerifyPreCheck(keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -463,6 +472,15 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
     return ret;
 }
 
+static int32_t CipherPreCheck(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksAccessControl(keyNode->paramSet, paramSet);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    return CipherAuth(keyNode, paramSet);
+}
+
 static int32_t CipherEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksUsageSpec *usageSpec, const struct HksBlob *inData, struct HksBlob *outData)
 {
@@ -499,7 +517,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
     }
 
     do {
-        ret = CipherAuth(keyNode, paramSet);
+        ret = CipherPreCheck(keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -542,14 +560,9 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
     return ret;
 }
 
-static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, struct HksParamSet **outParamSet)
+static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
+    struct HksParamSet *paramSet)
 {
-    struct HksParamSet *paramSet = NULL;
-    int32_t ret = HksInitParamSet(&paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init agree_key param set fail");
-        return ret;
-    }
     uint32_t alg = HKS_ALG_X25519;
     uint32_t keySize = HKS_CURVE25519_KEY_SIZE_256;
     switch (suite) {
@@ -572,7 +585,30 @@ static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, struct HksPara
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = keySize }
     };
 
-    ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
+    int32_t ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("unwrap suite add params failed.");
+        return ret;
+    }
+    struct HksParam *accessTokenIdParam = NULL;
+    ret = HksGetParam(inParamSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenIdParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get param access token id failed.");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HksAddParams(paramSet, accessTokenIdParam, 1);
+}
+
+static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
+    struct HksParamSet **outParamSet)
+{
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("init agree_key param set fail");
+        return ret;
+    }
+    ret = AddAgreeKeyParamSetFromUnwrapSuite(suite, inParamSet, paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("unwrap suite add params failed.");
         HksFreeParamSet(&paramSet);
@@ -666,7 +702,7 @@ static int32_t GetPublicKeyInnerFormat(const struct HksBlob *wrappingKey, const 
 }
 
 static int32_t AgreeSharedSecretWithPeerPublicKey(const struct HksBlob *wrappingKey, const struct HksBlob *publicKey,
-    uint32_t unwrapSuite, struct HksBlob *agreeSharedSecret)
+    uint32_t unwrapSuite, struct HksBlob *agreeSharedSecret, const struct HksParamSet *inParamSet)
 {
     int32_t ret = CheckWrappingKeyIsUsedForUnwrap(wrappingKey);
     if (ret != HKS_SUCCESS) {
@@ -675,7 +711,7 @@ static int32_t AgreeSharedSecretWithPeerPublicKey(const struct HksBlob *wrapping
     }
 
     struct HksParamSet *agreeKeyParamSet = NULL;
-    ret = GenAgreeKeyParamSetFromUnwrapSuite(unwrapSuite, &agreeKeyParamSet);
+    ret = GenAgreeKeyParamSetFromUnwrapSuite(unwrapSuite, inParamSet, &agreeKeyParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("gen agree key paramSet failed!");
         return ret;
@@ -944,16 +980,16 @@ int32_t HksCoreDecrypt(const struct HksBlob *key, const struct HksParamSet *para
 
 int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct HksBlob *key)
 {
-    (void)paramSet;
-
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
     if (keyNode == NULL) {
         HKS_LOG_E("check key legality failed");
         return HKS_ERROR_BAD_STATE;
     }
 
+    int32_t ret = HksAccessControl(keyNode->paramSet, paramSet);
+
     HksFreeKeyNode(&keyNode);
-    return HKS_SUCCESS;
+    return ret;
 }
 
 static int32_t CheckRsaKeyMaterialLen(uint32_t keyType, const struct HksBlob *key)
@@ -1150,18 +1186,25 @@ int32_t HksCoreExportPublicKey(const struct HksBlob *key, const struct HksParamS
         HKS_LOG_E("SignVerify generate keynode failed");
         return HKS_ERROR_BAD_STATE;
     }
+    int32_t ret;
+    do {
+        ret = HksAccessControl(keyNode->paramSet, paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
 
-    struct HksBlob rawKey = { 0, NULL };
-    int32_t ret = HksGetRawKey(keyNode->paramSet, &rawKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get raw key when exporting public key failed!");
-        HksFreeKeyNode(&keyNode);
-        return ret;
-    }
+        struct HksBlob rawKey = { 0, NULL };
+        ret = HksGetRawKey(keyNode->paramSet, &rawKey);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get raw key when exporting public key failed!");
+            break;
+        }
 
-    ret = HksCryptoHalGetPubKey(&rawKey, keyOut);
-    (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-    HKS_FREE_PTR(rawKey.data);
+        ret = HksCryptoHalGetPubKey(&rawKey, keyOut);
+        (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
+        HKS_FREE_PTR(rawKey.data);
+    } while (0);
+
     HksFreeKeyNode(&keyNode);
     return ret;
 }
@@ -1181,22 +1224,29 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
         return HKS_ERROR_BAD_STATE;
     }
 
-    struct HksBlob key = { 0, NULL };
-    ret = HksGetRawKey(privateKeyNode->paramSet, &key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get raw key when agreeing key failed!");
-        HksFreeKeyNode(&privateKeyNode);
-        return ret;
-    }
+    do {
+        ret = HksAccessControl(privateKeyNode->paramSet, paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
 
-    struct HksKeySpec agreeSpec = {0};
-    HksFillKeySpec(paramSet, &agreeSpec);
+        struct HksBlob key = { 0, NULL };
+        ret = HksGetRawKey(privateKeyNode->paramSet, &key);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get raw key when agreeing key failed!");
+            break;
+        }
 
-    HKS_LOG_I("Agree key.");
+        struct HksKeySpec agreeSpec = { 0 };
+        HksFillKeySpec(paramSet, &agreeSpec);
 
-    ret = HksCryptoHalAgreeKey(&key, peerPublicKey, &agreeSpec, agreedKey);
-    (void)memset_s(key.data, key.size, 0, key.size);
-    HKS_FREE_PTR(key.data);
+        HKS_LOG_I("Agree key.");
+
+        ret = HksCryptoHalAgreeKey(&key, peerPublicKey, &agreeSpec, agreedKey);
+        (void)memset_s(key.data, key.size, 0, key.size);
+        HKS_FREE_PTR(key.data);
+    } while (0);
+
     HksFreeKeyNode(&privateKeyNode);
     return ret;
 }
@@ -1216,6 +1266,11 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
     }
 
     do {
+        ret = HksAccessControl(keyNode->paramSet, paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
         ret = HksAuth(HKS_AUTH_ID_DERIVE, keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("derive auth failed!");
@@ -1261,6 +1316,11 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     }
 
     do {
+        ret = HksAccessControl(keyNode->paramSet, paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
         ret = HksAuth(HKS_AUTH_ID_MAC_HMAC, keyNode, paramSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("mac auth failed!");
@@ -1431,7 +1491,8 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
         HKS_LOG_I("Agree shared key.");
 
         /* 2. agree shared key with wrappingAlias's private key and peer public key */
-        ret = AgreeSharedSecretWithPeerPublicKey(wrappingKey, &peerPublicKey, unwrapSuite, &agreeSharedSecret);
+        ret = AgreeSharedSecretWithPeerPublicKey(wrappingKey, &peerPublicKey, unwrapSuite, &agreeSharedSecret,
+            paramSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("agree share secret failed!");
             break;
@@ -1515,13 +1576,9 @@ static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32
     return HKS_SUCCESS;
 }
 
-int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
-    struct HksBlob *token)
+static int32_t CoreInitPreCheck(const struct  HksBlob *key, const struct HksParamSet *paramSet,
+    const struct HksBlob *handle, const struct HksBlob *token)
 {
-    HKS_LOG_D("HksCoreInit in Core start");
-    uint32_t pur = 0;
-    uint32_t alg = 0;
-
     if (key == NULL || paramSet == NULL || handle == NULL || token == NULL) {
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_NULL_POINTER;
@@ -1532,7 +1589,17 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    int32_t ret = HksCheckParamSetTag(paramSet);
+    return HksCheckParamSetTag(paramSet);
+}
+
+int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token)
+{
+    HKS_LOG_D("HksCoreInit in Core start");
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+
+    int32_t ret = CoreInitPreCheck(key, paramSet, handle, token);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -1542,37 +1609,44 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         HKS_LOG_E("the pointer param entered is invalid");
         return HKS_ERROR_BAD_STATE;
     }
-
-    handle->size = sizeof(uint64_t);
-    (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
-
-    ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(keyNode->handle);
-        return ret;
-    }
-
-    ret = HksCoreSecureAccessInitParams(keyNode, paramSet, token);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init secure access params failed");
-        HksDeleteKeyNode(keyNode->handle);
-        return ret;
-    }
-
-    uint32_t i;
-    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreInitHandler);
-    for (i = 0; i < size; i++) {
-        if (g_hksCoreInitHandler[i].pur == pur) {
-            HKS_LOG_E("Core HksCoreInit [pur] = %d, pur = %d", g_hksCoreInitHandler[i].pur, pur);
-            ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
+    do {
+        ret = HksAccessControl(keyNode->keyBlobParamSet, paramSet);
+        if (ret != HKS_SUCCESS) {
             break;
         }
-    }
 
-    if (ret != HKS_SUCCESS || i == size) {
+        handle->size = sizeof(uint64_t);
+        (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
+
+        ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        ret = HksCoreSecureAccessInitParams(keyNode, paramSet, token);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("init secure access params failed");
+            break;
+        }
+
+        uint32_t i;
+        uint32_t size = HKS_ARRAY_SIZE(g_hksCoreInitHandler);
+        for (i = 0; i < size; i++) {
+            if (g_hksCoreInitHandler[i].pur == pur) {
+                HKS_LOG_E("Core HksCoreInit [pur] = %d, pur = %d", g_hksCoreInitHandler[i].pur, pur);
+                ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
+                break;
+            }
+        }
+
+        if (ret != HKS_SUCCESS || i == size) {
+            HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
+            ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
+            break;
+        }
+    } while (0);
+    if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
-        ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
 
     HKS_LOG_D("HksCoreInit in Core end");
