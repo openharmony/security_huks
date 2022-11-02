@@ -20,7 +20,13 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#ifdef SUPPORT_ACCESS_TOCKEN
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
 #endif
 #include "ipc_skeleton.h"
@@ -28,10 +34,6 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type_inner.h"
-
-#ifdef SUPPORT_ACCESS_TOCKEN
-#include "accesstoken_kit.h"
-#endif
 
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
@@ -135,14 +137,17 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->userId.data = name1;
     processInfo->userIdInt = userId;
 
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+    processInfo->accessTokenId = (uint64_t)IPCSkeleton::GetCallingTokenID();
+#endif
+
     return HKS_SUCCESS;
 }
 
-#ifdef SUPPORT_ACCESS_TOCKEN
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
 int32_t SensitivePermissionCheck()
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
-    HKS_LOG_I("AccessTokenID is %llx!", tokenId);
     int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId,
         "ohos.permission.ACCESS_IDS");
     if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {

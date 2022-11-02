@@ -21,6 +21,12 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_client_service.h"
 #include "hks_cmd_id.h"
 #include "hks_ipc_serialization.h"
@@ -30,7 +36,7 @@
 
 #define MAX_KEY_SIZE         2048
 
-#ifdef SUPPORT_ACCESS_TOCKEN
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
 static enum HksTag g_idList[] = {
     HKS_TAG_ATTESTATION_ID_BRAND,
     HKS_TAG_ATTESTATION_ID_DEVICE,
@@ -678,7 +684,7 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
 
 int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
 {
-#ifdef SUPPORT_ACCESS_TOCKEN
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
     for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             if (paramSet->params[j].tag == g_idList[i]) {

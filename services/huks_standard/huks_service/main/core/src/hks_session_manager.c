@@ -128,7 +128,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
     operation->processInfo.userId.data = userId;
     operation->processInfo.processName.size = processNameLen;
     operation->processInfo.processName.data = processName;
-
+    operation->accessTokenId = processInfo->accessTokenId;
     return HKS_SUCCESS;
 }
 
