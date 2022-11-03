@@ -80,7 +80,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksAttestKey fail, ret is %d!", ret);
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     HKS_LOG_I("Attest key success!");

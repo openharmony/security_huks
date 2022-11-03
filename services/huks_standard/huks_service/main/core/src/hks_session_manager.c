@@ -76,7 +76,7 @@ static bool DeleteFirstAbortableOperation(void)
             DeleteKeyNode(operation->handle);
             FreeOperation(&operation);
             --g_operationCount;
-            HKS_LOG_I("delete operation count:%u", g_operationCount);
+            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
             return true;
         }
     }
@@ -97,7 +97,7 @@ static int32_t AddOperation(struct HksOperation *operation)
 
     AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
     ++g_operationCount;
-    HKS_LOG_I("add operation count:%u", g_operationCount);
+    HKS_LOG_I("add operation count:%" LOG_PUBLIC "u", g_operationCount);
     pthread_mutex_unlock(&g_lock);
     return HKS_SUCCESS;
 }
@@ -235,7 +235,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
         if (operation != NULL && operation->handle == handle) {
             FreeOperation(&operation);
             --g_operationCount;
-            HKS_LOG_I("delete operation count:%u", g_operationCount);
+            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
             pthread_mutex_unlock(&g_lock);
             return;
         }
@@ -256,7 +256,7 @@ static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOp
         DeleteKeyNode(operation->handle);
         FreeOperation(&operation);
         --g_operationCount;
-        HKS_LOG_I("delete session count = %u", g_operationCount);
+        HKS_LOG_I("delete session count = %" LOG_PUBLIC "u", g_operationCount);
     }
 }
 

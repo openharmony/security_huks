@@ -236,7 +236,7 @@ static int32_t GenAgreeKey(const struct HksParamSet *paramSet, const struct HksB
 
     ret = HksCryptoHalAgreeKey(privateKey, peerPublicKey, &agreeSpec, agreedKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("agree key failed, ret = %d", ret);
+        HKS_LOG_E("agree key failed, ret = %" LOG_PUBLIC "d", ret);
         HKS_FREE_PTR(agreedKey->data); /* X25519AgreeKey will memset sharedKey if fail */
     }
     return ret;
@@ -283,7 +283,7 @@ int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParam
 {
     int32_t ret = HksCoreCheckGenKeyParams(keyAlias, paramSet, keyIn, keyOut);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks core check generate key params failed, ret:%x!", ret);
+        HKS_LOG_E("hks core check generate key params failed, ret:%" LOG_PUBLIC "x!", ret);
         return ret;
     }
 
@@ -312,7 +312,7 @@ int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParam
             ret = HKS_ERROR_INVALID_ARGUMENT;
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GenerateKey failed, ret:%x!", ret);
+        HKS_LOG_E("GenerateKey failed, ret:%" LOG_PUBLIC "x!", ret);
         return ret;
     }
 
@@ -368,7 +368,7 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const st
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -420,7 +420,8 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 {
     int32_t ret = HksCoreCheckSignVerifyParams(cmdId, key, paramSet, srcData, signature);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks failed to check signature or verify params, cmdId:%x, ret:%x!\n", cmdId, ret);
+        HKS_LOG_E("hks failed to check signature or verify params, cmdId:%" LOG_PUBLIC "x, ret:%" LOG_PUBLIC "x!\n",
+            cmdId, ret);
         return ret;
     }
 
@@ -506,7 +507,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
 {
     int32_t ret = HksCoreCheckCipherParams(cmdId, key, paramSet, inData, outData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks core check cipher params failed, cmdId:%x, ret:%x!\n", cmdId, ret);
+        HKS_LOG_E("hks core check cipher params failed, cmdId:%" LOG_PUBLIC "x, ret:%" LOG_PUBLIC "x!\n", cmdId, ret);
         return ret;
     }
 
@@ -552,7 +553,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
 
         HksFreeUsageSpec(&usageSpec);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("cipher[%x] failed!", cmdId);
+            HKS_LOG_E("cipher[%" LOG_PUBLIC "x] failed!", cmdId);
         }
     }while (0);
 
@@ -659,7 +660,7 @@ static int32_t CheckWrappingKeyIsUsedForUnwrap(const struct HksBlob *wrappingKey
     struct HksParam *purposeParamWrappingKey = NULL;
     int32_t ret = HksGetParam(wrappingKeyNode->paramSet, HKS_TAG_PURPOSE, &purposeParamWrappingKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get wrapping key param 0x%x failed!", HKS_TAG_PURPOSE);
+        HKS_LOG_E("get wrapping key param 0x%" LOG_PUBLIC "x failed!", HKS_TAG_PURPOSE);
         HksFreeKeyNode(&wrappingKeyNode);
         return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
     }
@@ -730,7 +731,7 @@ static int32_t AgreeSharedSecretWithPeerPublicKey(const struct HksBlob *wrapping
     ret = HksCoreAgreeKey(agreeKeyParamSet, wrappingKey, publicKey, &sharedSecret);
     HksFreeParamSet(&agreeKeyParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("agree with peer public key failed! ret = %d", ret);
+        HKS_LOG_E("agree with peer public key failed! ret = %" LOG_PUBLIC "d", ret);
         HKS_FREE_PTR(sharedSecret.data);
         return ret;
     }
@@ -995,7 +996,7 @@ int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct Hks
 static int32_t CheckRsaKeyMaterialLen(uint32_t keyType, const struct HksBlob *key)
 {
     if (key->size < sizeof(struct HksKeyMaterialRsa)) {
-        HKS_LOG_E("invalid import key size: %u", key->size);
+        HKS_LOG_E("invalid import key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -1015,7 +1016,7 @@ static int32_t CheckRsaKeyMaterialLen(uint32_t keyType, const struct HksBlob *ke
 
     uint32_t keySize = sizeof(struct HksKeyMaterialRsa) + keyMaterial->nSize + keyMaterial->dSize + keyMaterial->eSize;
     if (key->size < keySize) {
-        HKS_LOG_E("import key size[%u] smaller than keySize[%u]", key->size, keySize);
+        HKS_LOG_E("import key size[%" LOG_PUBLIC "u] smaller than keySize[%" LOG_PUBLIC "u]", key->size, keySize);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -1085,14 +1086,14 @@ static int32_t GetCurve25519PrivateOrPairInnerFormat(uint8_t alg, uint32_t keyTy
     }
 
     if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid curve25519 private key size! key size = 0x%X", key->size);
+        HKS_LOG_E("Invalid curve25519 private key size! key size = 0x%" LOG_PUBLIC "X", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     uint32_t totalSize = sizeof(struct HksKeyMaterial25519) + key->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
     if (buffer == NULL) {
-        HKS_LOG_E("malloc failed! %u", totalSize);
+        HKS_LOG_E("malloc failed! %" LOG_PUBLIC "u", totalSize);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(buffer, totalSize, 0, totalSize);
@@ -1158,7 +1159,7 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
         ret = CopyToInnerKey(key, &innerKey);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate key to inner format failed, ret = %d", ret);
+        HKS_LOG_E("translate key to inner format failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1173,7 +1174,8 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
     return ret;
 }
 
-int32_t HksCoreExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+int32_t HksCoreExportPublicKey(const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     (void)paramSet;
     if (CheckBlob(key) != HKS_SUCCESS || CheckBlob(keyOut) != HKS_SUCCESS) {
@@ -1358,7 +1360,7 @@ int32_t HksCoreRefreshKeyInfo(void)
     HksRkcDestroy();
     int32_t ret = HksRkcInit();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks rkc refresh info failed! ret = 0x%X", ret);
+        HKS_LOG_E("Hks rkc refresh info failed! ret = 0x%" LOG_PUBLIC "X", ret);
     }
 
     return ret;
@@ -1368,7 +1370,8 @@ int32_t HksCoreRefreshKeyInfo(void)
 }
 
 #ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut)
+int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias,
+    const struct HksBlob *keyInfo, struct HksBlob *keyOut)
 {
     return HksUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
 }
@@ -1382,7 +1385,7 @@ static int32_t GetMacKey(const struct HksBlob *salt, struct HksBlob *macKey)
 
     int32_t ret = HksCryptoHalGetMainKey(NULL, &mk);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get kek failed, ret = %d", ret);
+        HKS_LOG_E("get kek failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1409,14 +1412,14 @@ int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
     struct HksBlob macKey = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), keyBuf };
     int32_t ret = GetMacKey(salt, &macKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get mac key failed, ret = %d", ret);
+        HKS_LOG_E("get mac key failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     struct HksParam *digestParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("calc mac header get HKS_TAG_DIGEST param failed, ret = %d", ret);
+        HKS_LOG_E("calc mac header get HKS_TAG_DIGEST param failed, ret = %" LOG_PUBLIC "d", ret);
         (void)memset_s(macKey.data, macKey.size, 0, macKey.size);
         return ret;
     }
@@ -1440,19 +1443,19 @@ int32_t HksCoreModuleInit(void)
 
     ret = HksCryptoAbilityInit();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks init crypto ability failed, ret = %d", ret);
+        HKS_LOG_E("Hks init crypto ability failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     ret = HksCoreInitAuthTokenKey();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks init auth token key failed, ret = %d", ret);
+        HKS_LOG_E("Hks init auth token key failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 #ifndef _HARDWARE_ROOT_KEY_
     ret = HksRkcInit();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks rkc init failed! ret = 0x%X", ret);
+        HKS_LOG_E("Hks rkc init failed! ret = 0x%" LOG_PUBLIC "X", ret);
     }
 #endif
 
@@ -1538,7 +1541,7 @@ static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32
         return HKS_ERROR_NULL_POINTER;
     }
 
-    HKS_LOG_D("Get paramSet->paramsCnt %u", paramSet->paramsCnt);
+    HKS_LOG_D("Get paramSet->paramsCnt %" LOG_PUBLIC "u", paramSet->paramsCnt);
     for (i = 0; i < paramSet->paramsCnt; i++) {
         if (paramSet->params[i].tag == HKS_TAG_PURPOSE) {
             *pur = paramSet->params[i].uint32Param;
@@ -1549,7 +1552,7 @@ static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32
         }
 
         if (*pur != 0 && *alg != 0) {
-            HKS_LOG_E("found purpose : %u, algorithm : %u", *pur, *alg);
+            HKS_LOG_E("found purpose : %" LOG_PUBLIC "u, algorithm : %" LOG_PUBLIC "u", *pur, *alg);
             break;
         }
     }
@@ -1585,7 +1588,7 @@ static int32_t CoreInitPreCheck(const struct  HksBlob *key, const struct HksPara
     }
 
     if (handle->size < sizeof(uint64_t)) {
-        HKS_LOG_E("handle size is too small, size : %u", handle->size);
+        HKS_LOG_E("handle size is too small, size : %" LOG_PUBLIC "u", handle->size);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -1633,7 +1636,8 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         uint32_t size = HKS_ARRAY_SIZE(g_hksCoreInitHandler);
         for (i = 0; i < size; i++) {
             if (g_hksCoreInitHandler[i].pur == pur) {
-                HKS_LOG_E("Core HksCoreInit [pur] = %d, pur = %d", g_hksCoreInitHandler[i].pur, pur);
+                HKS_LOG_E("Core HksCoreInit [pur] = %" LOG_PUBLIC "d, pur = %" LOG_PUBLIC "d",
+                    g_hksCoreInitHandler[i].pur, pur);
                 ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
                 break;
             }
@@ -1677,8 +1681,8 @@ static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_
     return HKS_SUCCESS;
 }
 
-int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
-    struct HksBlob *outData)
+int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
 {
     HKS_LOG_D("HksCoreUpdate in Core start");
     uint32_t pur = 0;
@@ -1731,7 +1735,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
 
     if (ret != HKS_SUCCESS || i == size) {
         HksDeleteKeyNode(keyNode->handle);
-        HKS_LOG_E("CoreUpdate failed, pur : %u, ret : %d", pur, ret);
+        HKS_LOG_E("CoreUpdate failed, pur : %" LOG_PUBLIC "u, ret : %" LOG_PUBLIC "d", pur, ret);
         ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
 
@@ -1791,7 +1795,7 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     }
 
     if (i == size) {
-        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        HKS_LOG_E("don't found purpose, pur : %" LOG_PUBLIC "d", pur);
         ret = HKS_ERROR_INVALID_ARGUMENT;
     }
     HksDeleteKeyNode(sessionId);
@@ -1844,7 +1848,7 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     if (i == size) {
         HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("don't found purpose, pur : %d", pur);
+        HKS_LOG_E("don't found purpose, pur : %" LOG_PUBLIC "d", pur);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

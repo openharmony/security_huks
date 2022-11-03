@@ -90,7 +90,7 @@ static int32_t GetParamPosition(const struct HksBlob *keyInfo, uint32_t *paramPo
     uint32_t offset = sizeof(uint8_t) + HKS_SEALING_NONCE_SIZE; /* offset: flag and sealing nonce */
     uint8_t keyAliasSize = *(keyInfo->data + offset);
     if (keyAliasSize > HKS_MAX_KEY_ALIAS_LEN) {
-        HKS_LOG_E("invalid keyAlias size, size = %u", keyAliasSize);
+        HKS_LOG_E("invalid keyAlias size, size = %" LOG_PUBLIC "u", keyAliasSize);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -114,7 +114,7 @@ static int32_t GetKeySizePosition(const struct HksBlob *keyInfo, uint32_t *keySi
 
     uint8_t authIdSize = *(keyInfo->data + offset);
     if (authIdSize > HKS_MAX_KEY_AUTH_ID_LEN) {
-        HKS_LOG_E("invalid auth id size, size = %u", authIdSize);
+        HKS_LOG_E("invalid auth id size, size = %" LOG_PUBLIC "u", authIdSize);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -160,7 +160,7 @@ static int32_t GetKeyInfo(const struct HksBlob *keyInfo, struct HksKeyStoreInfo 
 
     keyStoreInfo->authIdSize = *(tmp + offset);
     if (keyStoreInfo->authIdSize > HKS_MAX_KEY_AUTH_ID_LEN) {
-        HKS_LOG_E("invalid auth id size, size = %u", keyStoreInfo->authIdSize);
+        HKS_LOG_E("invalid auth id size, size = %" LOG_PUBLIC "u", keyStoreInfo->authIdSize);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
     offset += sizeof(uint8_t);
@@ -216,7 +216,7 @@ static int32_t BuildDecryptMeterail(const struct HksBlob *keyInfo, const struct 
 
     uint8_t encryptedKeySize = *(keyInfo->data + keySizePosition);
     if ((encryptedKeySize > HKS_KEY_PAIR_CIPHER_ED25519) || (encryptedKeySize <= HKS_AE_TAG_LEN)) {
-        HKS_LOG_E("invalid key size, size = %u", encryptedKeySize);
+        HKS_LOG_E("invalid key size, size = %" LOG_PUBLIC "u", encryptedKeySize);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -239,7 +239,7 @@ static int32_t GetKek(const struct HksBlob *salt, struct HksBlob *kek)
     struct HksBlob mainKey = { HKS_KEY_BLOB_MAIN_KEY_SIZE, mainKeyData };
     int32_t ret = HksCryptoHalGetMainKey(NULL, &mainKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get main key failed, ret = %d", ret);
+        HKS_LOG_E("get main key failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -280,7 +280,7 @@ static int32_t DecryptKey(const struct HksBlob *kek, const struct HksUsageSpec *
 
     int32_t ret = HksCryptoHalDecrypt(kek, usageSpec, cipherKey, key);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("crypto hal decrypt failed, ret = %d", ret);
+        HKS_LOG_E("crypto hal decrypt failed, ret = %" LOG_PUBLIC "d", ret);
         HKS_FREE_PTR(key->data); /* decrypted failed, no need clear memory */
         key->size = 0;
         return HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
@@ -480,7 +480,7 @@ static int32_t AddKeyInfoParams(uint8_t flag, const struct HksKeyStoreInfo *keyS
     (void)memset_s(&spec, sizeof(spec), 0, sizeof(spec));
     int32_t ret = TranslateToNewValue(flag, keyStoreInfo, &spec);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate to new value failed, ret = %d", ret);
+        HKS_LOG_E("translate to new value failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -554,7 +554,7 @@ static int32_t AddParams(const struct HksBlob *keyInfo, struct HksParamSet *para
     uint8_t flag = *(keyInfo->data);
     ret = AddKeyInfoParams(flag, &keyStoreInfo, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add key info params failed, ret = %d", ret);
+        HKS_LOG_E("add key info params failed, ret = %" LOG_PUBLIC "d", ret);
     }
     if (keyStoreInfo.authIdData != NULL) {
         HKS_FREE_PTR(keyStoreInfo.authIdData);
@@ -619,7 +619,7 @@ int32_t HksUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *
         return ret;
     }
     if (keyInfo->size < GetKeySlotLen()) {
-        HKS_LOG_E("invalid key info size, size = %u", keyInfo->size);
+        HKS_LOG_E("invalid key info size, size = %" LOG_PUBLIC "u", keyInfo->size);
         return ret;
     }
 
@@ -645,7 +645,7 @@ int32_t HksUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *
 
         ret = HksBuildKeyBlob(keyAlias, keyFlag, &key, paramSet, keyOut);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("generate key blob failed, ret = %d", ret);
+            HKS_LOG_E("generate key blob failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);

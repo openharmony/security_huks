@@ -124,7 +124,7 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
 
     ret = AppendToNewParamSet(paramSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendToNewParamSet failed, ret : %d", ret);
+        HKS_LOG_E("AppendToNewParamSet failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -133,7 +133,7 @@ int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSe
     EXPECT_EQ(ret, HKS_SUCCESS) << "Add Param failed.";
     ret = HksTestUpdate(&handle, newParamSet, &inData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Update failed, ret : %d", ret);
+        HKS_LOG_E("Update failed, ret : %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&newParamSet);
         return ret;
     }
@@ -168,7 +168,7 @@ int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParam
 
     ret = AppendToNewParamSet(paramSet, &newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendToNewParamSet failed, ret : %d", ret);
+        HKS_LOG_E("AppendToNewParamSet failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -177,7 +177,7 @@ int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct HksParam
     EXPECT_EQ(ret, HKS_SUCCESS) << "Add Param failed.";
     ret = HksTestUpdate(&handle, newParamSet, &inData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Update failed, ret : %d", ret);
+        HKS_LOG_E("Update failed, ret : %" LOG_PUBLIC "d", ret);
         HksAbort(&handle, newParamSet);
         HksFreeParamSet(&newParamSet);
         return ret;
@@ -212,7 +212,7 @@ int32_t AddSignParamCustomCase(struct HksParam *signParams, struct HksParamSet *
 {
     int32_t ret = AppendToNewParamSet(paramSet, newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendToNewParamSet failed, ret : %d", ret);
+        HKS_LOG_E("AppendToNewParamSet failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     ret = HksAddParams(*newParamSet, signParams, 1);

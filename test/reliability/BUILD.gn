@@ -51,5 +51,8 @@ ohos_reliabilitytest("huks_stability_test") {
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
     "//third_party/googletest:gtest_main",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 }

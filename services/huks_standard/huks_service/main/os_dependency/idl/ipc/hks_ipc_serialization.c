@@ -198,7 +198,7 @@ int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyA
     }
 
     if (keyOutSize > MAX_OUT_BLOB_SIZE) {
-        HKS_LOG_E("keyOutSize out of range %u", keyOutSize);
+        HKS_LOG_E("keyOutSize out of range %" LOG_PUBLIC "u", keyOutSize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -464,13 +464,13 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, uint32_t *listCou
     }
 
     if ((UINT32_MAX / sizeof(struct HksKeyInfo)) < *listCount) {
-        HKS_LOG_E("listCount too big %u", *listCount);
+        HKS_LOG_E("listCount too big %" LOG_PUBLIC "u", *listCount);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t keyInfoListSize = (*listCount) * sizeof(struct HksKeyInfo);
     if (IsInvalidLength(keyInfoListSize)) {
-        HKS_LOG_E("keyInfoListSize too big %u", keyInfoListSize);
+        HKS_LOG_E("keyInfoListSize too big %" LOG_PUBLIC "u", keyInfoListSize);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -536,14 +536,15 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
 static int32_t GetNullBlobParam(const struct HksParamSet *paramSet, struct HksParamOut *outParams)
 {
     if (GetTagType(outParams->tag) != HKS_TAG_TYPE_BYTES) {
-        HKS_LOG_E("get param tag[0x%x] from ipc buffer failed", outParams->tag);
+        HKS_LOG_E("get param tag[0x%" LOG_PUBLIC "x] from ipc buffer failed", outParams->tag);
         return HKS_ERROR_PARAM_NOT_EXIST;
     }
 
     struct HksParam *param = NULL;
     int32_t ret = HksGetParam(paramSet, outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL, &param);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param tag[0x%x] from ipc buffer failed", outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL);
+        HKS_LOG_E("get param tag[0x%" LOG_PUBLIC "x] from ipc buffer failed",
+            outParams->tag + HKS_PARAM_BUFFER_NULL_INTERVAL);
         return ret;
     }
 
@@ -571,7 +572,7 @@ static int32_t GetNormalParam(const struct HksParam *param, struct HksParamOut *
             *(outParams->blob) = param->blob;
             break;
         default:
-            HKS_LOG_I("invalid tag type:%x", GetTagType(outParams->tag));
+            HKS_LOG_I("invalid tag type:%" LOG_PUBLIC "x", GetTagType(outParams->tag));
             return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -588,7 +589,7 @@ int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamO
             ret = GetNullBlobParam(paramSet, &outParams[i]);
         }
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get param failed, ret = %d", ret);
+            HKS_LOG_E("get param failed, ret = %" LOG_PUBLIC "d", ret);
             return ret;
         }
     }

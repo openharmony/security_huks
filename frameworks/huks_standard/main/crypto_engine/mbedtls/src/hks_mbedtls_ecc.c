@@ -42,7 +42,7 @@ static int32_t HksMbedtlsEccCheckKeySize(const uint32_t keySize)
 {
     if ((keySize != HKS_ECC_KEY_SIZE_224) && (keySize != HKS_ECC_KEY_SIZE_256) && (keySize != HKS_ECC_KEY_SIZE_384) &&
         (keySize != HKS_ECC_KEY_SIZE_521)) {
-        HKS_LOG_E("Invalid ecc keySize! keySize = 0x%X", keySize);
+        HKS_LOG_E("Invalid ecc keySize! keySize = 0x%" LOG_PUBLIC "X", keySize);
         return HKS_ERROR_INVALID_KEY_SIZE;
     }
 
@@ -65,7 +65,7 @@ int32_t GetEccGroupId(const uint32_t keyLen, mbedtls_ecp_group_id *grpId)
             *grpId = MBEDTLS_ECP_DP_SECP521R1;
             break;
         default:
-            HKS_LOG_E("Unsupported key length! keyLen: 0x%X", keyLen);
+            HKS_LOG_E("Unsupported key length! keyLen: 0x%" LOG_PUBLIC "X", keyLen);
             return HKS_ERROR_INVALID_KEY_SIZE;
     }
     return HKS_SUCCESS;
@@ -76,8 +76,8 @@ static int32_t EccKeyMaterialXyzSizeCheck(const struct KeyMaterialEcc *keyMateri
     const uint32_t maxKeyByteLen = HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_521);
     if ((keyMaterial->xSize > maxKeyByteLen) ||
         (keyMaterial->ySize > maxKeyByteLen) || (keyMaterial->zSize > maxKeyByteLen)) {
-        HKS_LOG_E("Invalid ecc keyMaterial! xSize = 0x%X, ySize = 0x%X, zSize = 0x%X",
-            keyMaterial->xSize, keyMaterial->ySize, keyMaterial->zSize);
+        HKS_LOG_E("Invalid ecc keyMaterial! xSize = 0x%" LOG_PUBLIC "X, ySize = 0x%" LOG_PUBLIC "X, "
+            "zSize = 0x%" LOG_PUBLIC "X", keyMaterial->xSize, keyMaterial->ySize, keyMaterial->zSize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -98,7 +98,7 @@ int32_t EccKeyCheck(const struct HksBlob *key)
     }
 
     if (key->size < (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize)) {
-        HKS_LOG_E("Ecc key size too small! key size = 0x%X", key->size);
+        HKS_LOG_E("Ecc key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -109,7 +109,7 @@ int32_t EccKeyCheck(const struct HksBlob *key)
 int32_t HksMbedtlsEccGetKeyCurveNist(const struct KeyMaterialEcc *keyMaterial, mbedtls_ecp_group_id *curve)
 {
     if ((keyMaterial->keyAlg != HKS_ALG_ECC) && (keyMaterial->keyAlg != HKS_ALG_ECDH)) {
-        HKS_LOG_E("Invalid param key! key mode = 0x%X", keyMaterial->keyAlg);
+        HKS_LOG_E("Invalid param key! key mode = 0x%" LOG_PUBLIC "X", keyMaterial->keyAlg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -123,21 +123,21 @@ int32_t HksEccKeyMaterialToPub(const struct HksBlob *key, mbedtls_ecp_point *pub
     uint32_t offset = sizeof(*keyMaterial);
     int32_t ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(X)), key->data + offset, keyMaterial->xSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to public key read X failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Ecc keyMaterial to public key read X failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     offset = offset + keyMaterial->xSize;
     ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(Y)), key->data + offset, keyMaterial->ySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to public key read Y failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Ecc keyMaterial to public key read Y failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     /* Z = 1, X and Y are its standard (affine) coordinates */
     ret = mbedtls_mpi_lset(&(pub->MBEDTLS_PRIVATE(Z)), 1);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to public key set Z failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Ecc keyMaterial to public key set Z failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -151,7 +151,7 @@ int32_t HksEccKeyMaterialToPri(const struct HksBlob *key, mbedtls_mpi *pri)
     uint32_t offset = sizeof(*keyMaterial) + keyMaterial->xSize + keyMaterial->ySize;
     int32_t ret = mbedtls_mpi_read_binary(pri, key->data + offset, keyMaterial->zSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to private key read Z failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Ecc keyMaterial to private key read Z failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -186,7 +186,7 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
         ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X)), rawMaterial + offset,
             keyMaterial->xSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Save ecc keyMaterial write X failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Save ecc keyMaterial write X failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -194,14 +194,14 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
         ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y)), rawMaterial + offset,
             keyMaterial->ySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Save ecc keyMaterial write Y failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Save ecc keyMaterial write Y failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         offset = offset + keyMaterial->ySize;
         ret = mbedtls_mpi_write_binary(&(ecp->MBEDTLS_PRIVATE(d)), rawMaterial + offset, keyMaterial->zSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Save ecc keyMaterial write D failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Save ecc keyMaterial write D failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -238,7 +238,7 @@ int32_t HksMbedtlsEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     do {
         ret = mbedtls_ecp_gen_key(grpId, &ecp, mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls ecc generate key failed! ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls ecc generate key failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -268,7 +268,7 @@ static int32_t GetEccPubKeyCheckParams(const struct HksBlob *keyIn, const struct
     }
 
     if (keyOut->size < (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize)) {
-        HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%X", keyOut->size);
+        HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 

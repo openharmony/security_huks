@@ -134,7 +134,7 @@ static int32_t RkcGetRmkRawKey(const struct HksRkcKsfData *ksfData, struct HksBl
     /* Get the fixed material */
     int32_t ret = RkcGetFixedMaterial(&material3);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get fixed material failed! ret = 0x%X", ret);
+        HKS_LOG_E("Get fixed material failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -146,7 +146,7 @@ static int32_t RkcGetRmkRawKey(const struct HksRkcKsfData *ksfData, struct HksBl
     /* append hardware UDID */
     ret = HksGetHardwareUdid(rawKey->data + HKS_RKC_MATERIAL_LEN, HKS_HARDWARE_UDID_LEN);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get hardware udid failed! ret = 0x%X", ret);
+        HKS_LOG_E("Get hardware udid failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -174,7 +174,7 @@ static int32_t RkcPbkdf2Hmac(const uint32_t hashAlg, const struct HksBlob *rawKe
     const struct HksKeySpec derivationSpec = { HKS_ALG_PBKDF2, dk->size, &derParam };
     int32_t ret = HksCryptoHalDeriveKey(rawKey, &derivationSpec, dk);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Crypto hal derive key failed! ret = 0x%X", ret);
+        HKS_LOG_E("Crypto hal derive key failed! ret = 0x%" LOG_PUBLIC "X", ret);
     }
 
     return ret;
@@ -196,7 +196,7 @@ static int32_t RkcDeriveRmk(const struct HksRkcKsfData *ksfData, struct HksBlob 
         /* get the raw key */
         ret = RkcGetRmkRawKey(ksfData, &rawKey);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Get rmk raw key failed! ret = 0x%X", ret);
+            HKS_LOG_E("Get rmk raw key failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -204,7 +204,7 @@ static int32_t RkcDeriveRmk(const struct HksRkcKsfData *ksfData, struct HksBlob 
         const struct HksBlob salt = { HKS_RKC_SALT_LEN, (uint8_t *)(ksfData->rmkSalt) };
         ret = RkcPbkdf2Hmac(ksfData->rmkHashAlg, &rawKey, &salt, ksfData->rmkIter, rmk);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Pbkdf2 failed! ret = 0x%X", ret);
+            HKS_LOG_E("Pbkdf2 failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -246,7 +246,7 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
     do {
         ret = RkcDeriveRmk(ksfData, &rmk);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Derive rmk failed! ret = 0x%X", ret);
+            HKS_LOG_E("Derive rmk failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -255,7 +255,7 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
         struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
         ret = InitMkCryptUsageSpec((uint8_t *)ksfData->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Init mk crypt usageSpec failed! ret = 0x%X", ret);
+            HKS_LOG_E("Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -271,7 +271,7 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
             ret = HksCryptoHalDecrypt(&key, &usageSpec, cipherText, plainText);
         }
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Crypto mk failed! ret = 0x%X", ret);
+            HKS_LOG_E("Crypto mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
         }
     } while (0);
@@ -318,14 +318,14 @@ static int32_t RkcRecoverMkTime(const struct HksRkcKsfData *ksfData)
         struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
         ret = HksCryptoHalFillRandom(&mkMaskBlob);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate mk failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         struct HksBlob mkCipherText = { HKS_RKC_MK_CIPHER_TEXT_LEN, (uint8_t *)ksfData->mkCiphertext };
         ret = RkcMkCrypt(ksfData, &mk, &mkCipherText, false); /* false: decrypt */
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Main key crypt failed! ret = 0x%X", ret);
+            HKS_LOG_E("Main key crypt failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -343,7 +343,7 @@ static int32_t RkcCheckKsf(const char *ksfName, int32_t ret,
 {
     /* If this ksf is different from the first valid ksf, try to overwrite it by the first valid ksf. */
     if ((ret != HKS_SUCCESS) || (HksMemCmp(validKsfData, ksfData, sizeof(struct HksRkcKsfData)) != 0)) {
-        HKS_LOG_E("Repair ksf[%s]", ksfName);
+        HKS_LOG_E("Repair ksf[%" LOG_PUBLIC "s]", ksfName);
         return HksRkcWriteKsf(ksfName, validKsfData);
     }
 
@@ -366,7 +366,7 @@ static int32_t RkcCheckAllKsf(const int32_t *allKsfRet, const struct HksRkcKsfDa
         /* if fail, continue */
         int32_t ret = RkcCheckKsf(g_hksRkcCfg.ksfAttr.name[i], allKsfRet[i], allKsfData + i, validKsfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Check 0x%X ksf failed! ret = 0x%X", i, ret);
+            HKS_LOG_E("Check 0x%" LOG_PUBLIC "X ksf failed! ret = 0x%" LOG_PUBLIC "X", i, ret);
         }
     }
 
@@ -378,7 +378,7 @@ static int32_t RkcLoadKsf(void)
     const uint32_t allKsfDataSize = sizeof(struct HksRkcKsfData) * HKS_RKC_KSF_NUM;
     struct HksRkcKsfData *allKsfData = (struct HksRkcKsfData *)HksMalloc(allKsfDataSize);
     if (allKsfData == NULL) {
-        HKS_LOG_E("Malloc all ksf data failed! malloc size = 0x%X", allKsfDataSize);
+        HKS_LOG_E("Malloc all ksf data failed! malloc size = 0x%" LOG_PUBLIC "X", allKsfDataSize);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(allKsfData, allKsfDataSize, 0, allKsfDataSize);
@@ -391,25 +391,25 @@ static int32_t RkcLoadKsf(void)
 
         ret = RkcReadAllKsf(allKsfRet, allKsfData, HKS_RKC_KSF_NUM, &validKsfData, &validKsfIndex);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("All ksf file are invalid! ret = 0x%X", ret);
+            HKS_LOG_E("All ksf file are invalid! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = RkcRecoverRkTime(validKsfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Recover rook key memory failed! ret = 0x%X", ret);
+            HKS_LOG_E("Recover rook key memory failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = RkcRecoverMkTime(validKsfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Recover main key memory failed! ret = 0x%X", ret);
+            HKS_LOG_E("Recover main key memory failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = RkcCheckAllKsf(allKsfRet, allKsfData, HKS_RKC_KSF_NUM, validKsfData, validKsfIndex);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Check all ksf failed! ret = 0x%X", ret);
+            HKS_LOG_E("Check all ksf failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -485,20 +485,20 @@ static int32_t RkcMakeRandomMaterial(struct HksRkcKsfData *ksfData)
         /* Generate 32 * 2 random number: R1 + R2 */
         ret = HksCryptoHalFillRandom(&random1);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate random1 failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate random1 failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = HksCryptoHalFillRandom(&random2);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate random2 failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate random2 failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         /* calculate material */
         ret = RkcCalculateMaterial(&random1, &random2, ksfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Calc material failed! ret = 0x%X", ret);
+            HKS_LOG_E("Calc material failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -525,14 +525,14 @@ static int32_t RkcMakeMk(struct HksRkcKsfData *ksfData)
         struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
         ret = HksCryptoHalFillRandom(&mkMaskBlob);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate mkMask failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate mkMask failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         /* generate main key */
         ret = HksCryptoHalFillRandom(&mk);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate mk failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -540,14 +540,14 @@ static int32_t RkcMakeMk(struct HksRkcKsfData *ksfData)
         struct HksBlob mkIvBlob = { HKS_RKC_MK_IV_LEN, ksfData->mkIv };
         ret = HksCryptoHalFillRandom(&mkIvBlob);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate mkIv failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate mkIv failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         struct HksBlob cipherTextBlob = { HKS_RKC_MK_CIPHER_TEXT_LEN, ksfData->mkCiphertext };
         ret = RkcMkCrypt(ksfData, &mk, &cipherTextBlob, true); /* true: encrypt */
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Encrypt mk failed! ret = 0x%X", ret);
+            HKS_LOG_E("Encrypt mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -593,7 +593,7 @@ static int32_t RkcCreateKsf(void)
         /* Two material are generated by random number. */
         ret = RkcMakeRandomMaterial(newKsfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate material failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate material failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -601,21 +601,21 @@ static int32_t RkcCreateKsf(void)
         struct HksBlob salt = { HKS_RKC_SALT_LEN, newKsfData->rmkSalt };
         ret = HksCryptoHalFillRandom(&salt);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Generate salt failed! ret = 0x%X", ret);
+            HKS_LOG_E("Generate salt failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         /* make main key. */
         ret = RkcMakeMk(newKsfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("make mk failed! ret = 0x%X", ret);
+            HKS_LOG_E("make mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         /* Write the root key component data into all keystore files */
         ret = RkcWriteAllKsf(newKsfData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Write ksf failed! ret = 0x%X", ret);
+            HKS_LOG_E("Write ksf failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -636,7 +636,7 @@ static int32_t RkcInitKsf(void)
         ret = RkcCreateKsf();
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Load/Create ksf failed! ret = 0x%X", ret);
+        HKS_LOG_E("Load/Create ksf failed! ret = 0x%" LOG_PUBLIC "X", ret);
     }
 
     return ret;
@@ -649,9 +649,9 @@ static char *CloneNewStr(const char *srcStr, const uint32_t strLenMax)
         return NULL;
     }
 
-    const size_t strLen = strlen(srcStr);
+    const uint32_t strLen = strlen(srcStr);
     if ((strLen == 0) || (strLen > strLenMax)) {
-        HKS_LOG_E("Invalid input string! len = 0x%X, maxLen = 0x%X", strLen, strLenMax);
+        HKS_LOG_E("Invalid input string! len = 0x%" LOG_PUBLIC "X, maxLen = 0x%" LOG_PUBLIC "X", strLen, strLenMax);
         return NULL;
     }
 
@@ -707,14 +707,14 @@ int32_t HksRkcInit(void)
         /* Initialize the attribute of keystore file */
         ret = RkcInitKsfAttr(&(initParamInner->ksfAttr));
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Init attribute of keystore file failed! ret = 0x%X", ret);
+            HKS_LOG_E("Init attribute of keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         /* Initialize the keystore file of root key component. */
         ret = RkcInitKsf();
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Init root key component failed! ret = 0x%X", ret);
+            HKS_LOG_E("Init root key component failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -751,7 +751,7 @@ int32_t HksRkcGetMainKey(struct HksBlob *mainKey)
     }
 
     if (mainKey->size != HKS_RKC_MK_LEN) {
-        HKS_LOG_E("Invalid mainKey size! size = 0x%X", mainKey->size);
+        HKS_LOG_E("Invalid mainKey size! size = 0x%" LOG_PUBLIC "X", mainKey->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

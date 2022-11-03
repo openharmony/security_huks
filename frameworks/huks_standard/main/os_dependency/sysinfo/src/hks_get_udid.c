@@ -44,7 +44,7 @@ int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
     char devUdidString[HKS_HARDWARE_UDID_STRING_LEN] = {0};
     int32_t ret = GetDevUdid(devUdidString, sizeof(devUdidString));
     if (ret != 0) {
-        HKS_LOG_E("Get dev udid error, ret = 0x%x", ret);
+        HKS_LOG_E("Get dev udid error, ret = 0x%" LOG_PUBLIC "x", ret);
         return HKS_ERROR_NO_PERMISSION;
     }
 

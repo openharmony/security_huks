@@ -48,7 +48,7 @@ static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
             *nid = NID_ffdhe4096;
             return HKS_SUCCESS;
         default:
-            HKS_LOG_E("invalid key size, keySize = %u", keySize);
+            HKS_LOG_E("invalid key size, keySize = %" LOG_PUBLIC "u", keySize);
             return HKS_ERROR_INVALID_KEY_SIZE;
     }
 }

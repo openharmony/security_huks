@@ -52,7 +52,7 @@ static int32_t RsaCheckKeySize(const uint32_t keySize)
         case HKS_RSA_KEY_SIZE_4096:
             break;
         default:
-            HKS_LOG_E("Invalid rsa key size! keySize = 0x%X", keySize);
+            HKS_LOG_E("Invalid rsa key size! keySize = 0x%" LOG_PUBLIC "X", keySize);
             return HKS_ERROR_INVALID_KEY_SIZE;
     }
 
@@ -64,7 +64,8 @@ static int32_t RsaKeyMaterialNedSizeCheck(const struct KeyMaterialRsa *keyMateri
     const uint32_t maxKeyByteLen = HKS_RSA_KEY_SIZE_4096 / HKS_BITS_PER_BYTE;
     if ((keyMaterial->nSize > maxKeyByteLen) || (keyMaterial->eSize > maxKeyByteLen) ||
         (keyMaterial->dSize > maxKeyByteLen)) {
-        HKS_LOG_E("Invalid rsa keyMaterial! nSize = 0x%X, eSize = 0x%X, dSize = 0x%X",
+        HKS_LOG_E("Invalid rsa keyMaterial! nSize = 0x%" LOG_PUBLIC "X, eSize = 0x%" LOG_PUBLIC "X, "
+            "dSize = 0x%" LOG_PUBLIC "X",
             keyMaterial->nSize,
             keyMaterial->eSize,
             keyMaterial->dSize);
@@ -89,7 +90,7 @@ static int32_t RsaKeyCheck(const struct HksBlob *key)
     }
 
     if (key->size < (sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize)) {
-        HKS_LOG_E("Rsa key size too small! key size = 0x%X", key->size);
+        HKS_LOG_E("Rsa key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -120,21 +121,21 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
         uint32_t offset = sizeof(*keyMaterial);
         ret = mbedtls_mpi_write_binary(&(ctx->MBEDTLS_PRIVATE(N)), rawMaterial + offset, keyMaterial->nSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Rsa save keyMaterial mpi write N failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Rsa save keyMaterial mpi write N failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         offset = offset + keyMaterial->nSize;
         ret = mbedtls_mpi_write_binary(&(ctx->MBEDTLS_PRIVATE(E)), rawMaterial + offset, keyMaterial->eSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Rsa save keyMaterial mpi write E failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Rsa save keyMaterial mpi write E failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         offset = offset + keyMaterial->eSize;
         ret = mbedtls_mpi_write_binary(&(ctx->MBEDTLS_PRIVATE(D)), rawMaterial + offset, keyMaterial->dSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Rsa save keyMaterial mpi write D failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Rsa save keyMaterial mpi write D failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -169,7 +170,7 @@ int32_t HksMbedtlsRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     do {
         ret = mbedtls_rsa_gen_key(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg, spec->keyLen, HKS_RSA_PUBLIC_EXPONENT);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa generate key failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa generate key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
@@ -202,14 +203,14 @@ static int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPri
         uint32_t offset = sizeof(*keyMaterial);
         ret = mbedtls_mpi_read_binary(&n, key->data + offset, keyMaterial->nSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx read N failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx read N failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         offset = offset + keyMaterial->nSize;
         ret = mbedtls_mpi_read_binary(&e, key->data + offset, keyMaterial->eSize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx read E failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx read E failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -217,20 +218,20 @@ static int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPri
             offset = offset + keyMaterial->eSize;
             ret = mbedtls_mpi_read_binary(&d, key->data + offset, keyMaterial->dSize);
             if (ret != HKS_MBEDTLS_SUCCESS) {
-                HKS_LOG_E("Mbedtls rsa keyMaterial to ctx read D failed! mbedtls ret = 0x%X", ret);
+                HKS_LOG_E("Mbedtls rsa keyMaterial to ctx read D failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
                 break;
             }
         }
 
         ret = mbedtls_rsa_import(ctx, &n, NULL, NULL, (needPrivateExponent ? &d : NULL), &e);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx import failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx import failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_rsa_complete(ctx);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx complete failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa keyMaterial to ctx complete failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -309,7 +310,7 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
                 &outlen, message->data, cipherText->data, (size_t)cipherText->size);
         }
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa crypt failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa crypt failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
@@ -392,7 +393,7 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
                 (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
         }
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa sign/verify failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls rsa sign/verify failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             (void)memset_s(signature->data, signature->size, 0, signature->size);
         }
@@ -442,7 +443,7 @@ static int32_t GetRsaPubKeyCheckParams(const struct HksBlob *keyIn, const struct
     /* check keyOut size */
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(keyIn->data);
     if (keyOut->size < (sizeof(struct HksPubKeyInfo) + keyMaterial->nSize + keyMaterial->eSize)) {
-        HKS_LOG_E("Rsa public keyOut size too small! keyOut size = 0x%X", keyOut->size);
+        HKS_LOG_E("Rsa public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 

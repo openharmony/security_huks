@@ -89,7 +89,7 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
     }
 
     if (appIdParam->blob.size > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("invalid app id size: %u", appIdParam->blob.size);
+        HKS_LOG_E("invalid app id size: %" LOG_PUBLIC "u", appIdParam->blob.size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -128,7 +128,7 @@ static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct Hks
     struct HksBlob encryptKey = { HKS_KEY_BLOB_MAIN_KEY_SIZE, encryptKeyData };
     ret = GetEncryptKey(&encryptKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks get encrypt key failed! ret = 0x%X", ret);
+        HKS_LOG_E("Hks get encrypt key failed! ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_BLOB(salt);
         return ret;
     }
@@ -214,7 +214,8 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     uint32_t keySize;
     (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keySize));
     if ((keyParam->blob.size - sizeof(*keyBlobInfo)) != keySize) {
-        HKS_LOG_E("invalid key size in keyBlob, keySize: %u, blobSize: %u", keySize, keyParam->blob.size);
+        HKS_LOG_E("invalid key size in keyBlob, keySize: %" LOG_PUBLIC "u, blobSize: %" LOG_PUBLIC "u",
+            keySize, keyParam->blob.size);
         HksFreeUsageSpec(&usageSpec);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
@@ -237,7 +238,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
         ret = HksCryptoHalDecrypt(&derivedKey, usageSpec, &encKey, &srcKey);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher key[0x%x] failed!", isEncrypt);
+        HKS_LOG_E("cipher key[0x%" LOG_PUBLIC "x] failed!", isEncrypt);
     }
 
     (void)memset_s(derivedKey.data, derivedKey.size, 0, derivedKey.size);
@@ -289,14 +290,14 @@ static int32_t InitKeyBlobInfo(const struct HksBlob *key, struct HksBlob *keyInf
         struct HksBlob salt = { HKS_KEY_BLOB_DERIVE_SALT_SIZE, keyBlobInfo->salt };
         ret = HksCryptoHalFillRandom(&salt);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get salt randomly failed, ret = %d", ret);
+            HKS_LOG_E("get salt randomly failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         struct HksBlob nonce = { HKS_KEY_BLOB_NONCE_SIZE, keyBlobInfo->nonce };
         ret = HksCryptoHalFillRandom(&nonce);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get nonce randomly failed, ret = %d", ret);
+            HKS_LOG_E("get nonce randomly failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -439,7 +440,7 @@ static int32_t GetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *a
 struct HksKeyNode *HksGenerateKeyNode(const struct HksBlob *key)
 {
     if (key->size > MAX_KEY_SIZE) {
-        HKS_LOG_E("invalid key blob size %x", key->size);
+        HKS_LOG_E("invalid key blob size %" LOG_PUBLIC "x", key->size);
         return NULL;
     }
 
@@ -491,7 +492,8 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     uint32_t keySize;
     (void)memcpy_s(&keySize, sizeof(keySize), &(keyBlobInfo->keySize), sizeof(keySize));
     if ((keyParam->blob.size - sizeof(*keyBlobInfo)) != keySize) {
-        HKS_LOG_E("invalid key size in keyBlob, keySize: %u, blobSize: %u", keySize, keyParam->blob.size);
+        HKS_LOG_E("invalid key size in keyBlob, keySize: %" LOG_PUBLIC "u, blobSize: %" LOG_PUBLIC "u",
+            keySize, keyParam->blob.size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 

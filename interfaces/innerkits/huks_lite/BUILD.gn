@@ -124,7 +124,7 @@ config("soft_huks_config") {
   if (board_toolchain_type == "iccarm") {
     cflags = [
       "--diag_suppress",
-      "Pe370",
+      "Pe370,Pe226",
     ]
   } else {
     cflags = [
@@ -199,10 +199,12 @@ if (ohos_kernel_type == "liteos_m") {
       configs += [ ":mbedtls_engine" ]
     }
 
-    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
+    defines = [
+      "MBEDTLS_ECP_RESTARTABLE=1",
+      "LOG_ENGINE_HILOG_MODULE_SCY",
+    ]
 
     if (huks_enable_log == true) {
-      sources += [ "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c" ]
       configs += [ ":hilog_lite_dir" ]
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
     }
@@ -214,9 +216,6 @@ if (ohos_kernel_type == "liteos_m") {
     configs += [ ":get_dev_udid_config" ]
     sources = huks_sources
     sources += huks_storage_source
-    sources += [
-      "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c",
-    ]
 
     include_dirs = [
       "//commonlibrary/c_utils/base/include",
@@ -236,7 +235,10 @@ if (ohos_kernel_type == "liteos_m") {
       configs += [ ":mbedtls_engine" ]
     }
 
-    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
+    defines = [
+      "MBEDTLS_ECP_RESTARTABLE=1",
+      "LOG_ENGINE_HILOG_MODULE_SCY",
+    ]
 
     configs += [ ":hilog_dir" ]
     deps += [

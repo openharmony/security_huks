@@ -53,6 +53,8 @@ ohos_static_library("libhuks_common_standard_static") {
     "src/hks_param.c",
   ]
 
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+
   cflags = [
     "-DHILOG_ENABLE",
     "-Wall",

@@ -52,7 +52,7 @@ static int32_t PkCtxToX509(mbedtls_pk_context *ctx, struct HksBlob *x509Key)
     do {
         int32_t x509Size = mbedtls_pk_write_pubkey_der(ctx, tmpBuf, MAX_KEY_SIZE);
         if (x509Size < HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("public key to x509 write der failed! mbedtls ret = 0x%X", x509Size);
+            HKS_LOG_E("public key to x509 write der failed! mbedtls ret = 0x%" LOG_PUBLIC "X", x509Size);
             ret = x509Size;
             break;
         }
@@ -85,7 +85,7 @@ static int32_t InitRsaPkCtx(const struct HksBlob *mod, const struct HksBlob *e, 
 {
     int32_t ret = mbedtls_pk_setup(ctx, mbedtls_pk_info_from_type(MBEDTLS_PK_RSA));
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls setup pk context failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls setup pk context failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -98,26 +98,26 @@ static int32_t InitRsaPkCtx(const struct HksBlob *mod, const struct HksBlob *e, 
     do {
         ret = mbedtls_mpi_read_binary(&mpiN, mod->data, mod->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Hks init rsa pk context read N failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Hks init rsa pk context read N failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_mpi_read_binary(&mpiE, e->data, e->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Hks init rsa pk context read E failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Hks init rsa pk context read E failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         mbedtls_rsa_context *rsaCtx = mbedtls_pk_rsa(*ctx);
         ret = mbedtls_rsa_import(rsaCtx, &mpiN, NULL, NULL, NULL, &mpiE);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Hks init rsa pk context import rsa context failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Hks init rsa pk context import rsa context failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_rsa_complete(rsaCtx);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Hks init rsa pk context complete rsa context failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Hks init rsa pk context complete rsa context failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -140,7 +140,7 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
 
         ret = PkCtxToX509(&ctx, x509Key);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Pk context to rsa x509 failed! ret = 0x%X", ret);
+            HKS_LOG_E("Pk context to rsa x509 failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -155,40 +155,40 @@ static int32_t InitEccPkCtx(uint32_t keySize, const struct HksBlob *x, const str
 {
     int32_t ret = mbedtls_pk_setup(ctx, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY));
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls setup pk context failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls setup pk context failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     mbedtls_ecp_group_id grp_id;
     ret = GetEccGroupId(keySize, &grp_id);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get ecc group id failed! ret = 0x%X", ret);
+        HKS_LOG_E("Get ecc group id failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     mbedtls_ecp_keypair *pubKey = mbedtls_pk_ec(*ctx);
     ret = mbedtls_ecp_group_load(&(pubKey->MBEDTLS_PRIVATE(grp)), grp_id);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Hks init ecc pk context load group failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Hks init ecc pk context load group failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     ret = mbedtls_mpi_read_binary(&(pubKey->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X)), x->data, x->size);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Hks init ecc pk context read X failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Hks init ecc pk context read X failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     ret = mbedtls_mpi_read_binary(&(pubKey->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y)), y->data, y->size);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Hks init ecc pk context read Y failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Hks init ecc pk context read Y failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     /* Z = 1, X and Y are its standard (affine) coordinates */
     ret = mbedtls_mpi_lset(&(pubKey->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Z)), 1);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Hks init ecc pk context set Z failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Hks init ecc pk context set Z failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -210,7 +210,7 @@ static int32_t EccToX509PublicKey(uint32_t keySize, const struct HksBlob *x, con
 
         ret = PkCtxToX509(&ctx, x509Key);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Pk context to ecc x509 failed! ret = 0x%X", ret);
+            HKS_LOG_E("Pk context to ecc x509 failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -224,7 +224,7 @@ static int32_t EccToX509PublicKey(uint32_t keySize, const struct HksBlob *x, con
 static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob *x509Key)
 {
     if (publicKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid public key size! key size = 0x%X", publicKey->size);
+        HKS_LOG_E("Invalid public key size! key size = 0x%" LOG_PUBLIC "X", publicKey->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -291,7 +291,7 @@ int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob
             return Curve25519ToX509PublicKey(&material1, x509Key);
 #endif
         default:
-            HKS_LOG_E("Unsupport alg type! type = 0x%X", publicKeyInfo->keyAlg);
+            HKS_LOG_E("Unsupport alg type! type = 0x%" LOG_PUBLIC "X", publicKeyInfo->keyAlg);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 #else
@@ -307,7 +307,7 @@ static int32_t CheckRsaCtx(const mbedtls_rsa_context *rsaCtx)
 {
     uint32_t maxKeyByteLen = HKS_RSA_KEY_SIZE_4096 / HKS_BITS_PER_BYTE;
     if (rsaCtx->MBEDTLS_PRIVATE(len) > maxKeyByteLen) {
-        HKS_LOG_E("Invalid mbedtls rsa context's len! len = 0x%X", rsaCtx->MBEDTLS_PRIVATE(len));
+        HKS_LOG_E("Invalid mbedtls rsa context's len! len = 0x%" LOG_PUBLIC "X", rsaCtx->MBEDTLS_PRIVATE(len));
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -318,7 +318,7 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
 {
     int32_t ret = CheckRsaCtx(rsaCtx);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Check rsa ctx failed! ret = 0x%X", ret);
+        HKS_LOG_E("Check rsa ctx failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -341,7 +341,7 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
 
     ret = mbedtls_mpi_write_binary(&rsaCtx->MBEDTLS_PRIVATE(N), keyBuffer + sizeof(struct HksPubKeyInfo), nSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("X509 public key to rsa write N failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("X509 public key to rsa write N failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_PTR(keyBuffer);
         return ret;
     }
@@ -349,7 +349,7 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
     ret = mbedtls_mpi_write_binary(&rsaCtx->MBEDTLS_PRIVATE(E),
         keyBuffer + sizeof(struct HksPubKeyInfo) + nSize, eSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("X509 public key to rsa write E failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("X509 public key to rsa write E failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_PTR(keyBuffer);
         return ret;
     }
@@ -366,7 +366,7 @@ static int32_t CheckEccXySize(const uint32_t xSize, const uint32_t ySize)
 {
     uint32_t maxKeyByteLen = HKS_ECC_KEY_SIZE_521 / HKS_BITS_PER_BYTE;
     if ((xSize > maxKeyByteLen) || (ySize > maxKeyByteLen)) {
-        HKS_LOG_E("Invalid ecc public key size! xSize = 0x%X, ySize = 0x%X", xSize, ySize);
+        HKS_LOG_E("Invalid ecc public key size! xSize = 0x%" LOG_PUBLIC "X, ySize = 0x%" LOG_PUBLIC "X", xSize, ySize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -381,7 +381,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
 
     int32_t ret = CheckEccXySize(xSize, ySize);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Check ecc public key size failed! ret = 0x%X", ret);
+        HKS_LOG_E("Check ecc public key size failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -394,7 +394,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
 
     if (mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)) > UINT32_MAX / HKS_BITS_PER_BYTE) {
         HKS_FREE_PTR(keyBuffer);
-        HKS_LOG_E("invalid param, the size is :%u", mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)));
+        HKS_LOG_E("invalid param, the size is :%" LOG_PUBLIC "u", mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)));
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -408,7 +408,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
     ret = mbedtls_mpi_write_binary(&(pubKey->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(X)),
                                    keyBuffer + sizeof(struct HksPubKeyInfo), xSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("X509 public key to ecc write X failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("X509 public key to ecc write X failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_PTR(keyBuffer);
         return ret;
     }
@@ -416,7 +416,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
     ret = mbedtls_mpi_write_binary(&(pubKey->MBEDTLS_PRIVATE(Q).MBEDTLS_PRIVATE(Y)),
                                     keyBuffer + sizeof(struct HksPubKeyInfo) + xSize, ySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("X509 public key to ecc write Y failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("X509 public key to ecc write Y failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_PTR(keyBuffer);
         return ret;
     }

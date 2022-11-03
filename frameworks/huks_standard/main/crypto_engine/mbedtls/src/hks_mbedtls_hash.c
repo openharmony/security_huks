@@ -517,7 +517,7 @@ int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
     }
 
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hash init failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls hash init failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -549,7 +549,7 @@ int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
     }
 
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hash update failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls hash update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -585,7 +585,7 @@ int32_t HksMbedtlsHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct 
     }
 
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hash final failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls hash final failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         HksFree(*cryptoCtx);
         *cryptoCtx = NULL;
         return ret;
@@ -676,7 +676,7 @@ int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
     }
 
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hash failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls hash failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 

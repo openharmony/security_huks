@@ -115,7 +115,7 @@ static int32_t CopyRootKeyMaterialFile(bool isFileExist, const char *oldFileName
 
     int32_t fileSize = HksOldVersionFileSize(oldFileName);
     if (fileSize < HKS_RKC_KSF_BUF_LEN) {
-        HKS_LOG_E("get old version file size failed, ret = %d", fileSize);
+        HKS_LOG_E("get old version file size failed, ret = %" LOG_PUBLIC "d", fileSize);
         return HKS_ERROR_FILE_SIZE_FAIL;
     }
 
@@ -150,7 +150,7 @@ static int32_t RollBackNewVersionFiles(void)
     char *processName = NULL;
     int32_t ret = HksGetProcessName(&processName);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get process name failed, ret = %d", ret);
+        HKS_LOG_E("get process name failed, ret = %" LOG_PUBLIC "d", ret);
     }
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
 
@@ -165,17 +165,17 @@ static int32_t RemoveOldVersionFiles(void)
 {
     int32_t ret = HksOldVersionFileRemove(HKS_KEY_STORE_FILE_NAME);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("remove key store file failed, ret = %d", ret); /* continue delete */
+        HKS_LOG_E("remove key store file failed, ret = %" LOG_PUBLIC "d", ret); /* continue delete */
     }
 #ifndef _HARDWARE_ROOT_KEY_
     ret = HksOldVersionFileRemove(HKS_ROOT_MATERIAL_FILE_NAME);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("remove root key material file failed, ret = %d", ret); /* continue delete */
+        HKS_LOG_E("remove root key material file failed, ret = %" LOG_PUBLIC "d", ret); /* continue delete */
     }
 
     ret = HksOldVersionFileRemove(HKS_BAK_ROOT_MATERIAL_FILE_NAME);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("remove backup root key material file failed, ret = %d", ret);
+        HKS_LOG_E("remove backup root key material file failed, ret = %" LOG_PUBLIC "d", ret);
     }
 #endif
     return ret;
@@ -264,7 +264,7 @@ static int32_t CheckKeyStoreHeaderValid(const struct HksBlob *keyInfo)
     do {
         ret = HksCryptoHalHash(HKS_DIGEST_SHA512, &srcData, &hashBlob);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks calculate header hash failed, ret = %d", ret);
+            HKS_LOG_E("hks calculate header hash failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -296,7 +296,7 @@ static int32_t GetKeyAlias(const struct HksBlob *keyInfo, struct HksBlob *keyAli
     uint32_t aliasPos = aliasSizePos + sizeof(uint8_t);
 
     if ((aliasSize == 0) || (aliasSize > HKS_MAX_KEY_ALIAS_LEN)) {
-        HKS_LOG_E("invalid key alias size, size = %u", aliasSize);
+        HKS_LOG_E("invalid key alias size, size = %" LOG_PUBLIC "u", aliasSize);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -325,7 +325,7 @@ static int32_t UpgradeSingleKeyInfo(const struct HksBlob *keyInfo)
     struct HksBlob keyAlias = { 0, NULL };
     ret = GetKeyAlias(keyInfo, &keyAlias);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get key alias failed, ret = %d", ret);
+        HKS_LOG_E("get key alias failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -346,7 +346,7 @@ static int32_t UpgradeSingleKeyInfo(const struct HksBlob *keyInfo)
 
         ret = HksStoreKeyBlob(&processNameBlob, &keyAlias, HKS_STORAGE_TYPE_KEY, &output);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("store keyblob to storage failed, ret = %d", ret);
+            HKS_LOG_E("store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);
@@ -383,7 +383,7 @@ static int32_t UpgradeKeyStoreInfo(const struct HksBlob *keyInfo)
         struct HksBlob key = { slotShift, tmp };
         ret = UpgradeSingleKeyInfo(&key);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("update the [%u]st key failed, ret = %d", i, ret);
+            HKS_LOG_E("update the [%" LOG_PUBLIC "u]st key failed, ret = %" LOG_PUBLIC "d", i, ret);
             break;
         }
         tmp += slotShift;
@@ -404,13 +404,13 @@ static int32_t UpgradeKeyStoreFiles(void)
     do {
         ret = CheckKeyStoreHeaderValid(&keyInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("key store file header invalid, ret = %d", ret);
+            HKS_LOG_E("key store file header invalid, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = UpgradeKeyStoreInfo(&keyInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("update key store info failed, ret = %d", ret);
+            HKS_LOG_E("update key store info failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);
@@ -431,7 +431,7 @@ int32_t HksUpgradeStorageData(void)
 #ifndef _HARDWARE_ROOT_KEY_
     ret = UpgradeRootKeyMaterialFile();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("update root key material file failed, ret = %d", ret);
+        HKS_LOG_E("update root key material file failed, ret = %" LOG_PUBLIC "d", ret);
         return (ret == HKS_ERROR_UPDATE_ROOT_KEY_MATERIAL_FAIL) ? ret : HKS_SUCCESS;
     }
 #endif
@@ -441,31 +441,32 @@ int32_t HksUpgradeStorageData(void)
         /* init rkc and update key store files, if process failed, need roolback all new files */
         ret = HuksAccessModuleInit();
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("init rkc failed, ret = %d", ret);
+            HKS_LOG_E("init rkc failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 #endif
 #ifdef _STORAGE_LITE_
         ret = HksLoadFileToBuffer();
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("load file to buffer failed, ret = %d", ret);
+            HKS_LOG_E("load file to buffer failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 #endif
         ret = UpgradeKeyStoreFiles();
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("update key store files failed, ret = %d", ret);
+            HKS_LOG_E("update key store files failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         HKS_LOG_I("upgrading key info files success");
 
         if (RemoveOldVersionFiles() != HKS_SUCCESS) {
-            HKS_LOG_E("remove old key store files failed, ret = %d", ret); /* add log, no proccess error code */
+             /* add log, no proccess error code */
+            HKS_LOG_E("remove old key store files failed, ret = %" LOG_PUBLIC "d", ret);
         }
     } while (0);
 
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("update storage data failed, need delete new files, ret = %d", ret);
+        HKS_LOG_E("update storage data failed, need delete new files, ret = %" LOG_PUBLIC "d", ret);
         if (RollBackNewVersionFiles() != HKS_SUCCESS) {
             HKS_LOG_D("rollback new files failed"); /* add log, no proccess error code */
         }

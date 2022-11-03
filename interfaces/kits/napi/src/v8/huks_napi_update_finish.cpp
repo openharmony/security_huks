@@ -212,7 +212,7 @@ static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncCon
     if (index < maxIndex) { /* has arg 4: can only be callback */
         ret = CheckIsCallbackFuction(env, argv[index], isFunc);
         if (ret != HKS_SUCCESS || !isFunc) {
-            HKS_LOG_E("check param4 failed[ret = %d], or param4 is not func.", ret);
+            HKS_LOG_E("check param4 failed[ret = %" LOG_PUBLIC "d], or param4 is not func.", ret);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         return GetCallBackFunction(env, argv[index], context);
@@ -229,10 +229,10 @@ static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet
         return HKS_SUCCESS;
     }
 
-    for (size_t i = 0; i < paramCount; ++i) {
+    for (uint32_t i = 0; i < paramCount; ++i) {
         int32_t ret = HksAddParams(paramSet, param, 1);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param[%u] failed", i);
+            HKS_LOG_E("add param[%" LOG_PUBLIC "u] failed", i);
             return ret;
         }
         param++;
@@ -316,7 +316,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
     if (status != napi_ok || properties == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("update could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        HKS_LOG_E("update could not get property %" LOG_PUBLIC "s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
 

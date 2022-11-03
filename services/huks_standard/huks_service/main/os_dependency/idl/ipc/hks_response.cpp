@@ -106,10 +106,11 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     int userId = 0;
 #ifdef HAS_OS_ACCOUNT_PART
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %d, userId = %d", callingUid, userId);
+    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
 #else // HAS_OS_ACCOUNT_PART
     GetOsAccountIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %d, userId = %d", callingUid, userId);
+    HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d",
+        callingUid, userId);
 #endif // HAS_OS_ACCOUNT_PART
 
     uint32_t size;

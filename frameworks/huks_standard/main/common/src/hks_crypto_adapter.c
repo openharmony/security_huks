@@ -220,7 +220,7 @@ int32_t HksBuildCipherUsageSpec(
 
     if (ret != HKS_SUCCESS) {
         HksFreeUsageSpec(&usageSpec);
-        HKS_LOG_E("fill[%x] param failed!", isAeMode);
+        HKS_LOG_E("fill[%" LOG_PUBLIC "x] param failed!", isAeMode);
         return ret;
     }
 
@@ -350,7 +350,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
 
     if (memcpy_s(paramSetOut, paramSetOut->paramSetSize, tmpParamSetOut, tmpParamSetOut->paramSetSize) != EOK) {
         HksFreeParamSet(&tmpParamSetOut);
-        HKS_LOG_E("memcpy paramSet out failed, paramSetOut size = %u", paramSetOut->paramSetSize);
+        HKS_LOG_E("memcpy paramSet out failed, paramSetOut size = %" LOG_PUBLIC "u", paramSetOut->paramSetSize);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -395,7 +395,8 @@ int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *
 
     uint32_t size = (isPubKey ? km->pubKeySize : km->priKeySize);
     if (size == 0) {
-        HKS_LOG_E("get key material size invalid, pubSize = %u, priSize = %u", km->pubKeySize, km->priKeySize);
+        HKS_LOG_E("get key material size invalid, pubSize = %" LOG_PUBLIC "u, priSize = %" LOG_PUBLIC "u",
+            km->pubKeySize, km->priKeySize);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
