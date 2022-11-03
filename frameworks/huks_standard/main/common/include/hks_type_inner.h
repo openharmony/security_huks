@@ -62,6 +62,8 @@ enum HksInnerTag {
     HKS_TAG_PARAM2_NULL = HKS_TAG_TYPE_BYTES | 30018,
     HKS_TAG_PARAM3_NULL = HKS_TAG_TYPE_BYTES | 30019,
     HKS_TAG_PARAM4_NULL = HKS_TAG_TYPE_BYTES | 30020,
+
+    HKS_TAG_ACCESS_TOKEN_ID = HKS_TAG_TYPE_UINT | 30021,
 };
 
 #define HKS_PARAM_BUFFER_NULL_INTERVAL ((HKS_TAG_PARAM0_NULL) - (HKS_TAG_PARAM0_BUFFER))
@@ -70,6 +72,7 @@ struct HksProcessInfo {
     struct HksBlob userId;
     struct HksBlob processName;
     int32_t userIdInt;
+    uint64_t accessTokenId;
 };
 
 struct HksParamOut {

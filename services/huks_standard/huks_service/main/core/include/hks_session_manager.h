@@ -27,6 +27,7 @@ struct HksOperation {
     struct HksProcessInfo processInfo;
     uint64_t handle;
     bool abortable;
+    uint64_t accessTokenId;
 };
 
 #ifdef __cplusplus

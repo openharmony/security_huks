@@ -177,37 +177,10 @@ static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const
     return ret;
 }
 
-static int32_t CheckBeforeDeleteParam(const struct HksParamSet *paramSet, uint32_t tag)
-{
-    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check paramSet failed, ret = %d", ret);
-        return ret;
-    }
-
-    if (paramSet->paramsCnt == 0) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
-        if (paramSet->params[i].tag == tag) {
-            return HKS_SUCCESS;
-        }
-    }
-
-    return HKS_ERROR_PARAM_NOT_EXIST;
-}
-
-static int32_t DeleteTagFromParamSet(uint32_t tag, const struct HksParamSet *paramSet,
+static int32_t DeleteTagFromParamSet(const uint32_t *tag, uint32_t tagCount, const struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet)
 {
-    int32_t ret = CheckBeforeDeleteParam(paramSet, tag);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check failed before delete param, ret = %d", ret);
-        return ret;
-    }
-
-    ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+    int32_t ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("fresh paramset failed");
         return ret;
@@ -221,7 +194,14 @@ static int32_t DeleteTagFromParamSet(uint32_t tag, const struct HksParamSet *par
     }
 
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
-        if (paramSet->params[i].tag != tag) {
+        bool isDeleteTag = false;
+        for (uint32_t j = 0; j < tagCount; ++j) {
+            if (paramSet->params[i].tag == tag[j]) {
+                isDeleteTag = true;
+                break;
+            }
+        }
+        if (!isDeleteTag) {
             ret = HksAddParams(newParamSet, &paramSet->params[i], 1);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("add in params failed");
@@ -242,6 +222,8 @@ static int32_t DeleteTagFromParamSet(uint32_t tag, const struct HksParamSet *par
     return HKS_SUCCESS;
 }
 
+static const uint32_t g_deleteTag[] = { HKS_TAG_KEY, HKS_TAG_ACCESS_TOKEN_ID };
+
 static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
 {
     if (key->size < sizeof(struct HksParamSet)) {
@@ -251,15 +233,8 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
 
     const struct HksParamSet *tmpParamSet = (const struct HksParamSet *)key->data;
     struct HksParamSet *outParamSet = NULL;
-    int32_t ret = DeleteTagFromParamSet(HKS_TAG_KEY, tmpParamSet, &outParamSet);
-    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        if (paramSet->paramSetSize < key->size) {
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
-        (void)memcpy_s(paramSet, paramSet->paramSetSize, key->data, key->size);
-        return HKS_SUCCESS;
-    }
-
+    int32_t ret = DeleteTagFromParamSet(g_deleteTag, sizeof(g_deleteTag) / sizeof(g_deleteTag[0]), tmpParamSet,
+        &outParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("delete tag from paramSet failed, ret = %d.", ret);
         return ret;
@@ -365,8 +340,8 @@ static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
     return false;
 }
 
-static int32_t AppendProcessNameTag(const struct HksParamSet *paramSet, const struct HksBlob *processName,
-    struct HksParamSet **outParamSet)
+static int32_t AppendProcessInfo(const struct HksParamSet *paramSet, const struct HksBlob *processName,
+    uint64_t accessTokenId, struct HksParamSet **outParamSet)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -398,6 +373,19 @@ static int32_t AppendProcessNameTag(const struct HksParamSet *paramSet, const st
             HKS_LOG_E("add param failed");
             break;
         }
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+        struct HksParam accessTokenIdParam;
+        accessTokenIdParam.tag = HKS_TAG_ACCESS_TOKEN_ID;
+        accessTokenIdParam.uint64Param = accessTokenId;
+        ret = HksAddParams(newParamSet, &accessTokenIdParam, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add access token id failed");
+            break;
+        }
+#else
+        (void)accessTokenId;
+#endif
 
         ret = HksBuildParamSet(&newParamSet);
         if (ret != HKS_SUCCESS) {
@@ -584,7 +572,7 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
     int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, &userAuthType, &authAccessType);
     if (ret == HKS_ERROR_NOT_SUPPORTED) {
         struct HksParamSet *newParamSet = NULL;
-        ret = AppendProcessNameTag(paramSet, &processInfo->processName, &newParamSet);
+        ret = AppendProcessInfo(paramSet, &processInfo->processName, processInfo->accessTokenId, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append tag processName failed, ret = %d", ret);
             return ret;
@@ -609,7 +597,8 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
         }
 
         struct HksParamSet *newInfoParamSet = NULL;
-        ret = AppendProcessNameTag(userAuthParamSet, &processInfo->processName, &newInfoParamSet);
+        ret = AppendProcessInfo(userAuthParamSet, &processInfo->processName, processInfo->accessTokenId,
+            &newInfoParamSet);
         if (ret != HKS_SUCCESS) {
             HksFreeParamSet(&userAuthParamSet);
             HKS_LOG_E("append tag processName failed, ret = %d", ret);
@@ -625,14 +614,14 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
 static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
-    return AppendProcessNameTag(paramSet, &processInfo->processName, outParamSet);
+    return AppendProcessInfo(paramSet, &processInfo->processName, processInfo->accessTokenId, outParamSet);
 }
 #endif
 
 static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
-    int32_t ret = AppendProcessNameTag(paramSet, &processInfo->processName, outParamSet);
+    int32_t ret = AppendProcessInfo(paramSet, &processInfo->processName, processInfo->accessTokenId, outParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("append tag processName failed, ret = %d", ret);
         return ret;
@@ -1582,9 +1571,15 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     int32_t ret;
     do {
-        if (QueryOperation(processInfo, handle) == NULL) {
+        struct HksOperation *operation = QueryOperation(processInfo, handle);
+        if (operation == NULL) {
             HKS_LOG_E("operationHandle is not exist");
             ret = HKS_ERROR_NOT_EXIST;
+            break;
+        }
+        if (operation->accessTokenId != processInfo->accessTokenId) {
+            HKS_LOG_E("compare access token id failed, unauthorized calling");
+            ret = HKS_ERROR_BAD_STATE;
             break;
         }
 
@@ -1608,14 +1603,20 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
 {
     int32_t ret;
     do {
-        ret = AppendProcessNameTag(paramSet, &processInfo->processName, newParamSet);
+        ret = AppendProcessInfo(paramSet, &processInfo->processName, processInfo->accessTokenId, newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append tag processName failed, ret = %d", ret);
             break;
         }
-        if (QueryOperation(processInfo, handle) == NULL) {
+        struct HksOperation *operation = QueryOperation(processInfo, handle);
+        if (operation == NULL) {
             HKS_LOG_E("operationHandle is not exist");
             ret = HKS_ERROR_NOT_EXIST;
+            break;
+        }
+        if (operation->accessTokenId != processInfo->accessTokenId) {
+            HKS_LOG_E("compare access token id failed, unauthorized calling");
+            ret = HKS_ERROR_BAD_STATE;
             break;
         }
     } while (0);
@@ -1743,7 +1744,7 @@ int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBl
             break;
         }
 
-        ret = AppendProcessNameTag(NULL, processName, &newParamSet);
+        ret = AppendProcessInfo(NULL, processName, 0, &newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append processName tag failed, ret = %d", ret);
             break;

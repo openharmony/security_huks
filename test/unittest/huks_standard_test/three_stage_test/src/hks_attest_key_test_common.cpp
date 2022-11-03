@@ -150,11 +150,13 @@ int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tm
         return ret;
     }
 
-    ret = HksAddParams(*paramSet, tmpParams, paramCount);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed");
-        HksFreeParamSet(paramSet);
-        return ret;
+    if (tmpParams != nullptr) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
     }
 
     ret = HksBuildParamSet(paramSet);

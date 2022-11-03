@@ -32,6 +32,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_secure_access.h"
 #include "securec.h"
 
 #define ID_HUKS_BASE            0x2B, 0x06, 0x01, 0x04, 0x01, 0x8F, 0x5B
@@ -1568,6 +1569,14 @@ int32_t HksSoftAttestKey(const struct HksBlob *key, const struct HksParamSet *pa
         HKS_LOG_E("generate keynode failed");
         return HKS_ERROR_BAD_STATE;
     }
+
+    ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("access control failed");
+        HksFreeKeyNode(&keyNode);
+        return ret;
+    }
+
     ret = CreateHwAttestCertChain(keyNode, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("create attest cert chain failed!");
