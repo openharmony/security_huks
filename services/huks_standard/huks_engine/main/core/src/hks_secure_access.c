@@ -1184,7 +1184,7 @@ static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamS
 }
 #endif
 
-int32_t HksAccessControl(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
+int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
     if (ret != HKS_SUCCESS) {

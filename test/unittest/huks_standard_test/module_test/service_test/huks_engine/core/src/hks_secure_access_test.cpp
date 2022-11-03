@@ -75,7 +75,7 @@ static int32_t BuildParamSetWithParam(struct HksParamSet **paramSet, struct HksP
 
 /**
  * @tc.name: HksSecureAccessTest.HksSecureAccessTest001
- * @tc.desc: tdd HksAccessControl, expect HKS_SUCCESS
+ * @tc.desc: tdd HksProcessIdentityVerify, expect HKS_SUCCESS
  * @tc.type: FUNC
  */
 HWTEST_F(HksSecureAccessTest, HksSecureAccessTest001, TestSize.Level0)
@@ -93,7 +93,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest001, TestSize.Level0)
     ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksAccessControl(blobParamSet, runtimeParamSet);
+    ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);
@@ -101,7 +101,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksSecureAccessTest.HksSecureAccessTest002
- * @tc.desc: tdd HksAccessControl, expect HKS_ERROR_BAD_STATE
+ * @tc.desc: tdd HksProcessIdentityVerify, expect HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksSecureAccessTest, HksSecureAccessTest002, TestSize.Level0)
@@ -118,7 +118,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest002, TestSize.Level0)
     ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksAccessControl(blobParamSet, runtimeParamSet);
+    ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
     EXPECT_EQ(ret, HKS_ERROR_BAD_STATE);
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);
@@ -126,7 +126,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest002, TestSize.Level0)
 
 /**
  * @tc.name: HksSecureAccessTest.HksSecureAccessTest003
- * @tc.desc: tdd HksAccessControl, expect HKS_SUCCESS
+ * @tc.desc: tdd HksProcessIdentityVerify, expect HKS_SUCCESS
  * @tc.type: FUNC
  */
 HWTEST_F(HksSecureAccessTest, HksSecureAccessTest003, TestSize.Level0)
@@ -143,7 +143,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest003, TestSize.Level0)
     ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksAccessControl(blobParamSet, runtimeParamSet);
+    ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);
@@ -151,7 +151,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest003, TestSize.Level0)
 
 /**
  * @tc.name: HksSecureAccessTest.HksSecureAccessTest004
- * @tc.desc: tdd HksAccessControl, expect HKS_ERROR_BAD_STATE
+ * @tc.desc: tdd HksProcessIdentityVerify, expect HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksSecureAccessTest, HksSecureAccessTest004, TestSize.Level0)
@@ -168,7 +168,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest004, TestSize.Level0)
     ret = BuildParamSetWithParam(&runtimeParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksAccessControl(blobParamSet, runtimeParamSet);
+    ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
     EXPECT_EQ(ret, HKS_ERROR_BAD_STATE);
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);

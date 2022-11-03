@@ -408,7 +408,7 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const st
 
 static int32_t SignVerifyPreCheck(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
-    int32_t ret = HksAccessControl(keyNode->paramSet, paramSet);
+    int32_t ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -474,7 +474,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
 static int32_t CipherPreCheck(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
-    int32_t ret = HksAccessControl(keyNode->paramSet, paramSet);
+    int32_t ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -986,7 +986,7 @@ int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct Hks
         return HKS_ERROR_BAD_STATE;
     }
 
-    int32_t ret = HksAccessControl(keyNode->paramSet, paramSet);
+    int32_t ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
 
     HksFreeKeyNode(&keyNode);
     return ret;
@@ -1188,7 +1188,7 @@ int32_t HksCoreExportPublicKey(const struct HksBlob *key, const struct HksParamS
     }
     int32_t ret;
     do {
-        ret = HksAccessControl(keyNode->paramSet, paramSet);
+        ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -1225,7 +1225,7 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
     }
 
     do {
-        ret = HksAccessControl(privateKeyNode->paramSet, paramSet);
+        ret = HksProcessIdentityVerify(privateKeyNode->paramSet, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -1266,7 +1266,7 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
     }
 
     do {
-        ret = HksAccessControl(keyNode->paramSet, paramSet);
+        ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -1316,7 +1316,7 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     }
 
     do {
-        ret = HksAccessControl(keyNode->paramSet, paramSet);
+        ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -1610,7 +1610,7 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         return HKS_ERROR_BAD_STATE;
     }
     do {
-        ret = HksAccessControl(keyNode->keyBlobParamSet, paramSet);
+        ret = HksProcessIdentityVerify(keyNode->keyBlobParamSet, paramSet);
         if (ret != HKS_SUCCESS) {
             break;
         }

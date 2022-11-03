@@ -1570,7 +1570,7 @@ int32_t HksSoftAttestKey(const struct HksBlob *key, const struct HksParamSet *pa
         return HKS_ERROR_BAD_STATE;
     }
 
-    ret = HksAccessControl(keyNode->paramSet, paramSet);
+    ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("access control failed");
         HksFreeKeyNode(&keyNode);
