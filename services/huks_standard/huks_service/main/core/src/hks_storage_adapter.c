@@ -72,7 +72,7 @@ static int32_t AddStorageParams(const struct HksBlob *key, const struct HksBlob 
     struct HksParamSet *paramSet)
 {
     if (keyInfoBlob->size < sizeof(struct HksStoreKeyInfo)) {
-        HKS_LOG_E("invalid keyInfoBlob, size too small, size = %u", keyInfoBlob->size);
+        HKS_LOG_E("invalid keyInfoBlob, size too small, size = %" LOG_PUBLIC "u", keyInfoBlob->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 

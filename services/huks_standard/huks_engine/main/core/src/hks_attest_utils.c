@@ -100,13 +100,13 @@ static int32_t GetEcPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *i
             spkiHeaderLen = sizeof(g_p521SpkiHeader);
             break;
         default:
-            HKS_LOG_E("ec curve not supported: %u\n", info->keySize);
+            HKS_LOG_E("ec curve not supported: %" LOG_PUBLIC "u\n", info->keySize);
             return HKS_ERROR_NOT_SUPPORTED;
     }
 
     uint32_t totalSize = spkiHeaderLen + info->nOrXSize + info->eOrYSize;
     if (key->size < totalSize) {
-        HKS_LOG_E("out size is too small: %u < %u\n", key->size, totalSize);
+        HKS_LOG_E("out size is too small: %" LOG_PUBLIC "u < %" LOG_PUBLIC "u\n", key->size, totalSize);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     key->size = totalSize;
@@ -248,7 +248,7 @@ int32_t HksGetPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info, c
     } else if (info->keyAlg == HKS_ALG_X25519) {
         return GetX25519PublicKey(key, info);
     } else {
-        HKS_LOG_E("alg %u not supported to export public key\n", info->keyAlg);
+        HKS_LOG_E("alg %" LOG_PUBLIC "u not supported to export public key\n", info->keyAlg);
         return HKS_ERROR_NOT_SUPPORTED;
     }
 }

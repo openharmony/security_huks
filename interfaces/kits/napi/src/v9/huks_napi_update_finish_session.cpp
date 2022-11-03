@@ -230,10 +230,10 @@ static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet
         return HKS_SUCCESS;
     }
 
-    for (size_t i = 0; i < paramCount; ++i) {
+    for (uint32_t i = 0; i < paramCount; ++i) {
         int32_t ret = HksAddParams(paramSet, param, 1);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param[%u] failed", i);
+            HKS_LOG_E("add param[%" LOG_PUBLIC "u] failed", i);
             return ret;
         }
         param++;

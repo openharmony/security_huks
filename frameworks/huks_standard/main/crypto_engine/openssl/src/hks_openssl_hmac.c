@@ -59,7 +59,7 @@ static int32_t HmacCheckBuffer(const struct HksBlob *key, const struct HksBlob *
 static int32_t HmacGenKeyCheckParam(const struct HksKeySpec *spec)
 {
     if ((spec->keyLen == 0) || (spec->keyLen % BIT_NUM_OF_UINT8 != 0)) {
-        HKS_LOG_E("keyLen is wrong, len = %u", spec->keyLen);
+        HKS_LOG_E("keyLen is wrong, len = %" LOG_PUBLIC "u", spec->keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -87,18 +87,18 @@ static int32_t HmacCheckParam(
 
     if ((alg != HKS_DIGEST_SHA1) && (alg != HKS_DIGEST_SHA224) && (alg != HKS_DIGEST_SHA256) &&
         (alg != HKS_DIGEST_SHA384) && (alg != HKS_DIGEST_SHA512) && (alg != HKS_DIGEST_SM3)) {
-        HKS_LOG_E("Invalid alg(0x%x)", alg);
+        HKS_LOG_E("Invalid alg(0x%" LOG_PUBLIC "x)", alg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     uint32_t digestLen;
     if (HksGetDigestLen(alg, &digestLen) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid alg(0x%x)", alg);
+        HKS_LOG_E("Invalid alg(0x%" LOG_PUBLIC "x)", alg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (mac->size < digestLen) {
-        HKS_LOG_E("invalid mac->size(0x%x) for digestLen(0x%x)", mac->size, digestLen);
+        HKS_LOG_E("invalid mac->size(0x%" LOG_PUBLIC "x) for digestLen(0x%" LOG_PUBLIC "x)", mac->size, digestLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -141,7 +141,7 @@ int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
 
     if ((digestAlg != HKS_DIGEST_SHA1) && (digestAlg != HKS_DIGEST_SHA224) && (digestAlg != HKS_DIGEST_SHA256) &&
         (digestAlg != HKS_DIGEST_SHA384) && (digestAlg != HKS_DIGEST_SHA512) && (digestAlg != HKS_DIGEST_SM3)) {
-        HKS_LOG_E("Invalid alg(0x%x)", digestAlg);
+        HKS_LOG_E("Invalid alg(0x%" LOG_PUBLIC "x)", digestAlg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -159,7 +159,7 @@ int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
 
     uint32_t digestLen;
     if (HksGetDigestLen(digestAlg, &digestLen) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid alg(0x%x)", digestAlg);
+        HKS_LOG_E("Invalid alg(0x%" LOG_PUBLIC "x)", digestAlg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

@@ -136,7 +136,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 
         AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
         ++g_keyNodeCount;
-        HKS_LOG_I("add keynode count:%u", g_keyNodeCount);
+        HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
     } while (0);
 
     HksMutexUnlock(HksCoreGetHuksMutex());
@@ -170,7 +170,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     struct HksBlob rawKey = { 0, NULL };
     ret = HksGetRawKeyMaterial(key, &rawKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get raw key material failed, ret = %d", ret);
+        HKS_LOG_E("get raw key material failed, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&runtimeParamSet);
         HksFree((void *)keyNode);
         return NULL;
@@ -181,7 +181,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE_BLOB(rawKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate key info to paramset failed, ret = %d", ret);
+        HKS_LOG_E("translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&runtimeParamSet);
         HksFree((void *)keyNode);
         return NULL;
@@ -383,7 +383,7 @@ void HksDeleteKeyNode(uint64_t handle)
             FreeRuntimeParamSet(&keyNode->authRuntimeParamSet);
             HKS_FREE_PTR(keyNode);
             --g_keyNodeCount;
-            HKS_LOG_I("delete keynode count:%u", g_keyNodeCount);
+            HKS_LOG_I("delete keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
             HksMutexUnlock(HksCoreGetHuksMutex());
             return;
         }

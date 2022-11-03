@@ -49,7 +49,7 @@ static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
     int32_t length = i2d_PUBKEY(pkey, NULL);
     if (length <= 0 || length > MAX_OUT_BLOB_SIZE) {
-        HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("i2d_PUBKEY error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -63,7 +63,7 @@ static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
     /* tmp will be modified in i2d_PUBKEY */
     uint8_t *tmp = key;
     if ((uint32_t)i2d_PUBKEY(pkey, &tmp) != keyLength) {
-        HKS_LOG_E("i2d_PUBKEY error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("i2d_PUBKEY error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         HksFree(key);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
@@ -92,11 +92,11 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
         rsaN = BN_bin2bn(mod->data, mod->size, NULL);
         rsaE = BN_bin2bn(e->data, e->size, NULL);
         if (rsaN == NULL || rsaE == NULL) {
-            HKS_LOG_E("BN_bin2bn error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("BN_bin2bn error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
         if (RSA_set0_key(rsa, rsaN, rsaE, NULL) == 0) {
-            HKS_LOG_E("RSA_set0_key error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("RSA_set0_key error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
         rsaN = NULL;
@@ -107,7 +107,7 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
             break;
         }
         if (EVP_PKEY_set1_RSA(pkey, rsa) == 0) {
-            HKS_LOG_E("EVP_PKEY_set1_RSA error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EVP_PKEY_set1_RSA error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
         result = EvpKeyToX509Format(pkey, x509Key);
@@ -166,7 +166,7 @@ static int32_t EccToX509PublicKey(
     do {
         ecKey = EC_KEY_new_by_curve_name(nid);
         if (ecKey == NULL) {
-            HKS_LOG_E("EC_KEY_new_by_curve_name error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EC_KEY_new_by_curve_name error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -178,7 +178,8 @@ static int32_t EccToX509PublicKey(
         }
 
         if (EC_KEY_set_public_key_affine_coordinates(ecKey, ecX, ecY) == 0) {
-            HKS_LOG_E("EC_KEY_set_public_key_affine_coordinates error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EC_KEY_set_public_key_affine_coordinates error %" LOG_PUBLIC "s",
+                ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -190,7 +191,7 @@ static int32_t EccToX509PublicKey(
         }
 
         if (EVP_PKEY_set1_EC_KEY(pkey, ecKey) == 0) {
-            HKS_LOG_E("EVP_PKEY_set1_EC_KEY error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EVP_PKEY_set1_EC_KEY error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -249,7 +250,7 @@ static int32_t DsaToX509PublicKey(const struct HksBlob *y, const struct HksBlob 
     do {
         dsa = DSA_new();
         if (dsa == NULL) {
-            HKS_LOG_E("DSA_new error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("DSA_new error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -259,12 +260,12 @@ static int32_t DsaToX509PublicKey(const struct HksBlob *y, const struct HksBlob 
         }
 
         if (DSA_set0_key(dsa, dsaY, NULL) != 1) {
-            HKS_LOG_E("DSA_set0_key error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("DSA_set0_key error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
         dsaY = NULL;
         if (DSA_set0_pqg(dsa, dsaP, dsaQ, dsaG) != 1) {
-            HKS_LOG_E("DSA_set0_pqg error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("DSA_set0_pqg error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
         dsaP = NULL;
@@ -278,7 +279,7 @@ static int32_t DsaToX509PublicKey(const struct HksBlob *y, const struct HksBlob 
         }
 
         if (EVP_PKEY_set1_DSA(pkey, dsa) == 0) {
-            HKS_LOG_E("EVP_PKEY_set1_DSA error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EVP_PKEY_set1_DSA error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -344,18 +345,18 @@ static int32_t DhToX509PublicKey(
     do {
         dh = DH_new_by_nid(nid);
         if (dh == NULL) {
-            HKS_LOG_E("DH_new_by_nid error:%s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("DH_new_by_nid error:%" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
         pub = BN_bin2bn(pubKey->data, pubKey->size, NULL);
         if (pub == NULL) {
-            HKS_LOG_E("BN_bin2bn error:%s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("BN_bin2bn error:%" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
         if (DH_set0_key(dh, pub, NULL) != 1) {
-            HKS_LOG_E("DH_set0_key error:%s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("DH_set0_key error:%" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
         pub = NULL;
@@ -367,7 +368,7 @@ static int32_t DhToX509PublicKey(
         }
 
         if (EVP_PKEY_set1_DH(pkey, dh) == 0) {
-            HKS_LOG_E("EVP_PKEY_set1_DH error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EVP_PKEY_set1_DH error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -386,7 +387,7 @@ static int32_t DhToX509PublicKey(
 static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob *x509Key)
 {
     if (publicKey->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid public key size! key size = 0x%X", publicKey->size);
+        HKS_LOG_E("Invalid public key size! key size = 0x%" LOG_PUBLIC "X", publicKey->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -455,7 +456,7 @@ int32_t TranslateToX509PublicKey(const struct HksBlob *publicKey, struct HksBlob
             return DhToX509PublicKey(publicKeyInfo->keySize, &material1, NULL, x509Key);
 #endif
         default:
-            HKS_LOG_E("Unsupport alg type! type = 0x%X", publicKeyInfo->keyAlg);
+            HKS_LOG_E("Unsupport alg type! type = 0x%" LOG_PUBLIC "X", publicKeyInfo->keyAlg);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }
@@ -467,7 +468,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
 {
     RSA *rsa = EVP_PKEY_get0_RSA(pkey);
     if (rsa == NULL) {
-        HKS_LOG_E("EVP_PKEY_get1_RSA error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("EVP_PKEY_get1_RSA error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -494,7 +495,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
     pubKeyInfo->placeHolder = 0;
     if (BN_bn2bin(RSA_get0_n(rsa), keyBuffer + sizeof(struct HksPubKeyInfo)) == 0 ||
         BN_bn2bin(RSA_get0_e(rsa), keyBuffer + sizeof(struct HksPubKeyInfo) + (uint32_t)nSize) == 0) {
-        HKS_LOG_E("BN_bn2bin error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("BN_bn2bin error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         HKS_FREE_PTR(keyBuffer);
         return HKS_ERROR_INTERNAL_ERROR;
     }
@@ -520,7 +521,8 @@ static int32_t EcKeyToPublicKey(const uint32_t alg, EC_KEY *ecKey, struct HksBlo
 
         if (EC_POINT_get_affine_coordinates_GFp(EC_KEY_get0_group(ecKey), EC_KEY_get0_public_key(ecKey), x, y, NULL) ==
             0) {
-            HKS_LOG_E("EC_POINT_get_affine_coordinates_GFp error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("EC_POINT_get_affine_coordinates_GFp error %" LOG_PUBLIC "s",
+                ERR_reason_error_string(ERR_get_error()));
             break;
         }
 
@@ -548,7 +550,7 @@ static int32_t EcKeyToPublicKey(const uint32_t alg, EC_KEY *ecKey, struct HksBlo
         pubKeyInfo->placeHolder = 0;
         if (BN_bn2binpad(x, keyBuffer + sizeof(struct HksPubKeyInfo), xSize) == 0 ||
             BN_bn2binpad(y, keyBuffer + sizeof(struct HksPubKeyInfo) + xSize, ySize) == 0) {
-            HKS_LOG_E("BN_bn2binpad error %s", ERR_reason_error_string(ERR_get_error()));
+            HKS_LOG_E("BN_bn2binpad error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
             HKS_FREE_PTR(keyBuffer);
             break;
         }
@@ -567,7 +569,7 @@ static int32_t X509PublicKeyToEcc(const uint32_t alg, EVP_PKEY *pkey, struct Hks
 {
     EC_KEY *ecKey = EVP_PKEY_get0_EC_KEY(pkey);
     if (ecKey == NULL) {
-        HKS_LOG_E("EVP_PKEY_get1_EC_KEY error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("EVP_PKEY_get1_EC_KEY error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -597,7 +599,7 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
 {
     DSA *dsa = EVP_PKEY_get0_DSA(pkey);
     if (dsa == NULL) {
-        HKS_LOG_E("EVP_PKEY_get1_DSA error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("EVP_PKEY_get1_DSA error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -642,7 +644,7 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
         (BN_bn2bin(p, keyBuffer + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize) == 0) ||
         (BN_bn2bin(q, keyBuffer + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize + pSize) == 0) ||
         (BN_bn2bin(g, keyBuffer + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize + pSize + qSize) == 0)) {
-        HKS_LOG_E("BN_bn2bin error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("BN_bn2bin error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         HKS_FREE_PTR(keyBuffer);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
@@ -658,13 +660,13 @@ static int32_t X509PublicKeyToDh(EVP_PKEY *pkey, struct HksBlob *dhPublicKey)
 {
     DH *dh = EVP_PKEY_get0_DH(pkey);
     if (dh == NULL) {
-        HKS_LOG_E("EVP_PKEY_get0_DH error %s", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("EVP_PKEY_get0_DH error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_NULL_POINTER;
     }
 
     const BIGNUM *pubKey = DH_get0_pub_key(dh);
     if (pubKey == NULL) {
-        HKS_LOG_E("DH_get0_pub_key error", ERR_reason_error_string(ERR_get_error()));
+        HKS_LOG_E("DH_get0_pub_key error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
         return HKS_ERROR_NULL_POINTER;
     }
 

@@ -95,19 +95,19 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     char filePath[PATH_MAX + 1] = {0};
     (void)realpath(fileName, filePath);
     if (strstr(filePath, "../") != NULL) {
-        HKS_LOG_E("invalid filePath, path %s", filePath);
+        HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", filePath);
         return 0;
     }
 
     FILE *fp = fopen(filePath, "rb");
     if (fp == NULL) {
-        HKS_LOG_E("failed to open file, errno = 0x%x", errno);
+        HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", errno);
         return 0;
     }
 
     uint32_t size = fread(buf, 1, len, fp);
     if (fclose(fp) < 0) {
-        HKS_LOG_E("failed to close file, errno = 0x%x", errno);
+        HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
         return 0;
     }
 
@@ -123,7 +123,7 @@ static uint32_t FileSize(const char *fileName)
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
-        HKS_LOG_E("file stat fail, errno = 0x%x", errno);
+        HKS_LOG_E("file stat fail, errno = 0x%" LOG_PUBLIC "x", errno);
         return 0;
     }
 
@@ -146,44 +146,44 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
     if (fp == NULL) {
-        HKS_LOG_E("open file fail, errno = 0x%x", errno);
+        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     if (chmod(filePath, S_IRUSR | S_IWUSR) < 0) {
-        HKS_LOG_E("chmod file fail, errno = 0x%x", errno);
+        HKS_LOG_E("chmod file fail, errno = 0x%" LOG_PUBLIC "x", errno);
         fclose(fp);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     uint32_t size = fwrite(buf, 1, len, fp);
     if (size != len) {
-        HKS_LOG_E("write file size fail, errno = 0x%x", errno);
+        HKS_LOG_E("write file size fail, errno = 0x%" LOG_PUBLIC "x", errno);
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fflush(fp) < 0) {
-        HKS_LOG_E("fflush file fail, errno = 0x%x", errno);
+        HKS_LOG_E("fflush file fail, errno = 0x%" LOG_PUBLIC "x", errno);
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     int fd = fileno(fp);
     if (fd < 0) {
-        HKS_LOG_E("fileno fail, errno = 0x%x", errno);
+        HKS_LOG_E("fileno fail, errno = 0x%" LOG_PUBLIC "x", errno);
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fsync(fd) < 0) {
-        HKS_LOG_E("sync file fail, errno = 0x%x", errno);
+        HKS_LOG_E("sync file fail, errno = 0x%" LOG_PUBLIC "x", errno);
         fclose(fp);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
     if (fclose(fp) < 0) {
-        HKS_LOG_E("failed to close file, errno = 0x%x", errno);
+        HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
         return HKS_ERROR_CLOSE_FILE_FAIL;
     }
 
@@ -207,7 +207,7 @@ static int32_t FileRemove(const char *fileName)
     }
 
     if ((unlink(fileName) != 0) && (errno != ENOENT)) {
-        HKS_LOG_E("failed to remove file: errno = 0x%x", errno);
+        HKS_LOG_E("failed to remove file: errno = 0x%" LOG_PUBLIC "x", errno);
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 
@@ -353,7 +353,7 @@ int32_t HksRemoveDir(const char *dirPath)
         if (dire->d_type == DT_REG) { /* only care about files. */
             ret = HksFileRemove(dirPath, dire->d_name);
             if (ret != HKS_SUCCESS) { /* Continue to delete remaining files */
-                HKS_LOG_E("remove file failed when remove dir files, ret = %d.", ret);
+                HKS_LOG_E("remove file failed when remove dir files, ret = %" LOG_PUBLIC "d.", ret);
             }
         }
         dire = readdir(dir);

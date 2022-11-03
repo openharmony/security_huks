@@ -37,6 +37,7 @@ ohos_static_library("libhuks_service_systemapi_mock_static") {
 
   external_deps = [
     "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
 

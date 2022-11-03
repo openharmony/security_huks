@@ -394,15 +394,15 @@ static void SetAttestCertValid(struct ValidPeriod *valid)
     uint64_t curTimeValue = (uint64_t)curTime.tv_sec;
     curTimeValue = curTimeValue * SECOND_TO_MILLI + ((uint64_t)curTime.tv_usec) / SECOND_TO_MILLI;
     activeDateTime = curTimeValue;
-    HKS_LOG_I("set active dateTime to default : %llu\n", activeDateTime);
 
     struct DataTime notBefore = {0};
     uint64_t tmpSec = (activeDateTime >> 10); /* 10 is uesed for uint64 dividing 1000 in 32 bit system. */
     tmpSec = tmpSec + ((3 * tmpSec) >> 7) + ((9 * tmpSec) >> 14); /* 3/7/9/14 are same with 10 */
     tmpSec = tmpSec + (uint32_t)(activeDateTime - tmpSec * SECOND_TO_MILLI) / SECOND_TO_MILLI;
     GenerateSysDateTime((uint32_t)tmpSec, &notBefore);
-    HKS_LOG_I("notBefore:%u%u%u %u:%u:%uZ\n", notBefore.year, notBefore.month, notBefore.day, notBefore.hour,
-        notBefore.min, notBefore.seconds);
+    HKS_LOG_I("notBefore:"
+        "%" LOG_PUBLIC "u%" LOG_PUBLIC "u%" LOG_PUBLIC "u %" LOG_PUBLIC "u:%" LOG_PUBLIC "u:%" LOG_PUBLIC "uZ\n",
+        notBefore.year, notBefore.month, notBefore.day, notBefore.hour, notBefore.min, notBefore.seconds);
     GetTimeStampTee(valid->start, &notBefore);
 
     HKS_LOG_I("set expired date to default.\n");
@@ -419,7 +419,7 @@ static int32_t IsValidTlv(const struct HksAsn1Obj obj)
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (length < ASN_1_MIN_HEADER_LEN) {
-        HKS_LOG_E("len %u < %u.", length, ASN_1_MIN_HEADER_LEN);
+        HKS_LOG_E("len %" LOG_PUBLIC "u < %" LOG_PUBLIC "u.", length, ASN_1_MIN_HEADER_LEN);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -860,7 +860,7 @@ int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
 
     out->data = materialBlob.data;
     out->size = materialBlob.size;
-    HKS_LOG_I("prikey size %x", out->size);
+    HKS_LOG_I("prikey size %" LOG_PUBLIC "x", out->size);
 
     return HKS_SUCCESS;
 }
@@ -1130,12 +1130,12 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
         HKS_LOG_E("insert signType failed");
         return ret;
     }
-    HKS_LOG_I("attest key claims signType[%u] success", signType);
+    HKS_LOG_I("attest key claims signType[%" LOG_PUBLIC "u] success", signType);
 
     bool isGroupInsert = false;
     ret = InsertGroupClaim(&isGroupInsert, out, attetUsageSpec, secLevel);
     if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_SUPPORTED) {
-        HKS_LOG_E("insert group fail, ret %d\n", ret);
+        HKS_LOG_E("insert group fail, ret %" LOG_PUBLIC "d\n", ret);
         return ret;
     }
 
@@ -1167,26 +1167,26 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
     return HKS_SUCCESS;
 }
 
-static int32_t InsertIdOrSecInfoData(enum HksTag tag, uint32_t type, const struct HksBlob *oid, struct HksBlob *out,
-    const struct HksParamSet *paramSet)
+static int32_t InsertIdOrSecInfoData(enum HksTag tag, uint32_t type, const struct HksBlob *oid,
+    struct HksBlob *out, const struct HksParamSet *paramSet)
 {
     struct HksParam *param = NULL;
     int32_t ret = HksGetParam(paramSet, tag, &param);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get id param failed! tag is %x", tag);
+        HKS_LOG_E("get id param failed! tag is %" LOG_PUBLIC "x", tag);
         return ret;
     }
 
     ret = VerifyIdsInfo(tag, param);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("VerifyIdsInfo failed! tag is %x", tag);
+        HKS_LOG_E("VerifyIdsInfo failed! tag is %" LOG_PUBLIC "x", tag);
         return ret;
     }
 
     struct HksAsn1Blob paramBlob = { type, param->blob.size, param->blob.data };
     ret = HksInsertClaim(out, oid, &paramBlob, HKS_SECURITY_LEVEL_SUPER);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert id cliam failed! tag is %x", tag);
+        HKS_LOG_E("insert id cliam failed! tag is %" LOG_PUBLIC "x", tag);
         return ret;
     }
     return ret;
@@ -1236,7 +1236,7 @@ static int32_t BuildAttestDeviceClaims(struct HksBlob *out, const struct HksPara
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             ret = InsertIdOrSecInfoByOid(paramSet->params[j].tag, g_idAttestList[i], out, paramSet);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("insert ids %x fail\n", paramSet->params[i].tag);
+                HKS_LOG_E("insert ids %" LOG_PUBLIC "x fail\n", paramSet->params[i].tag);
                 return ret;
             }
         }
@@ -1367,7 +1367,7 @@ static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
 {
     if ((usageSpec->algType != HKS_ALG_RSA) && (usageSpec->algType != HKS_ALG_ECC) &&
         (usageSpec->algType != HKS_ALG_X25519)) {
-            HKS_LOG_E("invalid alg %u\n", usageSpec->algType);
+            HKS_LOG_E("invalid alg %" LOG_PUBLIC "u\n", usageSpec->algType);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
     if ((usageSpec->algType == HKS_ALG_RSA) && (usageSpec->padding != HKS_PADDING_PSS)) {
@@ -1427,7 +1427,7 @@ static int32_t CreateHwAttestCert(const struct HksAttestSpec *attestSpec, struct
     }
 
     uint8_t *attest = HksMalloc(HKS_ATTEST_CERT_SIZE + attestSpec->claims.size);
-    HKS_LOG_E("mattestSpec->claims.size is %d!", attestSpec->claims.size);
+    HKS_LOG_E("mattestSpec->claims.size is %" LOG_PUBLIC "d!", attestSpec->claims.size);
     if (attest == NULL) {
         HKS_LOG_E("malloc attest cert failed!");
         return HKS_ERROR_MALLOC_FAIL;
@@ -1508,7 +1508,7 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     }
 
     certChain->size = tmp.data - certChain->data;
-    HKS_LOG_I("certChain size after format is %u", certChain->size);
+    HKS_LOG_I("certChain size after format is %" LOG_PUBLIC "u", certChain->size);
     return HKS_SUCCESS;
 }
 

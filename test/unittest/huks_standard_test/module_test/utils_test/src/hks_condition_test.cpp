@@ -77,7 +77,7 @@ void NotifyCondition(HksCondition *condition)
     (void)condition;
     int32_t ret = HksConditionNotify(condition);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksConditionNotify failed, ret = %d", ret);
+        HKS_LOG_E("HksConditionNotify failed, ret = %" LOG_PUBLIC "d", ret);
     }
 }
 

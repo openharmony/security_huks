@@ -65,7 +65,7 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
     do {
         ret = mbedtls_ecp_group_load(&(ctx.grp), curveNist);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls ecp group load fail! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls ecp group load fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -85,7 +85,7 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
             signature->data, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
         signature->size = (uint32_t)keyLen;
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Ecc mbedtls sign fail! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Ecc mbedtls sign fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(signature->data, signature->size, 0, signature->size);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
@@ -110,7 +110,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     mbedtls_ecp_group_id curveNist = MBEDTLS_ECP_DP_NONE;
     ret = HksMbedtlsEccGetKeyCurveNist((struct KeyMaterialEcc *)(key->data), &curveNist);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get ecc KeyCureNist fail! ret = 0x%X", ret);
+        HKS_LOG_E("Get ecc KeyCureNist fail! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -120,7 +120,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     do {
         ret = mbedtls_ecp_group_load(&(ctx.grp), curveNist);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls ecp group load fail! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls ecp group load fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -132,7 +132,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
         ret = mbedtls_ecdsa_read_signature(&ctx,
             message->data, message->size, signature->data, signature->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Ecc mbedtls verify fail! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Ecc mbedtls verify fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     } while (0);

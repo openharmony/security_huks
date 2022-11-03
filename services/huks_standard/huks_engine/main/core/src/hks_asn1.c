@@ -71,7 +71,7 @@ static int32_t Asn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, cons
 
     uint32_t outSize = header.size + value.size;
     if (buf->size < outSize) {
-        HKS_LOG_E("output buffer too small: %u. expected%u", buf->size, outSize);
+        HKS_LOG_E("output buffer too small: %" LOG_PUBLIC "u. expected%" LOG_PUBLIC "u", buf->size, outSize);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -160,7 +160,7 @@ static int32_t Asn1GetObj(struct HksBlob *next, struct HksAsn1Obj *obj, const st
     }
     obj->header.size = buf - data->data;
     if (length > data->size - obj->header.size) {
-        HKS_LOG_E("data buffer is not big enough to hold %u bytes.\n", length);
+        HKS_LOG_E("data buffer is not big enough to hold %" LOG_PUBLIC "u bytes.\n", length);
         return HKS_ERROR_INSUFFICIENT_DATA;
     }
 
@@ -186,7 +186,7 @@ int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const st
         return ret;
     }
     if (obj->header.type != expectedTag) {
-        HKS_LOG_E("tag %u does not match expected: %u\n", obj->header.type, expectedTag);
+        HKS_LOG_E("tag %" LOG_PUBLIC "u does not match expected: %" LOG_PUBLIC "u\n", obj->header.type, expectedTag);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;

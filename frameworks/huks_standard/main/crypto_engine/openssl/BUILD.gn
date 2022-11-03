@@ -58,7 +58,10 @@ ohos_static_library("libhuks_openssl_standard_static") {
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//third_party/openssl:libcrypto_shared",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
   cflags = [
     "-DHILOG_ENABLE",
     "-Wall",

@@ -213,13 +213,13 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
         offset += sizeof(uint32_t);
 
         if ((partDataLength == 0) || (partDataLength > dataSize - offset)) {
-            HKS_LOG_E(" the blob part:%u length is out of range!", blobIndex);
+            HKS_LOG_E(" the blob part:%" LOG_PUBLIC "u length is out of range!", blobIndex);
             return HKS_ERROR_INVALID_WRAPPED_FORMAT;
         }
         offset += partDataLength;
 
         if ((validBlobLengths != NULL) && (*(validBlobLengths + blobIndex) != partDataLength)) {
-            HKS_LOG_E("the blob part:%u length is invalid, should be %u!",
+            HKS_LOG_E("the blob part:%" LOG_PUBLIC "u length is invalid, should be %" LOG_PUBLIC "u!",
                 blobIndex, *(validBlobLengths + blobIndex));
             return HKS_ERROR_INVALID_WRAPPED_FORMAT;
         }

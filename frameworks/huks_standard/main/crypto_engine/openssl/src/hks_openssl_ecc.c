@@ -39,7 +39,7 @@ static int32_t HksOpensslEccCheckKeyLen(uint32_t keyLen)
 {
     if ((keyLen != HKS_ECC_KEY_SIZE_224) && (keyLen != HKS_ECC_KEY_SIZE_256) && (keyLen != HKS_ECC_KEY_SIZE_384) &&
         (keyLen != HKS_ECC_KEY_SIZE_521)) {
-        HKS_LOG_E("invalid param keyLen(0x%x)!", keyLen);
+        HKS_LOG_E("invalid param keyLen(0x%" LOG_PUBLIC "x)!", keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -206,7 +206,7 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 
         ret = EccSaveKeyMaterial(eccKey, spec, &key->data, &key->size);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("save ec key material failed! ret=0x%x", ret);
+            HKS_LOG_E("save ec key material failed! ret=0x%" LOG_PUBLIC "x", ret);
         }
     } while (0);
 

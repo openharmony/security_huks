@@ -100,7 +100,7 @@ static int32_t CalcHeaderMac(const struct HksBlob *salt, const uint8_t *buf,
 
         ret = HuksAccessCalcHeaderMac(paramSet, salt, &srcData, mac);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("access calc header mac failed, ret = %d.", ret);
+            HKS_LOG_E("access calc header mac failed, ret = %" LOG_PUBLIC "d.", ret);
         }
     } while (0);
 
@@ -121,7 +121,7 @@ static int32_t InitImageBuffer(void)
     struct HksBlob salt = { HKS_DERIVE_DEFAULT_SALT_LEN, keyInfoHead->salt };
     int32_t ret = HuksAccessGenerateRandom(NULL, &salt);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("generate random failed, ret = %d", ret);
+        HKS_LOG_E("generate random failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -146,7 +146,7 @@ static int32_t ApplyImageBuffer(uint32_t size)
     }
 
     if ((size == 0) || (size > MAX_BUF_SIZE)) {
-        HKS_LOG_E("invalid size = %u", size);
+        HKS_LOG_E("invalid size = %" LOG_PUBLIC "u", size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -183,7 +183,7 @@ static int32_t FreshImageBuffer(const char *fileName)
     uint32_t offset = HksGetStoreFileOffset();
     uint32_t fileLen = HksFileSize(HKS_KEY_STORE_PATH, fileName);
     if (fileLen < (totalLen + offset)) { /* keyfile len at least totalLen + offset */
-        HKS_LOG_E("total Len: %u, invalid file size: %u", totalLen, fileLen);
+        HKS_LOG_E("total Len: %" LOG_PUBLIC "u, invalid file size: %" LOG_PUBLIC "u", totalLen, fileLen);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -359,7 +359,7 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
 {
     struct HksBlob storageBuf = HksGetImageBuffer();
     if (storageBuf.size < sizeof(struct HksStoreHeaderInfo)) {
-        HKS_LOG_E("invalid keyinfo buffer size %u.", storageBuf.size);
+        HKS_LOG_E("invalid keyinfo buffer size %" LOG_PUBLIC "u.", storageBuf.size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -444,7 +444,7 @@ static int32_t AppendNewKey(const struct HksBlob *keyBlob)
 {
     struct HksBlob storageBuf = HksGetImageBuffer();
     if (storageBuf.size < sizeof(struct HksStoreHeaderInfo)) {
-        HKS_LOG_E("invalid keyinfo buffer size %u.", storageBuf.size);
+        HKS_LOG_E("invalid keyinfo buffer size %" LOG_PUBLIC "u.", storageBuf.size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -531,7 +531,7 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    uint32_t totalLenAdded;
+    uint32_t totalLenAdded = 0;
     int32_t ret;
 
     /* 1. check storage buffer enough for store new key */
@@ -773,7 +773,7 @@ int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t 
 {
     (void)processName;
     if (g_storageImageBuffer.size < sizeof(struct HksStoreHeaderInfo)) {
-        HKS_LOG_E("invalid keyinfo buffer size %u.", g_storageImageBuffer.size);
+        HKS_LOG_E("invalid keyinfo buffer size %" LOG_PUBLIC "u.", g_storageImageBuffer.size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -785,7 +785,7 @@ int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t 
 int32_t HksStoreGetToatalSize(uint32_t *size)
 {
     if (g_storageImageBuffer.size < sizeof(struct HksStoreHeaderInfo)) {
-        HKS_LOG_E("invalid keyinfo buffer size %u.", g_storageImageBuffer.size);
+        HKS_LOG_E("invalid keyinfo buffer size %" LOG_PUBLIC "u.", g_storageImageBuffer.size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
@@ -834,7 +834,7 @@ static int32_t GetAndCheckKeyCount(uint32_t *inputCount, uint32_t *keyCount)
 {
     struct HksBlob storageBuf = HksGetImageBuffer();
     if (storageBuf.size < sizeof(struct HksStoreHeaderInfo)) {
-        HKS_LOG_E("invalid keyinfo buffer size %u.", storageBuf.size);
+        HKS_LOG_E("invalid keyinfo buffer size %" LOG_PUBLIC "u.", storageBuf.size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 

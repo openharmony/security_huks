@@ -110,7 +110,7 @@ static int32_t X25519CheckKeyMaterialPubPriSize(const struct KeyMaterial25519 *k
 {
     if ((keyMaterial->pubKeySize > HKS_X25519_KEY_BYTES) ||
         (keyMaterial->priKeySize > HKS_X25519_KEY_BYTES)) {
-        HKS_LOG_E("Invalid x25519 keyMaterial! pubKeySize = 0x%X, priKeySize = 0x%X",
+        HKS_LOG_E("Invalid x25519 keyMaterial! pubKeySize = 0x%" LOG_PUBLIC "X, priKeySize = 0x%" LOG_PUBLIC "X",
             keyMaterial->pubKeySize, keyMaterial->priKeySize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -141,7 +141,7 @@ static int32_t X25519CheckKeySize(const struct HksBlob *key, const struct KeyMat
 {
     if (key->size < (sizeof(struct KeyMaterial25519) + keyMaterial->pubKeySize +
         (isPubKey ? 0 : keyMaterial->priKeySize))) {
-        HKS_LOG_E("X25519 key size too small! key size = 0x%X", key->size);
+        HKS_LOG_E("X25519 key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -195,7 +195,7 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
     uint32_t offset = sizeof(struct KeyMaterial25519);
     int32_t ret = mbedtls_mpi_write_binary(&(pub->MBEDTLS_PRIVATE(X)), rawMaterial + offset, keyMaterial->pubKeySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls mpi write to x25519 public key failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls mpi write to x25519 public key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
         HKS_FREE_PTR(rawMaterial);
         return ret;
@@ -211,7 +211,7 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
     offset = offset + keyMaterial->pubKeySize;
     ret = mbedtls_mpi_write_binary(pri, rawMaterial + offset, keyMaterial->priKeySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls mpi write to x25519 private key failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls mpi write to x25519 private key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
         HKS_FREE_PTR(rawMaterial);
         return ret;
@@ -244,13 +244,13 @@ int32_t HksMbedtlsX25519GenerateKey(const struct HksKeySpec *spec, struct HksBlo
     do {
         ret = mbedtls_ecp_group_load(&grp, MBEDTLS_ECP_DP_CURVE25519);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls load x25519 group failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls load x25519 group failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_ecdh_gen_public(&grp, &pri, &pub, mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls generate x25519 key failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls generate x25519 key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -291,14 +291,14 @@ static int32_t X25519KeyMaterialToPub(const struct HksBlob *pubKey, mbedtls_ecp_
 
         ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(X)), tmpPubKey, keyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi read from x25519 public key failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi read from x25519 public key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         /* set initial coordinates. Z = 1, X and Y are its standard(affine) coordinates. */
         ret = mbedtls_mpi_lset(&(pub->MBEDTLS_PRIVATE(Z)), 1);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi set Z = 1 failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi set Z = 1 failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 
@@ -313,7 +313,7 @@ static int32_t X25519KeyMaterialToPri(const struct HksBlob *nativeKey, mbedtls_m
     uint32_t offset = sizeof(struct KeyMaterial25519) + keyMaterial->pubKeySize;
     int32_t ret = mbedtls_mpi_read_binary(pri, nativeKey->data + offset, keyMaterial->priKeySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls mpi read from x25519 private key failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls mpi read from x25519 private key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -343,7 +343,7 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
     do {
         ret = mbedtls_ecp_group_load(&(ctx.MBEDTLS_PRIVATE(grp)), MBEDTLS_ECP_DP_CURVE25519);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls load x25519 group failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls load x25519 group failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -360,13 +360,13 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
         ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)),
             &(ctx.MBEDTLS_PRIVATE(Qp)), &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls x25519 shared key failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls x25519 shared key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_mpi_write_binary(&(ctx.MBEDTLS_PRIVATE(z)), sharedKey->data, HKS_X25519_KEY_BYTES);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi write to shared key failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi write to shared key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(sharedKey->data, sharedKey->size, 0, sharedKey->size);
             break;
         }
@@ -398,7 +398,7 @@ static int32_t GetX25519PubKeyCheckParams(const struct HksBlob *keyIn, const str
 
     /* check keyOut */
     if (keyOut->size < (sizeof(struct KeyMaterial25519) + keyMaterial->pubKeySize)) {
-        HKS_LOG_E("X25519 public keyOut size too small! keyOut size = 0x%X", keyOut->size);
+        HKS_LOG_E("X25519 public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -608,7 +608,7 @@ static int32_t HksCurvePskCheckPoint(const mbedtls_mpi *edwardsY, const uint8_t 
         /* if y >= p, return error */
         ret = mbedtls_mpi_cmp_mpi(edwardsY, &(curvePara->mpiP));
         if (ret >= 0) {
-            HKS_LOG_E("edwardsY is greater than or equal to p, ret is %d", ret);
+            HKS_LOG_E("edwardsY is greater than or equal to p, ret is %" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_INVALID_PUBLIC_KEY;
             break;
         }
@@ -786,13 +786,13 @@ int32_t MbedtlsEd25519KeyToX25519(const struct HksBlob *ed25519NativeKey,
 {
     int32_t ret = ConvertPublicKey(ed25519PubKey, x25519PubKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert ed25519 public key to x25519 public key failed! ret = %d", ret);
+        HKS_LOG_E("convert ed25519 public key to x25519 public key failed! ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     ret = ConvertPrivateKey(ed25519NativeKey, x25519NativeKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert ed25519 private key to x25519 private key failed! ret = %d", ret);
+        HKS_LOG_E("convert ed25519 private key to x25519 private key failed! ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -842,30 +842,30 @@ int32_t HksMbedtlsEd25519KeyAgreement(const struct HksBlob *nativeKey,
     do {
         ret = HksGetKeyFromMaterial(HKS_ALG_ED25519, false, nativeKey, &(key.rawNativeKey));
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get private key from material failed, ret = 0x%X", ret);
+            HKS_LOG_E("get private key from material failed, ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
         ret = HksGetKeyFromMaterial(HKS_ALG_ED25519, true, pubKey, &(key.rawPubKey));
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get public key from material failed, ret = 0x%X", ret);
+            HKS_LOG_E("get public key from material failed, ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = MbedtlsEd25519KeyToX25519(&(key.rawNativeKey), &(key.rawPubKey),
             &(key.rawX25519NativeKey), &(key.rawX25519PubKey));
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("covert from ed25519 to x25519 failed, ret = 0x%X", ret);
+            HKS_LOG_E("covert from ed25519 to x25519 failed, ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = HksSetKeyToMaterial(HKS_ALG_X25519, false, &(key.rawX25519NativeKey), &(key.kmX25519NativeKey));
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set private key to material failed, ret = 0x%X", ret);
+            HKS_LOG_E("set private key to material failed, ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
         ret = HksSetKeyToMaterial(HKS_ALG_X25519, true, &(key.rawX25519PubKey), &(key.kmX25519PubKey));
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set publicy key to material failed, ret = 0x%X", ret);
+            HKS_LOG_E("set publicy key to material failed, ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 

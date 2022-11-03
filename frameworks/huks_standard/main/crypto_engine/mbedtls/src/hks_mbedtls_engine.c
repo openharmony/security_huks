@@ -228,7 +228,7 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
 
     /* KeyMaterialRsa, KeyMaterialEcc, KeyMaterial25519's size are same */
     if (keyIn->size < sizeof(struct KeyMaterialRsa)) {
-        HKS_LOG_E("Crypt Hal getPubKey keyIn size is more smaller. size[%d]", keyIn->size);
+        HKS_LOG_E("Crypt Hal getPubKey keyIn size is more smaller. size[%" LOG_PUBLIC "d]", keyIn->size);
         return HKS_ERROR_INVALID_KEY_SIZE;
     }
 
