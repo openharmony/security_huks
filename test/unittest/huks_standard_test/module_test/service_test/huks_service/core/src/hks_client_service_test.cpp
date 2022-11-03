@@ -16,7 +16,7 @@
 #include "hks_client_service_test.h"
 
 #include <gtest/gtest.h>
-#include <string>
+#include <cstring>
 
 #include "hks_api.h"
 #include "hks_attest_key_test_common.h"
@@ -99,6 +99,11 @@ static int32_t TestGenerateKeyWithProcessInfo(const struct HksBlob *keyAlias, co
     return ret;
 }
 
+static const char *g_processNameString = "hks_client";
+static const struct HksBlob g_processName = { strlen(g_processNameString), (uint8_t *)g_processNameString };
+static uint32_t g_userIdInt = 0;
+static const struct HksBlob g_userId = { sizeof(g_userIdInt), (uint8_t *)(&g_userIdInt)};
+
 /**
  * @tc.name: HksClientServiceTest.HksClientServiceTest001
  * @tc.desc: tdd HksServiceDeleteProcessInfo, expect HKS_ERROR_INVALID_ARGUMENT
@@ -109,11 +114,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     HKS_LOG_I("enter HksClientServiceTest001");
     const char *alias = "HksClientServiceTest001";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    uint32_t userIdInt = 0;
-    struct HksBlob userId = { sizeof(userIdInt), (uint8_t *)(&userIdInt)};
-    const char *processNameString = "hks_client";
-    struct HksBlob processName = { strlen(processNameString), (uint8_t *)processNameString };
-    struct HksProcessInfo processInfo = { userId, processName, userIdInt };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
     int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 TestGenerateKey failed, ret = " << ret;
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
@@ -136,18 +137,14 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest002, TestSize.Level0)
     HKS_LOG_I("enter HksClientServiceTest002");
     const char *alias = "HksClientServiceTest002";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    uint32_t userIdInt = 0;
-    struct HksBlob userId = { sizeof(userIdInt), (uint8_t *)(&userIdInt)};
-    const char *processNameString = "hks_client";
-    struct HksBlob processName = { strlen(processNameString), (uint8_t *)processNameString };
-    struct HksProcessInfo processInfo = { userId, processName, userIdInt };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
     int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest002 TestGenerateKey failed, ret = " << ret;
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
 
     struct HksBlob processName2 = { 0, nullptr };
-    struct HksProcessInfo processInfo2 = { userId, processName2, userIdInt };
+    struct HksProcessInfo processInfo2 = { g_userId, processName2, g_userIdInt, 0 };
     HksServiceDeleteProcessInfo(&processInfo2);
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
@@ -272,36 +269,32 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksClientServiceTest004");
     const char *alias = "HksClientServiceTest004_alias";
-    const struct HksBlob g_keyAlias = { strlen(alias), (uint8_t *)alias };
-    const struct HksParam g_attestParams[] = {
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    const struct HksParam attestParams[] = {
     { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
     { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
     { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
-    { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
+    { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias },
     { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = g_udid },
     { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = g_sn },
     { .tag = HKS_TAG_ATTESTATION_ID_DEVICE, .blob = g_dId },
     };
-    uint32_t userIdInt = 0;
-    struct HksBlob userId = { sizeof(userIdInt), (uint8_t *)(&userIdInt)};
-    const char *processNameString = "hks_client";
-    struct HksBlob processName = { strlen(processNameString), (uint8_t *)processNameString };
-    struct HksProcessInfo processInfo = { userId, processName, userIdInt };
-    int32_t ret = GenerateX25519(&g_keyAlias, &processInfo);
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
+    int32_t ret = GenerateX25519(&keyAlias, &processInfo);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateX25519 failed, ret = " << ret;
     struct HksParamSet *paramSet = nullptr;
-    GenerateParamSet(&paramSet, g_attestParams, sizeof(g_attestParams) / sizeof(g_attestParams[0]));
+    GenerateParamSet(&paramSet, attestParams, sizeof(attestParams) / sizeof(attestParams[0]));
     struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ConstructCertChainBlob failed, ret = " << ret;
-    ret = HksServiceAttestKey(&processInfo, &g_keyAlias, paramSet, certChain);
+    ret = HksServiceAttestKey(&processInfo, &keyAlias, paramSet, certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "HksServiceAttestKey failed, ret = " << ret;
     HKS_LOG_I("Attest key success!");
     FreeCertChainBlob(certChain);
 
     HksFreeParamSet(&paramSet);
 
-    ret = HksServiceDeleteKey(&processInfo, &g_keyAlias);
+    ret = HksServiceDeleteKey(&processInfo, &keyAlias);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
@@ -335,7 +328,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest005, TestSize.Level0)
     HKS_LOG_I("enter HksClientServiceTest005");
     const char *alias = "HksClientServiceTest005_alias";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    const struct HksParam g_attestParams[] = {
+    const struct HksParam attestParams[] = {
     { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
     { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
     { .tag = HKS_TAG_ATTESTATION_ID_DEVICE, .blob = g_dId },
@@ -344,15 +337,12 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest005, TestSize.Level0)
     { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = g_udid },
     { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = g_sn },
     };
-    uint32_t userIdInt = 0;
-    struct HksBlob userId = { sizeof(userIdInt), (uint8_t *)(&userIdInt)};
-    const char *processNameString = "hks_client";
-    struct HksBlob processName = { strlen(processNameString), (uint8_t *)processNameString };
-    struct HksProcessInfo processInfo = { userId, processName, userIdInt };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
     int32_t ret = GenerateECC(&keyAlias, &processInfo);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest005 GenerateECC failed, ret = " << ret;
     struct HksParamSet *paramSet = nullptr;
-    GenerateParamSet(&paramSet, g_attestParams, sizeof(g_attestParams) / sizeof(g_attestParams[0]));
+    ret = GenerateParamSet(&paramSet, attestParams, sizeof(attestParams) / sizeof(attestParams[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS);
     struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "HksClientServiceTest005 ConstructCertChainBlob failed, ret = " << ret;
@@ -365,5 +355,161 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest005, TestSize.Level0)
 
     ret = HksServiceDeleteKey(&processInfo, &keyAlias);
     ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest006
+ * @tc.desc: tdd HksServiceGetKeyParamSet with ecc, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest006");
+    const char *alias = "HksClientServiceTest006_alias";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
+    int32_t ret = GenerateECC(&keyAlias, &processInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest006 GenerateECC failed, ret = " << ret;
+    
+    struct HksParamSet *paramSet = nullptr;
+    ret = GenerateParamSet(&paramSet, nullptr, 0);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    struct HksProcessInfo processInfo2 = { g_userId, g_processName, g_userIdInt, 1 };
+
+    ret = HksServiceGetKeyParamSet(&processInfo2, &keyAlias, paramSet);
+    ASSERT_TRUE(ret == HKS_ERROR_BAD_STATE);
+
+    HksFreeParamSet(&paramSet);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias);
+}
+
+static uint32_t g_paramSetDefaultSize = 4096;
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest007
+ * @tc.desc: tdd HksServiceGetKeyParamSet with ecc, expect HKS_SUCCESS and no accessTokenId in paramSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest007");
+    const char *alias = "HksClientServiceTest007_alias";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
+    int32_t ret = GenerateECC(&keyAlias, &processInfo);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest007 GenerateECC failed, ret = " << ret;
+
+    struct HksParamSet *paramSet = (struct HksParamSet *)HksMalloc(g_paramSetDefaultSize);
+
+    ASSERT_TRUE(paramSet != nullptr);
+
+    paramSet->paramSetSize = g_paramSetDefaultSize;
+
+    ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    struct HksParam *accessTokenId = nullptr;
+    ret = HksGetParam(paramSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenId);
+    ASSERT_TRUE(ret == HKS_ERROR_PARAM_NOT_EXIST);
+
+    HksFreeParamSet(&paramSet);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias);
+}
+
+static struct HksParam g_aesGenParams[] = {
+    {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }
+};
+
+static const uint32_t g_ivSize = 16;
+static uint8_t g_iv[g_ivSize] = { 0 };
+
+static struct HksParam g_aesEncryptParams[] = {
+    {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = g_ivSize,
+            .data = (uint8_t *)g_iv
+        }
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    },
+};
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest008
+ * @tc.desc: tdd three stage with access token id, expect HKS_SHKS_ERROR_BAD_STATEUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest008");
+    const char *alias = "alias";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+
+    struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0 };
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = GenerateParamSet(&genParamSet, g_aesGenParams, sizeof(g_aesGenParams) / sizeof(g_aesGenParams[0]));
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksServiceGenerateKey(&processInfo, &keyAlias, genParamSet, nullptr);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    struct HksParamSet *encParamSet = nullptr;
+    ret = GenerateParamSet(&encParamSet, g_aesEncryptParams,
+        sizeof(g_aesEncryptParams) / sizeof(g_aesEncryptParams[0]));
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    
+    struct HksBlob handle = { .size = sizeof(uint64_t), .data = (uint8_t *)HksMalloc(sizeof(uint64_t)) };
+    struct HksBlob token = { 0 };
+
+    ret = HksServiceInit(&processInfo, &keyAlias, encParamSet, &handle, &token);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    struct HksProcessInfo processInfo2 = { g_userId, g_processName, g_userIdInt, 1 };
+
+    struct HksBlob inDataBlob = { 0 };
+    struct HksBlob outDataBlob = { 0 };
+
+    ret = HksServiceUpdate(&handle, &processInfo2, encParamSet, &inDataBlob, &outDataBlob);
+    ASSERT_TRUE(ret == HKS_ERROR_BAD_STATE);
+
+    (void)HksServiceAbort(&handle, &processInfo, encParamSet);
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encParamSet);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias);
 }
 }

@@ -13,19 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CORE_SERVICE_TEST_H
-#define HKS_CORE_SERVICE_TEST_H
+#ifndef HKS_SUCURE_ACCESS_TEST_H
+#define HKS_SUCURE_ACCESS_TEST_H
 
-namespace Unittest::HksCoreServiceTest {
-int HksCoreServiceTest001(void);
-int HksCoreServiceTest002(void);
-int HksCoreServiceTest003(void);
-int HksCoreServiceTest004(void);
-int HksCoreServiceTest005(void);
-int HksCoreServiceTest006(void);
-int HksCoreServiceTest007(void);
-int HksCoreServiceTest008(void);
-int HksCoreServiceTest009(void);
-int HksCoreServiceTest010(void);
+namespace Unittest::HksSecureAccessTest {
+// error test for access token id
+int HksSecureAccessTest001(void);
+int HksSecureAccessTest002(void);
+int HksSecureAccessTest003(void);
+int HksSecureAccessTest004(void);
 }
 #endif

@@ -19,6 +19,8 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_type_inner.h"
+
 #include "securec.h"
 
 static uint32_t g_validTags[] = {
@@ -119,6 +121,8 @@ static uint32_t g_validTags[] = {
     HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
     HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA,
     HKS_TAG_KEY_ACCESS_TIME,
+
+    HKS_TAG_ACCESS_TOKEN_ID,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
