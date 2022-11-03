@@ -55,13 +55,13 @@ void HksTemplateTest::TearDown()
 static int32_t TestLogReturn()
 {
     int32_t ret = HKS_ERROR_NOT_EXIST;
-    HKS_EXCEPRTION_HALDER_LOGE_RETURN(HKS_ERROR_BAD_STATE, "test result error level")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "test result error level")
     return HKS_SUCCESS;
 }
 
 /**
  * @tc.name: HksTemplateTest.HksTemplateTest001
- * @tc.desc: tdd HKS_EXCEPRTION_HALDER_LOGE_RETURN, expecting HKS_ERROR_BAD_STATE
+ * @tc.desc: tdd HKS_IF_NOT_SUCC_LOGE_RETURN, expecting HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksTemplateTest, HksTemplateTest001, TestSize.Level0)
@@ -74,13 +74,13 @@ HWTEST_F(HksTemplateTest, HksTemplateTest001, TestSize.Level0)
 static int32_t TestVariadicLogReturn()
 {
     int32_t ret = HKS_ERROR_NOT_EXIST;
-    HKS_EXCEPRTION_HALDER_LOGE_RETURN(HKS_ERROR_BAD_STATE, "expect: %d", HKS_ERROR_BAD_STATE)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "expect: %d", HKS_ERROR_BAD_STATE)
     return HKS_SUCCESS;
 }
 
 /**
  * @tc.name: HksTemplateTest.HksTemplateTest002
- * @tc.desc: tdd HKS_EXCEPRTION_HALDER_LOGE_RETURN, expecting HKS_ERROR_BAD_STATE
+ * @tc.desc: tdd HKS_IF_NOT_SUCC_LOGE_RETURN, expecting HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksTemplateTest, HksTemplateTest002, TestSize.Level0)
@@ -93,13 +93,13 @@ HWTEST_F(HksTemplateTest, HksTemplateTest002, TestSize.Level0)
 static int32_t TestMultiVariadicLogReturn()
 {
     int32_t ret = HKS_ERROR_NOT_EXIST;
-    HKS_EXCEPRTION_HALDER_LOGE_RETURN(HKS_ERROR_BAD_STATE, "expect: %d, %s", HKS_ERROR_BAD_STATE, "xxxxxxx")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "expect: %d, %s", HKS_ERROR_BAD_STATE, "xxxxxxx")
     return HKS_SUCCESS;
 }
 
 /**
  * @tc.name: HksTemplateTest.HksTemplateTest003
- * @tc.desc: tdd HKS_EXCEPRTION_HALDER_LOGE_RETURN, expecting HKS_ERROR_BAD_STATE
+ * @tc.desc: tdd HKS_IF_NOT_SUCC_LOGE_RETURN, expecting HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksTemplateTest, HksTemplateTest003, TestSize.Level0)
@@ -118,20 +118,20 @@ HWTEST_F(HksTemplateTest, HksTemplateTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksTemplateTest004");
     int32_t ret = HKS_ERROR_API_NOT_SUPPORTED;
-    HKS_EXCEPRTION_HALDER_LOGE("HksTemplateTest004")
-    HKS_EXCEPRTION_HALDER_LOGE("HksTemplateTest004, %d, %s", 0, "HksTemplateTest004")
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksTemplateTest004")
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksTemplateTest004, %d, %s", 0, "HksTemplateTest004")
 }
 
 static int32_t TestReturn()
 {
     int32_t ret = HKS_ERROR_NOT_EXIST;
-    HKS_EXCEPRTION_HALDER_RETURN(HKS_ERROR_BAD_STATE)
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_BAD_STATE)
     return HKS_SUCCESS;
 }
 
 /**
  * @tc.name: HksTemplateTest.HksTemplateTest005
- * @tc.desc: tdd HKS_EXCEPRTION_HALDER_RETURN, expecting HKS_ERROR_BAD_STATE
+ * @tc.desc: tdd HKS_IF_NOT_SUCC_RETURN, expecting HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksTemplateTest, HksTemplateTest005, TestSize.Level0)
@@ -149,7 +149,7 @@ static int32_t TestLogBreak()
     int32_t ret = HKS_FAILURE;
     for (; i < max; ++i) {
         if (i == target) {
-            HKS_EXCEPRTION_HALDER_LOGE_BREAK("HksTemplateTest006, %d, %s", 0, "HksTemplateTest006")
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksTemplateTest006, %d, %s", 0, "HksTemplateTest006")
         }
     }
     if (i == target) {
@@ -160,7 +160,7 @@ static int32_t TestLogBreak()
 
 /**
  * @tc.name: HksTemplateTest.HksTemplateTest006
- * @tc.desc: tdd HKS_EXCEPRTION_HALDER_LOGE_BREAK, expecting HKS_SUCCESS
+ * @tc.desc: tdd HKS_IF_NOT_SUCC_LOGE_BREAK, expecting HKS_SUCCESS
  * @tc.type: FUNC
  */
 HWTEST_F(HksTemplateTest, HksTemplateTest006, TestSize.Level0)
@@ -168,5 +168,23 @@ HWTEST_F(HksTemplateTest, HksTemplateTest006, TestSize.Level0)
     HKS_LOG_I("enter HksTemplateTest006");
     int32_t ret = TestLogBreak();
     ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+static int32_t TestNullLogeReturn()
+{
+    HKS_IF_NULL_LOGE_RETURN(nullptr, HKS_ERROR_NULL_POINTER, "is nullptr: %d", HKS_ERROR_NULL_POINTER)
+    return HKS_SUCCESS;
+}
+
+/**
+ * @tc.name: HksTemplateTest.HksTemplateTest007
+ * @tc.desc: tdd HKS_IF_NULL_LOGE_RETURN, expecting HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksTemplateTest, HksTemplateTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksTemplateTest007");
+    int32_t ret = TestNullLogeReturn();
+    ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 }
