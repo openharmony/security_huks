@@ -16,26 +16,32 @@
 #ifndef HKS_TEMPLATE_H
 #define HKS_TEMPLATE_H
 
-#define HKS_EXCEPRTION_HALDER_LOGE_RETURN(ERROR_CODE, LOG_MESSAGE, ...) \
-if (ret != HKS_SUCCESS) { \
+#define HKS_IF_NOT_SUCC_LOGE_RETURN(RESULT, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
-    return ERROR_CODE; \
+    return (ERROR_CODE); \
 }
 
-#define HKS_EXCEPRTION_HALDER_LOGE_BREAK(LOG_MESSAGE, ...) \
-if (ret != HKS_SUCCESS) { \
+#define HKS_IF_NOT_SUCC_LOGE_BREAK(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
     break; \
 }
 
-#define HKS_EXCEPRTION_HALDER_LOGE(LOG_MESSAGE, ...) \
-if (ret != HKS_SUCCESS) { \
+#define HKS_IF_NOT_SUCC_LOGE(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
 }
 
-#define HKS_EXCEPRTION_HALDER_RETURN(ERROR_CODE) \
-if (ret != HKS_SUCCESS) { \
-    return ERROR_CODE; \
+#define HKS_IF_NOT_SUCC_RETURN(RESULT, ERROR_CODE) \
+if ((RESULT) != HKS_SUCCESS) { \
+    return (ERROR_CODE); \
+}
+
+#define HKS_IF_NULL_LOGE_RETURN(OBJECT, ERROR_CODE, LOG_MESSAGE, ...) \
+if ((OBJECT) == NULL) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    return (ERROR_CODE); \
 }
 
 #endif /* HKS_TEMPLATE_H */

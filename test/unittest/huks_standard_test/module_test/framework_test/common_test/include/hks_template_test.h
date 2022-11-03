@@ -23,5 +23,6 @@ int HksTemplateTest003(void);
 int HksTemplateTest004(void);
 int HksTemplateTest005(void);
 int HksTemplateTest006(void);
+int HksTemplateTest007(void);
 }
 #endif // HKS_TEMPLATE_TEST_H
