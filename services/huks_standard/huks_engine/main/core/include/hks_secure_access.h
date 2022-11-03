@@ -36,7 +36,7 @@ int32_t HksCoreAppendAuthInfoBeforeFinish(struct HuksKeyNode *keyNode, uint32_t 
 int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t pur,
     const struct HksParamSet *inParamSet, uint32_t inOutDataBufferSize, struct HksBlob *inOutData);
 
-int32_t HksAccessControl(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet);
+int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet);
 
 #ifdef __cplusplus
 }
