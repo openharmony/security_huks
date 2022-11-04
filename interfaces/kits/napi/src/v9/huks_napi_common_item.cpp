@@ -169,7 +169,7 @@ static napi_value CheckParamValueType(napi_env env, uint32_t tag, napi_value val
     if (result == nullptr) {
         napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
             "the value of the tag is of an incorrect type");
-        HKS_LOG_E("invalid tag or the type of value, tag = 0x%" LOG_PUBLIC "x, type = %" LOG_PUBLIC "u", 
+        HKS_LOG_E("invalid tag or the type of value, tag = 0x%" LOG_PUBLIC "x, type = %" LOG_PUBLIC "u",
             tag, valueType);
     }
     return result;

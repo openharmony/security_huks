@@ -23,6 +23,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #ifndef _CUT_AUTHENTICATE_
@@ -189,10 +190,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
 {
     struct HksParam *keyParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher keyBlob get key param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher keyBlob get key param failed!")
 
     if (keyParam->blob.size <= sizeof(struct HksKeyBlobInfo)) {
         return HKS_ERROR_INVALID_KEY_INFO;
