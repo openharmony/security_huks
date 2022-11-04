@@ -72,14 +72,14 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
 
         ret = HksSendRequest(HKS_MSG_GEN_KEY, &inBlob, &outBlob, paramSetIn);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest fail, ret = %d", ret);
+            HKS_LOG_E("HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         if (paramSetOut != NULL) {
             ret = HksFreshParamSet(paramSetOut, false);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("FreshParamSet fail, ret = %d", ret);
+                HKS_LOG_E("FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             }
         }
     } while (0);
@@ -218,13 +218,13 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamS
 
         ret = HksSendRequest(HKS_MSG_GET_KEY_PARAMSET, &inBlob, &outBlob, NULL);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest fail, ret = %d", ret);
+            HKS_LOG_E("HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksFreshParamSet(paramSetOut, false);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("FreshParamSet fail, ret = %d", ret);
+            HKS_LOG_E("FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret);
         }
     } while (0);
 
@@ -402,7 +402,7 @@ int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *pa
     struct HksParamSet *newParamSet = NULL;
     ret = AppendCipherTag(paramSet, plainText, true, &newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendCipherTag fail, ret = %d", ret);
+        HKS_LOG_E("AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -432,7 +432,7 @@ int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *pa
     struct HksBlob tmpCipherText = *cipherText;
     ret = AppendCipherTag(paramSet, &tmpCipherText, false, &newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendCipherTag fail, ret = %d", ret);
+        HKS_LOG_E("AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -663,7 +663,7 @@ static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob
     }
 
     if (out->size < size) {
-        HKS_LOG_E("out size[%u] smaller than [%u]", out->size, size);
+        HKS_LOG_E("out size[%" LOG_PUBLIC "u] smaller than [%" LOG_PUBLIC "u]", out->size, size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     (void)memcpy_s(out->data, out->size, data, size);
@@ -690,7 +690,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
         }
 
         if (outBlob.size < HANDLE_SIZE) {
-            HKS_LOG_E("invalid out size[%u]", outBlob.size);
+            HKS_LOG_E("invalid out size[%" LOG_PUBLIC "u]", outBlob.size);
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }

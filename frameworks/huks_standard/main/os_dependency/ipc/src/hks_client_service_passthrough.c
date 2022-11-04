@@ -370,7 +370,7 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
     }
     int32_t ret = HksServiceInit(&processInfo, keyAlias, paramSet, handle, &tokenTmp);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("service init failed, ret = %d", ret);
+        HKS_LOG_E("service init failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 

@@ -40,7 +40,7 @@ sptr<IRemoteObject> GetHksProxy()
 
     sptr<IRemoteObject> hksProxy = registry->GetSystemAbility(SA_ID_KEYSTORE_SERVICE);
     if (hksProxy == nullptr) {
-        HKS_LOG_E("GetHksProxy GetSystemAbility %d is null", SA_ID_KEYSTORE_SERVICE);
+        HKS_LOG_E("GetHksProxy GetSystemAbility %" LOG_PUBLIC "d is null", SA_ID_KEYSTORE_SERVICE);
         return nullptr;
     }
 
@@ -54,7 +54,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         return ret;
     }
 
-    size_t outLen = reply.ReadUint32();
+    uint32_t outLen = reply.ReadUint32();
     if (outLen == 0) {
         if (outBlob != NULL) {
             outBlob->size = 0;
@@ -72,7 +72,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     }
 
     if (outBlob->size < outLen) {
-        HKS_LOG_E("outBlob size[%u] smaller than outLen[%u]", outBlob->size, outLen);
+        HKS_LOG_E("outBlob size[%" LOG_PUBLIC "u] smaller than outLen[%" LOG_PUBLIC "u]", outBlob->size, outLen);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 

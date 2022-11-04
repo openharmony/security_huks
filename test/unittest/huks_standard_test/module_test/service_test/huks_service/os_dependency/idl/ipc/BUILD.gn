@@ -39,4 +39,6 @@ ohos_unittest("service_ipc_test") {
   deps = [
     "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
   ]
+
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }

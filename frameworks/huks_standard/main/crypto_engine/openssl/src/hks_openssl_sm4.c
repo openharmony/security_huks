@@ -37,7 +37,7 @@
 static int32_t Sm4GenKeyCheckParam(const struct HksKeySpec *spec)
 {
     if (spec->keyLen != HKS_SM4_KEY_SIZE_128) {
-        HKS_LOG_E("Invlid sm4 key len %x!", spec->keyLen);
+        HKS_LOG_E("Invlid sm4 key len %" LOG_PUBLIC "x!", spec->keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -101,13 +101,13 @@ int32_t HksOpensslSm4EncryptInit(void **cryptoCtx, const struct HksBlob *key, co
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherCryptInit(key, usageSpec, true, cryptoCtx, GetSm4CipherType);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherCryptInit for sm4 fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherCryptInit for sm4 fail, ret = %" LOG_PUBLIC "d", ret);
                 return ret;
             }
             break;
 #endif
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", usageSpec->mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -133,13 +133,13 @@ int32_t HksOpensslSm4EncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherEncryptUpdate(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherEncryptUpdate for sm4 fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherEncryptUpdate for sm4 fail, ret = %" LOG_PUBLIC "d", ret);
                 return ret;
             }
             break;
 #endif
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", mode);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -163,13 +163,13 @@ int32_t HksOpensslSm4EncryptFinal(void **cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherEncryptFinalThree(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherEncryptFinalThree for sm4 fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherEncryptFinalThree for sm4 fail, ret = %" LOG_PUBLIC "d", ret);
                 return ret;
             }
             break;
 #endif
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", mode);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -186,12 +186,12 @@ int32_t HksOpensslSm4DecryptInit(void **cryptoCtx, const struct HksBlob *key,
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherCryptInit(key, usageSpec, false, cryptoCtx, GetSm4CipherType);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherCryptInit for sm4 fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherCryptInit for sm4 fail, ret = %" LOG_PUBLIC "d", ret);
                 return ret;
             }
             break;
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", usageSpec->mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -210,12 +210,12 @@ int32_t HksOpensslSm4DecryptUpdate(void *cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherDecryptUpdate(cryptoCtx, message, plainText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherDecryptUpdate for sm4 fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherDecryptUpdate for sm4 fail, ret = %" LOG_PUBLIC "d", ret);
                 return ret;
             }
             break;
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", mode);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -238,13 +238,13 @@ int32_t HksOpensslSm4DecryptFinal(void **cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherDecryptFinalThree(cryptoCtx, message, cipherText);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherDecryptFinalThree for sm4 fail, ret = %d", ret);
+                HKS_LOG_E("OpensslBlockCipherDecryptFinalThree for sm4 fail, ret = %" LOG_PUBLIC "d", ret);
                 return ret;
             }
             break;
 #endif
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", mode);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -273,7 +273,7 @@ void HksOpensslSm4HalFreeCtx(void **cryptoCtx)
             break;
 #endif
         default:
-            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%x", opensslSm4Ctx->mode);
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", opensslSm4Ctx->mode);
             break;
     }
 

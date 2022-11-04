@@ -67,7 +67,8 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
 
     if (padding == HKS_PADDING_NONE) {
         if (outData->size < keySize) {
-            HKS_LOG_E("outData buffer too small size: %u, keySize: %u", outData->size, keySize);
+            HKS_LOG_E("outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
+                outData->size, keySize);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else if (padding == HKS_PADDING_OAEP) {
@@ -77,7 +78,7 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
         }
         int32_t ret = HksGetDigestLen(digest, &digestLen);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("GetDigestLen failed, ret = %x", ret);
+            HKS_LOG_E("GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret);
             return ret;
         }
         if (keySize <= (HKS_RSA_OAEP_DIGEST_NUM * digestLen + HKS_RSA_OAEP_DIGEST_NUM)) {
@@ -86,12 +87,14 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
         uint32_t size = keySize - HKS_RSA_OAEP_DIGEST_NUM * digestLen - HKS_RSA_OAEP_DIGEST_NUM;
         if (isEncrypt) {
             if (outData->size < keySize) {
-                HKS_LOG_E("encrypt, outData buffer too small size: %u, keySize: %u", outData->size, keySize);
+                HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
+                    outData->size, keySize);
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
         } else {
             if (outData->size < size) {
-                HKS_LOG_E("decrypt, outData buffer too small size: %u, keySize: %u", outData->size, keySize);
+                HKS_LOG_E("decrypt, outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
+                    outData->size, keySize);
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
         }
@@ -105,12 +108,14 @@ static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
 {
     if (isEncrypt) {
         if (outData->size < (inData->size + HKS_AE_TAG_LEN)) {
-            HKS_LOG_E("encrypt, out buffer too small size: %u, inSize: %u", outData->size, inData->size);
+            HKS_LOG_E("encrypt, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+                outData->size, inData->size);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else {
         if (outData->size < inData->size) {
-            HKS_LOG_E("decryptfinal, out buffer too small size: %u, inSize: %u", outData->size, inData->size);
+            HKS_LOG_E("decryptfinal, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+                outData->size, inData->size);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     }
@@ -126,24 +131,25 @@ static int32_t CheckBlockCipherOther(bool isEncrypt, uint32_t padding, const str
     if (isEncrypt) {
         if (padding == HKS_PADDING_NONE) {
             if (inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
-                HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %u", inData->size);
+                HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %" LOG_PUBLIC "u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         } else {
             paddingSize = HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE - inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE;
             if (inData->size > (UINT32_MAX - paddingSize)) {
-                HKS_LOG_E("encrypt, invalid inData size: %u", inData->size);
+                HKS_LOG_E("encrypt, invalid inData size: %" LOG_PUBLIC "u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
         if (outData->size < (inData->size + paddingSize)) {
-            HKS_LOG_E("encrypt, outData buffer too small size: %u, need: %u",
+            HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, need: %" LOG_PUBLIC "u",
                 outData->size, inData->size + paddingSize);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else {
         if (outData->size < inData->size) {
-            HKS_LOG_E("decrypt, outData buffer too small size: %u, inDataSize: %u", outData->size, inData->size);
+            HKS_LOG_E("decrypt, outData buffer too small size: %" LOG_PUBLIC "u, inDataSize: %" LOG_PUBLIC "u",
+                outData->size, inData->size);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     }
@@ -323,7 +329,7 @@ static int32_t GetNewCachedData(const struct HksBlob *cachedBlob, const struct H
     struct HksBlob *newBlob)
 {
     if ((cachedBlob->size > MAX_BUF_SIZE) || (inData->size > (MAX_BUF_SIZE - cachedBlob->size))) {
-        HKS_LOG_E("input data size too large, size = %u", inData->size);
+        HKS_LOG_E("input data size too large, size = %" LOG_PUBLIC "u", inData->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -367,7 +373,7 @@ static int32_t UpdateCachedData(const struct HuksKeyNode *keyNode, const struct 
     }
     ret = GetNewCachedData(cachedData, srcData, newCachedBlob);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get mew cached data failed, ret = %d", ret);
+        HKS_LOG_E("get mew cached data failed, ret = %" LOG_PUBLIC "d", ret);
         HKS_FREE_PTR(newCachedBlob);
         return ret;
     }
@@ -408,7 +414,7 @@ static int32_t FinishCachedData(const struct HuksKeyNode *keyNode, const struct 
     struct HksBlob *cachedData = (struct HksBlob *)ctx;
     ret = GetNewCachedData(cachedData, srcData, outData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get new cached data failed, ret = %d", ret);
+        HKS_LOG_E("get new cached data failed, ret = %" LOG_PUBLIC "d", ret);
     }
 
     FreeCachedData(&cachedData);
@@ -432,7 +438,7 @@ static int32_t CoreHashInit(const struct HuksKeyNode *keyNode, uint32_t alg)
 
     ret = HksCryptoHalHashInit(digest, &ctx);
     if (ret != HKS_SUCCESS)  {
-        HKS_LOG_E("hal hash init failed ret : %d", ret);
+        HKS_LOG_E("hal hash init failed ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     ctxParam->uint64Param = (uint64_t)(uintptr_t)ctx;
@@ -451,7 +457,7 @@ static int32_t CoreHashUpdate(const struct HuksKeyNode *keyNode, const struct Hk
 
     int32_t ret = HksCryptoHalHashUpdate(srcData, ctx);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hal hash update failed ret : %d", ret);
+        HKS_LOG_E("hal hash update failed ret : %" LOG_PUBLIC "d", ret);
     }
     return ret;
 }
@@ -483,7 +489,7 @@ static int32_t CoreHashFinish(const struct HuksKeyNode *keyNode, const struct Hk
 
     ret = HksCryptoHalHashFinal(srcData, &ctx, outData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hal hash final failed ret : %d", ret);
+        HKS_LOG_E("hal hash final failed ret : %" LOG_PUBLIC "d", ret);
         HKS_FREE_BLOB(*outData);
     }
 
@@ -557,7 +563,8 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
         ret = HksCryptoHalVerify(&rawKey, &usageSpec, inData, outData);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("SignVerify Finish failed, purpose = 0x%x, ret = %d", usageSpec.purpose, ret);
+        HKS_LOG_E("SignVerify Finish failed, purpose = 0x%" LOG_PUBLIC "x, ret = %" LOG_PUBLIC "d",
+            usageSpec.purpose, ret);
     }
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
@@ -637,7 +644,7 @@ static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
             ret = HksCryptoHalDecryptInit(&rawKey, usageSpec, &ctx);
         }
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("cipher ctx init failed, ret = %d", ret);
+            HKS_LOG_E("cipher ctx init failed, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         ctxParam->uint64Param = (uint64_t)(uintptr_t)ctx;
@@ -660,7 +667,8 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
     }
 
     if (outData->size < inData->size) {
-        HKS_LOG_E("cipher update, out buffer too small size: %u, inSize: %u", outData->size, inData->size);
+        HKS_LOG_E("cipher update, out buffer too small size: %" LOG_PUBLIC "u, inSize: %" LOG_PUBLIC "u",
+            outData->size, inData->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -685,7 +693,7 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
         ret = HksCryptoHalDecryptUpdate(inData, ctx, outData, alg);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher update failed! ret : %d", ret);
+        HKS_LOG_E("cipher update failed! ret : %" LOG_PUBLIC "d", ret);
     }
     return ret;
 }
@@ -720,7 +728,7 @@ static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
 
     ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, &tag, alg);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("aes encrypt Finish failed! ret : %d", ret);
+        HKS_LOG_E("aes encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
         return ret;
     }
@@ -772,7 +780,7 @@ static int32_t CoreAesDecryptFinish(const struct HuksKeyNode *keyNode,
 
     ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, &tag, alg);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher DecryptFinish failed! ret : %d", ret);
+        HKS_LOG_E("cipher DecryptFinish failed! ret : %" LOG_PUBLIC "d", ret);
     }
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
     return ret;
@@ -802,7 +810,7 @@ static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
 
     ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, NULL, alg);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("aes encrypt Finish failed! ret : %d", ret);
+        HKS_LOG_E("aes encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
         return ret;
     }
@@ -834,7 +842,7 @@ static int32_t CoreSm4DecryptFinish(const struct HuksKeyNode *keyNode,
 
     ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, NULL, alg);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher DecryptFinish failed! ret : %d", ret);
+        HKS_LOG_E("cipher DecryptFinish failed! ret : %" LOG_PUBLIC "d", ret);
     }
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
     return ret;
@@ -843,7 +851,7 @@ static int32_t CoreSm4DecryptFinish(const struct HuksKeyNode *keyNode,
 static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct HksBlob *inData,
     struct HksBlob *outData)
 {
-    HKS_LOG_E("rsa inData.size = %u", inData->size);
+    HKS_LOG_E("rsa inData.size = %" LOG_PUBLIC "u", inData->size);
     struct HksBlob rawKey = { 0, NULL };
     int32_t ret = HksGetRawKey(keyNode->keyBlobParamSet, &rawKey);
     if (ret != HKS_SUCCESS) {
@@ -873,7 +881,8 @@ static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct H
         ret = HksCryptoHalDecrypt(&rawKey, &usageSpec, inData, outData);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("rsa cipher Finish failed, purpose = 0x%x, ret = %d", usageSpec.purpose, ret);
+        HKS_LOG_E("rsa cipher Finish failed, purpose = 0x%" LOG_PUBLIC "x, ret = %" LOG_PUBLIC "d",
+            usageSpec.purpose, ret);
     }
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
@@ -953,13 +962,13 @@ static int32_t ConstructDervieBlob(const struct HksParamSet *paramSet, struct Hk
     struct HksParam *deriveSizeParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_DERIVE_KEY_SIZE, &deriveSizeParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get derive size failed, ret = %d", ret);
+        HKS_LOG_E("get derive size failed, ret = %" LOG_PUBLIC "d", ret);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     uint32_t deriveSize = deriveSizeParam->uint32Param;
     if ((deriveSize == 0) || (deriveSize > MAX_OUT_BLOB_SIZE)) {
-        HKS_LOG_E("derive size invalid, size = %u", deriveSize);
+        HKS_LOG_E("derive size invalid, size = %" LOG_PUBLIC "u", deriveSize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -1006,14 +1015,14 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
     (void)paramSet;
     int32_t ret = SignVerifyAuth(keyNode, keyNode->runtimeParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCoreSignVerifyThreeStageInit SignAuth fail ret : %d", ret);
+        HKS_LOG_E("HksCoreSignVerifyThreeStageInit SignAuth fail ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     struct HksParam *algParam = NULL;
     ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1036,7 +1045,7 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1059,7 +1068,7 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     struct HksParam *purposeParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_PURPOSE);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE);
         return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
     }
     if (purposeParam->uint32Param == HKS_KEY_PURPOSE_SIGN) { /* inData indicates signature when processing verify */
@@ -1070,7 +1079,7 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     struct HksParam *algParam = NULL;
     ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1083,7 +1092,7 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
         ret = CoreHashFinish(keyNode, &message, &signVerifyData);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("signVerify Finish get Data failed, ret = %d", ret);
+        HKS_LOG_E("signVerify Finish get Data failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1111,14 +1120,14 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
 
     int32_t ret = CipherAuth(keyNode, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher init failed, ret = %d", ret);
+        HKS_LOG_E("cipher init failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     struct HksParam *algParam = NULL;
     ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1142,7 +1151,7 @@ int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1171,7 +1180,7 @@ int32_t HksCoreEncryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1200,7 +1209,7 @@ int32_t HksCoreDecryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_ALGORITHM, &algParam);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%x failed", HKS_TAG_ALGORITHM);
+        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM);
         return HKS_ERROR_CHECK_GET_ALG_FAIL;
     }
 
@@ -1304,12 +1313,12 @@ static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, cons
         if (needStore) {
             ret = HksBuildKeyBlob(NULL, keyFlag, restoreData, paramSet, outData);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("HksBuildKeyBlob failed! ret: %d", ret);
+                HKS_LOG_E("HksBuildKeyBlob failed! ret: %" LOG_PUBLIC "d", ret);
                 break;
             }
         } else {
             if (outData->size < restoreData->size) {
-                HKS_LOG_E("outData size is too small, size : %u", outData->size);
+                HKS_LOG_E("outData size is too small, size : %" LOG_PUBLIC "u", outData->size);
                 ret = HKS_ERROR_BUFFER_TOO_SMALL;
                 break;
             }
@@ -1373,7 +1382,7 @@ int32_t HksCoreAgreeThreeStageInit(const struct HuksKeyNode *keyNode, const stru
     (void)keyNode;
     int32_t ret = AgreeAuth(keyNode, keyNode->runtimeParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCoreAgreeThreeStageInit AgreeAuth fail ret : %d", ret);
+        HKS_LOG_E("HksCoreAgreeThreeStageInit AgreeAuth fail ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     (void)paramSet;
@@ -1406,14 +1415,14 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
     do {
         ret = GetHksPubKeyInnerFormat(keyNode->runtimeParamSet, srcData, &publicKey);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get public key from x509 format failed, ret = %d.", ret);
+            HKS_LOG_E("get public key from x509 format failed, ret = %" LOG_PUBLIC "d.", ret);
             break;
         }
 
         struct HksBlob *agreeTemp = NULL;
         ret = ConstructAgreeBlob(&agreeTemp);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksCoreAgreeBuildData failed, ret = %d.", ret);
+            HKS_LOG_E("HksCoreAgreeBuildData failed, ret = %" LOG_PUBLIC "d.", ret);
             break;
         }
 
@@ -1431,7 +1440,7 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
 
         ret = HksCryptoHalAgreeKey(&rawKey, &publicKey, &agreeSpec, agreeTemp);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksCryptoHalAgreeKey failed, ret = %d.", ret);
+            HKS_LOG_E("HksCryptoHalAgreeKey failed, ret = %" LOG_PUBLIC "d.", ret);
             FreeOutBlob(&agreeTemp);
             break;
         }
@@ -1497,7 +1506,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
     (void)paramSet;
     int32_t ret = HmacAuth(keyNode, keyNode->runtimeParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCoreMacThreeStageInit MacAuth fail ret : %d", ret);
+        HKS_LOG_E("HksCoreMacThreeStageInit MacAuth fail ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1521,7 +1530,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
         void *ctx = NULL;
         ret = HksCryptoHalHmacInit(&rawKey, alg, &ctx);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hmac init failed! ret : %d", ret);
+            HKS_LOG_E("hmac init failed! ret : %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -1553,7 +1562,7 @@ int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const stru
 
     ret = HksCryptoHalHmacUpdate(srcData, ctx);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hmac update failed! ret : %d", ret);
+        HKS_LOG_E("hmac update failed! ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1601,7 +1610,7 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
 
     ret = HksCryptoHalHmacFinal(inData, &ctx, outData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hmac final failed! ret : %d", ret);
+        HKS_LOG_E("hmac final failed! ret : %" LOG_PUBLIC "d", ret);
     }
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
     return ret;

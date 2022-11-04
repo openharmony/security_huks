@@ -43,13 +43,13 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
 
     g_halDeviceHandle = dlopen("libhuks_engine_core_standard.z.so", RTLD_NOW);
     if (g_halDeviceHandle == NULL) {
-        HKS_LOG_E("dlopen failed, %s!", dlerror());
+        HKS_LOG_E("dlopen failed, %" LOG_PUBLIC "s!", dlerror());
         return HKS_FAILURE;
     }
 
     HalCreateHandle devicePtr = (HalCreateHandle)dlsym(g_halDeviceHandle, "HuksCreateHdiDevicePtr");
     if (devicePtr == NULL) {
-        HKS_LOG_E("dlsym failed, %s!", dlerror());
+        HKS_LOG_E("dlsym failed, %" LOG_PUBLIC "s!", dlerror());
         dlclose(g_halDeviceHandle);
         return HKS_ERROR_NULL_POINTER;
     }

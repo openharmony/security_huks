@@ -123,8 +123,8 @@ static int32_t CheckEd25519Material(const struct HksBlob *key)
         ((key->size - totalSize) < km->priKeySize) ||
         (km->pubKeySize > (UINT32_MAX - km->priKeySize)) ||
         ((key->size - totalSize) < (km->pubKeySize + km->priKeySize))) {
-        HKS_LOG_E("Ed25519 key material wrong pub and pri key size %u, %u, %u",
-            key->size, km->pubKeySize, km->priKeySize);
+        HKS_LOG_E("Ed25519 key material wrong pub and pri key size %" LOG_PUBLIC "u, %" LOG_PUBLIC "u, "
+            "%" LOG_PUBLIC "u", key->size, km->pubKeySize, km->priKeySize);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -143,7 +143,7 @@ static int32_t GetEd25519PubKeyCheck(const struct HksBlob *key, const struct Hks
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
     if ((km->pubKeySize > (UINT32_MAX - sizeof(struct KeyMaterial25519))) ||
         (keyOut->size < (sizeof(struct KeyMaterial25519) + km->pubKeySize))) {
-        HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%X", keyOut->size);
+        HKS_LOG_E("Ecc public keyOut size too small! keyOut size = 0x%" LOG_PUBLIC "X", keyOut->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -181,7 +181,8 @@ int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usa
     }
     if (signature->size < HKS_SIGNATURE_MIN_SIZE ||
         key->size <= (sizeof(struct KeyMaterial25519) + ED25519_PUBLIC_KEY_LEN)) {
-        HKS_LOG_E("invalid param : signature size = %u, key size = %u", signature->size, key->size);
+        HKS_LOG_E("invalid param : signature size = %" LOG_PUBLIC "u, key size = %" LOG_PUBLIC "u",
+            signature->size, key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

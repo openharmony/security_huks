@@ -150,13 +150,13 @@ HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
         uint32_t curTag = paramSet->params[i].tag;
         if (!IsValidTag(curTag)) {
-            HKS_LOG_E("paramSet contains invalid tag! 0x%x", curTag);
+            HKS_LOG_E("paramSet contains invalid tag! 0x%" LOG_PUBLIC "x", curTag);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
 
         for (uint32_t j = i + 1; j < paramSet->paramsCnt; ++j) {
             if (curTag == paramSet->params[j].tag) {
-                HKS_LOG_E("paramSet contains multi-tags! 0x%x", curTag);
+                HKS_LOG_E("paramSet contains multi-tags! 0x%" LOG_PUBLIC "x", curTag);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -446,7 +446,7 @@ HKS_API_EXPORT int32_t HksCheckParamMatch(const struct HksParam *baseParam, cons
             }
             return HKS_SUCCESS;
         default:
-            HKS_LOG_E("invalid tag type:%x", GetTagType((enum HksTag)(baseParam->tag)));
+            HKS_LOG_E("invalid tag type:%" LOG_PUBLIC "x", GetTagType((enum HksTag)(baseParam->tag)));
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }

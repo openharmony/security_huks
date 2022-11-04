@@ -77,7 +77,11 @@ ohos_unittest("crypto_engine_unit_test") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
     "//third_party/googletest:gtest_main",
   ]
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+
   cflags = [
     "-Wall",
     "-Werror",

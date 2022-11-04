@@ -46,7 +46,7 @@ static int32_t RsaGenKeyCheckParam(const struct HksKeySpec *spec)
         case HKS_RSA_KEY_SIZE_4096:
             return HKS_SUCCESS;
         default:
-            HKS_LOG_E("Invlid rsa key len %x!", spec->keyLen);
+            HKS_LOG_E("Invlid rsa key len %" LOG_PUBLIC "x!", spec->keyLen);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }

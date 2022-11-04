@@ -41,6 +41,7 @@ ohos_static_library("libhuks_service_systemapi_wrap_static") {
 
   external_deps = [
     "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_core",
   ]
   cflags_cc = [

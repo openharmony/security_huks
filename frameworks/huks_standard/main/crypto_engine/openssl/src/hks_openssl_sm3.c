@@ -30,7 +30,7 @@
 static int32_t Sm3GenKeyCheckParam(const struct HksKeySpec *spec)
 {
     if ((spec->keyLen == 0) || (spec->keyLen % BIT_NUM_OF_UINT8 != 0)) {
-        HKS_LOG_E("keyLen is wrong, len = %u", spec->keyLen);
+        HKS_LOG_E("keyLen is wrong, len = %" LOG_PUBLIC "u", spec->keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;

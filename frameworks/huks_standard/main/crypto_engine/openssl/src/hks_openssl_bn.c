@@ -121,7 +121,7 @@ int32_t HksOpensslBnExpMod(struct HksBlob *x, const struct HksBlob *a,
 
         ret = BN_mod_exp(bnParams.bnX, bnParams.bnA, bnParams.bnE, bnParams.bnN, bnParams.ctx);
         if (ret != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("BN_mod_exp fail, ret = %d", ret);
+            HKS_LOG_E("BN_mod_exp fail, ret = %" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }

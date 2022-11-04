@@ -38,7 +38,7 @@ void HksLogOpensslError(void)
     errCode = ERR_get_error();
     ERR_error_string_n(errCode, szErr, HKS_OPENSSL_ERROR_LEN);
 
-    HKS_LOG_E("Openssl engine fail, error code = %lu, error string = %s", errCode, szErr);
+    HKS_LOG_E("Openssl engine fail, error code = %lu, error string = %" LOG_PUBLIC "s", errCode, szErr);
 }
 
 inline int32_t HksOpensslCheckBlob(const struct HksBlob *blob)
@@ -210,7 +210,7 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
     struct KeyMaterialRsa *key = (struct KeyMaterialRsa *)(keyIn->data);
     PubKey func = (PubKey)GetAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(key->keyAlg));
     if (func == NULL) {
-        HKS_LOG_E("PubKey func is null, keyAlg:%d", key->keyAlg);
+        HKS_LOG_E("PubKey func is null, keyAlg:%" LOG_PUBLIC "d", key->keyAlg);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return func(keyIn, keyOut);

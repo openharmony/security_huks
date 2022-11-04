@@ -301,7 +301,7 @@ int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 
         ret = DsaSaveKeyMaterial(dsa, spec->keyLen, &key->data, &key->size);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("save dsa key material failed! ret=0x%x", ret);
+            HKS_LOG_E("save dsa key material failed! ret=0x%" LOG_PUBLIC "x", ret);
             break;
         }
     } while (0);
