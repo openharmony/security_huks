@@ -46,14 +46,14 @@ static int32_t DeriveKeyPbkdf2(const struct HksBlob *mainKey, const struct HksKe
     do {
         ret = mbedtls_md_setup(&ctx, info, 1); /* 1 for using HMAC */
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls md setup failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls md setup failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_pkcs5_pbkdf2_hmac(&ctx, mainKey->data, mainKey->size, derParam->salt.data,
             derParam->salt.size, derParam->iterations, derivedKey->size, derivedKey->data);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls pbkdf2 failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls pbkdf2 failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(derivedKey->data, derivedKey->size, 0, derivedKey->size);
         }
     } while (0);
@@ -70,7 +70,7 @@ static int32_t DeriveKeyHkdf(const struct HksBlob *mainKey, const struct HksKeyD
     int32_t ret = mbedtls_hkdf(info, derParam->salt.data, derParam->salt.size, mainKey->data, mainKey->size,
         derParam->info.data, derParam->info.size, derivedKey->data, derivedKey->size);
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hkdf failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls hkdf failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         (void)memset_s(derivedKey->data, derivedKey->size, 0, derivedKey->size);
     }
 
@@ -91,7 +91,7 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
 
     const mbedtls_md_info_t *info = mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg);
     if (info == NULL) {
-        HKS_LOG_E("Mbedtls get md info failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Mbedtls get md info failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -105,7 +105,7 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
             return DeriveKeyHkdf(mainKey, derParam, info, derivedKey);
 #endif
         default:
-            HKS_LOG_E("Unsupport derive key alg! mode = 0x%X", derivationSpec->algType);
+            HKS_LOG_E("Unsupport derive key alg! mode = 0x%" LOG_PUBLIC "X", derivationSpec->algType);
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }

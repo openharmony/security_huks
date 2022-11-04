@@ -79,7 +79,7 @@ static int32_t SetIdsToken()
     tokenId = GetAccessTokenId(&infoInstance);
     int32_t ret = SetSelfTokenID(tokenId);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     return ret;
 }
@@ -137,7 +137,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
 {
     int32_t ret = SetIdsToken();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias);
@@ -151,7 +151,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksAttestKey fail, ret is %d!", ret);
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = ValidateCertChainTest(certChain, g_idsParams, IDS_PARAM);
@@ -175,7 +175,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
 {
     int32_t ret = SetIdsToken();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
@@ -206,7 +206,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
 {
     int32_t ret = SetIdsToken();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias);
@@ -237,7 +237,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
 {
     int32_t ret = SetIdsToken();
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = TestGenerateKey(&g_keyAlias);

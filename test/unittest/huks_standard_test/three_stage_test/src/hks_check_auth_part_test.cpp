@@ -313,7 +313,7 @@ static int32_t CheckGenAuthTest(const TestAuthCaseParams &testCaseParams)
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("InitParamSet(gen) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(gen) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     uint8_t alias[] = "testCheckAuth";
@@ -321,7 +321,7 @@ static int32_t CheckGenAuthTest(const TestAuthCaseParams &testCaseParams)
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
-        HKS_LOG_I("HksGenerateKey failed, ret : %d", ret);
+        HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -354,7 +354,7 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
     struct HksParamSet *initParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("InitParamSet(gen) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(gen) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     
@@ -363,7 +363,7 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
-        HKS_LOG_I("HksGenerateKey failed, ret : %d", ret);
+        HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -371,7 +371,7 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
     getParamSetAuthTest(&paramOutSet, genParamSet);
     ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("InitParamSet(gen) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(gen) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     char tmpKey[] = "NewKeyAlias";

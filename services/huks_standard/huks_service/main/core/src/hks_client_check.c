@@ -26,12 +26,12 @@
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
 {
     if (processNameSize > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("processName size too long, size %u", processNameSize);
+        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processNameSize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (keyAliasSize > HKS_MAX_KEY_ALIAS_LEN) {
-        HKS_LOG_E("keyAlias size too long, size %u", keyAliasSize);
+        HKS_LOG_E("keyAlias size too long, size %" LOG_PUBLIC "u", keyAliasSize);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -136,7 +136,7 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
     }
 
     if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("processName size too long, size %u", processName->size);
+        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processName->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -163,12 +163,12 @@ int32_t HksCheckGenerateRandomParams(const struct HksBlob *processName, const st
     }
 
     if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
-        HKS_LOG_E("processName size too long, size %u.", processName->size);
+        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u.", processName->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (random->size > HKS_MAX_RANDOM_LEN) {
-        HKS_LOG_E("random size too long, size %u.", random->size);
+        HKS_LOG_E("random size too long, size %" LOG_PUBLIC "u.", random->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

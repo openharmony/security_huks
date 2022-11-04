@@ -32,7 +32,7 @@
 int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
 {
     if ((key->size == 0) || (key->size > MAX_KEY_SIZE)) {
-        HKS_LOG_E("invalid input key size: %u", key->size);
+        HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -54,14 +54,14 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     struct HksBlob *publicKey)
 {
     if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid curve25519 public key size! key size = 0x%X", key->size);
+        HKS_LOG_E("Invalid curve25519 public key size! key size = 0x%" LOG_PUBLIC "X", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + key->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
     if (buffer == NULL) {
-        HKS_LOG_E("malloc failed! %u", totalSize);
+        HKS_LOG_E("malloc failed! %" LOG_PUBLIC "u", totalSize);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(buffer, totalSize, 0, totalSize);
@@ -79,7 +79,8 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
 }
 #endif
 
-int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet, const struct HksBlob *key, struct HksBlob *outKey)
+int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
+    const struct HksBlob *key, struct HksBlob *outKey)
 {
     if ((CheckBlob(key) != HKS_SUCCESS) || (outKey == NULL)) {
         HKS_LOG_E("invalid key or outKey");
@@ -100,7 +101,7 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet, const struct
             if ((key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)) &&
                 (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_192)) &&
                 (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256))) {
-                HKS_LOG_E("invalid input key size: %u", key->size);
+                HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
                 return HKS_ERROR_INVALID_KEY_INFO;
             } /* fall-through */
         case HKS_ALG_HMAC:

@@ -223,7 +223,7 @@ static int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ks
     const struct HksBlob hashSrc = { *ksfBufOffset - HKS_RKC_KSF_FLAG_LEN, ksfFromFile->data + HKS_RKC_KSF_FLAG_LEN };
     int32_t ret = HksCryptoHalHash(HKS_DIGEST_SHA256, &hashSrc, &hashResultBlob);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks hash failed! ret = 0x%X", ret);
+        HKS_LOG_E("Hks hash failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -257,7 +257,7 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
     /* Extract root key data */
     ret = RkcExtractKsfRk(ksfFromFile, &ksfBufOffset, ksfData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Rkc extract ksf rk failed! ret = 0x%X", ret);
+        HKS_LOG_E("Rkc extract ksf rk failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -314,7 +314,7 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
 
         ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Get ksf file failed! ret = 0x%X", ret);
+            HKS_LOG_E("Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -497,7 +497,7 @@ static int32_t RkcFillKsfHash(struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
     struct HksBlob hash = { HKS_RKC_HASH_LEN, ksfBuf->data + *ksfBufOffset };
     int32_t ret = HksCryptoHalHash(HKS_DIGEST_SHA256, &hashSrc, &hash);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hash failed! ret = 0x%X", ret);
+        HKS_LOG_E("Hash failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
     *ksfBufOffset += HKS_RKC_HASH_LEN;
@@ -519,21 +519,21 @@ static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob
     /* Fill root key */
     int32_t ret = RkcFillKsfRk(ksfData, ksfBuf, &ksfBufOffset);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill root key info to ksf buf failed! ret = 0x%X", ret);
+        HKS_LOG_E("Fill root key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     /* Fill main key */
     ret = RkcFillKsfMk(ksfData, ksfBuf, &ksfBufOffset);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill main key info to ksf buf failed! ret = 0x%X", ret);
+        HKS_LOG_E("Fill main key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     /* calculate and fill SHA256 result, skip file flag, begin with version, end with reserve field. */
     ret = RkcFillKsfHash(ksfBuf, &ksfBufOffset);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill hash to ksf buf failed! ret = 0x%X", ret);
+        HKS_LOG_E("Fill hash to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
@@ -556,7 +556,7 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
         /* Fill data into buffer */
         ret = RkcFillKsfBuf(ksfData, &ksfBuf);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Fill ksf buf failed! ret = 0x%X", ret);
+            HKS_LOG_E("Fill ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -578,7 +578,7 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
         ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Store ksf failed! ret = 0x%X", ret);
+            HKS_LOG_E("Store ksf failed! ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 

@@ -308,7 +308,7 @@ static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *hea
     }
     /* Check that tag length can fit into buffer */
     if (length > (inLen - *headSize)) {
-        HKS_LOG_E("data buffer is not big enough to hold %u bytes.", length);
+        HKS_LOG_E("data buffer is not big enough to hold %" LOG_PUBLIC "u bytes.", length);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     *outLen = length;
@@ -337,7 +337,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     }
     /* Check that tag length can fit into buffer */
     if (length > (inLen - headSize)) {
-        HKS_LOG_E("data buffer is not big enough to hold %u bytes.", length);
+        HKS_LOG_E("data buffer is not big enough to hold %" LOG_PUBLIC "u bytes.", length);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (memcpy_s(out, *outLen, buf, length) != EOK) {
@@ -384,7 +384,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
     do {
         len = a2d_ASN1_OBJECT(NULL, 0, oid, -1);
         if (len <= 0) {
-            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len1 = %d", len);
+            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len1 = %" LOG_PUBLIC "d", len);
             return NULL;
         }
 
@@ -396,7 +396,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
 
         len = a2d_ASN1_OBJECT(buf, len, oid, -1);
         if (len <= 0) {
-            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len2 = %d", len);
+            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len2 = %" LOG_PUBLIC "d", len);
             break;
         }
 
@@ -543,7 +543,7 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
 
         ret = GetClaimDataParamSet(value, valueLength, paramSetOut);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("GetClaimDataParamSet failed, ret = %d", ret);
+            HKS_LOG_E("GetClaimDataParamSet failed, ret = %" LOG_PUBLIC "d", ret);
             HKS_FREE_PTR(value);
             return ret;
         }
@@ -650,7 +650,7 @@ static void FreeCertChainInfo(struct HksCertInfo **certs, uint32_t certNum)
 int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
 {
     if (certChain->certsCount != HKS_DEFAULT_CERT_CHAIN_CNT) {
-        HKS_LOG_E("validate cert chain chain invalid certChain count %zu", certChain->certsCount);
+        HKS_LOG_E("validate cert chain chain invalid certChain count %" LOG_PUBLIC "u", certChain->certsCount);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -663,13 +663,13 @@ int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct 
     ret = VerifyAttestationCertChain(certsInfo, certChain->certsCount);
     if (ret != HKS_SUCCESS) {
         FreeCertChainInfo(&certsInfo, certChain->certsCount);
-        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %d", ret);
+        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     ret = GetParamSetOutInfo(certsInfo, paramSetOut);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %d", ret);
+        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %" LOG_PUBLIC "d", ret);
     }
 
     FreeCertChainInfo(&certsInfo, certChain->certsCount);

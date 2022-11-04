@@ -79,15 +79,15 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceGenerateKey fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceGenerateKey fail, ret = %" LOG_PUBLIC "d", ret);
         }
-        HKS_LOG_E("key out size = %x", keyOut.size);
+        HKS_LOG_E("key out size = %" LOG_PUBLIC "x", keyOut.size);
     } while (0);
 
     if (isNoneResponse) {
@@ -118,13 +118,13 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret =  HksServiceImportKey(&processInfo, &keyAlias, paramSet, &key);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceImportKey fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceImportKey fail, ret = %" LOG_PUBLIC "d", ret);
         }
     } while (0);
 
@@ -152,13 +152,13 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get process info fail, ret = %d", ret);
+            HKS_LOG_E("get process info fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret =  HksServiceImportWrappedKey(&processInfo, &keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("do import wrapped key fail, ret = %d", ret);
+            HKS_LOG_E("do import wrapped key fail, ret = %" LOG_PUBLIC "d", ret);
         }
     } while (0);
 
@@ -184,13 +184,13 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceExportPublicKey(&processInfo, &keyAlias, &key);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceExportPublicKey fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         HksSendResponse(context, ret, &key);
@@ -212,7 +212,7 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
     do {
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -244,13 +244,13 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceGetKeyParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceGetKeyParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         struct HksBlob paramSetOut = { paramSet->paramSetSize, (uint8_t *)paramSet };
@@ -274,13 +274,13 @@ void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context
     do {
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceKeyExist(&processInfo, srcData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceKeyExist fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceKeyExist fail, ret = %" LOG_PUBLIC "d", ret);
         }
     } while (0);
 
@@ -305,7 +305,7 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
 
         random.size = *((uint32_t *)(srcData->data));
         if (IsInvalidLength(random.size)) {
-            HKS_LOG_E("invalid size %u", random.size);
+            HKS_LOG_E("invalid size %" LOG_PUBLIC "u", random.size);
             ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
@@ -318,13 +318,13 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
 
         ret = HksGetProcessNameForIPC(context, &processName);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessNameForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceGenerateRandom(&processName, &random);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceGenerateRandom fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceGenerateRandom fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         HksSendResponse(context, ret, &random);
@@ -356,7 +356,7 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -395,7 +395,7 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -429,7 +429,7 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -468,7 +468,7 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -507,13 +507,13 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceAgreeKey(&processInfo, inParamSet, &privateKey, &peerPublicKey, &agreedKey);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceAgreeKey fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceAgreeKey fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         HksSendResponse(context, ret, &agreedKey);
@@ -545,13 +545,13 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceDeriveKey(&processInfo, inParamSet, &masterKey, &derivedKey);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceDeriveKey fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceDeriveKey fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         HksSendResponse(context, ret, &derivedKey);
@@ -584,13 +584,13 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceMac(&processInfo, &key, inParamSet, &inputData, &mac);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceMac fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceMac fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         HksSendResponse(context, ret, &mac);
@@ -641,14 +641,14 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         uint32_t listCount = inputCount;
         ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &listCount);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceGetKeyInfoList fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceGetKeyInfoList fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -713,18 +713,18 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksAttestAccessControl(inParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksAttestAccessControl fail, ret = %d", ret);
+            HKS_LOG_E("HksAttestAccessControl fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceAttestKey fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceAttestKey fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         
@@ -750,17 +750,17 @@ static int32_t IpcServiceInit(const struct HksProcessInfo *processInfo, const st
 
     int32_t ret = HksServiceInit(processInfo, keyAlias, paramSet, &handle, &token);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("service init failed, ret = %d", ret);
+        HKS_LOG_E("service init failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     if ((handle.size != HANDLE_SIZE) || (token.size > TOKEN_SIZE)) {
-        HKS_LOG_E("invalid handle size[%u], or token size[%u]", handle.size, token.size);
+        HKS_LOG_E("invalid handle size[%" LOG_PUBLIC "u], or token size[%" LOG_PUBLIC "u]", handle.size, token.size);
         return HKS_ERROR_BAD_STATE;
     }
 
     if (outData->size < (handle.size + token.size)) {
-        HKS_LOG_E("ipc out size[%u] too small", outData->size);
+        HKS_LOG_E("ipc out size[%" LOG_PUBLIC "u] too small", outData->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -788,7 +788,7 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         struct HksParamOut params[] = {
@@ -808,19 +808,19 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = IpcServiceInit(&processInfo, &keyAlias, inParamSet, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("ipc service init fail, ret = %d", ret);
+            HKS_LOG_E("ipc service init fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);
@@ -845,7 +845,7 @@ void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *out
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -869,19 +869,19 @@ void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *out
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceUpdate fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);
@@ -906,7 +906,7 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
@@ -923,19 +923,19 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceFinish fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceFinish fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);
@@ -960,7 +960,7 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
         struct HksParamOut params[] = {
@@ -979,19 +979,19 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
 
         ret = HksGetParamSet((struct HksParamSet *)paramsBlob.data, paramsBlob.size, &inParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetParamSet fail, ret = %d", ret);
+            HKS_LOG_E("HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %d", ret);
+            HKS_LOG_E("HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
 
         ret = HksServiceAbort(&handle, &processInfo, inParamSet);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksServiceAbort fail, ret = %d", ret);
+            HKS_LOG_E("HksServiceAbort fail, ret = %" LOG_PUBLIC "d", ret);
             break;
         }
     } while (0);

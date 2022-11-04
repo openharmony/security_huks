@@ -78,7 +78,7 @@ static uint32_t GetDataSize(uint32_t cmdId, const struct HksBlob *inData, const 
 static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *inData, struct HksBlob *outData)
 {
-    HKS_LOG_I("invoke ProcessOnce cmdId %u", cmdId);
+    HKS_LOG_I("invoke ProcessOnce cmdId %" LOG_PUBLIC "u", cmdId);
 
     uint32_t paramBufSize, dataBufSize;
     if ((GetParamSize(key, paramSet, &paramBufSize) != HKS_SUCCESS) ||
@@ -124,7 +124,7 @@ int32_t HksSliceDataEntry(uint32_t cmdId, const struct HksBlob *key, const struc
     struct HksBlob *inData, struct HksBlob *outData)
 {
     if (!IsSliceCmd(cmdId)) {
-        HKS_LOG_E("cmd %u not support slice!", cmdId);
+        HKS_LOG_E("cmd %" LOG_PUBLIC "u not support slice!", cmdId);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

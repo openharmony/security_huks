@@ -108,7 +108,7 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
             enum HksUserAuthType authType;
             ret = ConvertToHksAuthType(info.enrolledInfo[i].authType, &authType);
             if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("ConvertToHksAuthType failed :%d!", ret);
+                HKS_LOG_E("ConvertToHksAuthType failed :%" LOG_PUBLIC "d!", ret);
                 break;
             }
             (**outSecInfo).enrolledInfo[i].authType = authType;
@@ -147,7 +147,7 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
             HksConditionWait(condition);
         }
     } else {
-        HKS_LOG_E("GetSecInfoCallback failed: %d!", ret);
+        HKS_LOG_E("GetSecInfoCallback failed: %" LOG_PUBLIC "d!", ret);
     }
     
     HksConditionDestroy(condition);
@@ -202,7 +202,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 
     int32_t ret = ConvertFromHksAuthType(hksAuthType, &authType);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ConvertFromHksAuthType failed: %d!", ret);
+        HKS_LOG_E("ConvertFromHksAuthType failed: %" LOG_PUBLIC "d!", ret);
         HksConditionDestroy(condition);
         return ret;
     }
@@ -217,7 +217,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
         HKS_LOG_E("no credential enrolled");
         ret = HKS_ERROR_CREDENTIAL_NOT_EXIST;
     } else {
-        HKS_LOG_E("GetAuthInfo failed: %d!", ret);
+        HKS_LOG_E("GetAuthInfo failed: %" LOG_PUBLIC "d!", ret);
         ret = HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED;
     }
     

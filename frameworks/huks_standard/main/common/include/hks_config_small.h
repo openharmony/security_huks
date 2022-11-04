@@ -18,6 +18,11 @@
 
 #define HKS_SUPPORT_POSIX
 
+#ifndef __LINUX__
+#define HKS_ENABLE_LOG_PUBLIC
+#endif
+#define HKS_LOG_ENGINE_HILOG_MODULE_SCY
+
 /* AES */
 #define HKS_SUPPORT_AES_C
 #define HKS_SUPPORT_AES_GENERATE_KEY

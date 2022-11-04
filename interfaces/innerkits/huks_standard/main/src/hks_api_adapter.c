@@ -53,7 +53,7 @@ int32_t HksImportKeyAdapter(const struct HksBlob *keyAlias,
         ret = GetHksPubKeyInnerFormat(paramSet, key, &innerKey);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate key to inner format failed, ret = %d", ret);
+        HKS_LOG_E("translate key to inner format failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -71,7 +71,7 @@ int32_t HksAgreeKeyAdapter(const struct HksParamSet *paramSet, const struct HksB
     struct HksBlob publicKey = { 0, NULL };
     int32_t ret = GetHksPubKeyInnerFormat(paramSet, peerPublicKey, &publicKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get public key from x509 format failed, ret = %d", ret);
+        HKS_LOG_E("get public key from x509 format failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 

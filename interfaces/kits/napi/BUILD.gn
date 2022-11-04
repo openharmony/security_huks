@@ -63,6 +63,7 @@ ohos_shared_library("huks") {
 
   external_deps = [
     "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
     "huks:libhukssdk",
     "napi:ace_napi",
   ]

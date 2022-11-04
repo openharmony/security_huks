@@ -93,7 +93,7 @@ static TEEC_Result TeecUuidInit(TEEC_Context *context, const char *taPath,
             return TEEC_ERROR_GENERIC;
         }
 
-        HKS_LOG_I("run on ta path:%s ", taPath);
+        HKS_LOG_I("run on ta path:%" LOG_PUBLIC "s ", taPath);
         return TEEC_SUCCESS;
     }
 
@@ -127,7 +127,7 @@ static TEEC_Result OpenSession(TEEC_Context *context, TEEC_Session **session)
     ret = TEEC_OpenSession(context, localSession, &uuid, TEEC_LOGIN_IDENTIFY, NULL, &operation, &origin);
     if (ret != TEEC_SUCCESS) {
         HksFree(localSession);
-        HKS_LOG_E("open ta session failed, ret=0x%x, origin=%u", ret, origin);
+        HKS_LOG_E("open ta session failed, ret=0x%" LOG_PUBLIC "x, origin=%" LOG_PUBLIC "u", ret, origin);
         return ret;
     }
 
@@ -150,7 +150,7 @@ static TEEC_Result TeecOpen(void)
 
     TEEC_Result result = TEEC_InitializeContext(NULL, g_context);
     if (result != TEEC_SUCCESS) {
-        HKS_LOG_E("Initialize TEE context failed, ret=0x%x", result);
+        HKS_LOG_E("Initialize TEE context failed, ret=0x%" LOG_PUBLIC "x", result);
         HKS_FREE_PTR(g_context);
         return result;
     }
@@ -216,7 +216,8 @@ static TEEC_Result TeecRequestCmdInner(enum HksCmdId pkiCmdId, TEEC_Operation *o
     uint32_t retOrigin = 0;
     ret = TEEC_InvokeCommand(g_sessionSelfStart, pkiCmdId, operation, &retOrigin);
     if (ret != TEEC_SUCCESS) {
-        HKS_LOG_E("invoke km command failed, cmd = %u, ret = 0x%x, retOrigin = %u", pkiCmdId, ret, retOrigin);
+        HKS_LOG_E("invoke km command failed, cmd = %" LOG_PUBLIC "u, ret = 0x%" LOG_PUBLIC "x, "
+            "retOrigin = %" LOG_PUBLIC "u", pkiCmdId, ret, retOrigin);
     }
 
     return ret;
@@ -492,7 +493,7 @@ int32_t ProcessInit(uint32_t cmdId, const struct HksBlob *keyBlob, const struct 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessInit[%u] failed", cmdId);
+        HKS_LOG_E("ProcessInit[%" LOG_PUBLIC "u] failed", cmdId);
         return ret;
     }
 
@@ -518,7 +519,7 @@ int32_t ProcessUpdate(uint32_t cmdId, uint64_t operationHandle,
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessUpdate[%u] failed", cmdId);
+        HKS_LOG_E("ProcessUpdate[%" LOG_PUBLIC "u] failed", cmdId);
     }
 
     return ret;
@@ -537,7 +538,7 @@ int32_t ProcessFinal(uint32_t cmdId, uint64_t operationHandle,
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessFinal[%u] failed", cmdId);
+        HKS_LOG_E("ProcessFinal[%" LOG_PUBLIC "u] failed", cmdId);
         return ret;
     }
 
@@ -563,7 +564,7 @@ int32_t ProcessOnce(uint32_t cmdId, const struct HksBlob *keyBlob, const struct 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessOnce[%u] failed", cmdId);
+        HKS_LOG_E("ProcessOnce[%" LOG_PUBLIC "u] failed", cmdId);
         return ret;
     }
 

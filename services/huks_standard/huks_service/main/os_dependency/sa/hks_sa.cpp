@@ -92,10 +92,10 @@ static void SubscribEvent()
 {
     for (uint32_t i = 0; i < MAX_DELAY_TIMES; ++i) {
         if (SystemEventObserver::SubscribeSystemEvent()) {
-            HKS_LOG_I("subscribe system event success, i = %u", i);
+            HKS_LOG_I("subscribe system event success, i = %" LOG_PUBLIC "u", i);
             return;
         } else {
-            HKS_LOG_E("subscribe system event failed %u times", i);
+            HKS_LOG_E("subscribe system event failed %" LOG_PUBLIC "u times", i);
             usleep(DELAY_INTERVAL);
         }
     }
@@ -137,7 +137,7 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
             if (outSize != 0) {
                 outData.size = outSize;
                 if (outData.size > MAX_MALLOC_LEN) {
-                    HKS_LOG_E("outData size is invalid, size:%u", outData.size);
+                    HKS_LOG_E("outData size is invalid, size:%" LOG_PUBLIC "u", outData.size);
                     return HW_SYSTEM_ERROR;
                 }
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
@@ -214,7 +214,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return HW_SYSTEM_ERROR;
     }
 
-    HKS_LOG_I("OnRemoteRequest code:%d", code);
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d", code);
     // check that the code is valid
     if (code < MSG_CODE_BASE || code >= MSG_CODE_MAX) {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -225,7 +225,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     struct HksBlob srcData = { 0, nullptr };
     srcData.size = static_cast<uint32_t>(data.ReadUint32());
     if (IsInvalidLength(srcData.size)) {
-        HKS_LOG_E("srcData size is invalid, size:%u", srcData.size);
+        HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
         return HW_SYSTEM_ERROR;
     }
 
@@ -276,7 +276,7 @@ void HksService::OnStart()
 
 void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    HKS_LOG_I("systemAbilityId is %d!", systemAbilityId);
+    HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
     HksSubscribeSystemEvent();
 #endif
@@ -284,7 +284,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &
 
 void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    HKS_LOG_I("systemAbilityId is %d!", systemAbilityId);
+    HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 }
 
 void HksService::OnStop()

@@ -96,13 +96,13 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 #else // HAS_OS_ACCOUNT_PART
         GetOsAccountIdFromUid(uid, userId);
 #endif // HAS_OS_ACCOUNT_PART
-        HKS_LOG_I("HksService package removed: uid is %d userId is %d", uid, userId);
+        HKS_LOG_I("HksService package removed: uid is %" LOG_PUBLIC "d userId is %" LOG_PUBLIC "d", uid, userId);
 
         GetProcessInfo(userId, uid, &processInfo);
         HksServiceDeleteProcessInfo(&processInfo);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int userId = data.GetCode();
-        HKS_LOG_I("HksService user removed: userId is %d", userId);
+        HKS_LOG_I("HksService user removed: userId is %" LOG_PUBLIC "d", userId);
 
         GetUserId(userId, &(processInfo.userId));
         HksServiceDeleteProcessInfo(&processInfo);

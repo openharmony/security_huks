@@ -43,13 +43,13 @@ static int32_t EccKeyMaterialToCtx(const struct HksBlob *nativeKey,
 {
     int32_t ret = HksEccKeyMaterialToPub(pubKey, &(ctx->Qp));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to public key failed! ret = 0x%X", ret);
+        HKS_LOG_E("Ecc keyMaterial to public key failed! ret = 0x%" LOG_PUBLIC "X", ret);
         return ret;
     }
 
     ret = HksEccKeyMaterialToPri(nativeKey, &(ctx->d));
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to private key failed! ret = 0x%X", ret);
+        HKS_LOG_E("Ecc keyMaterial to private key failed! ret = 0x%" LOG_PUBLIC "X", ret);
     }
 
     return ret;
@@ -82,7 +82,7 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
     do {
         ret = mbedtls_ecp_group_load(&(ctx.grp), mbedtlsCurveNist);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls ecdh load group failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls ecdh load group failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -93,14 +93,14 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
 
         ret = mbedtls_ecdh_compute_shared(&(ctx.grp), &(ctx.z), &(ctx.Qp), &(ctx.d), mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls ecdh shared key failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls ecdh shared key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         const uint32_t keyByteLen = HKS_KEY_BYTES(spec->keyLen);
         ret = mbedtls_mpi_write_binary(&(ctx.z), sharedKey->data, keyByteLen);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls ecdh mpi write to sharedKey failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls ecdh mpi write to sharedKey failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(sharedKey->data, sharedKey->size, 0, sharedKey->size);
             break;
         }

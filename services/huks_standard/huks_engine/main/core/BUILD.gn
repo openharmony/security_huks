@@ -70,5 +70,8 @@ ohos_shared_library("huks_engine_core_standard") {
   } else {
     deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
   }
-  external_deps = [ "c_utils:utils" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 }
