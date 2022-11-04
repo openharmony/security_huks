@@ -24,10 +24,6 @@
 #include "hks_config.h"
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #ifdef _HUKS_LOG_ENABLE_
 #ifdef HKS_ENABLE_LOG_PUBLIC
 #define LOG_PUBLIC "{public}"
@@ -63,10 +59,6 @@ extern "C" {
 #define HKS_LOG_W(...)
 #define HKS_LOG_E(...)
 #define HKS_LOG_D(...)
-#endif
-
-#ifdef __cplusplus
-}
 #endif
 
 #endif /* HKS_LOG_H */
