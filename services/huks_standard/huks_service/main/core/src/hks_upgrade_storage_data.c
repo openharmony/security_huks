@@ -31,6 +31,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_storage.h"
+#include "hks_template.h"
 
 #include "huks_access.h"
 
@@ -120,10 +121,7 @@ static int32_t CopyRootKeyMaterialFile(bool isFileExist, const char *oldFileName
     }
 
     uint8_t *tmpBuf = (uint8_t *)HksMalloc(fileSize);
-    if (tmpBuf == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpBuf, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     do {
         ret = HksOldVersionFileRead(oldFileName, 0, tmpBuf, fileSize);
@@ -230,10 +228,7 @@ static int32_t GetOldVersionKeyStoreBuf(struct HksBlob *keyInfo)
     }
 
     uint8_t *tmpBuf = (uint8_t *)HksMalloc(HKS_BUF_BYTES);
-    if (tmpBuf == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpBuf, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     fileSize = HksOldVersionFileRead(HKS_KEY_STORE_FILE_NAME, offset, tmpBuf, HKS_BUF_BYTES - offset);
     if ((fileSize <= 0) || ((uint32_t)fileSize < (HKS_BUF_BYTES - offset))) {
@@ -254,10 +249,8 @@ static int32_t CheckKeyStoreHeaderValid(const struct HksBlob *keyInfo)
     struct HksBlob srcData = { headerLen - HKS_HEADER_HASH_SIZE, keyInfo->data };
 
     uint8_t *tmpBuf = (uint8_t *)HksMalloc(HKS_HEADER_HASH_SIZE);
-    if (tmpBuf == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpBuf, HKS_ERROR_MALLOC_FAIL, "malloc failed")
+
     struct HksBlob hashBlob = { HKS_HEADER_HASH_SIZE, tmpBuf };
 
     int32_t ret;
@@ -301,10 +294,7 @@ static int32_t GetKeyAlias(const struct HksBlob *keyInfo, struct HksBlob *keyAli
     }
 
     uint8_t *tmpBuf = (uint8_t *)HksMalloc(aliasSize);
-    if (tmpBuf == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpBuf, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     (void)memcpy_s(tmpBuf, aliasSize, keyInfo->data + aliasPos, aliasSize);
     keyAlias->size = aliasSize;

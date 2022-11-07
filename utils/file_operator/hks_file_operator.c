@@ -190,7 +190,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
 static int32_t FileRemove(const char *fileName)
 {
     int32_t ret = IsFileExist(fileName);
-    HKS_IF_NOT_SUCC_RETURN(ret, HKS_SUCCESS)/* if file not exist, return ok */
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_SUCCESS) /* if file not exist, return ok */
 
     struct stat tmp;
     if (stat(fileName, &tmp) != 0) {

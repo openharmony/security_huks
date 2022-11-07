@@ -34,6 +34,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define OPENSSL_KEY_BLOCK 8
@@ -300,10 +301,7 @@ int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
         }
 
         ret = DsaSaveKeyMaterial(dsa, spec->keyLen, &key->data, &key->size);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("save dsa key material failed! ret=0x%" LOG_PUBLIC "x", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "save dsa key material failed! ret=0x%" LOG_PUBLIC "x", ret)
     } while (0);
 
     if (dsa != NULL) {

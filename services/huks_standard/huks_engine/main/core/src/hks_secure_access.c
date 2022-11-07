@@ -21,13 +21,14 @@
 
 #include "hks_secure_access.h"
 
-#include "hks_log.h"
-#include "hks_param.h"
-#include "hks_type_inner.h"
-#include "hks_mem.h"
+#include "hks_base_check.h"
 #include "hks_keyblob.h"
 #include "hks_keynode.h"
-#include "hks_base_check.h"
+#include "hks_log.h"
+#include "hks_mem.h"
+#include "hks_param.h"
+#include "hks_type_inner.h"
+#include "hks_template.h"
 
 #include "securec.h"
 
@@ -701,10 +702,7 @@ static int32_t GetUserAuthResult(const struct HuksKeyNode *keyNode, int32_t *aut
 
 static int32_t CheckParamsAndGetAppendState(const struct HuksKeyNode *keyNode, struct HksParam **isAppendDataParam)
 {
-    if (keyNode == NULL) {
-        HKS_LOG_E("the pointer param is invalid");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_NULL_POINTER, "the pointer param is invalid")
 
     struct HksParam *isAppendData = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IS_APPEND_UPDATE_DATA, &isAppendData);
@@ -814,10 +812,7 @@ static int32_t DoAppendPrefixAuthInfoToUpdateInData(const struct HuksKeyNode *ke
 {
     uint32_t outDataSize = sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo) + inData->size;
     uint8_t *outData = (uint8_t *)HksMalloc(outDataSize);
-    if (outData == NULL) {
-        HKS_LOG_E("malloc outData failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outData, HKS_ERROR_MALLOC_FAIL, "malloc outData failed!")
 
     uint32_t version = SECURE_SIGN_VERSION;
     (void)memcpy_s(outData, outDataSize, (uint8_t *)&version, sizeof(uint32_t));
@@ -908,10 +903,7 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
 
     uint32_t cacheOutDataSize = sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo) + innerParams->inData->size;
     uint8_t *cacheOutData = (uint8_t *)HksMalloc(cacheOutDataSize);
-    if (cacheOutData == NULL) {
-        HKS_LOG_E("malloc cacheOutData failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(cacheOutData, HKS_ERROR_MALLOC_FAIL, "malloc cacheOutData failed!")
 
     const uint32_t version = SECURE_SIGN_VERSION;
     (void)memcpy_s(cacheOutData, cacheOutDataSize, &version, sizeof(uint32_t));

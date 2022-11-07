@@ -14,6 +14,7 @@
  */
 
 #include "hks_samgr_server.h"
+#include "hks_template.h"
 
 #define STACK_SIZE 0x800
 #define QUEUE_SIZE 20
@@ -25,9 +26,8 @@ static const char *GetName(Service *service)
 }
 static BOOL Initialize(Service *service, Identity identity)
 {
-    if (service == NULL) {
-        return false;
-    }
+    HKS_IF_NULL_RETURN(service, false)
+
     HksMgrService *hksMgrService = (HksMgrService *)service;
     hksMgrService->identity = identity;
     return true;
@@ -36,9 +36,7 @@ static BOOL Initialize(Service *service, Identity identity)
 static BOOL MessageHandle(Service *service, const Request *request)
 {
     (void)service;
-    if (request == NULL) {
-        return false;
-    }
+    HKS_IF_NULL_RETURN(request, false)
     return true;
 }
 

@@ -33,6 +33,7 @@
 #include "hks_mem.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 
 struct HksOpensslHmacCtx {
     uint32_t digestLen;
@@ -41,18 +42,9 @@ struct HksOpensslHmacCtx {
 
 static int32_t HmacCheckBuffer(const struct HksBlob *key, const struct HksBlob *msg, const struct HksBlob *mac)
 {
-    if (HksOpensslCheckBlob(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid key point");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid msg");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (HksOpensslCheckBlob(mac) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid mac");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "Invalid key point")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(msg), HKS_ERROR_INVALID_ARGUMENT, "Invalid msg")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(mac), HKS_ERROR_INVALID_ARGUMENT, "Invalid mac")
     return HKS_SUCCESS;
 }
 
@@ -68,10 +60,8 @@ static int32_t HmacGenKeyCheckParam(const struct HksKeySpec *spec)
 #ifdef HKS_SUPPORT_HMAC_GENERATE_KEY
 int32_t HksOpensslHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (HmacGenKeyCheckParam(spec) != HKS_SUCCESS) {
-        HKS_LOG_E("aes generate key invalid params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HmacGenKeyCheckParam(spec),
+        HKS_ERROR_INVALID_ARGUMENT, "aes generate key invalid params!")
 
     return HksOpensslGenerateRandomKey(spec->keyLen, key);
 }
@@ -80,10 +70,7 @@ int32_t HksOpensslHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
 static int32_t HmacCheckParam(
     const struct HksBlob *key, uint32_t alg, const struct HksBlob *msg, const struct HksBlob *mac)
 {
-    if (HmacCheckBuffer(key, msg, mac) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid Buffer Info");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HmacCheckBuffer(key, msg, mac), HKS_ERROR_INVALID_ARGUMENT, "Invalid Buffer Info")
 
     if ((alg != HKS_DIGEST_SHA1) && (alg != HKS_DIGEST_SHA224) && (alg != HKS_DIGEST_SHA256) &&
         (alg != HKS_DIGEST_SHA384) && (alg != HKS_DIGEST_SHA512) && (alg != HKS_DIGEST_SM3)) {
@@ -92,10 +79,8 @@ static int32_t HmacCheckParam(
     }
 
     uint32_t digestLen;
-    if (HksGetDigestLen(alg, &digestLen) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid alg(0x%" LOG_PUBLIC "x)", alg);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetDigestLen(alg, &digestLen),
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid alg(0x%" LOG_PUBLIC "x)", alg)
 
     if (mac->size < digestLen) {
         HKS_LOG_E("invalid mac->size(0x%" LOG_PUBLIC "x) for digestLen(0x%" LOG_PUBLIC "x)", mac->size, digestLen);
@@ -108,9 +93,7 @@ static int32_t HmacCheckParam(
     defined(HKS_SUPPORT_HMAC_SHA384) || defined(HKS_SUPPORT_HMAC_SHA512) || defined(HKS_SUPPORT_HMAC_SM3)
 int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac)
 {
-    if (HmacCheckParam(key, digestAlg, msg, mac) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HmacCheckParam(key, digestAlg, msg, mac), HKS_ERROR_INVALID_ARGUMENT)
 
     const EVP_MD *opensslAlg = NULL;
     if (digestAlg == HKS_DIGEST_SM3) {
@@ -119,25 +102,16 @@ int32_t HksOpensslHmac(const struct HksBlob *key, uint32_t digestAlg, const stru
         opensslAlg = GetOpensslAlg(digestAlg);
     }
 
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("hmac get openssl algorithm failed");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hmac get openssl algorithm failed")
 
     uint8_t *hmacData = HMAC(opensslAlg, key->data, (int32_t)key->size, msg->data, msg->size, mac->data, &mac->size);
-    if (hmacData == NULL) {
-        HKS_LOG_E("hmac process failed.");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hmacData, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hmac process failed.")
     return HKS_SUCCESS;
 }
 
 int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t digestAlg)
 {
-    if (HksOpensslCheckBlob(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid key point");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "Invalid key point")
 
     if ((digestAlg != HKS_DIGEST_SHA1) && (digestAlg != HKS_DIGEST_SHA224) && (digestAlg != HKS_DIGEST_SHA256) &&
         (digestAlg != HKS_DIGEST_SHA384) && (digestAlg != HKS_DIGEST_SHA512) && (digestAlg != HKS_DIGEST_SM3)) {
@@ -152,22 +126,15 @@ int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
         opensslAlg = GetOpensslAlg(digestAlg);
     }
 
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("hmac_init get openssl algorithm fail");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hmac_init get openssl algorithm fail")
 
     uint32_t digestLen;
-    if (HksGetDigestLen(digestAlg, &digestLen) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid alg(0x%" LOG_PUBLIC "x)", digestAlg);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetDigestLen(digestAlg, &digestLen),
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid alg(0x%" LOG_PUBLIC "x)", digestAlg)
 
     HMAC_CTX *tmpCtx = NULL;
-    if ((tmpCtx = HMAC_CTX_new()) == NULL) {
-        HKS_LOG_E("initialize HksOpensslHmacCtx failed");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN((tmpCtx = HMAC_CTX_new()),
+        HKS_ERROR_CRYPTO_ENGINE_ERROR, "initialize HksOpensslHmacCtx failed")
 
     if (!HMAC_Init_ex(tmpCtx, key->data, (int32_t)key->size, opensslAlg, NULL)) {
         HKS_LOG_E("openssl hmac init failed.");
@@ -193,22 +160,13 @@ int32_t HksOpensslHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
 
 int32_t HksOpensslHmacUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
-    if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid key point");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(msg), HKS_ERROR_INVALID_ARGUMENT, "Invalid key point")
 
     struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)cryptoCtx;
-    if (hmacCtx == NULL) {
-        HKS_LOG_E("hmacCtx invalid");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hmacCtx, HKS_ERROR_NULL_POINTER, "hmacCtx invalid")
 
     HMAC_CTX *context = (HMAC_CTX *)hmacCtx->append;
-    if (context == NULL) {
-        HKS_LOG_E("context is null");
-        return HKS_FAILURE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(context, HKS_FAILURE, "context is null")
 
     int hmacData = HMAC_Update(context, msg->data, msg->size);
     if (!hmacData) {

@@ -18,6 +18,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define USER_IAM OHOS::UserIam::UserAuth
 
@@ -96,9 +97,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 
 int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType userIamType, uint32_t userIamValue, uint32_t *hksValue)
 {
-    if (hksValue == nullptr) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(hksValue, HKS_ERROR_NULL_POINTER)
 
     switch (userIamType) {
         case HKS_AUTH_TYPE:

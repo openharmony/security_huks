@@ -35,6 +35,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define HKS_RSA_PUBLIC_EXPONENT 65537
 #define HKS_RSA_KEYPAIR_CNT 3
@@ -80,14 +81,10 @@ static int32_t RsaKeyCheck(const struct HksBlob *key)
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
 
     int32_t ret = RsaCheckKeySize(keyMaterial->keySize);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = RsaKeyMaterialNedSizeCheck(keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (key->size < (sizeof(struct KeyMaterialRsa) + keyMaterial->nSize + keyMaterial->eSize + keyMaterial->dSize)) {
         HKS_LOG_E("Rsa key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
@@ -266,39 +263,29 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     int32_t ret = RsaKeyCheck(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     int32_t padding;
     ret = HksToMbedtlsPadding(usageSpec->padding, &padding);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     uint32_t mbedtlsAlg;
     if (padding == MBEDTLS_RSA_PKCS_V21) {
         ret = HksToMbedtlsDigestAlg(usageSpec->digest, &mbedtlsAlg);
-        if (ret != HKS_SUCCESS) {
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
     }
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_rsa_context ctx;
     mbedtls_rsa_init(&ctx); /* only support oaep padding */
 
     do {
         ret = RsaKeyMaterialToCtx(key, !encrypt, &ctx); /* encrypt don't need private exponent (d) */
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         size_t outlen;
         if (encrypt) {
@@ -360,31 +347,22 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     uint32_t mbedtlsAlg;
     uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
     int32_t ret = HksToMbedtlsDigestAlg(digest, &mbedtlsAlg);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     int32_t padding;
     ret = HksToMbedtlsSignPadding(usageSpec->padding, &padding);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_rsa_context ctx;
     mbedtls_rsa_init(&ctx);
 
     do {
         ret = RsaKeyMaterialToCtx(key, sign, &ctx); /* sign need private exponent (d) */
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
-
+        HKS_IF_NOT_SUCC_BREAK(ret)
         if (sign) {
             ret = mbedtls_rsa_pkcs1_sign(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
                 (mbedtls_md_type_t)mbedtlsAlg, message->size, message->data, signature->data);
@@ -413,9 +391,7 @@ int32_t HksMbedtlsRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
     const struct HksBlob *message, struct HksBlob *signature)
 {
     int32_t ret = RsaKeyCheck(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return HksMbedtlsRsaSignVerify(key, usageSpec, message, true, signature); /* true: is sign */
 }
@@ -424,9 +400,7 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     int32_t ret = RsaKeyCheck(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return HksMbedtlsRsaSignVerify(key, usageSpec, message, false, (struct HksBlob *)signature); /* false: is verify */
 }
@@ -436,9 +410,7 @@ int32_t HksMbedtlsRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
 static int32_t GetRsaPubKeyCheckParams(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
 {
     int32_t ret = RsaKeyCheck(keyIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* check keyOut size */
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(keyIn->data);
@@ -453,9 +425,7 @@ static int32_t GetRsaPubKeyCheckParams(const struct HksBlob *keyIn, const struct
 int32_t HksMbedtlsGetRsaPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     int32_t ret = GetRsaPubKeyCheckParams(keyIn, keyOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* n + e, so need size is: sizeof(struct HksPubKeyInfo) + nSize + eSize */
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(keyIn->data);

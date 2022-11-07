@@ -17,6 +17,7 @@
 
 #include "hks_mem.h"
 #include "hks_mutex.h"
+#include "hks_template.h"
 
 struct HksLock {
     HksMutex *lock;
@@ -37,33 +38,29 @@ HksLock *HksLockCreate(void)
 
 int32_t HksLockLockRead(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksMutexLock(lock->lock);
 }
 
 int32_t HksLockUnlockRead(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+        HKS_IF_NULL_RETURN(lock, -1)
+
     return HksMutexUnlock(lock->lock);
 }
 
 int32_t HksLockLockWrite(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksMutexLock(lock->lock);
 }
 
 int32_t HksLockUnlockWrite(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksMutexUnlock(lock->lock);
 }
 

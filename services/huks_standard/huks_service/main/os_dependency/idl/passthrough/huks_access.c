@@ -26,6 +26,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 static struct HuksHdi *g_hksHalDevicePtr = NULL;
 
@@ -35,10 +36,10 @@ ENABLE_CFI(int32_t HuksAccessModuleInit(void))
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiModuleInit == NULL) {
-        HKS_LOG_E("Module Init function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiModuleInit, HKS_ERROR_NULL_POINTER,
+        "Module Init function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiModuleInit();
 }
 
@@ -47,10 +48,10 @@ ENABLE_CFI(int32_t HuksAccessRefresh(void))
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiRefresh == NULL) {
-        HKS_LOG_E("Refresh function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiRefresh, HKS_ERROR_NULL_POINTER,
+        "Refresh function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiRefresh();
 }
 
@@ -60,10 +61,10 @@ ENABLE_CFI(int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const s
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiGenerateKey == NULL) {
-        HKS_LOG_E("GenerateKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGenerateKey, HKS_ERROR_NULL_POINTER,
+        "GenerateKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiGenerateKey(keyAlias, paramSetIn, keyIn, keyOut);
 }
 
@@ -73,10 +74,10 @@ ENABLE_CFI(int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const str
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiImportKey == NULL) {
-        HKS_LOG_E("ImportKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiImportKey, HKS_ERROR_NULL_POINTER,
+        "ImportKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiImportKey(keyAlias, key, paramSet, keyOut);
 }
 
@@ -86,10 +87,10 @@ ENABLE_CFI(int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyA
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiImportWrappedKey == NULL) {
-        HKS_LOG_E("ImportWrappedKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiImportWrappedKey, HKS_ERROR_NULL_POINTER,
+        "ImportWrappedKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiImportWrappedKey(wrappingKeyAlias, key, wrappedKeyData, paramSet, keyOut);
 }
 
@@ -99,10 +100,10 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiExportPublicKey == NULL) {
-        HKS_LOG_E("ExportPublicKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiExportPublicKey, HKS_ERROR_NULL_POINTER,
+        "ExportPublicKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiExportPublicKey(key, paramSet, keyOut);
 }
 
@@ -112,10 +113,10 @@ ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksPa
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiInit == NULL) {
-        HKS_LOG_E("Init function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiInit, HKS_ERROR_NULL_POINTER,
+        "Init function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiInit(key, paramSet, handle, token);
 }
 
@@ -125,10 +126,10 @@ ENABLE_CFI(int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct H
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiUpdate == NULL) {
-        HKS_LOG_E("Update function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpdate, HKS_ERROR_NULL_POINTER,
+        "Update function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiUpdate(handle, paramSet, inData, outData);
 }
 
@@ -138,10 +139,10 @@ ENABLE_CFI(int32_t HuksAccessFinish(const struct HksBlob *handle, const struct H
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiFinish == NULL) {
-        HKS_LOG_E("Finish function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiFinish, HKS_ERROR_NULL_POINTER,
+        "Finish function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiFinish(handle, paramSet, inData, outData);
 }
 
@@ -150,10 +151,10 @@ ENABLE_CFI(int32_t HuksAccessAbort(const struct HksBlob *handle, const struct Hk
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiAbort == NULL) {
-        HKS_LOG_E("Abort function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAbort, HKS_ERROR_NULL_POINTER,
+        "Abort function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiAbort(handle, paramSet);
 }
 
@@ -162,10 +163,10 @@ ENABLE_CFI(int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiGetKeyProperties == NULL) {
-        HKS_LOG_E("GetKeyProperties function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetKeyProperties, HKS_ERROR_NULL_POINTER,
+        "GetKeyProperties function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiGetKeyProperties(paramSet, key);
 }
 
@@ -174,10 +175,10 @@ ENABLE_CFI(int32_t HuksAccessGetAbility(int funcType))
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiGetAbility == NULL) {
-        HKS_LOG_E("GetAbility function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetAbility, HKS_ERROR_NULL_POINTER,
+        "GetAbility function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiGetAbility(funcType);
 }
 
@@ -186,10 +187,10 @@ ENABLE_CFI(int32_t HuksAccessGetHardwareInfo(void))
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiGetHardwareInfo == NULL) {
-        HKS_LOG_E("GetHardwareInfo function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetHardwareInfo, HKS_ERROR_NULL_POINTER,
+        "GetHardwareInfo function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiGetHardwareInfo();
 }
 
@@ -199,10 +200,10 @@ ENABLE_CFI(int32_t HuksAccessSign(const struct HksBlob *key, const struct HksPar
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiSign == NULL) {
-        HKS_LOG_E("Sign function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiSign, HKS_ERROR_NULL_POINTER,
+        "Sign function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiSign(key, paramSet, srcData, signature);
 }
 
@@ -212,10 +213,10 @@ ENABLE_CFI(int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksP
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiVerify == NULL) {
-        HKS_LOG_E("Verify function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiVerify, HKS_ERROR_NULL_POINTER,
+        "Verify function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiVerify(key, paramSet, srcData, signature);
 }
 
@@ -225,10 +226,10 @@ ENABLE_CFI(int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct Hks
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiEncrypt == NULL) {
-        HKS_LOG_E("Encrypt function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncrypt, HKS_ERROR_NULL_POINTER,
+        "Encrypt function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiEncrypt(key, paramSet, plainText, cipherText);
 }
 
@@ -238,10 +239,10 @@ ENABLE_CFI(int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct Hks
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiDecrypt == NULL) {
-        HKS_LOG_E("Decrypt function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDecrypt, HKS_ERROR_NULL_POINTER,
+        "Decrypt function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiDecrypt(key, paramSet, cipherText, plainText);
 }
 
@@ -251,10 +252,10 @@ ENABLE_CFI(int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const 
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiAgreeKey == NULL) {
-        HKS_LOG_E("AgreeKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAgreeKey, HKS_ERROR_NULL_POINTER,
+        "AgreeKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
 }
 
@@ -264,10 +265,10 @@ ENABLE_CFI(int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiDeriveKey == NULL) {
-        HKS_LOG_E("DeriveKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDeriveKey, HKS_ERROR_NULL_POINTER,
+        "DeriveKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiDeriveKey(paramSet, kdfKey, derivedKey);
 }
 
@@ -277,10 +278,10 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiMac == NULL) {
-        HKS_LOG_E("Mac function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiMac, HKS_ERROR_NULL_POINTER,
+        "Mac function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiMac(key, paramSet, srcData, mac);
 }
 
@@ -291,10 +292,10 @@ ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, c
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiCalcMacHeader == NULL) {
-        HKS_LOG_E("CalcMacHeader function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiCalcMacHeader, HKS_ERROR_NULL_POINTER,
+        "CalcMacHeader function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiCalcMacHeader(paramSet, salt, srcData, mac);
 }
 #endif
@@ -306,10 +307,10 @@ ENABLE_CFI(int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, cons
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo == NULL) {
-        HKS_LOG_E("UpgradeKeyInfo function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo, HKS_ERROR_NULL_POINTER,
+        "UpgradeKeyInfo function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
 }
 #endif
@@ -321,10 +322,10 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiAttestKey == NULL) {
-        HKS_LOG_E("AttestKey function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAttestKey, HKS_ERROR_NULL_POINTER,
+        "AttestKey function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiAttestKey(key, paramSet, certChain);
 }
 #endif
@@ -336,9 +337,9 @@ ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, 
     if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (g_hksHalDevicePtr->HuksHdiGenerateRandom == NULL) {
-        HKS_LOG_E("GenerateRandom function is null pointer");
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGenerateRandom, HKS_ERROR_NULL_POINTER,
+        "GenerateRandom function is null pointer")
+
     return g_hksHalDevicePtr->HuksHdiGenerateRandom(paramSet, random);
 }

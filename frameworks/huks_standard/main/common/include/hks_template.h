@@ -57,4 +57,14 @@ if ((OBJECT) == HKS_NULL_POINTER) { \
     return (ERROR_CODE); \
 }
 
+#define HKS_IF_NULL_LOGE_BREAK(OBJECT, LOG_MESSAGE, ...) \
+if ((OBJECT) == HKS_NULL_POINTER) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+}
+
+#define HKS_IF_NULL_RETURN(OBJECT, ERROR_CODE) \
+if ((OBJECT) == HKS_NULL_POINTER) { \
+    return (ERROR_CODE); \
+}
 #endif /* HKS_TEMPLATE_H */

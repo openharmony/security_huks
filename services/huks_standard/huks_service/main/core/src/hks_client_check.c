@@ -73,7 +73,6 @@ int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlo
     int32_t ret = HksCheckBlob4AndParamSet(processName, keyAlias, data1, data2, paramSet);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
 
@@ -82,7 +81,6 @@ int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struc
 {
     int32_t ret = HksCheckBlob2AndParamSet(processName, keyAlias, paramSet);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
 
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
@@ -221,10 +219,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     uint32_t *authAccessType)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-    if (paramSet == NULL) {
-        HKS_LOG_I("null init paramSet: not support user auth!");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NOT_SUPPORTED, "null init paramSet: not support user auth!")
 
     struct HksParam *noRequireAuth = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NO_AUTH_REQUIRED, &noRequireAuth);

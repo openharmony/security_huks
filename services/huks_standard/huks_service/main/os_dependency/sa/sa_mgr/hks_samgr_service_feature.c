@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "hks_samgr_server.h"
 #include "hks_ipc_service.h"
+#include "hks_samgr_server.h"
+#include "hks_template.h"
 
 static const char *FEATURE_GetName(Feature *feature);
 static void FEATURE_OnInitialize(Feature *feature, Service *parent, Identity identity);
@@ -60,9 +61,8 @@ static void FEATURE_OnStop(Feature *feature, Identity identity)
 static BOOL FEATURE_OnMessage(Feature *feature, Request *msg)
 {
     (void)feature;
-    if (msg == NULL) {
-        return false;
-    }
+    HKS_IF_NULL_RETURN(msg, false)
+
     Response response = { "Yes, you did!", 0 };
     return SAMGR_SendResponse(msg, &response);
 }
@@ -70,15 +70,13 @@ static BOOL FEATURE_OnMessage(Feature *feature, Request *msg)
 static int32 Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
 {
     BuffPtr* buffRsv = IpcIoPopDataBuff(req);
-    if (buffRsv == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(buffRsv, HKS_ERROR_NULL_POINTER)
+
     uint32_t len = buffRsv->buffSz;
     struct HksBlob srcData = { len, NULL };
     srcData.data = HksMalloc(len);
-    if (srcData.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(srcData.data, HKS_ERROR_MALLOC_FAIL)
+
     if (memcpy_s(srcData.data, len, buffRsv->buff, len) != EOK) {
         HKS_FREE_PTR(srcData.data);
         srcData.size = 0;
