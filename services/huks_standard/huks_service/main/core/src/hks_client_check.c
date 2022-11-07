@@ -17,10 +17,11 @@
 
 #include <stddef.h>
 
+#include "hks_base_check.h"
 #include "hks_common_check.h"
 #include "hks_log.h"
 #include "hks_param.h"
-#include "hks_base_check.h"
+#include "hks_template.h"
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
@@ -40,9 +41,7 @@ static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_
 
 int32_t HksCheckProcessNameAndKeyAlias(const struct HksBlob *processName, const struct HksBlob *keyAlias)
 {
-    if (HksCheckBlob2(processName, keyAlias) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob2(processName, keyAlias), HKS_ERROR_INVALID_ARGUMENT)
 
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
@@ -51,9 +50,7 @@ int32_t HksCheckGenAndImportKeyParams(const struct HksBlob *processName, const s
     const struct HksParamSet *paramSetIn, const struct HksBlob *key)
 {
     int32_t ret = HksCheckBlob3AndParamSet(processName, keyAlias, key, paramSetIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
@@ -62,14 +59,10 @@ int32_t HksCheckImportWrappedKeyParams(const struct HksBlob *processName, const 
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSetIn, const struct HksBlob *wrappedKeyData)
 {
     int32_t ret = HksCheckBlob4AndParamSet(processName, keyAlias, wrappingKeyAlias, wrappedKeyData, paramSetIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return CheckProcessNameAndKeyAliasSize(processName->size, wrappingKeyAlias->size);
 }
@@ -78,9 +71,8 @@ int32_t HksCheckAllParams(const struct HksBlob *processName, const struct HksBlo
     const struct HksParamSet *paramSet, const struct HksBlob *data1, const struct HksBlob *data2)
 {
     int32_t ret = HksCheckBlob4AndParamSet(processName, keyAlias, data1, data2, paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
 
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
@@ -89,9 +81,8 @@ int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struc
     const struct HksParamSet *paramSet)
 {
     int32_t ret = HksCheckBlob2AndParamSet(processName, keyAlias, paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
 
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
@@ -99,9 +90,7 @@ int32_t HksCheckServiceInitParams(const struct HksBlob *processName, const struc
 int32_t HksCheckGetKeyParamSetParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet)
 {
-    if (HksCheckProcessNameAndKeyAlias(processName, keyAlias) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckProcessNameAndKeyAlias(processName, keyAlias), HKS_ERROR_INVALID_ARGUMENT)
 
     if ((paramSet == NULL) || (paramSet->paramSetSize == 0)) {
         HKS_LOG_E("invalid paramSet");
@@ -114,9 +103,7 @@ int32_t HksCheckGetKeyParamSetParams(const struct HksBlob *processName, const st
 int32_t HksCheckExportPublicKeyParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
     const struct HksBlob *key)
 {
-    if (HksCheckBlob3(processName, keyAlias, key) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob3(processName, keyAlias, key), HKS_ERROR_INVALID_ARGUMENT)
 
     return CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
 }
@@ -130,10 +117,7 @@ int32_t HksCheckDeriveKeyParams(const struct HksBlob *processName, const struct 
 int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const struct HksKeyInfo *keyInfoList,
     const uint32_t *listCount)
 {
-    if (CheckBlob(processName) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid processName");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(processName), HKS_ERROR_INVALID_ARGUMENT, "invalid processName")
 
     if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
         HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processName->size);
@@ -158,9 +142,7 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
 
 int32_t HksCheckGenerateRandomParams(const struct HksBlob *processName, const struct HksBlob *random)
 {
-    if (HksCheckBlob2(processName, random) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob2(processName, random), HKS_ERROR_INVALID_ARGUMENT)
 
     if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
         HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u.", processName->size);
@@ -188,10 +170,8 @@ static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
 {
     struct HksParam *authAccess = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccess);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get auth access type fail");
-        return HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED, "get auth access type fail")
+
     if (authAccess->uint32Param < HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD) {
         HKS_LOG_E("auth access level is too low");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -203,10 +183,7 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
     uint32_t authAccessType, uint32_t challengeType)
 {
     int32_t ret = HksCheckUserAuthParams(userAuthType, authAccessType, challengeType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check user auth params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params failed")
 
     if (challengeType == HKS_CHALLENGE_TYPE_NONE) {
         struct HksParam *authTimeout = NULL;
@@ -223,10 +200,8 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
     ret = HksGetParam(paramSet, HKS_TAG_KEY_SECURE_SIGN_TYPE, &secureSignType);
     if (ret == HKS_SUCCESS) {
         ret = HksCheckSecureSignParams(secureSignType->uint32Param);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("secure sign type is invalid");
-            return HKS_ERROR_INVALID_SECURE_SIGN_TYPE;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_SECURE_SIGN_TYPE, "secure sign type is invalid")
+
         /* secure sign ability only support sign-purpose algorithm */
         struct HksParam *purposeParam = NULL;
         ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
@@ -235,10 +210,7 @@ static int32_t CheckUserAuthParamsValidity(const struct HksParamSet *paramSet, u
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         ret = CheckAuthAccessLevel(paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check auth access level fail");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "check auth access level fail")
     }
 
     return HKS_SUCCESS;
@@ -263,31 +235,19 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
     struct HksParam *userAuthTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_USER_AUTH_TYPE, &userAuthTypeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("no user auth type param: not support user auth!");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "no user auth type param: not support user auth!")
 
     struct HksParam *accessTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get auth access type param failed");
-        return HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED, "get auth access type param failed")
 
     struct HksParam *challengeTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &challengeTypeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get challenge type param failed");
-        return HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_CHALLENGE_TYPE_FAILED, "get challenge type param failed")
 
     ret = CheckUserAuthParamsValidity(paramSet, userAuthTypeParam->uint32Param, accessTypeParam->uint32Param,
         challengeTypeParam->uint32Param);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check user auth params validity failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth params validity failed")
 
     *userAuthType = userAuthTypeParam->uint32Param;
     *authAccessType = accessTypeParam->uint32Param;

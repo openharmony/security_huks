@@ -22,6 +22,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_request.h"
+#include "hks_template.h"
 
 static bool IsSliceCmd(uint32_t cmdId)
 {
@@ -55,15 +56,11 @@ static uint32_t GetDataSize(uint32_t cmdId, const struct HksBlob *inData, const 
     uint32_t *bufSize)
 {
     uint32_t inBuffData;
-    if (GetBlobBufSize(inData, &inBuffData) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(GetBlobBufSize(inData, &inBuffData), HKS_ERROR_INVALID_ARGUMENT)
 
     uint32_t bufOutDataSize;
     if (cmdId == HKS_MSG_VERIFY) {
-        if (GetBlobBufSize(outData, &bufOutDataSize) != HKS_SUCCESS) {
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_NOT_SUCC_RETURN(GetBlobBufSize(outData, &bufOutDataSize), HKS_ERROR_INVALID_ARGUMENT)
     } else {
         bufOutDataSize = sizeof(outData->size);
     }

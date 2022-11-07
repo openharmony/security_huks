@@ -24,6 +24,7 @@
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
 #include "hks_log.h"
+#include "hks_template.h"
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_RSA_C
@@ -678,10 +679,7 @@ static int32_t CheckAndGetKeySize(const struct HksBlob *key, const uint32_t *exp
 
     struct HksParamSet *keyParamSet = (struct HksParamSet *)key->data;
     int32_t ret = HksCheckParamSetValidity(keyParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key size: paramset invalid failed");
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE, "check key size: paramset invalid failed")
 
     struct HksParam *keySizeParam = NULL;
     ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
@@ -761,9 +759,7 @@ static int32_t CheckPurposeValid(uint32_t alg, uint32_t inputPurpose)
     uint32_t invalidPurpose = 0;
 
     int32_t result = GetInvalidPurpose(alg, &invalidPurpose);
-    if (result != HKS_SUCCESS) {
-        return result;
-    }
+    HKS_IF_NOT_SUCC_RETURN(result, result)
 
     if ((inputPurpose & invalidPurpose) != 0) {
         return HKS_ERROR_INVALID_PURPOSE;
@@ -1225,10 +1221,7 @@ static int32_t CheckBlockCipherIvMaterial(const struct HksParamSet *paramSet)
 {
     struct HksParam *ivParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get iv param failed!");
-        return HKS_ERROR_CHECK_GET_IV_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_IV_FAIL, "cipher get iv param failed!")
 
     if ((ivParam->blob.size != HKS_BLOCK_CIPHER_CBC_IV_LEN) || (ivParam->blob.data == NULL)) {
         HKS_LOG_E("cbc iv param invalid");
@@ -1299,13 +1292,8 @@ static int32_t CheckCipherAeAadMaterial(uint32_t mode, const struct HksParamSet 
 {
     struct HksParam *aadParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get aad param failed!");
-        return HKS_ERROR_CHECK_GET_AAD_FAIL;
-    }
-    if (CheckBlob(&aadParam->blob) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_AAD;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_AAD_FAIL, "cipher get aad param failed!")
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(&aadParam->blob), HKS_ERROR_INVALID_AAD)
 
     /* gcmMode: aadSize greater than 0 (has been checked); ccmMode: aadSize no less than 4 */
     if (mode == HKS_MODE_CCM) {
@@ -1322,14 +1310,8 @@ static int32_t CheckCipherAeNonceMaterial(uint32_t mode, const struct HksParamSe
 {
     struct HksParam *nonceParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NONCE, &nonceParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get nonce param failed!");
-        return HKS_ERROR_CHECK_GET_NONCE_FAIL;
-    }
-
-    if (CheckBlob(&nonceParam->blob) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_NONCE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_NONCE_FAIL, "cipher get nonce param failed!")
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(&nonceParam->blob), HKS_ERROR_INVALID_NONCE)
 
     /* gcmMode: nonceSize no less than 12; ccmMode: nonceSize no less than 7, and no greater than 13 */
     if (mode == HKS_MODE_GCM) {
@@ -1351,16 +1333,10 @@ static int32_t CheckCipherAeNonceMaterial(uint32_t mode, const struct HksParamSe
 static int32_t CheckCipherAeMaterial(uint32_t mode, const struct HksParamSet *paramSet)
 {
     int32_t ret = CheckCipherAeAadMaterial(mode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check ae cipher aad failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check ae cipher aad failed!")
 
     ret = CheckCipherAeNonceMaterial(mode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check ae cipher nonce failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check ae cipher nonce failed!")
 
     return ret;
 }
@@ -1399,10 +1375,7 @@ int32_t HksCheckValue(uint32_t inputValue, const uint32_t *expectValues, uint32_
 int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose)
 {
     int32_t ret = CheckPurposeUnique(inputPurpose);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("gen key purpose not unique");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "gen key purpose not unique")
 
     return CheckPurposeValid(alg, inputPurpose);
 }
@@ -1417,10 +1390,7 @@ static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
 
     struct HksParamSet *keyParamSet = (struct HksParamSet *)key->data;
     int32_t ret = HksCheckParamSetValidity(keyParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key size: paramset invalid failed");
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE, "check key size: paramset invalid failed")
 
     struct HksParam *keySizeParam = NULL;
     ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
@@ -1479,15 +1449,10 @@ int32_t HksGetInputParmasByAlg(uint32_t alg, enum CheckKeyType checkType, const 
     struct ParamsValues *inputParams)
 {
     int32_t ret = InitInputParamsByAlg(alg, checkType, inputParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init input params failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init input params failed!")
 
     ret = GetInputParams(paramSet, inputParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get input params failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get input params failed!")
 
     return ret;
 }
@@ -1496,9 +1461,7 @@ int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const str
 {
     struct ExpectParamsValues expectValues = EXPECT_PARAMS_VALUES_INIT;
     int32_t ret = GetExpectParams(alg, checkType, &expectValues);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (expectValues.keyLen.needCheck) {
         ret = HksCheckValue(inputParams->keyLen.value, expectValues.keyLen.values, expectValues.keyLen.valueCnt);
@@ -1687,10 +1650,8 @@ int32_t HksCheckSignVerifyMutableParams(uint32_t cmdId, uint32_t alg, const stru
     switch (alg) {
 #ifdef HKS_SUPPORT_RSA_C
         case HKS_ALG_RSA:
-            if (HksCheckValue(inputParams->padding.value, g_rsaSignPadding,
-                HKS_ARRAY_SIZE(g_rsaSignPadding)) != HKS_SUCCESS) {
-                return HKS_ERROR_INVALID_PADDING;
-            }
+            HKS_IF_NOT_SUCC_RETURN(HksCheckValue(inputParams->padding.value, g_rsaSignPadding,
+                HKS_ARRAY_SIZE(g_rsaSignPadding)), HKS_ERROR_INVALID_PADDING)
             break;
 #endif
 #ifdef HKS_SUPPORT_DSA_C
@@ -1746,9 +1707,7 @@ int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct P
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
-    if (ret != HKS_SUCCESS) {
-        ret = HKS_ERROR_INVALID_PADDING;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_PADDING)
     return ret;
 }
 
@@ -1827,14 +1786,10 @@ int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, u
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
     int32_t ret = HksCheckValue(userAuthType, g_supportUserAuthTypes, HKS_ARRAY_SIZE(g_supportUserAuthTypes));
-    if (ret != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_AUTH_TYPE;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
 
     ret = HksCheckValue(challengeType, g_userAuthChallengeType, HKS_ARRAY_SIZE(g_userAuthChallengeType));
-    if (ret != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_CHALLENGE_TYPE;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_CHALLENGE_TYPE)
 
     return HksCheckAuthAccessTypeByUserAuthType(userAuthType, authAccessType);
 #else
