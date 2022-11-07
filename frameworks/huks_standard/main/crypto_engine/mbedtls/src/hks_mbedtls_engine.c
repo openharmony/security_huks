@@ -413,7 +413,7 @@ int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message, void *ctx, stru
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_ARGUMENT, "Invalid param ctx or out !")
 
     DecryptUpdate func = (DecryptUpdate)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(algtype));
-    HKS_IF_NOT_SUCC_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, message, out, false);
 }
