@@ -29,6 +29,7 @@
 
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
+#include "hks_template.h"
 #include "hks_type_inner.h"
 
 #ifdef _CUT_AUTHENTICATE
@@ -85,9 +86,7 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
 
     uint32_t mbedtlsAlg;
     int32_t ret = HksToMbedtlsDigestAlg(derParam->digestAlg, &mbedtlsAlg);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     const mbedtls_md_info_t *info = mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg);
     if (info == NULL) {

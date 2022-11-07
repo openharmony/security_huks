@@ -40,6 +40,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
@@ -396,9 +397,7 @@ uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, ui
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileRead(fullFileName, offset, buf, len);
     HKS_FREE_PTR(fullFileName);
@@ -413,9 +412,7 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileWrite(fullFileName, offset, buf, len);
     HKS_FREE_PTR(fullFileName);
@@ -430,9 +427,7 @@ uint32_t HksFileSize(const char *path, const char *fileName)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileSize(fullFileName);
     HKS_FREE_PTR(fullFileName);
@@ -447,9 +442,7 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = IsFileExist(fullFileName);
     HKS_FREE_PTR(fullFileName);
@@ -464,9 +457,7 @@ int32_t HksFileRemove(const char *path, const char *fileName)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileRemove(fullFileName);
     HKS_FREE_PTR(fullFileName);

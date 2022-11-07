@@ -36,6 +36,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mbedtls_ecc.h"
+#include "hks_template.h"
 
 #ifdef HKS_SUPPORT_ECDH_AGREE_KEY
 static int32_t EccKeyMaterialToCtx(const struct HksBlob *nativeKey,
@@ -59,22 +60,16 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
     const struct HksBlob *pubKey, const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
     int32_t ret = EccKeyCheck(pubKey);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_id mbedtlsCurveNist = MBEDTLS_ECP_DP_NONE;
     ret = HksMbedtlsEccGetKeyCurveNist((struct KeyMaterialEcc *)(nativeKey->data), &mbedtlsCurveNist);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdh_context ctx;
     mbedtls_ecdh_init(&ctx);
@@ -87,9 +82,7 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
         }
 
         ret = EccKeyMaterialToCtx(nativeKey, pubKey, &ctx);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_ecdh_compute_shared(&(ctx.grp), &(ctx.z), &(ctx.Qp), &(ctx.d), mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {

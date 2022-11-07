@@ -40,6 +40,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define HKS_X25519_KEY_BITS 256
 #define HKS_X25519_KEY_BYTES 32
@@ -155,20 +156,12 @@ static int32_t X25519CheckKeyMaterialSize(const struct HksBlob *priKey, const st
 
     /* x25519's keySize is fixed at 256, so don't need to check */
     int32_t ret = X25519CheckKeyMaterialPubPriSize(priKm);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid privateKey size");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid privateKey size")
     ret = X25519CheckKeyMaterialPubPriSize(pubKm);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid publicKey size");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid publicKey size")
 
     ret = X25519CheckKeySize(priKey, priKm, false);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return X25519CheckKeySize(pubKey, pubKm, true);
 }
@@ -233,9 +226,7 @@ int32_t HksMbedtlsX25519GenerateKey(const struct HksKeySpec *spec, struct HksBlo
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
     int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_init(&grp);
     mbedtls_ecp_point_init(&pub);
@@ -285,9 +276,7 @@ static int32_t X25519KeyMaterialToPub(const struct HksBlob *pubKey, mbedtls_ecp_
         }
 
         ret = EndianSwap(tmpPubKey, keyMaterial->pubKeySize);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_mpi_read_binary(&(pub->MBEDTLS_PRIVATE(X)), tmpPubKey, keyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
@@ -325,9 +314,7 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
 {
     (void)spec;
     int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdh_context ctx;
     mbedtls_ecdh_init(&ctx);
@@ -348,14 +335,10 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
         }
 
         ret = X25519KeyMaterialToPub(pubKey, &(ctx.MBEDTLS_PRIVATE(Qp)));
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = X25519KeyMaterialToPri(nativeKey, &(ctx.MBEDTLS_PRIVATE(d)));
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)),
             &(ctx.MBEDTLS_PRIVATE(Qp)), &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
@@ -387,14 +370,10 @@ static int32_t GetX25519PubKeyCheckParams(const struct HksBlob *keyIn, const str
 {
     const struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)(keyIn->data);
     int32_t ret = X25519CheckKeyMaterialPubPriSize(keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = X25519CheckKeySize(keyIn, keyMaterial, false);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* check keyOut */
     if (keyOut->size < (sizeof(struct KeyMaterial25519) + keyMaterial->pubKeySize)) {
@@ -408,9 +387,7 @@ static int32_t GetX25519PubKeyCheckParams(const struct HksBlob *keyIn, const str
 int32_t HksMbedtlsGetX25519PubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     int32_t ret = GetX25519PubKeyCheckParams(keyIn, keyOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     const struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)(keyIn->data);
     const uint32_t outLen = sizeof(struct KeyMaterial25519) + keyMaterial->pubKeySize;
@@ -689,9 +666,7 @@ static int32_t ConvertPublicKey(const struct HksBlob *publicKeyIn, struct HksBlo
     /* RFC 8032 */
     publicKeyIn->data[publicKeyIn->size - 1] = publicKeyIn->data[publicKeyIn->size - 1] & 0x7f;
     int32_t ret = EndianSwap(publicKeyIn->data, publicKeyIn->size);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_mpi edwardsY;
     struct HksCurveConstPara curvePara;
@@ -701,9 +676,7 @@ static int32_t ConvertPublicKey(const struct HksBlob *publicKeyIn, struct HksBlo
 
     do {
         ret = HksCurveSetConstPara(&curvePara);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_mpi_read_binary(&edwardsY, publicKeyIn->data, publicKeyIn->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
@@ -711,9 +684,7 @@ static int32_t ConvertPublicKey(const struct HksBlob *publicKeyIn, struct HksBlo
         }
 
         ret = HksCurvePskCheckPoint(&edwardsY, publicKeyIn->data, publicKeyIn->size, &curvePara);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         x25519PublicKey->size = CURVE25519_KEY_BYTE_SIZE;
         x25519PublicKey->data = (uint8_t *)HksMalloc(x25519PublicKey->size);
@@ -724,9 +695,7 @@ static int32_t ConvertPublicKey(const struct HksBlob *publicKeyIn, struct HksBlo
         }
 
         ret = HksCurvePskCalcC(&edwardsY, x25519PublicKey, &curvePara);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = EndianSwap(x25519PublicKey->data, x25519PublicKey->size);
     } while (0);
@@ -748,10 +717,7 @@ static int32_t ConvertPrivateKey(const struct HksBlob *privateKeyIn, struct HksB
 
     /* Get 32-bit private key data as the hash input parameter (little endian) */
     int32_t ret = HksCryptoHalHash(HKS_DIGEST_SHA512, privateKeyIn, &hash512);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert private key calc hash failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "convert private key calc hash failed")
 
     x25519PrivateKey->size = CURVE25519_KEY_BYTE_SIZE;
     x25519PrivateKey->data = (uint8_t *)HksMalloc(x25519PrivateKey->size);
@@ -785,16 +751,13 @@ int32_t MbedtlsEd25519KeyToX25519(const struct HksBlob *ed25519NativeKey,
     const struct HksBlob *ed25519PubKey, struct HksBlob *x25519NativeKey, struct HksBlob *x25519PubKey)
 {
     int32_t ret = ConvertPublicKey(ed25519PubKey, x25519PubKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert ed25519 public key to x25519 public key failed! ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+        "convert ed25519 public key to x25519 public key failed! ret = %" LOG_PUBLIC "d", ret)
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+    "convert ed25519 private key to x25519 private key failed! ret = %" LOG_PUBLIC "d", ret)
 
     ret = ConvertPrivateKey(ed25519NativeKey, x25519NativeKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert ed25519 private key to x25519 private key failed! ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
 
     return HKS_SUCCESS;
 }
@@ -832,42 +795,26 @@ int32_t HksMbedtlsEd25519KeyAgreement(const struct HksBlob *nativeKey,
 {
     (void)spec;
     int32_t ret = X25519CheckKeyMaterialSize(nativeKey, pubKey);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksEd25519ToX25519Blob key;
     (void)memset_s(&key, sizeof(key), 0, sizeof(key));
 
     do {
         ret = HksGetKeyFromMaterial(HKS_ALG_ED25519, false, nativeKey, &(key.rawNativeKey));
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get private key from material failed, ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get private key from material failed, ret = 0x%" LOG_PUBLIC "X", ret)
         ret = HksGetKeyFromMaterial(HKS_ALG_ED25519, true, pubKey, &(key.rawPubKey));
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get public key from material failed, ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get public key from material failed, ret = 0x%" LOG_PUBLIC "X", ret)
 
         ret = MbedtlsEd25519KeyToX25519(&(key.rawNativeKey), &(key.rawPubKey),
             &(key.rawX25519NativeKey), &(key.rawX25519PubKey));
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("covert from ed25519 to x25519 failed, ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "covert from ed25519 to x25519 failed, ret = 0x%" LOG_PUBLIC "X", ret)
 
         ret = HksSetKeyToMaterial(HKS_ALG_X25519, false, &(key.rawX25519NativeKey), &(key.kmX25519NativeKey));
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set private key to material failed, ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "set private key to material failed, ret = 0x%" LOG_PUBLIC "X", ret)
+
         ret = HksSetKeyToMaterial(HKS_ALG_X25519, true, &(key.rawX25519PubKey), &(key.kmX25519PubKey));
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set publicy key to material failed, ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "set publicy key to material failed, ret = 0x%" LOG_PUBLIC "X", ret)
 
         ret = HksMbedtlsX25519KeyAgreement(&(key.kmX25519NativeKey), &(key.kmX25519PubKey), NULL, sharedKey);
     } while (0);

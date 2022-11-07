@@ -19,6 +19,7 @@
 
 #include "hks_mem.h"
 #include "hks_rwlock.h"
+#include "hks_template.h"
 
 struct HksLock {
     HksRwlock *lock;
@@ -39,33 +40,29 @@ HksLock *HksLockCreate(void)
 
 int32_t HksLockLockRead(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksRwlockLockRead(lock->lock);
 }
 
 int32_t HksLockUnlockRead(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksRwlockUnlockRead(lock->lock);
 }
 
 int32_t HksLockLockWrite(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksRwlockLockWrite(lock->lock);
 }
 
 int32_t HksLockUnlockWrite(HksLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksRwlockUnlockWrite(lock->lock);
 }
 

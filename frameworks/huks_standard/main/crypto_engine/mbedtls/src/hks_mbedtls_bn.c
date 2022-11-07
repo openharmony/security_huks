@@ -27,6 +27,7 @@
 
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
+#include "hks_template.h"
 
 static int32_t CheckBnExpModNx(const struct HksBlob *n, const struct HksBlob *x)
 {
@@ -48,9 +49,7 @@ int32_t HksMbedtlsBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n)
 {
     int32_t ret = CheckBnExpModNx(n, x);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_mpi bnX;
     mbedtls_mpi bnA;

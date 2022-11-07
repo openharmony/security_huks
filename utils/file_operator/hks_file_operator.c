@@ -29,6 +29,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
@@ -88,9 +89,7 @@ static int32_t IsFileExist(const char *fileName)
 static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
 {
     (void)offset;
-    if (IsFileExist(fileName) != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(IsFileExist(fileName), 0)
 
     char filePath[PATH_MAX + 1] = {0};
     (void)realpath(fileName, filePath);
@@ -116,9 +115,7 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
 
 static uint32_t FileSize(const char *fileName)
 {
-    if (IsFileExist(fileName) != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(IsFileExist(fileName), 0)
 
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
@@ -193,9 +190,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
 static int32_t FileRemove(const char *fileName)
 {
     int32_t ret = IsFileExist(fileName);
-    if (ret != HKS_SUCCESS) {
-        return HKS_SUCCESS; /* if file not exist, return ok */
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_SUCCESS) /* if file not exist, return ok */
 
     struct stat tmp;
     if (stat(fileName, &tmp) != 0) {
@@ -222,9 +217,7 @@ int32_t HksFileRemove(const char *path, const char *fileName)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileRemove(fullFileName);
     HKS_FREE_PTR(fullFileName);
@@ -239,9 +232,7 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = IsFileExist(fullFileName);
     HKS_FREE_PTR(fullFileName);
@@ -490,9 +481,7 @@ uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, ui
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileRead(fullFileName, offset, buf, len);
     HKS_FREE_PTR(fullFileName);
@@ -507,9 +496,7 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileWrite(fullFileName, offset, buf, len);
     HKS_FREE_PTR(fullFileName);
@@ -524,9 +511,7 @@ uint32_t HksFileSize(const char *path, const char *fileName)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileSize(fullFileName);
     HKS_FREE_PTR(fullFileName);

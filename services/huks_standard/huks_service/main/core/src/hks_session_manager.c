@@ -23,6 +23,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "huks_access.h"
 #include "securec.h"
 
@@ -109,10 +110,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
     uint32_t processNameLen = processInfo->processName.size;
 
     uint8_t *userId = (uint8_t *)HksMalloc(userIdLen);
-    if (userId == NULL) {
-        HKS_LOG_E("malloc operation userId failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(userId, HKS_ERROR_MALLOC_FAIL, "malloc operation userId failed")
 
     uint8_t *processName = (uint8_t *)HksMalloc(processNameLen);
     if (processName == NULL) {
@@ -150,10 +148,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
     bool abortable)
 {
     struct HksOperation *operation = (struct HksOperation *)HksMalloc(sizeof(struct HksOperation));
-    if (operation == NULL) {
-        HKS_LOG_E("malloc hks operation failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_MALLOC_FAIL, "malloc hks operation failed")
 
     int32_t ret = ConstructOperationProcessInfo(processInfo, operation);
     if (ret != HKS_SUCCESS) {

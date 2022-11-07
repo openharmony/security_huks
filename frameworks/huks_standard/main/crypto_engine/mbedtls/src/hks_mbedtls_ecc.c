@@ -35,6 +35,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define HKS_ECC_KEYPAIR_CNT 3
 
@@ -88,14 +89,10 @@ int32_t EccKeyCheck(const struct HksBlob *key)
 {
     const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(key->data);
     int32_t ret = HksMbedtlsEccCheckKeySize(keyMaterial->keySize);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = EccKeyMaterialXyzSizeCheck(keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (key->size < (sizeof(struct KeyMaterialEcc) + keyMaterial->xSize + keyMaterial->ySize + keyMaterial->zSize)) {
         HKS_LOG_E("Ecc key size too small! key size = 0x%" LOG_PUBLIC "X", key->size);
@@ -221,16 +218,12 @@ int32_t HksMbedtlsEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 {
     mbedtls_ecp_group_id grpId;
     int32_t ret = GetEccGroupId(spec->keyLen, &grpId);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_keypair ecp;
     mbedtls_ecp_keypair_init(&ecp);
@@ -256,9 +249,7 @@ int32_t HksMbedtlsEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 static int32_t GetEccPubKeyCheckParams(const struct HksBlob *keyIn, const struct HksBlob *keyOut)
 {
     int32_t ret = EccKeyCheck(keyIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* check keyOut size */
     const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(keyIn->data);
@@ -278,9 +269,7 @@ static int32_t GetEccPubKeyCheckParams(const struct HksBlob *keyIn, const struct
 int32_t HksMbedtlsGetEccPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     int32_t ret = GetEccPubKeyCheckParams(keyIn, keyOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* x + y, so need size is: sizeof(struct HksPubKeyInfo) + xSize + ySize */
     const struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)(keyIn->data);

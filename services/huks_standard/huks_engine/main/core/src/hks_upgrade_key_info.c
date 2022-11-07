@@ -32,6 +32,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 
 #define HKS_SEALING_NONCE_SIZE 16
 #define HKS_KEY_PAIR_CIPHER_ED25519 80
@@ -167,10 +168,8 @@ static int32_t GetKeyInfo(const struct HksBlob *keyInfo, struct HksKeyStoreInfo 
 
     if (keyStoreInfo->authIdSize != 0) {
         uint8_t *tmpAuthId = (uint8_t *)HksMalloc(keyStoreInfo->authIdSize);
-        if (tmpAuthId == NULL) {
-            HKS_LOG_E("malloc failed");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(tmpAuthId, HKS_ERROR_MALLOC_FAIL, "malloc failed")
+
         (void)memcpy_s(tmpAuthId, keyStoreInfo->authIdSize, tmp + offset, keyStoreInfo->authIdSize);
         keyStoreInfo->authIdData = tmpAuthId;
     }
@@ -180,10 +179,7 @@ static int32_t GetKeyInfo(const struct HksBlob *keyInfo, struct HksKeyStoreInfo 
 static int32_t GetNonce(const struct HksBlob *keyInfo, struct HksBlob *nonce)
 {
     uint8_t *tmp = (uint8_t *)HksMalloc(HKS_SEALING_NONCE_SIZE);
-    if (tmp == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmp, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     uint32_t offset = sizeof(uint8_t); /* offset: flags */
     /* keyInfo size has beed checked */
@@ -272,10 +268,8 @@ static int32_t DecryptKey(const struct HksBlob *kek, const struct HksUsageSpec *
     const struct HksBlob *cipherKey, struct HksBlob *key)
 {
     key->data = HksMalloc(cipherKey->size);
-    if (key->data == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
+
     key->size = cipherKey->size;
 
     int32_t ret = HksCryptoHalDecrypt(kek, usageSpec, cipherKey, key);
@@ -291,10 +285,7 @@ static int32_t DecryptKey(const struct HksBlob *kek, const struct HksUsageSpec *
 static int32_t CopyToNewBlob(const struct HksBlob *key, struct HksBlob *outKey)
 {
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(key->size);
-    if (keyBuffer == NULL) {
-        HKS_LOG_E("public key to inner key format malloc keyBuffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyBuffer, HKS_ERROR_MALLOC_FAIL, "public key to inner key format malloc keyBuffer failed!")
 
     (void)memcpy_s(keyBuffer, key->size, key->data, key->size);
     outKey->data = keyBuffer;
@@ -307,9 +298,7 @@ static int32_t ConvertEd25519ToNewFormat(uint8_t flag, const struct HksBlob *pub
 {
     uint32_t totalSize = sizeof(struct KeyMaterial25519) + pubKey->size + priKey->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)buffer;
     keyMaterial->keyAlg = HKS_ALG_ED25519;

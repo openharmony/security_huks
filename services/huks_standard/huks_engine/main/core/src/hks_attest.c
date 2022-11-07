@@ -33,6 +33,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_secure_access.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define ID_HUKS_BASE            0x2B, 0x06, 0x01, 0x04, 0x01, 0x8F, 0x5B
@@ -500,9 +501,7 @@ static void ParseAttestTbs(const struct HksBlob *template, struct HksAttestTbsSp
     ret += HksAsn1ExtractTag(&val, &tbsSpec->spki, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &tbsSpec->extensions, &val, ASN_1_TAG_TYPE_CTX_SPEC3);
     ret += IsValidAttestTbs(tbsSpec);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid tbs.\n");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "invalid tbs.\n")
 }
 
 static void ParseAttestCert(const struct HksBlob *devCert, struct HksAttestCert *cert)
@@ -519,9 +518,7 @@ static void ParseAttestCert(const struct HksBlob *devCert, struct HksAttestCert 
     ret += HksAsn1ExtractTag(&val, &cert->signature, &val, ASN_1_TAG_TYPE_BIT_STR);
 
     ret += IsValidAttestCert(cert);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid dev cert.\n");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "invalid dev cert.\n")
 }
 
 static void ParseAttestExtension(const struct HksBlob *data, struct HksAttestExt *ext)
@@ -534,9 +531,7 @@ static void ParseAttestExtension(const struct HksBlob *data, struct HksAttestExt
     ret += HksAsn1ExtractTag(&val, &ext->keyUsage, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &ext->crl, &val, ASN_1_TAG_TYPE_SEQ);
     ret += HksAsn1ExtractTag(&val, &ext->claims, &val, ASN_1_TAG_TYPE_SEQ);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid extension.\n");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "invalid extension.\n")
 }
 
 static uint32_t EncodeUtcTime(const uint8_t *time, uint8_t *buf)
@@ -560,9 +555,7 @@ static void EncodeValidity(const struct ValidPeriod *validity, struct HksBlob *o
 
     struct HksAsn1Blob insertValid = { ASN_1_TAG_TYPE_SEQ, (p - start), start };
     int32_t ret = HksAsn1WriteFinal(out, &insertValid);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("encode validity fail.\n");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "encode validity fail.\n")
 }
 
 static uint8_t EncodeKeyUsageBits(const uint32_t usage, uint8_t *bits)
@@ -598,10 +591,8 @@ static int32_t EncodeClaims(const struct HksBlob *oid, const struct HksBlob *cla
 
     struct HksAsn1Blob value = { ASN_1_TAG_TYPE_OCT_STR, claim->size, claim->data };
     int32_t ret = HksAsn1WriteFinal(&tmp, &value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("write claim oct str failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "write claim oct str failed!")
+
     size += tmp.size;
 
     value.type = ASN_1_TAG_TYPE_SEQ;
@@ -632,10 +623,7 @@ static int32_t CreateAttestExtension(const struct HksAttestSpec *attestSpec, str
     tmp.size -= claimsOffset;
 
     int32_t ret = EncodeClaims(&attestSpec->claimsOid, &attestSpec->claims, &tmp);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("EncodeClaims failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "EncodeClaims failed!")
 
     uint32_t usageOffset = tmplExt.keyUsage.header.data - extensionTmpl.data;
     struct HksAsn1Blob seqValue = {
@@ -653,45 +641,28 @@ static int32_t EncodeTbs(const struct HksAttestTbsSpec *tbs, struct HksBlob *out
     tmp.size -= ATT_CERT_HEADER_SIZE;
 
     int32_t ret = HksAsn1InsertValue(&tmp, NULL, &tbs->version.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert version failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert version failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->serial.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert serial failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert serial failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->signature.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert signature failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert signature failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->issuer.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert issuer failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert issuer failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->validity.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert validity failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert validity failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->subject.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert subject failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert subject failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->spki.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert spki failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert spki failed!")
+
     ret = HksAsn1InsertValue(&tmp, NULL, &tbs->extensions.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert extensions failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert extensions failed!")
 
     uint8_t *data = out->data + ATT_CERT_HEADER_SIZE;
     uint32_t size = tmp.data - data;
@@ -733,24 +704,19 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
     uint8_t pubKey[PUBKEY_DER_LEN] = {0};
     struct HksBlob pubKeyBlob = { PUBKEY_DER_LEN, pubKey };
     int32_t ret = HksCryptoHalGetPubKey(&attestSpec->attestKey, &pubKeyBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get attest public key failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get attest public key failed!")
+
     uint8_t pubKeyDer[PUBKEY_DER_LEN] = {0};
     struct HksBlob spkiBlob = { PUBKEY_DER_LEN, pubKeyDer };
     ret = HksGetPublicKey(&spkiBlob, (struct HksPubKeyInfo *)pubKeyBlob.data, &attestSpec->usageSpec);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("der public key failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "der public key failed!")
+
     struct HksAsn1Blob insertSpki = { ASN_1_TAG_TYPE_RAW, spkiBlob.size, spkiBlob.data };
     draftTbs.spki.value = insertSpki;
 
     uint8_t *extBuf = HksMalloc(EXT_MAX_SIZE + attestSpec->claims.size);
-    if (extBuf == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(extBuf, HKS_ERROR_MALLOC_FAIL)
+
     struct HksBlob extension = { EXT_MAX_SIZE + attestSpec->claims.size, extBuf };
     ret = CreateAttestExtension(attestSpec, &extension);
     if (ret != HKS_SUCCESS) {
@@ -776,10 +742,8 @@ static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *materi
 
     uint32_t offset = sizeof(struct KeyMaterialRsa);
     int32_t ret = HksAsn1ExtractTag(val, &obj, val, ASN_1_TAG_TYPE_INT);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("extract n fail!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "extract n fail!")
+
     if (memcpy_s(material->data + offset, material->size - offset, obj.value.data, obj.value.size) != EOK) {
         HKS_LOG_E("copy n fail!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -788,10 +752,8 @@ static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *materi
 
     offset += keyMaterial->nSize;
     ret = HksAsn1ExtractTag(val, &obj, val, ASN_1_TAG_TYPE_INT);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("extract e fail!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "extract e fail!")
+
     if (memcpy_s(material->data + offset, material->size - offset, obj.value.data, obj.value.size) != EOK) {
         HKS_LOG_E("copy e fail!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -800,10 +762,8 @@ static int32_t GetPrivateKeyMaterial(struct HksBlob *val, struct HksBlob *materi
 
     offset += keyMaterial->eSize;
     ret = HksAsn1ExtractTag(val, &obj, val, ASN_1_TAG_TYPE_INT);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("extract d fail!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "extract d fail!")
+
     if (memcpy_s(material->data + offset, material->size - offset, obj.value.data, obj.value.size) != EOK) {
         HKS_LOG_E("copy d fail!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -820,16 +780,14 @@ static int32_t StepIntoPrivateKey(const struct HksBlob *key, struct HksBlob *val
     int32_t ret;
 
     ret = HksAsn1ExtractTag(&skip, &obj, key, ASN_1_TAG_TYPE_SEQ);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     val->data = obj.value.data;
     val->size = obj.value.size;
 
     ret = HksAsn1ExtractTag(val, &obj, val, ASN_1_TAG_TYPE_INT);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     return HKS_SUCCESS;
 }
 
@@ -837,18 +795,13 @@ int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
 {
     struct HksBlob val = { 0, NULL };
     int32_t ret = StepIntoPrivateKey(key, &val);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("step into private key fail!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "step into private key fail!")
 
     uint32_t keySize = HKS_RSA_KEY_SIZE_2048;
     uint32_t materialLen = sizeof(struct KeyMaterialRsa) + keySize / HKS_BITS_PER_BYTE * 3; /* 3 bits are unused */
     uint8_t *material = (uint8_t *)HksMalloc(materialLen);
-    if (material == NULL) {
-        HKS_LOG_E("malloc key materail fail!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(material, HKS_ERROR_MALLOC_FAIL, "malloc key materail fail!")
+
     struct HksBlob materialBlob = { materialLen, material };
     ret = GetPrivateKeyMaterial(&val, &materialBlob);
     if (ret != HKS_SUCCESS) {
@@ -871,10 +824,7 @@ static int32_t SignTbs(struct HksBlob *sig, const struct HksBlob *tbs, const str
     uint8_t buffer[HKS_DIGEST_SHA256_LEN] = {0};
     struct HksBlob message = { HKS_DIGEST_SHA256_LEN, buffer };
     int32_t ret = HksCryptoHalHash(HKS_DIGEST_SHA256, tbs, &message);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("calc hash of tbs failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "calc hash of tbs failed!")
 
     struct HksUsageSpec usageSpec = {0};
     usageSpec.digest = HKS_DIGEST_SHA256;
@@ -888,18 +838,13 @@ static int32_t SignTbs(struct HksBlob *sig, const struct HksBlob *tbs, const str
 
     struct HksBlob priKey = { 0, NULL };
     ret = HksGetDevicePrivateKey(key, &priKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get private key failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get private key failed!")
 
     ret = HksCryptoHalSign(&priKey, &usageSpec, &message, sig);
     (void)memset_s(priKey.data, priKey.size, 0, priKey.size);
     HksFree(priKey.data);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("sign tbs failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign tbs failed!")
+
     return HKS_SUCCESS;
 }
 
@@ -910,18 +855,12 @@ static int32_t CreateAttestCert(struct HksBlob *attestCert, struct HksBlob *temp
     tbs.data += ATT_CERT_HEADER_SIZE;
     tbs.size -= ATT_CERT_HEADER_SIZE;
     int32_t ret = CreateTbs(template, attestSpec, &tbs, signAlg);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("CreateTbs failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "CreateTbs failed!")
 
     uint8_t sigBuf[SIG_MAX_SIZE] = {0};
     struct HksBlob signature = { sizeof(sigBuf), sigBuf };
     ret = SignTbs(&signature, &tbs, &attestSpec->devKey, signAlg);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("SignTbs failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "SignTbs failed!")
 
     uint32_t certSize = tbs.size;
     struct HksAsn1Obj obj = {{0}};
@@ -934,18 +873,14 @@ static int32_t CreateAttestCert(struct HksBlob *attestCert, struct HksBlob *temp
         signOidBlob.data = g_ecdsaSha256Oid.data;
     }
     ret = HksAsn1InsertValue(&tmp, &obj, &signOidBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert sign oid failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert sign oid failed!")
+
     certSize += obj.header.size + obj.value.size;
 
     struct HksAsn1Blob sigBlob = { ASN_1_TAG_TYPE_BIT_STR, signature.size, signature.data };
     ret = HksAsn1InsertValue(&tmp, &obj, &sigBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert sign failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert sign failed!")
+
     certSize += obj.header.size + obj.value.size;
 
     struct HksAsn1Blob certBlob = { ASN_1_TAG_TYPE_SEQ, certSize, attestCert->data + ATT_CERT_HEADER_SIZE };
@@ -1041,10 +976,7 @@ static int32_t InsertAppIdClaim(struct HksBlob *out, const struct HksParamSet *p
 {
     struct HksParam *appId = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_APPLICATION_ID, &appId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("not contain appId param!");
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not contain appId param!")
 
     uint8_t buf[ASN_1_MAX_HEADER_LEN + MAX_OID_LEN + HKS_APP_ID_SIZE] = {0};
     uint8_t *tmp = buf;
@@ -1057,10 +989,7 @@ static int32_t InsertAppIdClaim(struct HksBlob *out, const struct HksParamSet *p
     struct HksBlob tmpBlob = { sizeof(buf) - hksApplicationIdRawOid.size, tmp };
     struct HksAsn1Blob value = { ASN_1_TAG_TYPE_OCT_STR, appId->blob.size, appId->blob.data };
     ret = HksAsn1WriteFinal(&tmpBlob, &value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("write final value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "write final value fail\n")
 
     uint32_t seqSize = tmp - buf;
     struct HksAsn1Blob seq = { ASN_1_TAG_TYPE_SEQ, seqSize, buf };
@@ -1073,43 +1002,27 @@ static int32_t BuildAttestMsgClaims(struct HksBlob *out, const struct HksParamSe
     uint8_t version = HKS_HW_ATTESTATION_VERSION;
     struct HksAsn1Blob versionBlob = { ASN_1_TAG_TYPE_INT, 1, &version };
     int32_t ret = HksAsn1InsertValue(out, NULL, &versionBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert version fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert version fail\n")
 
     struct HksParam *challenge = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_CHALLENGE, &challenge);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get challenge param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get challenge param failed!")
 
     struct HksAsn1Blob challengeBlob = { ASN_1_TAG_TYPE_OCT_STR, challenge->blob.size, challenge->blob.data };
     ret = HksInsertClaim(out, &hksAttestationChallengeOid, &challengeBlob, HKS_SECURITY_LEVEL_LOW);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert challenge fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert challenge fail\n")
 
     struct HksParam *keyId = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_ID_ALIAS, &keyId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyId param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyId param failed!")
+
     struct HksAsn1Blob keyIdBlob = { ASN_1_TAG_TYPE_OCT_STR, keyId->blob.size, keyId->blob.data };
     ret = HksInsertClaim(out, &hksKeyIdOid, &keyIdBlob, secLevel);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert keyId fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert keyId fail\n")
 
     ret = InsertAppIdClaim(out, paramSet, secLevel);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert appId fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert appId fail\n")
+
     return HKS_SUCCESS;
 }
 
@@ -1126,10 +1039,8 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
     }
     struct HksAsn1Blob signTypeBlob = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t), (uint8_t *)&signType };
     ret = HksInsertClaim(out, &hksSignTypeOid, &signTypeBlob, secLevel);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert signType failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert signType failed")
+
     HKS_LOG_I("attest key claims signType[%" LOG_PUBLIC "u] success", signType);
 
     bool isGroupInsert = false;
@@ -1145,24 +1056,16 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
 
     struct HksAsn1Blob usage = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t), (uint8_t *)&attetUsageSpec->purpose };
     ret = HksInsertClaim(out, &hksKeyUsageOid, &usage, secLevel);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert usage fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert usage fail\n")
+
     struct HksAsn1Blob digest = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t), (uint8_t *)&attetUsageSpec->digest };
     ret = HksInsertClaim(out, &hksDigestOid, &digest, secLevel);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert digest fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert digest fail\n")
 
     if (attetUsageSpec->algType != HKS_ALG_RSA) {
         struct HksAsn1Blob padding = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t), (uint8_t *)&attetUsageSpec->padding };
         ret = HksInsertClaim(out, &hksPaddingOid, &padding, secLevel);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("insert padding fail\n");
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert padding fail\n")
     }
     return HKS_SUCCESS;
 }
@@ -1172,23 +1075,15 @@ static int32_t InsertIdOrSecInfoData(enum HksTag tag, uint32_t type, const struc
 {
     struct HksParam *param = NULL;
     int32_t ret = HksGetParam(paramSet, tag, &param);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get id param failed! tag is %" LOG_PUBLIC "x", tag);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get id param failed! tag is %" LOG_PUBLIC "x", tag)
 
     ret = VerifyIdsInfo(tag, param);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("VerifyIdsInfo failed! tag is %" LOG_PUBLIC "x", tag);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "VerifyIdsInfo failed! tag is %" LOG_PUBLIC "x", tag)
 
     struct HksAsn1Blob paramBlob = { type, param->blob.size, param->blob.data };
     ret = HksInsertClaim(out, oid, &paramBlob, HKS_SECURITY_LEVEL_SUPER);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert id cliam failed! tag is %" LOG_PUBLIC "x", tag);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert id cliam failed! tag is %" LOG_PUBLIC "x", tag)
+
     return ret;
 }
 
@@ -1235,10 +1130,7 @@ static int32_t BuildAttestDeviceClaims(struct HksBlob *out, const struct HksPara
     for (uint32_t i = 0; i < sizeof(g_idAttestList) / sizeof(g_idAttestList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             ret = InsertIdOrSecInfoByOid(paramSet->params[j].tag, g_idAttestList[i], out, paramSet);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("insert ids %" LOG_PUBLIC "x fail\n", paramSet->params[i].tag);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert ids %" LOG_PUBLIC "x fail\n", paramSet->params[i].tag)
         }
     }
     return ret;
@@ -1248,10 +1140,8 @@ static int32_t BuildAttestClaims(const struct HksParamSet *paramSet, const struc
     struct HksAttestSpec *attestSpec)
 {
     uint8_t *claims = HksMalloc(ATTEST_CLAIM_BUF_LEN + ASN_1_MAX_HEADER_LEN);
-    if (claims == NULL) {
-        HKS_LOG_E("malloc claims fail\n");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(claims, HKS_ERROR_MALLOC_FAIL, "malloc claims fail\n")
+
     attestSpec->claims.data = claims;
     attestSpec->claims.size = ATTEST_CLAIM_BUF_LEN + ASN_1_MAX_HEADER_LEN;
 
@@ -1260,31 +1150,19 @@ static int32_t BuildAttestClaims(const struct HksParamSet *paramSet, const struc
     tmp.size -= ASN_1_MAX_HEADER_LEN;
 
     int32_t ret = BuildAttestMsgClaims(&tmp, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build attest message claims fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest message claims fail\n")
 
     ret = BuildAttestDeviceClaims(&tmp, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build attest device claims fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest device claims fail\n")
 
     ret = BuildAttestKeyClaims(&tmp, keyParamSet, &attestSpec->usageSpec);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build attest key claims fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest key claims fail\n")
 
     uint8_t *seqData = claims + ASN_1_MAX_HEADER_LEN;
     uint32_t seqSize = tmp.data - seqData;
     struct HksAsn1Blob seqDataBlob = { ASN_1_TAG_TYPE_SEQ, seqSize, seqData };
     ret = HksAsn1WriteFinal(&attestSpec->claims, &seqDataBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build attest claims fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest claims fail\n")
 
     return HKS_SUCCESS;
 }
@@ -1292,10 +1170,8 @@ static int32_t BuildAttestClaims(const struct HksParamSet *paramSet, const struc
 static int32_t ReadCertOrKey(const uint8_t *inData, uint32_t size, struct HksBlob *out)
 {
     uint8_t *data = HksMalloc(size);
-    if (data == NULL) {
-        HKS_LOG_E("malloc data fail\n");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "malloc data fail\n")
+
     (void)memcpy_s(data, size, inData, size);
     out->size = size;
     out->data = data;
@@ -1322,19 +1198,14 @@ static int32_t GetCertOrKey(enum HksCertType type, struct HksBlob *out)
 static int32_t GetCertAndKey(const struct HksKeyNode *keyNode, struct HksAttestSpec *attestSpec)
 {
     int32_t ret = GetCertOrKey(HKS_DEVICE_CERT, &attestSpec->devCert);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get devCert fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devCert fail")
+
     ret = GetCertOrKey(HKS_DEVICE_KEY, &attestSpec->devKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get devKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devKey fail")
+
     ret = HksGetRawKey(keyNode->paramSet, &attestSpec->attestKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get attestKey fail");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get attestKey fail")
+
     return ret;
 }
 
@@ -1381,10 +1252,8 @@ static int32_t BuildAttestSpec(const struct HksKeyNode *keyNode, const struct Hk
     struct HksAttestSpec **outAttestSpec)
 {
     struct HksAttestSpec *attestSpec = HksMalloc(sizeof(struct HksAttestSpec));
-    if (attestSpec == NULL) {
-        HKS_LOG_E("malloc attestSpec fail\n");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(attestSpec, HKS_ERROR_MALLOC_FAIL, "malloc attestSpec fail\n")
+
     (void)memset_s(attestSpec, sizeof(struct HksAttestSpec), 0, sizeof(struct HksAttestSpec));
 
     SetAttestCertValid(&attestSpec->validity);
@@ -1428,10 +1297,8 @@ static int32_t CreateHwAttestCert(const struct HksAttestSpec *attestSpec, struct
 
     uint8_t *attest = HksMalloc(HKS_ATTEST_CERT_SIZE + attestSpec->claims.size);
     HKS_LOG_E("mattestSpec->claims.size is %" LOG_PUBLIC "d!", attestSpec->claims.size);
-    if (attest == NULL) {
-        HKS_LOG_E("malloc attest cert failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(attest, HKS_ERROR_MALLOC_FAIL, "malloc attest cert failed!")
+
     struct HksBlob attestCert = { HKS_ATTEST_CERT_SIZE + attestSpec->claims.size, attest };
     int32_t ret = CreateAttestCert(&attestCert, &template, attestSpec, signAlg);
     if (ret != HKS_SUCCESS) {
@@ -1461,17 +1328,12 @@ static int32_t FormatCertToBuf(enum HksCertType type, struct HksBlob *buf)
 {
     struct HksBlob cert = { 0, NULL };
     int32_t ret = GetCertOrKey(type, &cert);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get cert failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get cert failed!")
 
     ret = CopyBlobToBuffer(&cert, buf);
     HksFree(cert.data);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy cert fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy cert fail")
+
     return ret;
 }
 
@@ -1484,28 +1346,16 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     tmp.size -= sizeof(uint32_t);
 
     int32_t ret = CopyBlobToBuffer(attestCert, &tmp);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy attest cert fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy attest cert fail")
 
     ret = CopyBlobToBuffer(&attestSpec->devCert, &tmp);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("copy dev cert fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy dev cert fail")
 
     ret = FormatCertToBuf(HKS_CA_CERT, &tmp);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("format ca cert failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format ca cert failed!")
 
     ret = FormatCertToBuf(HKS_ROOT_CERT, &tmp);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("format root cert failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "format root cert failed!")
 
     certChain->size = tmp.data - certChain->data;
     HKS_LOG_I("certChain size after format is %" LOG_PUBLIC "u", certChain->size);
@@ -1517,10 +1367,7 @@ static int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct 
 {
     struct HksAttestSpec *attestSpec = NULL;
     int32_t ret = BuildAttestSpec(keyNode, paramSet, &attestSpec);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build attest spec failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest spec failed")
 
     struct HksBlob attestCert;
     ret = CreateHwAttestCert(attestSpec, &attestCert, HKS_ALG_RSA);
@@ -1539,20 +1386,14 @@ static int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct 
 static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *certChain)
 {
-    if (CheckBlob(key) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid key!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "invalid key!")
 
     if ((CheckBlob(certChain) != HKS_SUCCESS) || (certChain->size < HKS_ATTEST_CERT_SIZE)) {
         HKS_LOG_E("invalid cert chain!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if (HksCheckParamSetValidity(paramSet) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid paramSet!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSetValidity(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid paramSet!")
 
     return HKS_SUCCESS;
 }
@@ -1560,15 +1401,10 @@ static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksP
 int32_t HksSoftAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
     int32_t ret = CheckAttestKeyParams(key, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    if (keyNode == NULL) {
-        HKS_LOG_E("generate keynode failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate keynode failed")
 
     ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
     if (ret != HKS_SUCCESS) {
@@ -1578,9 +1414,8 @@ int32_t HksSoftAttestKey(const struct HksBlob *key, const struct HksParamSet *pa
     }
 
     ret = CreateHwAttestCertChain(keyNode, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("create attest cert chain failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "create attest cert chain failed!")
+
     HksFreeKeyNode(&keyNode);
     return ret;
 }

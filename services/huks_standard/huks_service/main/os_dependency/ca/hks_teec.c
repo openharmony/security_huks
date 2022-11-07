@@ -25,6 +25,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "tee_client_api.h"
 #include "tee_client_id.h"
 #include "tee_client_type.h"
@@ -111,10 +112,7 @@ static TEEC_Result OpenSession(TEEC_Context *context, TEEC_Session **session)
     }
 
     TEEC_Session *localSession = (TEEC_Session *)HksMalloc(sizeof(TEEC_Session));
-    if (localSession == NULL) {
-        HKS_LOG_E("out of memory!");
-        return (TEEC_Result)TEEC_ERROR_OUT_OF_MEMORY;
-    }
+    HKS_IF_NULL_LOGE_RETURN(localSession, (TEEC_Result)TEEC_ERROR_OUT_OF_MEMORY, "out of memory!")
 
     TEEC_Operation operation;
 
@@ -143,10 +141,7 @@ static TEEC_Result TeecOpen(void)
     }
 
     g_context = HksMalloc(sizeof(TEEC_Context));
-    if (g_context == NULL) {
-        HKS_LOG_E("memory allocate failed!");
-        return TEEC_ERROR_OUT_OF_MEMORY;
-    }
+    HKS_IF_NULL_LOGE_RETURN(g_context, TEEC_ERROR_OUT_OF_MEMORY, "memory allocate failed!")
 
     TEEC_Result result = TEEC_InitializeContext(NULL, g_context);
     if (result != TEEC_SUCCESS) {

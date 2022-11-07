@@ -27,6 +27,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define MAX_DEGIST_SIZE 64
@@ -43,16 +44,11 @@ static void HksLocalCryptoAbilityInit(void)
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksLocalHash(const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *hash)
 {
-    if (HksCheckBlob2AndParamSet(srcData, hash, paramSet) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob2AndParamSet(srcData, hash, paramSet), HKS_ERROR_INVALID_ARGUMENT)
 
     struct HksParam *digestAlg = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestAlg);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param digest failed");
-        return HKS_ERROR_CHECK_GET_DIGEST_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "get param digest failed")
 
     uint32_t digestLen;
     ret = HksGetDigestLen(digestAlg->uint32Param, &digestLen);
@@ -73,20 +69,13 @@ int32_t HksLocalHash(const struct HksParamSet *paramSet, const struct HksBlob *s
 int32_t HksLocalMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac)
 {
-    if (HksCheckBlob3AndParamSet(key, srcData, mac, paramSet) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob3AndParamSet(key, srcData, mac, paramSet), HKS_ERROR_INVALID_ARGUMENT)
     int32_t ret = HksCoreCheckMacParams(key, paramSet, srcData, mac, true);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksParam *digestAlg = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestAlg);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param digest failed");
-        return HKS_ERROR_CHECK_GET_DIGEST_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "get param digest failed")
     HksLocalCryptoAbilityInit();
     return HksCryptoHalHmac(key, digestAlg->uint32Param, srcData, mac);
 }
@@ -94,9 +83,7 @@ int32_t HksLocalMac(const struct HksBlob *key, const struct HksParamSet *paramSe
 int32_t HksLocalBnExpMod(struct HksBlob *x, const struct HksBlob *a, const struct HksBlob *e, const struct HksBlob *n)
 {
     int32_t ret = HksCheckBlob4(x, a, e, n);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     HksLocalCryptoAbilityInit();
     return HksCryptoHalBnExpMod(x, a, e, n);
 }
@@ -121,9 +108,7 @@ static int32_t CheckLocalGenerateKeyParams(const struct HksParamSet *paramSetIn,
 int32_t HksLocalGenerateKey(const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut)
 {
     int32_t ret = CheckLocalGenerateKeyParams(paramSetIn, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksKeySpec spec = {0};
     HksFillKeySpec(paramSetIn, &spec);
@@ -145,14 +130,11 @@ int32_t HksLocalGenerateKey(const struct HksParamSet *paramSetIn, struct HksPara
 int32_t HksLocalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
-    if (HksCheckBlob3AndParamSet(privateKey, peerPublicKey, agreedKey, paramSet) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob3AndParamSet(privateKey, peerPublicKey, agreedKey, paramSet),
+        HKS_ERROR_INVALID_ARGUMENT)
 
     int32_t ret = HksCoreCheckAgreeKeyParams(paramSet, privateKey, peerPublicKey, agreedKey, true);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksKeySpec spec = {0};
     HksFillKeySpec(paramSet, &spec);
@@ -192,16 +174,10 @@ static int32_t CipherEncrypt(const struct HksBlob *key, const struct HksParamSet
 {
     struct HksBlob tag = { 0, NULL };
     int32_t ret = HksGetEncryptAeTag(paramSet, inData, outData, &tag);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher encrypt get ae tag failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher encrypt get ae tag failed!")
 
     ret = HksCryptoHalEncrypt(key, usageSpec, inData, outData, &tag);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher encrypt failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher encrypt failed!")
 
     outData->size += tag.size;
     return HKS_SUCCESS;
@@ -210,15 +186,11 @@ static int32_t CipherEncrypt(const struct HksBlob *key, const struct HksParamSet
 static int32_t CheckLocalCipherParams(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *inputText, struct HksBlob *outputText)
 {
-    if (HksCheckBlob3AndParamSet(key, inputText, outputText, paramSet) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob3AndParamSet(key, inputText, outputText, paramSet), HKS_ERROR_INVALID_ARGUMENT)
 
     struct HksParam *outParam = NULL;
-    if (HksGetParam(paramSet, HKS_TAG_ALGORITHM, &outParam) != HKS_SUCCESS) {
-        HKS_LOG_E("get tag algorithm failed.");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetParam(paramSet, HKS_TAG_ALGORITHM, &outParam),
+        HKS_ERROR_CHECK_GET_ALG_FAIL, "get tag algorithm failed.")
 
     uint32_t keySize = 0;
     if (outParam->uint32Param == HKS_ALG_AES) {
@@ -237,9 +209,7 @@ static int32_t EncryptAndDecrypt(uint32_t cmdId, const struct HksBlob *key, cons
     const struct HksBlob *inputText, struct HksBlob *outputText)
 {
     int32_t ret = CheckLocalCipherParams(cmdId, key, paramSet, inputText, outputText);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksUsageSpec *usageSpec = NULL;
     bool isEncrypt = (cmdId == HKS_CMD_ID_ENCRYPT);
@@ -281,14 +251,10 @@ int32_t HksLocalDeriveKey(const struct HksParamSet *paramSet, const struct HksBl
     struct HksBlob *derivedKey)
 {
     HksLocalCryptoAbilityInit();
-    if (HksCheckBlob2AndParamSet(mainKey, derivedKey, paramSet) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob2AndParamSet(mainKey, derivedKey, paramSet), HKS_ERROR_INVALID_ARGUMENT)
 
     int32_t ret = HksCoreCheckDeriveKeyParams(paramSet, mainKey, derivedKey, true);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksKeyDerivationParam derivationParam = { { 0, NULL }, { 0, NULL }, 0, 0 };
     struct HksKeySpec derivationSpec = { 0, 0, &derivationParam };
@@ -304,16 +270,11 @@ static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *
     const struct HksBlob *srcData, const struct HksBlob *signature)
 {
     HksLocalCryptoAbilityInit();
-    if (HksCheckBlob3AndParamSet(key, srcData, signature, paramSet) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob3AndParamSet(key, srcData, signature, paramSet), HKS_ERROR_INVALID_ARGUMENT)
 
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param algorithm failed");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "get param algorithm failed")
 
     uint32_t keySize = 0;
     if (algParam->uint32Param == HKS_ALG_RSA) {
@@ -327,9 +288,7 @@ static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *
     }
 
     ret = HksLocalCheckSignVerifyParams(cmdId, keySize, paramSet, srcData, signature);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (algParam->uint32Param == HKS_ALG_ED25519) {
         if (key->size != (HKS_CURVE25519_KEY_SIZE_256 / HKS_BITS_PER_BYTE)) {
@@ -380,9 +339,7 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
     struct HksBlob *signature)
 {
     int32_t ret = CheckLocalSignVerifyParams(HKS_CMD_ID_SIGN, key, paramSet, srcData, signature);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
@@ -396,10 +353,7 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
             break;
         }
         ret = GetSignVerifyMessage(&usageSpec, srcData, &message, &needFree);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("SignVerify calc hash failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SignVerify calc hash failed!")
 
         HksLocalCryptoAbilityInit();
         ret = HksCryptoHalSign(&keyMaterial, &usageSpec, &message, signature);
@@ -423,9 +377,7 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
     const struct HksBlob *signature)
 {
     int32_t ret = CheckLocalSignVerifyParams(HKS_CMD_ID_VERIFY, key, paramSet, srcData, signature);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
@@ -441,10 +393,7 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
         }
 
         ret = GetSignVerifyMessage(&usageSpec, srcData, &message, &needFree);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("SignVerify calc hash failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SignVerify calc hash failed!")
 
         HksLocalCryptoAbilityInit();
         ret = HksCryptoHalVerify(&keyMaterial, &usageSpec, &message, signature);

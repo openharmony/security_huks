@@ -24,6 +24,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_storage_adapter.h"
+#include "hks_template.h"
 
 #include "huks_access.h"
 
@@ -81,9 +82,7 @@ static int32_t CalcHeaderMac(const struct HksBlob *salt, const uint8_t *buf,
 
     struct HksBlob srcData = { srcSize, NULL };
     srcData.data = (uint8_t *)HksMalloc(srcData.size);
-    if (srcData.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(srcData.data, HKS_ERROR_MALLOC_FAIL)
 
     int32_t ret;
     struct HksParamSet *paramSet = NULL;
@@ -151,9 +150,8 @@ static int32_t ApplyImageBuffer(uint32_t size)
     }
 
     g_storageImageBuffer.data = (uint8_t *)HksMalloc(size);
-    if (g_storageImageBuffer.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(g_storageImageBuffer.data, HKS_ERROR_MALLOC_FAIL)
+
     g_storageImageBuffer.size = size;
 
     return HKS_SUCCESS;
@@ -188,9 +186,7 @@ static int32_t FreshImageBuffer(const char *fileName)
     }
 
     uint8_t *buf = (uint8_t *)HksMalloc(totalLen);
-    if (buf == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buf, HKS_ERROR_MALLOC_FAIL)
 
     fileLen = HksFileRead(HKS_KEY_STORE_PATH, fileName, offset, buf, totalLen);
     if (fileLen == 0) {
@@ -235,9 +231,8 @@ static int32_t RefreshKeyInfoHeaderHmac(struct HksStoreHeaderInfo *keyInfoHead)
     uint16_t size = sizeof(*keyInfoHead) - HKS_HMAC_DIGEST_SHA512_LEN;
 
     uint8_t *buffer = (uint8_t *)HksMalloc(sizeof(*keyInfoHead));
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
+
     (void)memcpy_s(buffer, sizeof(*keyInfoHead), keyInfoHead, sizeof(*keyInfoHead));
 
     int32_t ret = CalcHeaderMac(&salt, buffer, size, &mac);
@@ -411,9 +406,8 @@ static int32_t AdjustImageBuffer(uint32_t totalLenAdded, const struct HksBlob *k
     uint32_t newBufLen = g_storageImageBuffer.size +
         ((keyBlob->size > BUF_SIZE_ADDEND_PER_TIME) ? keyBlob->size : BUF_SIZE_ADDEND_PER_TIME);
     uint8_t *buf = (uint8_t *)HksMalloc(newBufLen);
-    if (buf == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buf, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(buf, newBufLen, 0, newBufLen);
 
     /* copy old imagebuf to new malloc buf */
@@ -577,9 +571,7 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
 static int32_t GetFileName(const struct HksBlob *name, char **fileName)
 {
     char *tmpName = (char *)HksMalloc(name->size + 1); /* \0 at the end */
-    if (tmpName == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(tmpName, HKS_ERROR_MALLOC_FAIL)
 
     (void)memcpy_s(tmpName, name->size, name->data, name->size);
     tmpName[name->size] = '\0';
@@ -737,9 +729,8 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
     struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)tmpBuf;
 
     keyBlob->data = (uint8_t *)HksMalloc(keyInfo->keyInfoLen); /* need be freed by caller functions */
-    if (keyBlob->data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(keyBlob->data, HKS_ERROR_MALLOC_FAIL)
+
     keyBlob->size = keyInfo->keyInfoLen;
 
     if (memcpy_s(keyBlob->data, keyBlob->size, tmpBuf, keyInfo->keyInfoLen) != EOK) {

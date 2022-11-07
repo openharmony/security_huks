@@ -32,6 +32,7 @@
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define CRYPTO_SUCCESS 1
 #define ED25519_PRIVATE_KEY_LEN 32
@@ -95,9 +96,7 @@ int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key
 
     struct HksBlob tmp = { ED25519_PUBLIC_KEY_LEN, priKeyBlob.data };
     int32_t ret = HksCryptoHalFillRandom(&tmp);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ED25519_public_from_private(pubKeyBlob.data, priKeyBlob.data);
     if (IsBlobZero(&pubKeyBlob) || IsBlobZero(&priKeyBlob)) {
@@ -135,9 +134,7 @@ static int32_t CheckEd25519Material(const struct HksBlob *key)
 static int32_t GetEd25519PubKeyCheck(const struct HksBlob *key, const struct HksBlob *keyOut)
 {
     int32_t ret = CheckEd25519Material(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* check keyOut */
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
@@ -153,9 +150,7 @@ static int32_t GetEd25519PubKeyCheck(const struct HksBlob *key, const struct Hks
 int32_t HksGetEd25519PubKey(const struct HksBlob *input, struct HksBlob *output)
 {
     int32_t ret = GetEd25519PubKeyCheck(input, output);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct KeyMaterial25519 *key = (struct KeyMaterial25519 *)input->data;
     uint32_t outLen = sizeof(struct KeyMaterial25519) + key->pubKeySize;
@@ -176,9 +171,7 @@ int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usa
 {
     (void)usageSpec;
     int32_t ret = CheckEd25519Material(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     if (signature->size < HKS_SIGNATURE_MIN_SIZE ||
         key->size <= (sizeof(struct KeyMaterial25519) + ED25519_PUBLIC_KEY_LEN)) {
         HKS_LOG_E("invalid param : signature size = %" LOG_PUBLIC "u, key size = %" LOG_PUBLIC "u",
@@ -203,9 +196,7 @@ int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *u
 {
     (void)usageSpec;
     int32_t ret = CheckEd25519Material(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     if (signature->size < HKS_SIGNATURE_MIN_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }

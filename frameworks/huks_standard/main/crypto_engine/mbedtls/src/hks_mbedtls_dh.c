@@ -28,6 +28,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define HKS_DH_KEYPAIR_CNT 2
 
@@ -127,9 +128,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         struct HksBlob paramP;
         struct HksBlob paramG;
         ret = GetDhParam(spec->keyLen, &paramP, &paramG);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
         uint32_t keyLen = HKS_KEY_BYTES(spec->keyLen);
 
         if (mbedtls_mpi_read_binary(&ctx.P, paramP.data, paramP.size) != HKS_MBEDTLS_SUCCESS ||
@@ -193,9 +192,7 @@ static int32_t DhKeyMaterialToCtx(const struct HksBlob *key, const bool needPriv
         struct HksBlob paramP;
         struct HksBlob paramG;
         ret = GetDhParam(keyMaterial->keySize, &paramP, &paramG);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         if (mbedtls_mpi_read_binary(&ctx->P, paramP.data, paramP.size) != HKS_MBEDTLS_SUCCESS ||
             mbedtls_mpi_read_binary(&ctx->G, paramG.data, paramG.size) != HKS_MBEDTLS_SUCCESS) {
@@ -250,9 +247,7 @@ int32_t HksMbedtlsDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 
     do {
         ret = DhKeyMaterialToCtx(nativeKey, true, &ctx);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_dhm_read_public(&ctx, pubKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {

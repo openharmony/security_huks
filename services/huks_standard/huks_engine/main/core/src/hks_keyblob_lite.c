@@ -23,6 +23,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_storage_adapter.h"
+#include "hks_template.h"
 
 static const char g_deriveKekTag[] = "derive_key";
 static const char g_deriveNonceTag[] = "derive_nonce";
@@ -35,10 +36,8 @@ enum DeriveType {
 static int32_t HksBlobInit(struct HksBlob *blob, uint32_t size)
 {
     blob->data = (uint8_t *)HksMalloc(size);
-    if (blob->data == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(blob->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
+
     blob->size = size;
     return HKS_SUCCESS;
 }
@@ -329,10 +328,8 @@ struct HksKeyNode *HksGenerateKeyNode(const struct HksBlob *key)
         return NULL;
     }
     struct HksKeyNode *keyNode = (struct HksKeyNode *)HksMalloc(sizeof(struct HksKeyNode));
-    if (keyNode == NULL) {
-        HKS_LOG_E("malloc keynode failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc keynode failed")
+
     keyNode->refCnt = 1;
     keyNode->status = HKS_KEYNODE_INACTIVE;
     keyNode->handle = 0;
@@ -483,10 +480,8 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     }
 
     uint8_t *data = HksMalloc(keyParam->blob.size);
-    if (data == NULL) {
-        HKS_LOG_E("fail to malloc raw key");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
+
     (void)memcpy_s(data, keyParam->blob.size, keyParam->blob.data, keyParam->blob.size);
 
     rawKey->size = keyParam->blob.size;

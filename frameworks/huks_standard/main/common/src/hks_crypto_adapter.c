@@ -27,6 +27,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 void HksFillKeySpec(const struct HksParamSet *paramSet, struct HksKeySpec *spec)
@@ -110,17 +111,11 @@ int32_t HksFillAeadParam(
 {
     struct HksParam *nonceParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NONCE, &nonceParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksFillAeadParam get nonce param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get nonce param failed!")
 
     struct HksParam *aadParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksFillAeadParam get aad param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get aad param failed!")
 
     struct HksParam tagParam;
     if (!isEncrypt) {
@@ -157,10 +152,7 @@ int32_t HksFillIvParam(const struct HksParamSet *paramSet, struct HksUsageSpec *
 {
     struct HksParam *ivParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get iv param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher get iv param failed!")
 
     struct HksCipherParam *param = (struct HksCipherParam *)HksMalloc(sizeof(struct HksCipherParam));
     if (param == NULL) {
@@ -177,10 +169,7 @@ static bool HksIsAlgorithmSm4(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check sm4 get alg param failed!");
-        return false;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check sm4 get alg param failed!")
     return (algParam->uint32Param == HKS_ALG_SM4);
 }
 
@@ -190,10 +179,7 @@ int32_t HksBuildCipherUsageSpec(
     bool isAes = false;
     bool isAeMode = false;
     int32_t ret = HksCheckAesAeMode(paramSet, &isAes, &isAeMode);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get aeMode failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get aeMode failed!")
 
     struct HksUsageSpec *usageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
     if (usageSpec == NULL) {
@@ -234,10 +220,7 @@ int32_t HksGetEncryptAeTag(
     bool isAes = false;
     bool isAeMode = false;
     int32_t ret = HksCheckAesAeMode(paramSet, &isAes, &isAeMode);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get aeMode failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get aeMode failed!")
 
     if ((!isAes) || (!isAeMode)) {
         tagAead->data = NULL;
@@ -305,9 +288,7 @@ static int32_t CheckCurve25519KeySize(const struct HksBlob *keyIn)
 static int32_t CheckFormatCurve25519Key(const struct HksBlob *keyIn, struct HksParamSet *paramSetOut)
 {
     int32_t ret = CheckCurve25519KeySize(keyIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)keyIn->data;
     uint32_t offset = sizeof(struct HksParamSet) + (sizeof(struct HksParam) << 1);
@@ -329,10 +310,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
     struct HksParamSet *tmpParamSetOut = NULL;
 
     ret = HksInitParamSet(&tmpParamSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init paramSet failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramSet failed!")
 
     ret = HksAddParams(tmpParamSetOut, params, paramCnt);
     if (ret != HKS_SUCCESS) {
@@ -362,10 +340,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
 static int32_t FormatCurve25519Key(const struct HksBlob *keyIn, struct HksParamSet *paramSetOut)
 {
     int32_t ret = CheckFormatCurve25519Key(keyIn, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check curve 25519 key failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check curve 25519 key failed")
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)keyIn->data;
     struct HksParam params[] = {
@@ -387,9 +362,7 @@ int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *
     struct HksBlob *keyOut)
 {
     int32_t ret = CheckCurve25519KeySize(keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     const struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)(keyMaterial->data);
 

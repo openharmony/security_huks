@@ -29,6 +29,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static void BnFreeParams(struct HksBnExpModParams *bnParams)
@@ -106,10 +107,7 @@ int32_t HksOpensslBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     struct HksBnExpModParams bnParams;
     (void)memset_s(&bnParams, sizeof(bnParams), 0, sizeof(bnParams));
     int32_t ret = BnBuildParams(&bnParams, a, e, n);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("BnInitParams fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "BnInitParams fail")
 
     do {
         /* mod 0 is not supported */
@@ -127,10 +125,7 @@ int32_t HksOpensslBnExpMod(struct HksBlob *x, const struct HksBlob *a,
         }
 
         ret = BnExpModExport(bnParams.bnX, x);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("BnExpModExport fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BnExpModExport fail")
     } while (0);
 
     BnFreeParams(&bnParams);
