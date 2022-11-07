@@ -60,9 +60,7 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     struct HksBlob *key, int32_t mode)
 {
     int32_t ret = HksStoreGetKeyBlob(processInfo, keyAlias, mode, key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get key blob from storage failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get key blob from storage failed, ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
 
@@ -71,10 +69,7 @@ static int32_t CheckKeyCondition(const struct HksProcessInfo *processInfo, const
     /* check is enough buffer to store */
     uint32_t size = 0;
     int32_t ret = HksStoreGetToatalSize(&size);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get total size from storage failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get total size from storage failed, ret = %" LOG_PUBLIC "d", ret)
 
     if (size >= MAX_STORAGE_SIZE) {
         /* is key exist */
@@ -122,20 +117,15 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
 {
     uint32_t size;
     int32_t ret = HksStoreGetKeyBlobSize(processInfo, keyAlias, mode, &size);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyblob size from storage failed, ret = %" LOG_PUBLIC "d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyblob size from storage failed, ret = %" LOG_PUBLIC "d.", ret)
+
     if (size > MAX_STORAGE_SIZE) {
         HKS_LOG_E("invalid storage size, size = %" LOG_PUBLIC "u", size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
     key->data = (uint8_t *)HksMalloc(size);
-    if (key->data == NULL) {
-        HKS_LOG_E("get key data: malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_MALLOC_FAIL, "get key data: malloc failed")
 
     key->size = size;
     ret = HksStoreGetKeyBlob(processInfo, keyAlias, mode, key);
@@ -174,7 +164,6 @@ static int32_t DeleteTagFromParamSet(const uint32_t *tag, uint32_t tagCount, con
 {
     int32_t ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fresh paramset failed")
-
 
     struct HksParamSet *newParamSet = NULL;
     ret = HksInitParamSet(&newParamSet);
@@ -222,10 +211,7 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
     struct HksParamSet *outParamSet = NULL;
     int32_t ret = DeleteTagFromParamSet(g_deleteTag, sizeof(g_deleteTag) / sizeof(g_deleteTag[0]), tmpParamSet,
         &outParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("delete tag from paramSet failed, ret = %" LOG_PUBLIC "d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "delete tag from paramSet failed, ret = %" LOG_PUBLIC "d.", ret)
 
     if (paramSet->paramSetSize < outParamSet->paramSetSize) {
         HksFreeParamSet(&outParamSet);
@@ -244,31 +230,19 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
 
     do {
         ret = HksCheckGetKeyInfoListParams(&processInfo->processName, keyInfoList, listCount);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get key data failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksGetKeyAliasByProcessName(processInfo, keyInfoList, listCount);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get key alias list from storage failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias list from storage failed, ret = %" LOG_PUBLIC "d", ret)
 
         for (uint32_t i = 0; i < *listCount; ++i) {
             struct HksBlob keyFromFile = { 0, NULL };
             ret = GetKeyData(processInfo, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("get key data failed, ret = %" LOG_PUBLIC "d", ret);
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data failed, ret = %" LOG_PUBLIC "d", ret)
 
             ret = GetKeyParamSet(&keyFromFile, keyInfoList[i].paramSet);
             HKS_FREE_BLOB(keyFromFile);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("get key paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key paramSet failed, ret = %" LOG_PUBLIC "d", ret)
         }
     } while (0);
 
@@ -505,10 +479,8 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
             continue;
         }
         ret = CheckIfEnrollAuthInfo(userId, userAuthTypes[i]);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("no enrolled info of the user auth type: %" LOG_PUBLIC "d.", userAuthTypes[i]);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+            "no enrolled info of the user auth type: %" LOG_PUBLIC "d.", userAuthTypes[i])
     }
     return HKS_SUCCESS;
 }
@@ -522,10 +494,8 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
     if (ret == HKS_ERROR_NOT_SUPPORTED) {
         struct HksParamSet *newParamSet = NULL;
         ret = AppendProcessInfo(paramSet, &processInfo->processName, processInfo->accessTokenId, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("append tag processName failed, ret = %" LOG_PUBLIC "d", ret);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append tag processName failed, ret = %" LOG_PUBLIC "d", ret)
+
         *outParamSet = newParamSet;
         return HKS_SUCCESS;
     }
@@ -565,10 +535,7 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
     int32_t ret = AppendProcessInfo(paramSet, &processInfo->processName, processInfo->accessTokenId, outParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append tag processName failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append tag processName failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = GetKeyData(processInfo, keyAlias, key, HKS_STORAGE_TYPE_KEY);
     if (ret != HKS_SUCCESS) {
@@ -605,10 +572,8 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + key->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc failed! %" LOG_PUBLIC "u", totalSize);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed! %" LOG_PUBLIC "u", totalSize)
+
     (void)memset_s(buffer, totalSize, 0, totalSize);
 
     struct HksPubKeyInfo *curve25519Key = (struct HksPubKeyInfo *)buffer;
@@ -650,9 +615,8 @@ static int32_t ConbineIntoKeyPair(const struct HksBlob *privateKey,
 {
     uint32_t size = sizeof(struct Hks25519KeyPair) + privateKey->size + publicKey->size; /* size has been checked */
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(buffer, size, 0, size);
 
     struct Hks25519KeyPair keyPairStruct = { publicKey->size, privateKey->size };
@@ -679,14 +643,10 @@ static int32_t GetAgreeKeyPair(const uint32_t alg, const struct HksProcessInfo *
     struct HksBlob publicKey = { 0, NULL };
     do {
         ret = GetAgreePublicKey(alg, processInfo, paramSet, &publicKey);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = GetAgreePrivateKey(processInfo, paramSet, &privateKey);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = ConbineIntoKeyPair(&privateKey, &publicKey, key);
     } while (0);
@@ -748,15 +708,12 @@ static int32_t GetKeyIn(const struct HksProcessInfo *processInfo, const struct H
     int32_t ret = GetDeriveMainKey(processInfo, paramSet, key);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-
     /* if not generate by derive, init keyIn by default value(ca to ta not accept null pointer) */
     if (key->data == NULL) {
         key->size = 1; /* malloc least buffer as keyIn buffer */
         key->data = (uint8_t *)HksMalloc(key->size);
-        if (key->data == NULL) {
-            HKS_LOG_E("malloc failed");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
+
         key->data[0] = 0;
     }
     return HKS_SUCCESS;
@@ -776,10 +733,7 @@ static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const stru
 
     struct HksParam *keyAliasParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get key alias fail, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key alias fail, ret = %" LOG_PUBLIC "d", ret)
 
     if (keyAliasParam->blob.size > HKS_MAX_KEY_ALIAS_LEN) {
         HKS_LOG_E("key alias size is too long, size is %" LOG_PUBLIC "u", keyAliasParam->blob.size);
@@ -787,15 +741,10 @@ static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const stru
     }
 
     ret = CheckKeyCondition(processInfo, &keyAliasParam->blob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("CheckKeyCondition fail, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckKeyCondition fail, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksStoreKeyBlob(processInfo, &keyAliasParam->blob, HKS_STORAGE_TYPE_KEY, output);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksStoreKeyBlob fail, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksStoreKeyBlob fail, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 }
@@ -805,9 +754,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
 {
     struct HksParamSet *newParamSet = NULL;
     uint8_t *keyOutBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-    if (keyOutBuffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(keyOutBuffer, HKS_ERROR_MALLOC_FAIL)
 
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 
@@ -821,39 +768,22 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         }
 
         ret = HksCheckGenAndImportKeyParams(&processInfo->processName, keyAlias, paramSetIn, &output);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check generate key params failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate key params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = CheckKeyCondition(processInfo, keyAlias);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check key condition failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check key condition failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AppendNewInfoForGenKeyInService(processInfo, paramSetIn, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("append processName tag failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyIn(processInfo, newParamSet, &keyIn);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get keyIn failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keyIn failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessGenerateKey(keyAlias, newParamSet, &keyIn, &output);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("access level generate key failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level generate key failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &output);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HKS_FREE_PTR(keyOutBuffer);
@@ -877,16 +807,10 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, srcData, signature);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check sign params failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check sign params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("sign: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "sign: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessSign(&keyFromFile, newParamSet, srcData, signature);
     } while (0);
@@ -911,16 +835,10 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, srcData, signature);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check verify params failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check verify params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("verify: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessVerify(&keyFromFile, newParamSet, srcData, signature);
     } while (0);
@@ -944,16 +862,10 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, plainText, cipherText);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check encrypt failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check encrypt failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("encrypt: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "encrypt: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessEncrypt(&keyFromFile, newParamSet, plainText, cipherText);
     } while (0);
@@ -976,16 +888,10 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
 
     do {
         ret = HksCheckAllParams(&processInfo->processName, keyAlias, paramSet, cipherText, plainText);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check decrypt failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check decrypt failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("decrypt: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessDecrypt(&keyFromFile, newParamSet, cipherText, plainText);
     } while (0);
@@ -1044,27 +950,17 @@ int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const
 
     do {
         ret = HksCheckGetKeyParamSetParams(&processInfo->processName, keyAlias, paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check get key paramSet params failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check get key paramSet params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, NULL, &keyFromFile, &newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get key paramSet: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "get key paramSet: get key and new paramSet failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessGetKeyProperties(newParamSet, &keyFromFile);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("access level check key validity failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access level check key validity failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = GetKeyParamSet(&keyFromFile, paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get Key paramSet failed, ret = %" LOG_PUBLIC "d", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "get Key paramSet failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1548,9 +1444,8 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
 static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksBlob *outData, bool isStorage)
 {
     output->data = (uint8_t *)HksMalloc(output->size);
-    if (output->data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(output->data, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(output->data, output->size, 0, output->size);
     if (!isStorage) {
         if ((memcpy_s(output->data, output->size, outData->data, outData->size) != EOK)) {

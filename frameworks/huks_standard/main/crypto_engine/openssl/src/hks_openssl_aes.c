@@ -28,6 +28,7 @@
 #include "hks_mem.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 
 #if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||        \
@@ -268,10 +269,8 @@ static int32_t AesGenKeyCheckParam(const struct HksKeySpec *spec)
 
 int32_t HksOpensslAesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (AesGenKeyCheckParam(spec) != HKS_SUCCESS) {
-        HKS_LOG_E("aes generate key invalid params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(AesGenKeyCheckParam(spec), HKS_ERROR_INVALID_ARGUMENT,
+        "aes generate key invalid params!")
 
     return HksOpensslGenerateRandomKey(spec->keyLen, key);
 }
@@ -791,10 +790,7 @@ int32_t HksOpensslAesEncryptInit(void **cryptoCtx, const struct HksBlob *key, co
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
             ret = OpensslAesAeadCryptInit(key, usageSpec, true, cryptoCtx);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadInit fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "OpensslAesAeadInit fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||     \
@@ -804,10 +800,8 @@ int32_t HksOpensslAesEncryptInit(void **cryptoCtx, const struct HksBlob *key, co
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherCryptInit(key, usageSpec, true, cryptoCtx, GetAesCipherType);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherCryptInit for aes fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherCryptInit for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
         default:
@@ -828,10 +822,8 @@ int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
             ret = OpensslAesAeadEnryptUpdate(cryptoCtx, message, cipherText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadEnryptUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadEnryptUpdate for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||     \
@@ -841,10 +833,8 @@ int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherEncryptUpdate(cryptoCtx, message, cipherText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherEncryptUpdate for aes fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherEncryptUpdate for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
         default:
@@ -866,10 +856,8 @@ int32_t HksOpensslAesEncryptFinal(void **cryptoCtx, const struct HksBlob *messag
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
             ret = OpensslAesAeadEncryptFinalGCM(cryptoCtx, message, cipherText, tagAead);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadEncryptFinalGCM fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadEncryptFinalGCM for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||     \
@@ -879,10 +867,8 @@ int32_t HksOpensslAesEncryptFinal(void **cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherEncryptFinalThree(cryptoCtx, message, cipherText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherEncryptFinalThree for aes fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherEncryptFinalThree for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
         default:
@@ -900,19 +886,15 @@ int32_t HksOpensslAesDecryptInit(void **cryptoCtx, const struct HksBlob *key,
     switch (usageSpec->mode) {
         case HKS_MODE_GCM:
             ret = OpensslAesAeadCryptInit(key, usageSpec, false, cryptoCtx);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadDecryptInit fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadDecryptInit for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherCryptInit(key, usageSpec, false, cryptoCtx, GetAesCipherType);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherCryptInit for aes fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherCryptInit for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
         default:
             HKS_LOG_E("Unsupport aes mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);
@@ -931,19 +913,15 @@ int32_t HksOpensslAesDecryptUpdate(void *cryptoCtx, const struct HksBlob *messag
     switch (mode) {
         case HKS_MODE_GCM:
             ret = OpensslAesAeadDecryptUpdate(cryptoCtx, message, plainText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadDecryptUpdate fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadDecryptUpdate for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherDecryptUpdate(cryptoCtx, message, plainText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherDecryptUpdate for aes fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherDecryptUpdate for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
         default:
             HKS_LOG_E("Unsupport aes mode! mode = 0x%" LOG_PUBLIC "x", mode);
@@ -964,10 +942,8 @@ int32_t HksOpensslAesDecryptFinal(void **cryptoCtx, const struct HksBlob *messag
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
             ret = OpensslAesAeadDecryptFinalGCM(cryptoCtx, message, cipherText, tagAead);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadDecryptFinalGCM fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadDecryptFinalGCM for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||     \
@@ -977,10 +953,8 @@ int32_t HksOpensslAesDecryptFinal(void **cryptoCtx, const struct HksBlob *messag
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslBlockCipherDecryptFinalThree(cryptoCtx, message, cipherText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslBlockCipherDecryptFinalThree for aes fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherDecryptFinalThree for aes fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
         default:
@@ -1039,16 +1013,12 @@ int32_t HksOpensslAesEncrypt(const struct HksBlob *key, const struct HksUsageSpe
 #ifdef HKS_SUPPORT_AES_GCM
         case HKS_MODE_GCM:
             ret = OpensslAesAeadInit(key, usageSpec, true, &ctx);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadInit fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadInit for aes fail, ret = %" LOG_PUBLIC "d", ret)
 
             ret = OpensslAesAeadEncryptFinal(ctx, usageSpec, message, &tmpCipherText, tagAead);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadEncryptFinal fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadEncryptFinal fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||     \
@@ -1058,16 +1028,12 @@ int32_t HksOpensslAesEncrypt(const struct HksBlob *key, const struct HksUsageSpe
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslAesCipherInit(key, usageSpec, true, &ctx);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherInit fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesCipherInit fail, ret = %" LOG_PUBLIC "d", ret)
 
             ret = OpensslAesCipherEncryptFinal(ctx, message, &tmpCipherText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherEncryptFinal fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesCipherEncryptFinal fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
         default:
@@ -1089,31 +1055,23 @@ int32_t HksOpensslAesDecrypt(const struct HksBlob *key, const struct HksUsageSpe
     switch (usageSpec->mode) {
         case HKS_MODE_GCM:
             ret = OpensslAesAeadInit(key, usageSpec, false, &ctx);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadDecryptInit fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadDecryptInit fail, ret = %" LOG_PUBLIC "d", ret)
 
             ret = OpensslAesAeadDecryptFinal(ctx, usageSpec, message, &tmpPlainText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesAeadDecryptFinal fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadDecryptFinal fail, ret = %" LOG_PUBLIC "d", ret)
             break;
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
             ret = OpensslAesCipherInit(key, usageSpec, false, &ctx);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherInit fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesCipherInit fail, ret = %" LOG_PUBLIC "d", ret)
 
             ret = OpensslAesCipherDecryptFinal(ctx, message, &tmpPlainText);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("OpensslAesCipherDecryptFinal fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesCipherDecryptFinal fail, ret = %" LOG_PUBLIC "d", ret)
             break;
         default:
             HKS_LOG_E("Unsupport aes mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);

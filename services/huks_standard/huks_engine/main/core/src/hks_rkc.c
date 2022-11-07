@@ -22,6 +22,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_rkc_rw.h"
+#include "hks_template.h"
 
 #define HKS_RKC_RMK_LEN 64                              /* the length of root main key */
 #define HKS_RKC_RMK_EK_LEN 32                           /* the encryption key length of root main key */
@@ -184,10 +185,8 @@ static int32_t RkcDeriveRmk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 {
     struct HksBlob rawKey;
     rawKey.data = (uint8_t *)HksMalloc(HKS_RKC_RAW_KEY_LEN);
-    if (rawKey.data == NULL) {
-        HKS_LOG_E("Malloc rawKey failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(rawKey.data, HKS_ERROR_MALLOC_FAIL, "Malloc rawKey failed!")
+
     rawKey.size = HKS_RKC_RAW_KEY_LEN;
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
 
@@ -235,10 +234,8 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
 {
     struct HksBlob rmk;
     rmk.data = (uint8_t *)HksMalloc(HKS_RKC_RMK_LEN);
-    if (rmk.data == NULL) {
-        HKS_LOG_E("Malloc rmk failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(rmk.data, HKS_ERROR_MALLOC_FAIL, "Malloc rmk failed!")
+
     rmk.size = HKS_RKC_RMK_LEN;
     (void)memset_s(rmk.data, rmk.size, 0, rmk.size);
 
@@ -307,10 +304,8 @@ static int32_t RkcRecoverMkTime(const struct HksRkcKsfData *ksfData)
 
     struct HksBlob mk;
     mk.data = (uint8_t *)HksMalloc(HKS_RKC_MK_LEN);
-    if (mk.data == NULL) {
-        HKS_LOG_E("Malloc mk failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(mk.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk failed!")
+
     mk.size = HKS_RKC_MK_LEN;
 
     int32_t ret;
@@ -377,10 +372,9 @@ static int32_t RkcLoadKsf(void)
 {
     const uint32_t allKsfDataSize = sizeof(struct HksRkcKsfData) * HKS_RKC_KSF_NUM;
     struct HksRkcKsfData *allKsfData = (struct HksRkcKsfData *)HksMalloc(allKsfDataSize);
-    if (allKsfData == NULL) {
-        HKS_LOG_E("Malloc all ksf data failed! malloc size = 0x%" LOG_PUBLIC "X", allKsfDataSize);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(allKsfData, HKS_ERROR_MALLOC_FAIL,
+        "Malloc all ksf data failed! malloc size = 0x%" LOG_PUBLIC "X", allKsfDataSize)
+
     (void)memset_s(allKsfData, allKsfDataSize, 0, allKsfDataSize);
 
     int32_t ret;
@@ -428,10 +422,8 @@ static int32_t RkcCalculateMaterial(const struct HksBlob *random1, const struct 
      */
     struct HksBlob hashSrc;
     hashSrc.data = (uint8_t *)HksMalloc(1 + HKS_RKC_MATERIAL_LEN + HKS_RKC_MATERIAL_LEN);
-    if (hashSrc.data == NULL) {
-        HKS_LOG_E("Malloc hash src data failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hashSrc.data, HKS_ERROR_MALLOC_FAIL, "Malloc hash src data failed!")
+
     hashSrc.size = 1 + HKS_RKC_MATERIAL_LEN + HKS_RKC_MATERIAL_LEN;
 
     struct HksBlob hashResult1 = { HKS_RKC_MATERIAL_LEN, ksfData->rkMaterial1 };
@@ -511,10 +503,8 @@ static int32_t RkcMakeMk(struct HksRkcKsfData *ksfData)
 {
     struct HksBlob mk;
     mk.data = (uint8_t *)HksMalloc(HKS_RKC_MK_LEN);
-    if (mk.data == NULL) {
-        HKS_LOG_E("Malloc mk failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(mk.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk failed!")
+
     mk.size = HKS_RKC_MK_LEN;
 
     int32_t ret;
@@ -577,10 +567,8 @@ static int32_t RkcWriteAllKsf(const struct HksRkcKsfData *ksfData)
 static int32_t RkcCreateKsf(void)
 {
     struct HksRkcKsfData *newKsfData = (struct HksRkcKsfData *)HksMalloc(sizeof(struct HksRkcKsfData));
-    if (newKsfData == NULL) {
-        HKS_LOG_E("Malloc ksf data failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(newKsfData, HKS_ERROR_MALLOC_FAIL, "Malloc ksf data failed!")
+
     (void)memset_s(newKsfData, sizeof(struct HksRkcKsfData), 0, sizeof(struct HksRkcKsfData));
 
     int32_t ret;
@@ -644,10 +632,7 @@ static int32_t RkcInitKsf(void)
 
 static char *CloneNewStr(const char *srcStr, const uint32_t strLenMax)
 {
-    if (srcStr == NULL) {
-        HKS_LOG_E("Invalid input string!");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(srcStr, NULL, "Invalid input string!")
 
     const uint32_t strLen = strlen(srcStr);
     if ((strLen == 0) || (strLen > strLenMax)) {
@@ -656,10 +641,7 @@ static char *CloneNewStr(const char *srcStr, const uint32_t strLenMax)
     }
 
     char *newBuf = (char *)HksMalloc(strLen + 1); /* 1: end char */
-    if (newBuf == NULL) {
-        HKS_LOG_E("Malloc new buffer failed!");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(newBuf, NULL, "Malloc new buffer failed!")
 
     if (memcpy_s(newBuf, strLen, srcStr, strLen) != EOK) {
         HKS_LOG_E("Memcpy new buffer failed!");
@@ -676,10 +658,8 @@ static int32_t RkcInitKsfAttr(const struct HksRkcKsfAttr *ksfAttr)
     /* clone keystore filename from parameter. */
     for (uint8_t i = 0; i < ksfAttr->num; ++i) {
         char *fileName = CloneNewStr(ksfAttr->name[i], HKS_RKC_KSF_NAME_LEN_MAX);
-        if (fileName == NULL) {
-            /* the memory will be freed by hksRkcDestroy() */
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        /* the memory will be freed by hksRkcDestroy() */
+        HKS_IF_NULL_RETURN(fileName, HKS_ERROR_MALLOC_FAIL)
 
         g_hksRkcCfg.ksfAttr.name[i] = fileName;
     }

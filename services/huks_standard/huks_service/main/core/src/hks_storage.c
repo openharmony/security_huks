@@ -32,6 +32,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_storage_file_lock.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define HKS_ENCODE_OFFSET_LEN         6
@@ -144,10 +145,7 @@ static int32_t ConstructBlob(const char *src, struct HksBlob *blob)
 {
     uint32_t size = strlen(src);
     uint8_t *outputBlob = (uint8_t *)HksMalloc(size);
-    if (outputBlob == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outputBlob, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     uint32_t count = 0;
     int32_t ret = HKS_SUCCESS;
@@ -282,9 +280,7 @@ static int32_t MakeDirIfNotExist(const char *path)
 static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *fileName)
 {
     char *fullPath = HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (fullPath == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(fullPath, NULL)
 
     int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
@@ -382,9 +378,8 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
     }
 
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(buffer, size, 0, size);
 
     int32_t ret;
@@ -613,9 +608,7 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 static int32_t DataInit(char **data, uint32_t size)
 {
     *data = (char *)HksMalloc(size);
-    if (*data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(*data, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(*data, size, 0, size);
     return HKS_SUCCESS;
@@ -674,9 +667,8 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
 {
     char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
     char *user = (char *)HksMalloc(HKS_PROCESS_INFO_LEN);
-    if (user == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(user, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(user, HKS_PROCESS_INFO_LEN, 0, HKS_PROCESS_INFO_LEN);
 
     int32_t ret = ConstructName(&processInfo->userId, user, HKS_PROCESS_INFO_LEN);
@@ -844,9 +836,8 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
     }
 
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (name == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
@@ -904,9 +895,8 @@ static int32_t RecordKeyOperation(uint32_t operation, const char *path, const ch
 {
     uint32_t bufSize = strlen(keyAlias) + 1;
     char *outKeyAlias = (char *)HksMalloc(bufSize);
-    if (outKeyAlias == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outKeyAlias, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(outKeyAlias, bufSize, 0, bufSize);
 
     uint32_t keyAliasLen = strlen(keyAlias);
@@ -1149,9 +1139,8 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
     uint32_t storageType, struct HksStoreFileInfo *fileInfo)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (name == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
@@ -1194,10 +1183,7 @@ static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t key
 
     uint32_t totalSize = keyCount * sizeof(struct HksFileEntry);
     *fileNameList = (struct HksFileEntry *)HksMalloc(totalSize);
-    if (*fileNameList == NULL) {
-        HKS_LOG_E("malloc file name list failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*fileNameList, HKS_ERROR_MALLOC_FAIL, "malloc file name list failed.")
 
     (void)memset_s(*fileNameList, totalSize, 0, totalSize);
     int32_t ret = HKS_SUCCESS;
@@ -1343,9 +1329,8 @@ int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, ui
 static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t bakFlag)
 {
     char *destroyPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (destroyPath == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(destroyPath, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(destroyPath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = GetPath(storePath, typePath, destroyPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
@@ -1385,9 +1370,8 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
     }
 
     char *storePath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (storePath == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(storePath, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(storePath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     ret = GetPath(rootPath, processNameEncoded, storePath, HKS_MAX_FILE_NAME_LEN, bakFlag);
@@ -1419,9 +1403,8 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
 int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (name == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
@@ -1515,10 +1498,8 @@ static int32_t ConstructUidPath(const char *userId, const char *uid, char *uidPa
 int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (userData == NULL) {
-        HKS_LOG_E("malloc user data failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
+
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = ConstructName(&processName, userData, HKS_MAX_FILE_NAME_LEN);
@@ -1546,10 +1527,8 @@ int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
 int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (userData == NULL) {
-        HKS_LOG_E("malloc user data failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
+
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);

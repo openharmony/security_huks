@@ -283,10 +283,8 @@ static int32_t SetCacheModeCtx(const struct HuksKeyNode *keyNode)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get ctx from keyNode failed!")
 
     struct HksBlob *tempData = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    if (tempData == NULL) {
-        HKS_LOG_E("get cache mode ctx malloc fail.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tempData, HKS_ERROR_MALLOC_FAIL, "get cache mode ctx malloc fail.")
+
     tempData->size = 0;
     tempData->data = NULL;
     ctxParam->uint64Param = (uint64_t)(uintptr_t)tempData;
@@ -321,10 +319,7 @@ static int32_t GetNewCachedData(const struct HksBlob *cachedBlob, const struct H
 
     uint32_t newSize = cachedBlob->size + inData->size;
     uint8_t *newData = (uint8_t *)HksMalloc(newSize);
-    if (newData == NULL) {
-        HKS_LOG_E("update cache data malloc fail.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(newData, HKS_ERROR_MALLOC_FAIL, "update cache data malloc fail.")
 
     int32_t ret = CopyNewCachedData(cachedBlob, inData, newData, newSize);
     if (ret != HKS_SUCCESS) {
@@ -344,17 +339,12 @@ static int32_t UpdateCachedData(const struct HuksKeyNode *keyNode, const struct 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_BAD_STATE, "ctx is invalid: null!")
 
     struct HksBlob *cachedData = (struct HksBlob *)ctx;
     struct HksBlob *newCachedBlob = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    if (newCachedBlob == NULL) {
-        HKS_LOG_E("malloc new blob failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(newCachedBlob, HKS_ERROR_MALLOC_FAIL, "malloc new blob failed")
+
     ret = GetNewCachedData(cachedData, srcData, newCachedBlob);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get mew cached data failed, ret = %" LOG_PUBLIC "d", ret);
@@ -388,10 +378,7 @@ static int32_t FinishCachedData(const struct HuksKeyNode *keyNode, const struct 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_BAD_STATE, "ctx is invalid: null!")
 
     struct HksBlob *cachedData = (struct HksBlob *)ctx;
     ret = GetNewCachedData(cachedData, srcData, outData);
@@ -427,10 +414,7 @@ static int32_t CoreHashInit(const struct HuksKeyNode *keyNode, uint32_t alg)
 static int32_t CoreHashUpdate(const struct HuksKeyNode *keyNode, const struct HksBlob *srcData)
 {
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_BAD_STATE, "ctx is invalid: null!")
 
     HKS_LOG_I("Hal hash update.");
 
@@ -449,17 +433,11 @@ static int32_t CoreHashFinish(const struct HuksKeyNode *keyNode, const struct Hk
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_BAD_STATE, "ctx is invalid: null!")
 
     outData->size = MAX_HASH_SIZE;
     outData->data = (uint8_t *)HksMalloc(MAX_HASH_SIZE);
-    if (outData->data == NULL) {
-        HKS_LOG_E("malloc fail.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outData->data, HKS_ERROR_MALLOC_FAIL, "malloc fail.")
 
     HKS_LOG_I("Hal hash final.");
 
@@ -619,10 +597,7 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
     }
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
     struct HksParam *purposeParam = NULL;
     int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
@@ -656,10 +631,7 @@ static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
     ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, &tag, alg);
     if (ret != HKS_SUCCESS) {
@@ -700,10 +672,7 @@ static int32_t CoreAesDecryptFinish(const struct HuksKeyNode *keyNode,
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
     ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, &tag, alg);
     if (ret != HKS_SUCCESS) {
@@ -725,10 +694,7 @@ static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
     ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, NULL, alg);
     if (ret != HKS_SUCCESS) {
@@ -752,10 +718,7 @@ static int32_t CoreSm4DecryptFinish(const struct HuksKeyNode *keyNode,
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
 
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is invalid: null!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
     ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, NULL, alg);
     if (ret != HKS_SUCCESS) {
@@ -884,10 +847,7 @@ static int32_t ConstructDervieBlob(const struct HksParamSet *paramSet, struct Hk
     }
 
     struct HksBlob *tempOut = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    if (tempOut == NULL) {
-        HKS_LOG_E("construct derive blob malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tempOut, HKS_ERROR_MALLOC_FAIL, "construct derive blob malloc failed")
 
     tempOut->data = (uint8_t *)HksMalloc(deriveSize);
     if (tempOut->data == NULL) {
@@ -903,10 +863,7 @@ static int32_t ConstructDervieBlob(const struct HksParamSet *paramSet, struct Hk
 static int32_t ConstructAgreeBlob(struct HksBlob **agreeOut)
 {
     struct HksBlob *agreeTemp = (struct HksBlob *)HksMalloc(sizeof(struct HksBlob));
-    if (agreeTemp == NULL) {
-        HKS_LOG_E("malloc agreeTemp failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(agreeTemp, HKS_ERROR_MALLOC_FAIL, "malloc agreeTemp failed.")
 
     agreeTemp->size = MAX_KEY_SIZE;
     agreeTemp->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
@@ -1254,10 +1211,7 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
     }
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is NULL!")
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
@@ -1275,10 +1229,7 @@ int32_t HksCoreDeriveThreeStageAbort(const struct HuksKeyNode *keyNode, const st
     (void)alg;
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is NULL!")
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
@@ -1379,10 +1330,7 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
     }
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is NULL!")
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
@@ -1399,10 +1347,7 @@ int32_t HksCoreAgreeThreeStageAbort(const struct HuksKeyNode *keyNode, const str
     (void)alg;
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is NULL!")
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
@@ -1465,9 +1410,7 @@ int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const stru
     int32_t ret;
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is NULL!")
 
     HKS_LOG_I("Hal hmac update.");
 
@@ -1512,10 +1455,7 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
         return HKS_ERROR_BAD_STATE;
     }
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-    if (ctx == NULL) {
-        HKS_LOG_E("ctx invalid");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx invalid")
 
     HKS_LOG_I("Finish cache or hmac finish.");
 
@@ -1533,9 +1473,7 @@ int32_t HksCoreMacThreeStageAbort(const struct HuksKeyNode *keyNode, const struc
     (void)paramSet;
 
     void *ctx = GetCryptoCtx(keyNode);
-    if (ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx invalid")
 
     HksCryptoHalHmacFreeCtx(&ctx);
     ClearCryptoCtx(keyNode);

@@ -17,6 +17,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 static int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
@@ -56,9 +57,8 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
 static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
     const struct HksBlob *destBlob, uint32_t *destOffset)
 {
-    if (paramSet == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_INVALID_ARGUMENT)
+
     if ((*destOffset > destBlob->size) || (destBlob->size - *destOffset < ALIGN_SIZE(paramSet->paramSetSize))) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
@@ -148,9 +148,7 @@ static int32_t MallocBlobFromBuffer(const struct HksBlob *srcData, struct HksBlo
     }
 
     uint8_t *blobData = (uint8_t *)HksMalloc(blobSize);
-    if (blobData == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(blobData, HKS_ERROR_MALLOC_FAIL)
 
     blob->data = blobData;
     blob->size = blobSize;
@@ -172,9 +170,7 @@ static int32_t MallocParamSetFromBuffer(const struct HksBlob *srcData, struct Hk
     }
 
     *paramSet = (struct HksParamSet *)HksMalloc(paramSetOutSize);
-    if (*paramSet == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(*paramSet, HKS_ERROR_MALLOC_FAIL)
 
     (*paramSet)->paramSetSize = paramSetOutSize;
     return HKS_SUCCESS;
@@ -205,9 +201,7 @@ int32_t HksGenerateKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyA
     /* no allocate memory when keyOutSize is 0 */
     if (keyOutSize > 0) {
         uint8_t *keyData = (uint8_t *)HksMalloc(keyOutSize);
-        if (keyData == NULL) {
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        HKS_IF_NULL_RETURN(keyData, HKS_ERROR_MALLOC_FAIL)
 
         keyOut->data = keyData;
         keyOut->size = keyOutSize;
@@ -475,10 +469,8 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, uint32_t *listCou
     }
 
     *keyInfoList = (struct HksKeyInfo *)HksMalloc(keyInfoListSize);
-    if (*keyInfoList == NULL) {
-        HKS_LOG_E("*keyInfoList is NULL");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*keyInfoList, HKS_ERROR_MALLOC_FAIL, "*keyInfoList is NULL")
+
     (void)memset_s(*keyInfoList, keyInfoListSize, 0, keyInfoListSize);
 
     ret = KeyInfoListInit(*keyInfoList, *listCount, srcData, &offset);

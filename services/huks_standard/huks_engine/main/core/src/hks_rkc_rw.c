@@ -21,6 +21,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_storage.h"
+#include "hks_template.h"
 
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
 #define HKS_RKC_KSF_BUF_LEN 258     /* the length of keystore buffer */
@@ -288,9 +289,8 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
 {
     struct HksBlob tmpKsf;
     tmpKsf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
-    if (tmpKsf.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
+
     tmpKsf.size = HKS_RKC_KSF_BUF_LEN;
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
 
@@ -544,10 +544,8 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
 {
     struct HksBlob ksfBuf;
     ksfBuf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
-    if (ksfBuf.data == NULL) {
-        HKS_LOG_E("Malloc ksf buffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ksfBuf.data, HKS_ERROR_MALLOC_FAIL, "Malloc ksf buffer failed!")
+
     ksfBuf.size = HKS_RKC_KSF_BUF_LEN;
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
 

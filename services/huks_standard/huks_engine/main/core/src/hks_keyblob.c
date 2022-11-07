@@ -96,10 +96,7 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
 
     salt->size = appIdParam->blob.size + HKS_KEY_BLOB_DERIVE_SALT_SIZE;
     salt->data = (uint8_t *)HksMalloc(salt->size);
-    if (salt->data == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(salt->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     (void)memcpy_s(salt->data, salt->size, appIdParam->blob.data, appIdParam->blob.size);
 
@@ -164,10 +161,7 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
     usageSpec->algType = HKS_ALG_AES;
 
     struct HksAeadParam *aeadParam = (struct HksAeadParam *)HksMalloc(sizeof(struct HksAeadParam));
-    if (aeadParam == NULL) {
-        HKS_LOG_E("aeadParam malloc failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_MALLOC_FAIL, "aeadParam malloc failed!")
 
     struct HksKeyBlobInfo *keyBlobInfo = (struct HksKeyBlobInfo *)keyParam->blob.data;
     uint32_t keySize;
@@ -197,9 +191,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     }
 
     struct HksUsageSpec *usageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
-    if (usageSpec == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(usageSpec, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     ret = BuildKeyBlobUsageSpec(aad, keyParam, isEncrypt, usageSpec);
@@ -275,10 +267,7 @@ static int32_t InitKeyBlobInfo(const struct HksBlob *key, struct HksBlob *keyInf
 {
     keyInfo->size = key->size + sizeof(struct HksKeyBlobInfo);
     keyInfo->data = (uint8_t *)HksMalloc(keyInfo->size);
-    if (keyInfo->data == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyInfo->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     int32_t ret;
     do {
@@ -398,10 +387,8 @@ static int32_t BuildClearKeyBlob(const struct HksBlob *key, enum HksKeyFlag keyF
 static int32_t GetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, struct HksParamSet **paramSet)
 {
     uint8_t *keyBlob = (uint8_t *)HksMalloc(inData->size);
-    if (keyBlob == NULL) {
-        HKS_LOG_E("malloc keyBlob failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyBlob, HKS_ERROR_MALLOC_FAIL, "malloc keyBlob failed")
+
     (void)memcpy_s(keyBlob, inData->size, inData->data, inData->size);
 
     struct HksParamSet *keyBlobParamSet = NULL;
@@ -496,10 +483,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
     }
 
     uint8_t *data = HksMalloc(keySize);
-    if (data == NULL) {
-        HKS_LOG_E("fail to malloc raw key");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
 
     (void)memcpy_s(data, keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keySize);
     rawKey->size = keySize;
@@ -509,9 +493,8 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
 
 int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
 {
-    if (authToken == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(authToken, HKS_ERROR_NULL_POINTER)
+
     uint8_t hmacKey[HKS_KEY_BLOB_AT_HMAC_KEY_BYTES] = {0};
     struct HksBlob macKeyBlob = { HKS_KEY_BLOB_AT_HMAC_KEY_BYTES, hmacKey };
 
@@ -657,10 +640,7 @@ int32_t HksCoreInitAuthTokenKey()
         g_genAtKeyMutex = HksMutexCreate();
     }
 
-    if (g_genAtKeyMutex == NULL) {
-        HKS_LOG_I("create mutex failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(g_genAtKeyMutex, HKS_ERROR_BAD_STATE, "create mutex failed!")
 
     // here we return success for we could generate later at usage stage
     return HKS_SUCCESS;

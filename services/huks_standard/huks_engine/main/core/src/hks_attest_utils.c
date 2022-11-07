@@ -164,10 +164,8 @@ static int32_t GetRsaPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *
     }
 
     const struct HksBlob *signOid = GetRsaSignOid(usageSpec->digest);
-    if (signOid == NULL) {
-        HKS_LOG_E("invalid digest\n");
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_NULL_LOGE_RETURN(signOid, HKS_ERROR_INVALID_ALGORITHM, "invalid digest\n")
+
     struct HksAsn1Blob signOidBlob = { ASN_1_TAG_TYPE_SEQ, signOid->size, signOid->data };
     int32_t ret = HksAsn1InsertValue(&tmp, NULL, &signOidBlob);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert signOid value fail\n")

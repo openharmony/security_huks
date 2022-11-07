@@ -24,22 +24,15 @@
 #include "hks_ability.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
+#include "hks_template.h"
 
 static int32_t EncryptCheckParam(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    if (CheckBlob(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param key!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (CheckBlob(message) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (CheckBlob(cipherText) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param cipherText!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "Invalid param key!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(message), HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(cipherText), HKS_ERROR_INVALID_ARGUMENT, "Invalid param cipherText!")
+
     if (usageSpec == NULL) {
         HKS_LOG_E("Invalid param usageSpec!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -316,10 +309,7 @@ int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead)
 {
     int32_t ret = EncryptCheckParam(key, usageSpec, message, cipherText);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
 
     Encrypt func = (Encrypt)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT(usageSpec->algType));
     if (func == NULL) {
@@ -331,15 +321,8 @@ int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec
 
 int32_t HksCryptoHalEncryptInit(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, void **ctx)
 {
-    if (CheckBlob(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param key!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (usageSpec == NULL) {
-        HKS_LOG_E("Invalid param usageSpec!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "Invalid param key!")
+    HKS_IF_NULL_LOGE_RETURN(usageSpec, HKS_ERROR_INVALID_ARGUMENT, "Invalid param usageSpec!")
 
     EncryptInit func = (EncryptInit)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(usageSpec->algType));
     if (func == NULL) {
@@ -351,15 +334,8 @@ int32_t HksCryptoHalEncryptInit(const struct HksBlob *key, const struct HksUsage
 
 int32_t HksCryptoHalEncryptUpdate(const struct HksBlob *message, void *ctx, struct HksBlob *out, const uint32_t algtype)
 {
-    if (CheckBlob(message) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (CheckBlob(out) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param out!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(message), HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(out), HKS_ERROR_INVALID_ARGUMENT, "Invalid param out!")
 
     if (ctx == NULL) {
         HKS_LOG_E("Invalid param ctx or out !");
@@ -410,30 +386,17 @@ int32_t HksCryptoHalDecrypt(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
     int32_t ret = EncryptCheckParam(key, usageSpec, message, cipherText);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
 
     Decrypt func = (Decrypt)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT(usageSpec->algType));
-    if (func == NULL) {
-        HKS_LOG_E("DecryptAes func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "DecryptAes func is null!")
     return func(key, usageSpec, message, cipherText);
 }
 
 int32_t HksCryptoHalDecryptInit(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, void **ctx)
 {
-    if (CheckBlob(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param key!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (usageSpec == NULL) {
-        HKS_LOG_E("Invalid param usageSpec!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "Invalid param key!")
+    HKS_IF_NULL_LOGE_RETURN(usageSpec, HKS_ERROR_INVALID_ARGUMENT, "Invalid param key!")
 
     DecryptInit func = (DecryptInit)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(usageSpec->algType));
     if (func == NULL) {
@@ -445,25 +408,13 @@ int32_t HksCryptoHalDecryptInit(const struct HksBlob *key, const struct HksUsage
 
 int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message, void *ctx, struct HksBlob *out, const uint32_t algtype)
 {
-    if (CheckBlob(message) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (CheckBlob(out) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param out!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    if (ctx == NULL) {
-        HKS_LOG_E("Invalid param ctx or out !");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(message), HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(out), HKS_ERROR_INVALID_ARGUMENT, "Invalid param out!")
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_ARGUMENT, "Invalid param ctx or out !")
 
     DecryptUpdate func = (DecryptUpdate)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(algtype));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+
     return func(ctx, message, out, false);
 }
 

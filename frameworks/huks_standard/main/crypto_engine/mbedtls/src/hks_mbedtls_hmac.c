@@ -29,6 +29,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 struct HksMbedtlsHmacCtx {
     uint32_t digestAlg;
@@ -82,9 +83,7 @@ int32_t HksMbedtlsHmac(const struct HksBlob *key,
     /* input params have been checked */
     uint32_t mbedtlsAlg;
     int32_t ret = HksToMbedtlsDigestAlg(digestAlg, &mbedtlsAlg);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = mbedtls_md_hmac(mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg),
         key->data, key->size, msg->data, msg->size, mac->data);
@@ -108,9 +107,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
     /* input params have been checked */
     uint32_t mbedtlsAlg;
     int32_t ret = HksToMbedtlsDigestAlg(digestAlg, &mbedtlsAlg);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg) == NULL) {
         HKS_LOG_E("Mbedtls hmac engine info failed!");

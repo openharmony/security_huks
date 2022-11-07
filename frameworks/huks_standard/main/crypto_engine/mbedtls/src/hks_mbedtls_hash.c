@@ -37,6 +37,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_mbedtls_common.h"
+#include "hks_template.h"
 
 struct HksMbedtlsHashCtx {
     uint8_t *append;
@@ -516,10 +517,7 @@ int32_t HksMbedtlsHashInit(void **cryptoCtx, uint32_t digestAlg)
             return HKS_ERROR_INVALID_DIGEST;
     }
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hash init failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Mbedtls hash init failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret)
 
     return HKS_SUCCESS;
 }
@@ -548,10 +546,7 @@ int32_t HksMbedtlsHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
             return HKS_ERROR_INVALID_DIGEST;
     }
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Mbedtls hash update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Mbedtls hash update failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret)
 
     return HKS_SUCCESS;
 }
@@ -592,9 +587,7 @@ int32_t HksMbedtlsHashFinal(void **cryptoCtx, const struct HksBlob *msg, struct 
     }
 
     ret = HksGetDigestLen(hashCtx->mAlg, &(hash->size));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get digest len failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Get digest len failed!")
 
     HksMbedtlsHashFreeCtx(cryptoCtx);
     return ret;
@@ -681,9 +674,7 @@ int32_t HksMbedtlsHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
     }
 
     ret = HksGetDigestLen(alg, &(hash->size));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get digest len failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Get digest len failed!")
 
     return ret;
 }

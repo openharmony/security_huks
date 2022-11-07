@@ -26,6 +26,7 @@
 #include "hks_mem.h"
 #include "hks_mutex.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define S_TO_MS 1000
@@ -147,10 +148,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *keyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
-    if (keyNode == NULL) {
-        HKS_LOG_E("malloc hks keyNode failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc hks keyNode failed")
 
     int32_t ret = GenerateKeyNodeHandle(&keyNode->handle);
     if (ret != HKS_SUCCESS) {
@@ -223,10 +221,7 @@ static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *keyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
-    if (keyNode == NULL) {
-        HKS_LOG_E("malloc hks keyNode failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc hks keyNode failed")
 
     int32_t ret;
     struct HksBlob aad = { 0, NULL };
