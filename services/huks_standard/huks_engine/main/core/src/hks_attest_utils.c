@@ -20,6 +20,7 @@
 #include "hks_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static const uint8_t g_p256SpkiHeader[] = {
@@ -72,10 +73,7 @@ int32_t HksInsertClaim(struct HksBlob *out, const struct HksBlob *oid, const str
     uint32_t offset = buf - out->data;
     struct HksBlob tmp = { out->size - offset, buf };
     int32_t ret = HksAsn1WriteFinal(&tmp, value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("write final value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "write final value fail\n")
 
     uint32_t seqSize = ENCODED_SEC_LEVEL_SIZE + oid->size + tmp.size;
     struct HksAsn1Blob seq = { ASN_1_TAG_TYPE_SEQ, seqSize, out->data + ASN_1_MAX_HEADER_LEN };
@@ -134,24 +132,17 @@ static int32_t ConstructKeySeq(struct HksBlob *out, const struct HksPubKeyInfo *
     uint8_t *publicKey = (uint8_t *)(info + 1);
     struct HksAsn1Blob n = { ASN_1_TAG_TYPE_INT, info->nOrXSize, publicKey };
     int32_t ret = HksAsn1InsertValue(&buf, NULL, &n);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert n value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert n value fail\n")
+
     struct HksAsn1Blob e = { ASN_1_TAG_TYPE_INT, info->eOrYSize, publicKey + info->nOrXSize };
     ret = HksAsn1InsertValue(&buf, NULL, &e);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert e value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert e value fail\n")
 
     uint32_t seqSize = buf.data - out->data - ASN_1_MAX_HEADER_LEN;
     struct HksAsn1Blob seq = { ASN_1_TAG_TYPE_SEQ, seqSize, out->data + ASN_1_MAX_HEADER_LEN };
     ret = HksAsn1WriteFinal(out, &seq);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("write final value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "write final value fail\n")
+
     return HKS_SUCCESS;
 }
 
@@ -173,29 +164,19 @@ static int32_t GetRsaPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *
     }
 
     const struct HksBlob *signOid = GetRsaSignOid(usageSpec->digest);
-    if (signOid == NULL) {
-        HKS_LOG_E("invalid digest\n");
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_NULL_LOGE_RETURN(signOid, HKS_ERROR_INVALID_ALGORITHM, "invalid digest\n")
+
     struct HksAsn1Blob signOidBlob = { ASN_1_TAG_TYPE_SEQ, signOid->size, signOid->data };
     int32_t ret = HksAsn1InsertValue(&tmp, NULL, &signOidBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert signOid value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert signOid value fail\n")
 
     struct HksBlob spki = tmp;
     ret = ConstructKeySeq(&spki, info);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct key seq fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct key seq fail\n")
+
     struct HksAsn1Blob spkiBlob = { ASN_1_TAG_TYPE_BIT_STR, spki.size, spki.data };
     ret = HksAsn1InsertValue(&tmp, NULL, &spkiBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert spkiBlob value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert spkiBlob value fail\n")
 
     uint8_t *seqData = key->data + ASN_1_MAX_HEADER_LEN;
     uint32_t seqSize = tmp.data - seqData;
@@ -215,18 +196,12 @@ static int32_t GetX25519PublicKey(struct HksBlob *key, const struct HksPubKeyInf
 
     struct HksAsn1Blob x25519Oid = { ASN_1_TAG_TYPE_SEQ, g_x25519Oid.size, g_x25519Oid.data };
     int32_t ret = HksAsn1InsertValue(&tmp, NULL, &x25519Oid);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert oid value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert oid value fail\n")
 
     uint8_t *publicKey = (uint8_t *)(info + 1);
     struct HksAsn1Blob spkiBlob = { ASN_1_TAG_TYPE_BIT_STR, info->nOrXSize, publicKey };
     ret = HksAsn1InsertValue(&tmp, NULL, &spkiBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert pub value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert pub value fail\n")
 
     uint8_t *seqData = key->data + ASN_1_MAX_HEADER_LEN;
     uint32_t seqSize = tmp.data - seqData;

@@ -34,6 +34,7 @@
 #include "hks_mem.h"
 #include "hks_openssl_ecc.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 
 #ifdef HKS_SUPPORT_SM2_GENERATE_KEY
 int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
@@ -110,10 +111,8 @@ static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
     uint32_t privateSize;
     uint32_t keySize;
 
-    if (GetSm2Modules(keyPair, &keySize, &publicXSize, &publicYSize, &privateSize) != HKS_SUCCESS) {
-        HKS_LOG_E("get sm2 key modules is failed");
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetSm2Modules(keyPair, &keySize, &publicXSize, &publicYSize, &privateSize),
+        NULL, "get sm2 key modules is failed")
 
     EC_KEY *sm2Key = EC_KEY_new_by_curve_name(NID_sm2);
     if (sm2Key == NULL) {
@@ -147,10 +146,7 @@ static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
 static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, bool sign)
 {
     EC_KEY *sm2Key = Sm2InitKey(mainKey, sign);
-    if (sm2Key == NULL) {
-        HKS_LOG_E("initialize sm2 key failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(sm2Key, NULL, "initialize sm2 key failed")
 
     EVP_PKEY *key = EVP_PKEY_new();
     if (key == NULL) {

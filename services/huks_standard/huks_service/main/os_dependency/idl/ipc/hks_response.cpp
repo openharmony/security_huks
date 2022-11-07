@@ -33,6 +33,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "hks_type_inner.h"
 
 #ifdef HAS_OS_ACCOUNT_PART
@@ -75,10 +76,7 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-    if (name == nullptr) {
-        HKS_LOG_E("GetProcessName malloc failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
 
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processName->size = sizeof(callingUid);
@@ -95,10 +93,8 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-    if (name == nullptr) {
-        HKS_LOG_E("GetProcessName malloc failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
+
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;

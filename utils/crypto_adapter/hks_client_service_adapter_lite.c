@@ -30,6 +30,7 @@
 #include "hks_mbedtls_common.h"
 #include "hks_mbedtls_ecc.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #ifdef _CUT_AUTHENTICATE_
 #undef HKS_SUPPORT_HASH_C
@@ -134,9 +135,7 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
     int32_t ret;
     do {
         ret = InitRsaPkCtx(mod, e, &ctx);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = PkCtxToX509(&ctx, x509Key);
         if (ret != HKS_SUCCESS) {
@@ -204,9 +203,7 @@ static int32_t EccToX509PublicKey(uint32_t keySize, const struct HksBlob *x, con
     int32_t ret;
     do {
         ret = InitEccPkCtx(keySize, x, y, &ctx);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = PkCtxToX509(&ctx, x509Key);
         if (ret != HKS_SUCCESS) {

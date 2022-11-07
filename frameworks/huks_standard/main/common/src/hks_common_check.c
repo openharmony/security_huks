@@ -19,65 +19,39 @@
 
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 int32_t HksCheckBlob4(const struct HksBlob *data1, const struct HksBlob *data2,
     const struct HksBlob *data3, const struct HksBlob *data4)
 {
-    if (CheckBlob(data1) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data1.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data1), HKS_ERROR_INVALID_ARGUMENT, "invalid data1.")
 
-    if (CheckBlob(data2) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data2.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data2), HKS_ERROR_INVALID_ARGUMENT, "invalid data2.")
 
-    if (CheckBlob(data3) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data3.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data3), HKS_ERROR_INVALID_ARGUMENT, "invalid data3.")
 
-    if (CheckBlob(data4) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data4.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data4), HKS_ERROR_INVALID_ARGUMENT, "invalid data4.")
 
     return HKS_SUCCESS;
 }
 
 int32_t HksCheckBlob3(const struct HksBlob *data1, const struct HksBlob *data2, const struct HksBlob *data3)
 {
-    if (CheckBlob(data1) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data1.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data1), HKS_ERROR_INVALID_ARGUMENT, "invalid data1.")
 
-    if (CheckBlob(data2) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data2.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data2), HKS_ERROR_INVALID_ARGUMENT, "invalid data2.")
 
-    if (CheckBlob(data3) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data3.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data3), HKS_ERROR_INVALID_ARGUMENT, "invalid data3.")
 
     return HKS_SUCCESS;
 }
 
 int32_t HksCheckBlob2(const struct HksBlob *data1, const struct HksBlob *data2)
 {
-    if (CheckBlob(data1) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data1.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data1), HKS_ERROR_INVALID_ARGUMENT, "invalid data1.")
 
-    if (CheckBlob(data2) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid data2.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(data2), HKS_ERROR_INVALID_ARGUMENT, "invalid data2.")
 
     return HKS_SUCCESS;
 }
@@ -88,10 +62,8 @@ int32_t HksCheckParamSetValidity(const struct HksParamSet *paramSet)
         HKS_LOG_E("paramSet NULL!");
         return HKS_ERROR_NULL_POINTER;
     }
-    if (HksCheckParamSet(paramSet, paramSet->paramSetSize) != HKS_SUCCESS) {
-        HKS_LOG_E("paramSet invalid!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize),
+        HKS_ERROR_INVALID_ARGUMENT, "paramSet invalid!")
 
     return HksCheckParamSetTag(paramSet);
 }
@@ -100,9 +72,7 @@ int32_t HksCheckBlob4AndParamSet(const struct HksBlob *data1, const struct HksBl
     const struct HksBlob *data3, const struct HksBlob *data4, const struct HksParamSet *paramSet)
 {
     int32_t ret = HksCheckBlob4(data1, data2, data3, data4);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return HksCheckParamSetValidity(paramSet);
 }
@@ -111,9 +81,7 @@ int32_t HksCheckBlob3AndParamSet(const struct HksBlob *data1, const struct HksBl
     const struct HksBlob *data3, const struct HksParamSet *paramSet)
 {
     int32_t ret = HksCheckBlob3(data1, data2, data3);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return HksCheckParamSetValidity(paramSet);
 }
@@ -122,18 +90,14 @@ int32_t HksCheckBlob2AndParamSet(const struct HksBlob *data1, const struct HksBl
     const struct HksParamSet *paramSet)
 {
     int32_t ret = HksCheckBlob2(data1, data2);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return HksCheckParamSetValidity(paramSet);
 }
 
 int32_t HksCheckBlobAndParamSet(const struct HksBlob *data, const struct HksParamSet *paramSet)
 {
-    if (CheckBlob(data) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(data), HKS_ERROR_INVALID_ARGUMENT)
 
     return HksCheckParamSetValidity(paramSet);
 }
@@ -172,10 +136,7 @@ int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool 
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append cipher get alg param failed!");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "append cipher get alg param failed!")
     *isAes = (algParam->uint32Param == HKS_ALG_AES);
     if (!(*isAes)) {
         return HKS_SUCCESS;
@@ -183,10 +144,7 @@ int32_t HksCheckAesAeMode(const struct HksParamSet *paramSet, bool *isAes, bool 
 
     struct HksParam *modeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append cipher get mode param failed!");
-        return HKS_ERROR_CHECK_GET_MODE_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL, "append cipher get mode param failed!")
 
     *isAeMode = (modeParam->uint32Param == HKS_MODE_CCM) || (modeParam->uint32Param == HKS_MODE_GCM);
     return HKS_SUCCESS;

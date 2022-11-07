@@ -24,6 +24,7 @@
 #include "hks_condition.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 #include "user_idm_client.h"
@@ -126,16 +127,10 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
 
 int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
 {
-    if (outSecInfo == NULL) {
-        HKS_LOG_E("HksUserIdmGetSecInfo arguments invalid!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outSecInfo, HKS_ERROR_INVALID_ARGUMENT, "HksUserIdmGetSecInfo arguments invalid!")
 
     HksCondition *condition = HksConditionCreate();
-    if (condition == NULL) {
-        HKS_LOG_E("create condition failed!");
-        return HKS_FAILURE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(condition, HKS_FAILURE, "create condition failed!")
 
     auto mCallback = std::make_shared<GetSecUserInfoCallbackImplHuks>(outSecInfo, condition);
 
@@ -184,17 +179,11 @@ void GetCredentialInfoCallbackImplHuks::OnCredentialInfo(const std::vector<USER_
 
 int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthType, uint32_t *numOfAuthInfo)
 {
-    if (numOfAuthInfo == NULL) {
-        HKS_LOG_E("HksGetAuthInfo arguments invalid!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(numOfAuthInfo, HKS_ERROR_INVALID_ARGUMENT, "HksGetAuthInfo arguments invalid!")
 
     HksCondition *condition = HksConditionCreate();
-    if (condition == NULL) {
-        HKS_LOG_E("create condition failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
-    
+    HKS_IF_NULL_LOGE_RETURN(condition, HKS_ERROR_BAD_STATE, "create condition failed!")
+
     auto huksCallback = std::make_shared<GetCredentialInfoCallbackImplHuks>(numOfAuthInfo, condition);
     std::shared_ptr<USER_IAM::GetCredentialInfoCallback> callback = huksCallback;
 
@@ -227,9 +216,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
 
 int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue)
 {
-    if (hksValue == nullptr) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(hksValue, HKS_ERROR_NULL_POINTER)
 
     switch (type) {
         case HKS_AUTH_TYPE:

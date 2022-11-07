@@ -25,6 +25,7 @@
 
 #include "hks_cfi.h"
 #include "hks_log.h"
+#include "hks_template.h"
 
 typedef struct HuksHdi *(*HalCreateHandle)(void);
 typedef void (*HalDestroyHandle)(struct HuksHdi *);
@@ -33,19 +34,14 @@ void *g_halDeviceHandle = NULL;
 
 ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
 {
-    if (halDevice == NULL) {
-        HKS_LOG_E("invalid input halDevice");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(halDevice, HKS_ERROR_NULL_POINTER, "invalid input halDevice")
+
     if (*halDevice != NULL) {
         return HKS_SUCCESS;
     }
 
     g_halDeviceHandle = dlopen("libhuks_engine_core_standard.z.so", RTLD_NOW);
-    if (g_halDeviceHandle == NULL) {
-        HKS_LOG_E("dlopen failed, %" LOG_PUBLIC "s!", dlerror());
-        return HKS_FAILURE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(g_halDeviceHandle, HKS_FAILURE, "dlopen failed, %" LOG_PUBLIC "s!", dlerror())
 
     HalCreateHandle devicePtr = (HalCreateHandle)dlsym(g_halDeviceHandle, "HuksCreateHdiDevicePtr");
     if (devicePtr == NULL) {
@@ -70,10 +66,7 @@ ENABLE_CFI(int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice))
         return HKS_SUCCESS;
     }
 
-    if (g_halDeviceHandle == NULL) {
-        HKS_LOG_E("g_halDeviceHandle is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(g_halDeviceHandle, HKS_ERROR_NULL_POINTER, "g_halDeviceHandle is NULL!")
 
     HalDestroyHandle halDestroyHandle = (HalDestroyHandle)dlsym(g_halDeviceHandle, "HuksDestoryHdiDevicePtr");
     (*halDestroyHandle)(*halDevice);

@@ -15,6 +15,7 @@
 
 #include "hks_asn1.h"
 #include "hks_log.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define BIT_NUM_OF_UINT8 8
@@ -116,16 +117,12 @@ int32_t HksAsn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, const st
 
 int32_t HksAsn1WriteFinal(struct HksBlob *final, const struct HksAsn1Blob *tlv)
 {
-    if (CheckBlob(final) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid asn1 final buf.");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(final), HKS_ERROR_INVALID_ARGUMENT, "invalid asn1 final buf.")
+
     struct HksBlob tmp = { final->size, final->data };
     int32_t ret = HksAsn1InsertValue(&tmp, NULL, tlv);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("insert value fail\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert value fail\n")
+
     final->size -= tmp.size;
     return HKS_SUCCESS;
 }
@@ -181,10 +178,8 @@ int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const st
     }
 
     int32_t ret = Asn1GetObj(next, obj, data);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get asn1 obj fail.\n");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get asn1 obj fail.\n")
+
     if (obj->header.type != expectedTag) {
         HKS_LOG_E("tag %" LOG_PUBLIC "u does not match expected: %" LOG_PUBLIC "u\n", obj->header.type, expectedTag);
         return HKS_ERROR_INVALID_ARGUMENT;

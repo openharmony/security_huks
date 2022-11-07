@@ -21,9 +21,10 @@
 #include "system_ability_definition.h"
 
 #include "hks_client_service.h"
+#include "hks_ipc_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_ipc_service.h"
+#include "hks_template.h"
 
 #ifdef SUPPORT_COMMON_EVENT
 #include <pthread.h>
@@ -141,10 +142,7 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
                     return HW_SYSTEM_ERROR;
                 }
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
-                if (outData.data == nullptr) {
-                    HKS_LOG_E("Malloc outData failed.");
-                    return HW_SYSTEM_ERROR;
-                }
+                HKS_IF_NULL_LOGE_RETURN(outData.data, HW_SYSTEM_ERROR, "Malloc outData failed.")
             }
             g_hksIpcThreeStageHandler[i].handler((const struct HksBlob *)&srcData, &outData, (const uint8_t *)&reply);
             HKS_FREE_BLOB(outData);
@@ -181,10 +179,8 @@ bool HksService::Init()
 
     if (!registerToService_) {
         sptr<HksService> ptrInstance = HksService::GetInstance();
-        if (ptrInstance == nullptr) {
-            HKS_LOG_E("HksService::Init GetInstance Failed");
-            return false;
-        }
+        HKS_IF_NULL_LOGE_RETURN(ptrInstance, false, "HksService::Init GetInstance Failed")
+
         if (!Publish(ptrInstance)) {
             HKS_LOG_E("HksService::Init Publish Failed");
             return false;
@@ -230,10 +226,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     }
 
     srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
-    if (srcData.data == nullptr) {
-        HKS_LOG_E("Malloc srcData failed.");
-        return HW_SYSTEM_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(srcData.data, HW_SYSTEM_ERROR, "Malloc srcData failed.")
 
     const uint8_t *pdata = data.ReadBuffer((size_t)srcData.size);
     if (pdata == nullptr) {

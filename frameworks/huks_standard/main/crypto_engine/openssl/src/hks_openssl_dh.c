@@ -33,6 +33,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
@@ -62,9 +63,7 @@ static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponen
 
     int nid = 0;
     int32_t ret = HksOpensslGetNid(keyMaterial->keySize, &nid);
-    if (ret != HKS_SUCCESS) {
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, NULL)
 
     DH *dh = DH_new_by_nid(nid);
     if (dh == NULL) {
@@ -124,9 +123,7 @@ int32_t HksOpensslDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
     int32_t ret;
     int nid = 0;
     ret = HksOpensslGetNid(spec->keyLen, &nid);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     DH *dh = DH_new_by_nid(nid);
     if (dh == NULL) {

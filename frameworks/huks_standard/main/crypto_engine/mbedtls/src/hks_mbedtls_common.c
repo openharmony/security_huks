@@ -25,6 +25,7 @@
 #include <mbedtls/md.h>
 
 #include "hks_log.h"
+#include "hks_template.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
@@ -87,9 +88,7 @@ int32_t HksMbedtlsFillRandom(struct HksBlob *randomData)
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
     int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     do {
         ret = mbedtls_ctr_drbg_random(&ctrDrbg, randomData->data, randomData->size);

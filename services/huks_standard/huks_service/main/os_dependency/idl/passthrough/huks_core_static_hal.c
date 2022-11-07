@@ -23,22 +23,18 @@
 #include "hks_core_interfaces.h"
 
 #include "hks_log.h"
+#include "hks_template.h"
 
 int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
 {
-    if (halDevice == NULL) {
-        HKS_LOG_E("invalid input halDevice");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(halDevice, HKS_ERROR_NULL_POINTER, "invalid input halDevice")
+
     if (*halDevice != NULL) {
         return HKS_SUCCESS;
     }
 
     *halDevice = HuksCreateHdiDevicePtr();
-    if (*halDevice == NULL)  {
-        HKS_LOG_E("g_hksHalDevicePtr is NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(halDevice, HKS_ERROR_NULL_POINTER, "g_hksHalDevicePtr is NULL!")
 
     return HKS_SUCCESS;
 }

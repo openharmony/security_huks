@@ -35,6 +35,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mbedtls_ecc.h"
+#include "hks_template.h"
 
 #ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
 /* users must ensure the input params not null */
@@ -42,22 +43,16 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, struct HksBlob *signature)
 {
     int32_t ret = EccKeyCheck(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_id curveNist = MBEDTLS_ECP_DP_NONE;
     ret = HksMbedtlsEccGetKeyCurveNist((struct KeyMaterialEcc *)(key->data), &curveNist);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdsa_context ctx;
     mbedtls_ecdsa_init(&ctx);
@@ -70,16 +65,12 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
         }
 
         ret = HksEccKeyMaterialToPri(key, &(ctx.d));
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         uint32_t mbedtlsAlg;
         uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
         ret = HksToMbedtlsDigestAlg(digest, &mbedtlsAlg);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
         size_t keyLen = signature->size;
         ret = mbedtls_ecdsa_write_signature(&ctx, (mbedtls_md_type_t)mbedtlsAlg, message->data, (size_t)message->size,
             signature->data, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
@@ -103,9 +94,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
 {
     (void)usageSpec;
     int32_t ret = EccKeyCheck(key);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecp_group_id curveNist = MBEDTLS_ECP_DP_NONE;
     ret = HksMbedtlsEccGetKeyCurveNist((struct KeyMaterialEcc *)(key->data), &curveNist);
@@ -125,9 +114,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
         }
 
         ret = HksEccKeyMaterialToPub(key, &(ctx.Q));
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_ecdsa_read_signature(&ctx,
             message->data, message->size, signature->data, signature->size);

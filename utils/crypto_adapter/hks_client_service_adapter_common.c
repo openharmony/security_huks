@@ -27,6 +27,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
@@ -89,10 +90,7 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
 
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get alg param failed");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "get alg param failed")
 
     switch (algParam->uint32Param) {
 #if defined(HKS_SUPPORT_HMAC_C) || defined(HKS_SUPPORT_SM3_C) || defined(HKS_SUPPORT_SM4_C) || \

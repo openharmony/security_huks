@@ -37,6 +37,7 @@
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #if defined(HKS_SUPPORT_DSA_C)
@@ -152,10 +153,7 @@ static int32_t EccToX509PublicKey(
     if (alg == HKS_ALG_SM2) {
         nid = NID_sm2;
     } else {
-        if (GetEccNid(keySize, &nid) != HKS_SUCCESS) {
-            HKS_LOG_E("GetNidFromKeySize fail");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(GetEccNid(keySize, &nid), HKS_ERROR_INVALID_ARGUMENT, "GetNidFromKeySize fail")
     }
 
     EC_KEY *ecKey = NULL;
@@ -302,9 +300,7 @@ static int32_t DsaPublicKeyToX509(const struct HksBlob *publicKey, struct HksBlo
     struct HksBlob q = {0};
     struct HksBlob g = {0};
     int32_t ret = GetDsaPubKeyParam(publicKey, &y, &p, &q, &g);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     return DsaToX509PublicKey(&y, &p, &q, &g, x509Key);
 }
@@ -334,10 +330,7 @@ static int32_t DhToX509PublicKey(
 {
     int32_t nid;
     int32_t ret = GetDhNid(keySize, &nid);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetNidFromKeySize fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetNidFromKeySize fail")
 
     BIGNUM *pub = NULL;
     DH *dh = NULL;
