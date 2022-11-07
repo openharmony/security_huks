@@ -33,6 +33,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define HKS_AES_CBC_NOPADDING_IV_SIZE 16
 #define HKS_AES_CBC_DATA_BLOB_SIZE 16
@@ -1284,16 +1285,11 @@ static mbedtls_cipher_context_t *GetAesEcbNoPaddingCtx(void *cryptoCtx, const st
             }
 
             ret = AesEcbNoPaddingData(ecbNoPadingctx, blockSize, message, cipherText, olenTotal);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("AesEcbNoPaddingData failed");
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AesEcbNoPaddingData failed")
         }
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, NULL)
 
     return ecbNoPadingctx;
 }

@@ -21,16 +21,14 @@
 #include "hks_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_template.h"
 
 #define MIN_CERT_COUNT 3
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
 {
     int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSetIn);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check keyAlias or paramSetIn failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSetIn failed")
 
     if ((keyAlias->size > MAX_PROCESS_SIZE) ||
         ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
@@ -46,10 +44,7 @@ int32_t HksCheckIpcImportKey(const struct HksBlob *keyAlias, const struct HksPar
     const struct HksBlob *key)
 {
     int32_t ret = HksCheckBlob2AndParamSet(keyAlias, key, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check keyAlias or key or paramSetIn failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or key or paramSetIn failed")
 
     if ((keyAlias->size > MAX_PROCESS_SIZE) || (key->size > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -65,10 +60,7 @@ int32_t HksCheckIpcImportWrappedKey(const struct HksBlob *keyAlias, const struct
     const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
 {
     int32_t ret = HksCheckBlob3AndParamSet(keyAlias, wrappingKeyAlias, wrappedKeyData, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check keyAlias or wrappingKeyAlias or wrappedKeyData or paramSet failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or wrappingKeyAlias or wrappedKeyData or paramSet failed")
 
     if ((keyAlias->size > MAX_PROCESS_SIZE) || (wrappingKeyAlias->size > MAX_PROCESS_SIZE) ||
         (wrappedKeyData->size > MAX_PROCESS_SIZE)) {
@@ -85,9 +77,7 @@ int32_t HksCheckIpcImportWrappedKey(const struct HksBlob *keyAlias, const struct
 
 int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct HksBlob *key)
 {
-    if (HksCheckBlob2(keyAlias, key) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob2(keyAlias, key), HKS_ERROR_INVALID_ARGUMENT)
     if (keyAlias->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -99,9 +89,7 @@ int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct 
 
 int32_t HksCheckIpcGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSet)
 {
-    if (CheckBlob(keyAlias) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(keyAlias), HKS_ERROR_INVALID_ARGUMENT)
     if (keyAlias->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -118,10 +106,7 @@ int32_t HksCheckIpcAgreeKey(const struct HksParamSet *paramSet, const struct Hks
     const struct HksBlob *peerPublicKey, const struct HksBlob *agreedKey)
 {
     int32_t ret = HksCheckBlob3AndParamSet(privateKey, peerPublicKey, agreedKey, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key or paramSetIn failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check key or paramSetIn failed")
 
     if ((privateKey->size > MAX_PROCESS_SIZE) || (peerPublicKey->size > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -137,10 +122,7 @@ int32_t HksCheckIpcDeriveKey(const struct HksParamSet *paramSet, const struct Hk
     const struct HksBlob *derivedKey)
 {
     int32_t ret = HksCheckBlob2AndParamSet(mainKey, derivedKey, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key or paramSetIn failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check key or paramSetIn failed")
 
     if (mainKey->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -192,9 +174,7 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
     if ((certChain->certs == NULL) || (certChain->certsCount < MIN_CERT_COUNT)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (HksCheckParamSet(paramSet, paramSet->paramSetSize) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
     if ((keyAlias->size > MAX_PROCESS_SIZE) ||
         ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
         ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {

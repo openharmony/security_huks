@@ -36,6 +36,11 @@ if ((RESULT) != HKS_SUCCESS) { \
     break; \
 }
 
+#define HKS_IF_NOT_SUCC_BREAK(RESULT, ...) \
+if ((RESULT) != HKS_SUCCESS) { \
+    break; \
+}
+
 #define HKS_IF_NOT_SUCC_LOGE(RESULT, LOG_MESSAGE, ...) \
 if ((RESULT) != HKS_SUCCESS) { \
     HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \

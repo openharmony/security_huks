@@ -187,4 +187,33 @@ HWTEST_F(HksTemplateTest, HksTemplateTest007, TestSize.Level0)
     int32_t ret = TestNullLogeReturn();
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
+
+static int32_t TestBreak()
+{
+    uint32_t i = 0;
+    const uint32_t max = 10;
+    const uint32_t target = 3;
+    int32_t ret = HKS_FAILURE;
+    for (; i < max; ++i) {
+        if (i == target) {
+            HKS_IF_NOT_SUCC_BREAK(ret)
+        }
+    }
+    if (i == target) {
+        return HKS_SUCCESS;
+    }
+    return HKS_FAILURE;
+}
+
+/**
+ * @tc.name: HksTemplateTest.HksTemplateTest008
+ * @tc.desc: tdd HKS_IF_NOT_SUCC_BREAK, expecting HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksTemplateTest, HksTemplateTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksTemplateTest008");
+    int32_t ret = TestBreak();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
 }

@@ -18,6 +18,7 @@
 #include "securec.h"
 
 #include "hks_log.h"
+#include "hks_template.h"
 #include "hks_type.h"
 
 #define HKS_HARDWARE_UDID_LEN 32
@@ -51,10 +52,7 @@ int32_t HksGetHardwareUdid(uint8_t *udid, uint32_t udidLen)
     uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = {0};
     struct HksBlob hashData = { HKS_HARDWARE_UDID_LEN, devUdid };
     ret = ComputeHash(devUdidString, sizeof(devUdidString), &hashData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("compute udid hash failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "compute udid hash failed")
 #else
     /* simulation implementation */
     const uint8_t devUdid[HKS_HARDWARE_UDID_LEN] = {
