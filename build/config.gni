@@ -36,4 +36,10 @@ declare_args() {
 
   # whether huks enable log
   huks_enable_log = false
+
+  # specify the MbedTls huks depends on
+  huks_dependency_mbedtls_path = ""
+
+  # specify the OpenSSL huks depends on
+  huks_dependency_openssl_path = ""
 }
