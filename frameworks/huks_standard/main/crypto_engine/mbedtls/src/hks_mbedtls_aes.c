@@ -1414,10 +1414,8 @@ static int32_t CheckKeySize(const struct HksBlob *key)
 int32_t HksMbedtlsAesEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead)
 {
-    if (CheckKeySize(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid aes keySiz = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKeySize(key), HKS_ERROR_INVALID_KEY_SIZE,
+        "Invalid aes keySiz = 0x%" LOG_PUBLIC "X", key->size)
 
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7)
@@ -1482,10 +1480,7 @@ int32_t HksMbedtlsAesEncryptInit(void** cryptoCtx, const struct HksBlob *key, co
 
 int32_t HksMbedtlsAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    if (cryptoCtx == NULL) {
-        HKS_LOG_E("Mbedtls AES encrypt update param is null");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(cryptoCtx, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls AES encrypt update param is null")
 
     struct HksMbedtlsAesCtx *aesEncryptCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
 
@@ -1551,10 +1546,8 @@ int32_t HksMbedtlsAesEncryptFinal(void** cryptoCtx, const struct HksBlob *messag
 int32_t HksMbedtlsAesDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    if (CheckKeySize(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid aes keySize = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKeySize(key), HKS_ERROR_INVALID_KEY_SIZE,
+        "Invalid aes keySize = 0x%" LOG_PUBLIC "X", key->size)
 
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7)
@@ -1585,10 +1578,8 @@ int32_t HksMbedtlsAesDecrypt(const struct HksBlob *key, const struct HksUsageSpe
 
 int32_t HksMbedtlsAesDecryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
 {
-    if (CheckKeySize(key) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid aes keySize = 0x%" LOG_PUBLIC "X", key->size);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckKeySize(key), HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid aes keySize = 0x%" LOG_PUBLIC "X", key->size)
 
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7)

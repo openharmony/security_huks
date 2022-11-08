@@ -20,6 +20,7 @@
 
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_template.h"
 
 using namespace OHOS;
 
@@ -50,9 +51,7 @@ sptr<IRemoteObject> GetHksProxy()
 static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob)
 {
     int32_t ret = reply.ReadInt32();
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     uint32_t outLen = reply.ReadUint32();
     if (outLen == 0) {
@@ -62,9 +61,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
         return ret;
     }
 
-    if (CheckBlob(outBlob) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT)
 
     const uint8_t *outData = reply.ReadBuffer(outLen);
     if (outData == nullptr) {
