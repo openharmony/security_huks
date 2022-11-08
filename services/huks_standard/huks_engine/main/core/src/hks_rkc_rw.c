@@ -111,15 +111,11 @@ static int32_t RkcExtractKsfRk(const struct HksBlob *ksfFromFile,
 
     /* Extract rkCreatedTime */
     int32_t ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->rkCreatedTime));
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract rkExpiredTime */
     ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->rkExpiredTime));
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract the first material */
     if (memcpy_s(&(ksfData->rkMaterial1), HKS_RKC_MATERIAL_LEN,
@@ -169,17 +165,11 @@ static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
 {
     /* Extract mkCreatedTime */
     int32_t ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->mkCreatedTime));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Extract mkCreatedTime failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract mkCreatedTime failed!")
 
     /* Extract mkExpiredTime */
     ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->mkExpiredTime));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Extract mkExpiredTime failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract mkExpiredTime failed!")
 
     /* Fill encrption algorithm */
     if (memcpy_s(&(ksfData->mkEncryptAlg), sizeof(uint32_t),
@@ -223,10 +213,7 @@ static int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ks
     /* the upper layer ensures no overflow */
     const struct HksBlob hashSrc = { *ksfBufOffset - HKS_RKC_KSF_FLAG_LEN, ksfFromFile->data + HKS_RKC_KSF_FLAG_LEN };
     int32_t ret = HksCryptoHalHash(HKS_DIGEST_SHA256, &hashSrc, &hashResultBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks hash failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks hash failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* Extract hash from ksf buffer */
     uint8_t ksfHash[HKS_RKC_HASH_LEN] = {0};
@@ -251,22 +238,15 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
 
     /* Extract file flag. */
     int32_t ret = RkcExtractKsfFileFlag(ksfFromFile, &ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract root key data */
     ret = RkcExtractKsfRk(ksfFromFile, &ksfBufOffset, ksfData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Rkc extract ksf rk failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Rkc extract ksf rk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* Extract main key data */
     ret = RkcExtractKsfMk(ksfFromFile, &ksfBufOffset, ksfData);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract hash */
     return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
@@ -274,14 +254,10 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
 
 static int32_t GetProcessInfo(char **processName, char **userId)
 {
-    if (HksGetProcessName(processName) != HKS_SUCCESS) {
-        HKS_LOG_E("get process name failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
-    if (HksGetUserId(userId) != HKS_SUCCESS) {
-        HKS_LOG_E("get user id failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetUserId(userId), HKS_ERROR_INTERNAL_ERROR, "get user id failed")
+
     return HKS_SUCCESS;
 }
 
@@ -313,10 +289,7 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
 
         ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         ret = RkcExtractKsfBuf(&tmpKsf, ksfData);
     } while (0);
@@ -378,15 +351,11 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 
     /* Fill rkCreatedTime */
     int32_t ret = RkcFillKsfTime(&(ksfData->rkCreatedTime), ksfBuf, ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Fill rkExpiredTime */
     ret = RkcFillKsfTime(&(ksfData->rkExpiredTime), ksfBuf, ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Fill the first material */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN,
@@ -440,17 +409,11 @@ static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 {
     /* Fill mkCreatedTime */
     int32_t ret = RkcFillKsfTime(&(ksfData->mkCreatedTime), ksfBuf, ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill mk created time to ksf buf failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill mk created time to ksf buf failed!")
 
     /* Fill mkExpiredTime */
     ret = RkcFillKsfTime(&(ksfData->mkExpiredTime), ksfBuf, ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill mk expired time to ksf buf failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill mk expired time to ksf buf failed!")
 
     /* Fill encrption algorithm */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->mkEncryptAlg), sizeof(uint32_t)) != EOK) {
@@ -496,12 +459,9 @@ static int32_t RkcFillKsfHash(struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
     const struct HksBlob hashSrc = { *ksfBufOffset - HKS_RKC_KSF_FLAG_LEN, ksfBuf->data + HKS_RKC_KSF_FLAG_LEN };
     struct HksBlob hash = { HKS_RKC_HASH_LEN, ksfBuf->data + *ksfBufOffset };
     int32_t ret = HksCryptoHalHash(HKS_DIGEST_SHA256, &hashSrc, &hash);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hash failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
-    *ksfBufOffset += HKS_RKC_HASH_LEN;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hash failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
+    *ksfBufOffset += HKS_RKC_HASH_LEN;
     return HKS_SUCCESS;
 }
 
@@ -518,24 +478,15 @@ static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob
 
     /* Fill root key */
     int32_t ret = RkcFillKsfRk(ksfData, ksfBuf, &ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill root key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill root key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* Fill main key */
     ret = RkcFillKsfMk(ksfData, ksfBuf, &ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill main key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill main key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* calculate and fill SHA256 result, skip file flag, begin with version, end with reserve field. */
     ret = RkcFillKsfHash(ksfBuf, &ksfBufOffset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Fill hash to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill hash to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     return HKS_SUCCESS;
 }
@@ -553,10 +504,7 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
     do {
         /* Fill data into buffer */
         ret = RkcFillKsfBuf(ksfData, &ksfBuf);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Fill ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         char *processName = NULL;
         char *userId = NULL;
@@ -575,9 +523,7 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
         ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Store ksf failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "Store ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
@@ -589,10 +535,8 @@ bool RkcKsfExist(void)
 {
     char *processName = NULL;
     char *userId = NULL;
-    if (GetProcessInfo(&processName, &userId) != HKS_SUCCESS) {
-        HKS_LOG_E("get process info failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId),
+        HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },

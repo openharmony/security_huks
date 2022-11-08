@@ -239,16 +239,12 @@ static int32_t CheckAndGetAlgorithm(
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param 0x%" LOG_PUBLIC "x failed!", HKS_TAG_ALGORITHM);
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL,
+        "get param 0x%" LOG_PUBLIC "x failed!", HKS_TAG_ALGORITHM)
 
     ret = HksCheckValue(algParam->uint32Param, expectAlg, expectCnt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("alg value %" LOG_PUBLIC "u not expected", algParam->uint32Param);
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ALGORITHM,
+        "alg value %" LOG_PUBLIC "u not expected", algParam->uint32Param)
 
     *alg = algParam->uint32Param;
     return ret;
@@ -259,16 +255,12 @@ static int32_t CheckAndGetDigest(
 {
     struct HksParam *digestParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed!", HKS_TAG_DIGEST);
-        return HKS_ERROR_CHECK_GET_DIGEST_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL,
+        "get param get 0x%" LOG_PUBLIC "x failed!", HKS_TAG_DIGEST)
 
     ret = HksCheckValue(digestParam->uint32Param, expectDigest, expectCnt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("digest value %" LOG_PUBLIC "u not expected", digestParam->uint32Param);
-        return HKS_ERROR_INVALID_DIGEST;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_DIGEST,
+        "digest value %" LOG_PUBLIC "u not expected", digestParam->uint32Param)
 
     *digest = digestParam->uint32Param;
     return ret;
@@ -279,10 +271,8 @@ static int32_t CheckGenKeyParamsByAlg(uint32_t alg, const struct HksParamSet *pa
     struct ParamsValues *params)
 {
     int32_t ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_GEN_KEY, paramSet, params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get input params by algorithm failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+        "get input params by algorithm failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_GEN_KEY, params);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
@@ -299,29 +289,21 @@ static int32_t CheckGenKeyMacDeriveParams(
     }
 
     int32_t ret = HksCheckGenKeyPurpose(alg, inputPurpose);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check purpose invalid, purpose 0x%" LOG_PUBLIC "x", inputPurpose);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check purpose invalid, purpose 0x%" LOG_PUBLIC "x", inputPurpose)
 
     if (inputPurpose == HKS_KEY_PURPOSE_MAC) {
         ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_GEN_MAC_KEY, paramSet, params);
     } else {
         ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_GEN_DERIVE_KEY, paramSet, params);
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get input params by algorithm failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get input params by algorithm failed, ret = %" LOG_PUBLIC "d", ret)
 
     if (inputPurpose == HKS_KEY_PURPOSE_MAC) {
         ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_GEN_MAC_KEY, params);
     } else {
         ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_GEN_DERIVE_KEY, params);
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check fixed params failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get input params by algorithm failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 }
@@ -337,10 +319,8 @@ static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct 
 
     struct HksParam *purposeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE);
-        return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
+        "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE)
 
     if (((purposeParam->uint32Param & HKS_KEY_PURPOSE_DERIVE) != 0) ||
         ((purposeParam->uint32Param & HKS_KEY_PURPOSE_MAC) != 0)) {
@@ -387,10 +367,8 @@ static int32_t CheckAndGetWrappedKeyUnwrapAlgSuite(const struct HksParamSet *par
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "get unwrap algorithm suite fail")
 
     ret = HksCheckValue(algorithmSuite->uint32Param, g_unwrapSuite, HKS_ARRAY_SIZE(g_unwrapSuite));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("unwrap algorithm suite value %" LOG_PUBLIC "u not expected", algorithmSuite->uint32Param);
-        return HKS_ERROR_INVALID_ALGORITHM;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ALGORITHM,
+        "unwrap algorithm suite value %" LOG_PUBLIC "u not expected", algorithmSuite->uint32Param)
 
     *algSuite = algorithmSuite->uint32Param;
     return HKS_SUCCESS;
@@ -400,15 +378,10 @@ static int32_t CheckAndGetWrappedKeyUnwrapAlgSuite(const struct HksParamSet *par
 static int32_t CheckSignVerifyParamsByAlg(uint32_t cmdId, uint32_t alg, const struct ParamsValues *inputParams)
 {
     int32_t ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_USE_KEY, inputParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check sign or verify fixed params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check sign or verify fixed params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckSignVerifyMutableParams(cmdId, alg, inputParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check sign or verify mutable params failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "check sign or verify mutable params failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 }
@@ -419,21 +392,13 @@ static int32_t CheckCipherParamsByAlg(
     uint32_t cmdId, uint32_t alg, const struct HksParamSet *paramSet, const struct ParamsValues *inputParams)
 {
     int32_t ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_USE_KEY, inputParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher check fixed params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher check fixed params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckCipherMutableParams(cmdId, alg, inputParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher check mutable params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher check mutable params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckCipherMaterialParams(alg, inputParams, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher check material params failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "cipher check material params failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 }
@@ -723,15 +688,10 @@ static int32_t CheckImportKey(uint32_t alg, uint32_t keyType, const struct Param
     const struct HksBlob *key)
 {
     int32_t ret = CheckKeyLen(alg, keyType, params, key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key len failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check key len failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = CheckMutableParams(alg, keyType, params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check mutable params faile, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "check mutable params faile, ret = %" LOG_PUBLIC "d", ret)
     return ret;
 }
 
@@ -819,25 +779,17 @@ int32_t HksCoreCheckSignVerifyParams(uint32_t cmdId, const struct HksBlob *key, 
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
 
     ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_USE_KEY, paramSet, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("sign or verify get input params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify get input params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = CheckSignVerifyParamsByAlg(cmdId, alg, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("sign or verify check params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify check params failed, ret = %" LOG_PUBLIC "d", ret)
 
     uint32_t keySize = 0;
     ret = HksGetKeySize(alg, key, &keySize);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keySize failed!")
 
     ret = HksCheckSignature(cmdId, alg, keySize, signature);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check signature failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "check signature failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 #else
@@ -863,21 +815,13 @@ int32_t HksLocalCheckSignVerifyParams(uint32_t cmdId, uint32_t keySize, const st
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
 
     ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_USE_KEY, paramSet, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("sign or verify get input params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify get input params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = CheckSignVerifyParamsByAlg(cmdId, alg, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("sign or verify check params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify check params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckSignature(cmdId, alg, keySize, signature);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check signature failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "check signature failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 #else
@@ -945,10 +889,7 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
 
     ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_USE_KEY, paramSet, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get input params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher get input params failed, ret = %" LOG_PUBLIC "d", ret)
 
     if ((alg == HKS_ALG_RSA) || (alg == HKS_ALG_SM4)) {
         ret = HksGetKeySize(alg, key, &params.keyLen.value);
@@ -956,15 +897,10 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
     }
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher check params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckCihperData(cmdId, alg, &params, inData, outData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 }
@@ -990,30 +926,20 @@ int32_t HksLocalCheckCipherParams(uint32_t cmdId, uint32_t keySize, const struct
         ret = HKS_ERROR_NOT_SUPPORTED;
 #endif
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("keySize value %" LOG_PUBLIC "u not expected", keySize);
-        return HKS_ERROR_INVALID_KEY_SIZE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_SIZE,
+        "keySize value %" LOG_PUBLIC "u not expected", keySize)
 
     struct ParamsValues params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
 
     ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_USE_KEY, paramSet, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local cipher get input params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local cipher get input params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local cipher check params failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckCihperData(cmdId, alg, &params, inData, outData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "local cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
 }
@@ -1034,10 +960,8 @@ int32_t HksCoreCheckDeriveKeyParams(const struct HksParamSet *paramSet, const st
 
     struct HksParam *purposeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE);
-        return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
+        "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE)
 
     if (purposeParam->uint32Param != HKS_KEY_PURPOSE_DERIVE) {
         return HKS_ERROR_INVALID_PURPOSE;
@@ -1084,10 +1008,7 @@ static int32_t CheckMacOutput(
 
     uint32_t digestLen;
     ret = HksGetDigestLen(digest, &digestLen);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get digest length failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get digest length failed, ret = %" LOG_PUBLIC "d", ret)
 
     if (mac->size < digestLen) {
         HKS_LOG_E("mac buffer too small, size %" LOG_PUBLIC "u", mac->size);

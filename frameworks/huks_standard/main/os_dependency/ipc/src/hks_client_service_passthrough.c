@@ -329,10 +329,7 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
         tokenTmp.data = token->data;
     }
     int32_t ret = HksServiceInit(&processInfo, keyAlias, paramSet, handle, &tokenTmp);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("service init failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "service init failed, ret = %" LOG_PUBLIC "d", ret)
 
     if ((token != NULL) && (token->size != 0)) {
         token->size = tokenTmp.size;

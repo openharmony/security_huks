@@ -43,15 +43,10 @@ static int32_t EccKeyMaterialToCtx(const struct HksBlob *nativeKey,
     const struct HksBlob *pubKey, mbedtls_ecdh_context *ctx)
 {
     int32_t ret = HksEccKeyMaterialToPub(pubKey, &(ctx->Qp));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to public key failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Ecc keyMaterial to public key failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     ret = HksEccKeyMaterialToPri(nativeKey, &(ctx->d));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Ecc keyMaterial to private key failed! ret = 0x%" LOG_PUBLIC "X", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Ecc keyMaterial to private key failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     return ret;
 }

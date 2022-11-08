@@ -36,9 +36,7 @@
 static void HksLocalCryptoAbilityInit(void)
 {
     int32_t ret = HksCryptoAbilityInit();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Hks local init crypto ability failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Hks local init crypto ability failed, ret = %" LOG_PUBLIC "d", ret)
 }
 
 #ifndef _CUT_AUTHENTICATE_
@@ -52,10 +50,7 @@ int32_t HksLocalHash(const struct HksParamSet *paramSet, const struct HksBlob *s
 
     uint32_t digestLen;
     ret = HksGetDigestLen(digestAlg->uint32Param, &digestLen);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get digest len failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get digest len failed, ret = %" LOG_PUBLIC "d", ret)
 
     if (hash->size < digestLen) {
         HKS_LOG_E("hash len too small, size = %" LOG_PUBLIC "u", hash->size);
@@ -97,10 +92,8 @@ static int32_t CheckLocalGenerateKeyParams(const struct HksParamSet *paramSetIn,
     }
 
     ret = HksCoreCheckGenKeyParams(NULL, paramSetIn, NULL, NULL);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check generate key parameter failed ret = %" LOG_PUBLIC "x.", ret);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
+        "check generate key parameter failed ret = %" LOG_PUBLIC "x.", ret)
 
     return HKS_SUCCESS;
 }
@@ -116,10 +109,7 @@ int32_t HksLocalGenerateKey(const struct HksParamSet *paramSetIn, struct HksPara
 
     HksLocalCryptoAbilityInit();
     ret = HksCryptoHalGenerateKey(&spec, &key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local engine generate key failed, ret:%" LOG_PUBLIC "x!", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local engine generate key failed, ret:%" LOG_PUBLIC "x!", ret)
 
     ret = HksFormatKeyFromMaterial(spec.algType, &key, paramSetOut);
     (void)memset_s(key.data, key.size, 0, key.size);
@@ -141,10 +131,7 @@ int32_t HksLocalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlo
 
     struct HksBlob privateKeyMaterial = { 0, NULL };
     ret = HksSetKeyToMaterial(spec.algType, false, privateKey, &privateKeyMaterial);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("set prikey to materail failed, ret:%" LOG_PUBLIC "x!", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "set prikey to materail failed, ret:%" LOG_PUBLIC "x!", ret)
 
     struct HksBlob publicKeyMaterial = { 0, NULL };
     ret = HksSetKeyToMaterial(spec.algType, true, peerPublicKey, &publicKeyMaterial);
@@ -157,9 +144,7 @@ int32_t HksLocalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlo
 
     HksLocalCryptoAbilityInit();
     ret = HksCryptoHalAgreeKey(&privateKeyMaterial, &publicKeyMaterial, &spec, agreedKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local engine agree key failed, ret:%" LOG_PUBLIC "x!", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "local engine agree key failed, ret:%" LOG_PUBLIC "x!", ret)
 
     (void)memset_s(privateKeyMaterial.data, privateKeyMaterial.size, 0, privateKeyMaterial.size);
     HKS_FREE_PTR(privateKeyMaterial.data);
@@ -215,10 +200,7 @@ static int32_t EncryptAndDecrypt(uint32_t cmdId, const struct HksBlob *key, cons
     bool isEncrypt = (cmdId == HKS_CMD_ID_ENCRYPT);
     struct HksBlob tmpInputText = { inputText->size, inputText->data };
     ret = HksBuildCipherUsageSpec(paramSet, isEncrypt, &tmpInputText, &usageSpec);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build cipher usagespec failed, ret:%" LOG_PUBLIC "x!", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build cipher usagespec failed, ret:%" LOG_PUBLIC "x!", ret)
 
     if (cmdId == HKS_CMD_ID_ENCRYPT) {
         ret = CipherEncrypt(key, paramSet, usageSpec, &tmpInputText, outputText);
@@ -227,9 +209,8 @@ static int32_t EncryptAndDecrypt(uint32_t cmdId, const struct HksBlob *key, cons
     }
     HksFreeUsageSpec(&usageSpec);
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("local engine EncryptDecrypt cmdId = %" LOG_PUBLIC "u failed, ret:%" LOG_PUBLIC "x!", cmdId, ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret,
+        "local engine EncryptDecrypt cmdId = %" LOG_PUBLIC "u failed, ret:%" LOG_PUBLIC "x!", cmdId, ret)
     return ret;
 }
 
@@ -348,19 +329,13 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
     struct HksBlob keyMaterial = { 0, NULL };
     do {
         ret = HksSetKeyToMaterial(usageSpec.algType, false, key, &keyMaterial);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set key to material failed, ret:%" LOG_PUBLIC "x!", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "set key to material failed, ret:%" LOG_PUBLIC "x!", ret)
         ret = GetSignVerifyMessage(&usageSpec, srcData, &message, &needFree);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SignVerify calc hash failed!")
 
         HksLocalCryptoAbilityInit();
         ret = HksCryptoHalSign(&keyMaterial, &usageSpec, &message, signature);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("local engine verify failed, ret:%" LOG_PUBLIC "x!", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "local engine verify failed, ret:%" LOG_PUBLIC "x!", ret)
     } while (0);
 
     if (needFree) {
@@ -387,20 +362,14 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
     struct HksBlob keyMaterial = { 0, NULL };
     do {
         ret = HksSetKeyToMaterial(usageSpec.algType, true, key, &keyMaterial);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set key to material failed, ret:%" LOG_PUBLIC "x!", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "set key to material failed, ret:%" LOG_PUBLIC "x!", ret)
 
         ret = GetSignVerifyMessage(&usageSpec, srcData, &message, &needFree);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SignVerify calc hash failed!")
 
         HksLocalCryptoAbilityInit();
         ret = HksCryptoHalVerify(&keyMaterial, &usageSpec, &message, signature);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("local engine verify failed, ret:%" LOG_PUBLIC "x!", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "local engine verify failed, ret:%" LOG_PUBLIC "x!", ret)
     } while (0);
 
     if (needFree) {

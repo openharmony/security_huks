@@ -33,10 +33,7 @@ static int32_t EncryptCheckParam(const struct HksBlob *key, const struct HksUsag
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(message), HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(cipherText), HKS_ERROR_INVALID_ARGUMENT, "Invalid param cipherText!")
 
-    if (usageSpec == NULL) {
-        HKS_LOG_E("Invalid param usageSpec!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(usageSpec, HKS_ERROR_INVALID_ARGUMENT, "Invalid param usageSpec!")
     return HKS_SUCCESS;
 }
 

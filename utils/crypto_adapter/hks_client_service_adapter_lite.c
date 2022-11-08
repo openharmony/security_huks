@@ -138,9 +138,7 @@ static int32_t RsaToX509PublicKey(const struct HksBlob *mod, const struct HksBlo
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = PkCtxToX509(&ctx, x509Key);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Pk context to rsa x509 failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "Pk context to rsa x509 failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     mbedtls_pk_free(&ctx);
@@ -160,10 +158,7 @@ static int32_t InitEccPkCtx(uint32_t keySize, const struct HksBlob *x, const str
 
     mbedtls_ecp_group_id grp_id;
     ret = GetEccGroupId(keySize, &grp_id);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get ecc group id failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get ecc group id failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     mbedtls_ecp_keypair *pubKey = mbedtls_pk_ec(*ctx);
     ret = mbedtls_ecp_group_load(&(pubKey->MBEDTLS_PRIVATE(grp)), grp_id);
@@ -206,9 +201,7 @@ static int32_t EccToX509PublicKey(uint32_t keySize, const struct HksBlob *x, con
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = PkCtxToX509(&ctx, x509Key);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Pk context to ecc x509 failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "Pk context to ecc x509 failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     mbedtls_pk_free(&ctx);
@@ -314,10 +307,7 @@ static int32_t CheckRsaCtx(const mbedtls_rsa_context *rsaCtx)
 static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *rsaPublicKey)
 {
     int32_t ret = CheckRsaCtx(rsaCtx);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Check rsa ctx failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Check rsa ctx failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     uint32_t nSize = rsaCtx->MBEDTLS_PRIVATE(len);
     uint32_t eSize = rsaCtx->MBEDTLS_PRIVATE(len);
@@ -377,10 +367,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
     uint32_t ySize = mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P));
 
     int32_t ret = CheckEccXySize(xSize, ySize);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Check ecc public key size failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Check ecc public key size failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + xSize + ySize;
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
