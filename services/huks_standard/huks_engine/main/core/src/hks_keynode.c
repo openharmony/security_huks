@@ -43,10 +43,7 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
 {
     struct HksParamSet *paramSet = NULL;
     int32_t ret = HksInitParamSet(&paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init keyNode param set fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init keyNode param set fail")
 
     struct HksParam params[] = {
         {
@@ -98,10 +95,7 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
     };
 
     int32_t ret = HksCryptoHalFillRandom(&opHandle);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("fill keyNode handle failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fill keyNode handle failed")
 
     *handle = handleData; /* Temporarily only use 32 bit handle */
     return HKS_SUCCESS;
@@ -229,34 +223,19 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     struct HksParamSet *keyBlobParamSet = NULL;
     do {
         ret = GenerateKeyNodeHandle(&keyNode->handle);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get keynode handle failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get keynode handle failed")
 
         ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get runtime paramSet failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get runtime paramSet failed")
 
         ret = HksGetAadAndParamSet(key, &aad, &keyBlobParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get aad and paramSet failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get aad and paramSet failed")
 
         ret = HksDecryptKeyBlob(&aad, keyBlobParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("decrypt keyBlob failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt keyBlob failed")
 
         ret = AddKeyNode(keyNode);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add keyNode failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add keyNode failed")
     } while (0);
 
     if (ret != HKS_SUCCESS) {

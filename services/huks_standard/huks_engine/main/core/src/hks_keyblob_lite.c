@@ -54,9 +54,7 @@ static int32_t GetSalt(enum DeriveType type, const struct HksBlob *random, struc
     }
 
     int32_t ret = HksBlobInit(salt, random->size + tag.size);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if ((memcpy_s(salt->data, salt->size, random->data, random->size) != EOK) ||
         (memcpy_s(salt->data + random->size, salt->size - random->size, tag.data, tag.size) != EOK)) {
@@ -72,10 +70,7 @@ static int32_t GetDeriveMaterial(enum DeriveType type, const struct HksBlob *ran
     struct HksBlob mk = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), keyBuf };
 
     int32_t ret = HksCryptoHalGetMainKey(NULL, &mk);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get kek failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get kek failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob salt = { 0, NULL };
     ret = GetSalt(type, random, &salt);
@@ -92,9 +87,7 @@ static int32_t GetDeriveMaterial(enum DeriveType type, const struct HksBlob *ran
     };
     struct HksKeySpec derivationSpec = { HKS_ALG_PBKDF2, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), &derParam };
     ret = HksCryptoHalDeriveKey(&mk, &derivationSpec, derivedMaterial);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyblob derive material failed, type = %" LOG_PUBLIC "u", type);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get keyblob derive material failed, type = %" LOG_PUBLIC "u", type)
 
     HKS_FREE_BLOB(salt);
     (void)memset_s(mk.data, mk.size, 0, mk.size);
@@ -114,9 +107,8 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *cipherKey, const stru
     /* get nonce, derive from random + tag("derive_nonce") */
     struct HksBlob nonce = { 0, NULL };
     int32_t ret = HksBlobInit(&nonce, HKS_KEY_BLOB_NONCE_SIZE); /* need free by caller function */
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     ret = GetDeriveMaterial(DERIVE_NONCE, random, &nonce);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get derive material nonce failed, ret = %" LOG_PUBLIC "d", ret);
@@ -153,19 +145,14 @@ static int32_t EncryptAndDecryptKeyBlob(struct HksBlob *rawKey, struct HksBlob *
     struct HksBlob random = { HKS_DEFAULT_RANDOM_LEN, keyInfo->random };
     if (isEncrypt) {
         ret = HksCryptoHalFillRandom(&random);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get random failed");
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get random failed")
     }
 
     /* 2. get kek, derive from random + tag("derive_kek") */
     uint8_t kekBuf[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)] = {0};
     struct HksBlob kek = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), kekBuf };
     ret = GetDeriveMaterial(DERIVE_KEK, &random, &kek);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 3. get usage spec */
     struct HksAeadParam aeadParam = {0};
@@ -185,9 +172,7 @@ static int32_t EncryptAndDecryptKeyBlob(struct HksBlob *rawKey, struct HksBlob *
         encKey.size -= HKS_AE_TAG_LEN; /* the decrypt len should remove the tag len */
         ret = HksCryptoHalDecrypt(&kek, &usageSpec, &encKey, rawKey);
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher key[0x%" LOG_PUBLIC "x] failed, ret = %" LOG_PUBLIC "d", isEncrypt, ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "cipher key[0x%" LOG_PUBLIC "x] failed, ret = %" LOG_PUBLIC "d", isEncrypt, ret)
 
     /* need clean kek buf */
     (void)memset_s(kekBuf, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), 0, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256));
@@ -208,9 +193,8 @@ static int32_t DecryptKeyBlob(const struct HksBlob *cipherKey, struct HksBlob *r
 static int32_t CopyKey(const struct HksBlob *key, struct HksBlob *adjustedKey)
 {
     int32_t ret  = HksBlobInit(adjustedKey, key->size);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     if (memcpy_s(adjustedKey->data, adjustedKey->size, key->data, key->size) != EOK) {
         HKS_FREE_PTR(adjustedKey->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -227,9 +211,8 @@ static int32_t Ed25519BlobToKeyMaterial(const struct HksBlob *key, struct HksBlo
 
     int32_t ret  = HksBlobInit(adjustedKey, sizeof(struct KeyMaterial25519) +
         (HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256) << 1));
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     (void)memset_s(adjustedKey->data, adjustedKey->size, 0, adjustedKey->size);
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)adjustedKey->data;
@@ -267,9 +250,7 @@ static int32_t Ed25519KeyMaterialToBlob(const struct HksBlob *key, struct HksBlo
     }
 
     int32_t ret = HksBlobInit(adjustedKey, keyMaterial->priKeySize + keyMaterial->pubKeySize);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 32 bytes pubkey first, then 32 bytes private key */
     if (memcpy_s(adjustedKey->data, adjustedKey->size, key->data + sizeof(*keyMaterial),
@@ -296,9 +277,7 @@ static int32_t GetRawKeyMaterial(const struct HksBlob *key, struct HksBlob *rawK
 
     struct HksBlob tmpKey = { 0, NULL };
     int32_t ret = HksBlobInit(&tmpKey, keyInfo->keySize);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = DecryptKeyBlob(key, &tmpKey);
     if (ret != HKS_SUCCESS) {
@@ -312,9 +291,7 @@ static int32_t GetRawKeyMaterial(const struct HksBlob *key, struct HksBlob *rawK
     } else {
         ret = CopyKey(&tmpKey, rawKey);
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("operate failed, alg:%" LOG_PUBLIC "u, ret = %" LOG_PUBLIC "d", keyInfo->keyAlg, ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "operate failed, alg:%" LOG_PUBLIC "u, ret = %" LOG_PUBLIC "d", keyInfo->keyAlg, ret)
 
     (void)memset_s(tmpKey.data, tmpKey.size, 0, tmpKey.size);
     HKS_FREE_BLOB(tmpKey);
@@ -338,20 +315,15 @@ struct HksKeyNode *HksGenerateKeyNode(const struct HksBlob *key)
     do {
         struct HksBlob rawKey = { 0, NULL };
         ret = GetRawKeyMaterial(key, &rawKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get raw key material failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get raw key material failed, ret = %" LOG_PUBLIC "d", ret)
 
         struct HksParamSet *keyBlobParamSet = NULL;
         ret = TranslateKeyInfoBlobToParamSet(&rawKey, key, &keyBlobParamSet);
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
         HKS_FREE_BLOB(rawKey);
 
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret)
+
         keyNode->paramSet = keyBlobParamSet;
     } while (0);
 
@@ -432,17 +404,14 @@ static int32_t FillStoreKeyInfo(const struct HksBlob *keyAlias, uint8_t keyFlag,
 
     /* 2. copy keyAuthId, keyAlg, purpose ect. */
     int32_t ret = FillBaseInfo(paramSet, keyOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     keyInfo->keyInfoLen = sizeof(*keyInfo) + keyInfo->aliasSize + keyInfo->authIdSize + keyInfo->keySize;
 
     /* 3. encrypt key */
     ret = EncryptKeyBlob(key, keyOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("encrypt key blob failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "encrypt key blob failed, ret = %" LOG_PUBLIC "d", ret)
+
     keyOut->size = keyInfo->keyInfoLen;
 
     return ret;
@@ -453,10 +422,7 @@ static int32_t AdjustKey(uint8_t keyFlag, const struct HksParamSet *paramSet,
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get alg param failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get alg param failed")
 
     /* for storage-restricted products, when generate ed25519 key, only 64-byte private key can be stored */
     if ((algParam->uint32Param == HKS_ALG_ED25519) && (keyFlag == HKS_KEY_FLAG_GENERATE_KEY)) {
@@ -464,9 +430,9 @@ static int32_t AdjustKey(uint8_t keyFlag, const struct HksParamSet *paramSet,
     } else {
         ret = CopyKey(key, adjustedKey);
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("operate failed, alg = %" LOG_PUBLIC "u, ret = %" LOG_PUBLIC "d", algParam->uint32Param, ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret,
+        "operate failed, alg = %" LOG_PUBLIC "u, ret = %" LOG_PUBLIC "d", algParam->uint32Param, ret)
+
     return ret;
 }
 
@@ -474,10 +440,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
 {
     struct HksParam *keyParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get key param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key param failed!")
 
     uint8_t *data = HksMalloc(keyParam->blob.size);
     HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
@@ -494,27 +457,19 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
 {
     struct HksBlob adjustedKey = { 0, NULL };
     int32_t ret = AdjustKey(keyFlag, paramSet, key, &adjustedKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("adjust key failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "adjust key failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob tmpOut = { 0, NULL };
     do {
         uint32_t totalLen = sizeof(struct HksStoreKeyInfo) + HKS_MAX_KEY_ALIAS_LEN + HKS_MAX_KEY_AUTH_ID_LEN +
             HKS_MAX_KEY_MATERIAL_LEN;
         ret = HksBlobInit(&tmpOut, totalLen);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks blob init failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks blob init failed, ret = %" LOG_PUBLIC "d", ret)
+
         (void)memset_s(tmpOut.data, tmpOut.size, 0, tmpOut.size); /* need init 0 */
 
         ret = FillStoreKeyInfo(keyAlias, keyFlag, &adjustedKey, paramSet, &tmpOut);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("fill storage key info failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "fill storage key info failed, ret = %" LOG_PUBLIC "d", ret)
 
         if (memcpy_s(keyOut->data, keyOut->size, tmpOut.data, tmpOut.size) != EOK) {
             HKS_LOG_E("copy keyblob out failed!");

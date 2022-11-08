@@ -98,10 +98,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
 
     mbedtls_ecp_group_id curveNist = MBEDTLS_ECP_DP_NONE;
     ret = HksMbedtlsEccGetKeyCurveNist((struct KeyMaterialEcc *)(key->data), &curveNist);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get ecc KeyCureNist fail! ret = 0x%" LOG_PUBLIC "X", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get ecc KeyCureNist fail! ret = 0x%" LOG_PUBLIC "X", ret)
 
     mbedtls_ecdsa_context ctx;
     mbedtls_ecdsa_init(&ctx);
