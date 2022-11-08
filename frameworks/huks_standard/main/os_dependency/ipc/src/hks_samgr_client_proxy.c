@@ -14,6 +14,7 @@
  */
 
 #include "hks_samgr_client.h"
+#include "hks_template.h"
 #include "liteipc_adapter.h"
 
 #define PER_SECOND 1000000 /* OS_SYS_US_PER_SECOND */
@@ -132,9 +133,7 @@ static int32_t IpcAsyncCall(IUnknown *iUnknown, enum HksMessage type, const stru
 
     IpcIoPushDataBuffWithFree(&request, &requestBuff, HksFree);
     ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, NULL, CurrentCallback);
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_FAILURE)
     return SynchronizeOutput(outBlob);
 }
 
@@ -167,9 +166,7 @@ void HKS_DestroyClient(const char *service, const char *feature, void *iproxy)
 int32_t HksSamgrInitialize(void)
 {
     int32_t ret = SAMGR_RegisterFectory(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE, HKS_CreatClient, HKS_DestroyClient);
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_FAILURE)
     SAMGR_Bootstrap();
     return HKS_SUCCESS;
 }

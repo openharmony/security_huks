@@ -66,16 +66,11 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_GEN_KEY, &inBlob, &outBlob, paramSetIn);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
         if (paramSetOut != NULL) {
             ret = HksFreshParamSet(paramSetOut, false);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret);
-            }
+            HKS_IF_NOT_SUCC_LOGE(ret, "FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret)
         }
     } while (0);
 
@@ -187,15 +182,10 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamS
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_GET_KEY_PARAMSET, &inBlob, &outBlob, NULL);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksFreshParamSet(paramSetOut, false);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HKS_FREE_BLOB(inBlob);
@@ -338,10 +328,7 @@ int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *pa
 
     struct HksParamSet *newParamSet = NULL;
     ret = AppendCipherTag(paramSet, plainText, true, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob tmpInData = *plainText;
     struct HksBlob tmpOutData = *cipherText;
@@ -365,10 +352,7 @@ int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *pa
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob tmpCipherText = *cipherText;
     ret = AppendCipherTag(paramSet, &tmpCipherText, false, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob tmpOutData = *plainText;
     ret = HksSliceDataEntry(HKS_MSG_DECRYPT, key, newParamSet, &tmpCipherText, &tmpOutData);

@@ -275,10 +275,7 @@ int32_t HksGetKeyInfoListUnpackFromService(const struct HksBlob *srcData, uint32
         }
 
         ret = HksFreshParamSet(keyInfoList[i].paramSet, false);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret)
     }
 
     return HKS_SUCCESS;
@@ -428,10 +425,8 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
 
     struct HksBlob tmp = { 0, NULL };
     for (uint32_t i = 0; i < certsCount; ++i) {
-        if (GetBlobFromBuffer(&tmp, srcData, &offset) != HKS_SUCCESS) {
-            HKS_LOG_E("get certs %" LOG_PUBLIC "d fail", i);
-            return HKS_ERROR_IPC_MSG_FAIL;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(GetBlobFromBuffer(&tmp, srcData, &offset),
+            HKS_ERROR_IPC_MSG_FAIL, "get certs %" LOG_PUBLIC "d fail", i)
         if (memcpy_s(certChain->certs[i].data, certChain->certs[i].size, tmp.data, tmp.size)) {
             HKS_LOG_E("copy certs %" LOG_PUBLIC "d fail", i);
             return HKS_ERROR_INSUFFICIENT_DATA;
@@ -440,10 +435,7 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
         if (needEncode) {
             struct HksBlob inBlob = { tmp.size, certChain->certs[i].data };
             int32_t ret = EncodeCertChain(&inBlob, &certChain->certs[i]);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("EncodeCertChain fail, ret = %" LOG_PUBLIC "d", ret);
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "EncodeCertChain fail, ret = %" LOG_PUBLIC "d", ret)
         } else {
             certChain->certs[i].size = tmp.size;
         }

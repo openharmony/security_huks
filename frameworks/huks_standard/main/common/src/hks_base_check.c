@@ -683,16 +683,12 @@ static int32_t CheckAndGetKeySize(const struct HksBlob *key, const uint32_t *exp
 
     struct HksParam *keySizeParam = NULL;
     ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
+        "check key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
 
     ret = HksCheckValue(keySizeParam->uint32Param, expectKeySize, expectCnt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key size: key size value %" LOG_PUBLIC "u not expected", keySizeParam->uint32Param);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
+        "check key size: key size value %" LOG_PUBLIC "u not expected", keySizeParam->uint32Param)
     *keySize = keySizeParam->uint32Param;
     return ret;
 }
@@ -708,10 +704,8 @@ static int32_t CheckAndGetKeySize(const struct HksBlob *key, const uint32_t *exp
     struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)key->data;
     uint32_t keyLen = keyInfo->keyLen;
     int32_t ret = HksCheckValue(keyLen, expectKeySize, expectCnt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key size: keySize value %" LOG_PUBLIC "u not expected", keyLen);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
+        "check key size: keySize value %" LOG_PUBLIC "u not expected", keyLen)
     *keySize = keyLen;
     return ret;
 }
@@ -775,46 +769,36 @@ static int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsV
     struct HksParam *checkParam = NULL;
     if (inputParams->keyLen.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &checkParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE);
-            return HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL,
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
         inputParams->keyLen.value = checkParam->uint32Param;
     }
 
     if (inputParams->padding.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_PADDING, &checkParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING);
-            return HKS_ERROR_CHECK_GET_PADDING_FAIL;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING)
         inputParams->padding.value = checkParam->uint32Param;
     }
 
     if (inputParams->purpose.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &checkParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE);
-            return HKS_ERROR_CHECK_GET_PURPOSE_FAIL;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE)
         inputParams->purpose.value = checkParam->uint32Param;
     }
 
     if (inputParams->digest.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &checkParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_DIGEST);
-            return HKS_ERROR_CHECK_GET_DIGEST_FAIL;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL,
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_DIGEST)
         inputParams->digest.value = checkParam->uint32Param;
     }
 
     if (inputParams->mode.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &checkParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_BLOCK_MODE);
-            return HKS_ERROR_CHECK_GET_MODE_FAIL;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL,
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_BLOCK_MODE)
         inputParams->mode.value = checkParam->uint32Param;
     }
 
@@ -1078,10 +1062,7 @@ static int32_t CheckRsaOaepCipherData(uint32_t cmdId, uint32_t keySize, uint32_t
         digest = HKS_DIGEST_SHA1;
     }
     int32_t ret = HksGetDigestLen(digest, &digestLen);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
 
     /*
      * encrypt: inSize no greater than keySize - 2*digestLen - 2, outSize no less than keySize (in: plain; out: cipher)
@@ -1131,11 +1112,10 @@ static int32_t CheckRsaCipherData(uint32_t cmdId, const struct ParamsValues *inp
         ret = CheckRsaOaepCipherData(cmdId, keySize, inputParams->digest.value, inData, outData);
     }
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Check Rsa CipherData failed, cmdId: %" LOG_PUBLIC "u, padding: %" LOG_PUBLIC "u, "
-            "keyLen: %" LOG_PUBLIC "u, inData size: %" LOG_PUBLIC "u, outData size: %" LOG_PUBLIC "u",
-            cmdId, padding, keySize, inData->size, outData->size);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Check Rsa CipherData failed, cmdId: %" LOG_PUBLIC "u, padding: %" LOG_PUBLIC "u, "
+        "keyLen: %" LOG_PUBLIC "u, inData size: %" LOG_PUBLIC "u, outData size: %" LOG_PUBLIC "u",
+        cmdId, padding, keySize, inData->size, outData->size)
+
     return ret;
 }
 #endif
@@ -1394,10 +1374,8 @@ static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
 
     struct HksParam *keySizeParam = NULL;
     ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
+        "check key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
     *keySize = keySizeParam->uint32Param;
     return ret;
 }
@@ -1465,42 +1443,32 @@ int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const str
 
     if (expectValues.keyLen.needCheck) {
         ret = HksCheckValue(inputParams->keyLen.value, expectValues.keyLen.values, expectValues.keyLen.valueCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value);
-            return HKS_ERROR_INVALID_KEY_SIZE;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_SIZE,
+            "check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value)
     }
 
     if (expectValues.padding.needCheck) {
         ret = HksCheckValue(inputParams->padding.value, expectValues.padding.values, expectValues.padding.valueCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check  padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
-            return HKS_ERROR_INVALID_PADDING;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+            "check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
     }
 
     if (expectValues.purpose.needCheck) {
         ret = HksCheckValue(inputParams->purpose.value, expectValues.purpose.values, expectValues.purpose.valueCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check  purpose not expected, purpose = %" LOG_PUBLIC "u", inputParams->purpose.value);
-            return HKS_ERROR_INVALID_PURPOSE;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PURPOSE,
+            "check purpose not expected, purpose = %" LOG_PUBLIC "u", inputParams->purpose.value)
     }
 
     if (expectValues.digest.needCheck) {
         ret = HksCheckValue(inputParams->digest.value, expectValues.digest.values, expectValues.digest.valueCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check  digest not expected, digest = %" LOG_PUBLIC "u", inputParams->digest.value);
-            return HKS_ERROR_INVALID_DIGEST;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_DIGEST,
+            "check  digest not expected, digest = %" LOG_PUBLIC "u", inputParams->digest.value)
     }
 
     if (expectValues.mode.needCheck) {
         ret = HksCheckValue(inputParams->mode.value, expectValues.mode.values, expectValues.mode.valueCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check  mode not expected, mode = %" LOG_PUBLIC "u", inputParams->mode.value);
-            return HKS_ERROR_INVALID_MODE;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_MODE,
+            "check  mode not expected, mode = %" LOG_PUBLIC "u", inputParams->mode.value)
     }
 
     return ret;
@@ -1510,37 +1478,29 @@ int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const str
 int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inputParams)
 {
     int32_t ret = HksCheckGenKeyPurpose(alg, inputParams->purpose.value);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check purpose not expected, purpose = 0x%" LOG_PUBLIC "x", inputParams->purpose.value);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+        "check purpose not expected, purpose = 0x%" LOG_PUBLIC "x", inputParams->purpose.value)
 
     switch (alg) {
 #ifdef HKS_SUPPORT_RSA_C
         case HKS_ALG_RSA:
             ret = CheckRsaGenKeyPadding(inputParams);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
-                return HKS_ERROR_INVALID_PADDING;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
             break;
 #endif
 #ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             ret = CheckAesPadding(inputParams->mode.value, inputParams->padding.value);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
-                return HKS_ERROR_INVALID_PADDING;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
             break;
 #endif
 #ifdef HKS_SUPPORT_SM4_C
         case HKS_ALG_SM4:
             ret = CheckSm4Padding(inputParams->mode.value, inputParams->padding.value);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
-                return HKS_ERROR_INVALID_PADDING;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
             break;
 #endif
         default:
@@ -1595,10 +1555,8 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
     switch (alg) {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
         case HKS_ALG_RSA:
-            if (HksCheckValue(keySize, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize)) != HKS_SUCCESS) {
-                HKS_LOG_E("check key size: key size value %" LOG_PUBLIC "u not expected", keySize);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckValue(keySize, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize)),
+                HKS_ERROR_INVALID_ARGUMENT, "check key size: key size value %" LOG_PUBLIC "u not expected", keySize)
             return CheckRsaSignature(cmdId, keySize, signature);
 #endif
 #if defined(HKS_SUPPORT_DSA_C) && defined(HKS_SUPPORT_DSA_SIGN_VERIFY)
@@ -1607,10 +1565,8 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
 #endif
 #ifdef HKS_SUPPORT_ECC_C
         case HKS_ALG_ECC:
-            if (HksCheckValue(keySize, g_eccKeySize, HKS_ARRAY_SIZE(g_eccKeySize)) != HKS_SUCCESS) {
-                HKS_LOG_E("check key size: key size value %" LOG_PUBLIC "u not expected", keySize);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckValue(keySize, g_eccKeySize, HKS_ARRAY_SIZE(g_eccKeySize)),
+                HKS_ERROR_INVALID_ARGUMENT, "check key size: key size value %" LOG_PUBLIC "u not expected", keySize)
             return CheckEccSignature(cmdId, keySize, signature);
 #endif
 #ifdef HKS_SUPPORT_ED25519_C
@@ -1619,10 +1575,8 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
 #endif
 #ifdef HKS_SUPPORT_SM2_C
         case HKS_ALG_SM2:
-            if (HksCheckValue(keySize, g_sm2KeySize, HKS_ARRAY_SIZE(g_sm2KeySize)) != HKS_SUCCESS) {
-                HKS_LOG_E("check key size: key size value %" LOG_PUBLIC "u not expected", keySize);
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckValue(keySize, g_sm2KeySize, HKS_ARRAY_SIZE(g_sm2KeySize)),
+                HKS_ERROR_INVALID_ARGUMENT, "check key size: key size value %" LOG_PUBLIC "u not expected", keySize)
             return CheckEccSignature(cmdId, keySize, signature);
 #endif
         default:
