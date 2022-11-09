@@ -191,11 +191,14 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     ]
-
+    deps = []
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
-      deps = [ "//third_party/mbedtls:mbedtls_static" ]
-      include_dirs += [ "//third_party/mbedtls" ]
+      if (huks_dependency_mbedtls_path != "") {
+        deps += [ huks_dependency_mbedtls_path ]
+      } else {
+        deps += [ "//third_party/mbedtls:mbedtls_static" ]
+      }
       configs += [ ":mbedtls_engine" ]
     }
 
@@ -228,10 +231,16 @@ if (ohos_kernel_type == "liteos_m") {
 
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
-      deps += [
-        "//build/lite/config/component/openssl:openssl_shared",
-        "//third_party/mbedtls:mbedtls_shared",
-      ]
+      if (huks_dependency_mbedtls_path != "") {
+        deps += [ huks_dependency_mbedtls_path ]
+      } else {
+        deps += [ "//third_party/mbedtls:mbedtls_shared" ]
+      }
+      if (huks_dependency_openssl_path != "") {
+        deps += [ huks_dependency_openssl_path ]
+      } else {
+        deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
+      }
       configs += [ ":mbedtls_engine" ]
     }
 
