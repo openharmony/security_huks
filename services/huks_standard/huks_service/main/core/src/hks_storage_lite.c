@@ -46,9 +46,7 @@ static int32_t ConstructCalcMacParamSet(struct HksParamSet **paramSet)
 {
     struct HksParamSet *outputParamSet = NULL;
     int32_t ret = HksInitParamSet(&outputParamSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     do {
         struct HksParam digestParam = {
@@ -57,9 +55,7 @@ static int32_t ConstructCalcMacParamSet(struct HksParamSet **paramSet)
         };
 
         ret = HksAddParams(outputParamSet, &digestParam, 1); /* 1: param count */
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = HksBuildParamSet(&outputParamSet);
     } while (0);
@@ -93,14 +89,10 @@ static int32_t CalcHeaderMac(const struct HksBlob *salt, const uint8_t *buf,
         }
 
         ret = ConstructCalcMacParamSet(&paramSet);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = HuksAccessCalcHeaderMac(paramSet, salt, &srcData, mac);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("access calc header mac failed, ret = %" LOG_PUBLIC "d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "access calc header mac failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     HKS_FREE_BLOB(srcData);
@@ -119,10 +111,7 @@ static int32_t InitImageBuffer(void)
 
     struct HksBlob salt = { HKS_DERIVE_DEFAULT_SALT_LEN, keyInfoHead->salt };
     int32_t ret = HuksAccessGenerateRandom(NULL, &salt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("generate random failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "generate random failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob mac = { HKS_HMAC_DIGEST_SHA512_LEN, keyInfoHead->hmac };
     uint16_t size = sizeof(*keyInfoHead) - HKS_HMAC_DIGEST_SHA512_LEN;
@@ -212,9 +201,7 @@ static int32_t CheckKeyInfoHeaderValid(void)
     uint16_t size = sizeof(*keyInfoHead) - HKS_HMAC_DIGEST_SHA512_LEN;
 
     int32_t ret = CalcHeaderMac(&salt, g_storageImageBuffer.data, size, &mac);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (HksMemCmp(mac.data, keyInfoHead->hmac, HKS_HMAC_DIGEST_SHA512_LEN) != 0) {
         HKS_LOG_E("hmac value not match");
@@ -258,18 +245,14 @@ static int32_t LoadFileToBuffer(const char *fileName)
         if (len == 0) {
             HKS_LOG_I("file not exist, init buffer.");
             ret = InitImageBuffer();
-            if (ret != HKS_SUCCESS) {
-                break; /* init fail, need free global buf */
-            }
+            HKS_IF_NOT_SUCC_BREAK(ret) /* init fail, need free global buf */
             return ret;
         }
 
         /* 3. read header success, check keyinfo header */
         HKS_LOG_I("file exist, check buffer.");
         ret = CheckKeyInfoHeaderValid();
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         /* 4. check success, load full buffer */
         ret = FreshImageBuffer(fileName);
@@ -290,9 +273,8 @@ int32_t HksLoadFileToBuffer(void)
 
     /* 1. malloc keyinfo header size buffer */
     int32_t ret = ApplyImageBuffer(sizeof(struct HksStoreHeaderInfo));
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     CleanImageBuffer();
 
     /* 2. read file to buffer */
@@ -322,9 +304,8 @@ int32_t HksFileBufferRefresh(void)
 {
     /* malloc keyinfo header size buffer */
     int32_t ret = ApplyImageBuffer(sizeof(struct HksStoreHeaderInfo));
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     CleanImageBuffer();
 
     return CleanStorageKeyInfo(HKS_KEY_STORE_FILE_NAME);
@@ -535,30 +516,22 @@ static int32_t StoreKeyBlob(bool needDeleteKey, uint32_t offset, const struct Hk
         newkeyInfoHead.keyCount += 1,
         ret = GetLenAfterAddKey(keyBlob, keyInfoHead->totalLen, &totalLenAdded);
     }
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 2. calc temp hmac */
     newkeyInfoHead.totalLen = totalLenAdded;
     ret = RefreshKeyInfoHeaderHmac(&newkeyInfoHead);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 3. delete key if keyExist */
     if (needDeleteKey) {
         ret = DeleteKey(offset);
-        if (ret != HKS_SUCCESS) {
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
     }
 
     /* 4. append key */
     ret = AppendNewKey(keyBlob);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 5. replace header */
     if (memcpy_s(g_storageImageBuffer.data, sizeof(newkeyInfoHead), &newkeyInfoHead, sizeof(newkeyInfoHead)) != EOK) {
@@ -583,9 +556,8 @@ static int32_t StoreRootMaterial(const struct HksBlob *name, const struct HksBlo
 {
     char *fileName = NULL;
     int32_t ret = GetFileName(name, &fileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     ret = HksFileWrite(HKS_KEY_STORE_PATH, fileName, 0, buffer->data, buffer->size);
     HKS_FREE_PTR(fileName);
     return ret;
@@ -595,15 +567,12 @@ static int32_t IsRootMaterialExist(const struct HksBlob *name)
 {
     char *fileName = NULL;
     int32_t ret = GetFileName(name, &fileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     ret = HksIsFileExist(HKS_KEY_STORE_PATH, fileName);
     HKS_FREE_PTR(fileName);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("file not exist");
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST, "file not exist")
+
     return ret;
 }
 
@@ -611,9 +580,8 @@ static int32_t GetRootMaterial(const struct HksBlob *name, struct HksBlob *buffe
 {
     char *fileName = NULL;
     int32_t ret = GetFileName(name, &fileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     uint32_t len = HksFileRead(HKS_KEY_STORE_PATH, fileName, 0, buffer->data, buffer->size);
     HKS_FREE_PTR(fileName);
     if (len == 0) {
@@ -640,16 +608,13 @@ int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct H
     /* 2. store key blob */
     bool needDeleteKey = (ret == HKS_SUCCESS);
     ret = StoreKeyBlob(needDeleteKey, offset, keyBlob);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 3. write to file */
     uint32_t totalLen = 0;
     ret = HksStoreGetToatalSize(&totalLen);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     uint32_t fileOffset = HksGetStoreFileOffset();
     return HksFileWrite(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME, fileOffset, g_storageImageBuffer.data, totalLen);
 }
@@ -663,9 +628,7 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
     /* 1. check key exist or not */
     uint32_t offset = 0;
     int32_t ret = GetKeyOffsetByKeyAlias(keyAlias, &offset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 2. calc tmp header hmac */
     struct HksStoreHeaderInfo *keyInfoHead = (struct HksStoreHeaderInfo *)g_storageImageBuffer.data;
@@ -678,15 +641,11 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
     newkeyInfoHead.keyCount -= 1;
 
     ret = RefreshKeyInfoHeaderHmac(&newkeyInfoHead);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 3. delete key */
     ret = DeleteKey(offset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 4. replace header */
     if (memcpy_s(keyInfoHead, sizeof(*keyInfoHead), &newkeyInfoHead, sizeof(newkeyInfoHead)) != EOK) {
@@ -720,9 +679,7 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
 
     uint32_t offset = 0;
     int32_t ret = GetKeyOffsetByKeyAlias(keyAlias, &offset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* get offset success, len has been check valid */
     uint8_t *tmpBuf = g_storageImageBuffer.data + offset;
@@ -750,9 +707,7 @@ int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName,
 
     uint32_t offset = 0;
     int32_t ret = GetKeyOffsetByKeyAlias(keyAlias, &offset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* get offset success, len has been check valid */
     struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)(g_storageImageBuffer.data + offset);
@@ -802,9 +757,7 @@ static int32_t GetKeyInfoList(struct HksKeyInfo *keyInfoList, const struct HksBl
 
     struct HksParamSet *paramSet = NULL;
     int32_t ret = TranslateKeyInfoBlobToParamSet(NULL, keyInfoBlob, &paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (keyInfoList->paramSet->paramSetSize < paramSet->paramSetSize) {
         HksFreeParamSet(&paramSet);
@@ -852,9 +805,7 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
 {
     uint32_t keyCount;
     int32_t ret = GetAndCheckKeyCount(listCount, &keyCount);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* 2. traverse ImageBuffer to search for keyAlias */
     struct HksBlob storageBuf = HksGetImageBuffer();
@@ -878,9 +829,8 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
 
         struct HksBlob keyInfoBlob = { keyInfo->keyInfoLen, tmpBuf };
         ret = GetKeyInfoList(&keyInfoList[i], &keyInfoBlob);
-        if (ret != HKS_SUCCESS) {
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
         num++;
         offset += keyInfo->keyInfoLen;
     }
@@ -893,17 +843,16 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     (void)processName;
     int32_t ret = HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("remove key store file failed"); /* only record log, continue delete */
-    }
+    /* only record log, continue delete */
+    HKS_IF_NOT_SUCC_LOGE(ret, "remove key store file failed")
+
     ret = HksFileRemove(HKS_KEY_STORE_PATH, "info1.data");
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("remove info1 file failed"); /* only record log, continue delete */
-    }
+    /* only record log, continue delete */
+    HKS_IF_NOT_SUCC_LOGE(ret, "remove info1 file failed")
+
     ret = HksFileRemove(HKS_KEY_STORE_PATH, "info2.data");
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("remove info2 file failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "remove info2 file failed")
+
     return ret;
 }
 #endif /* _STORAGE_LITE_ */

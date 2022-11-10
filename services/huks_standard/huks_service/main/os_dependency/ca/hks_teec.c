@@ -281,15 +281,10 @@ int32_t HksTeeProvision(const struct HksBlob *keybox, struct HksBlob *challenge,
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_INJECT_KEY, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("command key provision failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "command key provision failed")
 
     ret = ProvisionVerify(&operation, challengeIn, (PROVISION_PARAM_COUNT >> 1), NULL, false);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("command HksTeeVerifyKeybox failed\n");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "command HksTeeVerifyKeybox failed\n")
 
     return ret;
 }
@@ -307,16 +302,11 @@ int32_t HksTeeProvisionVerify(const struct HksBlob *verify, struct HksBlob *chal
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_INJECT_KEY_VERIFY, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("command key provision verify failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "command key provision verify failed")
 
     /* here we only have one key signature to verify, so the count is half of the provision param count */
     ret = ProvisionVerify(&operation, challengeIn, (PROVISION_PARAM_COUNT >> 1), verify, true);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify provision failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "verify provision failed")
 
     return ret;
 }
@@ -353,9 +343,7 @@ int32_t HksTeeCheckKeyLegality(const struct HksParamSet *paramSet, const struct 
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_CHECK_KEY_LEGALITY, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("command HksTeeCheckKeyLegality failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "command HksTeeCheckKeyLegality failed")
 
     return ret;
 }
@@ -369,9 +357,7 @@ int32_t HksTeeGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob 
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_GENERATE_RANDOM, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("command HksTeeGenerateRandom failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "command HksTeeGenerateRandom failed")
 
     return ret;
 }
@@ -487,10 +473,7 @@ int32_t ProcessInit(uint32_t cmdId, const struct HksBlob *keyBlob, const struct 
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessInit[%" LOG_PUBLIC "u] failed", cmdId);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ProcessInit[%" LOG_PUBLIC "u] failed", cmdId)
 
     *operationHandle = Uint32To64(operation.params[2].value.a, operation.params[2].value.b); /* 2 is array index */
     return ret;
@@ -513,9 +496,7 @@ int32_t ProcessUpdate(uint32_t cmdId, uint64_t operationHandle,
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessUpdate[%" LOG_PUBLIC "u] failed", cmdId);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "ProcessUpdate[%" LOG_PUBLIC "u] failed", cmdId)
 
     return ret;
 }
@@ -532,10 +513,7 @@ int32_t ProcessFinal(uint32_t cmdId, uint64_t operationHandle,
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessFinal[%" LOG_PUBLIC "u] failed", cmdId);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ProcessFinal[%" LOG_PUBLIC "u] failed", cmdId)
 
     if (!isInput) {
         inOut->size = operation.params[2].tmpref.size; /* 2 is array index */
@@ -558,10 +536,7 @@ int32_t ProcessOnce(uint32_t cmdId, const struct HksBlob *keyBlob, const struct 
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, cmdId, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ProcessOnce[%" LOG_PUBLIC "u] failed", cmdId);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ProcessOnce[%" LOG_PUBLIC "u] failed", cmdId)
 
     if (!isInput) {
         inOut->size = operation.params[3].tmpref.size; /* 3 is array index */
@@ -621,10 +596,7 @@ int32_t HksTeeExportTrustCerts(struct HksBlob *certChain)
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_EXPORT_TRUST_CERT, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invoke HKS_CMD_ID_EXPORT_TRUST_CERT failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Invoke HKS_CMD_ID_EXPORT_TRUST_CERT failed")
 
     certChain->size = operation.params[0].tmpref.size;
     return ret;
@@ -638,10 +610,7 @@ int32_t HksTeeImportTrustCerts(const struct HksBlob *certChain)
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HKS_CMD_ID_IMPORT_TRUST_CERT, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invoke HKS_CMD_ID_IMPORT_TRUST_CERT failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Invoke HKS_CMD_ID_IMPORT_TRUST_CERT failed")
 
     return ret;
 }
@@ -654,8 +623,7 @@ int32_t HcmTeeIsDeviceKeyExist(void)
 
     TEEC_Operation operation;
     int32_t ret = HksTeeCommand(paramTypes, params, HCM_CMD_ID_IS_DEVICE_KEY_EXIST, &operation);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invoke HCM_CMD_ID_IS_DEVICE_KEY_EXIST failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Invoke HCM_CMD_ID_IS_DEVICE_KEY_EXIST failed")
+
     return ret;
 }

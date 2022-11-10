@@ -17,8 +17,10 @@
 #ifdef _STORAGE_LITE_
 
 #include "hks_storage_adapter.h"
+
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_template.h"
 
 bool HksIsKeyInfoLenInvalid(struct HksStoreKeyInfo *keyInfo)
 {
@@ -62,9 +64,8 @@ static int32_t AddStorageFixedParams(const struct HksStoreKeyInfo *keyInfo, stru
     };
 
     int32_t ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(params[0]));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksAddParams failed!")
+
     return ret;
 }
 
@@ -83,10 +84,7 @@ static int32_t AddStorageParams(const struct HksBlob *key, const struct HksBlob 
     }
 
     int32_t ret = AddStorageFixedParams(keyInfo, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add storage fixed params failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add storage fixed params failed!")
 
     if (keyInfo->authIdSize != 0) {
         struct HksBlob keyAuthId = { keyInfo->authIdSize, keyInfoBlob->data + sizeof(*keyInfo) + keyInfo->aliasSize };
@@ -95,10 +93,7 @@ static int32_t AddStorageParams(const struct HksBlob *key, const struct HksBlob 
             .blob = keyAuthId
         };
         ret = HksAddParams(paramSet, &keyAuthIdParam, 1);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksAddParams keyAuthId failed!");
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksAddParams keyAuthId failed!")
     }
 
     if (key != NULL) {
@@ -107,10 +102,7 @@ static int32_t AddStorageParams(const struct HksBlob *key, const struct HksBlob 
             .blob = *key
         };
         ret = HksAddParams(paramSet, &keyParam, 1);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksAddParams key failed!");
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksAddParams key failed!")
     }
     return ret;
 }
@@ -120,22 +112,14 @@ int32_t TranslateKeyInfoBlobToParamSet(const struct HksBlob *key, const struct H
 {
     struct HksParamSet *outputParamSet = NULL;
     int32_t ret = HksInitParamSet(&outputParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksInitParamSet failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksInitParamSet failed!")
 
     do {
         ret = AddStorageParams(key, keyInfoBlob, outputParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("AddParams failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddParams failed!")
 
         ret = HksBuildParamSet(&outputParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksBuildParamSet failed!");
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksBuildParamSet failed!")
     } while (0);
 
     if (ret != HKS_SUCCESS) {

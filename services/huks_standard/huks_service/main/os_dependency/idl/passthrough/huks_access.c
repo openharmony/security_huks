@@ -33,9 +33,7 @@ static struct HuksHdi *g_hksHalDevicePtr = NULL;
 #ifndef _CUT_AUTHENTICATE_
 ENABLE_CFI(int32_t HuksAccessModuleInit(void))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiModuleInit, HKS_ERROR_NULL_POINTER,
         "Module Init function is null pointer")
@@ -45,9 +43,7 @@ ENABLE_CFI(int32_t HuksAccessModuleInit(void))
 
 ENABLE_CFI(int32_t HuksAccessRefresh(void))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiRefresh, HKS_ERROR_NULL_POINTER,
         "Refresh function is null pointer")
@@ -58,9 +54,7 @@ ENABLE_CFI(int32_t HuksAccessRefresh(void))
 ENABLE_CFI(int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
     const struct HksBlob *keyIn, struct HksBlob *keyOut))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGenerateKey, HKS_ERROR_NULL_POINTER,
         "GenerateKey function is null pointer")
@@ -71,9 +65,7 @@ ENABLE_CFI(int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const s
 ENABLE_CFI(int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiImportKey, HKS_ERROR_NULL_POINTER,
         "ImportKey function is null pointer")
@@ -84,9 +76,7 @@ ENABLE_CFI(int32_t HuksAccessImportKey(const struct HksBlob *keyAlias, const str
 ENABLE_CFI(int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyAlias, const struct HksBlob *key,
     const struct HksBlob *wrappedKeyData, const struct HksParamSet *paramSet, struct HksBlob *keyOut))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiImportWrappedKey, HKS_ERROR_NULL_POINTER,
         "ImportWrappedKey function is null pointer")
@@ -97,9 +87,7 @@ ENABLE_CFI(int32_t HuksAccessImportWrappedKey(const struct HksBlob *wrappingKeyA
 ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *keyOut))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiExportPublicKey, HKS_ERROR_NULL_POINTER,
         "ExportPublicKey function is null pointer")
@@ -110,9 +98,7 @@ ENABLE_CFI(int32_t HuksAccessExportPublicKey(const struct HksBlob *key, const st
 ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *handle, struct HksBlob *token))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiInit, HKS_ERROR_NULL_POINTER,
         "Init function is null pointer")
@@ -123,9 +109,7 @@ ENABLE_CFI(int32_t HuksAccessInit(const struct  HksBlob *key, const struct HksPa
 ENABLE_CFI(int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpdate, HKS_ERROR_NULL_POINTER,
         "Update function is null pointer")
@@ -136,9 +120,7 @@ ENABLE_CFI(int32_t HuksAccessUpdate(const struct HksBlob *handle, const struct H
 ENABLE_CFI(int32_t HuksAccessFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiFinish, HKS_ERROR_NULL_POINTER,
         "Finish function is null pointer")
@@ -148,9 +130,7 @@ ENABLE_CFI(int32_t HuksAccessFinish(const struct HksBlob *handle, const struct H
 
 ENABLE_CFI(int32_t HuksAccessAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAbort, HKS_ERROR_NULL_POINTER,
         "Abort function is null pointer")
@@ -160,9 +140,7 @@ ENABLE_CFI(int32_t HuksAccessAbort(const struct HksBlob *handle, const struct Hk
 
 ENABLE_CFI(int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetKeyProperties, HKS_ERROR_NULL_POINTER,
         "GetKeyProperties function is null pointer")
@@ -172,9 +150,7 @@ ENABLE_CFI(int32_t HuksAccessGetKeyProperties(const struct HksParamSet *paramSet
 
 ENABLE_CFI(int32_t HuksAccessGetAbility(int funcType))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetAbility, HKS_ERROR_NULL_POINTER,
         "GetAbility function is null pointer")
@@ -184,9 +160,7 @@ ENABLE_CFI(int32_t HuksAccessGetAbility(int funcType))
 
 ENABLE_CFI(int32_t HuksAccessGetHardwareInfo(void))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGetHardwareInfo, HKS_ERROR_NULL_POINTER,
         "GetHardwareInfo function is null pointer")
@@ -197,9 +171,7 @@ ENABLE_CFI(int32_t HuksAccessGetHardwareInfo(void))
 ENABLE_CFI(int32_t HuksAccessSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiSign, HKS_ERROR_NULL_POINTER,
         "Sign function is null pointer")
@@ -210,9 +182,7 @@ ENABLE_CFI(int32_t HuksAccessSign(const struct HksBlob *key, const struct HksPar
 ENABLE_CFI(int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiVerify, HKS_ERROR_NULL_POINTER,
         "Verify function is null pointer")
@@ -223,9 +193,7 @@ ENABLE_CFI(int32_t HuksAccessVerify(const struct HksBlob *key, const struct HksP
 ENABLE_CFI(int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *plainText, struct HksBlob *cipherText))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiEncrypt, HKS_ERROR_NULL_POINTER,
         "Encrypt function is null pointer")
@@ -236,9 +204,7 @@ ENABLE_CFI(int32_t HuksAccessEncrypt(const struct HksBlob *key, const struct Hks
 ENABLE_CFI(int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDecrypt, HKS_ERROR_NULL_POINTER,
         "Decrypt function is null pointer")
@@ -249,9 +215,7 @@ ENABLE_CFI(int32_t HuksAccessDecrypt(const struct HksBlob *key, const struct Hks
 ENABLE_CFI(int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAgreeKey, HKS_ERROR_NULL_POINTER,
         "AgreeKey function is null pointer")
@@ -262,9 +226,7 @@ ENABLE_CFI(int32_t HuksAccessAgreeKey(const struct HksParamSet *paramSet, const 
 ENABLE_CFI(int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
     struct HksBlob *derivedKey))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiDeriveKey, HKS_ERROR_NULL_POINTER,
         "DeriveKey function is null pointer")
@@ -275,9 +237,7 @@ ENABLE_CFI(int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const
 ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiMac, HKS_ERROR_NULL_POINTER,
         "Mac function is null pointer")
@@ -289,9 +249,7 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
 ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiCalcMacHeader, HKS_ERROR_NULL_POINTER,
         "CalcMacHeader function is null pointer")
@@ -304,9 +262,7 @@ ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, c
 ENABLE_CFI(int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo,
     struct HksBlob *keyOut))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo, HKS_ERROR_NULL_POINTER,
         "UpgradeKeyInfo function is null pointer")
@@ -319,9 +275,7 @@ ENABLE_CFI(int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, cons
 ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *certChain))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiAttestKey, HKS_ERROR_NULL_POINTER,
         "AttestKey function is null pointer")
@@ -334,9 +288,7 @@ ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct H
 
 ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiGenerateRandom, HKS_ERROR_NULL_POINTER,
         "GenerateRandom function is null pointer")
