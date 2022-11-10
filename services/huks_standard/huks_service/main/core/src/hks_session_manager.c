@@ -196,10 +196,7 @@ struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, co
 {
     uint64_t handle;
     int32_t ret = ConstructOperationHandle(operationHandle, &handle);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct handle failed when query operation");
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, NULL, "construct handle failed when query operation")
 
     struct HksOperation *operation = NULL;
     pthread_mutex_lock(&g_lock);

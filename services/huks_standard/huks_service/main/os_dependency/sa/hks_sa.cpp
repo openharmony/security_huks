@@ -190,10 +190,7 @@ bool HksService::Init()
     }
 
     int32_t ret = HksServiceInitialize();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Init hks service failed!");
-        return false;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "Init hks service failed!")
 
     HKS_LOG_I("HksService::Init success.");
     return true;
