@@ -63,10 +63,8 @@ static int32_t CheckChallengeTypeValidity(const struct HksParam *blobChallengeTy
     if (blobChallengeType->uint32Param == HKS_CHALLENGE_TYPE_CUSTOM) {
         struct HksParam *challengePosParam = NULL;
         int32_t ret = HksGetParam(innerParams->initParamSet, HKS_TAG_CHALLENGE_POS, &challengePosParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get init paramSet's challenge pos failed!");
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get init paramSet's challenge pos failed!")
+
         if (challengePosParam->uint32Param > HKS_CHALLENGE_POS_3) {
             HKS_LOG_E("challenge position should in range of 0~3!");
             return HKS_ERROR_INVALID_ARGUMENT;
@@ -101,32 +99,21 @@ static int32_t CheckInitParamSetValidityAndGet(const struct HksParamSet *keyBlob
         return HKS_SUCCESS;
     }
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get blob user auth type failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get blob user auth type failed!")
 
     struct HksParam *blobChallengeType = NULL;
     ret = HksGetParam(keyBlobParamSet, HKS_TAG_CHALLENGE_TYPE, &blobChallengeType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get blob challenge type failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get blob challenge type failed!")
 
     ret = CheckChallengeTypeValidity(blobChallengeType, innerParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check init paramSet's challenge type related params failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check init paramSet's challenge type related params failed!")
 
     struct HksParam *secureSignTag = NULL;
     ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY_SECURE_SIGN_TYPE, &secureSignTag);
     if (ret == HKS_SUCCESS) {
         ret = HksCheckSecureSignParams(secureSignTag->uint32Param);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("invalid key blob secure sign type!");
-            return HKS_ERROR_BAD_STATE;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "invalid key blob secure sign type!")
+
         innerParams->isSecureSign = true;
     } else {
         innerParams->isSecureSign = false;
@@ -139,19 +126,14 @@ static int32_t CheckInitParamSetValidityAndGet(const struct HksParamSet *keyBlob
 static int32_t AddChallengeParams(struct HksParamSet *paramSet, struct HksBlob *challengeBlob)
 {
     int32_t ret = HksCryptoHalFillRandom(challengeBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("generate challenge failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "generate challenge failed!")
 
     struct HksParam challengeParam;
     challengeParam.tag = HKS_TAG_KEY_INIT_CHALLENGE;
     challengeParam.blob = *challengeBlob;
     ret = HksAddParams(paramSet, &challengeParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add challenge params fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add challenge params fail")
+
     return HKS_SUCCESS;
 }
 
@@ -159,19 +141,14 @@ static int32_t AddKeyAccessTimeParams(struct HksParamSet *paramSet)
 {
     uint64_t curTime = 0;
     int32_t ret = HksCoreHalElapsedRealTime(&curTime);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get elapsed real time failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get elapsed real time failed!")
 
     struct HksParam accessTimeParam;
     accessTimeParam.tag = HKS_TAG_KEY_ACCESS_TIME;
     accessTimeParam.uint64Param = curTime / S_TO_MS;
     ret = HksAddParams(paramSet, &accessTimeParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add access time param fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add access time param fail")
+
     return HKS_SUCCESS;
 }
 
@@ -204,10 +181,8 @@ static int32_t AddAppendDataPlaceholder(struct HksParamSet *paramSet, uint8_t *a
     };
 
     int32_t ret = HksAddParams(paramSet, &signAuthParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add sign auth info params fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add sign auth info params fail")
+
     return HKS_SUCCESS;
 }
 
@@ -223,10 +198,8 @@ static int32_t AddDefaultAuthRuntimeParams(struct HksParamSet *paramSet,
     };
 
     int32_t ret = HksAddParams(paramSet, defineParams, sizeof(defineParams) / sizeof(defineParams[0]));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add runtime defineParams fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add runtime defineParams fail")
+
     return HKS_SUCCESS;
 }
 
@@ -235,51 +208,31 @@ static int32_t BuildAuthRuntimeParamSet(struct HksSecureAccessInnerParams *inner
 {
     struct HksParamSet *paramSet = NULL;
     int32_t ret = HksInitParamSet(&paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init keyNode auth runtime param set fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init keyNode auth runtime param set fail")
 
     do {
         ret = AddDefaultAuthRuntimeParams(paramSet, innerParams, isNeedAppendAuthInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add auth runtime default params fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add auth runtime default params fail")
 
         ret = AddKeyAccessTimeParams(paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add key access time params failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key access time params failed!")
 
         uint8_t challenge[TOKEN_SIZE] = {0};
         struct HksBlob challengeBlob = { TOKEN_SIZE, challenge };
         ret = AddChallengeParams(paramSet, &challengeBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add challenge params failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add challenge params failed!")
 
         if (isNeedAppendAuthInfo) {
             uint8_t appendPlaceholder[sizeof(struct HksSecureSignAuthInfo)] = {0};
             ret = AddAppendDataPlaceholder(paramSet, appendPlaceholder, sizeof(appendPlaceholder));
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("add append data info params fail");
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add append data info params fail")
         }
 
         ret = HksBuildParamSet(&paramSet);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = AssignToken(innerParams->outToken, &challengeBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("assign out token failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "assign out token failed")
 
         *outParamSet = paramSet;
         return HKS_SUCCESS;
@@ -294,10 +247,8 @@ static int32_t HksVerifyKeyChallenge(const struct HuksKeyNode *keyNode, const st
 {
     struct HksParam *challenge = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_INIT_CHALLENGE, &challenge);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get init challenge failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get init challenge failed!")
+
     if (checkLen + challengePos * BYTES_PER_POS > challenge->blob.size) {
         HKS_LOG_E("check challenge too long!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -321,11 +272,8 @@ static int32_t HksVerifyKeyTimestamp(const struct HuksKeyNode *keyNode, const st
 
     struct HksParam *accessTime = NULL;
     ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_ACCESS_TIME, &accessTime);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get access time failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
-    
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get access time failed!")
+
     // ms to s
     uint64_t authTokenTime = token->time / S_TO_MS;
     if ((accessTime->uint64Param > authTokenTime && accessTime->uint64Param - authTokenTime > timeOutInt) ||
@@ -348,9 +296,7 @@ static int32_t CheckAuthToken(const struct HksBlob *authTokenParam)
 static int32_t ParseAuthToken(const struct HksBlob *inAuthTokenParam, struct HksUserAuthToken **outAuthToken)
 {
     int32_t ret = CheckAuthToken(inAuthTokenParam);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksUserAuthToken *authToken = NULL;
     do {
@@ -374,16 +320,11 @@ static int32_t GetAuthToken(const struct HksParamSet *paramSet, struct HksUserAu
 {
     struct HksParam *authTokenParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_AUTH_TOKEN, &authTokenParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get auth token param failed!");
-        return HKS_ERROR_CHECK_GET_AUTH_TOKEN_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_AUTH_TOKEN_FAILED, "get auth token param failed!")
 
     ret = ParseAuthToken(&authTokenParam->blob, authToken);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("parse auth token failed!");
-        return HKS_ERROR_INVALID_AUTH_TOKEN;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_AUTH_TOKEN, "parse auth token failed!")
+
     return HKS_SUCCESS;
 }
 
@@ -391,10 +332,8 @@ static int32_t GetChallengePos(const struct HksParamSet *paramSet, uint32_t *pos
 {
     struct HksParam *posParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_POS, &posParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get challenge pos failed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get challenge pos failed!")
+
     *pos = posParam->uint32Param;
     return ret;
 }
@@ -403,10 +342,8 @@ static int32_t GetChallengeType(const struct HksParamSet *paramSet, uint32_t *ty
 {
     struct HksParam *typeParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_CHALLENGE_TYPE, &typeParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get challenge type failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get challenge type failed!")
+
     *type = typeParam->uint32Param;
     return HKS_SUCCESS;
 }
@@ -415,10 +352,7 @@ static int32_t VerifyCustomChallenge(const struct HuksKeyNode *keyNode, const st
 {
     uint32_t pos = 0;
     int32_t ret = GetChallengePos(keyNode->authRuntimeParamSet, &pos);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get challenge pos failed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get challenge pos failed!")
 
     return HksVerifyKeyChallenge(keyNode, authToken, pos, BYTES_PER_POS);
 }
@@ -432,10 +366,7 @@ static int32_t VerifyChallengeOrTimeStamp(const struct HuksKeyNode *keyNode, con
 {
     uint32_t blobChallengeType;
     int32_t ret = GetChallengeType(keyNode->keyBlobParamSet, &blobChallengeType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get challenge type failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get challenge type failed!")
 
     switch (blobChallengeType) {
         case HKS_CHALLENGE_TYPE_NORMAL:
@@ -463,10 +394,7 @@ static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
 
     struct HksParam *secUid = NULL;
     int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_SECURE_UID, &secUid);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get sec uid failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get sec uid failed!")
 
     if (secUid->blob.size != sizeof(uint64_t)) {
         HKS_LOG_E("invalid sec uid param!");
@@ -491,10 +419,7 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
 
     struct HksParam *enrolledIdInfo = NULL;
     int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_ENROLL_ID_INFO, &enrolledIdInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get enrolled info param failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get enrolled info param failed!")
 
     struct HksBlob enrolledIdInfoBlob = enrolledIdInfo->blob;
     if (enrolledIdInfoBlob.size < ENROLLED_ID_INFO_MIN_LEN) {
@@ -527,24 +452,15 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     struct HksParamSet *keyBlobParamSet = keyNode->keyBlobParamSet;
     struct HksParam *userAuthType = NULL;
     int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_USER_AUTH_TYPE, &userAuthType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get userAuthType type failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get userAuthType type failed!")
 
     struct HksParam *authAccessType = NULL;
     ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccessType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get auth access type failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get auth access type failed!")
 
     uint32_t authTokenAuthType = 0;
     ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &authTokenAuthType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid user iam auth type:not support!");
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "invalid user iam auth type:not support!")
 
     if ((authTokenAuthType & userAuthType->uint32Param) == 0) {
         HKS_LOG_E("current keyblob auth do not support current auth token auth type!");
@@ -552,17 +468,11 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     }
 
     ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify sec uid failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")
 
     ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param,
         authAccessType->uint32Param, authTokenAuthType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify enrolled id info failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify enrolled id info failed!")
 
     return ret;
 }
@@ -572,10 +482,7 @@ static int32_t HksAddVerifiedAuthTokenIfNeed(struct HuksKeyNode *keyNode,
 {
     struct HksParam *isNeedSecureSignInfo = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IF_NEED_APPEND_AUTH_INFO, &isNeedSecureSignInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get is secure sign failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get is secure sign failed!")
 
     if (isNeedSecureSignInfo->boolParam == false) {
         return HKS_SUCCESS;
@@ -583,10 +490,7 @@ static int32_t HksAddVerifiedAuthTokenIfNeed(struct HuksKeyNode *keyNode,
 
     struct HksParamSet *newAuthRuntimeParamSet = NULL;
     ret = HksInitParamSet(&newAuthRuntimeParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init new auth param set fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init new auth param set fail")
 
     struct HksParamSet *authRuntimeParamSet = keyNode->authRuntimeParamSet;
     if (authRuntimeParamSet != NULL) {
@@ -629,17 +533,11 @@ static int32_t CheckIfNeedVerifyParams(const struct HuksKeyNode *keyNode, bool *
 {
     struct HksParam *isNeedSecureAccess = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IS_USER_AUTH_ACCESS, &isNeedSecureAccess);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get isSecureAccess failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get isSecureAccess failed!")
 
     struct HksParam *authResult = NULL;
     ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_AUTH_RESULT, &authResult);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get authResult failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get authResult failed!")
 
     *outAuthResult = authResult;
     if (isNeedSecureAccess->boolParam == false) {
@@ -680,10 +578,7 @@ static int32_t GetUserAuthResult(const struct HuksKeyNode *keyNode, int32_t *aut
 {
     struct HksParam *isSecureAccess = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IS_USER_AUTH_ACCESS, &isSecureAccess);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get isSecureAccess failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get isSecureAccess failed!")
 
     if (isSecureAccess->boolParam == false) {
         *authResult = HKS_AUTH_RESULT_NONE;
@@ -692,10 +587,8 @@ static int32_t GetUserAuthResult(const struct HuksKeyNode *keyNode, int32_t *aut
 
     struct HksParam *authResultParam = NULL;
     ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_AUTH_RESULT, &authResultParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get authResult failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get authResult failed!")
+
     *authResult = authResultParam->int32Param;
     return HKS_SUCCESS;
 }
@@ -706,10 +599,7 @@ static int32_t CheckParamsAndGetAppendState(const struct HuksKeyNode *keyNode, s
 
     struct HksParam *isAppendData = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IS_APPEND_UPDATE_DATA, &isAppendData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get is append update param failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get is append update param failed")
 
     *isAppendDataParam = isAppendData;
     return HKS_SUCCESS;
@@ -720,17 +610,11 @@ static int32_t GetSupportAppendAuthInfoParams(const struct HuksKeyNode *keyNode,
 {
     struct HksParam *isNeedAppendParam = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IF_NEED_APPEND_AUTH_INFO, &isNeedAppendParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get is need append param failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get is need append param failed")
 
     int32_t authResult = (int32_t) HKS_AUTH_RESULT_NONE;
     ret = GetUserAuthResult(keyNode, &authResult);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get auth result failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get auth result failed")
 
     *isNeedAppendAuthInfo = isNeedAppendParam->boolParam;
     *authResultOut = authResult;
@@ -743,10 +627,7 @@ static int32_t CheckIfNeedAppendUpdateData(const struct HksAppendDataInnerParams
     bool isNeedAppend = false;
     int32_t authResult = HKS_AUTH_RESULT_NONE;
     int32_t ret = GetSupportAppendAuthInfoParams(innerParams->keyNode, &isNeedAppend, &authResult);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get append auth support params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get append auth support params failed")
 
     *outAuthResult = authResult;
     if (isNeedAppend == false) {
@@ -756,10 +637,7 @@ static int32_t CheckIfNeedAppendUpdateData(const struct HksAppendDataInnerParams
 
     struct HksParam *isAlreadyAppendData = NULL;
     ret = CheckParamsAndGetAppendState(innerParams->keyNode, &isAlreadyAppendData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check is append data params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check is append data params failed")
 
     if (isAlreadyAppendData->boolParam == true) {
         *outIsNeedAppend = false;
@@ -784,10 +662,7 @@ static int32_t GetSecureSignAuthInfo(const struct HuksKeyNode *keyNode, struct H
 {
     struct HksParam *authTokenParam = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_VERIFIED_AUTH_TOKEN, &authTokenParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get verified auth token failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get verified auth token failed")
 
     if (authTokenParam->blob.size != sizeof(struct HksUserAuthToken)) {
         return HKS_ERROR_BAD_STATE;
@@ -796,10 +671,7 @@ static int32_t GetSecureSignAuthInfo(const struct HuksKeyNode *keyNode, struct H
     struct HksUserAuthToken *authToken = (struct HksUserAuthToken *)authTokenParam->blob.data;
     uint32_t hksAuthType;
     ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &hksAuthType);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid user iam auth type");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "invalid user iam auth type")
 
     secureSignInfo->userAuthType = hksAuthType;
     secureSignInfo->credentialId = authToken->credentialId;
@@ -848,10 +720,7 @@ static int32_t CheckIfNeedAppendFinishData(const struct HksAppendDataInnerParams
     bool isNeedAppend = false;
     int32_t authResult = HKS_AUTH_RESULT_NONE;
     int32_t ret = GetSupportAppendAuthInfoParams(innerParams->keyNode, &isNeedAppend, &authResult);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get append auth support params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get append auth support params failed")
 
     *outAuthResult = authResult;
     if (isNeedAppend == false) {
@@ -866,10 +735,7 @@ static int32_t CheckIfNeedAppendFinishData(const struct HksAppendDataInnerParams
 
     struct HksParam *isAlreadyAppendUpdateData = NULL;
     ret = CheckParamsAndGetAppendState(innerParams->keyNode, &isAlreadyAppendUpdateData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check is already append update data params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check is already append update data params failed")
 
     if (isAlreadyAppendUpdateData->boolParam == false) {
         HKS_LOG_E("did not append update data");
@@ -896,10 +762,7 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
 {
     struct HksParam *appendDataPrefixParam = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_APPENDED_DATA_PREFIX, &appendDataPrefixParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get append prefix data failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get append prefix data failed")
 
     uint32_t cacheOutDataSize = sizeof(uint32_t) + sizeof(struct HksSecureSignAuthInfo) + innerParams->inData->size;
     uint8_t *cacheOutData = (uint8_t *)HksMalloc(cacheOutDataSize);
@@ -939,17 +802,11 @@ int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct 
     innerParams.outToken = token;
 
     int32_t ret = CheckInitParamSetValidityAndGet(keyNode->keyBlobParamSet, &innerParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check init params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check init params failed")
 
     struct HksParamSet *authRuntimeParamSet = NULL;
     ret = BuildAuthRuntimeParamSet(&innerParams, innerParams.isSecureSign, &authRuntimeParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build auth run time params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build auth run time params failed")
 
     keyNode->authRuntimeParamSet = authRuntimeParamSet;
     return HKS_SUCCESS;
@@ -966,10 +823,7 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
     bool isNeedSecureAccess = true;
     
     int32_t ret = CheckIfNeedVerifyParams(keyNode, &isNeedSecureAccess, &authResult);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check if need verify params failed!");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "check if need verify params failed!")
 
     if (isNeedSecureAccess == false) {
         return HKS_SUCCESS;
@@ -983,28 +837,16 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
     struct HksUserAuthToken *authToken = NULL;
     do {
         ret = GetAuthToken(paramSet, &authToken);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get auth token failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get auth token failed!")
 
         ret = HksVerifyAuthTokenSign(authToken);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("verify the auth token sign failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify the auth token sign failed!")
 
         ret = VerifyChallengeOrTimeStamp(keyNode, authToken);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("verify challenge failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify challenge failed!")
 
         ret = VerifyAuthTokenInfo(keyNode, authToken);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("verify auth token info failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify auth token info failed!")
     } while (0);
 
     return AssignVerifyResultAndFree(ret, authResult, keyNode, authToken);
@@ -1028,10 +870,7 @@ int32_t HksCoreAppendAuthInfoBeforeUpdate(struct HuksKeyNode *keyNode, uint32_t 
     };
 
     int32_t ret = CheckIfNeedAppendUpdateData(&innerParams, &isNeedAppend, &authResult, appendedData, &isAppendedData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get if need append update data params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get if need append update data params failed")
 
     if (isNeedAppend == false) {
         return HKS_SUCCESS;
@@ -1044,17 +883,11 @@ int32_t HksCoreAppendAuthInfoBeforeUpdate(struct HuksKeyNode *keyNode, uint32_t 
 
     struct HksSecureSignAuthInfo secureSignInfo;
     ret = GetSecureSignAuthInfo(keyNode, &secureSignInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get secure sign auth info failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get secure sign auth info failed")
 
     struct HksBlob outDataBlob = { 0, NULL };
     ret = DoAppendPrefixAuthInfoToUpdateInData(keyNode, &secureSignInfo, inData, &outDataBlob);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("do append prefix auth info to update in data failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "do append prefix auth info to update in data failed")
 
     isAppendedData->boolParam = true;
     *appendedData = outDataBlob;
@@ -1084,10 +917,7 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
     };
 
     int32_t ret = CheckIfNeedAppendFinishData(&innerParams, &isNeedAppend, &authResult, inOutDataOriginSize);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get if need append finish data params failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get if need append finish data params failed")
 
     if (isNeedAppend == false) {
         return HKS_SUCCESS;
@@ -1152,16 +982,12 @@ static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamS
 {
     struct HksParam *blobAccessTokenId = NULL;
     int32_t ret = HksGetParam(blobParamSet, HKS_TAG_ACCESS_TOKEN_ID, &blobAccessTokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("no access token id in keyblob");
-        return HKS_SUCCESS;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "no access token id in keyblob")
+
     struct HksParam *runtimeAccessTokenId = NULL;
     ret = HksGetParam(runtimeParamSet, HKS_TAG_ACCESS_TOKEN_ID, &runtimeAccessTokenId);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get access token id form runtime paramSet failed");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get access token id form runtime paramSet failed")
+
     ret = (blobAccessTokenId->uint64Param == runtimeAccessTokenId->uint64Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
     return ret;
 }
@@ -1179,8 +1005,7 @@ static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamS
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("access token compare failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "access token compare failed")
+
     return ret;
 }

@@ -105,9 +105,7 @@ static int32_t GetKeySizePosition(const struct HksBlob *keyInfo, uint32_t *keySi
     /* keyInfo size has beed checked */
     uint32_t offset = 0;
     int32_t ret = GetParamPosition(keyInfo, &offset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* offset keyType + keyLen + keyUsage + padding + mode + role + domain + authIdType */
     offset += sizeof(uint32_t) + sizeof(uint16_t) + sizeof(uint32_t) +
@@ -129,9 +127,7 @@ static int32_t GetKeyInfo(const struct HksBlob *keyInfo, struct HksKeyStoreInfo 
     /* keyInfo size has beed checked */
     uint32_t offset = 0;
     int32_t ret = GetParamPosition(keyInfo, &offset);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     uint8_t *tmp = keyInfo->data;
     keyStoreInfo->rsv = 0;
@@ -199,9 +195,8 @@ static int32_t BuildDecryptMeterail(const struct HksBlob *keyInfo, const struct 
 {
     uint32_t keySizePosition = 0;
     int32_t ret = GetKeySizePosition(keyInfo, &keySizePosition);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     uint32_t keyPos = keySizePosition + sizeof(uint8_t);
     struct HksBlob aad = { keyPos, keyInfo->data }; /* aad: from flags to keySize */
 
@@ -234,10 +229,7 @@ static int32_t GetKek(const struct HksBlob *salt, struct HksBlob *kek)
     uint8_t mainKeyData[HKS_KEY_BLOB_MAIN_KEY_SIZE] = {0};
     struct HksBlob mainKey = { HKS_KEY_BLOB_MAIN_KEY_SIZE, mainKeyData };
     int32_t ret = HksCryptoHalGetMainKey(NULL, &mainKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get main key failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get main key failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksKeyDerivationParam derParam = {
         .salt = *salt,
@@ -374,15 +366,11 @@ static int32_t GetNewFormatKey(const struct HksBlob *keyInfo, struct HksBlob *ke
     struct HksBlob nonce = { 0, NULL };
     struct HksBlob rawKey = { 0, NULL };
     int32_t ret = GetNonce(keyInfo, &nonce);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     do {
         ret = GetKek(&nonce, &kek);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         struct HksAeadParam aeadParam;
         struct HksUsageSpec usageSpec;
@@ -392,19 +380,13 @@ static int32_t GetNewFormatKey(const struct HksBlob *keyInfo, struct HksBlob *ke
 
         struct HksBlob cipherKey = { 0, NULL };
         ret = BuildDecryptMeterail(keyInfo, &nonce, &usageSpec, &cipherKey);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = DecryptKey(&kek, &usageSpec, &cipherKey, &rawKey);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = ConvertToNewFormat(keyInfo, &rawKey, key);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
     } while (0);
 
     HKS_FREE_BLOB(nonce);
@@ -432,9 +414,8 @@ static int32_t AddKeyAuthIdParam(const struct HksKeyStoreInfo *keyStoreInfo, str
     };
 
     int32_t ret = HksAddParams(paramSet, &keyAuthIdParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add param keyAuthId failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "add param keyAuthId failed!")
+
     return ret;
 }
 
@@ -468,10 +449,7 @@ static int32_t AddKeyInfoParams(uint8_t flag, const struct HksKeyStoreInfo *keyS
     struct HksNewVersionValue spec;
     (void)memset_s(&spec, sizeof(spec), 0, sizeof(spec));
     int32_t ret = TranslateToNewValue(flag, keyStoreInfo, &spec);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate to new value failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "translate to new value failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksParam params[] = {
         {
@@ -496,10 +474,7 @@ static int32_t AddKeyInfoParams(uint8_t flag, const struct HksKeyStoreInfo *keyS
     };
 
     ret = HksAddParams(paramSet, params, sizeof(params) / sizeof(params[0]));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add params failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add params failed!")
 
     return AddKeyAuthIdParam(keyStoreInfo, paramSet);
 }
@@ -508,10 +483,8 @@ static int32_t AddProcessNameParam(struct HksParamSet *paramSet)
 {
     char *processName = NULL;
     int32_t ret = HksGetProcessName(&processName);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get process name failed");
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
     struct HksParam processNameParam = {
         .tag = HKS_TAG_PROCESS_NAME,
@@ -519,32 +492,26 @@ static int32_t AddProcessNameParam(struct HksParamSet *paramSet)
     };
 
     ret = HksAddParams(paramSet, &processNameParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add param proceseName failed!");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "add param proceseName failed!")
+
     return ret;
 }
 
 static int32_t AddParams(const struct HksBlob *keyInfo, struct HksParamSet *paramSet)
 {
     int32_t ret = AddProcessNameParam(paramSet);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* add params from key storage file */
     struct HksKeyStoreInfo keyStoreInfo;
     (void)memset_s(&keyStoreInfo, sizeof(keyStoreInfo), 0, sizeof(keyStoreInfo));
     ret = GetKeyInfo(keyInfo, &keyStoreInfo);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     uint8_t flag = *(keyInfo->data);
     ret = AddKeyInfoParams(flag, &keyStoreInfo, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add key info params failed, ret = %" LOG_PUBLIC "d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "add key info params failed, ret = %" LOG_PUBLIC "d", ret)
+
     if (keyStoreInfo.authIdData != NULL) {
         HKS_FREE_PTR(keyStoreInfo.authIdData);
     }
@@ -555,23 +522,14 @@ static int32_t GetParamSet(const struct HksBlob *keyInfo, struct HksParamSet **p
 {
     struct HksParamSet *outputParamSet = NULL;
     int32_t ret = HksInitParamSet(&outputParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksInitParamSet failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksInitParamSet failed!")
 
     do {
         ret = AddParams(keyInfo, outputParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("AddParams failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddParams failed!")
 
         ret = HksBuildParamSet(&outputParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksBuildParamSet failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet failed!")
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -604,9 +562,8 @@ static int32_t GetKeyFlag(const struct HksBlob *keyInfo, uint8_t *keyFlag)
 int32_t HksUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut)
 {
     int32_t ret = HksCheckBlob3(keyAlias, keyInfo, keyOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
     if (keyInfo->size < GetKeySlotLen()) {
         HKS_LOG_E("invalid key info size, size = %" LOG_PUBLIC "u", keyInfo->size);
         return ret;
@@ -617,26 +574,17 @@ int32_t HksUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *
 
     do {
         ret = GetNewFormatKey(keyInfo, &key);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = GetParamSet(keyInfo, &paramSet);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         uint8_t keyFlag = 0;
         ret = GetKeyFlag(keyInfo, &keyFlag);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = HksBuildKeyBlob(keyAlias, keyFlag, &key, paramSet, keyOut);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("generate key blob failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "generate key blob failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     if (key.data != NULL) {
