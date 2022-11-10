@@ -367,7 +367,6 @@ static int32_t UpgradeKeyStoreFiles(void)
 
         ret = UpgradeKeyStoreInfo(&keyInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "update key store info failed, ret = %" LOG_PUBLIC "d", ret)
-
     } while (0);
 
     HKS_FREE_BLOB(keyInfo);
