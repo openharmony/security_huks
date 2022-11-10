@@ -108,10 +108,8 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
         for (uint32_t i = 0; i < (**outSecInfo).enrolledInfoLen; ++i) {
             enum HksUserAuthType authType;
             ret = ConvertToHksAuthType(info.enrolledInfo[i].authType, &authType);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("ConvertToHksAuthType failed :%" LOG_PUBLIC "d!", ret);
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ConvertToHksAuthType failed :%" LOG_PUBLIC "d!", ret)
+
             (**outSecInfo).enrolledInfo[i].authType = authType;
                 
             (**outSecInfo).enrolledInfo[i].enrolledId = info.enrolledInfo[i].enrolledId;
