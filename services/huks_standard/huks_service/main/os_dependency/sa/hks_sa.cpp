@@ -227,7 +227,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
     HKS_IF_NULL_LOGE_RETURN(srcData.data, HW_SYSTEM_ERROR, "Malloc srcData failed.")
 
-    const uint8_t *pdata = data.ReadBuffer(reinterpret_cast<size_t>(srcData.size));
+    const uint8_t *pdata = data.ReadBuffer(static_cast<size_t>(srcData.size));
     if (pdata == nullptr) {
         HKS_FREE_BLOB(srcData);
         return HKS_ERROR_IPC_MSG_FAIL;
