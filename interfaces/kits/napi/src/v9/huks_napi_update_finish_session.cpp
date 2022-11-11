@@ -352,20 +352,22 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
-            if (context->isUpdate) {
-                context->result = HksUpdate(context->handle, context->paramSet, context->inData, context->outData);
+            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
+            if (napiContext->isUpdate) {
+                napiContext->result = HksUpdate(napiContext->handle,
+                    napiContext->paramSet, napiContext->inData, napiContext->outData);
             } else {
-                context->result = HksFinish(context->handle, context->paramSet, context->inData, context->outData);
+                napiContext->result = HksFinish(napiContext->handle,
+                    napiContext->paramSet, napiContext->inData, napiContext->outData);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
+            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            resultData.outData = context->outData;
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteUpdateAsyncContext(env, context);
+            resultData.outData = napiContext->outData;
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteUpdateAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

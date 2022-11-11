@@ -106,16 +106,17 @@ static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext con
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(data);
+            GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
 
-            context->result = HksGenerateKey(context->keyAlias, context->paramSetIn, context->paramSetOut);
+            napiContext->result = HksGenerateKey(napiContext->keyAlias,
+                napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
-            GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(data);
+            GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteGenerateKeyAsyncContext(env, context);
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteGenerateKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

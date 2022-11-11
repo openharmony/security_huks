@@ -71,7 +71,7 @@ static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_GETNRATEKEY_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -111,19 +111,20 @@ static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext con
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(data);
+            GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
 
-            context->result = HksGenerateKey(context->keyAlias, context->paramSetIn, context->paramSetOut);
+            napiContext->result = HksGenerateKey(napiContext->keyAlias,
+                napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
-            GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(data);
-            napi_value result = GenerateKeyWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            GenerateKeyAsyncContext napiContext = static_cast<GenerateKeyAsyncContext>(data);
+            napi_value result = GenerateKeyWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteGenerateKeyAsyncContext(env, context);
+            DeleteGenerateKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

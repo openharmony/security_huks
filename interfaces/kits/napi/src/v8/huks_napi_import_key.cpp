@@ -74,7 +74,7 @@ static napi_value ImportKeyParseParams(napi_env env, napi_callback_info info, Im
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_IMPORT_KEY_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -120,19 +120,20 @@ static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ImportKeyAsyncContext context = static_cast<ImportKeyAsyncContext>(data);
+            ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
 
-            context->result = HksImportKey(context->keyAlias, context->paramSet, context->key);
+            napiContext->result = HksImportKey(napiContext->keyAlias,
+                napiContext->paramSet, napiContext->key);
         },
         [](napi_env env, napi_status status, void *data) {
-            ImportKeyAsyncContext context = static_cast<ImportKeyAsyncContext>(data);
-            napi_value result = ImportKeyWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
+            napi_value result = ImportKeyWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteImportKeyAsyncContext(env, context);
+            DeleteImportKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

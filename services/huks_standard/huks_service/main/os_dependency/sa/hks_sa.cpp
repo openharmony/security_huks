@@ -126,7 +126,8 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
     uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
     for (uint32_t i = 0; i < size; ++i) {
         if (code == g_hksIpcMessageHandler[i].msgId) {
-            g_hksIpcMessageHandler[i].handler((const struct HksBlob *)&srcData, (const uint8_t *)&reply);
+            g_hksIpcMessageHandler[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData),
+                reinterpret_cast<const uint8_t *>(&reply));
             return NO_ERROR;
         }
     }
@@ -144,7 +145,8 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
                 HKS_IF_NULL_LOGE_RETURN(outData.data, HW_SYSTEM_ERROR, "Malloc outData failed.")
             }
-            g_hksIpcThreeStageHandler[i].handler((const struct HksBlob *)&srcData, &outData, (const uint8_t *)&reply);
+            g_hksIpcThreeStageHandler[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData), &outData,
+                reinterpret_cast<const uint8_t *>(&reply));
             HKS_FREE_BLOB(outData);
             break;
         }
@@ -225,7 +227,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
     HKS_IF_NULL_LOGE_RETURN(srcData.data, HW_SYSTEM_ERROR, "Malloc srcData failed.")
 
-    const uint8_t *pdata = data.ReadBuffer((size_t)srcData.size);
+    const uint8_t *pdata = data.ReadBuffer(reinterpret_cast<size_t>(srcData.size));
     if (pdata == nullptr) {
         HKS_FREE_BLOB(srcData);
         return HKS_ERROR_IPC_MSG_FAIL;
