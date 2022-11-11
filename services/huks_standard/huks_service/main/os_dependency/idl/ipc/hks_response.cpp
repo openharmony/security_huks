@@ -63,7 +63,7 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         reply->WriteUint32(0);
     } else {
         reply->WriteUint32(response->size);
-        reply->WriteBuffer(response->data, (size_t)response->size);
+        reply->WriteBuffer(response->data, reinterpret_cast<size_t>(response->size));
     }
 }
 
@@ -135,7 +135,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->userIdInt = userId;
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-    processInfo->accessTokenId = (uint64_t)IPCSkeleton::GetCallingTokenID();
+    processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
 #endif
 
     return HKS_SUCCESS;

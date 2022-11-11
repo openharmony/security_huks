@@ -286,6 +286,7 @@ int32_t HksRemoveDir(const char *dirPath)
     while (dire != NULL) {
         if (dire->d_type == DT_REG) { /* only care about files. */
             ret = HksFileRemove(dirPath, dire->d_name);
+            /* Continue to delete remaining files */
             HKS_IF_NOT_SUCC_LOGE(ret, "remove file failed when remove dir files, ret = %" LOG_PUBLIC "d.", ret)
         }
         dire = readdir(dir);
