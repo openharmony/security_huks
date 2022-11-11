@@ -82,10 +82,10 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
     enum HksSendType sendType = HKS_SEND_TYPE_SYNC;
-    struct HksParam *sendTypeParam = NULL;
+    struct HksParam *sendTypeParam = nullptr;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ASYNCHRONIZED, &sendTypeParam);
     if (ret == HKS_SUCCESS) {
-        sendType = (enum HksSendType)sendTypeParam->uint32Param;
+        sendType = static_cast<enum HksSendType>(sendTypeParam->uint32Param);
     }
 
     MessageParcel data;
@@ -106,7 +106,7 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
     }
 
     data.WriteUint32(inBlob->size);
-    data.WriteBuffer(inBlob->data, (size_t)inBlob->size);
+    data.WriteBuffer(inBlob->data, reinterpret_cast<size_t>(inBlob->size));
 
     sptr<IRemoteObject> hksProxy = GetHksProxy();
     if (hksProxy == nullptr) {

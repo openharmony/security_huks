@@ -205,7 +205,7 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             result = GetInt32(env, 0);
             break;
         case HKS_TAG_TYPE_ULONG:
-            NAPI_CALL(env, napi_get_value_int64(env, value, (int64_t *)&param.uint64Param));
+            NAPI_CALL(env, napi_get_value_int64(env, value, reinterpret_cast<int64_t *>(&param.uint64Param)));
             result = GetInt32(env, 0);
             break;
         case HKS_TAG_TYPE_BOOL:

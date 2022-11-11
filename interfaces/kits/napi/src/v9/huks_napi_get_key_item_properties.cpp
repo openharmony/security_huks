@@ -110,23 +110,24 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
+            GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
 
-            context->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
-            if (context->paramSetOut != nullptr) {
-                context->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
-                context->paramSetOut->paramsCnt = 0;
+            napiContext->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
+            if (napiContext->paramSetOut != nullptr) {
+                napiContext->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
+                napiContext->paramSetOut->paramsCnt = 0;
             }
 
-            context->result = HksGetKeyParamSet(context->keyAlias, context->paramSetIn, context->paramSetOut);
+            napiContext->result = HksGetKeyParamSet(napiContext->keyAlias,
+                napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
-            GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
+            GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            resultData.paramSet = context->paramSetOut;
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteGetKeyPropertiesAsyncContext(env, context);
+            resultData.paramSet = napiContext->paramSetOut;
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteGetKeyPropertiesAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

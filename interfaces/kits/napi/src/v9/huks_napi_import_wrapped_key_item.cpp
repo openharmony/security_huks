@@ -132,17 +132,17 @@ static napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncC
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ImportWrappedKeyAsyncContext context = static_cast<ImportWrappedKeyAsyncContext>(data);
+            ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
 
-            context->result = HksImportWrappedKey(context->keyAlias, context->wrappingKeyAlias,
-                                                  context->paramSet, context->wrappedData);
+            napiContext->result = HksImportWrappedKey(napiContext->keyAlias, napiContext->wrappingKeyAlias,
+                napiContext->paramSet, napiContext->wrappedData);
         },
         [](napi_env env, napi_status status, void *data) {
-            ImportWrappedKeyAsyncContext context = static_cast<ImportWrappedKeyAsyncContext>(data);
+            ImportWrappedKeyAsyncContext napiContext = static_cast<ImportWrappedKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteImportWrappedKeyAsyncContext(env, context);
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteImportWrappedKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

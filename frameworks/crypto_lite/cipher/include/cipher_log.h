@@ -14,7 +14,12 @@
  */
 
 #include "securec.h"
+
+#ifdef __cplusplus
+#include <cstdint>
+#else
 #include <stdint.h>
+#endif
 
 #undef LOG_TAG
 #define LOG_TAG "CIPHER"

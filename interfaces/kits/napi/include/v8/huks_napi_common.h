@@ -28,22 +28,22 @@
 #define DATA_SIZE_64KB  (1024 * 64)
 
 namespace HuksNapi {
-static const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
-static const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
+const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
+const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
 
-static const std::string HKS_PARAM_PROPERTY_TAG = "tag";
-static const std::string HKS_PARAM_PROPERTY_VALUE = "value";
+const std::string HKS_PARAM_PROPERTY_TAG = "tag";
+const std::string HKS_PARAM_PROPERTY_VALUE = "value";
 
-static const std::string HKS_RESULT_PROPERTY_ERRORCODE = "errorCode";
-static const std::string HKS_RESULT_PROPERTY_OUTDATA = "outData";
-static const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
-static const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
+const std::string HKS_RESULT_PROPERTY_ERRORCODE = "errorCode";
+const std::string HKS_RESULT_PROPERTY_OUTDATA = "outData";
+const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
+const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
 
-static const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
+const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
 
-static const std::string HKS_HANDLE_PROPERTY_ERRORCODE = "errorCode";
-static const std::string HKS_HANDLE_PROPERTY_HANDLE = "handle";
-static const std::string HKS_HANDLE_PROPERTY_TOKEN = "token";
+const std::string HKS_HANDLE_PROPERTY_ERRORCODE = "errorCode";
+const std::string HKS_HANDLE_PROPERTY_HANDLE = "handle";
+const std::string HKS_HANDLE_PROPERTY_TOKEN = "token";
 
 napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob);
 

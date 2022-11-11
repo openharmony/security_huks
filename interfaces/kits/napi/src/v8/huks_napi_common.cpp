@@ -46,7 +46,7 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 
     char *data = static_cast<char *>(HksMalloc(length + 1));
     if (data == nullptr) {
-        napi_throw_error(env, NULL, "could not alloc memory");
+        napi_throw_error(env, nullptr, "could not alloc memory");
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
@@ -83,7 +83,7 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     void *rawData = nullptr;
 
     NAPI_CALL(
-        env, napi_get_typedarray_info(env, object, &arrayType, &length, (void **)&rawData, &arrayBuffer, &offset));
+        env, napi_get_typedarray_info(env, object, &arrayType, &length, &rawData, &arrayBuffer, &offset));
     NAPI_ASSERT(env, arrayType == napi_uint8_array, "it's not uint8 array");
 
     if (length > HKS_MAX_DATA_LEN) {

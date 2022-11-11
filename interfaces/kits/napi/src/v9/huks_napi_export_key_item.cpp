@@ -125,21 +125,22 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context
         resourceName,
         [](napi_env env, void *data) {
             (void)env;
-            ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
-            int32_t ret = PrePareExportKeyContextBuffer(context);
+            ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
+            int32_t ret = PrePareExportKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
-                context->result = HksExportPublicKey(context->keyAlias, context->paramSet, context->key);
+                napiContext->result = HksExportPublicKey(napiContext->keyAlias,
+                    napiContext->paramSet, napiContext->key);
             } else {
-                context->result = ret;
+                napiContext->result = ret;
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
+            ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            resultData.outData = context->key;
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteExportKeyAsyncContext(env, context);
+            resultData.outData = napiContext->key;
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteExportKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);
