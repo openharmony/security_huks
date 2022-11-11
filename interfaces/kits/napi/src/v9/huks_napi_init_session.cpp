@@ -147,22 +147,23 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         resourceName,
         [](napi_env env, void *data) {
             (void)env;
-            InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
-            int32_t ret = InitOutParams(context);
+            InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
+            int32_t ret = InitOutParams(napiContext);
             if (ret != HKS_SUCCESS) {
-                context->result = ret;
+                napiContext->result = ret;
                 return;
             }
-            context->result = HksInit(context->keyAlias, context->paramSet, context->handle, context->token);
+            napiContext->result = HksInit(napiContext->keyAlias, napiContext->paramSet,
+                napiContext->handle, napiContext->token);
         },
         [](napi_env env, napi_status status, void *data) {
-            InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
+            InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            resultData.handle = context->handle;
-            resultData.challenge = context->token;
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteInitAsyncContext(env, context);
+            resultData.handle = napiContext->handle;
+            resultData.challenge = napiContext->token;
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteInitAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

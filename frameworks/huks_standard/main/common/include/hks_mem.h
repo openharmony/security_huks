@@ -16,8 +16,17 @@
 #ifndef HKS_MEM_H
 #define HKS_MEM_H
 
+#ifdef __cplusplus
+#include <cstdint>
+#include <cstdlib>
+
+#define HKS_NULL_POINTER nullptr
+#else
 #include <stdint.h>
 #include <stdlib.h>
+
+#define HKS_NULL_POINTER NULL
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -29,18 +38,18 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
 
 #define SELF_FREE_PTR(PTR, FREE_FUNC) \
 { \
-    if ((PTR) != NULL) { \
+    if ((PTR) != HKS_NULL_POINTER) { \
         FREE_FUNC(PTR); \
-        (PTR) = NULL; \
+        (PTR) = HKS_NULL_POINTER; \
     } \
 }
 
 #define HKS_FREE_PTR(p) SELF_FREE_PTR(p, HksFree)
 
 #define HKS_FREE_BLOB(blob) do { \
-    if ((blob).data != NULL) { \
+    if ((blob).data != HKS_NULL_POINTER) { \
         HksFree((blob).data); \
-        (blob).data = NULL; \
+        (blob).data = HKS_NULL_POINTER; \
     } \
     (blob).size = 0; \
 } while (0)

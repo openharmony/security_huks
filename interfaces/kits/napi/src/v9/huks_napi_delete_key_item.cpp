@@ -102,16 +102,16 @@ static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            DeleteKeyAsyncContext context = static_cast<DeleteKeyAsyncContext>(data);
+            DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
 
-            context->result = HksDeleteKey(context->keyAlias, context->paramSet);
+            napiContext->result = HksDeleteKey(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            DeleteKeyAsyncContext context = static_cast<DeleteKeyAsyncContext>(data);
+            DeleteKeyAsyncContext napiContext = static_cast<DeleteKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteDeleteKeyAsyncContext(env, context);
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteDeleteKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

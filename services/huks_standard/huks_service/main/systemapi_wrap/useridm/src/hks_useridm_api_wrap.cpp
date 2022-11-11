@@ -218,7 +218,8 @@ int32_t HksConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIa
 
     switch (type) {
         case HKS_AUTH_TYPE:
-            return ConvertToHksAuthType((enum USER_IAM::AuthType)userIamValue, (enum HksUserAuthType *)hksValue);
+            return ConvertToHksAuthType(static_cast<enum USER_IAM::AuthType>(userIamValue),
+                reinterpret_cast<enum HksUserAuthType *>(hksValue));
         default:
             break;
     }
