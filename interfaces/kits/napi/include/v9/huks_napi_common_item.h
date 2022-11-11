@@ -38,24 +38,24 @@ struct HksSuccessReturnResult {
 
 #define DATA_SIZE_64KB  (1024 * 64)
 
-static const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
-static const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
+const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
+const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
 
-static const std::string HKS_PARAM_PROPERTY_TAG = "tag";
-static const std::string HKS_PARAM_PROPERTY_VALUE = "value";
+const std::string HKS_PARAM_PROPERTY_TAG = "tag";
+const std::string HKS_PARAM_PROPERTY_VALUE = "value";
 
-static const std::string HKS_RESULT_PROPERTY_ERRORCODE = "errorCode";
-static const std::string HKS_RESULT_PROPERTY_OUTDATA = "outData";
-static const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
-static const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
+const std::string HKS_RESULT_PROPERTY_ERRORCODE = "errorCode";
+const std::string HKS_RESULT_PROPERTY_OUTDATA = "outData";
+const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
+const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
 
-static const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
-static const std::string BUSINESS_ERROR_PROPERTY_MESSAGE = "message";
-static const std::string BUSINESS_ERROR_PROPERTY_DATA = "data";
+const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
+const std::string BUSINESS_ERROR_PROPERTY_MESSAGE = "message";
+const std::string BUSINESS_ERROR_PROPERTY_DATA = "data";
 
-static const std::string HKS_HANDLE_PROPERTY_ERRORCODE = "errorCode";
-static const std::string HKS_HANDLE_PROPERTY_HANDLE = "handle";
-static const std::string HKS_HANDLE_PROPERTY_CHALLENGE = "challenge";
+const std::string HKS_HANDLE_PROPERTY_ERRORCODE = "errorCode";
+const std::string HKS_HANDLE_PROPERTY_HANDLE = "handle";
+const std::string HKS_HANDLE_PROPERTY_CHALLENGE = "challenge";
 
 inline napi_value GetNull(napi_env env)
 {

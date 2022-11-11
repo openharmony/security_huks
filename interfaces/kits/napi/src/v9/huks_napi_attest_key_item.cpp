@@ -138,22 +138,22 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            AttestKeyAsyncContext context = static_cast<AttestKeyAsyncContext>(data);
+            AttestKeyAsyncContext napiContext = static_cast<AttestKeyAsyncContext>(data);
 
-            context->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
-            if (context->certChain != nullptr) {
-                InitCertChain(context->certChain);
+            napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
+            if (napiContext->certChain != nullptr) {
+                InitCertChain(napiContext->certChain);
             }
 
-            context->result = HksAttestKey(context->keyAlias, context->paramSet, context->certChain);
+            napiContext->result = HksAttestKey(napiContext->keyAlias, napiContext->paramSet, napiContext->certChain);
         },
         [](napi_env env, napi_status status, void *data) {
-            AttestKeyAsyncContext context = static_cast<AttestKeyAsyncContext>(data);
+            AttestKeyAsyncContext napiContext = static_cast<AttestKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            resultData.certChain = context->certChain;
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteAttestKeyAsyncContext(env, context);
+            resultData.certChain = napiContext->certChain;
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteAttestKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);
