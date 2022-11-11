@@ -15,9 +15,15 @@
 #ifndef HKS_ERRCODE_ADAPTER_H
 #define HKS_ERRCODE_ADAPTER_H
 
+#ifdef __cplusplus
+#include <cstdbool>
+#include <cstdlib>
+#include <cstdint>
+#else
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdint.h>
+#endif
 
 #include "hks_type.h"
 

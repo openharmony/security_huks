@@ -102,15 +102,15 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
-            context->result = HksAbort(context->handle, context->paramSet);
+            AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
+            napiContext->result = HksAbort(napiContext->handle, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
+            AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteAbortAsyncContext(env, context);
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteAbortAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

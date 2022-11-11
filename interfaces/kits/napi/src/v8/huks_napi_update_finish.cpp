@@ -298,7 +298,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_UPDATE_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -362,23 +362,25 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
+            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
 
-            if (context->isUpdate) {
-                context->result = HksUpdate(context->handle, context->paramSet, context->inData, context->outData);
+            if (napiContext->isUpdate) {
+                napiContext->result = HksUpdate(napiContext->handle,
+                    napiContext->paramSet, napiContext->inData, napiContext->outData);
             } else {
-                context->result = HksFinish(context->handle, context->paramSet, context->inData, context->outData);
+                napiContext->result = HksFinish(napiContext->handle,
+                    napiContext->paramSet, napiContext->inData, napiContext->outData);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
-            napi_value result = UpdateWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
+            napi_value result = UpdateWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteUpdateAsyncContext(env, context);
+            DeleteUpdateAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

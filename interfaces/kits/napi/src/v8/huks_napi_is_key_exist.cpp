@@ -67,7 +67,7 @@ static napi_value IsKeyExistParseParams(napi_env env, napi_callback_info info, I
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_IS_KEY_EXIST_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -113,19 +113,19 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
+            IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
 
-            context->result = HksKeyExist(context->keyAlias, context->paramSet);
+            napiContext->result = HksKeyExist(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
-            napi_value result = IsKeyExistWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
+            napi_value result = IsKeyExistWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteIsKeyExistAsyncContext(env, context);
+            DeleteIsKeyExistAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);
