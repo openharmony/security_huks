@@ -622,7 +622,7 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
                 SetComplete(env, asyncContext->callback);
                 napi_delete_reference(env, asyncContext->callback->callbackSuccess);
             } else {
-                SetSuccess(env, asyncContext->textOut, reinterpret_cast<size_t>(strlen(asyncContext->textOut)),
+                SetSuccess(env, asyncContext->textOut, static_cast<size_t>(strlen(asyncContext->textOut)),
                     asyncContext->callback);
                 SetComplete(env, asyncContext->callback);
                 napi_delete_reference(env, asyncContext->callback->callbackFail);
