@@ -371,7 +371,7 @@ static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsage
         return NULL;
     }
 
-    if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS) {
+    if ((usageSpec->digest != HKS_DIGEST_NONE) && (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)) {
         HksLogOpensslError();
         EVP_PKEY_CTX_free(ctx);
         return NULL;
