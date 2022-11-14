@@ -73,9 +73,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
     const uint32_t keyByteLen = HKS_KEY_BYTES(keySize);
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + keyByteLen * HKS_DH_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)rawMaterial;
@@ -139,9 +137,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         ctx.len = keyLen;
 
         uint8_t *output = (uint8_t *)HksMalloc(keyLen);
-        if (output == NULL) {
-            break;
-        }
+        HKS_IF_NULL_BREAK(output)
         ret = mbedtls_dhm_make_public(&ctx, keyLen, output, keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_SUCCESS) {
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;

@@ -58,10 +58,7 @@ int32_t HksCheckBlob2(const struct HksBlob *data1, const struct HksBlob *data2)
 
 int32_t HksCheckParamSetValidity(const struct HksParamSet *paramSet)
 {
-    if (paramSet == NULL) {
-        HKS_LOG_E("paramSet NULL!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet NULL!")
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize),
         HKS_ERROR_INVALID_ARGUMENT, "paramSet invalid!")
 

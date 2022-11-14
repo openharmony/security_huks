@@ -45,9 +45,7 @@ int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const st
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     Hmac func = (Hmac)GetAbility(HKS_CRYPTO_ABILITY_HMAC);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(key, digestAlg, msg, mac);
 }
 
@@ -59,9 +57,7 @@ int32_t HksCryptoHalHmacInit(const struct HksBlob *key, uint32_t digestAlg, void
     }
 
     HmacInit func = (HmacInit)GetAbility(HKS_CRYPTO_ABILITY_HMAC_INIT);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, key, digestAlg);
 }
@@ -74,9 +70,7 @@ int32_t HksCryptoHalHmacUpdate(const struct HksBlob *chunk, void *ctx)
     }
 
     HmacUpdate func = (HmacUpdate)GetAbility(HKS_CRYPTO_ABILITY_HMAC_UPDATE);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, chunk);
 }
@@ -89,9 +83,7 @@ int32_t HksCryptoHalHmacFinal(const struct HksBlob *msg, void **ctx, struct HksB
     }
 
     HmacFinal func = (HmacFinal)GetAbility(HKS_CRYPTO_ABILITY_HMAC_FINAL);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, msg, mac);
 }
@@ -111,20 +103,14 @@ void HksCryptoHalHmacFreeCtx(void **ctx)
 int32_t HksCryptoHalHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash)
 {
     Hash func = (Hash)GetAbility(HKS_CRYPTO_ABILITY_HASH);
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls Hash func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls Hash func is null!")
     return func(alg, msg, hash);
 }
 
 int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx)
 {
     HashInit func = (HashInit)GetAbility(HKS_CRYPTO_ABILITY_HASH_INIT);
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls Hash init func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls Hash init func is null!")
 
     return func(ctx, alg);
 }
@@ -137,10 +123,7 @@ int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx)
     }
 
     HashUpdate func = (HashUpdate)GetAbility(HKS_CRYPTO_ABILITY_HASH_UPDATE);
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls Hash update func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls Hash update func is null!")
 
     return func(ctx, msg);
 }
@@ -153,10 +136,7 @@ int32_t HksCryptoHalHashFinal(const struct HksBlob *msg, void **ctx, struct HksB
     }
 
     HashFinal func = (HashFinal)GetAbility(HKS_CRYPTO_ABILITY_HASH_FINAL);
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls Hash final func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls Hash final func is null!")
 
     return func(ctx, msg, hash);
 }
@@ -178,9 +158,7 @@ int32_t HksCryptoHalBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n)
 {
     BnExpMod func = (BnExpMod)GetAbility(HKS_CRYPTO_ABILITY_BN_EXP_MOD);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(x, a, e, n);
 }
 
@@ -193,19 +171,14 @@ int32_t HksCryptoHalGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
     }
 
     GenerateKey func = (GenerateKey)GetAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(spec->algType));
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls GenerateKey func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls GenerateKey func is null!")
     return func(spec, key);
 }
 
 int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
 {
     GetMainKey func = (GetMainKey)GetAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(message, mainKey);
 }
 
@@ -224,9 +197,7 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
 
     struct KeyMaterialRsa *key = (struct KeyMaterialRsa *)(keyIn->data);
     PubKey func = (PubKey)GetAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(key->keyAlg));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(keyIn, keyOut);
 }
 #endif /* _CUT_AUTHENTICATE_ */
@@ -235,10 +206,7 @@ int32_t HksCryptoHalDeriveKey(const struct HksBlob *mainKey,
     const struct HksKeySpec *derivationSpec, struct HksBlob *derivedKey)
 {
     DeriveKey func = (DeriveKey)GetAbility(HKS_CRYPTO_ABILITY_DERIVE_KEY(derivationSpec->algType));
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls DeriveKey func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls DeriveKey func is null!")
     return func(mainKey, derivationSpec, derivedKey);
 }
 
@@ -253,10 +221,7 @@ int32_t HksCryptoHalAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     }
 
     AgreeKey func = (AgreeKey)GetAbility(HKS_CRYPTO_ABILITY_AGREE_KEY(spec->algType));
-    if (func == NULL) {
-        HKS_LOG_E("Mbedtls AgreeKey func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "Mbedtls AgreeKey func is null!")
     return func(nativeKey, pubKey, spec, sharedKey);
 }
 
@@ -270,9 +235,7 @@ int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *u
     }
 
     Sign func = (Sign)GetAbility(HKS_CRYPTO_ABILITY_SIGN(usageSpec->algType));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(key, usageSpec, message, signature);
 }
 
@@ -286,9 +249,7 @@ int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec 
     }
 
     Verify func = (Verify)GetAbility(HKS_CRYPTO_ABILITY_VERIFY(usageSpec->algType));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(key, usageSpec, message, signature);
 }
 #endif /* _CUT_AUTHENTICATE_ */
@@ -296,9 +257,7 @@ int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec 
 int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
 {
     FillRandom func = (FillRandom)GetAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM);
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(randomData);
 }
 
@@ -309,10 +268,7 @@ int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
 
     Encrypt func = (Encrypt)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT(usageSpec->algType));
-    if (func == NULL) {
-        HKS_LOG_E("EncryptAes func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "EncryptAes func is null!")
     return func(key, usageSpec, message, cipherText, tagAead);
 }
 
@@ -322,9 +278,7 @@ int32_t HksCryptoHalEncryptInit(const struct HksBlob *key, const struct HksUsage
     HKS_IF_NULL_LOGE_RETURN(usageSpec, HKS_ERROR_INVALID_ARGUMENT, "Invalid param usageSpec!")
 
     EncryptInit func = (EncryptInit)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(usageSpec->algType));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, key, usageSpec, true);
 }
@@ -334,15 +288,10 @@ int32_t HksCryptoHalEncryptUpdate(const struct HksBlob *message, void *ctx, stru
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(message), HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(out), HKS_ERROR_INVALID_ARGUMENT, "Invalid param out!")
 
-    if (ctx == NULL) {
-        HKS_LOG_E("Invalid param ctx or out !");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_ARGUMENT, "Invalid param ctx or out !")
 
     EncryptUpdate func = (EncryptUpdate)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(algtype));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, message, out, true);
 }
@@ -350,10 +299,7 @@ int32_t HksCryptoHalEncryptUpdate(const struct HksBlob *message, void *ctx, stru
 int32_t HksCryptoHalEncryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const uint32_t algtype)
 {
-    if (message == NULL) {
-        HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(message, HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
 
     if (ctx == NULL || *ctx == NULL) {
         HKS_LOG_E("Invalid param ctx!");
@@ -361,9 +307,7 @@ int32_t HksCryptoHalEncryptFinal(const struct HksBlob *message, void **ctx, stru
     }
 
     EncryptFinal func = (EncryptFinal)GetAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(algtype));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, message, cipherText, tagAead, true);
 }
@@ -396,9 +340,7 @@ int32_t HksCryptoHalDecryptInit(const struct HksBlob *key, const struct HksUsage
     HKS_IF_NULL_LOGE_RETURN(usageSpec, HKS_ERROR_INVALID_ARGUMENT, "Invalid param key!")
 
     DecryptInit func = (DecryptInit)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(usageSpec->algType));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, key, usageSpec, false);
 }
@@ -418,10 +360,7 @@ int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message, void *ctx, stru
 int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const uint32_t algtype)
 {
-    if (message == NULL) {
-        HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(message, HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
 
     if (ctx == NULL || *ctx == NULL) {
         HKS_LOG_E("Invalid param ctx!");
@@ -429,9 +368,7 @@ int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, stru
     }
 
     DecryptFinal func = (DecryptFinal)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(algtype));
-    if (func == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
 
     return func(ctx, message, cipherText, tagAead, false);
 }

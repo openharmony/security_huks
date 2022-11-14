@@ -292,10 +292,7 @@ static int32_t GetSignVerifyMessage(struct HksUsageSpec *usageSpec, const struct
     if (usageSpec->algType != HKS_ALG_ED25519) {
         message->size = MAX_DEGIST_SIZE;
         message->data = (uint8_t *)HksMalloc(MAX_DEGIST_SIZE);
-        if (message->data == NULL) {
-            HKS_LOG_E("SignVerify malloc message data failed!");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(message->data, HKS_ERROR_MALLOC_FAIL, "SignVerify malloc message data failed!")
 
         /* NONEwithECDSA/RSA default sha256 */
         usageSpec->digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;

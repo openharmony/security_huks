@@ -113,10 +113,8 @@ int32_t HksOpensslSm4EncryptInit(void **cryptoCtx, const struct HksBlob *key, co
 
 int32_t HksOpensslSm4EncryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-    if (cryptoCtx == NULL) {
-        HKS_LOG_E("cryptoCtx is NULL");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(cryptoCtx, HKS_ERROR_INVALID_ARGUMENT, "cryptoCtx is NULL")
+
     struct HksOpensslBlockCipherCtx *context = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     uint32_t mode = context->mode;
 
