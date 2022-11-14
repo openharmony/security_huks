@@ -1260,6 +1260,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test026, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef L2_STANDARD
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test027
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT, and necessary params is absent.
@@ -1291,6 +1292,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test027, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test028
