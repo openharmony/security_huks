@@ -272,7 +272,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest006, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS) << "HksValidateCertChain and get key flag failed";
 
     ASSERT_EQ(keyFlagparamSet->params[0].blob.size, sizeof(uint32_t));
-    uint32_t keyflag = *(uint32_t *)(keyFlagparamSet->params[0].blob.data);
+    uint32_t keyflag = *(reinterpret_cast<uint32_t *>(keyFlagparamSet->params[0].blob.data));
     ASSERT_EQ(HKS_KEY_FLAG_GENERATE_KEY, keyflag) << "fail compare key flag, " << keyflag;
     
     HKS_FREE_BLOB(keyFlagBlob);
