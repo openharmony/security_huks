@@ -76,10 +76,7 @@ static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
     }
 
     uint8_t *bnOutput = (uint8_t *)HksMalloc(outLen);
-    if (bnOutput == NULL) {
-        HKS_LOG_E("malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(bnOutput, HKS_ERROR_MALLOC_FAIL, "malloc fail")
 
     int32_t ret = HKS_SUCCESS;
     do {

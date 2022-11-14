@@ -45,9 +45,7 @@
 static int32_t PkCtxToX509(mbedtls_pk_context *ctx, struct HksBlob *x509Key)
 {
     uint8_t *tmpBuf = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-    if (tmpBuf == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(tmpBuf, HKS_ERROR_MALLOC_FAIL)
 
     int32_t ret = HKS_SUCCESS;
     do {
@@ -219,10 +217,8 @@ static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct
     }
 
     x509Key->data = (uint8_t *)HksMalloc(publicKey->size);
-    if (x509Key->data == NULL) {
-        HKS_LOG_E("X25519/Ed25519 to x509 public key malloc x509 key data failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(x509Key->data, HKS_ERROR_MALLOC_FAIL,
+        "X25519/Ed25519 to x509 public key malloc x509 key data failed!")
 
     if (memcpy_s(x509Key->data, publicKey->size, publicKey->data, publicKey->size) != EOK) {
         HKS_LOG_E("X25519/Ed25519 to x509 public key memcpy to x509 key data failed!");
@@ -314,10 +310,8 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + nSize + eSize;
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
-    if (keyBuffer == NULL) {
-        HKS_LOG_E("X509 public key to rsa malloc keyBuffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyBuffer, HKS_ERROR_MALLOC_FAIL,
+        "X509 public key to rsa malloc keyBuffer failed!")
 
     struct HksPubKeyInfo *pubKeyInfo = (struct HksPubKeyInfo *)keyBuffer;
     pubKeyInfo->keyAlg = HKS_ALG_RSA;
@@ -371,10 +365,8 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + xSize + ySize;
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(totalSize);
-    if (keyBuffer == NULL) {
-        HKS_LOG_E("X509 public key to ecc malloc keyBuffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(keyBuffer, HKS_ERROR_MALLOC_FAIL,
+        "X509 public key to ecc malloc keyBuffer failed!")
 
     if (mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)) > UINT32_MAX / HKS_BITS_PER_BYTE) {
         HKS_FREE_PTR(keyBuffer);

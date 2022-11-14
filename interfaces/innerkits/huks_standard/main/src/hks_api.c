@@ -30,6 +30,7 @@
 #include "hks_ability.h"
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "securec.h"
 
@@ -192,9 +193,7 @@ HKS_API_EXPORT int32_t HksDeleteKey(const struct HksBlob *keyAlias, const struct
 {
 #ifdef HKS_SUPPORT_API_DELETE_KEY
     HKS_LOG_I("enter delete key");
-    if (keyAlias == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(keyAlias, HKS_ERROR_NULL_POINTER)
     int32_t ret = HksClientDeleteKey(keyAlias, paramSet);
     HKS_LOG_I("leave delete key, result = %" LOG_PUBLIC "d", ret);
     return ret;
@@ -229,9 +228,7 @@ HKS_API_EXPORT int32_t HksKeyExist(const struct HksBlob *keyAlias, const struct 
 {
 #ifdef HKS_SUPPORT_API_KEY_EXIST
     HKS_LOG_I("enter check key exist");
-    if (keyAlias == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(keyAlias, HKS_ERROR_NULL_POINTER)
     int32_t ret = HksClientKeyExist(keyAlias, paramSet);
     HKS_LOG_I("leave check key exist, result = %" LOG_PUBLIC "d", ret);
     return ret;
@@ -246,9 +243,7 @@ HKS_API_EXPORT int32_t HksGenerateRandom(const struct HksParamSet *paramSet, str
 {
 #ifdef HKS_SUPPORT_API_GENERATE_RANDOM
     HKS_LOG_I("enter generate random");
-    if (random == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(random, HKS_ERROR_NULL_POINTER)
 
     int32_t ret = HksClientGenerateRandom(random, paramSet);
     HKS_LOG_I("leave generate random, result = %" LOG_PUBLIC "d", ret);

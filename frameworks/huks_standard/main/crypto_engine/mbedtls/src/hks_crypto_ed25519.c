@@ -44,9 +44,7 @@ static int32_t SaveEd25519KeyMaterial(const struct HksBlob *pubKey, const struct
 {
     uint32_t totalSize = sizeof(struct KeyMaterial25519) + pubKey->size + priKey->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)buffer;
     keyMaterial->keyAlg = HKS_ALG_ED25519;

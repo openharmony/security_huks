@@ -34,16 +34,11 @@ const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.servic
 sptr<IRemoteObject> GetHksProxy()
 {
     auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    if (registry == nullptr) {
-        HKS_LOG_E("GetHksProxy registry is null");
-        return nullptr;
-    }
+    HKS_IF_NULL_LOGE_RETURN(registry, nullptr, "GetHksProxy registry is null")
 
     sptr<IRemoteObject> hksProxy = registry->GetSystemAbility(SA_ID_KEYSTORE_SERVICE);
-    if (hksProxy == nullptr) {
-        HKS_LOG_E("GetHksProxy GetSystemAbility %" LOG_PUBLIC "d is null", SA_ID_KEYSTORE_SERVICE);
-        return nullptr;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hksProxy, nullptr,
+        "GetHksProxy GetSystemAbility %" LOG_PUBLIC "d is null", SA_ID_KEYSTORE_SERVICE)
 
     return hksProxy;
 }
@@ -64,9 +59,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     HKS_IF_NOT_SUCC_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT)
 
     const uint8_t *outData = reply.ReadBuffer(outLen);
-    if (outData == nullptr) {
-        return HKS_ERROR_IPC_MSG_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outData, HKS_ERROR_IPC_MSG_FAIL)
 
     if (outBlob->size < outLen) {
         HKS_LOG_E("outBlob size[%" LOG_PUBLIC "u] smaller than outLen[%" LOG_PUBLIC "u]", outBlob->size, outLen);
@@ -109,10 +102,7 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
     data.WriteBuffer(inBlob->data, (size_t)inBlob->size);
 
     sptr<IRemoteObject> hksProxy = GetHksProxy();
-    if (hksProxy == nullptr) {
-        HKS_LOG_E("GetHksProxy registry is null");
-        return HKS_ERROR_BAD_STATE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
 
     int error = hksProxy->SendRequest(type, data, reply, option);
     if (error != 0) {

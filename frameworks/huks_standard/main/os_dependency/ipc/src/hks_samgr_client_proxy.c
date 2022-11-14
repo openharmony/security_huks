@@ -143,9 +143,8 @@ void *HKS_CreatClient(const char *service, const char *feature, uint32 size)
     (void)feature;
     uint32 len = size + sizeof(HksMgrClientEntry);
     uint8 *client = malloc(len);
-    if (client == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(client, NULL)
+
     (void)memset_s(client, len, 0, len);
     HksMgrClientEntry *entry = (HksMgrClientEntry *)&client[size];
     entry->ver = ((uint16)CLIENT_PROXY_VER | (uint16)DEFAULT_VERSION);
@@ -175,16 +174,15 @@ static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *in
 {
     HksMgrClientApi *clientProxy;
     IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
-    if (iUnknown == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(iUnknown, HKS_ERROR_NULL_POINTER)
+
     int32_t ret = iUnknown->QueryInterface(iUnknown, DEFAULT_VERSION, (void **)&clientProxy);
     if ((clientProxy == NULL) || (ret != HKS_SUCCESS)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (clientProxy->IpcAsyncCallBack == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_RETURN(clientProxy->IpcAsyncCallBack, HKS_ERROR_NULL_POINTER)
+
     ret = clientProxy->IpcAsyncCallBack((IUnknown *)clientProxy, type, inBlob, outBlob);
     (void)clientProxy->Release((IUnknown *)clientProxy);
     return ret;

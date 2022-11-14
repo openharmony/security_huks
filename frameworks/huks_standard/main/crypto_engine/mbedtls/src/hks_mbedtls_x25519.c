@@ -173,9 +173,7 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
     const uint32_t keyByteLen = HKS_X25519_KEY_BITS / HKS_BITS_PER_BYTE;
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterial25519) + keyByteLen + keyByteLen;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)rawMaterial;
@@ -264,9 +262,7 @@ static int32_t X25519KeyMaterialToPub(const struct HksBlob *pubKey, mbedtls_ecp_
     uint32_t offset = sizeof(struct KeyMaterial25519);
 
     uint8_t *tmpPubKey = (uint8_t *)HksMalloc(keyMaterial->pubKeySize);
-    if (tmpPubKey == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(tmpPubKey, HKS_ERROR_MALLOC_FAIL)
 
     int32_t ret;
     do {
@@ -721,10 +717,7 @@ static int32_t ConvertPrivateKey(const struct HksBlob *privateKeyIn, struct HksB
 
     x25519PrivateKey->size = CURVE25519_KEY_BYTE_SIZE;
     x25519PrivateKey->data = (uint8_t *)HksMalloc(x25519PrivateKey->size);
-    if (x25519PrivateKey->data == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(x25519PrivateKey->data, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     do {
         /* Get the first 32 bytes of the hash value (little endian) */

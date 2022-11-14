@@ -69,10 +69,8 @@ static const unsigned char g_negativeOneDivideTwoBytes[P_BYTES] = {
 static int32_t ConvertStringToInt(const uint8_t *param, uint32_t paraLen, BIGNUM **bigNum)
 {
     *bigNum = BN_bin2bn(param, paraLen, NULL);
-    if (*bigNum == NULL) {
-        HKS_LOG_E("failed to translate octet string into big integer!");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*bigNum, HKS_ERROR_BUFFER_TOO_SMALL, "failed to translate octet string into big integer!")
+
     return HKS_SUCCESS;
 }
 
@@ -249,9 +247,8 @@ static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, 
     int32_t res = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     uint32_t result = (uint32_t)(BN_cmp(curve25519->ed25519Pubkey, curve25519->p) < 0);
     BIGNUM *tmpOne = BN_new();
-    if (tmpOne == NULL) {
-        return res;
-    }
+    HKS_IF_NULL_RETURN(tmpOne, res)
+
     do {
         if (BN_mod_sqr(var->a, curve25519->ed25519Pubkey, curve25519->p, ctx) <= 0) {
             break;
@@ -341,9 +338,8 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
 int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     BN_CTX *ctx = BN_CTX_new();
-    if (ctx == NULL) {
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR)
+
     struct Curve25519Var var = { NULL, NULL, NULL };
     int32_t ret = Curve25519LocalVar(&var);
     if (ret != HKS_SUCCESS) {

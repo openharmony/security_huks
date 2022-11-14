@@ -29,6 +29,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
@@ -87,10 +88,7 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
     uint8_t *buffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed")
     (void)memset_s(buffer, MAX_KEY_SIZE, 0, MAX_KEY_SIZE);
     struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
 
