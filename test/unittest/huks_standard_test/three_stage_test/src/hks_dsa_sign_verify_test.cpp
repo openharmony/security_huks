@@ -801,6 +801,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest008, TestSize.Level0)
  * @tc.name: HksDsaSignVerifyTest.HksDsaSignVerifyTest009
  * @tc.desc: alg-DSA pur-Sign-verify dig-NONE
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest009, TestSize.Level0)
 {
@@ -838,6 +839,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest009, TestSize.Level0)
  * @tc.name: HksDsaSignVerifyTest.HksDsaSignVerifyTest010
  * @tc.desc: alg-DSA pur-Sign-verify. Result will be failed because degist is absent.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest010, TestSize.Level0)
 {

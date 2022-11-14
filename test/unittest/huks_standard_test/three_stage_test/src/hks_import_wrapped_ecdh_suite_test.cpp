@@ -499,6 +499,7 @@ namespace Unittest::ImportWrappedKey {
      *           encrypt, of which generate kek, agree, encrypt should done by caller self. When importing the key,
      *           only the necessary parameters are passed in.
      * @tc.type: FUNC
+     * @tc.require:issueI611S5
      */
     HWTEST_F(HksImportWrappedEcdhSuiteTest, HksImportWrappedKeyTestEcdhSuite004, TestSize.Level0)
     {

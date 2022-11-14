@@ -477,6 +477,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
  * @tc.name: HksRsaCipherPart5Test.HksRsaCipherPart5Test046
  * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-4096 pad-OAEP dig-SHA512 mode-ECB.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test046, TestSize.Level1)
 {

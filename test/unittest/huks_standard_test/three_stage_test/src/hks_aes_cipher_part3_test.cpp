@@ -1232,6 +1232,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test025, TestSize.Level0)
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test026
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT, and When generating the key, only the necessary parameters are passed in.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test026, TestSize.Level0)
 {
@@ -1263,6 +1264,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test026, TestSize.Level0)
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test027
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT, and necessary params is absent.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test027, TestSize.Level0)
 {
@@ -1294,6 +1296,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test027, TestSize.Level0)
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test028
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT, and When generating the key, the necessary parameters and some other params are passed in.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test028, TestSize.Level0)
 {

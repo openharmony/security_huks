@@ -434,7 +434,7 @@ static struct HksParam g_verifyParamsTest088[] = {
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test081
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-MD5.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test081, TestSize.Level1)
 {
@@ -472,7 +472,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test081, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test082
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-SHA1.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test082, TestSize.Level1)
 {
@@ -510,7 +510,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test082, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test083
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-SHA224.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test083, TestSize.Level1)
 {
@@ -548,7 +548,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test083, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test084
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-SHA256.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test084, TestSize.Level1)
 {
@@ -586,7 +586,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test084, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test085
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PKCS1_V1_5 and digest-SHA384.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test085, TestSize.Level1)
 {
@@ -624,7 +624,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test085, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test086
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PKCS1_V1_5 and digest-SHA512.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test086, TestSize.Level1)
 {
@@ -662,7 +662,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test086, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test087
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PKCS1_V1_5 and digest-MD5.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test087, TestSize.Level1)
 {
@@ -700,7 +700,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test087, TestSize.Level
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test087
  * @tc.desc: rsa sign and verify; alg-RSA.
  * @tc.type: FUNC
- * @tc.result:HKS_SUCCESS
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test088, TestSize.Level1)
 {

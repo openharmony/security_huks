@@ -1015,6 +1015,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0020, TestSize.Level0)
  * @tc.name: HksPbkdf2DerivePart1Test.HksPbkdf2Derive020
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256. and When generating the key, only the necessary parameters are passed in.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive020, TestSize.Level0)
 {

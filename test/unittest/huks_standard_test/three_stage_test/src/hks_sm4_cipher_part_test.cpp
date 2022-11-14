@@ -928,6 +928,12 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest008, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+/**
+ * @tc.name: HksSm4CipherPartTest.HksSm4CipherPartTest009
+ * @tc.desc: normal parameter test case. And When generating the key, only the necessary parameters are passed in.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
 HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest009, TestSize.Level0)
 {
     HKS_LOG_E("Enter HksSm4CipherPartTest009");

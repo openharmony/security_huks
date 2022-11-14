@@ -668,6 +668,7 @@ HWTEST_F(HksHmacTest, HksHmacTest010, TestSize.Level0)
  * @tc.name: HksHmacTest.HksHmacTest011
  * @tc.desc: alg-HMAC pur-MAC dig-sm3. and When generating the key, only the necessary parameters are passed in.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksHmacTest, HksHmacTest011, TestSize.Level0)
 {
