@@ -142,9 +142,7 @@ static X509 *GetX509FormatCert(const struct HksCertInfo *cert)
     X509 *x509 = NULL;
 
     BIO *bio = BIO_new_mem_buf(cert->data, cert->length);
-    if (bio == NULL) {
-        return x509;
-    }
+    HKS_IF_NULL_RETURN(bio, x509)
 
     if (cert->format == HKS_CERT_DER) {
         x509 = d2i_X509_bio(bio, NULL);
@@ -160,10 +158,9 @@ static int32_t TranslateToX509Format(struct HksCertInfo *certs, uint32_t certNum
 {
     for (uint32_t i = 0; i < certNum; ++i) {
         X509 *x509 = GetX509FormatCert(&certs[i]);
-        if (x509 == NULL) {
-            HKS_LOG_E("load cert chain to x509 failed");
-            return HKS_ERROR_VERIFICATION_FAILED; /* if failed, x509 need to be freed by caller function */
-        }
+        /* if failed, x509 need to be freed by caller function */
+        HKS_IF_NULL_LOGE_RETURN(x509, HKS_ERROR_VERIFICATION_FAILED, "load cert chain to x509 failed")
+
         certs[i].x509 = x509;
     }
     return HKS_SUCCESS;
@@ -172,10 +169,7 @@ static int32_t TranslateToX509Format(struct HksCertInfo *certs, uint32_t certNum
 static int32_t VerifySignature(const struct HksCertInfo *cert, const struct HksCertInfo *issuerCert)
 {
     EVP_PKEY *pubKey = X509_get_pubkey(issuerCert->x509);
-    if (pubKey == NULL) {
-        HKS_LOG_E("get public key from device cert failed");
-        return HKS_ERROR_VERIFICATION_FAILED;
-    }
+    HKS_IF_NULL_LOGE_RETURN(pubKey, HKS_ERROR_VERIFICATION_FAILED, "get public key from device cert failed")
 
     int32_t resOpenssl = X509_verify(cert->x509, pubKey);
     if (resOpenssl != OPENSSL_SUCCESS) {
@@ -370,10 +364,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
         }
 
         buf = (uint8_t *)OPENSSL_malloc(len);
-        if (buf == NULL) {
-            HKS_LOG_E("openssl malloc fail");
-            return NULL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(buf, NULL, "openssl malloc fail")
 
         len = a2d_ASN1_OBJECT(buf, len, oid, -1);
         if (len <= 0) {
@@ -382,10 +373,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
         }
 
         obj = ASN1_OBJECT_create(nid, buf, len, sn, ln);
-        if (obj == NULL) {
-            HKS_LOG_E("ASN1_OBJECT_create fail");
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(obj, "ASN1_OBJECT_create fail")
     } while (0);
     OPENSSL_free(buf);
     return obj;
@@ -395,10 +383,7 @@ static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t
 {
     int32_t ret = HKS_ERROR_VERIFICATION_FAILED;
     ASN1_OBJECT *obj = GetObjByOid(NID_undef, KEY_DESCRIPTION_OID, "KeyDescription", "KEY DESCRIPTION OID");
-    if (obj == NULL) {
-        HKS_LOG_E("get obj by oid failed");
-        return ret;
-    }
+    HKS_IF_NULL_LOGE_RETURN(obj, ret, "get obj by oid failed")
 
     int32_t idx = X509_get_ext_by_OBJ(cert->x509, obj, -1);
     if (idx < 0) {
@@ -574,9 +559,8 @@ static int32_t InitCertChainInfo(const struct HksCertChain *certChain, struct Hk
 
     uint32_t certsInfoLen = sizeof(struct HksCertInfo) * certChain->certsCount; /* only 4 cert */
     struct HksCertInfo *certsInfo = (struct HksCertInfo *)HksMalloc(certsInfoLen);
-    if (certsInfo == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(certsInfo, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(certsInfo, certsInfoLen, 0, certsInfoLen);
 
     for (uint32_t i = 0; i < certChain->certsCount; ++i) {

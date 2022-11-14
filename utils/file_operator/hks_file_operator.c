@@ -61,9 +61,7 @@ static int32_t GetFullFileName(const char *path, const char *fileName, char **fu
 {
     uint32_t nameLen = HKS_MAX_FILE_NAME_LEN;
     char *tmpFileName = (char *)HksMalloc(nameLen);
-    if (tmpFileName == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(tmpFileName, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(tmpFileName, nameLen, 0, nameLen);
 
     int32_t ret = GetFileName(path, fileName, tmpFileName, nameLen);
@@ -99,10 +97,7 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     }
 
     FILE *fp = fopen(filePath, "rb");
-    if (fp == NULL) {
-        HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", errno);
-        return 0;
-    }
+    HKS_IF_NULL_LOGE_RETURN(fp, 0, "failed to open file, errno = 0x%" LOG_PUBLIC "x", errno)
 
     uint32_t size = fread(buf, 1, len, fp);
     if (fclose(fp) < 0) {
@@ -142,10 +137,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
 
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
-    if (fp == NULL) {
-        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(fp, HKS_ERROR_OPEN_FILE_FAIL, "open file fail, errno = 0x%" LOG_PUBLIC "x", errno)
 
     if (chmod(filePath, S_IRUSR | S_IWUSR) < 0) {
         HKS_LOG_E("chmod file fail, errno = 0x%" LOG_PUBLIC "x", errno);
@@ -211,9 +203,7 @@ static int32_t FileRemove(const char *fileName)
 
 int32_t HksFileRemove(const char *path, const char *fileName)
 {
-    if (fileName == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(fileName, HKS_ERROR_INVALID_ARGUMENT)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
@@ -226,9 +216,7 @@ int32_t HksFileRemove(const char *path, const char *fileName)
 
 int32_t HksIsFileExist(const char *path, const char *fileName)
 {
-    if (fileName == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(fileName, HKS_ERROR_NULL_POINTER)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
@@ -241,9 +229,7 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
 
 int32_t HksIsDirExist(const char *path)
 {
-    if (path == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(path, HKS_ERROR_NULL_POINTER)
     return IsFileExist(path);
 }
 
@@ -334,10 +320,7 @@ int32_t HksRemoveDir(const char *dirPath)
     }
 
     DIR *dir = opendir(dirPath);
-    if (dir  == NULL) {
-        HKS_LOG_E("open dir failed");
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
 
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
@@ -357,10 +340,7 @@ static int32_t HksDeletDirPartTwo(const char *path)
     int32_t ret;
     char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
     DIR *dir = opendir(path);
-    if (dir  == NULL) {
-        HKS_LOG_E("open dir failed");
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
@@ -395,10 +375,7 @@ static int32_t HksDeletDirPartOne(const char *path)
     int32_t ret;
     char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
     DIR *dir = opendir(path);
-    if (dir  == NULL) {
-        HKS_LOG_E("open dir failed");
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
@@ -436,10 +413,7 @@ int32_t HksDeleteDir(const char *path)
     char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
 
     DIR *dir = opendir(path);
-    if (dir  == NULL) {
-        HKS_LOG_E("open dir failed");
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
@@ -503,9 +477,7 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
 
 uint32_t HksFileSize(const char *path, const char *fileName)
 {
-    if (fileName == NULL) {
-        return 0;
-    }
+    HKS_IF_NULL_RETURN(fileName, 0)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);

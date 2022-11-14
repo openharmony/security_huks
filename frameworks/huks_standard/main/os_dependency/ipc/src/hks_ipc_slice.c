@@ -84,9 +84,7 @@ static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const 
     }
     uint32_t totalBufSize = paramBufSize + dataBufSize;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalBufSize);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
     struct HksBlob ipcBlob = { totalBufSize, buffer };
 
     uint32_t offset = 0;

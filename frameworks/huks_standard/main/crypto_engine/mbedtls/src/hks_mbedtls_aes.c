@@ -62,9 +62,7 @@ int32_t HksMbedtlsAesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     const uint32_t keyByteLen = spec->keyLen / HKS_BITS_PER_BYTE;
 
     uint8_t *outKey = (uint8_t *)HksMalloc(keyByteLen);
-    if (outKey == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outKey, HKS_ERROR_MALLOC_FAIL)
 
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
@@ -142,10 +140,7 @@ static int32_t AesCbcNoPaddingCryptInit(void **cryptoCtx, const struct HksBlob *
     const struct HksUsageSpec *usageSpec, const bool encrypt)
 {
     mbedtls_aes_context *ctx = (mbedtls_aes_context *)HksMalloc(sizeof(mbedtls_aes_context));
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize ctx fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_MALLOC_FAIL, "initialize ctx fail")
     mbedtls_aes_init(ctx);
 
     int32_t ret;
@@ -184,15 +179,11 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
-    if (aesCtx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(aesCtx, HKS_ERROR_NULL_POINTER)
 
     mbedtls_aes_context *cbcNoPaddingCtx = (mbedtls_aes_context *)aesCtx->append;
 
-    if (cbcNoPaddingCtx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(cbcNoPaddingCtx, HKS_ERROR_NULL_POINTER)
 
     int32_t ret;
     do {
@@ -349,10 +340,7 @@ static int32_t AesCbcPkcs7CryptInit(void **cryptoCtx, const struct HksBlob *key,
     const struct HksUsageSpec *usageSpec, const bool encrypt)
 {
     mbedtls_cipher_context_t *cbcPkcs7ctx = (mbedtls_cipher_context_t *)HksMalloc(sizeof(mbedtls_cipher_context_t));
-    if (cbcPkcs7ctx == NULL) {
-        HKS_LOG_E("malloc cbcPkcs7ctx fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(cbcPkcs7ctx, HKS_ERROR_MALLOC_FAIL, "malloc cbcPkcs7ctx fail")
     mbedtls_cipher_init(cbcPkcs7ctx);
 
     int32_t ret = AesCbcPkcs7CryptInitParam(key, cbcPkcs7ctx, encrypt);
@@ -401,9 +389,7 @@ static int32_t AesCbcPkcs7CryptUpdate(void *cryptoCtx, const struct HksBlob *mes
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_cipher_context_t *cbcPkcs7ctx = (mbedtls_cipher_context_t *)aesCtx->append;
 
-    if (cbcPkcs7ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(cbcPkcs7ctx, HKS_ERROR_NULL_POINTER)
     size_t keyLen = cipherText->size;
     int32_t ret = mbedtls_cipher_update(cbcPkcs7ctx, message->data, message->size, cipherText->data,
         &keyLen);
@@ -579,10 +565,7 @@ static int32_t AesEncryptGcm(const struct HksBlob *key, const struct HksUsageSpe
 static int32_t AesEncryptGcmInit(void **cryptoCtx, const struct HksUsageSpec *usageSpec, const struct HksBlob *key)
 {
     mbedtls_gcm_context *gcmCtx = (mbedtls_gcm_context *)HksMalloc(sizeof(mbedtls_gcm_context));
-    if (gcmCtx == NULL) {
-        HKS_LOG_E("Gcm gcmCtx malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(gcmCtx, HKS_ERROR_MALLOC_FAIL, "Gcm gcmCtx malloc fail")
 
     mbedtls_gcm_init(gcmCtx);
 
@@ -626,10 +609,7 @@ static int32_t AesEncryptGcmUpdate(void *cryptoCtx, const uint8_t padding, const
 
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_gcm_context *gcmCtx = (mbedtls_gcm_context *)aesCtx->append;
-    if (gcmCtx == NULL) {
-        HKS_LOG_E("GcmUpdate gcmCtx is null");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(gcmCtx, HKS_ERROR_NULL_POINTER, "GcmUpdate gcmCtx is null")
 
     size_t size = 0;
     int32_t ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
@@ -722,10 +702,7 @@ static int32_t AesDecryptGcm(const struct HksBlob *key, const struct HksUsageSpe
 static int32_t AesDecryptGcmInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
 {
     mbedtls_gcm_context *gcmCtx = (mbedtls_gcm_context*)HksMalloc(sizeof(mbedtls_gcm_context));
-    if (gcmCtx == NULL) {
-        HKS_LOG_E("Decrtyt Gcm gcmCtx malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(gcmCtx, HKS_ERROR_MALLOC_FAIL, "Decrtyt Gcm gcmCtx malloc fail")
 
     mbedtls_gcm_init(gcmCtx);
 
@@ -766,10 +743,7 @@ static int32_t AesDecryptGcmUpdate(void *cryptoCtx,
 {
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_gcm_context *gcmCtx = (mbedtls_gcm_context *)aesCtx->append;
-    if (gcmCtx == NULL) {
-        HKS_LOG_E("GcmUpdate gcmCtx is null");
-        return HKS_FAILURE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(gcmCtx, HKS_FAILURE, "GcmUpdate gcmCtx is null")
 
     size_t size = 0;
     int32_t ret = mbedtls_gcm_update(gcmCtx, message->data, message->size, cipherText->data, cipherText->size, &size);
@@ -983,10 +957,7 @@ static int32_t AesCtrCryptInit(void **cryptoCtx, const struct HksUsageSpec *usag
     const struct HksBlob *key, const bool encrypt)
 {
     mbedtls_cipher_context_t *ctrCtx = (mbedtls_cipher_context_t *)HksMalloc(sizeof(mbedtls_cipher_context_t));
-    if (ctrCtx == NULL) {
-        HKS_LOG_E("Ctr ctrCtx malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctrCtx, HKS_ERROR_MALLOC_FAIL, "Ctr ctrCtx malloc fail")
 
     mbedtls_cipher_init(ctrCtx);
 
@@ -1042,10 +1013,7 @@ static int32_t AesCtrCryptUpdate(void *cryptoCtx,
 {
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_cipher_context_t *ctrCtx = (mbedtls_cipher_context_t *)aesCtx->append;
-    if (ctrCtx == NULL) {
-        HKS_LOG_E("CtrUpdate ctrCtx is null");
-        return HKS_FAILURE;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctrCtx, HKS_FAILURE, "CtrUpdate ctrCtx is null")
 
     size_t olen;
     int32_t ret = mbedtls_cipher_update(ctrCtx, message->data, message->size, cipherText->data, &olen);
@@ -1171,10 +1139,7 @@ static int32_t AesEcbNoPaddingCryptInit(void **cryptoCtx, const struct HksUsageS
     const struct HksBlob *key, const bool encrypt)
 {
     mbedtls_cipher_context_t *ecbCtx = (mbedtls_cipher_context_t *)HksMalloc(sizeof(mbedtls_cipher_context_t));
-    if (ecbCtx == NULL) {
-        HKS_LOG_E("Ecb ecbCtx malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ecbCtx, HKS_ERROR_MALLOC_FAIL, "Ecb ecbCtx malloc fail")
 
     mbedtls_cipher_init(ecbCtx);
 
@@ -1217,10 +1182,7 @@ static int32_t AesEcbNoPaddingData(mbedtls_cipher_context_t *ecbNoPadingctx, siz
     int32_t ret;
 
     uint8_t *tmpMessage = (uint8_t *)HksMalloc(blockSize);
-    if (tmpMessage == NULL) {
-        HKS_LOG_E("EcbNoPaddingUpdate tmpMessage is null");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpMessage, HKS_ERROR_INSUFFICIENT_MEMORY, "EcbNoPaddingUpdate tmpMessage is null")
 
     if (message->size <= blockSize) {
         (void)memset_s(tmpMessage, blockSize, 0, blockSize);
@@ -1261,10 +1223,7 @@ static mbedtls_cipher_context_t *GetAesEcbNoPaddingCtx(void *cryptoCtx, const st
 {
     struct HksMbedtlsAesCtx *aesCtx = (struct HksMbedtlsAesCtx *)cryptoCtx;
     mbedtls_cipher_context_t *ecbNoPadingctx = (mbedtls_cipher_context_t *)aesCtx->append;
-    if (ecbNoPadingctx == NULL) {
-        HKS_LOG_E("EcbNoPaddingUpdate ecbNoPadingctx is null");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ecbNoPadingctx, NULL, "EcbNoPaddingUpdate ecbNoPadingctx is null")
 
     int32_t ret = HKS_SUCCESS;
     do {
@@ -1298,9 +1257,7 @@ static int32_t AesEcbNoPaddingCryptUpdate(void *cryptoCtx, const struct HksBlob 
     struct HksBlob *cipherText)
 {
     size_t olenTotal = 0;
-    if (GetAesEcbNoPaddingCtx(cryptoCtx, message, cipherText, &olenTotal) == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(GetAesEcbNoPaddingCtx(cryptoCtx, message, cipherText, &olenTotal), HKS_ERROR_NULL_POINTER)
 
     cipherText->size = olenTotal;
     return HKS_SUCCESS;

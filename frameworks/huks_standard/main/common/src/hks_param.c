@@ -144,9 +144,7 @@ static bool IsValidTag(uint32_t tag)
 
 HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
 {
-    if (paramSet == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_NULL_POINTER)
 
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
         uint32_t curTag = paramSet->params[i].tag;
@@ -193,10 +191,8 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
 
     if (size > HKS_DEFAULT_PARAM_SET_SIZE) {
         freshParamSet = (struct HksParamSet *)HksMalloc(size);
-        if (freshParamSet == NULL) {
-            HKS_LOG_E("malloc params failed!");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(freshParamSet, HKS_ERROR_MALLOC_FAIL, "malloc params failed!")
+
         if (memcpy_s(freshParamSet, size, *paramSet, offset) != EOK) {
             HKS_FREE_PTR(freshParamSet);
             HKS_LOG_E("copy params failed!");
@@ -211,10 +207,8 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
 
 HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCopy)
 {
-    if (paramSet == NULL) {
-        HKS_LOG_E("invalid NULL paramSet");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "invalid NULL paramSet")
+
     int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid fresh paramSet")
 
@@ -251,9 +245,7 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
 
 HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
 {
-    if (paramSet == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_NULL_POINTER)
 
     if ((size < sizeof(struct HksParamSet)) || (size > HKS_PARAM_SET_MAX_SIZE) ||
         (paramSet->paramSetSize != size) ||
@@ -266,16 +258,11 @@ HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint
 
 HKS_API_EXPORT int32_t HksInitParamSet(struct HksParamSet **paramSet)
 {
-    if (paramSet == NULL) {
-        HKS_LOG_E("invalid init params!");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "invalid init params!")
 
     *paramSet = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_PARAM_SET_SIZE);
-    if (*paramSet == NULL) {
-        HKS_LOG_E("malloc init param set failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*paramSet, HKS_ERROR_MALLOC_FAIL, "malloc init param set failed!")
+
     (*paramSet)->paramsCnt = 0;
     (*paramSet)->paramSetSize = sizeof(struct HksParamSet);
     return HKS_SUCCESS;
@@ -382,16 +369,12 @@ HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
     int32_t ret = HksCheckParamSet(inParamSet, inParamSetSize);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    if (outParamSet == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(outParamSet, HKS_ERROR_NULL_POINTER)
 
     uint32_t size = inParamSet->paramSetSize;
     struct HksParamSet *buf = (struct HksParamSet *)HksMalloc(size);
-    if (buf == NULL) {
-        HKS_LOG_E("malloc from param set failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buf, HKS_ERROR_MALLOC_FAIL, "malloc from param set failed!")
+
     (void)memcpy_s(buf, size, inParamSet, size);
 
     ret = FreshParamSet(buf, false);

@@ -32,10 +32,7 @@ static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey,
 {
     uint32_t totalSize = sizeof(struct KeyMaterial25519) + (CURVE25519_KEY_LEN << 1);
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc size %" LOG_PUBLIC "u failed", totalSize);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc size %" LOG_PUBLIC "u failed", totalSize)
 
     size_t tmpPubKeyLen = CURVE25519_KEY_LEN;
     size_t tmpPriKeyLen = CURVE25519_KEY_LEN;

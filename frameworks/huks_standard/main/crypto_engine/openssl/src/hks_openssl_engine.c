@@ -77,20 +77,16 @@ static int32_t SignVerifyCheckParam(const struct HksBlob *key, const struct HksU
 static int32_t DeriveKeyCheckParam(
     const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec, const struct HksBlob *derivedKey)
 {
-    if (HksOpensslCheckBlob(mainKey) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid mainKey params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(mainKey), HKS_ERROR_INVALID_ARGUMENT,
+        "Invalid mainKey params!")
 
     if ((derivationSpec == NULL) || (derivationSpec->algParam == NULL)) {
         HKS_LOG_E("Invalid params!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if (derivedKey == NULL) {
-        HKS_LOG_E("Invalid params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(derivedKey, HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
+
     return HKS_SUCCESS;
 }
 
@@ -462,10 +458,7 @@ int32_t HksCryptoHalDecryptUpdate(const struct HksBlob *message,
 int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, struct HksBlob *cipherText,
     struct HksBlob *tagAead, const uint32_t algtype)
 {
-    if (message == NULL) {
-        HKS_LOG_E("Invalid param message!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(message, HKS_ERROR_INVALID_ARGUMENT, "Invalid param message!")
 
     if (ctx == NULL || *ctx == NULL) {
         HKS_LOG_E("Invalid param ctx!");
@@ -473,10 +466,7 @@ int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, stru
     }
 
     DecryptFinal func = (DecryptFinal)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(algtype));
-    if (func == NULL) {
-        HKS_LOG_E("DecryptFinal func is null!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "DecryptFinal func is null!")
 
     return func(ctx, message, cipherText, tagAead, false);
 }

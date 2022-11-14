@@ -67,4 +67,9 @@ if ((OBJECT) == HKS_NULL_POINTER) { \
 if ((OBJECT) == HKS_NULL_POINTER) { \
     return (ERROR_CODE); \
 }
+
+#define HKS_IF_NULL_BREAK(OBJECT) \
+if ((OBJECT) == HKS_NULL_POINTER) { \
+    break; \
+}
 #endif /* HKS_TEMPLATE_H */
