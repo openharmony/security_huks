@@ -171,6 +171,11 @@ DECLARE_OID(hksPadding)
 DECLARE_TAG(hksSignType, ID_KEY_PROPERTY_SIGN_TYPE)
 DECLARE_OID(hksSignType)
 
+#define ID_KEY_PROPERTY_KEY_FLAG       ID_KEY_PROPERTIES, 0x0b
+#define ID_KEY_PROPERTY_KEY_FLAG_SIZE      (ID_KEY_PROPERTIES_SIZE + 1)
+DECLARE_TAG(hkskeyFlag, ID_KEY_PROPERTY_KEY_FLAG)
+DECLARE_OID(hkskeyFlag)
+
 #define ID_HUKS_PKI_OID     ID_HUKS_PKI, 0x01
 #define ID_HUKS_PKI_OID_SIZE    (ID_HUKS_PKI_SIZE + 1)
 
@@ -1041,7 +1046,17 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
     ret = HksInsertClaim(out, &hksSignTypeOid, &signTypeBlob, secLevel);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert signType failed")
 
-    HKS_LOG_I("attest key claims signType[%" LOG_PUBLIC "u] success", signType);
+    // insert key flag 
+    struct HksParam *keyFlagParam = NULL;
+    ret = HksGetParam(keyParamSet, HKS_TAG_KEY_FLAG, &keyFlagParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key flag failed")
+
+    struct HksAsn1Blob keyFlagBlob = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t),
+        (uint8_t *)&keyFlagParam->uint32Param };
+
+    ret = HksInsertClaim(out, &hkskeyFlagOid, &keyFlagBlob, secLevel);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert keyFlag failed")
+    HKS_LOG_I("attest key claims keyFlag[%" LOG_PUBLIC "u] success", keyFlagParam->uint32Param);
 
     bool isGroupInsert = false;
     ret = InsertGroupClaim(&isGroupInsert, out, attetUsageSpec, secLevel);
