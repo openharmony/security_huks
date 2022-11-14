@@ -364,6 +364,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest004, TestSize.Level0)
  * @tc.name: HksEd25519SignVerifyTest.HksEd25519SignVerifyTest005
  * @tc.desc: alg-ED25519 pur-Sign. GenerateKey with alg and key size
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest005, TestSize.Level0)
 {
@@ -399,6 +400,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest005, TestSize.Level0)
  * @tc.name: HksEd25519SignVerifyTest.HksEd25519SignVerifyTest006
  * @tc.desc: alg-ED25519 pur-Sign. GenerateKey with alg, key size and purpose
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest006, TestSize.Level0)
 {
@@ -434,6 +436,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest006, TestSize.Level0)
  * @tc.name: HksEd25519SignVerifyTest.HksEd25519SignVerifyTest007
  * @tc.desc: alg-ED25519 pur-Sign. and When generating the key, only the necessary parameters are passed in.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest007, TestSize.Level0)
 {

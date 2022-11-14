@@ -988,6 +988,7 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest006, TestSize.Level0)
  * @tc.name: HksImportRsaTest.HksImportRsaTest007
  * @tc.desc: import rsa 512-sign/verify-pss-sha256
  * @tc.type: FUNC normal
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksImportRsaTest, HksImportRsaTest007, TestSize.Level0)
 {
@@ -1000,6 +1001,7 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest007, TestSize.Level0)
  * @tc.name: HksImportRsaTest.HksImportRsaTest008
  * @tc.desc: import rsa 768-sign/verify-pss-sha256
  * @tc.type: FUNC normal
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksImportRsaTest, HksImportRsaTest008, TestSize.Level0)
 {
@@ -1012,6 +1014,7 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest008, TestSize.Level0)
  * @tc.name: HksImportRsaTest.HksImportRsaTest009
  * @tc.desc: import rsa 1024-sign/verify-pss-sha256
  * @tc.type: FUNC normal
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksImportRsaTest, HksImportRsaTest009, TestSize.Level0)
 {

@@ -546,6 +546,7 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest003, TestSize.Level0)
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest004
  * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-NONE.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest004, TestSize.Level0)
 {

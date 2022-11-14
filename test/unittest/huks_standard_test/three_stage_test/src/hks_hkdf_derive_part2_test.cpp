@@ -851,6 +851,7 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0020, TestSize.Level0)
  * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0021
  * @tc.desc: alg-HKDF pur-Derive dig-SHA512.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0021, TestSize.Level0)
 {
