@@ -16,6 +16,7 @@
 #include "hks_import_rsa_test.h"
 
 #include <gtest/gtest.h>
+#include <hks_log.h>
 
 using namespace testing::ext;
 namespace Unittest::ImportRsaTest {
@@ -398,6 +399,13 @@ static struct HksParam g_importRsaKeyParams[] = {
     { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
 };
 
+static struct HksParam g_importRsaKeyAnotherParams[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_512 },
+    { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
+};
+
 static struct HksParam g_initOp1Params[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
@@ -584,6 +592,13 @@ static void ModifyImportParams(uint32_t purpose, uint32_t keySize, uint32_t padd
     g_importRsaKeyParams[TAG_IMPOT_TYPE_ID].uint32Param = importType;
 }
 
+static void ModifyImportAnotherParams(uint32_t purpose, uint32_t keySize, uint32_t importType)
+{
+    g_importRsaKeyAnotherParams[TAG_PURPOSE_ID].uint32Param = purpose;
+    g_importRsaKeyAnotherParams[TAG_KEY_SIZE_ID].uint32Param = keySize;
+    g_importRsaKeyAnotherParams[3].uint32Param = importType;
+}
+
 static void ModifyinitOp1Params(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
     g_initOp1Params[TAG_PURPOSE_ID].uint32Param = purpose;
@@ -616,7 +631,28 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *
         HksFreeParamSet(&paramSet);
         return ret;
     }
+    ret = HksImportKey(keyAlias, paramSet, &key);
+    HKS_FREE_PTR(key.data);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
 
+static int32_t ImportKeyNew(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = InitParamSet(&paramSet, params, paramCount);
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    struct HksBlob key = { 0, nullptr };
+
+    // The caller guarantees that the access will not cross the border
+    ret = ConstructImportedKey(params[TAG_KEY_SIZE_ID].uint32Param, params[3].uint32Param, &key);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
     ret = HksImportKey(keyAlias, paramSet, &key);
     HKS_FREE_PTR(key.data);
     HksFreeParamSet(&paramSet);
@@ -798,7 +834,8 @@ static int32_t DoOperation(const struct HksBlob *priKeyAlias, const struct HksBl
     return ret;
 }
 
-static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
+static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding,
+    uint32_t digest, const bool isAnother)
 {
     uint32_t purposePri;
     uint32_t purposePair;
@@ -809,22 +846,41 @@ static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t p
     // import rsa private-key
     uint8_t priAlias[] = "import_rsa_private_key";
     struct HksBlob priKeyAlias = { sizeof(priAlias), priAlias };
-    ModifyImportParams(purposePri, keySize, padding, digest, HKS_KEY_TYPE_PRIVATE_KEY);
-    ret = ImportKey(&priKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    
+    if (isAnother) {
+        ModifyImportAnotherParams(purposePri, keySize, HKS_KEY_TYPE_PRIVATE_KEY);
+        ret = ImportKeyNew(&priKeyAlias, g_importRsaKeyAnotherParams,
+                sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
+    } else {
+        ModifyImportParams(purposePri, keySize, padding, digest, HKS_KEY_TYPE_PRIVATE_KEY);
+        ret = ImportKey(&priKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    }
     EXPECT_EQ(ret, HKS_SUCCESS) << "import pri key failed";
 
     // import rsa key-pair
     uint8_t pairAlias[] = "import_rsa_key_pair";
     struct HksBlob pairKeyAlias = { sizeof(pairAlias), pairAlias };
-    ModifyImportParams(purposePair, keySize, padding, digest, HKS_KEY_TYPE_KEY_PAIR);
-    ret = ImportKey(&pairKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    if (isAnother) {
+        ModifyImportAnotherParams(purposePair, keySize, HKS_KEY_TYPE_KEY_PAIR);
+        ret = ImportKeyNew(&pairKeyAlias, g_importRsaKeyAnotherParams,
+                sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
+    } else {
+        ModifyImportParams(purposePair, keySize, padding, digest, HKS_KEY_TYPE_KEY_PAIR);
+        ret = ImportKey(&pairKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    }
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key pair failed";
 
     // import rsa pubKey
     uint8_t pubAlias[] = "import_rsa_public_key";
     struct HksBlob pubKeyAlias = { sizeof(pubAlias), pubAlias };
-    ModifyImportParams(purposePub, keySize, padding, digest, HKS_KEY_TYPE_PUBLIC_KEY);
-    ret = ImportKey(&pubKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    if (isAnother) {
+        ModifyImportAnotherParams(purposePub, keySize, HKS_KEY_TYPE_PUBLIC_KEY);
+        ret = ImportKeyNew(&pubKeyAlias, g_importRsaKeyAnotherParams,
+                sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
+    } else {
+        ModifyImportParams(purposePub, keySize, padding, digest, HKS_KEY_TYPE_PUBLIC_KEY);
+        ret = ImportKey(&pubKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    }
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key public failed";
 
     uint32_t purposeOp1;
@@ -840,10 +896,26 @@ static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t p
     ret = DoOperation(&priKeyAlias, &pubKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "operation 2 failed";
 
+    // export public key
+    uint8_t pubKey[HKS_RSA_KEY_SIZE_1024] = {0};
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKey };
+    ret = HksExportPublicKey(&pubKeyAlias, nullptr, &publicKey);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
+
     // delete keys
     (void)HksDeleteKey(&priKeyAlias, nullptr);
     (void)HksDeleteKey(&pairKeyAlias, nullptr);
     (void)HksDeleteKey(&pubKeyAlias, nullptr);
+}
+
+static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
+{
+    return RsaImportPlainKeyTest(purpose, keySize, padding, digest, false);
+}
+
+static void ImportRsaPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
+{
+    return RsaImportPlainKeyTest(purpose, keySize, padding, digest, true);
 }
 
 /**
@@ -910,5 +982,41 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest006, TestSize.Level0)
 {
     ImportRsaPlainKeyTest(HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT, HKS_RSA_KEY_SIZE_4096,
         HKS_PADDING_OAEP, HKS_DIGEST_SHA256);
+}
+
+/**
+ * @tc.name: HksImportRsaTest.HksImportRsaTest007
+ * @tc.desc: import rsa 512-sign/verify-pss-sha256
+ * @tc.type: FUNC normal
+ */
+HWTEST_F(HksImportRsaTest, HksImportRsaTest007, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksImportRsaTest007");
+    ImportRsaPlainKeyAnotherTest(HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, HKS_RSA_KEY_SIZE_512,
+        HKS_PADDING_PSS, HKS_DIGEST_SHA256);
+}
+
+/**
+ * @tc.name: HksImportRsaTest.HksImportRsaTest008
+ * @tc.desc: import rsa 768-sign/verify-pss-sha256
+ * @tc.type: FUNC normal
+ */
+HWTEST_F(HksImportRsaTest, HksImportRsaTest008, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksImportRsaTest008");
+    ImportRsaPlainKeyAnotherTest(HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, HKS_RSA_KEY_SIZE_768,
+        HKS_PADDING_PSS, HKS_DIGEST_SHA384);
+}
+
+/**
+ * @tc.name: HksImportRsaTest.HksImportRsaTest009
+ * @tc.desc: import rsa 1024-sign/verify-pss-sha256
+ * @tc.type: FUNC normal
+ */
+HWTEST_F(HksImportRsaTest, HksImportRsaTest009, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksImportRsaTest009");
+    ImportRsaPlainKeyAnotherTest(HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, HKS_RSA_KEY_SIZE_1024,
+        HKS_PADDING_PSS, HKS_DIGEST_SHA384);
 }
 } // namespace Unittest::ImportRsaTest

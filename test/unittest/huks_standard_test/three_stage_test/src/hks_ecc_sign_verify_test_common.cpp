@@ -57,13 +57,21 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
 }
 
 int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
-    struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
+    struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, uint32_t loopIndex)
 {
     struct HksBlob inData = {
         g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     int32_t ret = HKS_FAILURE;
+
+    struct HksParam *digestAlg = nullptr;
+    ret = HksGetParam(signParamSet, HKS_TAG_DIGEST, &digestAlg);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
+    if (digestAlg->uint32Param == HKS_DIGEST_NONE) {
+        inData.size = g_inDataArrayAfterHashLen[loopIndex];
+        inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[loopIndex]);
+    }
 
     /* 1. Generate Key */
     // Generate Key
@@ -96,6 +104,20 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
     int32_t deleteRet = HksDeleteKey(&newKeyAlias, verifyParamSet);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
+    return ret;
+}
+
+int32_t HksTestSignVerifyParamAbsent(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *signParamSet)
+{   
+    /* 1. Generate Key */
+    uint32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    uint8_t tmpHandle[sizeof(uint64_t)] = {0};
+    struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
+    ret = HksInit(&keyAlias, signParamSet, &handle, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
     return ret;
 }
 }

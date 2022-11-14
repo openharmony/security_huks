@@ -58,6 +58,9 @@ int32_t HksToMbedtlsDigestAlg(const uint32_t hksAlg, uint32_t *mbedtlsAlg)
         case HKS_DIGEST_SHA512:
             *mbedtlsAlg = MBEDTLS_MD_SHA512;
             break;
+        case HKS_DIGEST_NONE:
+            *mbedtlsAlg = MBEDTLS_MD_NONE;
+            break;
         default:
             HKS_LOG_E("Unsupported digest algorithm! digestAlg: 0x%" LOG_PUBLIC "X", hksAlg);
             return HKS_ERROR_INVALID_DIGEST;

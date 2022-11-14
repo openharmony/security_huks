@@ -141,6 +141,8 @@ const EVP_MD *GetOpensslAlg(uint32_t alg)
             return EVP_sha384();
         case HKS_DIGEST_SHA512:
             return EVP_sha512();
+        case HKS_DIGEST_NONE:
+            return EVP_md_null();  // todo 
         default:
             return NULL;
     }

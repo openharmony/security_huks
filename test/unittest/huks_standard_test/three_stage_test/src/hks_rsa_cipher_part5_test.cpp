@@ -17,6 +17,7 @@
 #include "hks_rsa_cipher_test_common.h"
 
 #include <gtest/gtest.h>
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace Unittest::RsaCipher {
@@ -155,6 +156,61 @@ static struct HksParam g_encryptParams042[] = {
     }
 };
 static struct HksParam g_decryptParams042[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_4096
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_OAEP
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA512
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_ECB
+    }
+};
+
+static struct HksParam g_genParams043[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_4096
+    }
+};
+static struct HksParam g_encryptParams043[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_4096
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_OAEP
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA512
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_ECB
+    }
+};
+static struct HksParam g_decryptParams043[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_RSA
@@ -415,5 +471,38 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
+}
+
+/**
+ * @tc.name: HksRsaCipherPart5Test.HksRsaCipherPart5Test046
+ * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-4096 pad-OAEP dig-SHA512 mode-ECB.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test046, TestSize.Level1)
+{
+    HKS_LOG_E("Enter HksRsaCipherPart5Test046");
+    char tmpKeyAlias[] = "HksRSACipherKeyAliasTest046";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams043, sizeof(g_genParams043) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams043, sizeof(g_encryptParams043) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams043, sizeof(g_decryptParams043) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksRsaCipherTestCase(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
 }
 } // namespace Unittest::RsaCipher

@@ -289,6 +289,13 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING},
     };
 
+   static struct HksParam g_importHmac256KeyAtherParams[] = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256},
+        {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING},
+    };
+
     static struct HksBlob g_importedKeyAliasHmac256 = {
         .size = strlen("test_import_key_ecdh_hmac256"),
         .data = (uint8_t *) "test_import_key_ecdh_hmac256"
@@ -484,5 +491,30 @@ namespace Unittest::ImportWrappedKey {
         InitCommonTestParamsAndDoImport(&importWrappedKeyTestParams003, g_importHmac256KeyParams,
                                         sizeof(g_importHmac256KeyParams) / sizeof(struct HksParam));
         HksClearKeysForWrappedKeyTest(&importWrappedKeyTestParams003);
+    }
+
+    /**
+     * @tc.name: HksImportWrappedEcdhSuiteTest.HksImportWrappedKeyTestEcdhSuite004
+     * @tc.desc: Test import wrapped hmac256 key pair including generate&export ecdh p256 key, generate kek, agree,
+     *           encrypt, of which generate kek, agree, encrypt should done by caller self. When importing the key,
+     *           only the necessary parameters are passed in.
+     * @tc.type: FUNC
+     */
+    HWTEST_F(HksImportWrappedEcdhSuiteTest, HksImportWrappedKeyTestEcdhSuite004, TestSize.Level0)
+    {
+        HKS_LOG_E("Enter HksImportWrappedKeyTestEcdhSuite004");
+        struct HksImportWrappedKeyTestParams importWrappedKeyTestParams004 = {0};
+
+        importWrappedKeyTestParams004.wrappingKeyAlias = &g_wrappingKeyAliasHmac256;
+        importWrappedKeyTestParams004.keyMaterialLen = g_importHmac256Key.size;
+        importWrappedKeyTestParams004.callerKeyAlias = &g_callerKeyAliasHmac256;
+        importWrappedKeyTestParams004.callerKekAlias = &g_callerKekAliasHmac256;
+        importWrappedKeyTestParams004.callerKek = &g_callerHmac256Kek;
+        importWrappedKeyTestParams004.callerAgreeKeyAlias = &g_callerAgreeKeyAliasHmac256;
+        importWrappedKeyTestParams004.importedKeyAlias = &g_importedKeyAliasHmac256;
+        importWrappedKeyTestParams004.importedPlainKey = &g_importHmac256Key;
+        InitCommonTestParamsAndDoImport(&importWrappedKeyTestParams004, g_importHmac256KeyAtherParams,
+                                        sizeof(g_importHmac256KeyAtherParams) / sizeof(struct HksParam));
+        HksClearKeysForWrappedKeyTest(&importWrappedKeyTestParams004);
     }
 }

@@ -17,6 +17,7 @@
 
 #include <stddef.h>
 
+#include "hks_base_check.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
@@ -61,30 +62,90 @@ static int32_t CheckPurpose(const struct HksParam *authParam, const struct HksPa
     return HKS_SUCCESS;
 }
 
+static int32_t OptionalParamCheck(uint32_t authTag, uint32_t alg, uint32_t purpose, const struct HksParamSet *paramSet,
+    const struct ParamsValues* paramValues)
+{
+    HKS_LOG_I("tag is 0x%" LOG_PUBLIC "x", authTag);
+    struct HksParam *param = NULL;
+    bool isAbsent = false;
+    int32_t ret = HksGetParam(paramSet, authTag, &param);
+    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+        HKS_LOG_E("get auth param 0x%" LOG_PUBLIC "x failed!", authTag);
+        return ret;
+    }
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_D("when generates key, the tag is absent. tag is 0x%" LOG_PUBLIC "x", authTag);
+        isAbsent = true;
+    }
+
+    ret = HksCheckOptionalParam(authTag, alg, purpose, isAbsent, param);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check optional param fail");
+        return ret;
+    }
+    if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {
+        HKS_LOG_E("derive or mac no need to check");
+        return HKS_SUCCESS;
+    }
+    // Parameter check is more strict than above
+    return HksCheckGenKeyMutableParams(authTag, paramValues);
+}
+
+static int32_t GetAlgAndPurposeParam(const struct HksParamSet *paramSet, struct HksParam **algParam,
+    struct HksParam **purposeParam, struct ParamsValues* paramValues)
+{
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, algParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL,
+        "get param  0x%" LOG_PUBLIC "x failed!", HKS_TAG_ALGORITHM);
+    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, purposeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
+        "get param  0x%" LOG_PUBLIC "x failed!", HKS_TAG_PURPOSE);
+    return GetInputParams(paramSet, paramValues);
+}
+
 static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *paramSet)
 {
-    int32_t ret;
     uint32_t authTag;
     struct HksParam *authParam = NULL;
     struct HksParam *requestParam = NULL;
-
+    struct HksParam *algParam = NULL;
+    struct HksParam *purposeParam = NULL;
+    struct ParamsValues paramValues = { { false, 0, false }, { true, 0, false }, { false, 0, false }, { true, 0, false }, { true, 0, false } };
+    int32_t ret = GetAlgAndPurposeParam(keyBlobParamSet, &algParam, &purposeParam, &paramValues);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("GetAlgAndPurposeParam failed");
+        return ret;
+    }
     for (uint32_t i = 0; i < policy->policyCnt; i++) {
         authTag = policy->policyTag[i];
         ret = HksGetParam(keyBlobParamSet, authTag, &authParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get auth param[0x%" LOG_PUBLIC "x] failed!", authTag)
-
+        if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+            HKS_LOG_E("get auth param 0x%" LOG_PUBLIC "x failed!", authTag);
+            return ret;
+        }
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            ret = OptionalParamCheck(authTag, algParam->uint32Param, purposeParam->uint32Param, paramSet, &paramValues);
+            if (ret != HKS_SUCCESS) {
+                return ret;
+            }
+            continue;
+        }
         ret = HksGetParam(paramSet, authTag, &requestParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get request param[0x%" LOG_PUBLIC "x] failed!", authTag)
-
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("get request param 0x%" LOG_PUBLIC "x failed!", authTag);
+            return ret;
+        }
         if (authTag != HKS_TAG_PURPOSE) {
             ret = HksCheckParamMatch((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         } else {
             ret = CheckPurpose((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         }
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
-            "unmatch policy[0x%" LOG_PUBLIC "x], [0x%" LOG_PUBLIC "x] != [0x%" LOG_PUBLIC "x]!",
-            authTag, requestParam->uint32Param, authParam->uint32Param)
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("unmatch policy 0x%" LOG_PUBLIC "x , 0x%" LOG_PUBLIC "x != 0x%" LOG_PUBLIC "x!", authTag,
+                requestParam->uint32Param, authParam->uint32Param);
+            return ret;
+        }
     }
     return HKS_SUCCESS;
 }

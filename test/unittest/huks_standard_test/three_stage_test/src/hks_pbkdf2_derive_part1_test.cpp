@@ -17,6 +17,7 @@
 #include "hks_pbkdf2_derive_test_common.h"
 
 #include <gtest/gtest.h>
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace Unittest::Pbkdf2Derive {
@@ -627,6 +628,7 @@ static struct HksParam g_pbkdf2FinishParams009[] = {
  */
 HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive001, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksPbkdf2Derive001");
     struct HksBlob keyAlias = { strlen("HksPBKDF2DeriveKeyAliasTest001_1"),
         (uint8_t *)"HksPBKDF2DeriveKeyAliasTest001_1" };
     int32_t ret = HKS_FAILURE;
@@ -671,6 +673,7 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive001, TestSize.Level0)
  */
 HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive002, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksPbkdf2Derive002");
     struct HksBlob keyAlias = { strlen("HksPBKDF2DeriveKeyAliasTest002_1"),
         (uint8_t *)"HksPBKDF2DeriveKeyAliasTest002_1" };
     int32_t ret = HKS_FAILURE;

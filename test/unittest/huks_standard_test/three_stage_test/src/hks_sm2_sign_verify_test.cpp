@@ -127,6 +127,22 @@ static const struct GenerateKeyCaseParam g_genParamsTest[] = {
             },
         },
     },
+
+    {   4,
+        HKS_SUCCESS,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM2
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = HKS_SM2_KEY_SIZE_256
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+            }
+        },
+    },
 };
 static const struct GenerateKeyCaseParam g_signParamsTest[] = {
     {   0,
@@ -201,6 +217,25 @@ static const struct GenerateKeyCaseParam g_signParamsTest[] = {
             }, {
                 .tag = HKS_TAG_DIGEST,
                 .uint32Param = HKS_DIGEST_SM3
+            },
+        },
+    },
+
+    {   4,
+        HKS_SUCCESS,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM2
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = HKS_SM2_KEY_SIZE_256
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_SIGN
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_NONE
             },
         },
     },
@@ -281,14 +316,41 @@ static const struct GenerateKeyCaseParam g_verifyParamsTest[] = {
             },
         },
     },
+
+    {   4,
+        HKS_SUCCESS,
+        {
+            {
+                .tag = HKS_TAG_ALGORITHM,
+                .uint32Param = HKS_ALG_SM2
+            }, {
+                .tag = HKS_TAG_KEY_SIZE,
+                .uint32Param = HKS_SM2_KEY_SIZE_256
+            }, {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_VERIFY
+            }, {
+                .tag = HKS_TAG_DIGEST,
+                .uint32Param = HKS_DIGEST_NONE
+            },
+        },
+    },
 };
 
 static int32_t HksTestSignVerify(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *inData, struct HksBlob *outData)
+    struct HksBlob *inData, struct HksBlob *outData)
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
     int32_t ret;
+
+    struct HksParam *digestAlg = nullptr;
+    ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestAlg);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
+    if (digestAlg->uint32Param == HKS_DIGEST_NONE) {
+        inData->size = g_inDataArrayAfterHashLen[0];
+        inData->data = const_cast<uint8_t *>(g_inDataArrayAfterHash[0]);
+    }
 
     do {
         ret = HksInit(keyAlias, paramSet, &handle, nullptr);
@@ -366,8 +428,11 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
 
     do {
         /* 1. Generate Key */
-        ret = InitParamSet(&genParamSet, g_genParamsTest[genIndex].params,
-            sizeof(g_genParamsTest[genIndex].params) / sizeof(HksParam));
+        uint32_t cnt = sizeof(g_genParamsTest[genIndex].params) / sizeof(HksParam);
+        if (genIndex == 4) {
+            cnt -= 1;  // because GenerateKeyCaseParam struct (params[4] has 4 elements, but needs 3 elements) 
+        }
+        ret = InitParamSet(&genParamSet, g_genParamsTest[genIndex].params, cnt);
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
         ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
         if (ret != HKS_SUCCESS) {
@@ -421,6 +486,7 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest001, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksSm2SignVerifyTest001");
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest001";
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
     int ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX,
@@ -435,12 +501,13 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest001, TestSize.Level0)
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest002, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksSm2SignVerifyTest002");
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest002";
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
-    uint32_t genPramCnt = sizeof(g_genParamsTest) / sizeof(GenerateKeyCaseParam);
-    uint32_t signPramCnt = sizeof(g_signParamsTest) / sizeof(GenerateKeyCaseParam);
-    uint32_t verifyPramCnt = sizeof(g_verifyParamsTest) / sizeof(GenerateKeyCaseParam);
+    uint32_t genPramCnt = sizeof(g_genParamsTest) / sizeof(GenerateKeyCaseParam) - 1;
+    uint32_t signPramCnt = sizeof(g_signParamsTest) / sizeof(GenerateKeyCaseParam) - 1;
+    uint32_t verifyPramCnt = sizeof(g_verifyParamsTest) / sizeof(GenerateKeyCaseParam) - 1;
 
     int ret;
     for (uint32_t i = FAILURE_RETURN_INDEX; i < genPramCnt; i++) {
@@ -460,18 +527,33 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest002, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest002
+ * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest003
  * @tc.desc: abnormal parameter test case : the abnormal parameter is verifyData
  * @tc.type: FUNC
  */
 HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest003, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksSm2SignVerifyTest003");
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest003";
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     int ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX,
             SUCCESS_RETURN_INDEX, SUCCESS_RETURN_INDEX, true);
     EXPECT_EQ(ret, HKS_FAILURE) << "sm2SignVerifyTest003 failed.";
+}
+
+/**
+ * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest004
+ * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-NONE.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest004, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksSm2SignVerifyTest004");
+    const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest004";
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    int ret = HksSm2SignVerifyTestRun(&keyAlias, 4, 4, 4, false);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest004 failed.";
 }
 #endif
 }

@@ -328,7 +328,8 @@ static int32_t HksOpensslRsaCryptInit(EVP_PKEY_CTX *ctx, const struct HksUsageSp
 
     if (usageSpec->padding == HKS_PADDING_OAEP) {
         const EVP_MD *md = GetOpensslAlg(usageSpec->digest);
-        if (md == NULL || EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0 || EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, md) <= 0) {
+        if ((md == NULL) || ((usageSpec->digest != HKS_DIGEST_NONE) && (EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0))
+            || ((usageSpec->digest != HKS_DIGEST_NONE) && (EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, md) <= 0))) {
             HksLogOpensslError();
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
@@ -409,6 +410,9 @@ static int32_t GetRsaSignPadding(uint32_t padding, uint32_t *rsaPadding)
         case HKS_PADDING_PSS:
             *rsaPadding = RSA_PKCS1_PSS_PADDING;
             return HKS_SUCCESS;
+        case HKS_PADDING_NONE:
+            *rsaPadding = RSA_NO_PADDING;
+            return HKS_SUCCESS;
         default:
             return HKS_ERROR_NOT_SUPPORTED;
     }
@@ -446,18 +450,15 @@ static EVP_PKEY *InitRsaEvpKey(const struct HksBlob *key, bool signing)
         SELF_FREE_PTR(rsa, RSA_free);
         SELF_FREE_PTR(pkey, EVP_PKEY_free);
         return NULL;
-    }
+			    }
 
     return pkey;
 }
 
 static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
 {
-    uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
-
-    const EVP_MD *opensslAlg = GetOpensslAlg(digest);
+    const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
     HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
-
     EVP_PKEY *pkey = NULL;
     EVP_PKEY_CTX *ctx = NULL;
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -479,7 +480,7 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
 
         ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         HKS_IF_NOT_SUCC_BREAK(SetRsaPadding(ctx, usageSpec))
-        if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS) {
+        if ((usageSpec->digest != HKS_DIGEST_NONE) && (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)) {
             break;
         }
         ret = HKS_SUCCESS;
