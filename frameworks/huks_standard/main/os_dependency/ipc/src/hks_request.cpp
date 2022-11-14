@@ -99,7 +99,7 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
     }
 
     data.WriteUint32(inBlob->size);
-    data.WriteBuffer(inBlob->data, reinterpret_cast<size_t>(inBlob->size));
+    data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size));
 
     sptr<IRemoteObject> hksProxy = GetHksProxy();
     HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
