@@ -1046,7 +1046,7 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
     ret = HksInsertClaim(out, &hksSignTypeOid, &signTypeBlob, secLevel);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert signType failed")
 
-    // insert key flag 
+    // insert key flag
     struct HksParam *keyFlagParam = NULL;
     ret = HksGetParam(keyParamSet, HKS_TAG_KEY_FLAG, &keyFlagParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key flag failed")
