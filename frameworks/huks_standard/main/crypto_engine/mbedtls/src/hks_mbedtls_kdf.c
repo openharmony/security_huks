@@ -89,10 +89,8 @@ int32_t HksMbedtlsDeriveKey(const struct HksBlob *mainKey,
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     const mbedtls_md_info_t *info = mbedtls_md_info_from_type((mbedtls_md_type_t)mbedtlsAlg);
-    if (info == NULL) {
-        HKS_LOG_E("Mbedtls get md info failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(info, HKS_ERROR_CRYPTO_ENGINE_ERROR,
+        "Mbedtls get md info failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret)
 
     switch (derivationSpec->algType) {
 #ifdef HKS_SUPPORT_KDF_PBKDF2

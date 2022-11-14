@@ -38,10 +38,7 @@ int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
     }
 
     uint8_t *outData = (uint8_t *)HksMalloc(key->size);
-    if (outData == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outData, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     (void)memcpy_s(outData, key->size, key->data, key->size);
     outKey->data = outData;
@@ -61,10 +58,7 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + key->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc failed! %" LOG_PUBLIC "u", totalSize);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed! %" LOG_PUBLIC "u", totalSize)
     (void)memset_s(buffer, totalSize, 0, totalSize);
 
     struct HksPubKeyInfo *curve25519Key = (struct HksPubKeyInfo *)buffer;

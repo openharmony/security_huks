@@ -19,6 +19,7 @@
 #include <stddef.h>
 
 #include "hks_mem.h"
+#include "hks_template.h"
 
 struct HksMutex {
     pthread_mutex_t mutex;
@@ -39,18 +40,14 @@ HksMutex *HksMutexCreate(void)
 
 int32_t HksMutexLock(HksMutex *mutex)
 {
-    if (mutex == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(mutex, 1)
 
     return pthread_mutex_lock(&mutex->mutex);
 }
 
 int32_t HksMutexUnlock(HksMutex *mutex)
 {
-    if (mutex == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(mutex, 1)
 
     return pthread_mutex_unlock(&mutex->mutex);
 }

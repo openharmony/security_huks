@@ -51,9 +51,7 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     int ret;
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
     uint8_t *buff = (uint8_t *)HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
-    if (buff == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buff, HKS_ERROR_MALLOC_FAIL)
 
     BIGNUM *x = NULL;
     if (needPrivateExponent) {
@@ -94,9 +92,7 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
     int ret;
     const struct KeyMaterialDsa *keyMaterial = (struct KeyMaterialDsa *)(key->data);
     uint8_t *buff = HksMalloc(HKS_KEY_BYTES(keyMaterial->keySize));
-    if (buff == NULL) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
+    HKS_IF_NULL_RETURN(buff, HKS_ERROR_INSUFFICIENT_MEMORY)
 
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->pSize) != EOK) {
         HksFree(buff);
@@ -137,9 +133,7 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
 static DSA *InitDsaStruct(const struct HksBlob *key, const bool needPrivateExponent)
 {
     DSA *dsa = DSA_new();
-    if (dsa == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(dsa, NULL)
 
     uint32_t offset = sizeof(struct KeyMaterialDsa);
     if (InitDsaStructKey(key, needPrivateExponent, dsa, &offset) != HKS_SUCCESS) {
@@ -251,10 +245,7 @@ static int32_t DsaSaveKeyMaterial(const DSA *dsa, const uint32_t keySize, uint8_
     uint32_t keyLen;
     uint32_t rawMaterialLen = DsaCalculateMaterialLen(keySize, &keyLen);
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        HKS_LOG_E("malloc buffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL, "malloc buffer failed!")
 
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
@@ -280,10 +271,7 @@ int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     }
 
     DSA *dsa = DSA_new();
-    if (dsa == NULL) {
-        HKS_LOG_E("DSA structure is NULL.");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dsa, HKS_ERROR_CRYPTO_ENGINE_ERROR, "DSA structure is NULL.")
 
     do {
         ret = DSA_generate_parameters_ex(dsa, spec->keyLen, NULL, 0, NULL, NULL, NULL);
@@ -344,16 +332,10 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
 static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm fail");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
 
     DSA *dsa = InitDsaStruct(key, signing);
-    if (dsa == NULL) {
-        HKS_LOG_E("initialize dsa key failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dsa, NULL, "initialize dsa key failed")
 
     EVP_PKEY *pkey = EVP_PKEY_new();
     if (pkey == NULL) {
@@ -402,10 +384,7 @@ int32_t HksOpensslDsaSign(const struct HksBlob *key, const struct HksUsageSpec *
     const struct HksBlob *message, struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitDSACtx(key, usageSpec, true);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize dsa context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize dsa context failed")
 
     size_t sigSize = (size_t)signature->size;
     if (EVP_PKEY_sign(ctx, signature->data, &sigSize, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
@@ -422,10 +401,7 @@ int32_t HksOpensslDsaVerify(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitDSACtx(key, usageSpec, false);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize dsa context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize dsa context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();

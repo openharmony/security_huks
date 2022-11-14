@@ -164,9 +164,7 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
     const uint32_t keyByteLen = HKS_KEY_BYTES(keySize);
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterialEcc) + keyByteLen * HKS_ECC_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     /* ECC key data internal struct: struct KeyMaterialEcc + pubXData + pubYData + priData */

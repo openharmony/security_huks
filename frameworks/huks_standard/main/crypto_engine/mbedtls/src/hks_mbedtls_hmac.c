@@ -46,9 +46,7 @@ int32_t HksMbedtlsHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
     const uint32_t keyByteLen = spec->keyLen / HKS_BITS_PER_BYTE;
 
     uint8_t *outKey = (uint8_t *)HksMalloc(keyByteLen);
-    if (outKey == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outKey, HKS_ERROR_MALLOC_FAIL)
 
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
@@ -115,10 +113,7 @@ int32_t HksMbedtlsHmacInit(void **cryptoCtx, const struct HksBlob *key, uint32_t
     }
 
     mbedtls_md_context_t *hmacCtx = (mbedtls_md_context_t *)HksMalloc(sizeof(mbedtls_md_context_t));
-    if (hmacCtx == NULL) {
-        HKS_LOG_E("Mbedtls hmac init hmacCtx malloc fail!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hmacCtx, HKS_ERROR_MALLOC_FAIL, "Mbedtls hmac init hmacCtx malloc fail!")
 
     mbedtls_md_init(hmacCtx);
 
@@ -156,10 +151,7 @@ int32_t HksMbedtlsHmacUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
     struct HksMbedtlsHmacCtx *hctx = (struct HksMbedtlsHmacCtx *)cryptoCtx;
     mbedtls_md_context_t *hmacCtx = (mbedtls_md_context_t *)hctx->append;
-    if (hmacCtx == NULL) {
-        HKS_LOG_E("Mbedtls hmac update hmacCtx is null!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(hmacCtx, HKS_ERROR_MALLOC_FAIL, "Mbedtls hmac update hmacCtx is null!")
 
     int32_t ret = mbedtls_md_hmac_update(hmacCtx, msg->data, msg->size);
     if (ret != HKS_MBEDTLS_SUCCESS) {

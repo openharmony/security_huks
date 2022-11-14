@@ -170,10 +170,7 @@ static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, 
         }
 
         ctx = EVP_PKEY_CTX_new(key, NULL);
-        if (ctx == NULL) {
-            HKS_LOG_E("new ctx failed");
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(ctx, "new ctx failed")
 
         if (sign) {
             if (EVP_PKEY_sign_init(ctx) != HKS_OPENSSL_SUCCESS) {
@@ -204,10 +201,7 @@ int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, false);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize sm2 context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HKS_LOG_D("verify data failed");
@@ -224,10 +218,7 @@ int32_t HksOpensslSm2Sign(const struct HksBlob *key, const struct HksUsageSpec *
     const struct HksBlob *message, struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, true);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize sm2 context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
 
     size_t sigSize;
     if (EVP_PKEY_sign(ctx, NULL, &sigSize, message->data, message->size) != HKS_OPENSSL_SUCCESS) {

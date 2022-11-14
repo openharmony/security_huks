@@ -141,9 +141,7 @@ int32_t OpensslBlockCipherEncryptUpdate(
     struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
 
-    if (ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(ctx, HKS_ERROR_NULL_POINTER)
 
     int32_t outLen = 0;
     if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
@@ -202,9 +200,7 @@ int32_t OpensslBlockCipherDecryptUpdate(
     struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
 
-    if (ctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(ctx, HKS_ERROR_NULL_POINTER)
 
     int32_t outLen = 0;
     if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
@@ -351,9 +347,7 @@ static int32_t OpensslAesAeadInit(
 {
     int32_t ret;
     struct HksAeadParam *aeadParam = (struct HksAeadParam *)usageSpec->algParam;
-    if (aeadParam == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(aeadParam, HKS_ERROR_INVALID_ARGUMENT)
 
     *ctx = EVP_CIPHER_CTX_new();
     if (*ctx == NULL) {

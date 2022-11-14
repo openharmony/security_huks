@@ -100,9 +100,7 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
     const uint32_t keyByteLen = keySize / HKS_BITS_PER_BYTE;
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterialRsa) + keyByteLen * HKS_RSA_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     /* RSA key data internal struct: struct KeyMaterialRsa + nData + eData + dData */

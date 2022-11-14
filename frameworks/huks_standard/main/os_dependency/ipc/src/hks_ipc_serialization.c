@@ -375,10 +375,7 @@ static int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *out
 
     struct HksBlob tmpBlob = { tmpSize, NULL };
     tmpBlob.data = (uint8_t *)HksMalloc(tmpSize);
-    if (tmpBlob.data == NULL) {
-        HKS_LOG_E("malloc certEncoded fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpBlob.data, HKS_ERROR_MALLOC_FAIL, "malloc certEncoded fail")
 
     do {
         if (memcpy_s(tmpBlob.data, tmpSize, begin, beginLen) != EOK) {

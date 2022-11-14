@@ -78,10 +78,8 @@ int32_t InitRsaKeyBuf(const struct KeyMaterialRsa *keyMaterial, struct HksBlob *
     }
 
     bufBlob->data = (uint8_t *)HksMalloc(maxSize);
-    if (bufBlob->data == NULL) {
-        HKS_LOG_E("HksMalloc failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(bufBlob->data, HKS_ERROR_MALLOC_FAIL, "HksMalloc failed!")
+
     bufBlob->size = maxSize;
     return HKS_SUCCESS;
 }
@@ -147,9 +145,7 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
     const uint32_t keyByteLen = keySize / HKS_BITS_PER_BYTE;
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterialRsa) + keyByteLen * HKS_RSA_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
@@ -277,10 +273,7 @@ static EVP_PKEY_CTX *InitEvpPkeyCtx(const struct HksBlob *key, bool encrypt)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, NULL, "check key material failed")
 
     RSA *rsa = InitRsaStruct(key, !encrypt);
-    if (rsa == NULL) {
-        HKS_LOG_E("initialize rsa key failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(rsa, NULL, "initialize rsa key failed")
 
     EVP_PKEY *pkey = EVP_PKEY_new();
     if (pkey == NULL) {
@@ -463,24 +456,17 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
     uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
 
     const EVP_MD *opensslAlg = GetOpensslAlg(digest);
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm fail");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
 
     EVP_PKEY *pkey = NULL;
     EVP_PKEY_CTX *ctx = NULL;
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
         pkey = InitRsaEvpKey(key, signing);
-        if (pkey == NULL) {
-            break;
-        }
+        HKS_IF_NULL_BREAK(pkey)
 
         ctx = EVP_PKEY_CTX_new(pkey, NULL);
-        if (ctx == NULL) {
-            break;
-        }
+        HKS_IF_NULL_BREAK(ctx)
 
         if (signing) {
             ret = EVP_PKEY_sign_init(ctx);
@@ -529,10 +515,7 @@ int32_t HksOpensslRsaVerify(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, false);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize rsa context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize rsa context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
