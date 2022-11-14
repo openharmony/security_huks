@@ -63,7 +63,7 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         reply->WriteUint32(0);
     } else {
         reply->WriteUint32(response->size);
-        reply->WriteBuffer(response->data, reinterpret_cast<size_t>(response->size));
+        reply->WriteBuffer(response->data, static_cast<size_t>(response->size));
     }
 }
 
