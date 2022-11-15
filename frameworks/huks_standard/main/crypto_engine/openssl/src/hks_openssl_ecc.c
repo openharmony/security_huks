@@ -454,10 +454,54 @@ int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct Hks
 #endif
 
 #ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
+static int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature, bool signing)
+{
+    HKS_LOG_E("ECC SignVerifyWithDigestNone begin");
+    int32_t ret = HKS_FAILURE;
+    EC_KEY *eccKey = EccInitKey(key, signing);
+    if (eccKey == NULL) {
+        HKS_LOG_E("initialize ecc key failed");
+        return ret;
+    }
+
+    if (signing) {
+        uint32_t sigSize = ECDSA_size(eccKey);
+        HKS_LOG_E("signature size is short: signature size: %d, key size: %d", signature->size, sigSize);
+        if (signature->size < sigSize) {
+            EC_KEY_free(eccKey);
+            HksLogOpensslError();
+            return ret;
+        }
+
+        if (ECDSA_sign(0, message->data, message->size, signature->data, &sigSize, eccKey) == 0) {
+            HKS_LOG_E("ECDSA_sign failed");
+            EC_KEY_free(eccKey);
+            HksLogOpensslError();
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+        HKS_LOG_I("real signature size %d", sigSize);
+        signature->size = sigSize;
+    } else {
+        ret = ECDSA_verify(0, message->data, message->size, signature->data, signature->size, eccKey);
+        if (ret <= 0) {
+            HKS_LOG_E("ECDSA_verify failed");
+            HksLogOpensslError();
+            EC_KEY_free(eccKey);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+    EC_KEY_free(eccKey);
+    return HKS_SUCCESS;
+}
+
 static EVP_PKEY_CTX *InitEcdsaCtx(const struct HksBlob *mainKey, uint32_t digest, bool sign)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(digest);
-    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
+    if ((digest != HKS_DIGEST_NONE) && (opensslAlg == NULL)) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return NULL;
+    }
 
     EC_KEY *eccKey = EccInitKey(mainKey, sign);
     HKS_IF_NULL_LOGE_RETURN(eccKey, NULL, "initialize ecc key failed")
@@ -493,7 +537,7 @@ static EVP_PKEY_CTX *InitEcdsaCtx(const struct HksBlob *mainKey, uint32_t digest
         EVP_PKEY_CTX_free(ctx);
         return NULL;
     }
-    if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS) {
+    if ((digest != HKS_DIGEST_NONE) && (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)) {
         HksLogOpensslError();
         EVP_PKEY_CTX_free(ctx);
         return NULL;
@@ -504,6 +548,9 @@ static EVP_PKEY_CTX *InitEcdsaCtx(const struct HksBlob *mainKey, uint32_t digest
 int32_t HksOpensslEcdsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
+    if (usageSpec->digest == HKS_DIGEST_NONE) {
+        return SignVerifyWithDigestNone(key, usageSpec, message, (struct HksBlob *)signature, false);
+    }
     EVP_PKEY_CTX *ctx = InitEcdsaCtx(key, usageSpec->digest, false);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize ecc context failed")
 
@@ -520,6 +567,9 @@ int32_t HksOpensslEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
 int32_t HksOpensslEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
+    if (usageSpec->digest == HKS_DIGEST_NONE) {
+        return SignVerifyWithDigestNone(key, usageSpec, message, signature, true);
+    }
     EVP_PKEY_CTX *ctx = InitEcdsaCtx(key, usageSpec->digest, true);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize ecc context failed")
 

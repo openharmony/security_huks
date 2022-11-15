@@ -74,9 +74,6 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
         }
     } else if (padding == HKS_PADDING_OAEP) {
         uint32_t digestLen;
-        if (digest == HKS_DIGEST_NONE) {
-            digest = HKS_DIGEST_SHA1;
-        }
         int32_t ret = HksGetDigestLen(digest, &digestLen);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
 
@@ -394,11 +391,9 @@ static int32_t CoreHashInit(const struct HuksKeyNode *keyNode, uint32_t alg)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get ctx from keyNode failed!")
 
     void *ctx = NULL;
-    uint32_t digest = (alg == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : alg;
-
     HKS_LOG_I("Hal hash init.");
 
-    ret = HksCryptoHalHashInit(digest, &ctx);
+    ret = HksCryptoHalHashInit(alg, &ctx);
     if (ret != HKS_SUCCESS)  {
         HKS_LOG_E("hal hash init failed ret : %" LOG_PUBLIC "d", ret);
         return ret;
@@ -486,9 +481,6 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
     struct HksUsageSpec usageSpec;
     (void)memset_s(&usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
-
-    /* NONEwithECDSA/RSA default sha256 */
-    usageSpec.digest = (usageSpec.digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec.digest;
 
     if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
         ret = HksCryptoHalSign(&rawKey, &usageSpec, inData, outData);
@@ -725,8 +717,6 @@ static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct H
     struct HksUsageSpec usageSpec;
     (void)memset_s(&usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
-    /* NONEwithECDSA/RSA default sha256 */
-    usageSpec.digest = (usageSpec.digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec.digest;
 
     bool isEncrypt = (usageSpec.purpose == HKS_KEY_PURPOSE_ENCRYPT) ? true : false;
     ret = HksCheckFinishOutSize(isEncrypt, keyNode->runtimeParamSet, inData, outData);
@@ -865,9 +855,12 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL,
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM)
 
+    uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Init cache or hash init.");
-
-    if (algParam->uint32Param == HKS_ALG_ED25519) {
+    /* If the algorithm is ed25519, the plaintext is directly cached, and the hash value does not need to be
+       calculated. The openssl algorithm needs to calculate the hash value.
+    */
+    if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
         return SetCacheModeCtx(keyNode);
     } else {
         return CoreHashInit(keyNode, alg);
@@ -886,9 +879,12 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL,
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM)
 
+    uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Update cache or hash update.");
-
-    if (algParam->uint32Param == HKS_ALG_ED25519) {
+    /* If the algorithm is ed25519, the plaintext is directly cached, and the hash value does not need to be
+       calculated. The openssl algorithm needs to calculate the hash value.
+    */
+    if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
         return UpdateCachedData(keyNode, srcData);
     } else {
         return CoreHashUpdate(keyNode, srcData);
@@ -917,10 +913,13 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL,
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM)
 
+    uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Finish cache or hash finish.");
-
     struct HksBlob signVerifyData = { 0, NULL };
-    if (algParam->uint32Param == HKS_ALG_ED25519) {
+    /* If the algorithm is ed25519, the plaintext is directly cached, and the hash value does not need to be
+       calculated. The openssl algorithm needs to calculate the hash value.
+    */
+    if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
         ret = FinishCachedData(keyNode, &message, &signVerifyData);
     } else {
         ret = CoreHashFinish(keyNode, &message, &signVerifyData);
