@@ -17,6 +17,7 @@
 #include "hks_ecc_sign_verify_test_common.h"
 
 #include <gtest/gtest.h>
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace Unittest::EccSifnVerify {
@@ -523,6 +524,74 @@ static struct HksParam g_signParamsTest027[] = {
     }
 };
 
+static struct HksParam g_genParamsTest028[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ECC
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_ECC_KEY_SIZE_521
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }
+};
+static struct HksParam g_signParamsTest028[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ECC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_ECC_KEY_SIZE_521
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA512
+    }
+};
+static struct HksParam g_verifyParamsTest028[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ECC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_ECC_KEY_SIZE_521
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA512
+    }
+};
+
+static struct HksParam g_genParamsTest029[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ECC
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_ECC_KEY_SIZE_521
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }
+};
+static struct HksParam g_signParamsTest029[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_ECC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_ECC_KEY_SIZE_521
+    }
+};
+
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0017
  * @tc.desc: alg-ECC pur-Sign.
@@ -544,7 +613,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest017, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest017, sizeof(g_verifyParamsTest017) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -577,7 +646,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest018, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest018, sizeof(g_verifyParamsTest018) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -596,6 +665,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest018, TestSize.Level0)
  */
 HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest019, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksEccSignVerifyTest019");
     const char *keyAliasString = "HksECCSignVerifyKeyAliasTest0019";
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
@@ -610,7 +680,10 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest019, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest019, sizeof(g_verifyParamsTest019) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
+            HKS_LOG_E("HksEccSignVerifyTest019, loop: %d", i);
+            ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, i);
+        }
     }
 
     /* Delete Key */
@@ -643,7 +716,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest020, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest020, sizeof(g_verifyParamsTest020) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -676,7 +749,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest021, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest021, sizeof(g_verifyParamsTest021) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -709,7 +782,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest022, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest022, sizeof(g_verifyParamsTest022) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -742,7 +815,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest023, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest023, sizeof(g_verifyParamsTest023) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -775,7 +848,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest024, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest024, sizeof(g_verifyParamsTest024) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -808,7 +881,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest025, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest025, sizeof(g_verifyParamsTest025) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* Delete Key */
@@ -900,5 +973,72 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest027, TestSize.Level0)
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
+}
+
+/**
+ * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0028
+ * @tc.desc: alg-ECC pur-Sign.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest028, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksEccSignVerifyTest028");
+    const char *keyAliasString = "HksECCSignVerifyKeyAliasTest028";
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+    int32_t ret = HKS_FAILURE;
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+
+    ret = InitParamSet(&genParamSet, g_genParamsTest028, sizeof(g_genParamsTest028) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest028, sizeof(g_signParamsTest028) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest028, sizeof(g_verifyParamsTest028) / sizeof(HksParam));
+
+    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
+        ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
+    }
+
+    /* Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&signParamSet);
+    HksFreeParamSet(&verifyParamSet);
+}
+
+/**
+ * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0029
+ * @tc.desc: alg-ECC pur-Sign. Result will be failed because degist is absent.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest029, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksEccSignVerifyTest029");
+    const char *keyAliasString = "HksECCSignVerifyKeyAliasTest029";
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+    int32_t ret = HKS_FAILURE;
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+
+    ret = InitParamSet(&genParamSet, g_genParamsTest029, sizeof(g_genParamsTest029) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest029, sizeof(g_signParamsTest029) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    ret = HksTestSignVerifyParamAbsent(keyAlias, genParamSet, signParamSet);
+    EXPECT_NE(ret, HKS_SUCCESS) << "HksTestSignVerifyParamAbsent failed.";
+
+    /* Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&signParamSet);
+    HksFreeParamSet(&verifyParamSet);
 }
 } // namespace Unittest::EccSifnVerify

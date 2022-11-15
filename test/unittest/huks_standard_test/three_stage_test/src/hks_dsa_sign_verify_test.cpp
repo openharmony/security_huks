@@ -356,6 +356,68 @@ static struct HksParam g_signParamsTest008[] = {
     }
 };
 
+static struct HksParam g_genParamsTest009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = DSA_COMMON_SIZE
+    }
+};
+static struct HksParam g_signParamsTest009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }
+};
+static struct HksParam g_verifyParamsTest009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = DSA_COMMON_SIZE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }
+};
+
+static struct HksParam g_genParamsTest010[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = DSA_COMMON_SIZE
+    }
+};
+static struct HksParam g_signParamsTest010[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }
+};
+
 int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData, bool isSign)
 {
@@ -393,14 +455,22 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     return ret;
 }
 
-int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
-    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
+static int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, uint32_t loopIndex)
 {
     struct HksBlob inData = {
         g_inData.length(),
         (uint8_t *)g_inData.c_str()
     };
     int32_t ret = HKS_FAILURE;
+
+    struct HksParam *digestAlg = nullptr;
+    ret = HksGetParam(signParamSet, HKS_TAG_DIGEST, &digestAlg);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
+    if (digestAlg->uint32Param == HKS_DIGEST_NONE) {
+        inData.size = g_inDataArrayAfterHashLen[loopIndex];
+        inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[loopIndex]);
+    }
 
     /* 1. Generate Key */
     // Generate Key
@@ -443,6 +513,7 @@ int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
  */
 HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest001, TestSize.Level0)
 {
+    HKS_LOG_E("Enter HksDsaSignVerifyTest001");
     int32_t ret = HKS_FAILURE;
     const char *keyAliasString = "HksDSASignVerifyKeyAliasTest001";
     struct HksParamSet *genParamSet = nullptr;
@@ -457,7 +528,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest001, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest001, sizeof(g_verifyParamsTest001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* 5. Delete Key */
@@ -491,7 +562,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* 5. Delete Key */
@@ -525,7 +596,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* 5. Delete Key */
@@ -559,7 +630,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest004, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* 5. Delete Key */
@@ -593,7 +664,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* 5. Delete Key */
@@ -627,7 +698,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+        ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, 0);
     }
 
     /* 5. Delete Key */
@@ -725,4 +796,76 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest008, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
 }
+
+/**
+ * @tc.name: HksDsaSignVerifyTest.HksDsaSignVerifyTest009
+ * @tc.desc: alg-DSA pur-Sign-verify dig-NONE
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest009, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksDsaSignVerifyTest009");
+    int32_t ret = HKS_FAILURE;
+    const char *keyAliasString = "HksDsaSignVerifyTest009";
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+
+    ret = InitParamSet(&genParamSet, g_genParamsTest009, sizeof(g_genParamsTest009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest009, sizeof(g_signParamsTest009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest009, sizeof(g_verifyParamsTest009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
+        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
+            HKS_LOG_E("HksDsaSignVerifyTest009 loop: %d", i);
+            ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, i);
+        }
+    }
+
+    /* 5. Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&signParamSet);
+    HksFreeParamSet(&verifyParamSet);
+}
+
+/**
+ * @tc.name: HksDsaSignVerifyTest.HksDsaSignVerifyTest010
+ * @tc.desc: alg-DSA pur-Sign-verify. Result will be failed because degist is absent.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest010, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksDsaSignVerifyTest010");
+    const char *keyAliasString = "HksDSASignVerifyKeyAliasTest010";
+    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    int32_t ret = HKS_FAILURE;
+
+    /* 1. Generate Key */
+    struct HksParamSet *genParamSet = nullptr;
+    ret = InitParamSet(&genParamSet, g_genParamsTest010, sizeof(g_genParamsTest010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    // Generate Key
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    /* 2. Sign Three Stage  */
+    struct HksParamSet *signParamSet = nullptr;
+    ret = InitParamSet(&signParamSet, g_signParamsTest010, sizeof(g_signParamsTest010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    // Init. Result will be faied because of less degist.
+    uint8_t handleS[sizeof(uint64_t)] = {0};
+    struct HksBlob handleSign = { sizeof(uint64_t), handleS };
+
+    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
 } // namespace Unittest::DsaSignVerify
+}

@@ -343,8 +343,7 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     const struct HksBlob *message, const bool sign, struct HksBlob *signature)
 {
     uint32_t mbedtlsAlg;
-    uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
-    int32_t ret = HksToMbedtlsDigestAlg(digest, &mbedtlsAlg);
+    int32_t ret = HksToMbedtlsDigestAlg(usageSpec->digest, &mbedtlsAlg);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     int32_t padding;
     ret = HksToMbedtlsSignPadding(usageSpec->padding, &padding);

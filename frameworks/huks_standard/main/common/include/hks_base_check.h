@@ -29,6 +29,7 @@ enum CheckKeyType {
 struct Params {
     bool needCheck;
     uint32_t value;
+    bool isAbsent;
 };
 
 struct ParamsValues {
@@ -103,6 +104,10 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
 int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, uint32_t challengeType);
 
 int32_t HksCheckSecureSignParams(uint32_t secureSignType);
+
+int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *inputParams);
+
+int32_t HksCheckOptionalParam(enum HksTag tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
 #ifdef __cplusplus
 }
 #endif
