@@ -490,9 +490,6 @@ enum OH_Huks_SecureSignType {
  * @version 1.0
  */
 enum OH_Huks_Tag {
-    /** Invalid tag. */
-    OH_HUKS_TAG_INVALID = OH_HUKS_TAG_TYPE_INVALID | 0,
-
     /** Tags for key parameters. The value range is 1 to 200. */
     /** Algorithm. */
     OH_HUKS_TAG_ALGORITHM = OH_HUKS_TAG_TYPE_UINT | 1,
@@ -519,19 +516,11 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_INFO = OH_HUKS_TAG_TYPE_BYTES | 11,
     /** Salt value used for key derivation. */
     OH_HUKS_TAG_SALT = OH_HUKS_TAG_TYPE_BYTES | 12,
-    /** Password used for key derivation. */
-    OH_HUKS_TAG_PWD = OH_HUKS_TAG_TYPE_BYTES | 13,
     /** Number of iterations for key derivation. */
     OH_HUKS_TAG_ITERATION = OH_HUKS_TAG_TYPE_UINT | 14,
 
     /** Type of the generated key. For details, see {@link OH_Huks_KeyGenerateType}. */
     OH_HUKS_TAG_KEY_GENERATE_TYPE = OH_HUKS_TAG_TYPE_UINT | 15,
-    /** Main key used in key derivation. */
-    OH_HUKS_TAG_DERIVE_MAIN_KEY = OH_HUKS_TAG_TYPE_BYTES | 16,
-    /** Factor used in key derivation. */
-    OH_HUKS_TAG_DERIVE_FACTOR = OH_HUKS_TAG_TYPE_BYTES | 17,
-    /** Algorithm used in key derivation. */
-    OH_HUKS_TAG_DERIVE_ALG = OH_HUKS_TAG_TYPE_UINT | 18,
     /** Algorithm used in key agreement. */
     OH_HUKS_TAG_AGREE_ALG = OH_HUKS_TAG_TYPE_UINT | 19,
     /** Alias of the public key used for key agreement. */
@@ -582,28 +571,8 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_ATTESTATION_CHALLENGE = OH_HUKS_TAG_TYPE_BYTES | 501,
     /** Application ID used in the attestation. */
     OH_HUKS_TAG_ATTESTATION_APPLICATION_ID = OH_HUKS_TAG_TYPE_BYTES | 502,
-    /** Brand of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_BRAND = OH_HUKS_TAG_TYPE_BYTES | 503,
-    /** ID of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_DEVICE = OH_HUKS_TAG_TYPE_BYTES | 504,
-    /** Product name of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_PRODUCT = OH_HUKS_TAG_TYPE_BYTES | 505,
-    /** Serial number (SN) of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_SERIAL = OH_HUKS_TAG_TYPE_BYTES | 506,
-    /** International mobile equipment identity (IMEI) of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_IMEI = OH_HUKS_TAG_TYPE_BYTES | 507,
-    /** Mobile equipment identity (MEID) of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_MEID = OH_HUKS_TAG_TYPE_BYTES | 508,
-    /** Manufacturer of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_MANUFACTURER = OH_HUKS_TAG_TYPE_BYTES | 509,
-    /** Device model. */
-    OH_HUKS_TAG_ATTESTATION_ID_MODEL = OH_HUKS_TAG_TYPE_BYTES | 510,
     /** Alias of the key. */
     OH_HUKS_TAG_ATTESTATION_ID_ALIAS = OH_HUKS_TAG_TYPE_BYTES | 511,
-    /** System-on-a-chip identity (SoCID) of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_SOCID = OH_HUKS_TAG_TYPE_BYTES | 512,
-    /** Unique device identifier (UDID) of the device. */
-    OH_HUKS_TAG_ATTESTATION_ID_UDID = OH_HUKS_TAG_TYPE_BYTES | 513,
     /** Security level used in the attestation. */
     OH_HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO = OH_HUKS_TAG_TYPE_BYTES | 514,
     /** Version information used in the attestation. */
@@ -630,10 +599,6 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_KEY_FLAG = OH_HUKS_TAG_TYPE_UINT | 1007,
     /** Specifies whether this API is asynchronous. */
     OH_HUKS_TAG_IS_ASYNCHRONIZED = OH_HUKS_TAG_TYPE_UINT | 1008,
-    /** Alias of the secure key. */
-    OH_HUKS_TAG_SECURE_KEY_ALIAS = OH_HUKS_TAG_TYPE_BOOL | 1009,
-    /** UUID of the secure key. */
-    OH_HUKS_TAG_SECURE_KEY_UUID = OH_HUKS_TAG_TYPE_BYTES | 1010,
     /** Key domain. */
     OH_HUKS_TAG_KEY_DOMAIN = OH_HUKS_TAG_TYPE_UINT | 1011,
 
