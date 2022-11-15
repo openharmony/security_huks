@@ -14,8 +14,9 @@
  */
 
 #include "hks_rsa_sign_verify_part9_test.h"
-#include "hks_rsa_sign_verify_test_common.h"
 #include "hks_log.h"
+#include "hks_rsa_sign_verify_test_common.h"
+
 #include <gtest/gtest.h>
 
 using namespace testing::ext;

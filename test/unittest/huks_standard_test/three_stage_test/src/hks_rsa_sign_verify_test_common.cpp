@@ -116,7 +116,7 @@ int32_t HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias,
         uint32_t arraySize = (sizeof(g_inDataArrayAfterHash) / sizeof(uint8_t *));
         for (uint32_t i = 0; i < arraySize; i++) {
             HKS_LOG_E("HksRsaSignVerifyTestNormalCase loop: %d", i);
-            if (keySize->uint32Param == HKS_RSA_KEY_SIZE_512 && i == 5) {
+            if ((keySize->uint32Param == HKS_RSA_KEY_SIZE_512) && (i == arraySize - 1)) {
                 continue;
             }
             param.hashAlgIndex = i;

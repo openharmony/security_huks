@@ -318,7 +318,7 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
         return HKS_SUCCESS;
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
-        return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode, paramSet);;
+        return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode, paramSet);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }

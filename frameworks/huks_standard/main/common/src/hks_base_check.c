@@ -1526,7 +1526,6 @@ int32_t HksCheckOptionalParam(enum HksTag tag, uint32_t alg, uint32_t purpose, b
         }
         if (purpose == HKS_KEY_PURPOSE_DERIVE) {
             checkType = HKS_CHECK_TYPE_GEN_DERIVE_KEY;
-
         } else {
             checkType = HKS_CHECK_TYPE_GEN_MAC_KEY;
         }
