@@ -596,7 +596,7 @@ static void ModifyImportAnotherParams(uint32_t purpose, uint32_t keySize, uint32
 {
     g_importRsaKeyAnotherParams[TAG_PURPOSE_ID].uint32Param = purpose;
     g_importRsaKeyAnotherParams[TAG_KEY_SIZE_ID].uint32Param = keySize;
-    g_importRsaKeyAnotherParams[3].uint32Param = importType;
+    g_importRsaKeyAnotherParams[TAG_IMPORT_NEW_INDEX].uint32Param = importType;
 }
 
 static void ModifyinitOp1Params(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
@@ -648,7 +648,7 @@ static int32_t ImportKeyNew(const struct HksBlob *keyAlias, const struct HksPara
     struct HksBlob key = { 0, nullptr };
 
     // The caller guarantees that the access will not cross the border
-    ret = ConstructImportedKey(params[TAG_KEY_SIZE_ID].uint32Param, params[3].uint32Param, &key);
+    ret = ConstructImportedKey(params[TAG_KEY_SIZE_ID].uint32Param, params[TAG_KEY_SIZE_NEW_INDEX].uint32Param, &key);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         return ret;
@@ -834,8 +834,7 @@ static int32_t DoOperation(const struct HksBlob *priKeyAlias, const struct HksBl
     return ret;
 }
 
-static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding,
-    uint32_t digest, const bool isAnother)
+static void RsaImportPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
     uint32_t purposePri;
     uint32_t purposePair;
@@ -847,40 +846,83 @@ static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t p
     uint8_t priAlias[] = "import_rsa_private_key";
     struct HksBlob priKeyAlias = { sizeof(priAlias), priAlias };
     
-    if (isAnother) {
-        ModifyImportAnotherParams(purposePri, keySize, HKS_KEY_TYPE_PRIVATE_KEY);
-        ret = ImportKeyNew(&priKeyAlias, g_importRsaKeyAnotherParams,
-                sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
-    } else {
-        ModifyImportParams(purposePri, keySize, padding, digest, HKS_KEY_TYPE_PRIVATE_KEY);
-        ret = ImportKey(&priKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
-    }
+    ModifyImportAnotherParams(purposePri, keySize, HKS_KEY_TYPE_PRIVATE_KEY);
+    ret = ImportKeyNew(&priKeyAlias, g_importRsaKeyAnotherParams,
+        sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "import pri key failed";
 
     // import rsa key-pair
     uint8_t pairAlias[] = "import_rsa_key_pair";
     struct HksBlob pairKeyAlias = { sizeof(pairAlias), pairAlias };
-    if (isAnother) {
-        ModifyImportAnotherParams(purposePair, keySize, HKS_KEY_TYPE_KEY_PAIR);
-        ret = ImportKeyNew(&pairKeyAlias, g_importRsaKeyAnotherParams,
-                sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
-    } else {
-        ModifyImportParams(purposePair, keySize, padding, digest, HKS_KEY_TYPE_KEY_PAIR);
-        ret = ImportKey(&pairKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
-    }
+
+    ModifyImportAnotherParams(purposePair, keySize, HKS_KEY_TYPE_KEY_PAIR);
+    ret = ImportKeyNew(&pairKeyAlias, g_importRsaKeyAnotherParams,
+        sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
+    
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key pair failed";
 
     // import rsa pubKey
     uint8_t pubAlias[] = "import_rsa_public_key";
     struct HksBlob pubKeyAlias = { sizeof(pubAlias), pubAlias };
-    if (isAnother) {
-        ModifyImportAnotherParams(purposePub, keySize, HKS_KEY_TYPE_PUBLIC_KEY);
-        ret = ImportKeyNew(&pubKeyAlias, g_importRsaKeyAnotherParams,
-                sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
-    } else {
-        ModifyImportParams(purposePub, keySize, padding, digest, HKS_KEY_TYPE_PUBLIC_KEY);
-        ret = ImportKey(&pubKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
-    }
+
+    ModifyImportAnotherParams(purposePub, keySize, HKS_KEY_TYPE_PUBLIC_KEY);
+    ret = ImportKeyNew(&pubKeyAlias, g_importRsaKeyAnotherParams,
+        sizeof(g_importRsaKeyAnotherParams) / sizeof(struct HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "import key public failed";
+
+    uint32_t purposeOp1;
+    uint32_t purposeOp2;
+    ret = ConstructOpPurpose(purpose, purposeOp1, purposeOp2);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "construct operation purpose failed";
+
+    ModifyinitOp1Params(purposeOp1, keySize, padding, digest);
+    ModifyinitOp2Params(purposeOp2, keySize, padding, digest);
+
+    ret = DoOperation(&priKeyAlias, &pairKeyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "operation failed";
+    ret = DoOperation(&priKeyAlias, &pubKeyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "operation 2 failed";
+
+    // export public key
+    uint8_t pubKey[HKS_RSA_KEY_SIZE_1024] = {0};
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKey };
+    ret = HksExportPublicKey(&pubKeyAlias, nullptr, &publicKey);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
+
+    // delete keys
+    (void)HksDeleteKey(&priKeyAlias, nullptr);
+    (void)HksDeleteKey(&pairKeyAlias, nullptr);
+    (void)HksDeleteKey(&pubKeyAlias, nullptr);
+}
+
+static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
+{
+    uint32_t purposePri;
+    uint32_t purposePair;
+    uint32_t purposePub;
+    int32_t ret = ConstructPurpose(purpose, purposePri, purposePair, purposePub);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "construct purpose failed";
+
+    // import rsa private-key
+    uint8_t priAlias[] = "import_rsa_private_key";
+    struct HksBlob priKeyAlias = { sizeof(priAlias), priAlias };
+    
+    ModifyImportParams(purposePri, keySize, padding, digest, HKS_KEY_TYPE_PRIVATE_KEY);
+    ret = ImportKey(&priKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "import pri key failed";
+
+    // import rsa key-pair
+    uint8_t pairAlias[] = "import_rsa_key_pair";
+    struct HksBlob pairKeyAlias = { sizeof(pairAlias), pairAlias };
+    ModifyImportParams(purposePair, keySize, padding, digest, HKS_KEY_TYPE_KEY_PAIR);
+    ret = ImportKey(&pairKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "import key pair failed";
+
+    // import rsa pubKey
+    uint8_t pubAlias[] = "import_rsa_public_key";
+    struct HksBlob pubKeyAlias = { sizeof(pubAlias), pubAlias };
+    ModifyImportParams(purposePub, keySize, padding, digest, HKS_KEY_TYPE_PUBLIC_KEY);
+    ret = ImportKey(&pubKeyAlias, g_importRsaKeyParams, sizeof(g_importRsaKeyParams) / sizeof(struct HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key public failed";
 
     uint32_t purposeOp1;
@@ -910,12 +952,12 @@ static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t p
 
 static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
-    return RsaImportPlainKeyTest(purpose, keySize, padding, digest, false);
+    return RsaImportPlainKeyTest(purpose, keySize, padding, digest);
 }
 
 static void ImportRsaPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
-    return RsaImportPlainKeyTest(purpose, keySize, padding, digest, true);
+    return RsaImportPlainKeyAnotherTest(purpose, keySize, padding, digest);
 }
 
 /**

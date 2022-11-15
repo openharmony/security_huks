@@ -236,8 +236,10 @@ static const uint32_t g_dhKeySize[] = {
 
 #ifdef HKS_SUPPORT_RSA_C
 static const struct ParamsValuesChecker g_rsaParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectRsaParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -261,10 +263,14 @@ static const struct ExpectParamsValuesChecker g_expectRsaParams[] = {
 
 #ifdef HKS_SUPPORT_AES_C
 static const struct ParamsValuesChecker g_aesParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false}, { true, 0, false} } },
-	{ HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false}, { true, 0, false} } },
-    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+	{ HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 
 static const struct ExpectParamsValuesChecker g_expectAesParams[] = {
@@ -305,8 +311,10 @@ static const struct ExpectParamsValuesChecker g_expectAesParams[] = {
 
 #ifdef HKS_SUPPORT_ECC_C
 static const struct ParamsValuesChecker g_eccParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectEccParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -330,8 +338,10 @@ static const struct ExpectParamsValuesChecker g_expectEccParams[] = {
 
 #ifdef HKS_SUPPORT_SM2_C
 static const struct ParamsValuesChecker g_sm2ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm2Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -355,8 +365,10 @@ static const struct ExpectParamsValuesChecker g_expectSm2Params[] = {
 
 #ifdef HKS_SUPPORT_SM3_C
 static const struct ParamsValuesChecker g_sm3ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm3Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -380,8 +392,10 @@ static const struct ExpectParamsValuesChecker g_expectSm3Params[] = {
 
 #ifdef HKS_SUPPORT_SM4_C
 static const struct ParamsValuesChecker g_sm4ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false}, { true, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false}, { true, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm4Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -405,8 +419,10 @@ static const struct ExpectParamsValuesChecker g_expectSm4Params[] = {
 
 #if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
 static const struct ParamsValuesChecker g_curve25519ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectCurve25519Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -430,9 +446,12 @@ static const struct ExpectParamsValuesChecker g_expectCurve25519Params[] = {
 
 #ifdef HKS_SUPPORT_HMAC_C
 static const struct ParamsValuesChecker g_hmacParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectHmacParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -464,8 +483,10 @@ static const struct ExpectParamsValuesChecker g_expectHmacParams[] = {
 
 #ifdef HKS_SUPPORT_DSA_C
 static const struct ParamsValuesChecker g_dsaParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectDsaParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -489,8 +510,10 @@ static const struct ExpectParamsValuesChecker g_expectDsaParams[] = {
 
 #ifdef HKS_SUPPORT_DH_C
 static const struct ParamsValuesChecker g_dhParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectDhParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -514,8 +537,10 @@ static const struct ExpectParamsValuesChecker g_expectDhParams[] = {
 
 #ifdef HKS_SUPPORT_ECDH_C
 static const struct ParamsValuesChecker g_ecdhParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false}, { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false}, { false, 0, false} } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectEcdhParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -765,7 +790,7 @@ static int32_t CheckPurposeValid(uint32_t alg, uint32_t inputPurpose)
 }
 #endif /* _CUT_AUTHENTICATE_ */
 
-// if tag is optional param, when tag is empty, it is supported. 
+// If tag is optional param, when tag is empty, it is supported.
 static int32_t GetOptionalParams(const struct HksParamSet *paramSet, uint32_t tag, bool needCheck, uint32_t* value,
     bool* isAbsent)
 {
@@ -783,7 +808,7 @@ static int32_t GetOptionalParams(const struct HksParamSet *paramSet, uint32_t ta
         }
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    return HKS_SUCCESS; 
+    return HKS_SUCCESS;
 }
 
 int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *inputParams)
@@ -1234,7 +1259,7 @@ static int32_t CheckAesPadding(const struct ParamsValues *inputParams)
 {
     if ((inputParams->mode.isAbsent) || (inputParams->padding.isAbsent)) {
         return HKS_SUCCESS;
-    }   
+    }
     uint32_t mode = inputParams->mode.value;
     uint32_t padding = inputParams->padding.value;
     if (mode == HKS_MODE_CBC) {
@@ -1470,13 +1495,13 @@ static int32_t CheckOptionalParams(bool needCheck, bool isAbsent, uint32_t input
                 HKS_LOG_E("CheckOptionalParams invalid argument, %d", inputValue);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
-        } 
+        }
     }
     return HKS_SUCCESS;
 }
 
-static int32_t InitCheckOptionalParams(bool needCheck, bool isAbsent, struct HksParam *param, const uint32_t* expectValue,
-    uint32_t expectCnt)
+static int32_t InitCheckOptionalParams(bool needCheck, bool isAbsent, struct HksParam *param,
+    const uint32_t* expectValue, uint32_t expectCnt)
 {
     if (needCheck) {
         if (!isAbsent) {
@@ -1499,7 +1524,7 @@ int32_t HksCheckOptionalParam(enum HksTag tag, uint32_t alg, uint32_t purpose, b
             HKS_LOG_E("check mac or derive, not aes alg, alg: %u", alg);
             return HKS_ERROR_INVALID_PURPOSE;
         }
-        if ( purpose == HKS_KEY_PURPOSE_DERIVE) {
+        if (purpose == HKS_KEY_PURPOSE_DERIVE) {
             checkType = HKS_CHECK_TYPE_GEN_DERIVE_KEY;
 
         } else {

@@ -1013,6 +1013,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest028, TestSize.Level0)
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0029
  * @tc.desc: alg-ECC pur-Sign. Result will be failed because degist is absent.
  * @tc.type: FUNC
+ * @tc.require:issueI611S5
  */
 HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest029, TestSize.Level0)
 {

@@ -454,7 +454,8 @@ int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct Hks
 #endif
 
 #ifdef HKS_SUPPORT_ECDSA_SIGN_VERIFY
-static int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, const struct HksBlob *message, struct HksBlob *signature, bool signing)
+static int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature, bool signing)
 {
     HKS_LOG_E("ECC SignVerifyWithDigestNone begin");
     int32_t ret = HKS_FAILURE;
@@ -497,7 +498,10 @@ static int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct 
 static EVP_PKEY_CTX *InitEcdsaCtx(const struct HksBlob *mainKey, uint32_t digest, bool sign)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(digest);
-    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
+    if ((digest != HKS_DIGEST_NONE) && (opensslAlg == NULL)) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return NULL;
+    }
 
     EC_KEY *eccKey = EccInitKey(mainKey, sign);
     HKS_IF_NULL_LOGE_RETURN(eccKey, NULL, "initialize ecc key failed")

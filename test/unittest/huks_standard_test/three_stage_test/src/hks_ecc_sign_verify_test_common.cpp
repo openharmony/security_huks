@@ -56,8 +56,8 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     return ret;
 }
 
-int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
-    struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, uint32_t loopIndex)
+int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, uint32_t loopIndex)
 {
     struct HksBlob inData = {
         g_inData.length(),
@@ -109,7 +109,7 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias,
 
 int32_t HksTestSignVerifyParamAbsent(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *signParamSet)
-{   
+{
     /* 1. Generate Key */
     uint32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
