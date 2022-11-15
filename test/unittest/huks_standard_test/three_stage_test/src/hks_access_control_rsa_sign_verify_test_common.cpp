@@ -24,14 +24,13 @@
 
 using namespace testing::ext;
 namespace Unittest::AccessControlRsaSignVerify {
-struct AcRsaSignVerifyParamStruct
-{
+struct AcRsaSignVerifyParamStruct {
     IDMParams testIDMParams;
     bool isUseIndataAfterHash;
     uint32_t hashAlgIndex;
 };
 
-const uint32_t g_sleepTwoSecond = 2;
+const uint32_t SLEEP_TWO_SECOND = 2;
 
 static int32_t RSAAuthTokenSign(struct HksBlob *challenge,
     const IDMParams &testIDMParams, struct HksParam *tmpParams)
@@ -107,7 +106,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
     return ret;
 }
 
-static const uint32_t g_sleepTime = 1;
+static const uint32_t SLEEP_TIME = 1;
 
 static int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct HksParamSet *paramSet,
     const struct AcRsaSignVerifyParamStruct &param, struct HksBlob *inDataSign, struct HksBlob *outDataSign)
@@ -131,7 +130,7 @@ static int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct Hks
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // sleep 1 sec for time out test
-    sleep(g_sleepTime);
+    sleep(SLEEP_TIME);
     
     // Update loop
     struct HksParam Params;
@@ -183,7 +182,7 @@ static int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct H
     int32_t ret = HksInit(keyAlias, paramSet, &handle, &challengeBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
-    sleep(g_sleepTwoSecond); // Waiting for time out
+    sleep(SLEEP_TWO_SECOND); // Waiting for time out
 
     // Update loop
     struct HksParam Params;

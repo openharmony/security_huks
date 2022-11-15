@@ -332,7 +332,10 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
 static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
-    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
+    if ((usageSpec->digest != HKS_DIGEST_NONE) && (opensslAlg == NULL)) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return NULL;
+    }
 
     DSA *dsa = InitDsaStruct(key, signing);
     HKS_IF_NULL_LOGE_RETURN(dsa, NULL, "initialize dsa key failed")
@@ -371,7 +374,8 @@ static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsage
         return NULL;
     }
 
-    if ((usageSpec->digest != HKS_DIGEST_NONE) && (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)) {
+    if ((usageSpec->digest != HKS_DIGEST_NONE) &&
+        (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)) {
         HksLogOpensslError();
         EVP_PKEY_CTX_free(ctx);
         return NULL;

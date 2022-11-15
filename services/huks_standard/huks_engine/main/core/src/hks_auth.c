@@ -111,7 +111,8 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksPa
     struct HksParam *requestParam = NULL;
     struct HksParam *algParam = NULL;
     struct HksParam *purposeParam = NULL;
-    struct ParamsValues paramValues = { { false, 0, false }, { true, 0, false }, { false, 0, false }, { true, 0, false }, { true, 0, false } };
+    struct ParamsValues paramValues = { { false, 0, false }, { true, 0, false }, { false, 0, false },
+        { true, 0, false }, { true, 0, false } };
     int32_t ret = GetAlgAndPurposeParam(keyBlobParamSet, &algParam, &purposeParam, &paramValues);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("GetAlgAndPurposeParam failed");

@@ -19,8 +19,7 @@
 
 using namespace testing::ext;
 namespace Unittest::RsaSignVerify {
-struct RsaSignVerifyParamStruct
-{
+struct RsaSignVerifyParamStruct {
     bool isGenParamSetSameAsImport;
     bool isUseIndataAfterHash;
     uint32_t hashAlgIndex;
@@ -94,7 +93,7 @@ static int32_t RsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksPa
 
     /* 6. Delete Key */
     ret = HksDeleteKey(&newKeyAlias, verifyParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed."; 
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     return ret;
 }
@@ -114,7 +113,8 @@ int32_t HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias,
     EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
 
     if (param.isUseIndataAfterHash) {
-        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(uint8_t *)); i++) {
+        uint32_t arraySize = (sizeof(g_inDataArrayAfterHash) / sizeof(uint8_t *));
+        for (uint32_t i = 0; i < arraySize; i++) {
             HKS_LOG_E("HksRsaSignVerifyTestNormalCase loop: %d", i);
             if (keySize->uint32Param == HKS_RSA_KEY_SIZE_512 && i == 5) {
                 continue;

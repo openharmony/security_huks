@@ -51,6 +51,8 @@ void HksSm2SignVerifyTest::TearDown()
 const uint32_t SUCCESS_RETURN_INDEX = 0;
 const uint32_t FAILURE_RETURN_INDEX = 1;
 
+const uint32_t NECESSARY_PARAMS_SUCCESS_RETURN_INDEX = 4;
+
 static const struct GenerateKeyCaseParam g_genParamsTest[] = {
     {   0,
         HKS_SUCCESS,
@@ -423,15 +425,12 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
     struct HksBlob publicKey = { HKS_MAX_KEY_LEN, pubKey };
 
     struct HksBlob importKeyAlias;
-    int ret = CreateImportKeyAlias(&importKeyAlias, keyAlias);
+    int32_t ret = CreateImportKeyAlias(&importKeyAlias, keyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "createImportKeyAlias failed.";
-
     do {
         /* 1. Generate Key */
         uint32_t cnt = sizeof(g_genParamsTest[genIndex].params) / sizeof(HksParam);
-        if (genIndex == 4) {
-            cnt -= 1;  // because GenerateKeyCaseParam struct (params[4] has 4 elements, but needs 3 elements) 
-        }
+        cnt = (genIndex == NECESSARY_PARAMS_SUCCESS_RETURN_INDEX) ? (cnt - 1) : cnt;
         ret = InitParamSet(&genParamSet, g_genParamsTest[genIndex].params, cnt);
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
         ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
@@ -451,8 +450,7 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
         }
 
         /* 3. Export Public Key */
-        ret = HksExportPublicKey(keyAlias, genParamSet, &publicKey);
-        EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
+        EXPECT_EQ(HksExportPublicKey(keyAlias, genParamSet, &publicKey), HKS_SUCCESS) << "ExportPublicKey failed.";
 
         /* 4. Import Key */
         ret = InitParamSet(&verifyParamSet, g_verifyParamsTest[verifyIndex].params,
@@ -553,7 +551,8 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest004, TestSize.Level0)
     HKS_LOG_E("Enter HksSm2SignVerifyTest004");
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest004";
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
-    int ret = HksSm2SignVerifyTestRun(&keyAlias, 4, 4, 4, false);
+    int ret = HksSm2SignVerifyTestRun(&keyAlias, NECESSARY_PARAMS_SUCCESS_RETURN_INDEX,
+    NECESSARY_PARAMS_SUCCESS_RETURN_INDEX, NECESSARY_PARAMS_SUCCESS_RETURN_INDEX, false);
     EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest004 failed.";
 }
 #endif

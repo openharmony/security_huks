@@ -1296,7 +1296,8 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test027, TestSize.Level0)
 
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test028
- * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT, and When generating the key, the necessary parameters and some other params are passed in.
+ * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT, and When generating the key, the necessary parameters and some other
+ *           params are passed in.
  * @tc.type: FUNC
  * @tc.require:issueI611S5
  */

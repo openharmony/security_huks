@@ -91,7 +91,7 @@ int32_t HksAesCipherTestParamAbsentCase(const struct HksBlob *keyAlias, struct H
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    /* 2. Encrypt, init will fail*/
+    /* 2. Encrypt, init will fail */
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
     ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);

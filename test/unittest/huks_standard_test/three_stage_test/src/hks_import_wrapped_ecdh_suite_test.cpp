@@ -289,7 +289,7 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING},
     };
 
-   static struct HksParam g_importHmac256KeyAtherParams[] = {
+    static struct HksParam g_importHmac256KeyAtherParams[] = {
         {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC},
         {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC},
         {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256},
