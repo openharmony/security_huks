@@ -27,6 +27,7 @@
 
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
+#include "hks_template.h"
 
 static int32_t CheckBnExpModNx(const struct HksBlob *n, const struct HksBlob *x)
 {
@@ -37,7 +38,7 @@ static int32_t CheckBnExpModNx(const struct HksBlob *n, const struct HksBlob *x)
     }
 
     if (x->size < n->size) {
-        HKS_LOG_E("The param x's size is too samll! x size = 0x%X", x->size);
+        HKS_LOG_E("The param x's size is too samll! x size = 0x%" LOG_PUBLIC "X", x->size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -48,9 +49,7 @@ int32_t HksMbedtlsBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     const struct HksBlob *e, const struct HksBlob *n)
 {
     int32_t ret = CheckBnExpModNx(n, x);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_mpi bnX;
     mbedtls_mpi bnA;
@@ -65,29 +64,29 @@ int32_t HksMbedtlsBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     do {
         ret = mbedtls_mpi_read_binary(&bnA, a->data, a->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi read a failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi read a failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
         ret = mbedtls_mpi_read_binary(&bnE, e->data, e->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi read e failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi read e failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
         ret = mbedtls_mpi_read_binary(&bnN, n->data, n->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi read n failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi read n failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_mpi_exp_mod(&bnX, &bnA, &bnE, &bnN, NULL);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls exp mod failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls exp mod failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
         ret = mbedtls_mpi_write_binary(&bnX, x->data, x->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls mpi write x failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls mpi write x failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         }
     } while (0);
 

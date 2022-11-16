@@ -28,6 +28,7 @@
 #include "hks_log.h"
 #include "hks_mbedtls_common.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #define HKS_DH_KEYPAIR_CNT 2
 
@@ -72,9 +73,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
     const uint32_t keyByteLen = HKS_KEY_BYTES(keySize);
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + keyByteLen * HKS_DH_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)rawMaterial;
@@ -88,7 +87,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
         uint32_t offset = sizeof(*keyMaterial);
         ret = mbedtls_mpi_write_binary(&(ctx->GX), rawMaterial + offset, keyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
             HksFree(rawMaterial);
             break;
@@ -97,7 +96,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
         offset = offset + keyMaterial->pubKeySize;
         ret = mbedtls_mpi_write_binary(&(ctx->X), rawMaterial + offset, keyMaterial->priKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
             HksFree(rawMaterial);
             break;
@@ -127,9 +126,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         struct HksBlob paramP;
         struct HksBlob paramG;
         ret = GetDhParam(spec->keyLen, &paramP, &paramG);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
         uint32_t keyLen = HKS_KEY_BYTES(spec->keyLen);
 
         if (mbedtls_mpi_read_binary(&ctx.P, paramP.data, paramP.size) != HKS_MBEDTLS_SUCCESS ||
@@ -140,9 +137,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         ctx.len = keyLen;
 
         uint8_t *output = (uint8_t *)HksMalloc(keyLen);
-        if (output == NULL) {
-            break;
-        }
+        HKS_IF_NULL_BREAK(output)
         ret = mbedtls_dhm_make_public(&ctx, keyLen, output, keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_SUCCESS) {
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -193,9 +188,7 @@ static int32_t DhKeyMaterialToCtx(const struct HksBlob *key, const bool needPriv
         struct HksBlob paramP;
         struct HksBlob paramG;
         ret = GetDhParam(keyMaterial->keySize, &paramP, &paramG);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         if (mbedtls_mpi_read_binary(&ctx->P, paramP.data, paramP.size) != HKS_MBEDTLS_SUCCESS ||
             mbedtls_mpi_read_binary(&ctx->G, paramG.data, paramG.size) != HKS_MBEDTLS_SUCCESS) {
@@ -208,7 +201,7 @@ static int32_t DhKeyMaterialToCtx(const struct HksBlob *key, const bool needPriv
         ret = mbedtls_mpi_read_binary(&ctx->GX, key->data + offset, keyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            HKS_LOG_E("mbedtls_mpi_read_binary failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("mbedtls_mpi_read_binary failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
@@ -217,7 +210,7 @@ static int32_t DhKeyMaterialToCtx(const struct HksBlob *key, const bool needPriv
             ret = mbedtls_mpi_read_binary(&ctx->X, key->data + offset, keyMaterial->priKeySize);
             if (ret != HKS_MBEDTLS_SUCCESS) {
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-                HKS_LOG_E("mbedtls_mpi_read_binary failed! mbedtls ret = 0x%X", ret);
+                HKS_LOG_E("mbedtls_mpi_read_binary failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
                 break;
             }
         }
@@ -250,13 +243,11 @@ int32_t HksMbedtlsDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 
     do {
         ret = DhKeyMaterialToCtx(nativeKey, true, &ctx);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_dhm_read_public(&ctx, pubKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("mbedtls_dhm_read_public failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("mbedtls_dhm_read_public failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
@@ -265,7 +256,7 @@ int32_t HksMbedtlsDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         ret =
             mbedtls_dhm_calc_secret(&ctx, sharedKey->data, sharedKey->size, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("mbedtls_dhm_calc_secret failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("mbedtls_dhm_calc_secret failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }

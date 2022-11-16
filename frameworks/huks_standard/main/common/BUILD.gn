@@ -39,7 +39,7 @@ ohos_static_library("libhuks_common_standard_static") {
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
 
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
+    "//third_party/bounds_checking_function/include",
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
   ]
 
@@ -52,6 +52,8 @@ ohos_static_library("libhuks_common_standard_static") {
     "src/hks_errcode_adapter.c",
     "src/hks_param.c",
   ]
+
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 
   cflags = [
     "-DHILOG_ENABLE",

@@ -16,6 +16,7 @@
 #include "hks_condition.h"
 
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,9 +31,7 @@ struct HksCondition {
 
 int32_t HksConditionWait(HksCondition *condition)
 {
-    if (condition == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(condition, -1)
 
     int32_t ret = pthread_mutex_lock(&condition->mutex);
     if (ret != 0) {
@@ -54,9 +53,7 @@ int32_t HksConditionWait(HksCondition *condition)
 
 int32_t HksConditionNotify(HksCondition *condition)
 {
-    if (condition == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(condition, -1)
 
     int32_t ret = pthread_mutex_lock(&condition->mutex);
     if (ret != 0) {
@@ -76,9 +73,7 @@ int32_t HksConditionNotify(HksCondition *condition)
 HksCondition *HksConditionCreate(void)
 {
     HksCondition *condition = (HksCondition *)HksMalloc(sizeof(HksCondition));
-    if (condition == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(condition, NULL)
     condition->notified = false;
     condition->waited = false;
     int32_t ret = pthread_mutex_init(&condition->mutex, NULL);

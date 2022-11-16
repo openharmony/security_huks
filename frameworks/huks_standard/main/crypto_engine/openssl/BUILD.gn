@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
@@ -26,8 +27,6 @@ ohos_static_library("libhuks_openssl_standard_static") {
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]
-
-  include_dirs = [ "//third_party/openssl/include" ]
 
   defines = [
     "L2_STANDARD",
@@ -54,11 +53,16 @@ ohos_static_library("libhuks_openssl_standard_static") {
     "src/hks_openssl_sm4.c",
   ]
 
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//third_party/openssl:libcrypto_shared",
+  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  if (huks_dependency_openssl_path != "") {
+    deps += [ huks_dependency_openssl_path ]
+  } else {
+    deps += [ "//third_party/openssl:libcrypto_shared" ]
+  }
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
   ]
-  external_deps = [ "c_utils:utils" ]
   cflags = [
     "-DHILOG_ENABLE",
     "-Wall",

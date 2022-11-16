@@ -40,4 +40,5 @@ ohos_static_library("libhuks_core_hal_api_static") {
   ]
   cflags = cflags_cc
   complete_static_lib = true
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }

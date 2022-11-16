@@ -46,7 +46,7 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 
     char *data = static_cast<char *>(HksMalloc(length + 1));
     if (data == nullptr) {
-        napi_throw_error(env, NULL, "could not alloc memory");
+        napi_throw_error(env, nullptr, "could not alloc memory");
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
@@ -83,11 +83,11 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     void *rawData = nullptr;
 
     NAPI_CALL(
-        env, napi_get_typedarray_info(env, object, &arrayType, &length, (void **)&rawData, &arrayBuffer, &offset));
+        env, napi_get_typedarray_info(env, object, &arrayType, &length, &rawData, &arrayBuffer, &offset));
     NAPI_ASSERT(env, arrayType == napi_uint8_array, "it's not uint8 array");
 
     if (length > HKS_MAX_DATA_LEN) {
-        HKS_LOG_E("data len is too large, len = %x", length);
+        HKS_LOG_E("data len is too large, len = %" LOG_PUBLIC "zx", length);
         return nullptr;
     }
     if (length == 0) {
@@ -139,11 +139,11 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             if (result == nullptr) {
                 HKS_LOG_E("get uint8 array fail.");
             } else {
-                HKS_LOG_D("tag 0x%x, len 0x%x", param.tag, param.blob.size);
+                HKS_LOG_D("tag 0x%" LOG_PUBLIC "x, len 0x%" LOG_PUBLIC "x", param.tag, param.blob.size);
             }
             break;
         default:
-            HKS_LOG_E("invalid tag value 0x%x", param.tag);
+            HKS_LOG_E("invalid tag value 0x%" LOG_PUBLIC "x", param.tag);
             break;
     }
 
@@ -194,7 +194,7 @@ static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet
     for (auto &param : params) {
         int32_t ret = HksAddParams(paramSet, &param, 1);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param.tag[%x] failed", param.tag);
+            HKS_LOG_E("add param.tag[%" LOG_PUBLIC "x] failed", param.tag);
             return ret;
         }
     }
@@ -468,7 +468,7 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *
     NAPI_CALL(env, napi_set_named_property(env, result, HKS_HANDLE_PROPERTY_ERRORCODE.c_str(), errorCode));
 
     if (error != HKS_SUCCESS) {
-        HKS_LOG_E("init failed, ret = %d", error);
+        HKS_LOG_E("init failed, ret = %" LOG_PUBLIC "d", error);
         return result;
     }
 
@@ -578,7 +578,7 @@ static napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSe
         HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
     if (status != napi_ok || properties == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        HKS_LOG_E("could not get property %" LOG_PUBLIC "s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
     napi_value result = ParseHksParamSet(env, properties, paramSet);
@@ -651,7 +651,7 @@ napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob)
     napi_status status = napi_get_named_property(env, value, HKS_OPTIONS_PROPERTY_INDATA.c_str(), &inData);
     if (status != napi_ok || inData == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("could not get property %s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
+        HKS_LOG_E("could not get property %" LOG_PUBLIC "s", HKS_OPTIONS_PROPERTY_INDATA.c_str());
         return nullptr;
     }
 

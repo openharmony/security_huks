@@ -18,6 +18,7 @@
 #include <pthread.h>
 
 #include "hks_mem.h"
+#include "hks_template.h"
 
 struct HksRwlock {
     pthread_rwlock_t lock;
@@ -38,34 +39,29 @@ HksRwlock *HksRwlockCreate(void)
 
 int32_t HksRwlockLockRead(HksRwlock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
 
     return pthread_rwlock_rdlock(&lock->lock);
 }
 
 int32_t HksRwlockUnlockRead(HksRwlock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return pthread_rwlock_unlock(&lock->lock);
 }
 
 int32_t HksRwlockLockWrite(HksRwlock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return pthread_rwlock_wrlock(&lock->lock);
 }
 
 int32_t HksRwlockUnlockWrite(HksRwlock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return pthread_rwlock_unlock(&lock->lock);
 }
 

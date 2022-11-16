@@ -82,7 +82,7 @@ static napi_value ParseInitParams(napi_env env, napi_callback_info info, InitAsy
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_INIT_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -152,23 +152,24 @@ static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
         resourceName,
         [](napi_env env, void *data) {
             (void)env;
-            InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
-            int32_t ret = InitOutParams(context);
+            InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
+            int32_t ret = InitOutParams(napiContext);
             if (ret != HKS_SUCCESS) {
-                context->result = ret;
+                napiContext->result = ret;
                 return;
             }
-            context->result = HksInit(context->keyAlias, context->paramSet, context->handle, context->token);
+            napiContext->result = HksInit(napiContext->keyAlias,
+                napiContext->paramSet, napiContext->handle, napiContext->token);
         },
         [](napi_env env, napi_status status, void *data) {
-            InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(data);
-            napi_value result = InitWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            InitAsyncCtxPtr napiContext = static_cast<InitAsyncCtxPtr>(data);
+            napi_value result = InitWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteInitAsyncContext(env, context);
+            DeleteInitAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

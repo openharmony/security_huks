@@ -28,7 +28,7 @@ ohos_static_library("libhuks_core_standard_static") {
   public_configs = [ ":huks_config" ]
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
+    "//third_party/bounds_checking_function/include",
     "//third_party/openssl/include/",
   ]
   defines = [
@@ -48,5 +48,6 @@ ohos_static_library("libhuks_core_standard_static") {
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//third_party/openssl:libcrypto_shared",
   ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   complete_static_lib = true
 }

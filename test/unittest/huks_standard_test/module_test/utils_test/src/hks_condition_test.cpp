@@ -61,13 +61,13 @@ void HksConditionTest::TearDown()
 
 /**
  * @tc.name: HksConditionTest.HksConditionTest001
- * @tc.desc: tdd HksConditionWait, with NULL input, expect -1
+ * @tc.desc: tdd HksConditionWait, with nullptr input, expect -1
  * @tc.type: FUNC
  */
 HWTEST_F(HksConditionTest, HksConditionTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksConditionTest001");
-    int32_t ret = HksConditionWait(NULL);
+    int32_t ret = HksConditionWait(nullptr);
     EXPECT_EQ(ret, -1) << "HksConditionTest001 failed, ret = " << ret;
 }
 
@@ -77,7 +77,7 @@ void NotifyCondition(HksCondition *condition)
     (void)condition;
     int32_t ret = HksConditionNotify(condition);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksConditionNotify failed, ret = %d", ret);
+        HKS_LOG_E("HksConditionNotify failed, ret = %" LOG_PUBLIC "d", ret);
     }
 }
 
@@ -130,12 +130,12 @@ HWTEST_F(HksConditionTest, HksConditionTest004, TestSize.Level0)
 
 /**
  * @tc.name: HksConditionTest.HksConditionTest005
- * @tc.desc: tdd HksConditionDestroy, with NULL input
+ * @tc.desc: tdd HksConditionDestroy, with nullptr input
  * @tc.type: FUNC
  */
 HWTEST_F(HksConditionTest, HksConditionTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksConditionTest005");
-    HksConditionDestroy(NULL);
+    HksConditionDestroy(nullptr);
 }
 }

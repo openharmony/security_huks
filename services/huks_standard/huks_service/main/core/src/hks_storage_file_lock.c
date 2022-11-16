@@ -22,6 +22,7 @@
 #include "hks_lock.h"
 #include "hks_mem.h"
 #include "hks_mutex.h"
+#include "hks_template.h"
 #include "securec.h"
 
 struct HksStorageFileLock {
@@ -88,9 +89,8 @@ static HksStorageFileLock *FindFileLock(const char *path)
 static HksStorageFileLock *AllocFileLock(const char *path)
 {
     HksStorageFileLock *lock = HksMalloc(sizeof(HksStorageFileLock));
-    if (lock == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(lock, NULL)
+
     size_t len = strlen(path);
     lock->path = HksMalloc(len + 1);
     if (lock->path == NULL) {
@@ -138,13 +138,9 @@ static void AppendFileLock(HksStorageFileLock *lock)
 
 HksStorageFileLock *HksStorageFileLockCreate(const char *path)
 {
-    if (path == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(path, NULL)
 
-    if (g_lockListLock == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(g_lockListLock, NULL)
 
     if (HksMutexLock(g_lockListLock) != 0) {
         return NULL;
@@ -165,33 +161,29 @@ HksStorageFileLock *HksStorageFileLockCreate(const char *path)
 
 int32_t HksStorageFileLockRead(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksLockLockRead(lock->lock);
 }
 
 int32_t HksStorageFileUnlockRead(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksLockUnlockRead(lock->lock);
 }
 
 int32_t HksStorageFileLockWrite(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksLockLockWrite(lock->lock);
 }
 
 int32_t HksStorageFileUnlockWrite(HksStorageFileLock *lock)
 {
-    if (lock == NULL) {
-        return -1;
-    }
+    HKS_IF_NULL_RETURN(lock, -1)
+
     return HksLockUnlockWrite(lock->lock);
 }
 

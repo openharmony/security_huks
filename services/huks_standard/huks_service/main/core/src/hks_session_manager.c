@@ -23,6 +23,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "huks_access.h"
 #include "securec.h"
 
@@ -76,7 +77,7 @@ static bool DeleteFirstAbortableOperation(void)
             DeleteKeyNode(operation->handle);
             FreeOperation(&operation);
             --g_operationCount;
-            HKS_LOG_I("delete operation count:%u", g_operationCount);
+            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
             return true;
         }
     }
@@ -97,7 +98,7 @@ static int32_t AddOperation(struct HksOperation *operation)
 
     AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
     ++g_operationCount;
-    HKS_LOG_I("add operation count:%u", g_operationCount);
+    HKS_LOG_I("add operation count:%" LOG_PUBLIC "u", g_operationCount);
     pthread_mutex_unlock(&g_lock);
     return HKS_SUCCESS;
 }
@@ -109,10 +110,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
     uint32_t processNameLen = processInfo->processName.size;
 
     uint8_t *userId = (uint8_t *)HksMalloc(userIdLen);
-    if (userId == NULL) {
-        HKS_LOG_E("malloc operation userId failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(userId, HKS_ERROR_MALLOC_FAIL, "malloc operation userId failed")
 
     uint8_t *processName = (uint8_t *)HksMalloc(processNameLen);
     if (processName == NULL) {
@@ -128,7 +126,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
     operation->processInfo.userId.data = userId;
     operation->processInfo.processName.size = processNameLen;
     operation->processInfo.processName.data = processName;
-
+    operation->accessTokenId = processInfo->accessTokenId;
     return HKS_SUCCESS;
 }
 
@@ -150,10 +148,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
     bool abortable)
 {
     struct HksOperation *operation = (struct HksOperation *)HksMalloc(sizeof(struct HksOperation));
-    if (operation == NULL) {
-        HKS_LOG_E("malloc hks operation failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_MALLOC_FAIL, "malloc hks operation failed")
 
     int32_t ret = ConstructOperationProcessInfo(processInfo, operation);
     if (ret != HKS_SUCCESS) {
@@ -201,10 +196,7 @@ struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, co
 {
     uint64_t handle;
     int32_t ret = ConstructOperationHandle(operationHandle, &handle);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct handle failed when query operation");
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, NULL, "construct handle failed when query operation")
 
     struct HksOperation *operation = NULL;
     pthread_mutex_lock(&g_lock);
@@ -235,7 +227,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
         if (operation != NULL && operation->handle == handle) {
             FreeOperation(&operation);
             --g_operationCount;
-            HKS_LOG_I("delete operation count:%u", g_operationCount);
+            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
             pthread_mutex_unlock(&g_lock);
             return;
         }
@@ -256,7 +248,7 @@ static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOp
         DeleteKeyNode(operation->handle);
         FreeOperation(&operation);
         --g_operationCount;
-        HKS_LOG_I("delete session count = %u", g_operationCount);
+        HKS_LOG_I("delete session count = %" LOG_PUBLIC "u", g_operationCount);
     }
 }
 

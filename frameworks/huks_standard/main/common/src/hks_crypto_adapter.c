@@ -27,6 +27,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 void HksFillKeySpec(const struct HksParamSet *paramSet, struct HksKeySpec *spec)
@@ -110,17 +111,11 @@ int32_t HksFillAeadParam(
 {
     struct HksParam *nonceParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NONCE, &nonceParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksFillAeadParam get nonce param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get nonce param failed!")
 
     struct HksParam *aadParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksFillAeadParam get aad param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get aad param failed!")
 
     struct HksParam tagParam;
     if (!isEncrypt) {
@@ -135,10 +130,7 @@ int32_t HksFillAeadParam(
     }
 
     struct HksAeadParam *aeadParam = (struct HksAeadParam *)HksMalloc(sizeof(struct HksAeadParam));
-    if (aeadParam == NULL) {
-        HKS_LOG_E("aeadParam malloc failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_MALLOC_FAIL, "aeadParam malloc failed!")
 
     if (!isEncrypt) {
         aeadParam->tagDec = tagParam.blob;
@@ -157,16 +149,10 @@ int32_t HksFillIvParam(const struct HksParamSet *paramSet, struct HksUsageSpec *
 {
     struct HksParam *ivParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IV, &ivParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("cipher get iv param failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher get iv param failed!")
 
     struct HksCipherParam *param = (struct HksCipherParam *)HksMalloc(sizeof(struct HksCipherParam));
-    if (param == NULL) {
-        HKS_LOG_E("param malloc failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(param, HKS_ERROR_MALLOC_FAIL, "param malloc failed!")
 
     param->iv = ivParam->blob;
     usageSpec->algParam = param;
@@ -177,10 +163,7 @@ static bool HksIsAlgorithmSm4(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check sm4 get alg param failed!");
-        return false;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check sm4 get alg param failed!")
     return (algParam->uint32Param == HKS_ALG_SM4);
 }
 
@@ -190,16 +173,10 @@ int32_t HksBuildCipherUsageSpec(
     bool isAes = false;
     bool isAeMode = false;
     int32_t ret = HksCheckAesAeMode(paramSet, &isAes, &isAeMode);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get aeMode failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get aeMode failed!")
 
     struct HksUsageSpec *usageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
-    if (usageSpec == NULL) {
-        HKS_LOG_E("cipher usageSpec malloc failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(usageSpec, HKS_ERROR_MALLOC_FAIL, "cipher usageSpec malloc failed!")
 
     HksFillUsageSpec(paramSet, usageSpec);
 
@@ -220,7 +197,7 @@ int32_t HksBuildCipherUsageSpec(
 
     if (ret != HKS_SUCCESS) {
         HksFreeUsageSpec(&usageSpec);
-        HKS_LOG_E("fill[%x] param failed!", isAeMode);
+        HKS_LOG_E("fill[%" LOG_PUBLIC "x] param failed!", isAeMode);
         return ret;
     }
 
@@ -234,10 +211,7 @@ int32_t HksGetEncryptAeTag(
     bool isAes = false;
     bool isAeMode = false;
     int32_t ret = HksCheckAesAeMode(paramSet, &isAes, &isAeMode);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get aeMode failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get aeMode failed!")
 
     if ((!isAes) || (!isAeMode)) {
         tagAead->data = NULL;
@@ -273,9 +247,7 @@ static int32_t SetCurve25519KeyMaterial(bool isPubKey, const struct HksBlob *key
 
     keyOut->size = sizeof(struct KeyMaterial25519) + curve25519Km.pubKeySize + curve25519Km.priKeySize;
     keyOut->data = (uint8_t *)HksMalloc(keyOut->size);
-    if (keyOut->data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(keyOut->data, HKS_ERROR_MALLOC_FAIL)
 
     (void)memcpy_s(keyOut->data, keyOut->size, &curve25519Km, sizeof(struct KeyMaterial25519));
 
@@ -305,9 +277,7 @@ static int32_t CheckCurve25519KeySize(const struct HksBlob *keyIn)
 static int32_t CheckFormatCurve25519Key(const struct HksBlob *keyIn, struct HksParamSet *paramSetOut)
 {
     int32_t ret = CheckCurve25519KeySize(keyIn);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)keyIn->data;
     uint32_t offset = sizeof(struct HksParamSet) + (sizeof(struct HksParam) << 1);
@@ -329,10 +299,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
     struct HksParamSet *tmpParamSetOut = NULL;
 
     ret = HksInitParamSet(&tmpParamSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init paramSet failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init paramSet failed!")
 
     ret = HksAddParams(tmpParamSetOut, params, paramCnt);
     if (ret != HKS_SUCCESS) {
@@ -350,7 +317,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
 
     if (memcpy_s(paramSetOut, paramSetOut->paramSetSize, tmpParamSetOut, tmpParamSetOut->paramSetSize) != EOK) {
         HksFreeParamSet(&tmpParamSetOut);
-        HKS_LOG_E("memcpy paramSet out failed, paramSetOut size = %u", paramSetOut->paramSetSize);
+        HKS_LOG_E("memcpy paramSet out failed, paramSetOut size = %" LOG_PUBLIC "u", paramSetOut->paramSetSize);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -362,10 +329,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
 static int32_t FormatCurve25519Key(const struct HksBlob *keyIn, struct HksParamSet *paramSetOut)
 {
     int32_t ret = CheckFormatCurve25519Key(keyIn, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check curve 25519 key failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check curve 25519 key failed")
 
     struct KeyMaterial25519 *keyMaterial = (struct KeyMaterial25519 *)keyIn->data;
     struct HksParam params[] = {
@@ -387,21 +351,18 @@ int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *
     struct HksBlob *keyOut)
 {
     int32_t ret = CheckCurve25519KeySize(keyMaterial);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     const struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)(keyMaterial->data);
 
     uint32_t size = (isPubKey ? km->pubKeySize : km->priKeySize);
     if (size == 0) {
-        HKS_LOG_E("get key material size invalid, pubSize = %u, priSize = %u", km->pubKeySize, km->priKeySize);
+        HKS_LOG_E("get key material size invalid, pubSize = %" LOG_PUBLIC "u, priSize = %" LOG_PUBLIC "u",
+            km->pubKeySize, km->priKeySize);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
 
     uint32_t offset = sizeof(struct KeyMaterial25519);
     uint8_t *tmp = (isPubKey ? (keyMaterial->data + offset) : (keyMaterial->data + offset + km->pubKeySize));
@@ -440,10 +401,7 @@ static int32_t FormatRsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     }
 
     uint8_t *publicKey = (uint8_t *)HksMalloc(publicKeySize);
-    if (publicKey == NULL) {
-        HKS_LOG_E("malloc public key failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(publicKey, HKS_ERROR_MALLOC_FAIL, "malloc public key failed.")
 
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialRsa *)publicKey)->dSize = 0;
@@ -494,10 +452,7 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     }
 
     uint8_t *publicKey = (uint8_t *)HksMalloc(publicKeySize);
-    if (publicKey == NULL) {
-        HKS_LOG_E("malloc key failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(publicKey, HKS_ERROR_MALLOC_FAIL, "malloc key failed.")
 
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, sizeof(struct KeyMaterialDsa));
     uint32_t inOffset = sizeof(struct KeyMaterialDsa);
@@ -538,10 +493,7 @@ static int32_t FormatEccKey(const struct HksBlob *keyIn, struct HksParamSet *par
     }
 
     uint8_t *publicKey = (uint8_t *)HksMalloc(publicKeySize);
-    if (publicKey == NULL) {
-        HKS_LOG_E("malloc public key failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(publicKey, HKS_ERROR_MALLOC_FAIL, "malloc public key failed.")
 
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialEcc *)publicKey)->zSize = 0;
@@ -578,10 +530,7 @@ static int32_t FormatDhKey(const struct HksBlob *keyIn, struct HksParamSet *para
     }
 
     uint8_t *publicKey = (uint8_t *)HksMalloc(publicKeySize);
-    if (publicKey == NULL) {
-        HKS_LOG_E("malloc public key failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(publicKey, HKS_ERROR_MALLOC_FAIL, "malloc public key failed.")
 
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialDh *)publicKey)->priKeySize = 0;

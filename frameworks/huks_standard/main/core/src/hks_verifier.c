@@ -27,6 +27,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "securec.h"
 
@@ -81,6 +82,9 @@ static uint8_t g_versionInfoOid[] = {
 static uint8_t g_deviceIdOid[] = {
     0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x04, 0x05
 };
+static uint8_t g_keyFlagOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x0b
+};
 
 static const struct HksParam g_oidParams[] = {
     {
@@ -119,6 +123,12 @@ static const struct HksParam g_oidParams[] = {
             .size = sizeof(g_deviceIdOid),
             .data = g_deviceIdOid
         }
+    }, {
+        .tag = HKS_TAG_KEY_FLAG,
+        .blob = {
+            .size = sizeof(g_keyFlagOid),
+            .data = g_keyFlagOid
+        }
     },
 };
 
@@ -141,9 +151,7 @@ static X509 *GetX509FormatCert(const struct HksCertInfo *cert)
     X509 *x509 = NULL;
 
     BIO *bio = BIO_new_mem_buf(cert->data, cert->length);
-    if (bio == NULL) {
-        return x509;
-    }
+    HKS_IF_NULL_RETURN(bio, x509)
 
     if (cert->format == HKS_CERT_DER) {
         x509 = d2i_X509_bio(bio, NULL);
@@ -159,10 +167,9 @@ static int32_t TranslateToX509Format(struct HksCertInfo *certs, uint32_t certNum
 {
     for (uint32_t i = 0; i < certNum; ++i) {
         X509 *x509 = GetX509FormatCert(&certs[i]);
-        if (x509 == NULL) {
-            HKS_LOG_E("load cert chain to x509 failed");
-            return HKS_ERROR_VERIFICATION_FAILED; /* if failed, x509 need to be freed by caller function */
-        }
+        /* if failed, x509 need to be freed by caller function */
+        HKS_IF_NULL_LOGE_RETURN(x509, HKS_ERROR_VERIFICATION_FAILED, "load cert chain to x509 failed")
+
         certs[i].x509 = x509;
     }
     return HKS_SUCCESS;
@@ -171,10 +178,7 @@ static int32_t TranslateToX509Format(struct HksCertInfo *certs, uint32_t certNum
 static int32_t VerifySignature(const struct HksCertInfo *cert, const struct HksCertInfo *issuerCert)
 {
     EVP_PKEY *pubKey = X509_get_pubkey(issuerCert->x509);
-    if (pubKey == NULL) {
-        HKS_LOG_E("get public key from device cert failed");
-        return HKS_ERROR_VERIFICATION_FAILED;
-    }
+    HKS_IF_NULL_LOGE_RETURN(pubKey, HKS_ERROR_VERIFICATION_FAILED, "get public key from device cert failed")
 
     int32_t resOpenssl = X509_verify(cert->x509, pubKey);
     if (resOpenssl != OPENSSL_SUCCESS) {
@@ -215,9 +219,7 @@ static int32_t VerifyCertChain(const struct HksCertInfo *certs, uint32_t certNum
     }
 
     ret = VerifySignature(&certs[certNum - 1], &certs[certNum - 1]); /* root ca cert need to be verified by itself */
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify root cert failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "verify root cert failed")
 
 EXIT:
     if (verifyCtx != NULL) {
@@ -232,22 +234,14 @@ EXIT:
 static int32_t VerifyAttestationCertChain(struct HksCertInfo *certs, uint32_t certNum)
 {
     int32_t ret = TranslateToX509Format(certs, certNum);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate to x509 format failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "translate to x509 format failed")
 
     ret = VerifyCertChain(certs, certNum);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify attestation cert chain verify cert chain failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify attestation cert chain verify cert chain failed")
 
     /* use device cert's pubkey to verify the attestation cert */
     ret = VerifySignature(&certs[0], &certs[1]); /* 0:attestation cert, 1:device cert */
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("verify attestation cert chain signature failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "verify attestation cert chain signature failed")
 
     return ret;
 }
@@ -297,9 +291,7 @@ static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *hea
     uint32_t length = 0; /* length of the payload */
 
     int32_t ret = EncodeTlvAndGetLength(&buf, &length, inLen);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     *headSize = buf - in;
     if (*headSize > inLen) {
@@ -308,7 +300,7 @@ static int32_t ExtractTlvLength(const uint8_t *in, uint32_t inLen, uint32_t *hea
     }
     /* Check that tag length can fit into buffer */
     if (length > (inLen - *headSize)) {
-        HKS_LOG_E("data buffer is not big enough to hold %u bytes.", length);
+        HKS_LOG_E("data buffer is not big enough to hold %" LOG_PUBLIC "u bytes.", length);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     *outLen = length;
@@ -326,9 +318,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     uint32_t length = 0; /* length of the payload */
 
     int32_t ret = EncodeTlvAndGetLength(&buf, &length, inLen);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     uint32_t headSize = buf - in;
     if (headSize > inLen) {
@@ -337,7 +327,7 @@ static int32_t ExtractTlvData(const uint8_t *in, uint32_t inLen, uint8_t *out, u
     }
     /* Check that tag length can fit into buffer */
     if (length > (inLen - headSize)) {
-        HKS_LOG_E("data buffer is not big enough to hold %u bytes.", length);
+        HKS_LOG_E("data buffer is not big enough to hold %" LOG_PUBLIC "u bytes.", length);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     if (memcpy_s(out, *outLen, buf, length) != EOK) {
@@ -353,20 +343,14 @@ static int32_t ExtractTlvDataAndHeadSize(const uint8_t *in, uint32_t inLen,
 {
     uint32_t headOffset = 0;
     int32_t ret = ExtractTlvLength(in, inLen, &headOffset, outLen);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ExtractTlvLength fail!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExtractTlvLength fail!")
 
     if (size != NULL) {
         *size = headOffset;
     }
 
     *out = (uint8_t *)HksMalloc(*outLen);
-    if (*out == NULL) {
-        HKS_LOG_E("malloc fail!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*out, HKS_ERROR_MALLOC_FAIL, "malloc fail!")
 
     ret = ExtractTlvData(in, inLen, *out, outLen);
     if (ret != HKS_SUCCESS) {
@@ -384,27 +368,21 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
     do {
         len = a2d_ASN1_OBJECT(NULL, 0, oid, -1);
         if (len <= 0) {
-            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len1 = %d", len);
+            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len1 = %" LOG_PUBLIC "d", len);
             return NULL;
         }
 
         buf = (uint8_t *)OPENSSL_malloc(len);
-        if (buf == NULL) {
-            HKS_LOG_E("openssl malloc fail");
-            return NULL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(buf, NULL, "openssl malloc fail")
 
         len = a2d_ASN1_OBJECT(buf, len, oid, -1);
         if (len <= 0) {
-            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len2 = %d", len);
+            HKS_LOG_E("get a2d_ASN1_OBJECT fail, len2 = %" LOG_PUBLIC "d", len);
             break;
         }
 
         obj = ASN1_OBJECT_create(nid, buf, len, sn, ln);
-        if (obj == NULL) {
-            HKS_LOG_E("ASN1_OBJECT_create fail");
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(obj, "ASN1_OBJECT_create fail")
     } while (0);
     OPENSSL_free(buf);
     return obj;
@@ -414,10 +392,7 @@ static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t
 {
     int32_t ret = HKS_ERROR_VERIFICATION_FAILED;
     ASN1_OBJECT *obj = GetObjByOid(NID_undef, KEY_DESCRIPTION_OID, "KeyDescription", "KEY DESCRIPTION OID");
-    if (obj == NULL) {
-        HKS_LOG_E("get obj by oid failed");
-        return ret;
-    }
+    HKS_IF_NULL_LOGE_RETURN(obj, ret, "get obj by oid failed")
 
     int32_t idx = X509_get_ext_by_OBJ(cert->x509, obj, -1);
     if (idx < 0) {
@@ -462,10 +437,7 @@ static int32_t ConstructParamSetOut(enum HksTag tag, uint8_t *data, uint32_t len
     for (uint32_t i = 0; i < paramSetOut->paramsCnt; i++) {
         if (paramSetOut->params[i].tag == tag) {
             ret = CopyBlobBuffer(data, len, &(paramSetOut->params[i].blob));
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("CopyBlobBuffer failed");
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CopyBlobBuffer failed")
             return HKS_SUCCESS;
         }
     }
@@ -488,10 +460,7 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
         if (HksMemCmp(g_oidParams[i].blob.data, data + offset, g_oidParams[i].blob.size) == 0) {
             offset += g_oidParams[i].blob.size;
             int32_t ret = ExtractTlvDataAndHeadSize(data + offset, len - offset, &claimData, &claimSize, &headSize);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("get cliam count fail");
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get cliam count fail")
 
             if (claimSize >= MAX_ATTEST_CLAIM_BUF_LEN) {
                 HKS_LOG_E("the length of claim is too long");
@@ -543,7 +512,7 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
 
         ret = GetClaimDataParamSet(value, valueLength, paramSetOut);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("GetClaimDataParamSet failed, ret = %d", ret);
+            HKS_LOG_E("GetClaimDataParamSet failed, ret = %" LOG_PUBLIC "d", ret);
             HKS_FREE_PTR(value);
             return ret;
         }
@@ -571,9 +540,7 @@ static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksPa
 
     ret = FillAttestExtendParamSet(data + TLV_VERSION_NEED_SIZE, length - TLV_VERSION_NEED_SIZE,
         *version, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("fill attest extend paramSet fail");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "fill attest extend paramSet fail")
 
     HKS_FREE_PTR(version);
     return ret;
@@ -585,15 +552,10 @@ static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksPar
     uint32_t keyDescLen;
 
     int32_t ret = GetKeyDescriptionSeqValue(&certs[0], &keyDescription, &keyDescLen);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("GetKeyDescriptionSeqValue failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyDescriptionSeqValue failed")
 
     ret = FillAttestExtendInfo(keyDescription, keyDescLen, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("fill attest extend info fail");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "fill attest extend info fail")
 
     (void)memset_s(keyDescription, keyDescLen, 0, keyDescLen);
     HKS_FREE_PTR(keyDescription);
@@ -606,9 +568,8 @@ static int32_t InitCertChainInfo(const struct HksCertChain *certChain, struct Hk
 
     uint32_t certsInfoLen = sizeof(struct HksCertInfo) * certChain->certsCount; /* only 4 cert */
     struct HksCertInfo *certsInfo = (struct HksCertInfo *)HksMalloc(certsInfoLen);
-    if (certsInfo == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(certsInfo, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(certsInfo, certsInfoLen, 0, certsInfoLen);
 
     for (uint32_t i = 0; i < certChain->certsCount; ++i) {
@@ -650,27 +611,22 @@ static void FreeCertChainInfo(struct HksCertInfo **certs, uint32_t certNum)
 int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
 {
     if (certChain->certsCount != HKS_DEFAULT_CERT_CHAIN_CNT) {
-        HKS_LOG_E("validate cert chain chain invalid certChain count %zu", certChain->certsCount);
+        HKS_LOG_E("validate cert chain chain invalid certChain count %" LOG_PUBLIC "u", certChain->certsCount);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     struct HksCertInfo *certsInfo = NULL;
     int32_t ret = InitCertChainInfo(certChain, &certsInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get cert chain info failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get cert chain info failed")
     ret = VerifyAttestationCertChain(certsInfo, certChain->certsCount);
     if (ret != HKS_SUCCESS) {
         FreeCertChainInfo(&certsInfo, certChain->certsCount);
-        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %d", ret);
+        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     ret = GetParamSetOutInfo(certsInfo, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("VerifyAttestationCertChain failed, ret = %d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "VerifyAttestationCertChain failed, ret = %" LOG_PUBLIC "d", ret)
 
     FreeCertChainInfo(&certsInfo, certChain->certsCount);
     return ret;

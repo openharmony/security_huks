@@ -14,6 +14,7 @@
  */
 
 #include "hks_samgr_client.h"
+#include "hks_template.h"
 #include "liteipc_adapter.h"
 
 #define PER_SECOND 1000000 /* OS_SYS_US_PER_SECOND */
@@ -132,9 +133,7 @@ static int32_t IpcAsyncCall(IUnknown *iUnknown, enum HksMessage type, const stru
 
     IpcIoPushDataBuffWithFree(&request, &requestBuff, HksFree);
     ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, NULL, CurrentCallback);
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_FAILURE)
     return SynchronizeOutput(outBlob);
 }
 
@@ -144,9 +143,8 @@ void *HKS_CreatClient(const char *service, const char *feature, uint32 size)
     (void)feature;
     uint32 len = size + sizeof(HksMgrClientEntry);
     uint8 *client = malloc(len);
-    if (client == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(client, NULL)
+
     (void)memset_s(client, len, 0, len);
     HksMgrClientEntry *entry = (HksMgrClientEntry *)&client[size];
     entry->ver = ((uint16)CLIENT_PROXY_VER | (uint16)DEFAULT_VERSION);
@@ -167,9 +165,7 @@ void HKS_DestroyClient(const char *service, const char *feature, void *iproxy)
 int32_t HksSamgrInitialize(void)
 {
     int32_t ret = SAMGR_RegisterFectory(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE, HKS_CreatClient, HKS_DestroyClient);
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_FAILURE)
     SAMGR_Bootstrap();
     return HKS_SUCCESS;
 }
@@ -178,16 +174,15 @@ static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *in
 {
     HksMgrClientApi *clientProxy;
     IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
-    if (iUnknown == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(iUnknown, HKS_ERROR_NULL_POINTER)
+
     int32_t ret = iUnknown->QueryInterface(iUnknown, DEFAULT_VERSION, (void **)&clientProxy);
     if ((clientProxy == NULL) || (ret != HKS_SUCCESS)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (clientProxy->IpcAsyncCallBack == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+
+    HKS_IF_NULL_RETURN(clientProxy->IpcAsyncCallBack, HKS_ERROR_NULL_POINTER)
+
     ret = clientProxy->IpcAsyncCallBack((IUnknown *)clientProxy, type, inBlob, outBlob);
     (void)clientProxy->Release((IUnknown *)clientProxy);
     return ret;

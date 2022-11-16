@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_client_service_test.h"
+#include "hks_keynode_test.h"
 
 #include <gtest/gtest.h>
 #include <string>
@@ -59,7 +59,6 @@ static const struct HksParam g_params[] = {
         .uint64Param = 0
     },
 };
-        
 
 /**
  * @tc.name: HksKeyNodeTest.HksKeyNodeTest001
@@ -77,7 +76,7 @@ HWTEST_F(HksKeyNodeTest, HksKeyNodeTest001, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksKeyNodeTest001 HksBuildParamSet failed";
     struct HuksKeyNode *keyNode = HksCreateKeyNode(nullptr, paramSet);
-
     EXPECT_EQ(keyNode == nullptr, true) << "HksKeyNodeTest001 HksCreateKeyNode not failed";
+    HksFreeParamSet(&paramSet);
 }
 }

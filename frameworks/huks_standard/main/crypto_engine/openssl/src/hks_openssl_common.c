@@ -21,6 +21,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
@@ -29,14 +30,11 @@ int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
 
     uint8_t *tmpKey = (uint8_t *)HksMalloc(keySizeByte);
-    if (tmpKey == NULL) {
-        HKS_LOG_E("malloc buffer failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpKey, HKS_ERROR_MALLOC_FAIL, "malloc buffer failed")
 
     do {
         if (RAND_bytes(tmpKey, keySizeByte) <= 0) {
-            HKS_LOG_E("generate key is failed:0x%x", ret);
+            HKS_LOG_E("generate key is failed:0x%" LOG_PUBLIC "x", ret);
             break;
         }
 
@@ -56,7 +54,7 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
 {
     int ret = RAND_bytes(randomData->data, randomData->size);
     if (ret <= 0) {
-        HKS_LOG_E("generate random failed, ret = 0x%x", ret);
+        HKS_LOG_E("generate random failed, ret = 0x%" LOG_PUBLIC "x", ret);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -72,7 +70,7 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
         }
     }
     if (j == randomData->size) {
-        HKS_LOG_E("fill random failed, size %x", randomData->size);
+        HKS_LOG_E("fill random failed, size %" LOG_PUBLIC "x", randomData->size);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     HKS_LOG_D("generate random success");

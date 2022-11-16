@@ -21,16 +21,17 @@
 
 #ifdef HKS_SUPPORT_SM3_C
 
-#include "hks_openssl_sm3.h"
 #include "hks_log.h"
 #include "hks_openssl_common.h"
 #include "hks_openssl_engine.h"
+#include "hks_openssl_sm3.h"
+#include "hks_template.h"
 
 #ifdef HKS_SUPPORT_SM3_GENERATE_KEY
 static int32_t Sm3GenKeyCheckParam(const struct HksKeySpec *spec)
 {
     if ((spec->keyLen == 0) || (spec->keyLen % BIT_NUM_OF_UINT8 != 0)) {
-        HKS_LOG_E("keyLen is wrong, len = %u", spec->keyLen);
+        HKS_LOG_E("keyLen is wrong, len = %" LOG_PUBLIC "u", spec->keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -38,10 +39,8 @@ static int32_t Sm3GenKeyCheckParam(const struct HksKeySpec *spec)
 
 int32_t HksOpensslSm3GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    if (Sm3GenKeyCheckParam(spec) != HKS_SUCCESS) {
-        HKS_LOG_E("sm3 generate key invalid params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(Sm3GenKeyCheckParam(spec),
+        HKS_ERROR_INVALID_ARGUMENT, "sm3 generate key invalid params!")
     return HksOpensslGenerateRandomKey(spec->keyLen, key);
 }
 #endif /* HKS_SUPPORT_SM3_GENERATE_KEY */

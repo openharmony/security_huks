@@ -24,6 +24,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type_inner.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #ifndef HAS_OS_ACCOUNT_PART
@@ -96,13 +97,13 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 #else // HAS_OS_ACCOUNT_PART
         GetOsAccountIdFromUid(uid, userId);
 #endif // HAS_OS_ACCOUNT_PART
-        HKS_LOG_I("HksService package removed: uid is %d userId is %d", uid, userId);
+        HKS_LOG_I("HksService package removed: uid is %" LOG_PUBLIC "d userId is %" LOG_PUBLIC "d", uid, userId);
 
         GetProcessInfo(userId, uid, &processInfo);
         HksServiceDeleteProcessInfo(&processInfo);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED) {
         int userId = data.GetCode();
-        HKS_LOG_I("HksService user removed: userId is %d", userId);
+        HKS_LOG_I("HksService user removed: userId is %" LOG_PUBLIC "d", userId);
 
         GetUserId(userId, &(processInfo.userId));
         HksServiceDeleteProcessInfo(&processInfo);
@@ -128,20 +129,15 @@ bool SystemEventObserver::SubscribeSystemEvent()
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo);
 
-    if (systemEventSubscriber_ == nullptr) {
-        HKS_LOG_E("huks system subscriber nullptr");
-        return false;
-    }
+    HKS_IF_NULL_LOGE_RETURN(systemEventSubscriber_, false, "huks system subscriber nullptr")
 
     return OHOS::EventFwk::CommonEventManager::SubscribeCommonEvent(systemEventSubscriber_);
 }
 
 bool SystemEventObserver::UnSubscribeSystemEvent()
 {
-    if (systemEventSubscriber_ == nullptr) {
-        HKS_LOG_E("huks system subscriber nullptr");
-        return false;
-    }
+    HKS_IF_NULL_LOGE_RETURN(systemEventSubscriber_, false, "huks system subscriber nullptr")
+
     return OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(systemEventSubscriber_);
 }
 } // namespace Hks

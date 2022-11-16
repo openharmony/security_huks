@@ -212,7 +212,7 @@ static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncCon
     if (index < maxIndex) { /* has arg 4: can only be callback */
         ret = CheckIsCallbackFuction(env, argv[index], isFunc);
         if (ret != HKS_SUCCESS || !isFunc) {
-            HKS_LOG_E("check param4 failed[ret = %d], or param4 is not func.", ret);
+            HKS_LOG_E("check param4 failed[ret = %" LOG_PUBLIC "d], or param4 is not func.", ret);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         return GetCallBackFunction(env, argv[index], context);
@@ -229,10 +229,10 @@ static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet
         return HKS_SUCCESS;
     }
 
-    for (size_t i = 0; i < paramCount; ++i) {
+    for (uint32_t i = 0; i < paramCount; ++i) {
         int32_t ret = HksAddParams(paramSet, param, 1);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param[%u] failed", i);
+            HKS_LOG_E("add param[%" LOG_PUBLIC "u] failed", i);
             return ret;
         }
         param++;
@@ -298,7 +298,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_UPDATE_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -316,7 +316,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         HKS_OPTIONS_PROPERTY_PROPERTIES.c_str(), &properties);
     if (status != napi_ok || properties == nullptr) {
         GET_AND_THROW_LAST_ERROR((env));
-        HKS_LOG_E("update could not get property %s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
+        HKS_LOG_E("update could not get property %" LOG_PUBLIC "s", HKS_OPTIONS_PROPERTY_PROPERTIES.c_str());
         return nullptr;
     }
 
@@ -362,23 +362,25 @@ static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
+            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
 
-            if (context->isUpdate) {
-                context->result = HksUpdate(context->handle, context->paramSet, context->inData, context->outData);
+            if (napiContext->isUpdate) {
+                napiContext->result = HksUpdate(napiContext->handle,
+                    napiContext->paramSet, napiContext->inData, napiContext->outData);
             } else {
-                context->result = HksFinish(context->handle, context->paramSet, context->inData, context->outData);
+                napiContext->result = HksFinish(napiContext->handle,
+                    napiContext->paramSet, napiContext->inData, napiContext->outData);
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            UpdateAsyncContext context = static_cast<UpdateAsyncContext>(data);
-            napi_value result = UpdateWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            UpdateAsyncContext napiContext = static_cast<UpdateAsyncContext>(data);
+            napi_value result = UpdateWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteUpdateAsyncContext(env, context);
+            DeleteUpdateAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);
