@@ -150,11 +150,13 @@ int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tm
         return ret;
     }
 
-    ret = HksAddParams(*paramSet, tmpParams, paramCount);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed");
-        HksFreeParamSet(paramSet);
-        return ret;
+    if (tmpParams != nullptr) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
     }
 
     ret = HksBuildParamSet(paramSet);
@@ -173,12 +175,12 @@ static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertCh
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     int32_t ret = HksValidateCertChain(certChain, paramSet);
-    HKS_LOG_I("validate cert chain result is %x", ret);
-    HKS_LOG_I("paramsSet count is : %d", paramSet->paramsCnt);
-    HKS_LOG_I("secinfo is %s\n", reinterpret_cast<char *>(paramSet->params[g_index0].blob.data));
-    HKS_LOG_I("challenge is %s\n", reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
-    HKS_LOG_I("version is %s\n", reinterpret_cast<char *>(paramSet->params[g_index2].blob.data));
-    HKS_LOG_I("alias is %s\n", reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
+    HKS_LOG_I("validate cert chain result is %" LOG_PUBLIC "x", ret);
+    HKS_LOG_I("paramsSet count is : %" LOG_PUBLIC "d", paramSet->paramsCnt);
+    HKS_LOG_I("secinfo is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index0].blob.data));
+    HKS_LOG_I("challenge is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
+    HKS_LOG_I("version is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index2].blob.data));
+    HKS_LOG_I("alias is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
     if (ret == HKS_SUCCESS) {
         ret |= strcmp(SEC_INFO_DATA, reinterpret_cast<char *>(paramSet->params[g_index0].blob.data));
         ret |= strcmp(CHALLENGE_DATA, reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
@@ -186,9 +188,9 @@ static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertCh
         ret |= strcmp(ALIAS, reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
     }
     if (type == IDS_PARAM) {
-        HKS_LOG_I("udid is %s\n", reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
-        HKS_LOG_I("sn is %s\n", reinterpret_cast<char *>(paramSet->params[g_index5].blob.data));
-        HKS_LOG_I("device id is %s\n", reinterpret_cast<char *>(paramSet->params[g_index6].blob.data));
+        HKS_LOG_I("udid is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
+        HKS_LOG_I("sn is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index5].blob.data));
+        HKS_LOG_I("device id is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index6].blob.data));
         if (ret == HKS_SUCCESS) {
             ret |= strcmp(UDID_DATA, reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
             ret |= strcmp(SN_DATA, reinterpret_cast<char *>(paramSet->params[g_index5].blob.data));
@@ -198,7 +200,8 @@ static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertCh
     return ret;
 }
 
-int32_t ValidateCertChainTest(const struct HksCertChain *certChain, const struct HksParam tmpParam[], ParamType type)
+int32_t ValidateCertChainTest(const struct HksCertChain *certChain,
+    const struct HksParam tmpParam[], ParamType type)
 {
     int32_t ret = HKS_ERROR_MALLOC_FAIL;
     struct HksParamSet *paramSet = nullptr;

@@ -16,7 +16,12 @@
 #ifndef HKS_CLIENT_SERVICE_H
 #define HKS_CLIENT_SERVICE_H
 
+
+#ifdef __cplusplus
+#include <cstdint>
+#else
 #include <stdint.h>
+#endif
 
 #include "hks_type_inner.h"
 

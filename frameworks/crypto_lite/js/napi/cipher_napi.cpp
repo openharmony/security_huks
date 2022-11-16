@@ -101,7 +101,7 @@ static int32_t GetString(napi_env env, napi_value object, char **element, size_t
         return ERROR_CODE_GENERAL;
     }
 
-    *element = (char *)malloc(*len + 1);
+    *element = static_cast<char *>(malloc(*len + 1));
     if (*element == nullptr) {
         CIPHER_LOG_E("malloc element fail");
         return ERROR_CODE_GENERAL;
@@ -270,7 +270,7 @@ static int32_t GetAesInput(napi_env env, napi_value object, AesAsyncContext *con
     napi_value failFunc = nullptr;
     napi_value completeFunc = nullptr;
     napi_valuetype valueType = napi_undefined;
-    context->commonNapi = (CommonNapiValue *)malloc(sizeof(struct CommonNapiValue));
+    context->commonNapi = static_cast<CommonNapiValue *>(malloc(sizeof(struct CommonNapiValue)));
     if (context->commonNapi == nullptr) {
         return ERROR_CODE_GENERAL;
     }
@@ -294,7 +294,7 @@ static int32_t GetAesInput(napi_env env, napi_value object, AesAsyncContext *con
         return ret;
     }
 
-    context->callback = (CallbackContext *)malloc(sizeof(struct CallbackContext));
+    context->callback = static_cast<CallbackContext *>(malloc(sizeof(struct CallbackContext)));
     if (context->callback == nullptr) {
         return ERROR_CODE_GENERAL;
     }
@@ -326,7 +326,7 @@ static int32_t AesExcute(AesAsyncContext *asyncContext)
     if (ret != ERROR_SUCCESS) {
         CIPHER_LOG_E("AesCrypt fail, ret is %d", ret);
     }
-    asyncContext->textOut = (char *)malloc(strlen(aes.data.text) + 1);
+    asyncContext->textOut = static_cast<char *>(malloc(strlen(aes.data.text) + 1));
     if (asyncContext->textOut == nullptr) {
         DeinitAesCryptData(&aes);
         return ERROR_CODE_GENERAL;
@@ -340,20 +340,20 @@ static int32_t AesExcute(AesAsyncContext *asyncContext)
 
 static int32_t ReadRsaData(napi_env env, RsaAsyncContext *context)
 {
-    context->rsaKey = (RsaKeyData *)malloc(sizeof(RsaKeyData));
+    context->rsaKey = static_cast<RsaKeyData *>(malloc(sizeof(RsaKeyData)));
     if (context->rsaKey == nullptr) {
         return ERROR_CODE_GENERAL;
     }
     (void)memset_s(context->rsaKey, sizeof(RsaKeyData), 0, sizeof(RsaKeyData));
 
     context->rsaKey->trans = nullptr;
-    context->textIn = (RsaData *)malloc(sizeof(RsaData));
+    context->textIn = static_cast<RsaData *>(malloc(sizeof(RsaData)));
     if (context->textIn == nullptr) {
         return ERROR_CODE_GENERAL;
     }
     (void)memset_s(context->textIn, sizeof(RsaData), 0, sizeof(RsaData));
 
-    context->textOut = (RsaData *)malloc(sizeof(RsaData));
+    context->textOut = static_cast<RsaData *>(malloc(sizeof(RsaData)));
     if (context->textOut == nullptr) {
         return ERROR_CODE_GENERAL;
     }
@@ -395,7 +395,7 @@ static int32_t GetRsaInput(napi_env env, napi_value object, RsaAsyncContext *con
     napi_value failFunc = nullptr;
     napi_value completeFunc = nullptr;
     napi_valuetype valueType = napi_undefined;
-    context->commonNapi = (CommonNapiValue *)malloc(sizeof(struct CommonNapiValue));
+    context->commonNapi = static_cast<CommonNapiValue *>(malloc(sizeof(struct CommonNapiValue)));
     if (context->commonNapi == nullptr) {
         return ERROR_CODE_GENERAL;
     }
@@ -419,7 +419,7 @@ static int32_t GetRsaInput(napi_env env, napi_value object, RsaAsyncContext *con
         return ret;
     }
 
-    context->callback = (CallbackContext *)malloc(sizeof(struct CallbackContext));
+    context->callback = static_cast<CallbackContext *>(malloc(sizeof(struct CallbackContext)));
     if (context->callback == nullptr) {
         return ERROR_CODE_GENERAL;
     }
@@ -588,7 +588,7 @@ static napi_value JSCipherRsa(napi_env env, napi_callback_info info)
             DeleteRsaAsyncContext(env, asyncContext);
             delete asyncContext;
         },
-        (void *)rsaAsyncContext,
+        reinterpret_cast<void *>(rsaAsyncContext),
         &rsaAsyncContext->commonNapi->work);
         napi_queue_async_work(env, rsaAsyncContext->commonNapi->work);
         return nullptr;
@@ -622,7 +622,7 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
                 SetComplete(env, asyncContext->callback);
                 napi_delete_reference(env, asyncContext->callback->callbackSuccess);
             } else {
-                SetSuccess(env, asyncContext->textOut, (size_t)(strlen(asyncContext->textOut)),
+                SetSuccess(env, asyncContext->textOut, static_cast<size_t>(strlen(asyncContext->textOut)),
                     asyncContext->callback);
                 SetComplete(env, asyncContext->callback);
                 napi_delete_reference(env, asyncContext->callback->callbackFail);
@@ -631,7 +631,7 @@ static napi_value JSCipherAes(napi_env env, napi_callback_info info)
             DeleteAesAsyncContext(env, asyncContext);
             delete asyncContext;
         },
-        (void *)aesAsyncContext,
+        reinterpret_cast<void *>(aesAsyncContext),
         &aesAsyncContext->commonNapi->work);
         napi_queue_async_work(env, aesAsyncContext->commonNapi->work);
         return nullptr;
@@ -655,7 +655,7 @@ static napi_module CipherModule = {
     .nm_filename = nullptr,
     .nm_register_func = CipherExport,
     .nm_modname = "cipher",
-    .nm_priv = ((void*)0),
+    .nm_priv = reinterpret_cast<void *>(0),
     .reserved = { 0 },
 };
 

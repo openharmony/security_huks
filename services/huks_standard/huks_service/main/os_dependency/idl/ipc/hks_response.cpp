@@ -20,18 +20,21 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#ifdef SUPPORT_ACCESS_TOCKEN
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
 #endif
 #include "ipc_skeleton.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "hks_type_inner.h"
-
-#ifdef SUPPORT_ACCESS_TOCKEN
-#include "accesstoken_kit.h"
-#endif
 
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
@@ -60,7 +63,7 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         reply->WriteUint32(0);
     } else {
         reply->WriteUint32(response->size);
-        reply->WriteBuffer(response->data, (size_t)response->size);
+        reply->WriteBuffer(response->data, static_cast<size_t>(response->size));
     }
 }
 
@@ -73,10 +76,7 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-    if (name == nullptr) {
-        HKS_LOG_E("GetProcessName malloc failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
 
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processName->size = sizeof(callingUid);
@@ -93,10 +93,8 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     auto callingUid = IPCSkeleton::GetCallingUid();
     uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-    if (name == nullptr) {
-        HKS_LOG_E("GetProcessName malloc failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
+
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
@@ -104,10 +102,11 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     int userId = 0;
 #ifdef HAS_OS_ACCOUNT_PART
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %d, userId = %d", callingUid, userId);
+    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
 #else // HAS_OS_ACCOUNT_PART
     GetOsAccountIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %d, userId = %d", callingUid, userId);
+    HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d",
+        callingUid, userId);
 #endif // HAS_OS_ACCOUNT_PART
 
     uint32_t size;
@@ -135,14 +134,17 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->userId.data = name1;
     processInfo->userIdInt = userId;
 
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+    processInfo->accessTokenId = static_cast<uint64_t>(IPCSkeleton::GetCallingTokenID());
+#endif
+
     return HKS_SUCCESS;
 }
 
-#ifdef SUPPORT_ACCESS_TOCKEN
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
 int32_t SensitivePermissionCheck()
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
-    HKS_LOG_I("AccessTokenID is %llx!", tokenId);
     int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId,
         "ohos.permission.ACCESS_IDS");
     if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {

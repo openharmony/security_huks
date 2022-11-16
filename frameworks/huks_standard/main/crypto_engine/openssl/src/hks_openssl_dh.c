@@ -33,6 +33,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
@@ -48,7 +49,7 @@ static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
             *nid = NID_ffdhe4096;
             return HKS_SUCCESS;
         default:
-            HKS_LOG_E("invalid key size, keySize = %u", keySize);
+            HKS_LOG_E("invalid key size, keySize = %" LOG_PUBLIC "u", keySize);
             return HKS_ERROR_INVALID_KEY_SIZE;
     }
 }
@@ -62,9 +63,7 @@ static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponen
 
     int nid = 0;
     int32_t ret = HksOpensslGetNid(keyMaterial->keySize, &nid);
-    if (ret != HKS_SUCCESS) {
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, NULL)
 
     DH *dh = DH_new_by_nid(nid);
     if (dh == NULL) {
@@ -95,9 +94,7 @@ static int32_t DhSaveKeyMaterial(const DH *dh, const uint32_t keySize, struct Hk
     const uint32_t rawMaterialLen = sizeof(struct KeyMaterialDh) + (uint32_t)BN_num_bytes(pubKey)
         + (uint32_t)BN_num_bytes(privKey);
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
@@ -124,9 +121,7 @@ int32_t HksOpensslDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
     int32_t ret;
     int nid = 0;
     ret = HksOpensslGetNid(spec->keyLen, &nid);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     DH *dh = DH_new_by_nid(nid);
     if (dh == NULL) {
@@ -178,9 +173,7 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 
     struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)pubKey->data;
     BIGNUM *pub = BN_bin2bn(pubKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize, NULL);
-    if (pub == NULL) {
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_RETURN(pub, HKS_ERROR_CRYPTO_ENGINE_ERROR)
 
     DH *dh = InitDhStruct(nativeKey, true);
     if (dh == NULL) {

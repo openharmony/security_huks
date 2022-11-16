@@ -245,14 +245,14 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
         HKS_LOG_E("AuthToeknSign Failed.");
         return ret;
     }
-    uint8_t authToken[AUTH_TOKEN_LEN] = {0};
+    uint8_t authToken[AUTH_TOKEN_LEN + 1] = {0};
     for (uint32_t i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];
     }
     tmpParams.tag = HKS_TAG_AUTH_TOKEN;
     tmpParams.blob.data = authToken;
     tmpParams.blob.size = AUTH_TOKEN_LEN;
-    HKS_LOG_I("AuthToekn Data: %u", authToken);
+    HKS_LOG_I("AuthToekn Data: %" LOG_PUBLIC "s", authToken);
 
     struct HksParamSet *newParamSet = nullptr;
 
@@ -288,7 +288,7 @@ int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle,
 
     int ret = TestUpdateLoopFinish(handle, initParamSet, &inData, &outDataSign);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("TestUpdateLoopFinish failed, ret : %d", ret);
+        HKS_LOG_I("TestUpdateLoopFinish failed, ret : %" LOG_PUBLIC "d", ret);
     }
     return ret;
 }
@@ -300,7 +300,7 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
 
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("InitParamSet(gen) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(gen) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     uint8_t alias[] = "testCheckAuth";
@@ -308,14 +308,14 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
-        HKS_LOG_I("HksGenerateKey failed, ret : %d", ret);
+        HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     struct HksParamSet *initParamSet = nullptr;
     ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("InitParamSet(init) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(init) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
     uint8_t challenge[32] = {0};
@@ -330,7 +330,7 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
 
     ret = HksBuildAuthtoken(&initParamSet, &challengeBlob, testIDMParams);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksBuildAuthtoken failed, ret : %d", ret);
+        HKS_LOG_I("HksBuildAuthtoken failed, ret : %" LOG_PUBLIC "d", ret);
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
     }
@@ -356,7 +356,7 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
-        HKS_LOG_I("HksGenerateKey failed, ret : %d", ret);
+        HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -388,7 +388,7 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
     struct HksBlob outData = { HMAC_COMMON_SIZE, out };
     ret = TestUpdateFinish(&handleHMAC, initParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("TestUpdateFinish failed, ret : %d", ret);
+        HKS_LOG_I("TestUpdateFinish failed, ret : %" LOG_PUBLIC "d", ret);
         HksDeleteKey(&keyAlias, genParamSet);
         return ret;
     }

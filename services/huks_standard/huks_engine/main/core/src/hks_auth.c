@@ -19,6 +19,7 @@
 
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_template.h"
 
 struct HksAuthPolicy {
     uint32_t authId;
@@ -71,27 +72,19 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksPa
     for (uint32_t i = 0; i < policy->policyCnt; i++) {
         authTag = policy->policyTag[i];
         ret = HksGetParam(keyBlobParamSet, authTag, &authParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get auth param[0x%x] failed!", authTag);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get auth param[0x%" LOG_PUBLIC "x] failed!", authTag)
 
         ret = HksGetParam(paramSet, authTag, &requestParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get request param[0x%x] failed!", authTag);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get request param[0x%" LOG_PUBLIC "x] failed!", authTag)
 
         if (authTag != HKS_TAG_PURPOSE) {
             ret = HksCheckParamMatch((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         } else {
             ret = CheckPurpose((const struct HksParam *)authParam, (const struct HksParam *)requestParam);
         }
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("unmatch policy[0x%x], [0x%x] != [0x%x]!", authTag, requestParam->uint32Param,
-                authParam->uint32Param);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+            "unmatch policy[0x%" LOG_PUBLIC "x], [0x%" LOG_PUBLIC "x] != [0x%" LOG_PUBLIC "x]!",
+            authTag, requestParam->uint32Param, authParam->uint32Param)
     }
     return HKS_SUCCESS;
 }

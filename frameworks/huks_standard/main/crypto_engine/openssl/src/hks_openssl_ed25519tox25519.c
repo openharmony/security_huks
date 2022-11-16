@@ -23,6 +23,7 @@
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define CURVE25519_KEY_LEN 32
@@ -68,10 +69,8 @@ static const unsigned char g_negativeOneDivideTwoBytes[P_BYTES] = {
 static int32_t ConvertStringToInt(const uint8_t *param, uint32_t paraLen, BIGNUM **bigNum)
 {
     *bigNum = BN_bin2bn(param, paraLen, NULL);
-    if (*bigNum == NULL) {
-        HKS_LOG_E("failed to translate octet string into big integer!");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*bigNum, HKS_ERROR_BUFFER_TOO_SMALL, "failed to translate octet string into big integer!")
+
     return HKS_SUCCESS;
 }
 
@@ -125,35 +124,17 @@ static int32_t CovertData(struct Curve25519Structure *curve25519, uint8_t *pubke
     int32_t ret;
     do {
         ret = ConvertStringToInt(g_pBytes, P_BYTES, &curve25519->p);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert to g_pBytes big number failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert to g_pBytes big number failed!")
         ret = ConvertStringToInt(g_dBytes, P_BYTES, &curve25519->d);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert to g_dBytes big number failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert to g_dBytes big number failed!")
         ret = ConvertStringToInt(g_negativeTwoModPBytes, P_BYTES, &curve25519->negativeTwo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert to g_negativeTwoModPBytes big number failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert to g_negativeTwoModPBytes big number failed!")
         ret = ConvertStringToInt(g_negativeOneModPBytes, P_BYTES, &curve25519->negativeOne);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert to g_negativeOneModPBytes big number failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert to g_negativeOneModPBytes big number failed!")
         ret = ConvertStringToInt(g_negativeOneDivideTwoBytes, P_BYTES, &curve25519->negativeOneDivideTwo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert to g_negativeOneDivideTwoBytes big number failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert to g_negativeOneDivideTwoBytes big number failed!")
         ret = ConvertStringToInt(pubkey, len, &curve25519->ed25519Pubkey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Convert to ed25519 big number failed!");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Convert to ed25519 big number failed!")
     } while (0);
 
     if (ret != HKS_SUCCESS) {
@@ -179,10 +160,7 @@ static int32_t Curve25519Initialize(struct Curve25519Structure *curve25519,
 
     (void)memset_s(curve25519, sizeof(struct Curve25519Structure), 0, sizeof(struct Curve25519Structure));
     ret = CovertData(curve25519, pubKey, sizeof(pubKey));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert binary data to big num failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "convert binary data to big num failed!")
     return ret;
 }
 
@@ -269,9 +247,8 @@ static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, 
     int32_t res = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     uint32_t result = (uint32_t)(BN_cmp(curve25519->ed25519Pubkey, curve25519->p) < 0);
     BIGNUM *tmpOne = BN_new();
-    if (tmpOne == NULL) {
-        return res;
-    }
+    HKS_IF_NULL_RETURN(tmpOne, res)
+
     do {
         if (BN_mod_sqr(var->a, curve25519->ed25519Pubkey, curve25519->p, ctx) <= 0) {
             break;
@@ -279,9 +256,7 @@ static int32_t CheckEd25519Pubkey(const struct Curve25519Structure *curve25519, 
         if (BN_mod_mul(var->b, var->a, curve25519->d, curve25519->p, ctx) <= 0) {
             break;
         }
-        if (CheckEd25519PubkeyPart(curve25519, var, ctx, tmpOne) != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(CheckEd25519PubkeyPart(curve25519, var, ctx, tmpOne))
         result &= (uint32_t)(BN_cmp(var->b, curve25519->negativeOneDivideTwo) < 0);
         if (BN_mod_sub(var->a, var->a, curve25519->p, curve25519->p, ctx) <= 0) {
             break;
@@ -321,14 +296,10 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
     uint8_t tmpKey[P_BYTES] = {0};
     struct Curve25519Structure curve25519 = {0};
     int32_t ret = Curve25519Initialize(&curve25519, keyIn->data, keyIn->size, true);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
     ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
-        if (CheckEd25519Pubkey(&curve25519, var, keyIn->data[keyIn->size - 1], ctx) != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(CheckEd25519Pubkey(&curve25519, var, keyIn->data[keyIn->size - 1], ctx))
         if (BN_set_word(numberOne, 1) <= 0) {
             break;
         }
@@ -351,9 +322,7 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
             break;
         }
         tmpSize = (uint32_t)BN_num_bytes(var->c);
-        if (FillPubKeyByZero(tmpKey, &tmpSize) != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(FillPubKeyByZero(tmpKey, &tmpSize))
         SwapEndianThirtyTwoByte(tmpKey, tmpSize, true);
         if (memcpy_s(keyOut->data, keyOut->size, tmpKey, tmpSize) != EOK) {
             break;
@@ -369,9 +338,8 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
 int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     BN_CTX *ctx = BN_CTX_new();
-    if (ctx == NULL) {
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR)
+
     struct Curve25519Var var = { NULL, NULL, NULL };
     int32_t ret = Curve25519LocalVar(&var);
     if (ret != HKS_SUCCESS) {
