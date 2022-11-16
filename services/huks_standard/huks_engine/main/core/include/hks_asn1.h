@@ -104,7 +104,7 @@ int32_t HksAsn1WriteFinal(struct HksBlob *final, const struct HksAsn1Blob *tlv);
 int32_t HksAsn1GetObj(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data);
 
 int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data,
-    uint32_t expected_tag);
+    uint32_t expectedTag);
 
 static inline int32_t CheckAsn1Blob(const struct HksAsn1Blob *blob)
 {

@@ -27,7 +27,7 @@ extern "C" {
 
 #define HKDF_EXPAND_MAX 0xFF
 
-int32_t HksOpensslHkdf(const struct HksBlob *masterKey, const struct HksKeySpec *derivationSpec,
+int32_t HksOpensslHkdf(const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec,
     struct HksBlob *derivedKey);
 
 int32_t HksOpensslPbkdf2(const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec,
