@@ -1516,7 +1516,7 @@ static int32_t InitCheckOptionalParams(bool needCheck, bool isAbsent, struct Hks
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckOptionalParam(enum HksTag tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param)
+int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param)
 {
     enum CheckKeyType checkType = HKS_CHECK_TYPE_GEN_KEY;
     if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {

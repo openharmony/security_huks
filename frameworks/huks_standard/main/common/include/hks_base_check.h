@@ -107,7 +107,7 @@ int32_t HksCheckSecureSignParams(uint32_t secureSignType);
 
 int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *inputParams);
 
-int32_t HksCheckOptionalParam(enum HksTag tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
+int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
 #ifdef __cplusplus
 }
 #endif
