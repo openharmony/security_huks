@@ -55,7 +55,7 @@ int32_t HksGetEncryptKey(struct HksBlob *mainKey);
 
 int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey);
 
-int32_t HksCoreInitAuthTokenKey(void);
+int32_t HksCoreInitAuthTokenKey();
 
 int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken);
 

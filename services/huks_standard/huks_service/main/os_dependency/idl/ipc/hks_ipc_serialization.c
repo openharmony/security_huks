@@ -369,7 +369,7 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, uint32_t *listCou
     int32_t ret = GetUint32FromBuffer(listCount, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get count failed")
 
-    if ((UINT32_MAX / sizeof(struct HksKeyInfo)) < *listCount) {
+    if (*listCount > (UINT32_MAX / sizeof(struct HksKeyInfo))) {
         HKS_LOG_E("listCount too big %" LOG_PUBLIC "u", *listCount);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }

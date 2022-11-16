@@ -251,7 +251,7 @@ ERROR:
     return ERROR_CODE_GENERAL;
 }
 
-void DeinitAesCryptData(AesCryptContext *ctx)
+void DeinitAesCryptData(AesCryptContext *aesCryptCxt)
 {
     if (ctx == NULL) {
         return;
