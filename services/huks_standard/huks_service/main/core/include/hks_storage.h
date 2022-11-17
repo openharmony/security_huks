@@ -57,7 +57,7 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob);
 int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName,
     const struct HksBlob *keyAlias, uint32_t storageType, uint32_t *keyBlobSize);
-int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t *keyCount);
+int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t *fileCount);
 #else // _STORAGE_LITE_
 
 int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
@@ -75,7 +75,7 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const struc
 int32_t HksStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     uint32_t storageType, uint32_t *keyBlobSize);
 
-int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, uint32_t *keyCount);
+int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, uint32_t *fileCount);
 #endif // _STORAGE_LITE_
 #endif // _CUT_AUTHENTICATE_
 

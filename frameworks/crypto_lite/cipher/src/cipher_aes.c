@@ -251,26 +251,26 @@ ERROR:
     return ERROR_CODE_GENERAL;
 }
 
-void DeinitAesCryptData(AesCryptContext *ctx)
+void DeinitAesCryptData(AesCryptContext *aesCryptCxt)
 {
-    if (ctx == NULL) {
+    if (aesCryptCxt == NULL) {
         return;
     }
 
-    if (ctx->iv.ivBuf != NULL) {
-        free(ctx->iv.ivBuf);
-        ctx->iv.ivBuf = NULL;
+    if (aesCryptCxt->iv.ivBuf != NULL) {
+        free(aesCryptCxt->iv.ivBuf);
+        aesCryptCxt->iv.ivBuf = NULL;
     }
 
-    if (ctx->data.key != NULL) {
-        (void)memset_s(ctx->data.key, ctx->data.keyLen, 0, ctx->data.keyLen);
-        free(ctx->data.key);
-        ctx->data.key = NULL;
+    if (aesCryptCxt->data.key != NULL) {
+        (void)memset_s(aesCryptCxt->data.key, aesCryptCxt->data.keyLen, 0, aesCryptCxt->data.keyLen);
+        free(aesCryptCxt->data.key);
+        aesCryptCxt->data.key = NULL;
     }
 
-    if (ctx->data.text != NULL) {
-        free(ctx->data.text);
-        ctx->data.text = NULL;
+    if (aesCryptCxt->data.text != NULL) {
+        free(aesCryptCxt->data.text);
+        aesCryptCxt->data.text = NULL;
     }
 }
 

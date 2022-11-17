@@ -61,7 +61,7 @@ int32_t HksCoreDeriveThreeStageInit(const struct HuksKeyNode *keyNode, const str
     uint32_t alg);
 
 int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *signature, uint32_t alg);
+    const struct HksBlob *srcData, struct HksBlob *derive, uint32_t alg);
 
 int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg);
