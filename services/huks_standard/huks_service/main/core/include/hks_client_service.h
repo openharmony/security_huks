@@ -78,7 +78,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
 int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount);
 
-int32_t HksServiceAttestKey(const struct HksProcessInfo *processName, const struct HksBlob *keyAlias,
+int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain);
 
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
