@@ -42,7 +42,7 @@ struct HksError {
 extern "C" {
 #endif
 
-struct HksResult HksConvertErrCode(int32_t result);
+struct HksResult HksConvertErrCode(int32_t ret);
 
 #ifdef __cplusplus
 }
