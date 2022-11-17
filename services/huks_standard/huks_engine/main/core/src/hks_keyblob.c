@@ -574,7 +574,7 @@ static int32_t GenerateAuthTokenKey()
     return ret;
 }
 
-int32_t HksCoreInitAuthTokenKey()
+int32_t HksCoreInitAuthTokenKey(void)
 {
     if (g_isInitAuthTokenKey == false) {
         if (GenerateAuthTokenKey() == HKS_SUCCESS) {
