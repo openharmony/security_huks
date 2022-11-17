@@ -37,8 +37,8 @@ HKS_API_EXPORT int32_t HksBuildParamSet(struct HksParamSet **paramSet);
 
 HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet);
 
-HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *fromParamSet, uint32_t fromParamSetSize,
-    struct HksParamSet **paramSet);
+HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *inParamSet, uint32_t inParamSetSize,
+    struct HksParamSet **outParamSet);
 
 HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t tag, struct HksParam **param);
 

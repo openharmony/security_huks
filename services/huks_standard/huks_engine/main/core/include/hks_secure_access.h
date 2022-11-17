@@ -25,7 +25,7 @@ extern "C" {
 int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct HksParamSet *initParamSet,
     struct HksBlob *token);
 
-int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struct HksParamSet *inParamSet);
+int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
 
 int32_t HksCoreAppendAuthInfoBeforeUpdate(struct HuksKeyNode *keyNode, uint32_t pur,
     const struct HksParamSet *inParamSet, const struct HksBlob *inData, struct HksBlob *appendedData);
@@ -34,7 +34,7 @@ int32_t HksCoreAppendAuthInfoBeforeFinish(struct HuksKeyNode *keyNode, uint32_t 
     const struct HksParamSet *inParamSet, const struct HksBlob *inData, struct HksBlob *appendedData);
 
 int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t pur,
-    const struct HksParamSet *inParamSet, uint32_t inOutDataBufferSize, struct HksBlob *inOutData);
+    const struct HksParamSet *inParamSet, uint32_t inOutDataOriginSize, struct HksBlob *inOutData);
 
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet);
 

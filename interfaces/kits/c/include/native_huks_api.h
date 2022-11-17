@@ -198,7 +198,7 @@ struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
  * @see OH_Huks_AbortSession
  */
 struct OH_Huks_Result OH_Huks_InitSession(const struct OH_Huks_Blob *keyAlias,
-    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *handle, struct OH_Huks_Blob *challenge);
+    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *handle, struct OH_Huks_Blob *token);
 
 /**
  * @brief Adds data by segment for the key operation, performs the related key operation,

@@ -537,7 +537,7 @@ static struct HksBlob g_cachedAuthTokenKey = {
     .size = (uint32_t)HKS_DEFAULT_USER_AT_KEY_LEN,
     .data = (uint8_t *)HKS_DEFAULT_USER_AT_KEY
 };
-int32_t HksCoreInitAuthTokenKey()
+int32_t HksCoreInitAuthTokenKey(void)
 {
     HKS_LOG_I("generate At key success!");
     return HKS_SUCCESS;
@@ -574,7 +574,7 @@ static int32_t GenerateAuthTokenKey()
     return ret;
 }
 
-int32_t HksCoreInitAuthTokenKey()
+int32_t HksCoreInitAuthTokenKey(void)
 {
     if (g_isInitAuthTokenKey == false) {
         if (GenerateAuthTokenKey() == HKS_SUCCESS) {
