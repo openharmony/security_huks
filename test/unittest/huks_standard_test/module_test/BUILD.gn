@@ -136,6 +136,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_base_check_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_check_paramset_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_common_check_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_crypto_hal_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_errorcode_adapter_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_param_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_template_test.cpp",

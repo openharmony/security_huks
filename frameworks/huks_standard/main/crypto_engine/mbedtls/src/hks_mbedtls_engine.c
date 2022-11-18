@@ -261,6 +261,11 @@ int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
     return func(randomData);
 }
 
+int32_t HksCryptoHalFillPriRandom(struct HksBlob *randomData)
+{
+    return HksCryptoHalFillRandom(randomData);
+}
+
 int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead)
 {
