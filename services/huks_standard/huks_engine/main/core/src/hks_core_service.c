@@ -1021,8 +1021,8 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = HksBuildKeyBlob(keyAlias, HKS_KEY_FLAG_IMPORT_KEY, &innerKey, paramSet, keyOut);
-     } while (0);
-   
+    } while (0);
+
     (void)memset_s(innerKey.data, innerKey.size, 0, innerKey.size);
     HKS_FREE_BLOB(innerKey);
     return ret;

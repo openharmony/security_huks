@@ -78,7 +78,7 @@ HWTEST_F(HksCryptoHalTest, HksCryptoHalTest001, TestSize.Level0)
             isAllZero = false;
             break;
         }
-    }                                            
+    }
     HKS_FREE_BLOB(random);
     ASSERT_EQ(isAllZero, false);
 }
