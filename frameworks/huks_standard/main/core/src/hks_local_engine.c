@@ -289,7 +289,7 @@ static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *
 static int32_t GetSignVerifyMessage(struct HksUsageSpec *usageSpec, const struct HksBlob *srcData,
     struct HksBlob *message, bool *needFree)
 {
-    if (usageSpec->algType != HKS_ALG_ED25519) {
+    if (usageSpec->algType != HKS_ALG_ED25519 && usageSpec->digest != HKS_DIGEST_NONE) {
         message->size = MAX_DEGIST_SIZE;
         message->data = (uint8_t *)HksMalloc(MAX_DEGIST_SIZE);
         HKS_IF_NULL_LOGE_RETURN(message->data, HKS_ERROR_MALLOC_FAIL, "SignVerify malloc message data failed!")

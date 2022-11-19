@@ -18,6 +18,7 @@
 #include "hks_access_control_rsa_sign_verify_test_common.h"
 
 #include <gtest/gtest.h>
+#include "hks_client_service.h"
 
 using namespace testing::ext;
 namespace Unittest::AccessControlRsaSignVerify {
@@ -42,6 +43,7 @@ void HksAccessControlRsaSignVerifyTest::TearDownTestCase(void)
 
 void HksAccessControlRsaSignVerifyTest::SetUp()
 {
+     HksServiceInitialize();
 }
 
 void HksAccessControlRsaSignVerifyTest::TearDown()

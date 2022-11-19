@@ -61,11 +61,15 @@ ohos_unittest("crypto_engine_unit_test") {
     sources += [ "./src/hks_crypto_hal_api_mbedtls.cpp" ]
   }
 
+  defines = [
+    "_HUKS_LOG_ENABLE_",
+  ]
+
   if (use_crypto_lib == "openssl") {
-    defines = [ "_USE_OPENSSL_" ]
+    defines += [ "_USE_OPENSSL_" ]
   }
   if (use_crypto_lib == "mbedtls") {
-    defines = [ "_USE_MBEDTLS_" ]
+    defines += [ "_USE_MBEDTLS_" ]
   }
 
   configs = [
