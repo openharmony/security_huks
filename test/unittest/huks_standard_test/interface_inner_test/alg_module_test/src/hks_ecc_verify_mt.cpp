@@ -848,8 +848,12 @@ protected:
         HksBlob signature = { .size = ECC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(ECC_MESSAGE_SIZE) };
         ASSERT_NE(signature.data, nullptr);
 
-        EXPECT_EQ(EcdsaSign(&authId, digest, &message, &signature), testCaseParams.signResult);
-
+        if (digest == HKS_DIGEST_NONE) {
+            EXPECT_EQ(SignVerifyWithDigestNone(&authId, &message, &signature, true), testCaseParams.verifyResult);
+        } else {
+            EXPECT_EQ(EcdsaSign(&authId, digest, &message, &signature), testCaseParams.signResult);
+        }
+        
         if (storage == HKS_STORAGE_TEMP) {
             EXPECT_EQ(HksVerify(&pubKey, paramInSet, &message, &signature), testCaseParams.verifyResult);
         } else if (storage == HKS_STORAGE_PERSISTENT) {
