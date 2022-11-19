@@ -93,7 +93,7 @@ int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key
     struct HksBlob priKeyBlob = { ED25519_PRIVATE_KEY_LEN, priKey };
 
     struct HksBlob tmp = { ED25519_PUBLIC_KEY_LEN, priKeyBlob.data };
-    int32_t ret = HksCryptoHalFillRandom(&tmp);
+    int32_t ret = HksCryptoHalFillPrivRandom(&tmp);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ED25519_public_from_private(pubKeyBlob.data, priKeyBlob.data);

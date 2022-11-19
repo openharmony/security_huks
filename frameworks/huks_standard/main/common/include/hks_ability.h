@@ -53,6 +53,7 @@ enum HksOperationType {
     HKS_OPERATION_HMAC_FREE_CTX = 0x1b,      /* hmac free ctx */
     HKS_OPERATION_ENCRYPT_FREE_CTX = 0x1c,   /* encrypt free ctx */
     HKS_OPERATION_DECRYPT_FREE_CTX = 0x1d,   /* decrypt free ctx */
+    HKS_OPERATION_FILL_PRI_RANDOM = 0x1e,    /* fill private random */
 };
 
 struct HksAbility {
@@ -103,6 +104,7 @@ struct HksAbility {
 
 #define HKS_CRYPTO_ABILITY_FILL_RANDOM          HKS_CRYPTO_ABILITY(HKS_OPERATION_FILL_RANDOM, 0)
 #define HKS_CRYPTO_ABILITY_BN_EXP_MOD           HKS_CRYPTO_ABILITY(HKS_OPERATION_BN_EXP_MOD, 0)
+#define HKS_CRYPTO_ABILITY_FILL_PRI_RANDOM          HKS_CRYPTO_ABILITY(HKS_OPERATION_FILL_PRI_RANDOM, 0)
 
 #ifdef __cplusplus
 extern "C" {
