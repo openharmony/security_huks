@@ -1016,10 +1016,13 @@ int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *k
     }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "translate key to inner format failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = HksCoreCheckImportKeyParams(keyAlias, &innerKey, paramSet, keyOut);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    do {
+        ret = HksCoreCheckImportKeyParams(keyAlias, &innerKey, paramSet, keyOut);
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
-    ret = HksBuildKeyBlob(keyAlias, HKS_KEY_FLAG_IMPORT_KEY, &innerKey, paramSet, keyOut);
+        ret = HksBuildKeyBlob(keyAlias, HKS_KEY_FLAG_IMPORT_KEY, &innerKey, paramSet, keyOut);
+    } while (0);
+
     (void)memset_s(innerKey.data, innerKey.size, 0, innerKey.size);
     HKS_FREE_BLOB(innerKey);
     return ret;
