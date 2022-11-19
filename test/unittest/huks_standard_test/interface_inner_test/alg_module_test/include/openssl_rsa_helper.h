@@ -48,6 +48,11 @@ int32_t OpensslSignRsa(const struct HksBlob *plainText, struct HksBlob *signData
 int32_t OpensslVerifyRsa(const struct HksBlob *plainText, struct HksBlob *signData, struct HksBlob *key, int padding,
     enum HksKeyDigest digestType);
 
+int32_t OpensslRsaSignWithNoneDegist(struct HksBlob *key, int padding, const struct HksBlob *message,
+    struct HksBlob *signature);
+
+int32_t OpensslRsaVerifyWithNoneDegist(struct HksBlob *key, int padding, const struct HksBlob *message,
+    struct HksBlob *signature);
 #ifdef __cplusplus
 #if __cplusplus
 }

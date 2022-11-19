@@ -514,8 +514,14 @@ static void FreeSignVerifyCtx(const struct HuksKeyNode *keyNode)
         HKS_LOG_E("append cipher get alg param failed!");
         return;
     }
+    struct HksParam *digestParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_DIGEST, &digestParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("append cipher get digest param failed!");
+        return;
+    }
 
-    if (algParam->uint32Param != HKS_ALG_ED25519) {
+    if (algParam->uint32Param != HKS_ALG_ED25519 && digestParam->uint32Param != HKS_DIGEST_NONE) {
         HksCryptoHalHashFreeCtx(&ctx);
     } else {
         struct HksBlob *cachedData = (struct HksBlob *)ctx;
