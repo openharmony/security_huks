@@ -183,7 +183,7 @@ int32_t HksCryptoHalDeriveKey(const struct HksBlob *mainKey, const struct HksKey
 
 int32_t HksCryptoHalFillRandom(struct HksBlob *randomData);
 
-int32_t HksCryptoHalFillPriRandom(struct HksBlob *randomData);
+int32_t HksCryptoHalFillPrivRandom(struct HksBlob *randomData);
 
 int32_t HksCryptoHalAddEntropy(const struct HksBlob *entropy);
 

@@ -155,7 +155,7 @@ int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
     return func(randomData);
 }
 
-int32_t HksCryptoHalFillPriRandom(struct HksBlob *randomData)
+int32_t HksCryptoHalFillPrivRandom(struct HksBlob *randomData)
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(randomData), HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
 

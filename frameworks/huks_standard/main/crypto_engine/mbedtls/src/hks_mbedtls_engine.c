@@ -261,7 +261,7 @@ int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
     return func(randomData);
 }
 
-int32_t HksCryptoHalFillPriRandom(struct HksBlob *randomData)
+int32_t HksCryptoHalFillPrivRandom(struct HksBlob *randomData)
 {
     return HksCryptoHalFillRandom(randomData);
 }
