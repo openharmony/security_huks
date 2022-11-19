@@ -43,7 +43,7 @@ void HksAccessControlRsaSignVerifyTest::TearDownTestCase(void)
 
 void HksAccessControlRsaSignVerifyTest::SetUp()
 {
-     HksServiceInitialize();
+    HksServiceInitialize();
 }
 
 void HksAccessControlRsaSignVerifyTest::TearDown()
