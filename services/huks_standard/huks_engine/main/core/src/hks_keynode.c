@@ -279,7 +279,7 @@ static void FreeCachedData(void **ctx)
     HKS_FREE_PTR(*ctx);
 }
 
-static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, uint32_t digest, void **ctx)
+static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, bool hasCalcHash, void **ctx)
 {
     switch (purpose) {
         case HKS_KEY_PURPOSE_AGREE:
@@ -288,7 +288,7 @@ static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, uint32_t digest, void
             break;
         case HKS_KEY_PURPOSE_SIGN:
         case HKS_KEY_PURPOSE_VERIFY:
-            if (alg != HKS_ALG_ED25519 && digest != HKS_DIGEST_NONE) {
+            if (alg != HKS_ALG_ED25519 && hasCalcHash) {
                 HksCryptoHalHashFreeCtx(ctx);
             } else {
                 FreeCachedData(ctx);
@@ -341,11 +341,15 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
         }
         struct HksParam *param3 = NULL;
         ret = HksGetParam(*paramSet, HKS_TAG_DIGEST, &param3);
-        if (ret != HKS_SUCCESS) {
+        if (ret == HKS_ERROR_INVALID_ARGUMENT) {
             HksFreeParamSet(paramSet);
             return;
         }
-        KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, param3->uint32Param, &ctx);
+        bool hasCalcHash = true;
+        if (ret == HKS_SUCCESS) {
+            hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
+        }
+        KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, hasCalcHash, &ctx);
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
     }
     HksFreeParamSet(paramSet);

@@ -415,9 +415,8 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
 
 void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCaseParams)
 {
-    struct HksBlob authId = {
-        .size = testCaseParams.alias.length(),
-        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
+    struct HksBlob authId = { .size = testCaseParams.alias.length(),
+                              .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
     };
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
@@ -436,9 +435,8 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
-    HksBlob plainText = {
-        .size =strlen(hexData),
-        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
+    HksBlob plainText = { .size =strlen(hexData),
+                          .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
     };
 
     HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
