@@ -32,8 +32,9 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/include",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_depenfency/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/include",
   ]
 
   sources = []
@@ -132,18 +133,26 @@ ohos_unittest("huks_module_test") {
 
   # framework test
   sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_base_check_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_check_paramset_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_common_check_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_errorcode_adapter_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_param_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_template_test.cpp",
   ]
 
   # interface test
   sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_api_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
   # utils test
-  sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_condition_test.cpp" ]
+  sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_condition_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_file_operator_test.cpp",
+  ]
 
   # service test
   sources += [
@@ -154,8 +163,10 @@ ohos_unittest("huks_module_test") {
 
   # engine test
   sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_core_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keynode_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_depenfency/src/hks_core_hal_api_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_secure_access_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/src/hks_core_hal_api_test.cpp",
   ]
 
   defines = [
@@ -182,4 +193,12 @@ ohos_unittest("huks_module_test") {
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
   ]
+  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  if (support_jsapi) {
+    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_event_observer_test.cpp" ]
+    external_deps += [
+      "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
+    ]
+  }
 }

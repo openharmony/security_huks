@@ -21,9 +21,10 @@
 #include "system_ability_definition.h"
 
 #include "hks_client_service.h"
+#include "hks_ipc_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_ipc_service.h"
+#include "hks_template.h"
 
 #ifdef SUPPORT_COMMON_EVENT
 #include <pthread.h>
@@ -92,10 +93,10 @@ static void SubscribEvent()
 {
     for (uint32_t i = 0; i < MAX_DELAY_TIMES; ++i) {
         if (SystemEventObserver::SubscribeSystemEvent()) {
-            HKS_LOG_I("subscribe system event success, i = %u", i);
+            HKS_LOG_I("subscribe system event success, i = %" LOG_PUBLIC "u", i);
             return;
         } else {
-            HKS_LOG_E("subscribe system event failed %u times", i);
+            HKS_LOG_E("subscribe system event failed %" LOG_PUBLIC "u times", i);
             usleep(DELAY_INTERVAL);
         }
     }
@@ -125,7 +126,8 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
     uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
     for (uint32_t i = 0; i < size; ++i) {
         if (code == g_hksIpcMessageHandler[i].msgId) {
-            g_hksIpcMessageHandler[i].handler((const struct HksBlob *)&srcData, (const uint8_t *)&reply);
+            g_hksIpcMessageHandler[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData),
+                reinterpret_cast<const uint8_t *>(&reply));
             return NO_ERROR;
         }
     }
@@ -137,16 +139,14 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
             if (outSize != 0) {
                 outData.size = outSize;
                 if (outData.size > MAX_MALLOC_LEN) {
-                    HKS_LOG_E("outData size is invalid, size:%u", outData.size);
+                    HKS_LOG_E("outData size is invalid, size:%" LOG_PUBLIC "u", outData.size);
                     return HW_SYSTEM_ERROR;
                 }
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
-                if (outData.data == nullptr) {
-                    HKS_LOG_E("Malloc outData failed.");
-                    return HW_SYSTEM_ERROR;
-                }
+                HKS_IF_NULL_LOGE_RETURN(outData.data, HW_SYSTEM_ERROR, "Malloc outData failed.")
             }
-            g_hksIpcThreeStageHandler[i].handler((const struct HksBlob *)&srcData, &outData, (const uint8_t *)&reply);
+            g_hksIpcThreeStageHandler[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData), &outData,
+                reinterpret_cast<const uint8_t *>(&reply));
             HKS_FREE_BLOB(outData);
             break;
         }
@@ -181,10 +181,8 @@ bool HksService::Init()
 
     if (!registerToService_) {
         sptr<HksService> ptrInstance = HksService::GetInstance();
-        if (ptrInstance == nullptr) {
-            HKS_LOG_E("HksService::Init GetInstance Failed");
-            return false;
-        }
+        HKS_IF_NULL_LOGE_RETURN(ptrInstance, false, "HksService::Init GetInstance Failed")
+
         if (!Publish(ptrInstance)) {
             HKS_LOG_E("HksService::Init Publish Failed");
             return false;
@@ -194,10 +192,7 @@ bool HksService::Init()
     }
 
     int32_t ret = HksServiceInitialize();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Init hks service failed!");
-        return false;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "Init hks service failed!")
 
     HKS_LOG_I("HksService::Init success.");
     return true;
@@ -214,7 +209,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return HW_SYSTEM_ERROR;
     }
 
-    HKS_LOG_I("OnRemoteRequest code:%d", code);
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d", code);
     // check that the code is valid
     if (code < MSG_CODE_BASE || code >= MSG_CODE_MAX) {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -225,17 +220,14 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     struct HksBlob srcData = { 0, nullptr };
     srcData.size = static_cast<uint32_t>(data.ReadUint32());
     if (IsInvalidLength(srcData.size)) {
-        HKS_LOG_E("srcData size is invalid, size:%u", srcData.size);
+        HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
         return HW_SYSTEM_ERROR;
     }
 
     srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
-    if (srcData.data == nullptr) {
-        HKS_LOG_E("Malloc srcData failed.");
-        return HW_SYSTEM_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(srcData.data, HW_SYSTEM_ERROR, "Malloc srcData failed.")
 
-    const uint8_t *pdata = data.ReadBuffer((size_t)srcData.size);
+    const uint8_t *pdata = data.ReadBuffer(static_cast<size_t>(srcData.size));
     if (pdata == nullptr) {
         HKS_FREE_BLOB(srcData);
         return HKS_ERROR_IPC_MSG_FAIL;
@@ -276,7 +268,7 @@ void HksService::OnStart()
 
 void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &deviceId)
 {
-    HKS_LOG_I("systemAbilityId is %d!", systemAbilityId);
+    HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
     HksSubscribeSystemEvent();
 #endif
@@ -284,7 +276,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &
 
 void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    HKS_LOG_I("systemAbilityId is %d!", systemAbilityId);
+    HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 }
 
 void HksService::OnStop()

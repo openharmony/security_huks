@@ -43,8 +43,6 @@ int32_t HksCoreEncrypt(const struct HksBlob *key, const struct HksParamSet *para
 int32_t HksCoreDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet, const struct HksBlob *cipherText,
     struct HksBlob *plainText);
 
-int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct HksBlob *key);
-
 int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random);
 
 int32_t HksCoreImportKey(const struct HksBlob *keyAlias, const struct HksBlob *key,

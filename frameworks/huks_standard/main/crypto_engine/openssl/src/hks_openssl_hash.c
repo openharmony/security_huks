@@ -29,6 +29,7 @@
 
 #include "hks_log.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 
 static int32_t CheckDigestAlg(uint32_t alg)
 {
@@ -64,36 +65,21 @@ static int32_t CheckDigestAlg(uint32_t alg)
 
 static int32_t HashCheckParam(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash)
 {
-    if (CheckDigestAlg(alg) != HKS_SUCCESS) {
-        HKS_LOG_E("Unsupport HASH Type!");
-        return HKS_ERROR_INVALID_DIGEST;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckDigestAlg(alg), HKS_ERROR_INVALID_DIGEST, "Unsupport HASH Type!")
 
-    if (HksOpensslCheckBlob(hash) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param hash!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(hash), HKS_ERROR_INVALID_ARGUMENT, "Invalid param hash!")
 
-    if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param msg!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(msg), HKS_ERROR_INVALID_ARGUMENT, "Invalid param msg!")
     return HKS_SUCCESS;
 }
 
 int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash)
 {
     int32_t ret = HashCheckParam(alg, msg, hash);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid Params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "Invalid Params!")
 
     const EVP_MD *opensslAlg = GetOpensslAlg(alg);
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm fail");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "get openssl algorithm fail")
 
     ret = EVP_Digest(msg->data, msg->size, hash->data, &hash->size, opensslAlg, NULL);
     if (ret != HKS_OPENSSL_SUCCESS) {
@@ -105,10 +91,7 @@ int32_t HksOpensslHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *
 
 int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
 {
-    if (CheckDigestAlg(alg) != HKS_SUCCESS) {
-        HKS_LOG_E("Unsupport HASH Type!");
-        return HKS_ERROR_INVALID_DIGEST;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckDigestAlg(alg), HKS_ERROR_INVALID_DIGEST, "Unsupport HASH Type!")
 
     const EVP_MD *opensslAlg = NULL;
     if (alg == HKS_DIGEST_SM3) {
@@ -117,15 +100,10 @@ int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
         opensslAlg = GetOpensslAlg(alg);
     }
 
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("hash_init get openssl algorithm fail");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, HKS_ERROR_CRYPTO_ENGINE_ERROR, "hash_init get openssl algorithm fail")
 
     EVP_MD_CTX *tmpctx = EVP_MD_CTX_new();
-    if (tmpctx == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(opensslAlg, HKS_ERROR_NULL_POINTER)
 
     EVP_MD_CTX_set_flags(tmpctx, EVP_MD_CTX_FLAG_ONESHOT);
     int32_t ret = EVP_DigestInit_ex(tmpctx, opensslAlg, NULL);
@@ -140,15 +118,10 @@ int32_t HksOpensslHashInit(void **cryptoCtx, uint32_t alg)
 
 int32_t HksOpensslHashUpdate(void *cryptoCtx, const struct HksBlob *msg)
 {
-    if (cryptoCtx == NULL) {
-        HKS_LOG_E("Invalid param cryptoCtx!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(cryptoCtx, HKS_ERROR_INVALID_ARGUMENT, "Invalid param cryptoCtx!")
 
-    if (HksOpensslCheckBlob(msg) != HKS_SUCCESS) {
-        HKS_LOG_E("Invalid param msg!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(msg),
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid param msg!")
 
     int32_t ret = EVP_DigestUpdate(cryptoCtx, msg->data, msg->size);
     if (ret != HKS_OPENSSL_SUCCESS) {

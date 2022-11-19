@@ -29,6 +29,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static void BnFreeParams(struct HksBnExpModParams *bnParams)
@@ -75,10 +76,7 @@ static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
     }
 
     uint8_t *bnOutput = (uint8_t *)HksMalloc(outLen);
-    if (bnOutput == NULL) {
-        HKS_LOG_E("malloc fail");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(bnOutput, HKS_ERROR_MALLOC_FAIL, "malloc fail")
 
     int32_t ret = HKS_SUCCESS;
     do {
@@ -106,10 +104,7 @@ int32_t HksOpensslBnExpMod(struct HksBlob *x, const struct HksBlob *a,
     struct HksBnExpModParams bnParams;
     (void)memset_s(&bnParams, sizeof(bnParams), 0, sizeof(bnParams));
     int32_t ret = BnBuildParams(&bnParams, a, e, n);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("BnInitParams fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "BnInitParams fail")
 
     do {
         /* mod 0 is not supported */
@@ -121,16 +116,13 @@ int32_t HksOpensslBnExpMod(struct HksBlob *x, const struct HksBlob *a,
 
         ret = BN_mod_exp(bnParams.bnX, bnParams.bnA, bnParams.bnE, bnParams.bnN, bnParams.ctx);
         if (ret != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("BN_mod_exp fail, ret = %d", ret);
+            HKS_LOG_E("BN_mod_exp fail, ret = %" LOG_PUBLIC "d", ret);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
 
         ret = BnExpModExport(bnParams.bnX, x);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("BnExpModExport fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BnExpModExport fail")
     } while (0);
 
     BnFreeParams(&bnParams);

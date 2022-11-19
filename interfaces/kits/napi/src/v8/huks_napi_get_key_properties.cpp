@@ -75,7 +75,7 @@ static napi_value GetKeyPropertiesParseParams(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_GET_KEY_PROPERTIES_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -115,25 +115,26 @@ static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncC
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
+            GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
 
-            context->paramSetOut = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE);
-            if (context->paramSetOut != nullptr) {
-                context->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
-                context->paramSetOut->paramsCnt = 0;
+            napiContext->paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(HKS_DEFAULT_OUTPARAMSET_SIZE));
+            if (napiContext->paramSetOut != nullptr) {
+                napiContext->paramSetOut->paramSetSize = HKS_DEFAULT_OUTPARAMSET_SIZE;
+                napiContext->paramSetOut->paramsCnt = 0;
             }
 
-            context->result = HksGetKeyParamSet(context->keyAlias, context->paramSetIn, context->paramSetOut);
+            napiContext->result = HksGetKeyParamSet(napiContext->keyAlias,
+                napiContext->paramSetIn, napiContext->paramSetOut);
         },
         [](napi_env env, napi_status status, void *data) {
-            GetKeyPropertiesAsyncContext context = static_cast<GetKeyPropertiesAsyncContext>(data);
-            napi_value result = GetKeyPropertiesWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            GetKeyPropertiesAsyncContext napiContext = static_cast<GetKeyPropertiesAsyncContext>(data);
+            napi_value result = GetKeyPropertiesWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteGetKeyPropertiesAsyncContext(env, context);
+            DeleteGetKeyPropertiesAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

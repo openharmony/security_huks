@@ -75,6 +75,7 @@ ohos_static_library("libhuks_service_core_standard_static") {
   external_deps = [
     "c_utils:utils",
     "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
   ]
   complete_static_lib = true
 }

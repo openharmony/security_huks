@@ -33,13 +33,14 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static int32_t HksOpensslEccCheckKeyLen(uint32_t keyLen)
 {
     if ((keyLen != HKS_ECC_KEY_SIZE_224) && (keyLen != HKS_ECC_KEY_SIZE_256) && (keyLen != HKS_ECC_KEY_SIZE_384) &&
         (keyLen != HKS_ECC_KEY_SIZE_521)) {
-        HKS_LOG_E("invalid param keyLen(0x%x)!", keyLen);
+        HKS_LOG_E("invalid param keyLen(0x%" LOG_PUBLIC "x)!", keyLen);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -112,10 +113,7 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const struct HksKeySpec 
     /* public exponent x and y, and private exponent, so need size is: keySize / 8 * 3 */
     uint32_t rawMaterialLen = sizeof(struct KeyMaterialEcc) + HKS_KEY_BYTES(keySize) * ECC_KEYPAIR_CNT;
     uint8_t *rawMaterial = (uint8_t *)HksMalloc(rawMaterialLen);
-    if (rawMaterial == NULL) {
-        HKS_LOG_E("malloc buffer failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(rawMaterial, HKS_ERROR_MALLOC_FAIL, "malloc buffer failed!")
 
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
@@ -176,15 +174,11 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
             break;
 #endif
         default:
-            if (HksOpensslEccCheckKeyLen(spec->keyLen) != HKS_SUCCESS) {
-                HKS_LOG_E("Ecc Invalid Param!");
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
+                HKS_ERROR_INVALID_ARGUMENT, "Ecc Invalid Param!")
 
-            if (HksOpensslGetCurveId(spec->keyLen, &curveId) != HKS_SUCCESS) {
-                HKS_LOG_E("Ecc get curveId failed!");
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslGetCurveId(spec->keyLen, &curveId),
+                HKS_ERROR_INVALID_ARGUMENT, "Ecc get curveId failed!")
             break;
     }
 
@@ -205,9 +199,7 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
         }
 
         ret = EccSaveKeyMaterial(eccKey, spec, &key->data, &key->size);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("save ec key material failed! ret=0x%x", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "save ec key material failed! ret=0x%" LOG_PUBLIC "x", ret)
     } while (0);
 
     if (eccKey != NULL) {
@@ -321,10 +313,7 @@ static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
     }
 
     int nid;
-    if (HksOpensslGetCurveId(keySize, &nid) != HKS_SUCCESS) {
-        HKS_LOG_E("get curve id failed");
-        return NULL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslGetCurveId(keySize, &nid), NULL, "get curve id failed")
 
     EC_KEY *eccKey = EC_KEY_new_by_curve_name(nid);
     if (eccKey == NULL) {
@@ -357,10 +346,7 @@ static EC_KEY *EccInitKey(const struct HksBlob *keyBlob, bool private)
 static int32_t GetEvpKey(const struct HksBlob *keyBlob, EVP_PKEY *key, bool private)
 {
     EC_KEY *eccKey = EccInitKey(keyBlob, private);
-    if (eccKey == NULL) {
-        HKS_LOG_E("initialize ecc key failed\n");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NULL_LOGE_RETURN(eccKey, HKS_ERROR_CRYPTO_ENGINE_ERROR, "initialize ecc key failed\n")
 
     if (EVP_PKEY_assign_EC_KEY(key, eccKey) <= 0) {
         HksLogOpensslError();
@@ -373,20 +359,14 @@ static int32_t GetEvpKey(const struct HksBlob *keyBlob, EVP_PKEY *key, bool priv
 static int32_t GetNativePKey(const struct HksBlob *nativeKey, EVP_PKEY *key)
 {
     int32_t ret = GetEvpKey(nativeKey, key, true);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get native evp key failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get native evp key failed")
     return ret;
 }
 
 static int32_t GetPeerKey(const struct HksBlob *pubKey, EVP_PKEY *key)
 {
     int32_t ret = GetEvpKey(pubKey, key, false);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get peer evp key failed");
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR, "get peer evp key failed")
     return ret;
 }
 
@@ -432,16 +412,10 @@ static int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlo
             break;
         }
         int32_t ret = GetNativePKey(nativeKey, pKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get native pkey failed\n");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get native pkey failed\n")
 
         ret = GetPeerKey(pubKey, peerKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get peer pkey failed\n");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get peer pkey failed\n")
 
         ctx = EVP_PKEY_CTX_new(pKey, NULL);
         if (ctx == NULL) {
@@ -450,10 +424,7 @@ static int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlo
         }
 
         ret = EcdhDerive(ctx, peerKey, sharedKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("derive ecdh key failed\n");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "derive ecdh key failed\n")
 
         res = HKS_SUCCESS;
     } while (0);
@@ -473,15 +444,10 @@ static int32_t AgreeKeyEcdh(const struct HksBlob *nativeKey, const struct HksBlo
 int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
-    if (HksOpensslEccCheckKeyLen(spec->keyLen) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid param!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
+        HKS_ERROR_INVALID_ARGUMENT, "invalid param!")
     int32_t ret = AgreeKeyEcdh(nativeKey, pubKey, sharedKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("ecdh key agreement failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ecdh key agreement failed!")
 
     return ret;
 }
@@ -491,16 +457,11 @@ int32_t HksOpensslEcdhAgreeKey(const struct HksBlob *nativeKey, const struct Hks
 static EVP_PKEY_CTX *InitEcdsaCtx(const struct HksBlob *mainKey, uint32_t digest, bool sign)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(digest);
-    if (opensslAlg == NULL) {
-        HKS_LOG_E("get openssl algorithm fail");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
 
     EC_KEY *eccKey = EccInitKey(mainKey, sign);
-    if (eccKey == NULL) {
-        HKS_LOG_E("initialize ecc key failed");
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(eccKey, NULL, "initialize ecc key failed")
+
     EVP_PKEY *key = EVP_PKEY_new();
     if (key == NULL) {
         HksLogOpensslError();
@@ -544,10 +505,7 @@ int32_t HksOpensslEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     const struct HksBlob *message, const struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitEcdsaCtx(key, usageSpec->digest, false);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize ecc context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize ecc context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
@@ -563,10 +521,7 @@ int32_t HksOpensslEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
     const struct HksBlob *message, struct HksBlob *signature)
 {
     EVP_PKEY_CTX *ctx = InitEcdsaCtx(key, usageSpec->digest, true);
-    if (ctx == NULL) {
-        HKS_LOG_E("initialize ecc context failed");
-        return HKS_ERROR_INVALID_KEY_INFO;
-    }
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize ecc context failed")
 
     size_t sigSize = (size_t)signature->size;
     if (EVP_PKEY_sign(ctx, signature->data, &sigSize, message->data, message->size) != HKS_OPENSSL_SUCCESS) {

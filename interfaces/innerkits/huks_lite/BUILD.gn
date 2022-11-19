@@ -124,7 +124,7 @@ config("soft_huks_config") {
   if (board_toolchain_type == "iccarm") {
     cflags = [
       "--diag_suppress",
-      "Pe370",
+      "Pe370,Pe226",
     ]
   } else {
     cflags = [
@@ -191,18 +191,23 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     ]
-
+    deps = []
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
-      deps = [ "//third_party/mbedtls:mbedtls_static" ]
-      include_dirs += [ "//third_party/mbedtls" ]
+      if (huks_dependency_mbedtls_path != "") {
+        deps += [ huks_dependency_mbedtls_path ]
+      } else {
+        deps += [ "//third_party/mbedtls:mbedtls_static" ]
+      }
       configs += [ ":mbedtls_engine" ]
     }
 
-    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
+    defines = [
+      "MBEDTLS_ECP_RESTARTABLE=1",
+      "LOG_ENGINE_HILOG_MODULE_SCY",
+    ]
 
     if (huks_enable_log == true) {
-      sources += [ "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c" ]
       configs += [ ":hilog_lite_dir" ]
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
     }
@@ -214,9 +219,6 @@ if (ohos_kernel_type == "liteos_m") {
     configs += [ ":get_dev_udid_config" ]
     sources = huks_sources
     sources += huks_storage_source
-    sources += [
-      "../../../frameworks/huks_standard/main/os_dependency/log/hks_log_lite.c",
-    ]
 
     include_dirs = [
       "//commonlibrary/c_utils/base/include",
@@ -229,14 +231,23 @@ if (ohos_kernel_type == "liteos_m") {
 
     if (huks_use_mbedtls == true) {
       sources += huks_mbedtls_engine_sources
-      deps += [
-        "//build/lite/config/component/openssl:openssl_shared",
-        "//third_party/mbedtls:mbedtls_shared",
-      ]
+      if (huks_dependency_mbedtls_path != "") {
+        deps += [ huks_dependency_mbedtls_path ]
+      } else {
+        deps += [ "//third_party/mbedtls:mbedtls_shared" ]
+      }
+      if (huks_dependency_openssl_path != "") {
+        deps += [ huks_dependency_openssl_path ]
+      } else {
+        deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
+      }
       configs += [ ":mbedtls_engine" ]
     }
 
-    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
+    defines = [
+      "MBEDTLS_ECP_RESTARTABLE=1",
+      "LOG_ENGINE_HILOG_MODULE_SCY",
+    ]
 
     configs += [ ":hilog_dir" ]
     deps += [

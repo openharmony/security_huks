@@ -44,18 +44,18 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
 
 HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCopy);
 
-int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
+HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
 
-int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size);
+HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size);
 
-int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param);
+HKS_API_EXPORT int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param);
 
-int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
+HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet);
 
-int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
+HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
     const struct HksParamSet *targetParamSet);
     
-enum HksTagType GetTagType(enum HksTag tag);
+HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag);
 
 #ifdef __cplusplus
 }

@@ -16,8 +16,13 @@
 #ifndef CIPHER_H
 #define CIPHER_H
 
+#ifdef __cplusplus
+#include <cstdint>
+#include <cstdio>
+#else
 #include <stdint.h>
 #include <stdio.h>
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus

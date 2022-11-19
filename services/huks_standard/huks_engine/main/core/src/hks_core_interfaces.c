@@ -21,6 +21,7 @@
 #include "hks_core_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "securec.h"
 
@@ -165,10 +166,8 @@ int32_t HuksHdiUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBl
 struct HuksHdi *HuksCreateHdiDevicePtr(void)
 {
     struct HuksHdi *hdiDevicePtr = (struct HuksHdi *)HksMalloc(sizeof(struct HuksHdi));
-    if (hdiDevicePtr == NULL) {
-        HKS_LOG_E("malloc hdiDevicePtr failed.");
-        return hdiDevicePtr;
-    }
+    HKS_IF_NULL_RETURN(hdiDevicePtr, hdiDevicePtr)
+
     (void)memset_s(hdiDevicePtr, sizeof(struct HuksHdi), 0, sizeof(struct HuksHdi));
 
 #ifndef _CUT_AUTHENTICATE_

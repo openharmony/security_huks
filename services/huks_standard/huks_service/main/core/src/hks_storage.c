@@ -32,6 +32,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_storage_file_lock.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #define HKS_ENCODE_OFFSET_LEN         6
@@ -144,10 +145,7 @@ static int32_t ConstructBlob(const char *src, struct HksBlob *blob)
 {
     uint32_t size = strlen(src);
     uint8_t *outputBlob = (uint8_t *)HksMalloc(size);
-    if (outputBlob == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outputBlob, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     uint32_t count = 0;
     int32_t ret = HKS_SUCCESS;
@@ -221,10 +219,7 @@ static int32_t GetFullPath(const char *path, const char *processName, const char
 {
     int32_t ret = GetPath(path, processName, fileInfo->mainPath.processPath, fileInfo->mainPath.size,
         HKS_STORAGE_BAK_FLAG_FLASE);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get processPath failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get processPath failed, ret = %" LOG_PUBLIC "d.", ret)
 
     return GetPath(fileInfo->mainPath.processPath, storeName, fileInfo->mainPath.path, fileInfo->mainPath.size,
         HKS_STORAGE_BAK_FLAG_FLASE);
@@ -236,10 +231,8 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
         if (!g_setRootMainPath) {
             uint32_t len = sizeof(g_keyStoreMainPath);
             int32_t ret = HksGetStoragePath(HKS_STORAGE_MAIN_PATH, g_keyStoreMainPath, &len);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("get mainStorage path fail");
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get mainStorage path fail")
+
             g_setRootMainPath = true;
         }
         *path = g_keyStoreMainPath;
@@ -247,10 +240,8 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
         if (!g_setRootBakPath) {
             uint32_t len = sizeof(g_keyStoreBakPath);
             int32_t ret = HksGetStoragePath(HKS_STORAGE_BACKUP_PATH, g_keyStoreBakPath, &len);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("get backup storage path fail");
-                return ret;
-            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get backup storage path fail")
+
             g_setRootBakPath = true;
         }
         *path = g_keyStoreBakPath;
@@ -264,7 +255,7 @@ static int32_t MakeDirIfNotExist(const char *path)
 {
     int32_t ret = HksIsDirExist(path);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("dir not exist, path = %s", path);
+        HKS_LOG_I("dir not exist, path = %" LOG_PUBLIC "s", path);
         ret = HksMakeDir(path);
         if (ret != HKS_SUCCESS) {
             if (ret == HKS_ERROR_ALREADY_EXISTS) {
@@ -282,13 +273,11 @@ static int32_t MakeDirIfNotExist(const char *path)
 static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *fileName)
 {
     char *fullPath = HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (fullPath == NULL) {
-        return NULL;
-    }
+    HKS_IF_NULL_RETURN(fullPath, NULL)
 
     int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get full path failed, ret = %d.", ret);
+        HKS_LOG_E("get full path failed, ret = %" LOG_PUBLIC "d.", ret);
         HksFree(fullPath);
         return NULL;
     }
@@ -349,10 +338,7 @@ static int32_t GetBakFullPath(const char *path, const char *processName, const c
 {
     int32_t ret = GetPath(path, processName, fileInfo->bakPath.processPath, fileInfo->bakPath.size,
         HKS_STORAGE_BAK_FLAG_TRUE);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get bakProcessPath failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get bakProcessPath failed, ret = %" LOG_PUBLIC "d.", ret)
 
     return GetPath(fileInfo->bakPath.processPath, storeName, fileInfo->bakPath.path, fileInfo->bakPath.size,
         HKS_STORAGE_BAK_FLAG_TRUE);
@@ -377,36 +363,29 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
 {
     uint32_t size = HksFileSize(srcPath, srcFileName);
     if (size == 0) {
-        HKS_LOG_E("get file size failed, ret = %u.", size);
+        HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
         return HKS_ERROR_FILE_SIZE_FAIL;
     }
 
     uint8_t *buffer = (uint8_t *)HksMalloc(size);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(buffer, size, 0, size);
 
     int32_t ret;
     do {
         size = HksStorageReadFile(srcPath, srcFileName, 0, buffer, size);
         if (size == 0) {
-            HKS_LOG_E("read file failed, ret = %u.", size);
+            HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "u.", size);
             ret = HKS_ERROR_READ_FILE_FAIL;
             break;
         }
 
         ret = MakeDirIfNotExist(destPath);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("makdir destPath failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "makdir destPath failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksStorageWriteFile(destPath, destFileName, 0, buffer, size);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("file write destPath failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "file write destPath failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     HKS_FREE_PTR(buffer);
@@ -425,16 +404,14 @@ static int32_t CopyKeyBlob(const struct HksStoreFileInfo *fileInfo,
     int32_t ret = HKS_SUCCESS;
     if (isMainFileExist != HKS_SUCCESS) {
         ret = MakeDirIfNotExist(fileInfo->mainPath.processPath);
-        if (ret != HKS_SUCCESS) {
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
         ret = CopyKeyBlobFromSrc(fileInfo->bakPath.path, fileInfo->bakPath.fileName,
             fileInfo->mainPath.path, fileInfo->mainPath.fileName);
     } else if (isBakFileExist != HKS_SUCCESS) {
         ret = MakeDirIfNotExist(fileInfo->bakPath.processPath);
-        if (ret != HKS_SUCCESS) {
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
         ret = CopyKeyBlobFromSrc(fileInfo->mainPath.path, fileInfo->mainPath.fileName,
             fileInfo->bakPath.path, fileInfo->bakPath.fileName);
     }
@@ -456,7 +433,7 @@ static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct
 
     size = HksStorageReadFile(path, fileName, 0, keyBlob->data, keyBlob->size);
     if (size == 0) {
-        HKS_LOG_E("file read failed, ret = %u.", size);
+        HKS_LOG_E("file read failed, ret = %" LOG_PUBLIC "u.", size);
         return HKS_ERROR_READ_FILE_FAIL;
     }
 
@@ -468,16 +445,10 @@ static int32_t SaveKeyBlob(const char *processPath, const char *path, const char
     const struct HksBlob *keyBlob)
 {
     int32_t ret = MakeDirIfNotExist(processPath);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("makedir processPath failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "makedir processPath failed, ret = %" LOG_PUBLIC "d.", ret)
 
     ret = MakeDirIfNotExist(path);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("makedir path failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "makedir path failed, ret = %" LOG_PUBLIC "d.", ret)
 
     return HksStorageWriteFile(path, fileName, 0, keyBlob->data, keyBlob->size);
 }
@@ -486,15 +457,10 @@ static int32_t DeleteKeyBlob(const struct HksStoreFileInfo *fileInfo)
 {
     int32_t isMainFileExist = HksIsFileExist(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
 #ifndef SUPPORT_STORAGE_BACKUP
-    if (isMainFileExist != HKS_SUCCESS) {
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NOT_SUCC_RETURN(isMainFileExist, HKS_ERROR_NOT_EXIST)
 
     int32_t ret = HksStorageRemoveFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("delete key remove file failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "delete key remove file failed, ret = %" LOG_PUBLIC "d.", ret)
 #else
     int32_t isBakFileExist = HksIsFileExist(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
     if ((isMainFileExist != HKS_SUCCESS) && (isBakFileExist != HKS_SUCCESS)) {
@@ -504,18 +470,12 @@ static int32_t DeleteKeyBlob(const struct HksStoreFileInfo *fileInfo)
     int32_t ret = HKS_SUCCESS;
     if (isMainFileExist == HKS_SUCCESS) {
         ret = HksStorageRemoveFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("delete key remove file failed, ret = %d.", ret);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "delete key remove file failed, ret = %" LOG_PUBLIC "d.", ret)
     }
 
     if (isBakFileExist == HKS_SUCCESS) {
         ret = HksStorageRemoveFile(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("delete key remove bakfile failed, ret = %d.", ret);
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "delete key remove bakfile failed, ret = %" LOG_PUBLIC "d.", ret)
     }
 #endif
 
@@ -526,9 +486,8 @@ static int32_t GetKeyBlob(const struct HksStoreFileInfo *fileInfo, struct HksBlo
 {
     int32_t isMainFileExist = HksIsFileExist(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
 #ifndef SUPPORT_STORAGE_BACKUP
-    if (isMainFileExist != HKS_SUCCESS) {
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NOT_SUCC_RETURN(isMainFileExist, HKS_ERROR_NOT_EXIST)
+
     int32_t ret = GetKeyBlobFromFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName, keyBlob);
 #else
     int32_t isBakFileExist = HksIsFileExist(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
@@ -555,9 +514,8 @@ static int32_t GetKeyBlobSize(const struct HksStoreFileInfo *fileInfo, uint32_t 
 {
     int32_t isMainFileExist = HksIsFileExist(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
 #ifndef SUPPORT_STORAGE_BACKUP
-    if (isMainFileExist != HKS_SUCCESS) {
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NOT_SUCC_RETURN(isMainFileExist, HKS_ERROR_NOT_EXIST)
+
     uint32_t size = HksFileSize(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
     if (size == 0) {
         return HKS_ERROR_FILE_SIZE_FAIL;
@@ -593,9 +551,7 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 {
     int32_t isMainFileExist = HksIsFileExist(fileInfo->mainPath.path, fileInfo->mainPath.fileName);
 #ifndef SUPPORT_STORAGE_BACKUP
-    if (isMainFileExist != HKS_SUCCESS) {
-        return HKS_ERROR_NOT_EXIST;
-    }
+    HKS_IF_NOT_SUCC_RETURN(isMainFileExist, HKS_ERROR_NOT_EXIST)
 #else
     int32_t isBakFileExist = HksIsFileExist(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
     if ((isMainFileExist != HKS_SUCCESS) && (isBakFileExist != HKS_SUCCESS)) {
@@ -613,9 +569,7 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 static int32_t DataInit(char **data, uint32_t size)
 {
     *data = (char *)HksMalloc(size);
-    if (*data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(*data, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(*data, size, 0, size);
     return HKS_SUCCESS;
@@ -665,7 +619,7 @@ static int32_t MakeSubPath(const char *mainPath, const char *tmpPath, char *outP
     if (strncat_s(outPath, outPathLen, tmpPath, strlen(tmpPath)) != EOK) {
         return HKS_ERROR_INTERNAL_ERROR;
     }
-    HKS_LOG_E("MakeSubPath outPath = %s", outPath);
+    HKS_LOG_E("MakeSubPath outPath = %" LOG_PUBLIC "s", outPath);
     return HKS_SUCCESS;
 }
 
@@ -674,14 +628,13 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
 {
     char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
     char *user = (char *)HksMalloc(HKS_PROCESS_INFO_LEN);
-    if (user == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(user, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(user, HKS_PROCESS_INFO_LEN, 0, HKS_PROCESS_INFO_LEN);
 
     int32_t ret = ConstructName(&processInfo->userId, user, HKS_PROCESS_INFO_LEN);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct name failed, ret = %d.", ret);
+        HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
         HksFree(user);
         return ret;
     }
@@ -692,13 +645,11 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
     }
     HksFree(user);
 
-    if (MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    ret = MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
 
-    if (MakeDirIfNotExist(workPath) != HKS_SUCCESS) {
-        return HKS_ERROR_NO_PERMISSION;
-    }
+    ret = MakeDirIfNotExist(workPath);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_NO_PERMISSION)
 
     if (strncat_s(userProcess, HKS_PROCESS_INFO_LEN, "/", strlen("/")) != EOK) {
         return HKS_ERROR_INTERNAL_ERROR;
@@ -708,13 +659,10 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
-    if (MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {
-        return HKS_ERROR_INTERNAL_ERROR;
-    }
+    ret = MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
 
-    if (MakeDirIfNotExist(workPath) != HKS_SUCCESS) {
-        return HKS_ERROR_NO_PERMISSION;
-    }
+    HKS_IF_NOT_SUCC_RETURN(MakeDirIfNotExist(workPath), HKS_ERROR_NO_PERMISSION)
     return HKS_SUCCESS;
 }
 
@@ -725,21 +673,14 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
     int32_t ret;
     char *bakRootPath = NULL;
     ret = GetStoreRootPath(HKS_STORAGE_BACKUP_PATH, &bakRootPath);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get root path failed");
-        return ret;
-    }
-    if (MakeDirIfNotExist(bakRootPath) != HKS_SUCCESS) {
-        HKS_LOG_E("makedir backup path failed");
-        return HKS_ERROR_NO_PERMISSION;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get root path failed")
+
+    ret = MakeDirIfNotExist(bakRootPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NO_PERMISSION, "makedir backup path failed")
 
     (void)memset_s(workPath, HKS_MAX_DIRENT_FILE_LEN, 0, HKS_MAX_DIRENT_FILE_LEN);
 
-    if (CheckBlob(&processInfo->userId) != HKS_SUCCESS) {
-        HKS_LOG_E("processInfo->userId is NULL");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(&processInfo->userId), HKS_ERROR_NULL_POINTER, "processInfo->userId is NULL")
 
     if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
         (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, sizeof(USER_ID_ROOT)) == 0)) {
@@ -748,24 +689,18 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
-        if (MakeSubPath(bakRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
+        ret = MakeSubPath(bakRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN);
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
 
-        if (MakeDirIfNotExist(workPath) != HKS_SUCCESS) {
-            return ret;
-        }
+        ret = MakeDirIfNotExist(workPath);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
     } else {
-        if (MakeUserAndProcessNamePath(bakRootPath, userProcess, HKS_PROCESS_INFO_LEN,
-            processInfo) != HKS_SUCCESS) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
+        ret = MakeUserAndProcessNamePath(bakRootPath, userProcess, HKS_PROCESS_INFO_LEN, processInfo);
+        HKS_IF_NOT_SUCC_RETURN(ret HKS_ERROR_INTERNAL_ERROR)
     }
 
     ret = GetBakFullPath(bakRootPath, userProcess, storageName, fileInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get backup full path failed, ret = %d.", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get backup full path failed, ret = %" LOG_PUBLIC "d.", ret)
     return ret;
 }
 #endif
@@ -778,20 +713,12 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
     char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
 
     int32_t ret = GetStoreRootPath(HKS_STORAGE_MAIN_PATH, &mainRootPath);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get root path failed");
-        return ret;
-    }
-    ret = MakeDirIfNotExist(mainRootPath);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("makedir main path failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get root path failed")
 
-    if (CheckBlob(&processInfo->userId) != HKS_SUCCESS) {
-        HKS_LOG_E("processInfo->userId is NULL");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    ret = MakeDirIfNotExist(mainRootPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "makedir main path failed")
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(&processInfo->userId), HKS_ERROR_NULL_POINTER, "processInfo->userId is NULL")
 
     if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
         (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, strlen(USER_ID_ROOT)) == 0)) {
@@ -800,24 +727,18 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
-        if (MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN) != HKS_SUCCESS) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
+        ret = MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN);
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
 
-        if (MakeDirIfNotExist(workPath) != HKS_SUCCESS) {
-            return HKS_ERROR_NO_PERMISSION;
-        }
+        ret = MakeDirIfNotExist(workPath);
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_NO_PERMISSION)
     } else {
-        if (MakeUserAndProcessNamePath(mainRootPath, userProcess, HKS_PROCESS_INFO_LEN, processInfo) != HKS_SUCCESS) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
+        ret = MakeUserAndProcessNamePath(mainRootPath, userProcess, HKS_PROCESS_INFO_LEN, processInfo);
+        HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
     }
 
     ret = GetFullPath(mainRootPath, userProcess, storageName, fileInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get full path failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get full path failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
     ret = GetStoreBakPath(processInfo, storageName, fileInfo, userProcess, workPath);
@@ -838,20 +759,16 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksStoreFileInfo *fileInfo)
 {
     int32_t ret = FileInfoInit(fileInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("hks file info init failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hks file info init failed, ret = %" LOG_PUBLIC "d.", ret)
 
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (name == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct name failed, ret = %d.", ret);
+        HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
         HKS_FREE_PTR(name);
         return ret;
     }
@@ -868,22 +785,14 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
     }
     HKS_FREE_PTR(name);
 
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get store path failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get store path failed, ret = %" LOG_PUBLIC "d.", ret)
 
     ret = ConstructName(keyAlias, fileInfo->mainPath.fileName, fileInfo->mainPath.size);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct name failed, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct name failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
     ret = GetBakFileName(fileInfo->mainPath.fileName, fileInfo->bakPath.fileName, fileInfo->bakPath.size);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get backup file name failed, ret = %d.", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "get backup file name failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
 
     return ret;
@@ -904,9 +813,8 @@ static int32_t RecordKeyOperation(uint32_t operation, const char *path, const ch
 {
     uint32_t bufSize = strlen(keyAlias) + 1;
     char *outKeyAlias = (char *)HksMalloc(bufSize);
-    if (outKeyAlias == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(outKeyAlias, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(outKeyAlias, bufSize, 0, bufSize);
 
     uint32_t keyAliasLen = strlen(keyAlias);
@@ -923,13 +831,15 @@ static int32_t RecordKeyOperation(uint32_t operation, const char *path, const ch
     int32_t ret = HKS_SUCCESS;
     switch (operation) {
         case KEY_OPERATION_SAVE:
-            HKS_LOG_I("generate key or certchain, storage path: %s, key alias: %s", path, outKeyAlias);
+            HKS_LOG_I("generate key or certchain, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s",
+                path, outKeyAlias);
             break;
         case KEY_OPERATION_GET:
-            HKS_LOG_I("use key, storage path: %s, key alias: %s", path, outKeyAlias);
+            HKS_LOG_I("use key, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s", path, outKeyAlias);
             break;
         case KEY_OPERATION_DELETE:
-            HKS_LOG_I("delete key or certchain, storage path: %s, key alias: %s", path, outKeyAlias);
+            HKS_LOG_I("delete key or certchain, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s",
+                path, outKeyAlias);
             break;
         default:
             ret = HKS_ERROR_INVALID_ARGUMENT;
@@ -948,27 +858,17 @@ int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct H
     int32_t ret;
     do {
         ret = GetFileInfo(processInfo, keyAlias, storageType, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = RecordKeyOperation(KEY_OPERATION_SAVE, fileInfo.mainPath.path, fileInfo.mainPath.fileName);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = SaveKeyBlob(fileInfo.mainPath.processPath, fileInfo.mainPath.path, fileInfo.mainPath.fileName, keyBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks save key blob failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks save key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
         ret = SaveKeyBlob(fileInfo.bakPath.processPath, fileInfo.bakPath.path, fileInfo.bakPath.fileName, keyBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks save bak key blob failed, ret = %d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "hks save bak key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
     } while (0);
 
@@ -985,15 +885,10 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
     int32_t ret;
     do {
         ret = GetFileInfo(processInfo, keyAlias, storageType, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = RecordKeyOperation(KEY_OPERATION_DELETE, fileInfo.mainPath.path, fileInfo.mainPath.fileName);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = DeleteKeyBlob(&fileInfo);
     } while (0);
@@ -1011,15 +906,10 @@ int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
     int32_t ret;
     do {
         ret = GetFileInfo(processInfo, keyAlias, storageType, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = IsKeyBlobExist(&fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check is key exist, ret = %d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "check is key exist, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
@@ -1035,20 +925,13 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
     int32_t ret;
     do {
         ret = GetFileInfo(processInfo, keyAlias, storageType, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = RecordKeyOperation(KEY_OPERATION_GET, fileInfo.mainPath.path, fileInfo.mainPath.fileName);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
+        HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = GetKeyBlob(&fileInfo, keyBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get keyblob failed, ret = %d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "hks get keyblob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
@@ -1064,15 +947,10 @@ int32_t HksStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const s
     int32_t ret;
     do {
         ret = GetFileInfo(processInfo, keyAlias, storageType, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = GetKeyBlobSize(&fileInfo, keyBlobSize);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get keyblob size failed, ret = %d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "hks get keyblob size failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
@@ -1147,14 +1025,13 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
     uint32_t storageType, struct HksStoreFileInfo *fileInfo)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (name == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct name failed, ret = %d.", ret);
+        HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
         HKS_FREE_PTR(name);
         return ret;
     }
@@ -1192,10 +1069,7 @@ static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t key
 
     uint32_t totalSize = keyCount * sizeof(struct HksFileEntry);
     *fileNameList = (struct HksFileEntry *)HksMalloc(totalSize);
-    if (*fileNameList == NULL) {
-        HKS_LOG_E("malloc file name list failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*fileNameList, HKS_ERROR_MALLOC_FAIL, "malloc file name list failed.")
 
     (void)memset_s(*fileNameList, totalSize, 0, totalSize);
     int32_t ret = HKS_SUCCESS;
@@ -1219,10 +1093,7 @@ static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t key
 static int32_t GetAndCheckFileCount(const char *path, uint32_t *fileCount, const uint32_t *inputCount)
 {
     int32_t ret = GetFileCount(path, fileCount);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get storage file count, ret = %d.", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get storage file count, ret = %" LOG_PUBLIC "d.", ret)
 
     if (*inputCount < *fileCount) {
         HKS_LOG_E("listCount space not enough");
@@ -1237,9 +1108,7 @@ static int32_t GetKeyAliasByProcessName(const struct HksStoreFileInfo *fileInfo,
 {
     uint32_t fileCount;
     int32_t ret = GetAndCheckFileCount(fileInfo->mainPath.path, &fileCount, listCount);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (fileCount == 0) {
         *listCount = 0;
@@ -1248,32 +1117,21 @@ static int32_t GetKeyAliasByProcessName(const struct HksStoreFileInfo *fileInfo,
 
     struct HksFileEntry *fileNameList = NULL;
     ret = FileNameListInit(&fileNameList, fileCount);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init file name list failed.");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init file name list failed.")
 
     uint32_t realFileCount = fileCount;
     do {
         ret = GetFileNameList(fileInfo->mainPath.path, fileNameList, &realFileCount);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get file name list failed, ret = %d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file name list failed, ret = %" LOG_PUBLIC "d", ret)
 
         for (uint32_t i = 0; i < realFileCount; ++i) {
             ret = ConstructBlob(fileNameList[i].fileName, &(keyInfoList[i].alias));
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("construct blob failed, ret = %d", ret);
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct blob failed, ret = %" LOG_PUBLIC "d", ret)
         }
     } while (0);
 
     FileNameListFree(&fileNameList, fileCount);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     *listCount = realFileCount;
     return ret;
@@ -1288,21 +1146,13 @@ int32_t HksGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, st
     int32_t ret;
     do {
         ret = FileInfoInit(&fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks file info init failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks file info init failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = GetFilePath(processInfo, HKS_STORAGE_TYPE_KEY, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = GetKeyAliasByProcessName(&fileInfo, keyInfoList, listCount);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get key alias by processName failed, ret = %d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "get key alias by processName failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
@@ -1317,21 +1167,13 @@ int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, ui
     int32_t ret;
     do {
         ret = FileInfoInit(&fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks file info init failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks file info init failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = GetFilePath(processInfo, HKS_STORAGE_TYPE_KEY, &fileInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("hks get file info failed, ret = %d.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = GetFileCount(fileInfo.mainPath.path, fileCount);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get storage file count failed, ret = %d.", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get storage file count failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
     FileInfoFree(&fileInfo);
@@ -1341,14 +1183,13 @@ int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, ui
 static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t bakFlag)
 {
     char *destroyPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (destroyPath == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(destroyPath, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(destroyPath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = GetPath(storePath, typePath, destroyPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get Path failed! ret = 0x%X", ret);
+        HKS_LOG_E("Get Path failed! ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_PTR(destroyPath);
         return ret;
     }
@@ -1360,9 +1201,7 @@ static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t
     }
 
     ret = HksRemoveDir(destroyPath);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Destroy dir failed! ret = 0x%X", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "Destroy dir failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     HKS_FREE_PTR(destroyPath);
     return ret;
@@ -1377,37 +1216,33 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
     } else {
         ret = GetStoreRootPath(HKS_STORAGE_MAIN_PATH, &rootPath);
     }
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get root path failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get root path failed")
 
     char *storePath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (storePath == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(storePath, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(storePath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     ret = GetPath(rootPath, processNameEncoded, storePath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("Get Path failed! ret = 0x%X", ret);
+        HKS_LOG_E("Get Path failed! ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE_PTR(storePath);
         return ret;
     }
 
     ret = DestroyType(storePath, HKS_KEY_STORE_ROOT_KEY_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destroy info dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy info dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
     }
 
     ret = DestroyType(storePath, HKS_KEY_STORE_KEY_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destroy key dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy key dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
     }
 
     ret = DestroyType(storePath, HKS_KEY_STORE_CERTCHAIN_PATH, bakFlag);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destroy certchain dir failed! ret = 0x%X", ret); /* continue delete */
+        HKS_LOG_I("Destroy certchain dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
     }
 
     HKS_FREE_PTR(storePath);
@@ -1417,31 +1252,21 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
 int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (name == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
+
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
     do {
         ret = ConstructName(processName, name, HKS_MAX_FILE_NAME_LEN);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Construct process name failed! ret = 0x%X.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Construct process name failed! ret = 0x%" LOG_PUBLIC "X.", ret)
 
         ret = StoreDestroy(name, HKS_STORAGE_BAK_FLAG_FLASE);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hks destroy dir failed! ret = 0x%X.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Hks destroy dir failed! ret = 0x%" LOG_PUBLIC "X.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
         ret = StoreDestroy(name, HKS_STORAGE_BAK_FLAG_TRUE);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Hks destroy back dir failed! ret = 0x%X.", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Hks destroy back dir failed! ret = 0x%" LOG_PUBLIC "X.", ret)
 #endif
     } while (0);
 
@@ -1513,16 +1338,14 @@ static int32_t ConstructUidPath(const char *userId, const char *uid, char *uidPa
 int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (userData == NULL) {
-        HKS_LOG_E("malloc user data failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
+
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = ConstructName(&processName, userData, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_FREE_PTR(userData);
-        HKS_LOG_E("construct user id name failed, ret = %d", ret);
+        HKS_LOG_E("construct user id name failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1534,7 +1357,7 @@ int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
         return ret;
     }
 
-    HKS_LOG_I("delete path: %s", userProcess);
+    HKS_LOG_I("delete path: %" LOG_PUBLIC "s", userProcess);
 
     ret = HksDeleteDir(userProcess);
     HKS_FREE_PTR(userData);
@@ -1544,16 +1367,14 @@ int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
 int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (userData == NULL) {
-        HKS_LOG_E("malloc user data failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
+
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_FREE_PTR(userData);
-        HKS_LOG_E("construct user id name failed, ret = %d", ret);
+        HKS_LOG_E("construct user id name failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1569,7 +1390,7 @@ int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
     if (ret != HKS_SUCCESS) {
         HKS_FREE_PTR(userData);
         HKS_FREE_PTR(uidData);
-        HKS_LOG_E("construct uid name failed, ret = %d", ret);
+        HKS_LOG_E("construct uid name failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -1582,7 +1403,7 @@ int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
         return ret;
     }
 
-    HKS_LOG_I("delete path : %s", userProcess);
+    HKS_LOG_I("delete path : %" LOG_PUBLIC "s", userProcess);
 
     ret = HksDeleteDir(userProcess);
     HKS_FREE_PTR(userData);

@@ -29,6 +29,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 #ifdef _CUT_AUTHENTICATE_
@@ -53,7 +54,7 @@ int32_t HksImportKeyAdapter(const struct HksBlob *keyAlias,
         ret = GetHksPubKeyInnerFormat(paramSet, key, &innerKey);
     }
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("translate key to inner format failed, ret = %d", ret);
+        HKS_LOG_E("translate key to inner format failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -71,7 +72,7 @@ int32_t HksAgreeKeyAdapter(const struct HksParamSet *paramSet, const struct HksB
     struct HksBlob publicKey = { 0, NULL };
     int32_t ret = GetHksPubKeyInnerFormat(paramSet, peerPublicKey, &publicKey);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get public key from x509 format failed, ret = %d", ret);
+        HKS_LOG_E("get public key from x509 format failed, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -87,10 +88,7 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *key)
 {
     uint8_t *buffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed")
     (void)memset_s(buffer, MAX_KEY_SIZE, 0, MAX_KEY_SIZE);
     struct HksBlob publicKey = { MAX_KEY_SIZE, buffer };
 

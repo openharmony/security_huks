@@ -23,5 +23,16 @@ int HksParamTest003(void);
 int HksParamTest004(void);
 int HksParamTest005(void);
 int HksParamTest006(void);
+int HksParamTest007(void);
+int HksParamTest008(void);
+int HksParamTest009(void);
+int HksParamTest010(void);
+int HksParamTest011(void);
+int HksParamTest012(void);
+int HksParamTest013(void);
+int HksParamTest014(void);
+int HksParamTest015(void);
+int HksParamTest016(void);
+int HksParamTest017(void);
 }
 #endif // HKS_PARAM_TEST_H

@@ -25,6 +25,7 @@
 #include <mbedtls/md.h>
 
 #include "hks_log.h"
+#include "hks_template.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
@@ -58,7 +59,7 @@ int32_t HksToMbedtlsDigestAlg(const uint32_t hksAlg, uint32_t *mbedtlsAlg)
             *mbedtlsAlg = MBEDTLS_MD_SHA512;
             break;
         default:
-            HKS_LOG_E("Unsupported digest algorithm! digestAlg: 0x%X", hksAlg);
+            HKS_LOG_E("Unsupported digest algorithm! digestAlg: 0x%" LOG_PUBLIC "X", hksAlg);
             return HKS_ERROR_INVALID_DIGEST;
     }
     return HKS_SUCCESS;
@@ -73,7 +74,7 @@ int32_t HksCtrDrbgSeed(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_contex
     int32_t ret = mbedtls_ctr_drbg_seed(ctrDrbg, mbedtls_entropy_func,
         entropy, g_hksRandomSeedCustom, sizeof(g_hksRandomSeedCustom));
     if (ret != HKS_MBEDTLS_SUCCESS) {
-        HKS_LOG_E("Ctr drbg seed failed! mbedtls ret = 0x%X", ret);
+        HKS_LOG_E("Ctr drbg seed failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         mbedtls_ctr_drbg_free(ctrDrbg);
         mbedtls_entropy_free(entropy);
         return ret;
@@ -87,14 +88,12 @@ int32_t HksMbedtlsFillRandom(struct HksBlob *randomData)
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
     int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     do {
         ret = mbedtls_ctr_drbg_random(&ctrDrbg, randomData->data, randomData->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
-            HKS_LOG_E("Mbedtls random failed! mbedtls ret = 0x%X", ret);
+            HKS_LOG_E("Mbedtls random failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(randomData->data, randomData->size, 0, randomData->size);
         }
     } while (0);

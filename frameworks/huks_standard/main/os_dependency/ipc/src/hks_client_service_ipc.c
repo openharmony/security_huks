@@ -27,6 +27,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_request.h"
+#include "hks_template.h"
 #include "hks_type.h"
 #include "hks_type_inner.h"
 #include "securec.h"
@@ -45,19 +46,14 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
     struct HksParamSet *paramSetOut)
 {
     int32_t ret = HksCheckIpcGenerateKey(keyAlias, paramSetIn);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcGenerateKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcGenerateKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
     inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
         sizeof(outBlob.size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
     if (paramSetOut != NULL) {
         outBlob.size = paramSetOut->paramSetSize;
         outBlob.data = (uint8_t *)paramSetOut;
@@ -65,22 +61,14 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
 
     do {
         ret = HksGenerateKeyPack(&inBlob, keyAlias, paramSetIn, &outBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGenerateKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_GEN_KEY, &inBlob, &outBlob, paramSetIn);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest fail, ret = %d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
         if (paramSetOut != NULL) {
             ret = HksFreshParamSet(paramSetOut, false);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("FreshParamSet fail, ret = %d", ret);
-            }
+            HKS_IF_NOT_SUCC_LOGE(ret, "FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret)
         }
     } while (0);
 
@@ -92,25 +80,17 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
     const struct HksBlob *key)
 {
     int32_t ret = HksCheckIpcImportKey(keyAlias, paramSet, key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcImportKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcImportKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
     inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
         sizeof(key->size) + ALIGN_SIZE(key->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = HksImportKeyPack(&inBlob, keyAlias, paramSet, key);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksImportKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_IMPORT_KEY, &inBlob, NULL, paramSet);
     } while (0);
@@ -123,24 +103,16 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
     struct HksBlob *key)
 {
     int32_t ret = HksCheckIpcExportPublicKey(keyAlias, key);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcExportPublicKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcExportPublicKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
     inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(key->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = HksExportPublicKeyPack(&inBlob, keyAlias, key);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksExportPublicKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportPublicKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_EXPORT_PUBLIC_KEY, &inBlob, key, paramSet);
     } while (0);
@@ -153,10 +125,7 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
     const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
 {
     int32_t ret = HksCheckIpcImportWrappedKey(keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksClientImportWrappedKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientImportWrappedKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
     inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
@@ -164,16 +133,11 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
                   ALIGN_SIZE(paramSet->paramSetSize) +
                   sizeof(wrappedKeyData->size) + ALIGN_SIZE(wrappedKeyData->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = HksImportWrappedKeyPack(&inBlob, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksImportWrappedKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksImportWrappedKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_IMPORT_WRAPPED_KEY, &inBlob, NULL, paramSet);
     } while (0);
@@ -184,9 +148,7 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
 
 int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
-    if (CheckBlob(keyAlias) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(keyAlias), HKS_ERROR_INVALID_ARGUMENT)
     if (keyAlias->size > MAX_PROCESS_SIZE) {
         HKS_LOG_E("CheckDeleteKeyParam fail");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -197,35 +159,23 @@ int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParam
 int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSetOut)
 {
     int32_t ret = HksCheckIpcGetKeyParamSet(keyAlias, paramSetOut);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { paramSetOut->paramSetSize, (uint8_t *)paramSetOut };
     inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(paramSetOut->paramSetSize);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = HksGetKeyParamSetPack(&inBlob, keyAlias, &outBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGenerateKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGenerateKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_GET_KEY_PARAMSET, &inBlob, &outBlob, NULL);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest fail, ret = %d", ret);
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksFreshParamSet(paramSetOut, false);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("FreshParamSet fail, ret = %d", ret);
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "FreshParamSet fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HKS_FREE_BLOB(inBlob);
@@ -234,9 +184,7 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamS
 
 int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
-    if (CheckBlob(keyAlias) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(keyAlias), HKS_ERROR_INVALID_ARGUMENT)
     if (keyAlias->size > MAX_PROCESS_SIZE) {
         HKS_LOG_E("CheckKeyExistParam fail");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -246,9 +194,7 @@ int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamS
 
 int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet *paramSet)
 {
-    if (CheckBlob(random) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(CheckBlob(random), HKS_ERROR_INVALID_ARGUMENT)
     struct HksBlob inBlob = { sizeof(random->size), (uint8_t *)&(random->size) };
     return HksSendRequest(HKS_MSG_GENERATE_RANDOM, &inBlob, random, paramSet);
 }
@@ -257,10 +203,7 @@ int32_t HksClientSign(const struct HksBlob *key, const struct HksParamSet *param
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
     int32_t ret = HksCheckBlob3AndParamSet(key, srcData, signature, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check in and out data failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check in and out data failed")
 
     struct HksBlob tmpInData = *srcData;
     struct HksBlob tmpOutData = *signature;
@@ -277,17 +220,12 @@ int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *par
     const struct HksBlob *srcData, const struct HksBlob *signature)
 {
     int32_t ret = HksCheckBlob3AndParamSet(key, srcData, signature, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check in and out data failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check in and out data failed")
 
     struct HksBlob tmpInData = *srcData;
     struct HksBlob tmpOutData = *signature;
     ret = HksSliceDataEntry(HKS_MSG_VERIFY, key, paramSet, &tmpInData, &tmpOutData);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksClientVerify fail");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "HksClientVerify fail")
     return ret;
 }
 
@@ -305,19 +243,14 @@ static int32_t AddAeTag(struct HksParamSet *paramSet, const struct HksBlob *inTe
         aeParam.blob.data = inText->data + inText->size - HKS_AE_TAG_LEN;
         aeParam.blob.size = HKS_AE_TAG_LEN;
         ret = HksAddParams(paramSet, &aeParam, 1);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("decrypt add ae params failed");
-            return ret;
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "decrypt add ae params failed")
     }
 
     struct HksParam payloadParam;
     payloadParam.tag = HKS_TAG_PAYLOAD_LEN;
     payloadParam.uint32Param = inText->size;
     ret = HksAddParams(paramSet, &payloadParam, 1);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add payload param failed");
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "add payload param failed")
     return ret;
 }
 
@@ -327,9 +260,7 @@ static int32_t AddAesTag(const struct HksParamSet *paramSet, struct HksParamSet 
     bool isAeMode = false;
     bool isAes = false;
     int32_t ret = HksCheckAesAeMode(paramSet, &isAes, &isAeMode);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Except for AES GCM and CCM mode, no need add tag, return success */
     if ((!isAes) || (!isAeMode)) {
@@ -343,10 +274,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
 {
     struct HksParamSet *newParamSet = NULL;
     int32_t ret = HksInitParamSet(&newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append init operation param set fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append init operation param set fail")
 
     ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
     if (ret != HKS_SUCCESS) {
@@ -364,22 +292,14 @@ static int32_t AppendCipherTag(const struct HksParamSet *paramSet, const struct 
 {
     struct HksParamSet *newParamSet = NULL;
     int32_t ret = AppendToNewParamSet(paramSet, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append cipher client service tag fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append cipher client service tag fail")
 
     do {
         ret = AddAesTag(paramSet, newParamSet, (struct HksBlob *)inText, isEncrypt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("append add Aes Tag fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append add Aes Tag fail")
 
         ret = HksBuildParamSet(&newParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("append build paramset fail");
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "append build paramset fail")
     } while (0);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&newParamSet);
@@ -394,17 +314,11 @@ int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *pa
     const struct HksBlob *plainText, struct HksBlob *cipherText)
 {
     int32_t ret = HksCheckBlob3AndParamSet(key, plainText, cipherText, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check in and out data failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check in and out data failed")
 
     struct HksParamSet *newParamSet = NULL;
     ret = AppendCipherTag(paramSet, plainText, true, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendCipherTag fail, ret = %d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob tmpInData = *plainText;
     struct HksBlob tmpOutData = *cipherText;
@@ -423,18 +337,12 @@ int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *pa
     const struct HksBlob *cipherText, struct HksBlob *plainText)
 {
     int32_t ret = HksCheckBlob3AndParamSet(key, plainText, cipherText, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check in and out data failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check in and out data failed")
 
     struct HksParamSet *newParamSet = NULL;
     struct HksBlob tmpCipherText = *cipherText;
     ret = AppendCipherTag(paramSet, &tmpCipherText, false, &newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendCipherTag fail, ret = %d", ret);
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendCipherTag fail, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksBlob tmpOutData = *plainText;
     ret = HksSliceDataEntry(HKS_MSG_DECRYPT, key, newParamSet, &tmpCipherText, &tmpOutData);
@@ -452,25 +360,17 @@ int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBl
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
     int32_t ret = HksCheckIpcAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcAgreeKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcAgreeKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
     inBlob.size = ALIGN_SIZE(paramSet->paramSetSize) + sizeof(privateKey->size) + ALIGN_SIZE(privateKey->size) +
         sizeof(peerPublicKey->size) + ALIGN_SIZE(peerPublicKey->size) + sizeof(agreedKey->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = HksAgreeKeyPack(&inBlob, paramSet, privateKey, peerPublicKey, agreedKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksAgreeKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAgreeKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_AGREE_KEY, &inBlob, agreedKey, paramSet);
     } while (0);
@@ -483,25 +383,17 @@ int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksB
     struct HksBlob *derivedKey)
 {
     int32_t ret = HksCheckIpcDeriveKey(paramSet, mainKey, derivedKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcDeriveKey fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcDeriveKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
     inBlob.size = ALIGN_SIZE(paramSet->paramSetSize) + sizeof(mainKey->size) + ALIGN_SIZE(mainKey->size) +
         sizeof(derivedKey->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     do {
         ret = HksDeriveKeyPack(&inBlob, paramSet, mainKey, derivedKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksDeriveKeyPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeriveKeyPack fail")
 
         ret = HksSendRequest(HKS_MSG_DERIVE_KEY, &inBlob, derivedKey, paramSet);
     } while (0);
@@ -514,10 +406,7 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
     struct HksBlob *mac)
 {
     int32_t ret = HksCheckBlob3AndParamSet(key, srcData, mac, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("check in and out data failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check in and out data failed")
 
     struct HksBlob tmpInData = *srcData;
     struct HksBlob tmpOutData = *mac;
@@ -533,18 +422,13 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
 int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
     int32_t ret = HksCheckIpcGetKeyInfoList(keyInfoList, *listCount);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcGetKeyInfoList fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcGetKeyInfoList fail")
 
     struct HksBlob inBlob = { 0, NULL };
     inBlob.size = sizeof(*listCount) + (sizeof(keyInfoList->alias.size) +
         sizeof(keyInfoList->paramSet->paramSetSize)) * (*listCount);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
-    if (inBlob.data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
     struct HksBlob outBlob = { 0, NULL };
     outBlob.size += sizeof(*listCount);
@@ -561,16 +445,10 @@ int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCo
 
     do {
         ret = HksGetKeyInfoListPack(&inBlob, *listCount, keyInfoList);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksGetKeyInfoListPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetKeyInfoListPack fail")
 
         ret = HksSendRequest(HKS_MSG_GET_KEY_INFO_LIST, &inBlob, &outBlob, NULL);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksSendRequest result is fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest result is fail")
 
         ret = HksGetKeyInfoListUnpackFromService(&outBlob, listCount, keyInfoList);
     } while (0);
@@ -584,10 +462,7 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     const struct HksParamSet *paramSet, const struct HksCertChain *certChain)
 {
     int32_t ret = HksCheckIpcCertificateChain(keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksCheckIpcCertificateChain fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcCertificateChain fail")
 
     uint32_t certBufSize = sizeof(certChain->certsCount);
     for (uint32_t i = 0; i < certChain->certsCount; ++i) {
@@ -597,9 +472,7 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     inBlob->size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
         sizeof(certBufSize);
     inBlob->data = (uint8_t *)HksMalloc(inBlob->size);
-    if (inBlob->data == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL)
 
     outBlob->size = certBufSize;
     outBlob->data = (uint8_t *)HksMalloc(certBufSize);
@@ -618,10 +491,7 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
     struct HksBlob outBlob = { 0, NULL };
     
     int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("CertificateChainInitBlob fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CertificateChainInitBlob fail")
 
     do {
         struct HksParam *isBase64Param = NULL;
@@ -631,16 +501,10 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
             isBase64 = isBase64Param->boolParam;
         }
         ret = HksCertificateChainPack(&inBlob, keyAlias, paramSet, &outBlob);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksCertificateChainPack fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainPack fail")
 
         ret = HksSendRequest(type, &inBlob, &outBlob, paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("CertificateChainGetOrAttest request fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
         ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
     } while (0);
 
@@ -663,7 +527,7 @@ static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob
     }
 
     if (out->size < size) {
-        HKS_LOG_E("out size[%u] smaller than [%u]", out->size, size);
+        HKS_LOG_E("out size[%" LOG_PUBLIC "u] smaller than [%" LOG_PUBLIC "u]", out->size, size);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     (void)memcpy_s(out->data, out->size, data, size);
@@ -675,30 +539,21 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
     struct HksBlob *handle, struct HksBlob *token)
 {
     uint8_t *tmpOut = (uint8_t *)HksMalloc(HANDLE_SIZE + TOKEN_SIZE);
-    if (tmpOut == NULL) {
-        HKS_LOG_E("malloc ipc tmp out failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(tmpOut, HKS_ERROR_MALLOC_FAIL, "malloc ipc tmp out failed")
     struct HksBlob outBlob = { HANDLE_SIZE + TOKEN_SIZE, tmpOut };
 
     int32_t ret;
     do {
         ret = HksSendRequest(HKS_MSG_INIT, inData, &outBlob, paramSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("client init send fail");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "client init send fail")
 
         if (outBlob.size < HANDLE_SIZE) {
-            HKS_LOG_E("invalid out size[%u]", outBlob.size);
+            HKS_LOG_E("invalid out size[%" LOG_PUBLIC "u]", outBlob.size);
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
         ret = CopyData(outBlob.data, HANDLE_SIZE, handle);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("copy handle failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy handle failed")
 
         if (token != NULL) {
             if (outBlob.size < (HANDLE_SIZE + TOKEN_SIZE)) {
@@ -713,10 +568,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
             }
 
             ret = CopyData(outBlob.data + HANDLE_SIZE, TOKEN_SIZE, token);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("copy token failed");
-                break;
-            }
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy token failed")
         }
     } while (0);
 
@@ -738,10 +590,7 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamsToParamSet fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamsToParamSet fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,
@@ -769,10 +618,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSetPack fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,
@@ -806,10 +652,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSetPack fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,
@@ -838,10 +681,7 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
     };
 
     int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSetPack fail");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
 
     struct HksBlob parcelBlob = {
         .size = sendParamSet->paramSetSize,

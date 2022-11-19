@@ -19,6 +19,9 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
+#include "hks_type_inner.h"
+
 #include "securec.h"
 
 static uint32_t g_validTags[] = {
@@ -119,9 +122,11 @@ static uint32_t g_validTags[] = {
     HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
     HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA,
     HKS_TAG_KEY_ACCESS_TIME,
+
+    HKS_TAG_ACCESS_TOKEN_ID,
 };
 
-enum HksTagType GetTagType(enum HksTag tag)
+HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
 {
     return (enum HksTagType)((uint32_t)tag & (uint32_t)HKS_TAG_TYPE_MASK);
 }
@@ -137,22 +142,20 @@ static bool IsValidTag(uint32_t tag)
     return false;
 }
 
-int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
+HKS_API_EXPORT int32_t HksCheckParamSetTag(const struct HksParamSet *paramSet)
 {
-    if (paramSet == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_NULL_POINTER)
 
     for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
         uint32_t curTag = paramSet->params[i].tag;
         if (!IsValidTag(curTag)) {
-            HKS_LOG_E("paramSet contains invalid tag! 0x%x", curTag);
+            HKS_LOG_E("paramSet contains invalid tag! 0x%" LOG_PUBLIC "x", curTag);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
 
         for (uint32_t j = i + 1; j < paramSet->paramsCnt; ++j) {
             if (curTag == paramSet->params[j].tag) {
-                HKS_LOG_E("paramSet contains multi-tags! 0x%x", curTag);
+                HKS_LOG_E("paramSet contains multi-tags! 0x%" LOG_PUBLIC "x", curTag);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -188,10 +191,8 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
 
     if (size > HKS_DEFAULT_PARAM_SET_SIZE) {
         freshParamSet = (struct HksParamSet *)HksMalloc(size);
-        if (freshParamSet == NULL) {
-            HKS_LOG_E("malloc params failed!");
-            return HKS_ERROR_MALLOC_FAIL;
-        }
+        HKS_IF_NULL_LOGE_RETURN(freshParamSet, HKS_ERROR_MALLOC_FAIL, "malloc params failed!")
+
         if (memcpy_s(freshParamSet, size, *paramSet, offset) != EOK) {
             HKS_FREE_PTR(freshParamSet);
             HKS_LOG_E("copy params failed!");
@@ -206,15 +207,10 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
 
 HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCopy)
 {
-    if (paramSet == NULL) {
-        HKS_LOG_E("invalid NULL paramSet");
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "invalid NULL paramSet")
+
     int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid fresh paramSet");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid fresh paramSet")
 
     uint32_t size = paramSet->paramSetSize;
     uint32_t offset = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramSet->paramsCnt;
@@ -247,11 +243,9 @@ HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCop
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
+HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
 {
-    if (paramSet == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(paramSet, HKS_ERROR_NULL_POINTER)
 
     if ((size < sizeof(struct HksParamSet)) || (size > HKS_PARAM_SET_MAX_SIZE) ||
         (paramSet->paramSetSize != size) ||
@@ -264,16 +258,11 @@ int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
 
 HKS_API_EXPORT int32_t HksInitParamSet(struct HksParamSet **paramSet)
 {
-    if (paramSet == NULL) {
-        HKS_LOG_E("invalid init params!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "invalid init params!")
 
     *paramSet = (struct HksParamSet *)HksMalloc(HKS_DEFAULT_PARAM_SET_SIZE);
-    if (*paramSet == NULL) {
-        HKS_LOG_E("malloc init param set failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(*paramSet, HKS_ERROR_MALLOC_FAIL, "malloc init param set failed!")
+
     (*paramSet)->paramsCnt = 0;
     (*paramSet)->paramSetSize = sizeof(struct HksParamSet);
     return HKS_SUCCESS;
@@ -283,9 +272,7 @@ HKS_API_EXPORT int32_t HksAddParams(struct HksParamSet *paramSet,
     const struct HksParam *params, uint32_t paramCnt)
 {
     int32_t ret = CheckBeforeAddParams(paramSet, params, paramCnt);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     for (uint32_t i = 0; i < paramCnt; i++) {
         paramSet->paramSetSize += sizeof(struct HksParam);
@@ -310,10 +297,7 @@ HKS_API_EXPORT int32_t HksBuildParamSet(struct HksParamSet **paramSet)
     }
 
     int ret = HksCheckParamSet(*paramSet, (*paramSet)->paramSetSize);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("invalid build params!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid build params!")
 
     return BuildParamSet(paramSet);
 }
@@ -327,7 +311,7 @@ HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet)
     HKS_FREE_PTR(*paramSet);
 }
 
-int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
+static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
 {
     uint32_t size = paramSet->paramSetSize;
     uint32_t offset = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramSet->paramsCnt;
@@ -366,10 +350,8 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if (HksCheckParamSet(paramSet, paramSet->paramSetSize) != HKS_SUCCESS) {
-        HKS_LOG_E("invalid paramSet!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize),
+        HKS_ERROR_INVALID_ARGUMENT, "invalid paramSet!")
 
     for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
         if (tag == paramSet->params[i].tag) {
@@ -381,20 +363,18 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
     return HKS_ERROR_PARAM_NOT_EXIST;
 }
 
-int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
+HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
     uint32_t inParamSetSize, struct HksParamSet **outParamSet)
 {
     int32_t ret = HksCheckParamSet(inParamSet, inParamSetSize);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    HKS_IF_NULL_RETURN(outParamSet, HKS_ERROR_NULL_POINTER)
 
     uint32_t size = inParamSet->paramSetSize;
     struct HksParamSet *buf = (struct HksParamSet *)HksMalloc(size);
-    if (buf == NULL) {
-        HKS_LOG_E("malloc from param set failed!");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buf, HKS_ERROR_MALLOC_FAIL, "malloc from param set failed!")
+
     (void)memcpy_s(buf, size, inParamSet, size);
 
     ret = FreshParamSet(buf, false);
@@ -406,8 +386,12 @@ int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param)
+HKS_API_EXPORT int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksParam *param)
 {
+    if (baseParam == NULL || param == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
     if (baseParam->tag != param->tag) {
         HKS_LOG_E("unmatch param type!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -434,14 +418,21 @@ int32_t HksCheckParamMatch(const struct HksParam *baseParam, const struct HksPar
             }
             return HKS_SUCCESS;
         default:
-            HKS_LOG_E("invalid tag type:%x", GetTagType((enum HksTag)(baseParam->tag)));
+            HKS_LOG_E("invalid tag type:%" LOG_PUBLIC "x", GetTagType((enum HksTag)(baseParam->tag)));
             return HKS_ERROR_INVALID_ARGUMENT;
     }
 }
 
-int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
+HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, uint32_t paramsCnt,
     const struct HksParamSet *targetParamSet)
 {
+    if (params == NULL || targetParamSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksCheckParamSet(targetParamSet, targetParamSet->paramSetSize);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    
     for (uint32_t i = 0; i < targetParamSet->paramsCnt; ++i) {
         for (uint32_t j = 0; j < paramsCnt; ++j) {
             if (params[j].tag == targetParamSet->params[i].tag) {

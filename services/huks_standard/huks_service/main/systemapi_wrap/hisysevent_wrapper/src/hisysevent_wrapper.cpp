@@ -18,6 +18,7 @@
 #include "hisysevent.h"
 
 #include "hks_log.h"
+#include "hks_template.h"
 
 using namespace OHOS::HiviewDFX;
 
@@ -57,12 +58,10 @@ int WriteEvent(enum EventType eventType, const char *functionName, const struct 
 {
     int32_t outEventTypeInt = 0;
     int32_t ret = ConvertToHiSysEventType(eventType, &outEventTypeInt);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("convert to hiSysEvent event type failed!");
-        return ret;
-    }
-    enum HiSysEvent::EventType outEventType =
-        (enum HiSysEvent::EventType)outEventTypeInt;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "convert to hiSysEvent event type failed!")
+
+    enum HiSysEvent::EventType outEventType = static_cast<enum HiSysEvent::EventType>(outEventTypeInt);
+
     ret = HiSysEventWrite(HiSysEvent::Domain::HUKS, g_eventName,
         outEventType, g_tagFunction, functionName, g_tagUserId, eventValues->userId, g_tagProcessUID,
         eventValues->processName, g_tagKeyType, eventValues->keyType, g_tagErrorCode, eventValues->errorCode,

@@ -18,6 +18,7 @@
 #include "hks_param.h"
 #include "hks_type_inner.h"
 #include "hks_report_wrapper.h"
+#include "hks_template.h"
 
 #define EXTRA_DATA_SIZE 512
 
@@ -91,10 +92,7 @@ static int32_t AppendToExtra(const struct HksBlob *tag, const struct HksParam *p
         return HKS_ERROR_BAD_STATE;
     }
     int32_t ret = AppendParamToExtra(paramIn, extraOut, index);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("append param to extra failed!");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append param to extra failed!")
 
     split = ';';
     if (ISExceedTheLimitSize(*index)) {
@@ -115,9 +113,7 @@ static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, co
     int32_t ret = HksGetParam(paramSetIn, tag, &temp);
     if (ret == HKS_SUCCESS) {
         ret = AppendToExtra(tagString, temp, extraOut, index);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Append extra data failed!");
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "Append extra data failed!")
     } else {
         HKS_LOG_I("Tag not exist.");
     }
