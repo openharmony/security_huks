@@ -343,6 +343,9 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *nodeParamSet, cons
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "SignVerify get digestParam failed!");
     }
 
+    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+       hash value has been passed in by the user. So the hash value does not need to be calculated.
+    */
     if ((algParam->uint32Param != HKS_ALG_ED25519) && (digestParam->uint32Param != HKS_DIGEST_NONE)) {
         message->size = MAX_HASH_SIZE;
         message->data = (uint8_t *)HksMalloc(MAX_HASH_SIZE);

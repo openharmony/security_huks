@@ -520,7 +520,9 @@ static void FreeSignVerifyCtx(const struct HuksKeyNode *keyNode)
         HKS_LOG_E("append cipher get digest param failed!");
         return;
     }
-
+    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+       hash value has been passed in by the user. So the hash value does not need to be free.
+    */
     if (algParam->uint32Param != HKS_ALG_ED25519 && digestParam->uint32Param != HKS_DIGEST_NONE) {
         HksCryptoHalHashFreeCtx(&ctx);
     } else {
@@ -863,8 +865,8 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Init cache or hash init.");
-    /* If the algorithm is ed25519, the plaintext is directly cached, and the hash value does not need to be
-       calculated. The openssl algorithm needs to calculate the hash value.
+    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+       hash value has been passed in by the user. So the hash value does not need to be calculated.
     */
     if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
         return SetCacheModeCtx(keyNode);
@@ -887,8 +889,8 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Update cache or hash update.");
-    /* If the algorithm is ed25519, the plaintext is directly cached, and the hash value does not need to be
-       calculated. The openssl algorithm needs to calculate the hash value.
+    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+       hash value has been passed in by the user. So the hash value does not need to be calculated.
     */
     if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
         return UpdateCachedData(keyNode, srcData);
@@ -922,8 +924,8 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Finish cache or hash finish.");
     struct HksBlob signVerifyData = { 0, NULL };
-    /* If the algorithm is ed25519, the plaintext is directly cached, and the hash value does not need to be
-       calculated. The openssl algorithm needs to calculate the hash value.
+    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+       hash value has been passed in by the user. So the hash value does not need to be calculated.
     */
     if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
         ret = FinishCachedData(keyNode, &message, &signVerifyData);
