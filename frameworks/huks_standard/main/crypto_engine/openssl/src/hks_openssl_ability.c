@@ -250,7 +250,7 @@ static void RegisterAbilityGetMainKey(void)
 static void RegisterAbilityFillRandom(void)
 {
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM, HksOpensslFillRandom);
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_PRI_RANDOM, HksOpensslFillPriRandom);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_PRI_RANDOM, HksOpensslFillPrivRandom);
 }
 
 static void RegisterAbilityBnExpMod(void)

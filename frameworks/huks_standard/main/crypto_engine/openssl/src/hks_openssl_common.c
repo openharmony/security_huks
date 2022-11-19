@@ -77,7 +77,7 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
     return HKS_SUCCESS;
 }
 
-int32_t HksOpensslFillPriRandom(struct HksBlob *randomData)
+int32_t HksOpensslFillPrivRandom(struct HksBlob *randomData)
 {
     int ret = RAND_priv_bytes(randomData->data, randomData->size);
     if (ret <= 0) {
