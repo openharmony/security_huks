@@ -461,7 +461,8 @@ static int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct 
     int32_t ret = HKS_FAILURE;
     EC_KEY *eccKey = EccInitKey(key, signing);
     if (eccKey == NULL) {
-        HKS_LOG_E("initialize ecc key failed");
+        HKS_LOG_E("EccInitKey initialize ecc key failed");
+        ret = HKS_ERROR_INVALID_KEY_INFO;
         return ret;
     }
 

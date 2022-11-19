@@ -861,8 +861,12 @@ protected:
         ASSERT_NE(signature.data, nullptr);
 
         EXPECT_EQ(HksSign(&authId, paramInSet, &message, &signature), testCaseParams.signResult);
-        EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);
-
+        if (digest == HKS_DIGEST_NONE) {
+            EXPECT_EQ(SignVerifyWithDigestNone(&pubKey, &message, &signature, false), testCaseParams.verifyResult);
+        } else {
+            EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);
+        }
+        
         (void)HksDeleteKey(&authId, nullptr);
         if (storage == HKS_STORAGE_TEMP) {
             HksFree(authId.data);

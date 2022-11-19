@@ -25,6 +25,7 @@
 
 #include "hks_crypto_hal.h"
 #include "hks_mem.h"
+#include "hks_log.h"
 
 static int32_t GetCurveId(uint32_t keyLen, int *nid)
 {
@@ -346,6 +347,45 @@ int32_t EcdsaSign(const struct HksBlob *key, int digest, const struct HksBlob *m
 
     EVP_MD_CTX_free(ctx);
     return ECC_SUCCESS;
+}
+
+int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct HksBlob *message, struct HksBlob *signature,
+    bool signing)
+{
+    HKS_LOG_E("ECC SignVerifyWithDigestNone begin");
+    int32_t ret = HKS_FAILURE;
+    EC_KEY *eccKey = EccInitKey(key, signing);
+    if (eccKey == NULL) {
+        HKS_LOG_E("EccInitKey initialize ecc key failed");
+        ret = HKS_ERROR_INVALID_KEY_INFO;
+        return ret;
+    }
+
+    if (signing) {
+        uint32_t sigSize = ECDSA_size(eccKey);
+        HKS_LOG_E("signature size is short: signature size: %d, key size: %d", signature->size, sigSize);
+        if (signature->size < sigSize) {
+            EC_KEY_free(eccKey);
+            return ret;
+        }
+
+        if (ECDSA_sign(0, message->data, message->size, signature->data, &sigSize, eccKey) == 0) {
+            HKS_LOG_E("ECDSA_sign failed");
+            EC_KEY_free(eccKey);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+        HKS_LOG_I("real signature size %d", sigSize);
+        signature->size = sigSize;
+    } else {
+        ret = ECDSA_verify(0, message->data, message->size, signature->data, signature->size, eccKey);
+        if (ret <= 0) {
+            HKS_LOG_E("ECDSA_verify failed");
+            EC_KEY_free(eccKey);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+    EC_KEY_free(eccKey);
+    return HKS_SUCCESS;
 }
 
 int32_t EcdsaVerify(
