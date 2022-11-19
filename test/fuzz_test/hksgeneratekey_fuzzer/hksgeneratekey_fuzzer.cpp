@@ -31,7 +31,7 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *myData = (uint8_t *)HksMalloc(sizeof(uint8_t) * size);
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;
         }

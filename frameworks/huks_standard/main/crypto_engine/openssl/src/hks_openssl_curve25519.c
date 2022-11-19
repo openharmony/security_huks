@@ -25,16 +25,14 @@
 #include "hks_mem.h"
 #include "hks_openssl_ed25519tox25519.h"
 #include "hks_openssl_engine.h"
+#include "hks_template.h"
 #include "securec.h"
 
 static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey, struct HksBlob *keyOut)
 {
     uint32_t totalSize = sizeof(struct KeyMaterial25519) + (CURVE25519_KEY_LEN << 1);
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc size %u failed", totalSize);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc size %" LOG_PUBLIC "u failed", totalSize)
 
     size_t tmpPubKeyLen = CURVE25519_KEY_LEN;
     size_t tmpPriKeyLen = CURVE25519_KEY_LEN;
@@ -100,9 +98,7 @@ int32_t HksOpensslCurve25519GenerateKey(const struct HksKeySpec *spec, struct Hk
         }
 
         ret = SaveCurve25519KeyMaterial(spec->algType, pkey, key);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("save curve25519 key material failed");
-        }
+        HKS_IF_NOT_SUCC_LOGE(ret, "save curve25519 key material failed")
     } while (0);
 
     if (pctx != NULL) {
@@ -152,10 +148,7 @@ int32_t HksOpensslX25519AgreeKey(const struct HksBlob *nativeKey, const struct H
     size_t tmpSharedKeySize = (size_t)sharedKey->size;
 
     int32_t ret = ImportX25519EvpKey(&ours, &theirs, nativeKey, pubKey);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("import x25519 evp key failed");
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "import x25519 evp key failed")
     do {
         ctx = EVP_PKEY_CTX_new(ours, NULL);
         if (ctx == NULL) {
@@ -223,31 +216,16 @@ int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct 
     int32_t ret;
     do {
         ret = ConvertPrivX25519FromED25519(nativeKey, &nKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("convert ED25519 private key to x25519 failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "convert ED25519 private key to x25519 failed")
 
         ret = HksGetKeyFromMaterial(HKS_ALG_X25519, true, pubKey, &pubKeyData);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("get key data from key material failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data from key material failed")
         ret = ConvertPubkeyX25519FromED25519(&pubKeyData, &pKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("convert ED25519 public key to x25519 failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "convert ED25519 public key to x25519 failed")
         ret = HksSetKeyToMaterial(HKS_ALG_X25519, true, &pKey, &pubKm);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("set mkey data to key material failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "set mkey data to key material failed")
         ret = HksOpensslX25519AgreeKey(&nKey, &pubKm, NULL, sharedKey);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("x25519 agree key failed");
-            break;
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "x25519 agree key failed")
     } while (0);
     (void)memset_s(nKey.data, nKey.size, 0, nKey.size);
     FreeEd25519KeyData(nKey.data, pKey.data, pubKm.data);

@@ -17,6 +17,7 @@
 
 #include "hks_api.h"
 #include "hks_errcode_adapter.h"
+#include "native_huks_api_adapter.h"
 
 static struct OH_Huks_Result ConvertApiResult(int32_t ret)
 {
@@ -89,8 +90,7 @@ struct OH_Huks_Result OH_Huks_IsKeyItemExist(const struct OH_Huks_Blob *keyAlias
 struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain)
 {
-    int32_t result = HksAttestKey((const struct HksBlob *) keyAlias,
-        (const struct HksParamSet *) paramSet, (struct HksCertChain *) certChain);
+    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain);
     return ConvertApiResult(result);
 }
 

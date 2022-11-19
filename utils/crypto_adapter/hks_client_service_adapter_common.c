@@ -27,20 +27,18 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_template.h"
 #include "securec.h"
 
 int32_t CopyToInnerKey(const struct HksBlob *key, struct HksBlob *outKey)
 {
     if ((key->size == 0) || (key->size > MAX_KEY_SIZE)) {
-        HKS_LOG_E("invalid input key size: %u", key->size);
+        HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     uint8_t *outData = (uint8_t *)HksMalloc(key->size);
-    if (outData == NULL) {
-        HKS_LOG_E("malloc failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(outData, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
     (void)memcpy_s(outData, key->size, key->data, key->size);
     outKey->data = outData;
@@ -54,16 +52,13 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
     struct HksBlob *publicKey)
 {
     if (key->size != HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("Invalid curve25519 public key size! key size = 0x%X", key->size);
+        HKS_LOG_E("Invalid curve25519 public key size! key size = 0x%" LOG_PUBLIC "X", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     uint32_t totalSize = sizeof(struct HksPubKeyInfo) + key->size;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalSize);
-    if (buffer == NULL) {
-        HKS_LOG_E("malloc failed! %u", totalSize);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(buffer, HKS_ERROR_MALLOC_FAIL, "malloc failed! %" LOG_PUBLIC "u", totalSize)
     (void)memset_s(buffer, totalSize, 0, totalSize);
 
     struct HksPubKeyInfo *curve25519Key = (struct HksPubKeyInfo *)buffer;
@@ -79,7 +74,8 @@ static int32_t TranslateToInnerCurve25519Format(const uint32_t alg, const struct
 }
 #endif
 
-int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet, const struct HksBlob *key, struct HksBlob *outKey)
+int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet,
+    const struct HksBlob *key, struct HksBlob *outKey)
 {
     if ((CheckBlob(key) != HKS_SUCCESS) || (outKey == NULL)) {
         HKS_LOG_E("invalid key or outKey");
@@ -88,10 +84,7 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet, const struct
 
     struct HksParam *algParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get alg param failed");
-        return HKS_ERROR_CHECK_GET_ALG_FAIL;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "get alg param failed")
 
     switch (algParam->uint32Param) {
 #if defined(HKS_SUPPORT_HMAC_C) || defined(HKS_SUPPORT_SM3_C) || defined(HKS_SUPPORT_SM4_C) || \
@@ -100,7 +93,7 @@ int32_t GetHksPubKeyInnerFormat(const struct HksParamSet *paramSet, const struct
             if ((key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128)) &&
                 (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_192)) &&
                 (key->size != HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256))) {
-                HKS_LOG_E("invalid input key size: %u", key->size);
+                HKS_LOG_E("invalid input key size: %" LOG_PUBLIC "u", key->size);
                 return HKS_ERROR_INVALID_KEY_INFO;
             } /* fall-through */
         case HKS_ALG_HMAC:

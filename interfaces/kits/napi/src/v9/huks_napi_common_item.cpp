@@ -106,7 +106,7 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     if (length > HKS_MAX_DATA_LEN) {
         napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
             "the length of data is too long");
-        HKS_LOG_E("data len is too large, len = %x", length);
+        HKS_LOG_E("data len is too large, len = %" LOG_PUBLIC "zx", length);
         return nullptr;
     }
     if (length == 0) {
@@ -162,14 +162,15 @@ static napi_value CheckParamValueType(napi_env env, uint32_t tag, napi_value val
             }
             break;
         default:
-            HKS_LOG_E("invalid tag value 0x%x", tag);
+            HKS_LOG_E("invalid tag value 0x%" LOG_PUBLIC "x", tag);
             break;
     }
 
     if (result == nullptr) {
         napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
             "the value of the tag is of an incorrect type");
-        HKS_LOG_E("invalid tag or the type of value, tag = 0x%x, type = %u", tag, valueType);
+        HKS_LOG_E("invalid tag or the type of value, tag = 0x%" LOG_PUBLIC "x, type = %" LOG_PUBLIC "u",
+            tag, valueType);
     }
     return result;
 }
@@ -204,7 +205,7 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             result = GetInt32(env, 0);
             break;
         case HKS_TAG_TYPE_ULONG:
-            NAPI_CALL(env, napi_get_value_int64(env, value, (int64_t *)&param.uint64Param));
+            NAPI_CALL(env, napi_get_value_int64(env, value, reinterpret_cast<int64_t *>(&param.uint64Param)));
             result = GetInt32(env, 0);
             break;
         case HKS_TAG_TYPE_BOOL:
@@ -216,11 +217,11 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
             if (result == nullptr) {
                 HKS_LOG_E("get uint8 array fail.");
             } else {
-                HKS_LOG_D("tag 0x%x, len 0x%x", param.tag, param.blob.size);
+                HKS_LOG_D("tag 0x%" LOG_PUBLIC "x, len 0x%" LOG_PUBLIC "x", param.tag, param.blob.size);
             }
             break;
         default:
-            HKS_LOG_E("invalid tag value 0x%x", param.tag);
+            HKS_LOG_E("invalid tag value 0x%" LOG_PUBLIC "x", param.tag);
             break;
     }
 
@@ -271,7 +272,7 @@ static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet
     for (auto &param : params) {
         int32_t ret = HksAddParams(paramSet, &param, 1);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param.tag[%x] failed", param.tag);
+            HKS_LOG_E("add param.tag[%" LOG_PUBLIC "x] failed", param.tag);
             return ret;
         }
     }
@@ -558,7 +559,7 @@ napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::str
     if (status != napi_ok || property == nullptr) {
         napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
             "get value failed, maybe the target does not exist");
-        HKS_LOG_E("could not get property %s", propertyStr.c_str());
+        HKS_LOG_E("could not get property %" LOG_PUBLIC "s", propertyStr.c_str());
         return nullptr;
     }
 

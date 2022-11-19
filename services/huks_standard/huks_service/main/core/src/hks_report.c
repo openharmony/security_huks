@@ -16,6 +16,7 @@
 #include "hks_report.h"
 
 #include "hks_log.h"
+#include "hks_template.h"
 
 #ifdef L2_STANDARD
 #include "hks_report_wrapper.h"
@@ -26,9 +27,7 @@ void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
 {
 #ifdef L2_STANDARD
     int32_t ret = ReportFaultEvent(funcName, processInfo, paramSetIn, errorCode);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("report fault event failed, ret = %d", ret);
-    }
+    HKS_IF_NOT_SUCC_LOGE(ret, "report fault event failed, ret = %" LOG_PUBLIC "d", ret)
 #else
     (void)funcName;
     (void)processInfo;

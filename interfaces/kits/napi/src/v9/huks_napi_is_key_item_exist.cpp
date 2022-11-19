@@ -102,17 +102,17 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
+            IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
 
-            context->result = HksKeyExist(context->keyAlias, context->paramSet);
+            napiContext->result = HksKeyExist(napiContext->keyAlias, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(data);
+            IsKeyExistAsyncContext napiContext = static_cast<IsKeyExistAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
             resultData.isOnlyReturnBoolResult = true;
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteIsKeyExistAsyncContext(env, context);
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteIsKeyExistAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

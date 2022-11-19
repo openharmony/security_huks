@@ -18,6 +18,7 @@
 
 #include "hks_response.h"
 #include "hks_samgr_server.h"
+#include "hks_template.h"
 
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response)
 {
@@ -60,10 +61,7 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
     HksIpcContext *ipcContext = (HksIpcContext *)context;
     uint32_t callingUid = (uint32_t)(ipcContext->callingUid);
     uint8_t *name = (uint8_t *)HksMalloc(sizeof(callingUid));
-    if (name == NULL) {
-        HKS_LOG_E("GetProcessName malloc failed.");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
 
     if (memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid)) != EOK) {
         HKS_FREE_PTR(name);

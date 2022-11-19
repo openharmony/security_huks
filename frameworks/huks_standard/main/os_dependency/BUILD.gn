@@ -42,7 +42,6 @@ ohos_static_library("libhuks_os_dependency_standard_static") {
     "./ipc/src/hks_ipc_serialization.c",
     "./ipc/src/hks_ipc_slice.c",
     "./ipc/src/hks_request.cpp",
-    "./log/hks_log.c",
     "./posix/hks_mem.c",
   ]
   deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]

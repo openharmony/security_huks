@@ -22,6 +22,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_request.h"
+#include "hks_template.h"
 
 static bool IsSliceCmd(uint32_t cmdId)
 {
@@ -55,15 +56,11 @@ static uint32_t GetDataSize(uint32_t cmdId, const struct HksBlob *inData, const 
     uint32_t *bufSize)
 {
     uint32_t inBuffData;
-    if (GetBlobBufSize(inData, &inBuffData) != HKS_SUCCESS) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NOT_SUCC_RETURN(GetBlobBufSize(inData, &inBuffData), HKS_ERROR_INVALID_ARGUMENT)
 
     uint32_t bufOutDataSize;
     if (cmdId == HKS_MSG_VERIFY) {
-        if (GetBlobBufSize(outData, &bufOutDataSize) != HKS_SUCCESS) {
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
+        HKS_IF_NOT_SUCC_RETURN(GetBlobBufSize(outData, &bufOutDataSize), HKS_ERROR_INVALID_ARGUMENT)
     } else {
         bufOutDataSize = sizeof(outData->size);
     }
@@ -78,7 +75,7 @@ static uint32_t GetDataSize(uint32_t cmdId, const struct HksBlob *inData, const 
 static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *inData, struct HksBlob *outData)
 {
-    HKS_LOG_I("invoke ProcessOnce cmdId %u", cmdId);
+    HKS_LOG_I("invoke ProcessOnce cmdId %" LOG_PUBLIC "u", cmdId);
 
     uint32_t paramBufSize, dataBufSize;
     if ((GetParamSize(key, paramSet, &paramBufSize) != HKS_SUCCESS) ||
@@ -87,9 +84,7 @@ static int32_t ProcessDataOnce(uint32_t cmdId, const struct HksBlob *key, const 
     }
     uint32_t totalBufSize = paramBufSize + dataBufSize;
     uint8_t *buffer = (uint8_t *)HksMalloc(totalBufSize);
-    if (buffer == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
     struct HksBlob ipcBlob = { totalBufSize, buffer };
 
     uint32_t offset = 0;
@@ -124,7 +119,7 @@ int32_t HksSliceDataEntry(uint32_t cmdId, const struct HksBlob *key, const struc
     struct HksBlob *inData, struct HksBlob *outData)
 {
     if (!IsSliceCmd(cmdId)) {
-        HKS_LOG_E("cmd %u not support slice!", cmdId);
+        HKS_LOG_E("cmd %" LOG_PUBLIC "u not support slice!", cmdId);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

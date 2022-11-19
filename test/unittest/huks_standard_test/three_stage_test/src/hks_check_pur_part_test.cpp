@@ -242,7 +242,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, testCaseParams.genParams.data(), testCaseParams.genParams.size());
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("InitParamSet(gen) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(gen) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -251,7 +251,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
-        HKS_LOG_I("HksGenerateKey failed, ret : %d", ret);
+        HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
@@ -259,7 +259,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
     ret = InitParamSet(&initParamSet, testCaseParams.initParams.data(), testCaseParams.initParams.size());
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
-        HKS_LOG_I("InitParamSet(init) failed, ret : %d", ret);
+        HKS_LOG_I("InitParamSet(init) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 

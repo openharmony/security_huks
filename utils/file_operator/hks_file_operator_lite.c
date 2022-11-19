@@ -40,6 +40,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_template.h"
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
@@ -71,9 +72,7 @@ static int32_t GetFullFileName(const char *path, const char *fileName, char **fu
 {
     uint32_t nameLen = HKS_MAX_FILE_NAME_LEN;
     char *tmpFileName = (char *)HksMalloc(nameLen);
-    if (tmpFileName == NULL) {
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    HKS_IF_NULL_RETURN(tmpFileName, HKS_ERROR_MALLOC_FAIL)
     (void)memset_s(tmpFileName, nameLen, 0, nameLen);
 
     int32_t ret = GetFileName(path, fileName, tmpFileName, nameLen);
@@ -96,7 +95,7 @@ static int32_t IsFileExist(const char *fileName)
         if (errno == ENOENT) {
             return HKS_ERROR_NOT_EXIST;
         } else {
-            HKS_LOG_E("file stat failed, errno = 0x%x", errno);
+            HKS_LOG_E("file stat failed, errno = 0x%" LOG_PUBLIC "x", errno);
             return HKS_ERROR_OPEN_FILE_FAIL;
         }
     }
@@ -109,14 +108,14 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     (void)offset;
     int32_t fd = open(fileName, O_RDONLY);
     if (fd < 0) {
-        HKS_LOG_E("failed to open file, errno = 0x%x", errno);
+        HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", errno);
         return 0;
     }
 
     int32_t size = read(fd, buf, len);
     close(fd);
     if (size < 0) {
-        HKS_LOG_E("failed to read file, errno = 0x%x", errno);
+        HKS_LOG_E("failed to read file, errno = 0x%" LOG_PUBLIC "x", errno);
         return 0;
     }
 
@@ -128,7 +127,7 @@ static uint32_t FileSize(const char *fileName)
     struct stat fileStat;
     (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
     if (stat(fileName, &fileStat) != 0) {
-        HKS_LOG_E("file stat failed, errno = 0x%x", errno);
+        HKS_LOG_E("file stat failed, errno = 0x%" LOG_PUBLIC "x", errno);
         return 0;
     }
 
@@ -140,13 +139,13 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     (void)offset;
     int32_t fd = open(fileName, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
-        HKS_LOG_E("open file failed, errno = 0x%x", errno);
+        HKS_LOG_E("open file failed, errno = 0x%" LOG_PUBLIC "x", errno);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     int32_t size = write(fd, buf, len);
     if (size < 0) {
-        HKS_LOG_E("write file size failed, errno = 0x%x", errno);
+        HKS_LOG_E("write file size failed, errno = 0x%" LOG_PUBLIC "x", errno);
         close(fd);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
@@ -163,7 +162,7 @@ static int32_t FileRemove(const char *fileName)
         if (errno == ENOENT) {
             return HKS_SUCCESS; /* if file not exist, return ok */
         } else {
-            HKS_LOG_E("file stat failed, errno = 0x%x", errno);
+            HKS_LOG_E("file stat failed, errno = 0x%" LOG_PUBLIC "x", errno);
             return HKS_ERROR_OPEN_FILE_FAIL;
         }
     }
@@ -173,7 +172,7 @@ static int32_t FileRemove(const char *fileName)
     }
 
     if (unlink(fileName) != 0) {
-        HKS_LOG_E("remove file failed, errno = 0x%x", errno);
+        HKS_LOG_E("remove file failed, errno = 0x%" LOG_PUBLIC "x", errno);
         return HKS_ERROR_REMOVE_FILE_FAIL;
     }
 
@@ -182,9 +181,7 @@ static int32_t FileRemove(const char *fileName)
 
 int32_t HksIsDirExist(const char *path)
 {
-    if (path == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(path, HKS_ERROR_NULL_POINTER)
     return IsFileExist(path);
 }
 
@@ -198,7 +195,7 @@ int32_t HksMakeDir(const char *path)
             case EEXIST:
                 return HKS_ERROR_ALREADY_EXISTS;
             default:
-                HKS_LOG_E("mkdir failed, errno = 0x%x", errno);
+                HKS_LOG_E("mkdir failed, errno = 0x%" LOG_PUBLIC "x", errno);
                 return HKS_ERROR_MAKE_DIR_FAIL;
         }
     }
@@ -276,18 +273,14 @@ int32_t HksRemoveDir(const char *dirPath)
     }
 
     DIR *dir = opendir(dirPath);
-    if (dir  == NULL) {
-        HKS_LOG_E("open dir failed");
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
 
     struct dirent *dire = readdir(dir);
     while (dire != NULL) {
         if (dire->d_type == DT_REG) { /* only care about files. */
             ret = HksFileRemove(dirPath, dire->d_name);
-            if (ret != HKS_SUCCESS) { /* Continue to delete remaining files */
-                HKS_LOG_E("remove file failed when remove dir files, ret = %d.", ret);
-            }
+            /* Continue to delete remaining files */
+            HKS_IF_NOT_SUCC_LOGE(ret, "remove file failed when remove dir files, ret = %" LOG_PUBLIC "d.", ret)
         }
         dire = readdir(dir);
     }
@@ -316,25 +309,26 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     unsigned int fileSize;
     int32_t ret = UtilsFileStat(fileName, &fileSize);
     if (ret < 0) {
-        HKS_LOG_E("stat file failed, errno = 0x%x", ret);
+        HKS_LOG_E("stat file failed, errno = 0x%" LOG_PUBLIC "x", ret);
         return 0;
     }
 
     if (len > fileSize) {
-        HKS_LOG_E("read data over file size!\n, file size = %d\n, buf len = %d\n", fileSize, len);
+        HKS_LOG_E("read data over file size!\n, file size = %" LOG_PUBLIC "d\n, buf len = %" LOG_PUBLIC "d\n",
+            fileSize, len);
         return 0;
     }
 
     int fd = UtilsFileOpen(fileName, O_RDONLY_FS, 0);
     if (fd < 0) {
-        HKS_LOG_E("failed to open file, errno = 0x%x", fd);
+        HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", fd);
         return 0;
     }
 
     ret = UtilsFileRead(fd, (char *)buf, len);
     UtilsFileClose(fd);
     if (ret < 0) {
-        HKS_LOG_E("failed to read file, errno = 0x%x", ret);
+        HKS_LOG_E("failed to read file, errno = 0x%" LOG_PUBLIC "x", ret);
         return 0;
     }
 
@@ -350,14 +344,14 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
 
     int fd = UtilsFileOpen(fileName, O_CREAT_FS | O_TRUNC_FS | O_RDWR_FS, 0);
     if (fd < 0) {
-        HKS_LOG_E("failed to open key file, errno = 0x%x\n", fd);
+        HKS_LOG_E("failed to open key file, errno = 0x%" LOG_PUBLIC "x\n", fd);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     int32_t ret = UtilsFileWrite(fd, (const char*)buf, len);
     (void)UtilsFileClose(fd);
     if (ret < 0) {
-        HKS_LOG_E("failed to write key file, errno = 0x%x\n", ret);
+        HKS_LOG_E("failed to write key file, errno = 0x%" LOG_PUBLIC "x\n", ret);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
@@ -369,7 +363,7 @@ static uint32_t FileSize(const char *fileName)
     unsigned int fileSize;
     int32_t ret = UtilsFileStat(fileName, &fileSize);
     if (ret < 0) {
-        HKS_LOG_E("stat file failed, errno = 0x%x", ret);
+        HKS_LOG_E("stat file failed, errno = 0x%" LOG_PUBLIC "x", ret);
         return 0;
     }
     return fileSize;
@@ -395,9 +389,7 @@ uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, ui
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileRead(fullFileName, offset, buf, len);
     HKS_FREE_PTR(fullFileName);
@@ -412,9 +404,7 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileWrite(fullFileName, offset, buf, len);
     HKS_FREE_PTR(fullFileName);
@@ -423,15 +413,11 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
 
 uint32_t HksFileSize(const char *path, const char *fileName)
 {
-    if (fileName == NULL) {
-        return 0;
-    }
+    HKS_IF_NULL_RETURN(fileName, 0)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return 0;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileSize(fullFileName);
     HKS_FREE_PTR(fullFileName);
@@ -440,15 +426,11 @@ uint32_t HksFileSize(const char *path, const char *fileName)
 
 int32_t HksIsFileExist(const char *path, const char *fileName)
 {
-    if (fileName == NULL) {
-        return HKS_ERROR_NULL_POINTER;
-    }
+    HKS_IF_NULL_RETURN(fileName, HKS_ERROR_NULL_POINTER)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = IsFileExist(fullFileName);
     HKS_FREE_PTR(fullFileName);
@@ -457,15 +439,11 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
 
 int32_t HksFileRemove(const char *path, const char *fileName)
 {
-    if (fileName == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    HKS_IF_NULL_RETURN(fileName, HKS_ERROR_INVALID_ARGUMENT)
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    if (ret != HKS_SUCCESS) {
-        return ret;
-    }
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileRemove(fullFileName);
     HKS_FREE_PTR(fullFileName);

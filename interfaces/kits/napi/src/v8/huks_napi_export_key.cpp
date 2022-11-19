@@ -74,7 +74,7 @@ static napi_value ExportKeyParseParams(napi_env env, napi_callback_info info, Ex
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_EXPORT_KEY_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -133,23 +133,24 @@ static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context
         resourceName,
         [](napi_env env, void *data) {
             (void)env;
-            ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
-            int32_t ret = PrePareExportKeyContextBuffer(context);
+            ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
+            int32_t ret = PrePareExportKeyContextBuffer(napiContext);
             if (ret == HKS_SUCCESS) {
-                context->result = HksExportPublicKey(context->keyAlias, context->paramSet, context->key);
+                napiContext->result = HksExportPublicKey(napiContext->keyAlias,
+                    napiContext->paramSet, napiContext->key);
             } else {
-                context->result = ret;
+                napiContext->result = ret;
             }
         },
         [](napi_env env, napi_status status, void *data) {
-            ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(data);
-            napi_value result = ExportKeyWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            ExportKeyAsyncContext napiContext = static_cast<ExportKeyAsyncContext>(data);
+            napi_value result = ExportKeyWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteExportKeyAsyncContext(env, context);
+            DeleteExportKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

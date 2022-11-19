@@ -22,5 +22,10 @@ int HksClientServiceTest002(void);
 int HksClientServiceTest003(void);
 int HksClientServiceTest004(void);
 int HksClientServiceTest005(void);
+
+// error test for access token id
+int HksClientServiceTest006(void);
+int HksClientServiceTest007(void);
+int HksClientServiceTest008(void);
 }
 #endif

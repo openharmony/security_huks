@@ -67,7 +67,7 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_ABORT_MIN_ARGS) {
-        napi_throw_error(env, NULL, "invalid arguments");
+        napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -107,18 +107,18 @@ static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
-            context->result = HksAbort(context->handle, context->paramSet);
+            AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
+            napiContext->result = HksAbort(napiContext->handle, napiContext->paramSet);
         },
         [](napi_env env, napi_status status, void *data) {
-            AbortAsyncContext context = static_cast<AbortAsyncContext>(data);
-            napi_value result = AbortWriteResult(env, context);
-            if (context->callback == nullptr) {
-                napi_resolve_deferred(env, context->deferred, result);
+            AbortAsyncContext napiContext = static_cast<AbortAsyncContext>(data);
+            napi_value result = AbortWriteResult(env, napiContext);
+            if (napiContext->callback == nullptr) {
+                napi_resolve_deferred(env, napiContext->deferred, result);
             } else if (result != nullptr) {
-                CallAsyncCallback(env, context->callback, context->result, result);
+                CallAsyncCallback(env, napiContext->callback, napiContext->result, result);
             }
-            DeleteAbortAsyncContext(env, context);
+            DeleteAbortAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);
