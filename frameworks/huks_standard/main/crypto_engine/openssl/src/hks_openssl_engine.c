@@ -155,6 +155,15 @@ int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
     return func(randomData);
 }
 
+int32_t HksCryptoHalFillPrivRandom(struct HksBlob *randomData)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(randomData), HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
+
+    FillRandom func = (FillRandom)GetAbility(HKS_CRYPTO_ABILITY_FILL_PRI_RANDOM);
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+    return func(randomData);
+}
+
 int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
     if (CheckBlob(keyIn) != HKS_SUCCESS || CheckBlob(keyOut) != HKS_SUCCESS) {
