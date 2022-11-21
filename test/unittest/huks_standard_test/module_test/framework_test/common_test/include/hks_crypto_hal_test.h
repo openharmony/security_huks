@@ -13,34 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef HKS_HISYSEVENT_WRAPPER_H
-#define HKS_HISYSEVENT_WRAPPER_H
+#ifndef HKS_CRYPTO_HAL_TEST_H
+#define HKS_CRYPTO_HAL_TEST_H
 
-#include "hks_type_inner.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-struct EventValues {
-    uint32_t userId;
-    uint32_t processName;
-    uint32_t keyType;
-    int32_t errorCode;
-};
-
-enum EventType {
-    FAULT,
-    STATISTIC,
-    SECURITY,
-    BEHAVIOR,
-};
-
-int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues,
-    const char *extra);
-
-#ifdef __cplusplus
+namespace Unittest::HksFrameworkCommonCryptoHalTest {
+int HksCryptoHalTest001(void);
 }
-#endif
-
-#endif
+#endif // HKS_CRYPTO_HAL_TEST_H
