@@ -461,7 +461,7 @@ static int32_t CheckSignVerifyParams(const struct HuksKeyNode *keyNode, const st
 
     uint32_t keySize = tmpParam->uint32Param;
 
-    ret = HksCheckSignature((purpose == HKS_KEY_PURPOSE_SIGN) ? HKS_CMD_ID_SIGN: HKS_CMD_ID_VERIFY,
+    ret = HksCheckSignature((purpose == HKS_KEY_PURPOSE_SIGN) ? HKS_CMD_ID_SIGN : HKS_CMD_ID_VERIFY,
         alg, keySize, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "check signature failed!")
 

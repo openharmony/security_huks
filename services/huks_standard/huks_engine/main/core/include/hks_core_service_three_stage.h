@@ -85,7 +85,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
     uint32_t alg);
 
 int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *signature, uint32_t alg);
+    const struct HksBlob *srcData, struct HksBlob *mac, uint32_t alg);
 
 int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg);

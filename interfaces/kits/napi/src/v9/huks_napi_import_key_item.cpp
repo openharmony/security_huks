@@ -115,16 +115,16 @@ static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context
         nullptr,
         resourceName,
         [](napi_env env, void *data) {
-            ImportKeyAsyncContext context = static_cast<ImportKeyAsyncContext>(data);
+            ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
 
-            context->result = HksImportKey(context->keyAlias, context->paramSet, context->key);
+            napiContext->result = HksImportKey(napiContext->keyAlias, napiContext->paramSet, napiContext->key);
         },
         [](napi_env env, napi_status status, void *data) {
-            ImportKeyAsyncContext context = static_cast<ImportKeyAsyncContext>(data);
+            ImportKeyAsyncContext napiContext = static_cast<ImportKeyAsyncContext>(data);
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
-            HksReturnNapiResult(env, context->callback, context->deferred, context->result, resultData);
-            DeleteImportKeyAsyncContext(env, context);
+            HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
+            DeleteImportKeyAsyncContext(env, napiContext);
         },
         static_cast<void *>(context),
         &context->asyncWork);

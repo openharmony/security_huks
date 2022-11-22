@@ -349,14 +349,14 @@ int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec 
 }
 
 int32_t HksCryptoHalDeriveKey(
-    const struct HksBlob *masterKey, const struct HksKeySpec *derivationSpec, struct HksBlob *derivedKey)
+    const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec, struct HksBlob *derivedKey)
 {
-    int32_t ret = DeriveKeyCheckParam(masterKey, derivationSpec, derivedKey);
+    int32_t ret = DeriveKeyCheckParam(mainKey, derivationSpec, derivedKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")
 
     DeriveKey func = (DeriveKey)GetAbility(HKS_CRYPTO_ABILITY_DERIVE_KEY(derivationSpec->algType));
     HKS_IF_NULL_LOGE_RETURN(func, HKS_ERROR_INVALID_ARGUMENT, "DeriveKey func is null!")
-    return func(masterKey, derivationSpec, derivedKey);
+    return func(mainKey, derivationSpec, derivedKey);
 }
 
 int32_t HksCryptoHalEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
