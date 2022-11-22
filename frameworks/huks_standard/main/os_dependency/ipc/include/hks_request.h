@@ -16,38 +16,8 @@
 #ifndef HKS_REQUEST_H
 #define HKS_REQUEST_H
 
+#include "hks_message_code.h"
 #include "hks_type_inner.h"
-
-enum HksMessage {
-#ifndef _HKS_L1_TEE_
-    HKS_MSG_BASE = 0x3a400, /* range of message value defined by router. globally unique */
-#else
-    HKS_MSG_BASE = 1000, /* range of message value defined by SmartLock. Max 65535 */
-#endif
-    HKS_MSG_GEN_KEY = HKS_MSG_BASE,
-    HKS_MSG_IMPORT_KEY,
-    HKS_MSG_EXPORT_PUBLIC_KEY,
-    HKS_MSG_IMPORT_WRAPPED_KEY,
-    HKS_MSG_DELETE_KEY,
-    HKS_MSG_GET_KEY_PARAMSET,
-    HKS_MSG_KEY_EXIST,
-    HKS_MSG_GENERATE_RANDOM,
-    HKS_MSG_SIGN,
-    HKS_MSG_VERIFY,
-    HKS_MSG_ENCRYPT,
-    HKS_MSG_DECRYPT,
-    HKS_MSG_AGREE_KEY,
-    HKS_MSG_DERIVE_KEY,
-    HKS_MSG_MAC,
-    HKS_MSG_GET_KEY_INFO_LIST,
-    HKS_MSG_ATTEST_KEY,
-    HKS_MSG_GET_CERTIFICATE_CHAIN,
-    HKS_MSG_INIT,
-    HKS_MSG_UPDATE,
-    HKS_MSG_FINISH,
-    HKS_MSG_ABORT,
-    HKS_MSG_MAX, /* new cmd type must be added before HKS_MSG_MAX */
-};
 
 #ifdef __cplusplus
 extern "C" {
