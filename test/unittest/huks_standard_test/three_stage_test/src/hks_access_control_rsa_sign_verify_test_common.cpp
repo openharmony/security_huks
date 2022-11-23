@@ -214,8 +214,8 @@ static int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct H
     return ret;
 }
 
-static int32_t AddAuthToeknParamCustomCase(struct HksBlob &challengeBlob1, struct HksBlob &challengeBlob2,
-    struct HksParam *signParams, const IDMParams &testIDMParams)
+static int32_t AddAuthToeknParamCustomCase(const struct HksBlob &challengeBlob1,
+    const struct HksBlob &challengeBlob2, struct HksParam *signParams, const IDMParams &testIDMParams)
 {
     uint8_t challenge[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob = { TOKEN_CHALLENGE_LEN, challenge };
@@ -562,7 +562,7 @@ static int32_t HksAcRsaVerifyTestCustomCase(const TestAccessCaseRSAParams &testC
         testCaseParams1.verifyParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
     char newKey1[] = "RSA_Sign_Verify_Import_KeyAlia1";
-    struct HksBlob newKeyAlias1 = { .size = strlen(newKey1), .data = (uint8_t *)newKey1 };
+    struct HksBlob newKeyAlias1 = { .size = strlen(newKey1), .data = reinterpret_cast<uint8_t *>(newKey1) };
     ret = HksImportKey(&newKeyAlias1, verifyParamSet1, publicKey1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
@@ -570,7 +570,7 @@ static int32_t HksAcRsaVerifyTestCustomCase(const TestAccessCaseRSAParams &testC
     ret = InitParamSet(&verifyParamSet2, testCaseParams2.verifyParams.data(), testCaseParams2.verifyParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
     char newKey2[] = "RSA_Sign_Verify_Import_KeyAlia2";
-    struct HksBlob newKeyAlias2 = { .size = strlen(newKey2), .data = (uint8_t *)newKey2 };
+    struct HksBlob newKeyAlias2 = { .size = strlen(newKey2), .data = reinterpret_cast<uint8_t *>(newKey2) };
     ret = HksImportKey(&newKeyAlias2, verifyParamSet2, publicKey2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 

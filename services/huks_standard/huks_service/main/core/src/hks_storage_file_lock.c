@@ -220,7 +220,7 @@ static uint32_t Release(HksStorageFileLock *lock)
         }
     }
 
-    if (remove) {
+    if (remove && iter != NULL) {
         if (previous != NULL) {
             previous->next = iter->next;
         } else {
