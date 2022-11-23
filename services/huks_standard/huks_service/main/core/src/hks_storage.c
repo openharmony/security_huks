@@ -1364,6 +1364,16 @@ int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
     return ret;
 }
 
+static bool HksIsUserIdRoot(const struct HksProcessInfo *processInfo)
+{
+    if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
+        (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, strlen(USER_ID_ROOT)) == 0)) {
+        HKS_LOG_I("is root user id");
+        return true;
+    }
+    return false;
+}
+
 int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
@@ -1371,11 +1381,14 @@ int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
 
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-    int32_t ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(userData);
-        HKS_LOG_E("construct user id name failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
+    int32_t ret;
+    if (!HksIsUserIdRoot(&processInfo)) {
+        ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_PTR(userData);
+            HKS_LOG_E("construct user id name failed, ret = %" LOG_PUBLIC "d", ret);
+            return ret;
+        }
     }
 
     char *uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);

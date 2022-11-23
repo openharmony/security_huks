@@ -103,6 +103,7 @@ config("soft_huks_config") {
     "_FORTIFY_SOURCE = 2",
     "HAS_OS_ACCOUNT_PART",
     "SUPPORT_COMMON_EVENT",
+    "L2_STANDARD",
   ]
 
   cflags = [ "-fvisibility=default" ]

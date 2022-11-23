@@ -27,5 +27,7 @@ int HksClientServiceTest005(void);
 int HksClientServiceTest006(void);
 int HksClientServiceTest007(void);
 int HksClientServiceTest008(void);
+
+int HksClientServiceTest009(void);
 }
 #endif
