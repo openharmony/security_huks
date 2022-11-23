@@ -128,6 +128,31 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest009
+ * @tc.desc: tdd HksServiceDeleteProcessInfo, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest009");
+    const char *alias = "HksClientServiceTest009";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    struct HksBlob userRootId = { strlen("0"), reinterpret_cast<uint8_t *>(HksMalloc(strlen("0")))};
+    (void)memcpy_s(userRootId.data, userRootId.size, "0", strlen("0"));
+    struct HksProcessInfo processInfo = { userRootId, g_processName, g_userIdInt, 0 };
+    int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 TestGenerateKey failed, ret = " << ret;
+    ret = HksServiceKeyExist(&processInfo, &keyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
+    uint64_t handle = 111;
+    struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
+    CreateOperation(&processInfo, &operationHandle, true);
+    HksServiceDeleteProcessInfo(&processInfo);
+    ret = HksServiceKeyExist(&processInfo, &keyAlias);
+    EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
+}
+
+/**
  * @tc.name: HksClientServiceTest.HksClientServiceTest002
  * @tc.desc: tdd HksServiceDeleteProcessInfo, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
