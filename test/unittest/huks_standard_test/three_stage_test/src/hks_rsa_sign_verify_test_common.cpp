@@ -68,7 +68,7 @@ static int32_t RsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksPa
 
     /* 4. Import Key */
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
     if (param.isGenParamSetSameAsImport) {
         ret = HksImportKey(&newKeyAlias, genParamSet, &publicKey);
     } else {
@@ -186,7 +186,7 @@ int32_t RSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSe
     };
     struct HksBlob finishInData = { 0, NULL };
 
-    if (!hashAlgIndex) {
+    if (hashAlgIndex != nullptr) {
         inData.size = g_inDataArrayAfterHashLen[*hashAlgIndex];
         inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[*hashAlgIndex]);
     }

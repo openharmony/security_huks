@@ -34,7 +34,7 @@ int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice)
     }
 
     *halDevice = HuksCreateHdiDevicePtr();
-    HKS_IF_NULL_LOGE_RETURN(halDevice, HKS_ERROR_NULL_POINTER, "g_hksHalDevicePtr is NULL!")
+    HKS_IF_NULL_LOGE_RETURN(*halDevice, HKS_ERROR_NULL_POINTER, "g_hksHalDevicePtr is NULL!")
 
     return HKS_SUCCESS;
 }
