@@ -165,7 +165,6 @@ static int32_t RemoveOldVersionFiles(void)
 
     ret = HksOldVersionFileRemove(HKS_BAK_ROOT_MATERIAL_FILE_NAME);
     HKS_IF_NOT_SUCC_LOGE(ret, "remove backup root key material file failed, ret = %" LOG_PUBLIC "d", ret)
-    }
 #endif
     return ret;
 }
