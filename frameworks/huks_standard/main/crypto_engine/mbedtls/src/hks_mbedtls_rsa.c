@@ -150,6 +150,7 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
 int32_t HksMbedtlsRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
     mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx);
     ctx.MBEDTLS_PRIVATE(padding) = 0;
     ctx.MBEDTLS_PRIVATE(hash_id) = 0;
@@ -283,6 +284,7 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx); /* only support oaep padding */
 
     do {
@@ -361,6 +363,7 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx);
 
     do {

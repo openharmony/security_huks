@@ -315,6 +315,7 @@ int32_t HksMbedtlsX25519KeyAgreement(const struct HksBlob *nativeKey,
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdh_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdh_context), 0, sizeof(mbedtls_ecdh_context));
     mbedtls_ecdh_init(&ctx);
 
     mbedtls_ctr_drbg_context ctrDrbg;
