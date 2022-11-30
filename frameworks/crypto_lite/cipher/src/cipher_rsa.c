@@ -137,8 +137,6 @@ static int32_t RsaLoadPrivateKey(mbedtls_pk_context *pk, const unsigned char *ke
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
-    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
-    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     RsaInit(&ctrDrbg, &entropy);
 
     do {
@@ -264,8 +262,6 @@ static int32_t RsaEncryptMultipleBlock(mbedtls_rsa_context *rsa, const char *pla
 {
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
-    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
-    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     int32_t rsaLen = mbedtls_rsa_get_len(rsa);
     int32_t rsaContentLen = rsaLen - RSA_KEY_BYTE;
     if ((rsaContentLen <= 0) || (rsaLen <= 0)) {
@@ -400,8 +396,6 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
     (void)memset_s(tembuf, cipher->length, 0, cipher->length);
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
-    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
-    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     RsaInit(&ctrDrbg, &entropy);
     size_t dataLen;
 
