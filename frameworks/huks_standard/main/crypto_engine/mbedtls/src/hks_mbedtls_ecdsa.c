@@ -57,6 +57,7 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdsa_context), 0, sizeof(mbedtls_ecdsa_context));
     mbedtls_ecdsa_init(&ctx);
 
     do {
@@ -103,6 +104,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get ecc KeyCureNist fail! ret = 0x%" LOG_PUBLIC "X", ret)
 
     mbedtls_ecdsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdsa_context), 0, sizeof(mbedtls_ecdsa_context));
     mbedtls_ecdsa_init(&ctx);
 
     do {

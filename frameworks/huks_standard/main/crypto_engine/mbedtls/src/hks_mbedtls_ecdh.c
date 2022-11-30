@@ -69,6 +69,7 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_ecdh_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdh_context), 0, sizeof(mbedtls_ecdh_context));
     mbedtls_ecdh_init(&ctx);
 
     do {

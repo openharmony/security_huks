@@ -112,6 +112,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
 int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
     mbedtls_dhm_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_dhm_context), 0, sizeof(mbedtls_dhm_context));
     mbedtls_dhm_init(&ctx);
 
     mbedtls_entropy_context entropy;
@@ -233,6 +234,7 @@ int32_t HksMbedtlsDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)pubKey->data;
 
     mbedtls_dhm_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_dhm_context), 0, sizeof(mbedtls_dhm_context));
     mbedtls_dhm_init(&ctx);
 
     mbedtls_entropy_context entropy;
