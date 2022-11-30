@@ -116,6 +116,8 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
 
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         mbedtls_dhm_free(&ctx);
@@ -235,6 +237,8 @@ int32_t HksMbedtlsDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
 
     mbedtls_entropy_context entropy;
     mbedtls_ctr_drbg_context ctrDrbg;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         mbedtls_dhm_free(&ctx);
