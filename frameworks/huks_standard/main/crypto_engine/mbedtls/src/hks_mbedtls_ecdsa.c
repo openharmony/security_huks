@@ -54,12 +54,15 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
     mbedtls_ecdsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdsa_context), 0, sizeof(mbedtls_ecdsa_context));
     mbedtls_ecdsa_init(&ctx);
 
     do {
@@ -115,6 +118,7 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     }
 
     mbedtls_ecdsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdsa_context), 0, sizeof(mbedtls_ecdsa_context));
     mbedtls_ecdsa_init(&ctx);
 
     do {
