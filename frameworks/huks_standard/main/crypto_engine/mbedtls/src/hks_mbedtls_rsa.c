@@ -152,12 +152,15 @@ static int32_t RsaSaveKeyMaterial(const mbedtls_rsa_context *ctx, const uint32_t
 int32_t HksMbedtlsRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
     mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx, MBEDTLS_RSA_PKCS_V21, MBEDTLS_MD_SHA256);
     ctx.padding = 0;
     ctx.hash_id = 0;
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         mbedtls_rsa_free(&ctx);
@@ -283,12 +286,15 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
     mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx, padding, mbedtlsAlg); /* only support oaep padding */
 
     do {
@@ -368,12 +374,15 @@ static int32_t HksMbedtlsRsaSignVerify(const struct HksBlob *key, const struct H
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
     mbedtls_rsa_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
     mbedtls_rsa_init(&ctx, padding, (mbedtls_md_type_t)mbedtlsAlg);
 
     do {

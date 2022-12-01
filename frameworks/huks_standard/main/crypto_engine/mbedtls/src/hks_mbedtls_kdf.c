@@ -40,6 +40,7 @@ static int32_t DeriveKeyPbkdf2(const struct HksBlob *mainKey, const struct HksKe
     const mbedtls_md_info_t *info, struct HksBlob *derivedKey)
 {
     mbedtls_md_context_t ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_md_context_t), 0, sizeof(mbedtls_md_context_t));
     mbedtls_md_init(&ctx);
 
     int32_t ret;

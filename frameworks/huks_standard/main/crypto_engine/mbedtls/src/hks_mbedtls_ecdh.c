@@ -71,12 +71,15 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
 
     mbedtls_ctr_drbg_context ctrDrbg;
     mbedtls_entropy_context entropy;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
     ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
     mbedtls_ecdh_context ctx;
+    (void)memset_s(&ctx, sizeof(mbedtls_ecdh_context), 0, sizeof(mbedtls_ecdh_context));
     mbedtls_ecdh_init(&ctx);
 
     do {
