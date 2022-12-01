@@ -18,6 +18,8 @@
 
 #define HKS_SUPPORT_POSIX
 
+#define HKS_L0_LITE
+
 /* AES */
 #define HKS_SUPPORT_AES_C
 #define HKS_SUPPORT_AES_GENERATE_KEY
