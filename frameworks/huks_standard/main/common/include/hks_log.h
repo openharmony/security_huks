@@ -23,6 +23,11 @@
 #define LOG_TAG "HUKS"
 #undef LOG_DOMAIN
 #define LOG_DOMAIN 0xD002F00 /* Security subsystem's domain id */
+
+#ifdef HKS_L0_LITE
+#include "log.h"
+#endif
+
 #endif
 
 enum HksLogLevel {

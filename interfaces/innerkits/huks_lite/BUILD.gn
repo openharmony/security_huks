@@ -45,7 +45,6 @@ huks_sources = [
   "../../../services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_report.c",
   "../../../services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
-  "../../../services/huks_standard/huks_service/main/core/src/hks_upgrade_storage_data.c",
   "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
   "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c",
   "../../../utils/crypto_adapter/hks_client_service_adapter_common.c",
