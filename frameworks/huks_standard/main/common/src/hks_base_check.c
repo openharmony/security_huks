@@ -660,7 +660,7 @@ static const uint32_t g_invalidImportKeyPurpose[][2] = {
 #ifdef HKS_SUPPORT_X25519_C
     {
         HKS_ALG_X25519,
-        HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,,
+        HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,
     },
 #endif
 #ifdef HKS_SUPPORT_SM2_C
