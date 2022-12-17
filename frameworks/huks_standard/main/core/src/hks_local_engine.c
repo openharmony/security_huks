@@ -91,7 +91,7 @@ static int32_t CheckLocalGenerateKeyParams(const struct HksParamSet *paramSetIn,
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    ret = HksCoreCheckGenKeyParams(NULL, paramSetIn, NULL, NULL);
+    ret = HksCoreCheckGenKeyParams(NULL, paramSetIn, NULL, NULL, HKS_KEY_FLAG_GENERATE_KEY);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT,
         "check generate key parameter failed ret = %" LOG_PUBLIC "x.", ret)
 

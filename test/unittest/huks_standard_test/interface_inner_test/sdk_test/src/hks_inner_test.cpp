@@ -36,9 +36,9 @@ class HksInnerTest : public testing::Test {};
 HWTEST_F(HksInnerTest, HksInnerTest001, Function | SmallTest | Level0)
 {
     int32_t ret = HKS_SUCCESS;
-    ret = HksCheckGenKeyPurpose(HKS_ALG_HMAC, HKS_KEY_PURPOSE_MAC);
+    ret = HksCheckGenKeyPurpose(HKS_ALG_HMAC, HKS_KEY_PURPOSE_MAC, HKS_KEY_FLAG_GENERATE_KEY);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksCheckGenKeyPurpose(HKS_ALG_DSA, HKS_KEY_PURPOSE_SIGN);
+    ret = HksCheckGenKeyPurpose(HKS_ALG_DSA, HKS_KEY_PURPOSE_SIGN, HKS_KEY_FLAG_GENERATE_KEY);
     ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
