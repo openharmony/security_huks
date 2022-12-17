@@ -18,6 +18,7 @@
 #include "hks_mem.h"
 #include "hks_test_log.h"
 #include "hks_type.h"
+#include "hks_param.h"
 #include "hks_three_stage_test_common.h"
 
 #include "hks_import_wrapped_test_common.h"
@@ -209,15 +210,15 @@ namespace Unittest::ImportWrappedKey {
                                         &commonAad, &commonNonce, &kekTag, &keyMaterialLen, plainCipher };
         int32_t ret = BuildWrappedKeyData(blobArray, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, wrappedKeyData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "BuildWrappedKeyData failed.";
-
-        ret = HksImportWrappedKey(params->importedKeyAlias, params->wrappingKeyAlias,
-                                  params->importWrappedKeyParamSet, wrappedKeyData);
         
-        struct HksParams *purpose = NULL;
+        struct HksParam *purpose = nullptr;
         ret = HksGetParam(params->importWrappedKeyParamSet, HKS_TAG_PURPOSE, &purpose);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Get wrapped purpose param failed.";
 
-        if (purpose->uint32Param == HKS_KEY_PURPOSE_UNWRAP) {
+        ret = HksImportWrappedKey(params->importedKeyAlias, params->wrappingKeyAlias,
+                                  params->importWrappedKeyParamSet, wrappedKeyData);
+
+        if (purpose->uint32Param == (uint32_t)HKS_KEY_PURPOSE_UNWRAP) {
             EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "Import unwrap purpose wrapped key shouldn't be success.";
         } else {
             EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportWrappedKey failed.";

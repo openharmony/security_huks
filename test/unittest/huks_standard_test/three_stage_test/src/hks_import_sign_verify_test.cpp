@@ -392,10 +392,10 @@ static int32_t ConstructImportedCurve25519Key(uint32_t alg, uint32_t keySize, ui
     }
     struct HksBlob pubKeyBlob = { 0, nullptr };
     struct HksBlob privKeyBlob = { 0, nullptr };
-    pubKeyBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PriData : (uint8_t *)g_x25519PriData;
-    pubKeyBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PriData) : sizeof(g_x25519PriData);
-    privKeyBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PubData : (uint8_t *)g_x25519PubData;
-    privKeyBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PubData) : sizeof(g_x25519PubData);
+    privKeyBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PriData : (uint8_t *)g_x25519PriData;
+    privKeyBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PriData) : sizeof(g_x25519PriData);
+    pubKeyBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PubData : (uint8_t *)g_x25519PubData;
+    pubKeyBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PubData) : sizeof(g_x25519PubData);
 
     struct HksKeyMaterial25519 material;
     material.keyAlg = (enum HksKeyAlg)alg;
