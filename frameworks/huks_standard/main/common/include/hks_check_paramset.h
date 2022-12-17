@@ -26,7 +26,7 @@ extern "C" {
 #endif
 
 int32_t HksCoreCheckGenKeyParams(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyIn, const struct HksBlob *keyOut);
+    const struct HksBlob *keyIn, const struct HksBlob *keyOut, uint32_t keyFlag);
 
 int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksBlob *keyOut);

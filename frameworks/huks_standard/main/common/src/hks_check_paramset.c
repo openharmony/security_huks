@@ -268,7 +268,7 @@ static int32_t CheckAndGetDigest(
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckGenKeyParamsByAlg(uint32_t alg, const struct HksParamSet *paramSet,
-    struct ParamsValues *params)
+    struct ParamsValues *params, uint32_t keyFlag)
 {
     int32_t ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_GEN_KEY, paramSet, params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
@@ -277,21 +277,22 @@ static int32_t CheckGenKeyParamsByAlg(uint32_t alg, const struct HksParamSet *pa
     ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_GEN_KEY, params);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    ret = HksCheckGenKeyPurpose(alg, params->purpose.value);
+    ret = HksCheckGenKeyPurpose(alg, params->purpose.value, keyFlag);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "check purpose not expected, purpose =  %" LOG_PUBLIC "d", params->purpose.value);
     return HksCheckGenKeyMutableParams(alg, params);
 }
 
 static int32_t CheckGenKeyMacDeriveParams(
-    uint32_t alg, uint32_t inputPurpose, const struct HksParamSet *paramSet, struct ParamsValues *params)
+    uint32_t alg, uint32_t inputPurpose, const struct HksParamSet *paramSet, struct ParamsValues *params,
+    uint32_t keyFlag)
 {
     if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3) {
         HKS_LOG_E("check mac or derive, not aes alg, alg: %" LOG_PUBLIC "u", alg);
         return HKS_ERROR_INVALID_PURPOSE;
     }
 
-    int32_t ret = HksCheckGenKeyPurpose(alg, inputPurpose);
+    int32_t ret = HksCheckGenKeyPurpose(alg, inputPurpose, keyFlag);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check purpose invalid, purpose 0x%" LOG_PUBLIC "x", inputPurpose)
 
     if (inputPurpose == HKS_KEY_PURPOSE_MAC) {
@@ -311,7 +312,7 @@ static int32_t CheckGenKeyMacDeriveParams(
     return ret;
 }
 
-static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct ParamsValues *params)
+static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct ParamsValues *params, uint32_t keyFlag)
 {
     uint32_t alg;
     int32_t ret = HksCheckParamSetTag(paramSet);
@@ -327,10 +328,10 @@ static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct 
 
     if (((purposeParam->uint32Param & HKS_KEY_PURPOSE_DERIVE) != 0) ||
         ((purposeParam->uint32Param & HKS_KEY_PURPOSE_MAC) != 0)) {
-        return CheckGenKeyMacDeriveParams(alg, purposeParam->uint32Param, paramSet, params);
+        return CheckGenKeyMacDeriveParams(alg, purposeParam->uint32Param, paramSet, params, keyFlag);
     }
 
-    return CheckGenKeyParamsByAlg(alg, paramSet, params);
+    return CheckGenKeyParamsByAlg(alg, paramSet, params, keyFlag);
 }
 
 static int32_t CheckImportKeySize(uint32_t alg, const struct ParamsValues *params, const struct HksBlob *key)
@@ -431,14 +432,14 @@ static int32_t CheckPbkdf2DeriveKeyParams(const struct HksParamSet *paramSet)
 #endif
 
 int32_t HksCoreCheckGenKeyParams(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyIn, const struct HksBlob *keyOut)
+    const struct HksBlob *keyIn, const struct HksBlob *keyOut, uint32_t keyFlag)
 {
     (void)keyAlias;
     (void)keyIn;
     (void)keyOut;
     struct ParamsValues params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    return CoreCheckGenKeyParams(paramSet, &params);
+    return CoreCheckGenKeyParams(paramSet, &params, keyFlag);
 }
 
 static int32_t CheckRsaKeyLen(uint32_t alg, uint32_t keyType, const struct ParamsValues *params,
@@ -714,7 +715,7 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
     /* import key paramset is subset of generate key paramset */
     struct ParamsValues params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    int32_t ret = CoreCheckGenKeyParams(paramSet, &params);
+    int32_t ret = CoreCheckGenKeyParams(paramSet, &params, HKS_KEY_FLAG_IMPORT_KEY);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckImportKeyParams failed")
 
     uint32_t alg;
@@ -759,7 +760,7 @@ int32_t HksCoreCheckImportWrappedKeyParams(const struct HksBlob *key, const stru
     /* then check the origin key paramset which is the same as import key */
     struct ParamsValues params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    ret = CoreCheckGenKeyParams(paramSet, &params);
+    ret = CoreCheckGenKeyParams(paramSet, &params, HKS_TAG_IMPORT_KEY_TYPE);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check origin key param set failed")
 
     uint32_t alg;

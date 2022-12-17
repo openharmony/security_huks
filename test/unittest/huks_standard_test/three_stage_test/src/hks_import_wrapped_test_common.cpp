@@ -212,7 +212,16 @@ namespace Unittest::ImportWrappedKey {
 
         ret = HksImportWrappedKey(params->importedKeyAlias, params->wrappingKeyAlias,
                                   params->importWrappedKeyParamSet, wrappedKeyData);
-        EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportWrappedKey failed.";
+        
+        struct HksParams *purpose = NULL;
+        ret = HksGetParam(params->importWrappedKeyParamSet, HKS_TAG_PURPOSE, &purpose);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "Get wrapped purpose param failed.";
+
+        if (purpose->uint32Param == HKS_KEY_PURPOSE_UNWRAP) {
+            EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "Import unwrap purpose wrapped key shouldn't be success.";
+        } else {
+            EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportWrappedKey failed.";
+        }
     }
 
     void HksImportWrappedKeyTestCommonCase(const struct HksImportWrappedKeyTestParams *params)
