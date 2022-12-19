@@ -644,6 +644,7 @@ HWTEST_F(HksRsaSignVerifyPart1Test, HksRsaSignVerifyPart1Test001, TestSize.Level
  */
 HWTEST_F(HksRsaSignVerifyPart1Test, HksRsaSignVerifyPart1Test002, TestSize.Level0)
 {
+    HKS_LOG_E(" Enter HksRsaSignVerifyPart1Test002");
     int32_t ret = HKS_FAILURE;
     const char *keyAliasString = "HksRSASignVerifyKeyAliasTest002";
     struct HksParamSet *genParamSet = nullptr;

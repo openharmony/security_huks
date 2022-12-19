@@ -115,8 +115,8 @@ int32_t HksRsaSignVerifyTestNormalCase(struct HksBlob keyAlias,
     if (param.isUseIndataAfterHash) {
         uint32_t arraySize = (sizeof(g_inDataArrayAfterHash) / sizeof(uint8_t *));
         for (uint32_t i = 0; i < arraySize; i++) {
-            HKS_LOG_E("HksRsaSignVerifyTestNormalCase loop: %d", i);
-            if ((keySize->uint32Param == HKS_RSA_KEY_SIZE_512) && (i == arraySize - 1)) {
+            HKS_LOG_E("HksRsaSignVerifyTestNormalCase loop: %" LOG_PUBLIC "d", i);
+            if ((keySize->uint32Param == HKS_RSA_KEY_SIZE_512) && (i >= arraySize - 2)) {
                 continue;
             }
             param.hashAlgIndex = i;
@@ -143,6 +143,7 @@ int32_t HksRsaSignVerifyTestNormalAnotherCase(struct HksBlob keyAlias,
     if (param.isUseIndataAfterHash) {
         for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(uint8_t *)); i++) {
             param.hashAlgIndex = i;
+            HKS_LOG_E("HksRsaSignVerifyTestNormalAnotherCase, loop0: %" LOG_PUBLIC "d", i);
             ret = RsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, param);
             if (ret != HKS_SUCCESS) {
                 return ret;
@@ -249,6 +250,23 @@ int32_t RSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSe
     return ret;
 }
 
+int32_t RSASignVerifyTestAbnormalCaseNoPadding(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, const uint32_t *hashAlgIndex)
+{
+    /* 1. Generate Key */
+    // Generate Key
+    int32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    /* 2. Sign Three Stage */
+    // Init
+    uint8_t handleS[sizeof(uint64_t)] = {0};
+    struct HksBlob handleSign = { sizeof(uint64_t), handleS };
+    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
+    return ret;
+}
+
 
 int32_t HksRSASignVerifyTestAbnormalCase(struct HksBlob keyAlias,
     struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
@@ -268,6 +286,29 @@ int32_t HksRSASignVerifyTestAbnormalCase(struct HksBlob keyAlias,
         }
     } else {
         return RSASignVerifyTestAbnormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, nullptr);
+    }
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksRSASignVerifyTestAbnormalCaseNoPadding(struct HksBlob keyAlias,
+    struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
+{
+    uint32_t hashAlgIndex;
+    struct HksParam *digestAlg = nullptr;
+    int32_t ret = HksGetParam(signParamSet, HKS_TAG_DIGEST, &digestAlg);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
+    if (digestAlg->uint32Param == HKS_DIGEST_NONE) {
+        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(uint8_t *)); i++) {
+            hashAlgIndex = i;
+            ret = RSASignVerifyTestAbnormalCaseNoPadding(keyAlias,
+                genParamSet, signParamSet, verifyParamSet, &hashAlgIndex);
+            if (ret != HKS_SUCCESS) {
+                return ret;
+            }
+        }
+    } else {
+        return RSASignVerifyTestAbnormalCaseNoPadding(keyAlias, genParamSet, signParamSet, verifyParamSet, nullptr);
     }
 
     return HKS_SUCCESS;

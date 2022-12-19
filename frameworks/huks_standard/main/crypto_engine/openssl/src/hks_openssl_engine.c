@@ -146,6 +146,27 @@ const EVP_MD *GetOpensslAlg(uint32_t alg)
     }
 }
 
+const EVP_MD *GetOpensslAlgFromLen(uint32_t len)
+{
+    HKS_LOG_I("GetOpensslAlgFromLen, %" LOG_PUBLIC "d", len);
+    switch (len) {
+        case AFTER_HASH_LEN_16:
+            return EVP_md5();
+        case AFTER_HASH_LEN_20:
+            return EVP_sha1();
+        case AFTER_HASH_LEN_28:
+            return EVP_sha224();
+        case AFTER_HASH_LEN_32:
+            return EVP_sha256();
+        case AFTER_HASH_LEN_48:
+            return EVP_sha384();
+        case AFTER_HASH_LEN_64:
+            return EVP_sha512();
+        default:
+            return NULL;
+    }
+}
+
 int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(randomData), HKS_ERROR_INVALID_ARGUMENT, "Invalid params!")

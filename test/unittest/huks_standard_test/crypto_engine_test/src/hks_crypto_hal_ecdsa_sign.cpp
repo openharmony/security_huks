@@ -21,6 +21,7 @@
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
 #include "hks_mem.h"
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace OHOS {
