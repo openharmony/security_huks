@@ -16,6 +16,7 @@
 #include "hks_cross_test.h"
 
 #include <gtest/gtest.h>
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace Unittest::CrossTest {
@@ -32,6 +33,7 @@ public:
 
 void HksCrossTest::SetUpTestCase(void)
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksCrossTest::TearDownTestCase(void)
@@ -53,6 +55,7 @@ void HksCrossTest::TearDown()
  */
 HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
 {
+    HKS_LOG_E(" Enter HksCrossTestAesCipher001");
     char tmpKeyAlias[] = "HksCrossTestAesCipher001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
@@ -95,6 +98,7 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
  */
 HWTEST_F(HksCrossTest, HksCrossTestAesCipher002, TestSize.Level0)
 {
+    HKS_LOG_E(" Enter HksCrossTestAesCipher002");
     char tmpKeyAlias[] = "HksCrossTestAesCipher002";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
@@ -323,6 +327,7 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify002, TestSize.Level0)
  */
 HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify001, TestSize.Level0)
 {
+    HKS_LOG_E(" Enter HksCrossTestEccSignVerify001");
     char tmpKeyAlias[] = "HksCrossTestEccSignVerify001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
@@ -342,8 +347,8 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify001, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { g_inData.length(),
-                              (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_hashData.length(),
+                              (uint8_t *)g_hashData.c_str() };
     uint8_t sign[CROSS_COMMON_SIZE] = {0};
     struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
@@ -367,6 +372,7 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify001, TestSize.Level0)
  */
 HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify002, TestSize.Level0)
 {
+    HKS_LOG_E(" Enter HksCrossTestEccSignVerify002");
     char tmpKeyAlias[] = "HksCrossTestEccSignVerify002";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksParamSet *genParamSet = nullptr;
@@ -386,8 +392,8 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify002, TestSize.Level0)
     ret = HksCrossTestImportKey(&keyAlias, genParamSet, verifyParamSet, &newKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestImportKey failed.";
 
-    struct HksBlob inData = { g_inData.length(),
-                              (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { g_hashData.length(),
+                              (uint8_t *)g_hashData.c_str() };
     uint8_t sign[CROSS_COMMON_SIZE] = {0};
     struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 

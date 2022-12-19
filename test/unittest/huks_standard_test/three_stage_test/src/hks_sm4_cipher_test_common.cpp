@@ -72,14 +72,14 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     };
 
     struct HksParam *modeParam = nullptr;
-    HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
-    if (modeParam->uint32Param == HKS_MODE_ECB) {
+    int32_t ret = HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    if (ret == HKS_SUCCESS && modeParam->uint32Param == HKS_MODE_ECB) {
         inData.size = strlen(tmpInData);
         inData.data = reinterpret_cast<uint8_t *>(tmpInData);
     }
 
     /* 1. Generate Key */
-    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("GenerateKey failed");
         return ret;

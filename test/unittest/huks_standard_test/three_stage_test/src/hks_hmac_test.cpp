@@ -264,6 +264,34 @@ static struct HksParam g_hmacParams007[] = {
     }
 };
 
+static struct HksParam g_genParams008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HMAC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = Unittest::Hmac::COMMON_SIZE
+    }
+};
+static struct HksParam g_hmacParams008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HMAC
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_MAC
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SM3
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = Unittest::Hmac::COMMON_SIZE
+    }
+};
+
 static const struct GenerateKeyCaseParam g_genParamsFail[] = {
     {   0,
         HKS_ERROR_INVALID_DIGEST,
@@ -631,6 +659,31 @@ HWTEST_F(HksHmacTest, HksHmacTest010, TestSize.Level0)
 
     ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_DIGEST) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&hmacParamSet);
+}
+
+/**
+ * @tc.name: HksHmacTest.HksHmacTest011
+ * @tc.desc: alg-HMAC pur-MAC dig-sm3. and When generating the key, only the necessary parameters are passed in.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksHmacTest, HksHmacTest011, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksHmacTest011");
+    char tmpKeyAlias[] = "HksHMACKeyAliasTest011";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
+
+    struct HksParamSet *hmacParamSet = nullptr;
+    ret = InitParamSet(&hmacParamSet, g_hmacParams008, sizeof(g_hmacParams008) / sizeof(HksParam));
+
+    ret = HksHmacTestCase(&keyAlias, genParamSet, hmacParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);

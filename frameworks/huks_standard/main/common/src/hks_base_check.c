@@ -171,7 +171,8 @@ static const uint32_t g_sm2KeySize[] = {
 };
 
 static const uint32_t g_sm2Digest[] = {
-    HKS_DIGEST_SM3
+    HKS_DIGEST_SM3,
+    HKS_DIGEST_NONE
 };
 #endif
 
@@ -217,6 +218,7 @@ static const uint32_t g_hmacDigest[] = {
 #endif
 #ifdef HKS_SUPPORT_DSA_C
 static const uint32_t g_dsaDigest[] = {
+    HKS_DIGEST_NONE,
     HKS_DIGEST_SHA1,
     HKS_DIGEST_SHA224,
     HKS_DIGEST_SHA256,
@@ -234,8 +236,10 @@ static const uint32_t g_dhKeySize[] = {
 
 #ifdef HKS_SUPPORT_RSA_C
 static const struct ParamsValuesChecker g_rsaParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { true, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0 }, { true, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectRsaParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -259,10 +263,14 @@ static const struct ExpectParamsValuesChecker g_expectRsaParams[] = {
 
 #ifdef HKS_SUPPORT_AES_C
 static const struct ParamsValuesChecker g_aesParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { true, 0 }, { true, 0 }, { false, 0 }, { true, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 }, { true, 0 } } },
-    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0 }, { false, 0 }, { false, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0 }, { false, 0 }, { false, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+	{ HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 
 static const struct ExpectParamsValuesChecker g_expectAesParams[] = {
@@ -303,8 +311,10 @@ static const struct ExpectParamsValuesChecker g_expectAesParams[] = {
 
 #ifdef HKS_SUPPORT_ECC_C
 static const struct ParamsValuesChecker g_eccParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectEccParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -328,8 +338,10 @@ static const struct ExpectParamsValuesChecker g_expectEccParams[] = {
 
 #ifdef HKS_SUPPORT_SM2_C
 static const struct ParamsValuesChecker g_sm2ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm2Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -353,8 +365,10 @@ static const struct ExpectParamsValuesChecker g_expectSm2Params[] = {
 
 #ifdef HKS_SUPPORT_SM3_C
 static const struct ParamsValuesChecker g_sm3ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm3Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -378,8 +392,10 @@ static const struct ExpectParamsValuesChecker g_expectSm3Params[] = {
 
 #ifdef HKS_SUPPORT_SM4_C
 static const struct ParamsValuesChecker g_sm4ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { true, 0 }, { true, 0 }, { false, 0 }, { true, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0 }, { true, 0 }, { true, 0 }, { false, 0 }, { true, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm4Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -403,8 +419,10 @@ static const struct ExpectParamsValuesChecker g_expectSm4Params[] = {
 
 #if defined(HKS_SUPPORT_X25519_C) || defined(HKS_SUPPORT_ED25519_C)
 static const struct ParamsValuesChecker g_curve25519ParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { false, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0 }, { false, 0 }, { true, 0 }, { false, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectCurve25519Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -428,9 +446,12 @@ static const struct ExpectParamsValuesChecker g_expectCurve25519Params[] = {
 
 #ifdef HKS_SUPPORT_HMAC_C
 static const struct ParamsValuesChecker g_hmacParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectHmacParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -462,8 +483,10 @@ static const struct ExpectParamsValuesChecker g_expectHmacParams[] = {
 
 #ifdef HKS_SUPPORT_DSA_C
 static const struct ParamsValuesChecker g_dsaParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0 }, { false, 0 }, { true, 0 }, { true, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectDsaParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -487,8 +510,10 @@ static const struct ExpectParamsValuesChecker g_expectDsaParams[] = {
 
 #ifdef HKS_SUPPORT_DH_C
 static const struct ParamsValuesChecker g_dhParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { false, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { false, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectDhParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -512,8 +537,10 @@ static const struct ExpectParamsValuesChecker g_expectDhParams[] = {
 
 #ifdef HKS_SUPPORT_ECDH_C
 static const struct ParamsValuesChecker g_ecdhParamSet[] = {
-    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { false, 0 }, { false, 0 } } },
-    { HKS_CHECK_TYPE_USE_KEY, { { true, 0 }, { false, 0 }, { true, 0 }, { false, 0 }, { false, 0 } } }
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { false, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectEcdhParams[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -763,45 +790,57 @@ static int32_t CheckPurposeValid(uint32_t alg, uint32_t inputPurpose)
 }
 #endif /* _CUT_AUTHENTICATE_ */
 
-static int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *inputParams)
+// If tag is optional param, when tag is empty, it is supported.
+static int32_t GetOptionalParams(const struct HksParamSet *paramSet, uint32_t tag, bool needCheck, uint32_t* value,
+    bool* isAbsent)
+{
+    if (needCheck) {
+        struct HksParam *param;
+        int32_t ret = HksGetParam(paramSet, tag, &param);
+        if (ret == HKS_SUCCESS) {
+            *value = param->uint32Param;
+            return ret;
+        }
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            HKS_LOG_I("tag is empty, but it is supported!");
+            *isAbsent = true;
+            return HKS_SUCCESS;
+        }
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *inputParams)
 {
     int32_t ret = HKS_SUCCESS;
     struct HksParam *checkParam = NULL;
     if (inputParams->keyLen.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &checkParam);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_KEY_SIZE_FAIL,
-            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE);
         inputParams->keyLen.value = checkParam->uint32Param;
-    }
-
-    if (inputParams->padding.needCheck) {
-        ret = HksGetParam(paramSet, HKS_TAG_PADDING, &checkParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
-            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING)
-        inputParams->padding.value = checkParam->uint32Param;
     }
 
     if (inputParams->purpose.needCheck) {
         ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &checkParam);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
-            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE)
+            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE);
         inputParams->purpose.value = checkParam->uint32Param;
     }
 
-    if (inputParams->digest.needCheck) {
-        ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &checkParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL,
-            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_DIGEST)
-        inputParams->digest.value = checkParam->uint32Param;
-    }
-
-    if (inputParams->mode.needCheck) {
-        ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &checkParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL,
-            "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_BLOCK_MODE)
-        inputParams->mode.value = checkParam->uint32Param;
-    }
-
+    ret = GetOptionalParams(paramSet, HKS_TAG_PADDING, inputParams->padding.needCheck, &inputParams->padding.value,
+        &inputParams->padding.isAbsent);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
+        "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING);
+    ret = GetOptionalParams(paramSet, HKS_TAG_DIGEST, inputParams->digest.needCheck, &inputParams->digest.value,
+        &inputParams->digest.isAbsent);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL,
+        "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_DIGEST);
+    ret = GetOptionalParams(paramSet, HKS_TAG_BLOCK_MODE, inputParams->mode.needCheck, &inputParams->mode.value,
+        &inputParams->mode.isAbsent);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL,
+        "get Param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_BLOCK_MODE);
     return ret;
 }
 
@@ -998,6 +1037,9 @@ static int32_t CheckEd25519Signature(uint32_t cmdId, const struct HksBlob *signa
 #ifdef HKS_SUPPORT_RSA_C
 static int32_t CheckRsaGenKeyPadding(const struct ParamsValues *inputParams)
 {
+    if (inputParams->padding.isAbsent) {
+        return HKS_SUCCESS;
+    }
     if ((inputParams->purpose.value & (HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT)) != 0) {
         return HksCheckValue(inputParams->padding.value, g_rsaCipherPadding, HKS_ARRAY_SIZE(g_rsaCipherPadding));
     } else if ((inputParams->purpose.value & (HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY)) != 0) {
@@ -1213,8 +1255,13 @@ static int32_t CheckBlockCipherIvMaterial(const struct HksParamSet *paramSet)
 #endif // defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
 
 #ifdef HKS_SUPPORT_AES_C
-static int32_t CheckAesPadding(uint32_t mode, uint32_t padding)
+static int32_t CheckAesPadding(const struct ParamsValues *inputParams)
 {
+    if ((inputParams->mode.isAbsent) || (inputParams->padding.isAbsent)) {
+        return HKS_SUCCESS;
+    }
+    uint32_t mode = inputParams->mode.value;
+    uint32_t padding = inputParams->padding.value;
     if (mode == HKS_MODE_CBC) {
         return HksCheckValue(padding, g_aesCbcPadding, HKS_ARRAY_SIZE(g_aesCbcPadding));
     }
@@ -1323,8 +1370,13 @@ static int32_t CheckCipherAeMaterial(uint32_t mode, const struct HksParamSet *pa
 #endif
 
 #ifdef HKS_SUPPORT_SM4_C
-static int32_t CheckSm4Padding(uint32_t mode, uint32_t padding)
+static int32_t CheckSm4Padding(const struct ParamsValues *inputParams)
 {
+    if ((inputParams->mode.isAbsent) || (inputParams->padding.isAbsent)) {
+        return HKS_SUCCESS;
+    }
+    uint32_t mode = inputParams->mode.value;
+    uint32_t padding = inputParams->padding.value;
     if (mode == HKS_MODE_CBC) {
         return HksCheckValue(padding, g_sm4CbcPadding, HKS_ARRAY_SIZE(g_sm4CbcPadding));
     }
@@ -1434,6 +1486,78 @@ int32_t HksGetInputParmasByAlg(uint32_t alg, enum CheckKeyType checkType, const 
 
     return ret;
 }
+static int32_t CheckOptionalParams(bool needCheck, bool isAbsent, uint32_t inputValue, const uint32_t* expectValue,
+    uint32_t expectCnt)
+{
+    if (needCheck) {
+        if (!isAbsent) {
+            if (HksCheckValue(inputValue, expectValue, expectCnt) != HKS_SUCCESS) {
+                HKS_LOG_E("CheckOptionalParams invalid argument, %d", inputValue);
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t InitCheckOptionalParams(bool needCheck, bool isAbsent, struct HksParam *param,
+    const uint32_t* expectValue, uint32_t expectCnt)
+{
+    if (needCheck) {
+        if (!isAbsent) {
+            if (HksCheckValue(param->uint32Param, expectValue, expectCnt) != HKS_SUCCESS) {
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
+        } else {
+            HKS_LOG_E("This param is absent, but it is necessary.");
+            return HKS_ERROR_NOT_EXIST;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param)
+{
+    enum CheckKeyType checkType = HKS_CHECK_TYPE_GEN_KEY;
+    if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {
+        if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3) {
+            HKS_LOG_E("check mac or derive, not aes alg, alg: %u", alg);
+            return HKS_ERROR_INVALID_PURPOSE;
+        }
+        if (purpose == HKS_KEY_PURPOSE_DERIVE) {
+            checkType = HKS_CHECK_TYPE_GEN_DERIVE_KEY;
+        } else {
+            checkType = HKS_CHECK_TYPE_GEN_MAC_KEY;
+        }
+    }
+    struct ExpectParamsValues expectValues = EXPECT_PARAMS_VALUES_INIT;
+    int32_t ret = GetExpectParams(alg, checkType, &expectValues);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    switch (tag) {
+        case HKS_TAG_BLOCK_MODE:
+            ret = InitCheckOptionalParams(expectValues.mode.needCheck, isAbsent, param,
+                expectValues.mode.values, expectValues.mode.valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_MODE_FAIL,
+                "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_BLOCK_MODE);
+            break;
+        case HKS_TAG_DIGEST:
+            ret = InitCheckOptionalParams(expectValues.digest.needCheck, isAbsent, param,
+                expectValues.digest.values, expectValues.digest.valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL,
+                "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_DIGEST);
+            break;
+        case HKS_TAG_PADDING:
+            ret = InitCheckOptionalParams(expectValues.padding.needCheck, isAbsent, param,
+                expectValues.padding.values, expectValues.padding.valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
+                "check param fail:0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING);
+            break;
+        default:
+            HKS_LOG_E("invalid tag: %d", tag);
+            ret = HKS_FAILURE;
+    }
+    return ret;
+}
 
 int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const struct ParamsValues *inputParams)
 {
@@ -1441,66 +1565,53 @@ int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const str
     int32_t ret = GetExpectParams(alg, checkType, &expectValues);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    if (expectValues.keyLen.needCheck) {
-        ret = HksCheckValue(inputParams->keyLen.value, expectValues.keyLen.values, expectValues.keyLen.valueCnt);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_SIZE,
-            "check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value)
-    }
-
-    if (expectValues.padding.needCheck) {
-        ret = HksCheckValue(inputParams->padding.value, expectValues.padding.values, expectValues.padding.valueCnt);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
-            "check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
-    }
-
-    if (expectValues.purpose.needCheck) {
-        ret = HksCheckValue(inputParams->purpose.value, expectValues.purpose.values, expectValues.purpose.valueCnt);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PURPOSE,
-            "check purpose not expected, purpose = %" LOG_PUBLIC "u", inputParams->purpose.value)
-    }
-
-    if (expectValues.digest.needCheck) {
-        ret = HksCheckValue(inputParams->digest.value, expectValues.digest.values, expectValues.digest.valueCnt);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_DIGEST,
-            "check  digest not expected, digest = %" LOG_PUBLIC "u", inputParams->digest.value)
-    }
-
-    if (expectValues.mode.needCheck) {
-        ret = HksCheckValue(inputParams->mode.value, expectValues.mode.values, expectValues.mode.valueCnt);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_MODE,
-            "check  mode not expected, mode = %" LOG_PUBLIC "u", inputParams->mode.value)
-    }
-
+    ret = CheckOptionalParams(expectValues.keyLen.needCheck, inputParams->keyLen.isAbsent, inputParams->keyLen.value,
+        expectValues.keyLen.values, expectValues.keyLen.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_SIZE,
+            "check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value);
+    ret = CheckOptionalParams(expectValues.padding.needCheck, inputParams->padding.isAbsent, inputParams->padding.value,
+        expectValues.padding.values, expectValues.padding.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+        "check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
+    ret = CheckOptionalParams(expectValues.purpose.needCheck, inputParams->purpose.isAbsent, inputParams->purpose.value,
+        expectValues.purpose.values, expectValues.purpose.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PURPOSE,
+        "check purpose not expected, purpose = %" LOG_PUBLIC "u", inputParams->purpose.value);
+    ret = CheckOptionalParams(expectValues.digest.needCheck, inputParams->digest.isAbsent, inputParams->digest.value,
+        expectValues.digest.values, expectValues.digest.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_DIGEST,
+        "check digest not expected, digest = %" LOG_PUBLIC "u", inputParams->digest.value);
+    ret = CheckOptionalParams(expectValues.mode.needCheck, inputParams->mode.isAbsent, inputParams->mode.value,
+        expectValues.mode.values, expectValues.mode.valueCnt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_MODE,
+        "check mode not expected, mode = %" LOG_PUBLIC "u", inputParams->mode.value);
     return ret;
 }
 
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inputParams)
 {
-    int32_t ret = HksCheckGenKeyPurpose(alg, inputParams->purpose.value);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
-        "check purpose not expected, purpose = 0x%" LOG_PUBLIC "x", inputParams->purpose.value)
-
+    uint32_t ret = HKS_SUCCESS;
     switch (alg) {
 #ifdef HKS_SUPPORT_RSA_C
         case HKS_ALG_RSA:
             ret = CheckRsaGenKeyPadding(inputParams);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
-                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
             break;
 #endif
 #ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
-            ret = CheckAesPadding(inputParams->mode.value, inputParams->padding.value);
+            ret = CheckAesPadding(inputParams);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
-                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
             break;
 #endif
 #ifdef HKS_SUPPORT_SM4_C
         case HKS_ALG_SM4:
-            ret = CheckSm4Padding(inputParams->mode.value, inputParams->padding.value);
+            ret = CheckSm4Padding(inputParams);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
-                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value)
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
             break;
 #endif
         default:
@@ -1534,6 +1645,9 @@ int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params
 
     if (alg == HKS_ALG_RSA) {
 #ifdef HKS_SUPPORT_RSA_C
+        if (params->padding.isAbsent) {
+            return HKS_SUCCESS;
+        }
         if (params->purpose.value == HKS_KEY_PURPOSE_ENCRYPT) {
             return HksCheckValue(params->padding.value, g_rsaCipherPadding, HKS_ARRAY_SIZE(g_rsaCipherPadding));
         } else if (params->purpose.value == HKS_KEY_PURPOSE_VERIFY) {
@@ -1650,12 +1764,12 @@ int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct P
 #endif
 #ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
-            ret = CheckAesPadding(inputParams->mode.value, inputParams->padding.value);
+            ret = CheckAesPadding(inputParams);
             break;
 #endif
 #ifdef HKS_SUPPORT_SM4_C
         case HKS_ALG_SM4:
-            ret = CheckSm4Padding(inputParams->mode.value, inputParams->padding.value);
+            ret = CheckSm4Padding(inputParams);
             break;
 #endif
         default:
@@ -1762,4 +1876,16 @@ int32_t HksCheckSecureSignParams(uint32_t secureSignType)
     (void)secureSignType;
     return HKS_SUCCESS;
 #endif
+}
+
+/* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+   hash value has been passed in by the user. So the hash value does not need to be free.
+*/
+int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest)
+{
+    if ((alg == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
+        HKS_LOG_I("need to cache the data");
+        return HKS_SUCCESS;
+    }
+    return HKS_FAILURE;
 }

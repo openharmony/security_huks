@@ -19,6 +19,7 @@
 #include <stddef.h>
 
 #include "hks_ability.h"
+#include "hks_base_check.h"
 #include "hks_check_paramset.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
@@ -289,13 +290,15 @@ static int32_t CheckLocalSignVerifyParams(uint32_t cmdId, const struct HksBlob *
 static int32_t GetSignVerifyMessage(struct HksUsageSpec *usageSpec, const struct HksBlob *srcData,
     struct HksBlob *message, bool *needFree)
 {
-    if (usageSpec->algType != HKS_ALG_ED25519) {
+    if (HksCheckNeedCache(usageSpec->algType, usageSpec->digest) == HKS_SUCCESS) {
+        message->size = srcData->size;
+        message->data = srcData->data;
+        *needFree = false;
+    } else {
         message->size = MAX_DEGIST_SIZE;
         message->data = (uint8_t *)HksMalloc(MAX_DEGIST_SIZE);
         HKS_IF_NULL_LOGE_RETURN(message->data, HKS_ERROR_MALLOC_FAIL, "SignVerify malloc message data failed!")
 
-        /* NONEwithECDSA/RSA default sha256 */
-        usageSpec->digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
         int32_t ret = HksCryptoHalHash(usageSpec->digest, srcData, message);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("SignVerify calc hash failed!");
@@ -304,12 +307,7 @@ static int32_t GetSignVerifyMessage(struct HksUsageSpec *usageSpec, const struct
         }
 
         *needFree = true;
-    } else {
-        message->size = srcData->size;
-        message->data = srcData->data;
-        *needFree = false;
     }
-
     return HKS_SUCCESS;
 }
 

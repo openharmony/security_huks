@@ -42,6 +42,7 @@ void HksAccessControlRsaSignVerifyTest::TearDownTestCase(void)
 
 void HksAccessControlRsaSignVerifyTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksAccessControlRsaSignVerifyTest::TearDown()

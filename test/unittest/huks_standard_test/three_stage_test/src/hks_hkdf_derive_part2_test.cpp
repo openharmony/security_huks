@@ -389,6 +389,34 @@ static struct HksParam g_hkdfParams020[] = {
     }
 };
 
+static struct HksParam g_genParams021[] = {
+    {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag =  HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag =  HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }
+};
+static struct HksParam g_hkdfParams021[] = {
+    {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HKDF
+    }, {
+        .tag =  HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag =  HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA512
+    }, {
+        .tag =  HKS_TAG_DERIVE_KEY_SIZE,
+        .uint32Param = DERIVE_KEY_SIZE_64
+    }
+};
+
 /**
  * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0010
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
@@ -817,5 +845,46 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0020, TestSize.Level0)
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hkdfParamSet);
+}
+
+/**
+ * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0021
+ * @tc.desc: alg-HKDF pur-Derive dig-SHA512.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0021, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksHKDFDerive0021");
+    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest0021"), (uint8_t *)"HksHKDFDeriveKeyAliasTest0021" };
+    int32_t ret = HKS_FAILURE;
+
+    /* 1. Generate Key */
+    struct HksParamSet *genParamSet = nullptr;
+    ret = InitParamSet(&genParamSet, g_genParams021, sizeof(g_genParams021) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    /* 2. HKDF Three Stage */
+    struct HksParamSet *hkdfParamSet = nullptr;
+    struct HksParamSet *hkdfFinishParamSet = nullptr;
+    ret = InitParamSet(&hkdfParamSet, g_hkdfParams021, sizeof(g_hkdfParams021) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    // finish paramset
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfStorageParams, sizeof(g_hkdfStorageParams) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    // Init-Update-final
+#ifdef L2_STANDARD
+    HksHkdfDeriveTestCmpCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet);
+#else
+    HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet);
+#endif
+    /* 3. Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&hkdfParamSet);
+    HksFreeParamSet(&hkdfFinishParamSet);
 }
 } // namespace Unittest::HkdfDerive
