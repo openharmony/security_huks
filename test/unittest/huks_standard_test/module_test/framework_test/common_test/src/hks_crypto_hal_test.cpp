@@ -69,7 +69,7 @@ HWTEST_F(HksCryptoHalTest, HksCryptoHalTest001, TestSize.Level0)
     const uint32_t randomSize = 32;
     struct HksBlob random = { .size = randomSize, .data = reinterpret_cast<uint8_t *>(HksMalloc(randomSize)) };
     (void)memset_s(random.data, random.size, 0, random.size);
-    int32_t ret = HksCryptoHalFillPrivRandom(&random);
+    int32_t ret = HksCryptoHalFillRandom(&random);
     ASSERT_EQ(ret, HKS_SUCCESS);
     uint32_t i = 0;
     bool isAllZero = true;
