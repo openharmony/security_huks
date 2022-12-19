@@ -35,6 +35,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/include",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
   ]
 
   sources = []
@@ -150,6 +151,7 @@ ohos_unittest("huks_module_test") {
 
   # utils test
   sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_attest_utils_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_condition_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_file_operator_test.cpp",
   ]
