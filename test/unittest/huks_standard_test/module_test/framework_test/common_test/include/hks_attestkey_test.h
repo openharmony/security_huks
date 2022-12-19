@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef HKS_BASE_CHECK_TEST_H
-#define HKS_BASE_CHECK_TEST_H
+#ifndef HKS_ATTESTKEY_TEST_H
+#define HKS_ATTESTKEY_TEST_H
 
 namespace Unittest::HksServiceKeyAttestationTest {
     void HksKeyAttest001();
+    void HksKeyAttest002();
+    void HksKeyAttest003();
 }
-#endif // HKS_BASE_CHECK_TEST_H
+#endif // HKS_ATTESTKEY_TEST_H

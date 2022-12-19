@@ -141,11 +141,6 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_template_test.cpp",
   ]
 
-  # service test
-  sources += [
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_attestkey_test.cpp",
-  ]
-
   # interface test
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_api_test.cpp",
@@ -161,6 +156,7 @@ ohos_unittest("huks_module_test") {
 
   # service test
   sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_attestkey_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/src/huks_core_dynamic_hal_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
