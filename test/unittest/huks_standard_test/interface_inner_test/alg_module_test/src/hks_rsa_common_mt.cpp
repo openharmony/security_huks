@@ -22,6 +22,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "openssl_rsa_helper.h"
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace OHOS {

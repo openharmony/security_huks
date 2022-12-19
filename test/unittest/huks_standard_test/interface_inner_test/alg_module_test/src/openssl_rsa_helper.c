@@ -21,8 +21,10 @@
 #include <openssl/x509.h>
 #include <securec.h>
 
+#include "hks_openssl_engine.h"
 #include "hks_crypto_hal.h"
 #include "hks_mem.h"
+#include "hks_log.h"
 
 int32_t SaveRsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key)
 {
@@ -328,25 +330,10 @@ int32_t DecryptRsa(const struct HksBlob *inData, struct HksBlob *outData, struct
     return RSA_SUCCESS;
 }
 
-static int32_t GetRsaSignPadding(uint32_t padding, uint32_t *rsaPadding)
+static EVP_PKEY_CTX *InitRsaCtx(struct HksBlob *key, int padding, bool signing, uint32_t len)
 {
-    switch (padding) {
-        case HKS_PADDING_PKCS1_V1_5:
-            *rsaPadding = RSA_PKCS1_PADDING;
-            return HKS_SUCCESS;
-        case HKS_PADDING_PSS:
-            *rsaPadding = RSA_PKCS1_PSS_PADDING;
-            return HKS_SUCCESS;
-        case HKS_PADDING_NONE:
-            *rsaPadding = RSA_NO_PADDING;
-            return HKS_SUCCESS;
-        default:
-            return HKS_ERROR_NOT_SUPPORTED;
-    }
-}
+    const EVP_MD *opensslAlg = GetOpensslAlgFromLen(len);
 
-static EVP_PKEY_CTX *InitRsaCtx(struct HksBlob *key, int padding, bool signing)
-{
     EVP_PKEY *pkey = NULL;
     EVP_PKEY_CTX *ctx = NULL;
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -361,14 +348,12 @@ static EVP_PKEY_CTX *InitRsaCtx(struct HksBlob *key, int padding, bool signing)
             break;
         }
         if (EVP_PKEY_assign_RSA(pkey, rsa) != 1) {
-            EVP_PKEY_free(pkey);
             RSA_free(rsa);
             break;
         }
 
         ctx = EVP_PKEY_CTX_new(pkey, NULL);
         if (ctx == NULL) {
-            EVP_PKEY_free(pkey);
             break;
         }
 
@@ -381,13 +366,11 @@ static EVP_PKEY_CTX *InitRsaCtx(struct HksBlob *key, int padding, bool signing)
             break;
         }
 
-        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-        uint32_t opensslPadding = 0;
-        ret = GetRsaSignPadding(padding, &opensslPadding);
-        if (padding == HKS_PADDING_PSS) {
-            if (EVP_PKEY_CTX_set_rsa_padding(ctx, opensslPadding) != 1) {
-                break;
-            }
+        if (EVP_PKEY_CTX_set_rsa_padding(ctx, padding) != 1) {
+            break;
+        }
+        if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != 1) {
+            break;
         }
         ret = HKS_SUCCESS;
     } while (0);
@@ -401,7 +384,7 @@ static EVP_PKEY_CTX *InitRsaCtx(struct HksBlob *key, int padding, bool signing)
 int32_t OpensslRsaSignWithNoneDegist(struct HksBlob *key, int padding, const struct HksBlob *message,
     struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitRsaCtx(key, padding, true);
+    EVP_PKEY_CTX *ctx = InitRsaCtx(key, padding, true, message->size);
     if (ctx == NULL) {
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
@@ -419,7 +402,7 @@ int32_t OpensslRsaSignWithNoneDegist(struct HksBlob *key, int padding, const str
 int32_t OpensslRsaVerifyWithNoneDegist(struct HksBlob *key, int padding, const struct HksBlob *message,
     struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitRsaCtx(key, padding, false);
+    EVP_PKEY_CTX *ctx = InitRsaCtx(key, padding, false, message->size);
     if (ctx == NULL) {
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }

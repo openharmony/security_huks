@@ -431,6 +431,106 @@ static struct HksParam g_verifyParamsTest088[] = {
     }
 };
 
+static struct HksParam g_genParamsTest089[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_1024
+    }
+};
+
+static struct HksParam g_signParamsTest089[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_1024
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_PSS
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }
+};
+static struct HksParam g_verifyParamsTest089[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_1024
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_PSS
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }
+};
+
+static struct HksParam g_genParamsTest090[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_1024
+    }
+};
+
+static struct HksParam g_signParamsTest090[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_1024
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }
+};
+static struct HksParam g_verifyParamsTest090[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_VERIFY
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_1024
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }
+};
+
 /**
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test081
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-MD5.
@@ -724,6 +824,82 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test088, TestSize.Level
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestParamAbsentCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+    }
+
+    /* Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&signParamSet);
+    HksFreeParamSet(&verifyParamSet);
+}
+
+/**
+ * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test089
+ * @tc.desc: rsa sign and verify; alg-RSA, pad-PKCS1_V1_5 and digest-MD5.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test089, TestSize.Level1)
+{
+    HKS_LOG_E(" Enter HksRsaSignVerifyPart9Test089");
+    int32_t ret = HKS_FAILURE;
+    const char *keyAliasString = "HksRSASignVerifyKeyAliasTest089";
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+
+    ret = InitParamSet(&genParamSet, g_genParamsTest089, sizeof(g_genParamsTest089) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest089, sizeof(g_signParamsTest089) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest089, sizeof(g_verifyParamsTest089) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    /* Generate Key */
+    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+
+    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
+        ret = HksRsaSignVerifyTestNormalAnotherCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
+    }
+
+    /* Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&signParamSet);
+    HksFreeParamSet(&verifyParamSet);
+}
+
+/**
+ * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test090
+ * @tc.desc: rsa sign and verify; alg-RSA, pad-PKCS1_V1_5 and digest-MD5.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test090, TestSize.Level1)
+{
+    HKS_LOG_E(" Enter HksRsaSignVerifyPart9Test090");
+    int32_t ret = HKS_FAILURE;
+    const char *keyAliasString = "HksRSASignVerifyKeyAliasTest090";
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *signParamSet = nullptr;
+    struct HksParamSet *verifyParamSet = nullptr;
+
+    ret = InitParamSet(&genParamSet, g_genParamsTest090, sizeof(g_genParamsTest090) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&signParamSet, g_signParamsTest090, sizeof(g_signParamsTest090) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest090, sizeof(g_verifyParamsTest090) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    /* Generate Key */
+    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+
+    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
+        ret = HksRSASignVerifyTestAbnormalCaseNoPadding(keyAlias, genParamSet, signParamSet, verifyParamSet);
     }
 
     /* Delete Key */

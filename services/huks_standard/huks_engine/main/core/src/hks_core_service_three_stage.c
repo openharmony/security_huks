@@ -520,14 +520,11 @@ static void FreeSignVerifyCtx(const struct HuksKeyNode *keyNode)
         HKS_LOG_E("append cipher get digest param failed!");
         return;
     }
-    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-       hash value has been passed in by the user. So the hash value does not need to be free.
-    */
-    if (algParam->uint32Param != HKS_ALG_ED25519 && digestParam->uint32Param != HKS_DIGEST_NONE) {
-        HksCryptoHalHashFreeCtx(&ctx);
-    } else {
+    if (HksCheckNeedCache(algParam->uint32Param, digestParam->uint32Param) == HKS_SUCCESS) {
         struct HksBlob *cachedData = (struct HksBlob *)ctx;
         FreeCachedData(&cachedData);
+    } else {
+        HksCryptoHalHashFreeCtx(&ctx);
     }
 
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
@@ -865,10 +862,7 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Init cache or hash init.");
-    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-       hash value has been passed in by the user. So the hash value does not need to be calculated.
-    */
-    if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
+    if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
         return SetCacheModeCtx(keyNode);
     } else {
         return CoreHashInit(keyNode, alg);
@@ -889,10 +883,7 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Update cache or hash update.");
-    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-       hash value has been passed in by the user. So the hash value does not need to be calculated.
-    */
-    if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
+    if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
         return UpdateCachedData(keyNode, srcData);
     } else {
         return CoreHashUpdate(keyNode, srcData);
@@ -924,10 +915,7 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Finish cache or hash finish.");
     struct HksBlob signVerifyData = { 0, NULL };
-    /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-       hash value has been passed in by the user. So the hash value does not need to be calculated.
-    */
-    if ((algParam->uint32Param == HKS_ALG_ED25519) || (digest == HKS_DIGEST_NONE)) {
+    if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
         ret = FinishCachedData(keyNode, &message, &signVerifyData);
     } else {
         ret = CoreHashFinish(keyNode, &message, &signVerifyData);
