@@ -44,6 +44,9 @@ int32_t HksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key);
 int32_t EcdhAgreeKey(
     const int keyLen, const struct HksBlob *nativeKey, const struct HksBlob *pubKey, struct HksBlob *sharedKey);
 
+int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct HksBlob *message, struct HksBlob *signature,
+    bool signing);
+
 #ifdef __cplusplus
 #if __cplusplus
 }

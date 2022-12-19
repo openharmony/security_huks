@@ -279,7 +279,7 @@ static void FreeCachedData(void **ctx)
     HKS_FREE_PTR(*ctx);
 }
 
-static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, void **ctx)
+static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, bool hasCalcHash, void **ctx)
 {
     switch (purpose) {
         case HKS_KEY_PURPOSE_AGREE:
@@ -288,7 +288,7 @@ static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, void **ctx)
             break;
         case HKS_KEY_PURPOSE_SIGN:
         case HKS_KEY_PURPOSE_VERIFY:
-            if (alg != HKS_ALG_ED25519) {
+            if (hasCalcHash) {
                 HksCryptoHalHashFreeCtx(ctx);
             } else {
                 FreeCachedData(ctx);
@@ -339,7 +339,21 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
             HksFreeParamSet(paramSet);
             return;
         }
-        KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, &ctx);
+        struct HksParam *param3 = NULL;
+        ret = HksGetParam(*paramSet, HKS_TAG_DIGEST, &param3);
+        if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+        bool hasCalcHash = true;
+        /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+           hash value has been passed in by the user. So the hash value does not need to be free.
+        */
+        if (ret == HKS_SUCCESS) {
+            hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
+        }
+        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519);
+        KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, hasCalcHash, &ctx);
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
     }
     HksFreeParamSet(paramSet);

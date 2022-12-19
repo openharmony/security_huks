@@ -329,10 +329,17 @@ int32_t HksOpensslGetDsaPubKey(const struct HksBlob *input, struct HksBlob *outp
 #endif
 
 #ifdef HKS_SUPPORT_DSA_SIGN_VERIFY
-static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
+static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing,
+    uint32_t len)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
-    HKS_IF_NULL_LOGE_RETURN(opensslAlg, NULL, "get openssl algorithm fail")
+    if (usageSpec->digest == HKS_DIGEST_NONE) {
+        opensslAlg = GetOpensslAlgFromLen(len);
+    }
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return NULL;
+    }
 
     DSA *dsa = InitDsaStruct(key, signing);
     HKS_IF_NULL_LOGE_RETURN(dsa, NULL, "initialize dsa key failed")
@@ -383,7 +390,7 @@ static EVP_PKEY_CTX *InitDSACtx(const struct HksBlob *key, const struct HksUsage
 int32_t HksOpensslDsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitDSACtx(key, usageSpec, true);
+    EVP_PKEY_CTX *ctx = InitDSACtx(key, usageSpec, true, message->size);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize dsa context failed")
 
     size_t sigSize = (size_t)signature->size;
@@ -400,7 +407,7 @@ int32_t HksOpensslDsaSign(const struct HksBlob *key, const struct HksUsageSpec *
 int32_t HksOpensslDsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitDSACtx(key, usageSpec, false);
+    EVP_PKEY_CTX *ctx = InitDSACtx(key, usageSpec, false, message->size);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize dsa context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {

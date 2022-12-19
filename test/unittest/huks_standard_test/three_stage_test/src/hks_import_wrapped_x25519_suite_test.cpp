@@ -263,6 +263,15 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING},
     };
 
+    static struct HksParam g_importX25519PairKeyParamsAnother[] = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256},
+        {.tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR},
+        {.tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256},
+        {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING},
+    };
+
     static struct HksBlob g_importedKeyAliasX25519 = {
         .size = strlen("test_import_key_x25519_x25519"),
         .data = (uint8_t *) "test_import_key_x25519_x25519"
@@ -521,5 +530,36 @@ namespace Unittest::ImportWrappedKey {
         InitCommonTestParamsAndDoImport(&importWrappedKeyTestParams003, g_importX25519PairKeyParams,
                                         sizeof(g_importX25519PairKeyParams) / sizeof(struct HksParam));
         HksClearKeysForWrappedKeyTest(&importWrappedKeyTestParams003);
+    }
+
+   /**
+     * @tc.name: HksImportWrappedX25519SuiteTest.HksImportWrappedKeyTestX25519Suite004
+     * @tc.desc: Test import wrapped x25519 key pair including generate&export x25519 key, generate kek, agree, encrypt,
+     *           of which generate kek, agree, encrypt should done by caller self.When importing the key, only the
+     *           necessary parameters are passed in.
+     * @tc.type: FUNC
+     * @tc.require:issueI611S5
+     */
+    HWTEST_F(HksImportWrappedX25519SuiteTest, HksImportWrappedKeyTestX25519Suite004, TestSize.Level0)
+    {
+        HKS_LOG_E("Enter HksImportWrappedKeyTestX25519Suite004");
+        struct HksBlob plainKey = {0, nullptr};
+        int32_t ret = ConstructImportedCurve25519Key(HKS_ALG_X25519, HKS_CURVE25519_KEY_SIZE_256, HKS_KEY_TYPE_KEY_PAIR,
+                                                     &plainKey);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "construct x25519 pair failed.";
+
+        struct HksImportWrappedKeyTestParams importWrappedKeyTestParams004 = {0};
+
+        importWrappedKeyTestParams004.wrappingKeyAlias = &g_wrappingKeyAliasX25519;
+        importWrappedKeyTestParams004.keyMaterialLen = plainKey.size;
+        importWrappedKeyTestParams004.callerKeyAlias = &g_callerKeyAliasX25519;
+        importWrappedKeyTestParams004.callerKekAlias = &g_callerKekAliasX25519;
+        importWrappedKeyTestParams004.callerKek = &g_callerX25519Kek;
+        importWrappedKeyTestParams004.callerAgreeKeyAlias = &g_callerAgreeKeyAliasX25519;
+        importWrappedKeyTestParams004.importedKeyAlias = &g_importedKeyAliasX25519;
+        importWrappedKeyTestParams004.importedPlainKey = &plainKey;
+        InitCommonTestParamsAndDoImport(&importWrappedKeyTestParams004, g_importX25519PairKeyParamsAnother,
+                                        sizeof(g_importX25519PairKeyParamsAnother) / sizeof(struct HksParam));
+        HksClearKeysForWrappedKeyTest(&importWrappedKeyTestParams004);
     }
 }
