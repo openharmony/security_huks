@@ -24,13 +24,6 @@
 #include "hks_log.h"
 #include "hks_type.h"
 
-struct HksCondition {
-    bool notified;
-    bool waited;
-    pthread_mutex_t mutex;
-    pthread_cond_t cond;
-};
-
 using namespace testing::ext;
 namespace Unittest::HksAttestUtilsTest {
 class HksAttestUtilsTest : public testing::Test {
@@ -68,10 +61,10 @@ void HksAttestUtilsTest::TearDown()
 HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestUtilsTest001");
-    uint8_t buffer[1] = {0};
-    struct HksBlob key = {1, buffer};
-    struct HksBlob oid = {1, buffer};
-    struct HksAsn1Blob fakeBlob = {0, 1, buffer};
+    uint8_t buffer[1] = { 0 };
+    struct HksBlob key = { 1, buffer };
+    struct HksBlob oid = { 1, buffer };
+    struct HksAsn1Blob fakeBlob = { 0, 1, buffer };
     int32_t ret = HksInsertClaim(&key, nullptr, &fakeBlob, HKS_SECURITY_LEVEL_LOW);
     ret = HksInsertClaim(nullptr, &oid, &fakeBlob, HKS_SECURITY_LEVEL_LOW);
     ret = HksInsertClaim(&key, &oid, nullptr, HKS_SECURITY_LEVEL_LOW);
@@ -86,10 +79,10 @@ HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest001, TestSize.Level0)
 HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestUtilsTest002");
-    uint8_t buffer[1] = {0};
-    struct HksBlob key = {1, buffer};
-    struct HksBlob oid = {1, buffer};
-    struct HksAsn1Blob fakeBlob = {0, 1, buffer};
+    uint8_t buffer[1] = { 0 };
+    struct HksBlob key = { 1, buffer };
+    struct HksBlob oid = { 1, buffer };
+    struct HksAsn1Blob fakeBlob = { 0, 1, buffer };
     int32_t ret = HksInsertClaim(&key, &oid, &fakeBlob, HKS_SECURITY_LEVEL_LOW);
     EXPECT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL) << "HksAttestUtilsTest002 failed, ret = " << ret;
 }
