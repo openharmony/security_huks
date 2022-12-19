@@ -78,7 +78,7 @@ int32_t HksCheckValue(uint32_t inputValue, const uint32_t *expectValues, uint32_
 
 int32_t HksGetKeySize(uint32_t alg, const struct HksBlob *key, uint32_t *keySize);
 
-int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose);
+int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose, uint32_t keyFlag);
 
 int32_t HksGetInputParmasByAlg(uint32_t alg, enum CheckKeyType checkType, const struct HksParamSet *paramSet,
     struct ParamsValues *inputParams);

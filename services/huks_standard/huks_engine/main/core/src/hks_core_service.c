@@ -257,7 +257,7 @@ static int32_t GenKeyByAgree(const struct HksBlob *keyIn, const struct HksParamS
 int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    int32_t ret = HksCoreCheckGenKeyParams(keyAlias, paramSet, keyIn, keyOut);
+    int32_t ret = HksCoreCheckGenKeyParams(keyAlias, paramSet, keyIn, keyOut, HKS_KEY_FLAG_GENERATE_KEY);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hks core check generate key params failed, ret:%" LOG_PUBLIC "x!", ret)
 
     uint32_t genType = HKS_KEY_GENERATE_TYPE_DEFAULT;

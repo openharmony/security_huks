@@ -649,6 +649,27 @@ static const uint32_t g_invalidPurpose[][2] = {
     },
 #endif
 };
+
+static const uint32_t g_invalidImportKeyPurpose[][2] = {
+#ifdef HKS_SUPPORT_ECC_C
+    {
+        HKS_ALG_ECC,
+        HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,
+    },
+#endif
+#ifdef HKS_SUPPORT_X25519_C
+    {
+        HKS_ALG_X25519,
+        HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,
+    },
+#endif
+#ifdef HKS_SUPPORT_SM2_C
+    {
+        HKS_ALG_SM2,
+        HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP,
+    },
+#endif
+};
 #endif
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
@@ -758,7 +779,7 @@ static int32_t CheckPurposeUnique(uint32_t inputPurpose)
     return (purposeCount == 1) ? HKS_SUCCESS : HKS_ERROR_INVALID_PURPOSE;
 }
 
-static int32_t GetInvalidPurpose(uint32_t alg, uint32_t *inputPurpose)
+static int32_t GetInvalidPurpose(uint32_t alg, uint32_t *inputPurpose, uint32_t keyFlag)
 {
     int32_t result = HKS_ERROR_INVALID_ALGORITHM;
     if (sizeof(g_invalidPurpose) == 0) {
@@ -772,14 +793,25 @@ static int32_t GetInvalidPurpose(uint32_t alg, uint32_t *inputPurpose)
             break;
         }
     }
+    if ((keyFlag != HKS_KEY_FLAG_IMPORT_KEY) || (sizeof(g_invalidImportKeyPurpose) == 0)) {
+        return result;
+    }
+    // add invalid purpose for import key additionally
+    count = sizeof(g_invalidImportKeyPurpose) / sizeof(g_invalidImportKeyPurpose[0]);
+    for (uint32_t i = 0; i < count; i++) {
+        if (alg == g_invalidImportKeyPurpose[i][0]) {
+            *inputPurpose |= g_invalidImportKeyPurpose[i][1];
+            break;
+        }
+    }
     return result;
 }
 
-static int32_t CheckPurposeValid(uint32_t alg, uint32_t inputPurpose)
+static int32_t CheckPurposeValid(uint32_t alg, uint32_t inputPurpose, uint32_t keyFlag)
 {
     uint32_t invalidPurpose = 0;
 
-    int32_t result = GetInvalidPurpose(alg, &invalidPurpose);
+    int32_t result = GetInvalidPurpose(alg, &invalidPurpose, keyFlag);
     HKS_IF_NOT_SUCC_RETURN(result, result)
 
     if ((inputPurpose & invalidPurpose) != 0) {
@@ -1404,12 +1436,12 @@ int32_t HksCheckValue(uint32_t inputValue, const uint32_t *expectValues, uint32_
 }
 
 #ifndef _CUT_AUTHENTICATE_
-int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose)
+int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose, uint32_t keyFlag)
 {
     int32_t ret = CheckPurposeUnique(inputPurpose);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "gen key purpose not unique")
 
-    return CheckPurposeValid(alg, inputPurpose);
+    return CheckPurposeValid(alg, inputPurpose, keyFlag);
 }
 
 #ifdef HKS_SUPPORT_DSA_C
