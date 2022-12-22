@@ -17,8 +17,8 @@
 #define HKS_ATTESTKEY_TEST_H
 
 namespace Unittest::HksServiceKeyAttestationTest {
-    void HksKeyAttest001();
-    void HksKeyAttest002();
-    void HksKeyAttest003();
+void HksKeyAttest001();
+void HksKeyAttest002();
+void HksKeyAttest003();
 }
 #endif // HKS_ATTESTKEY_TEST_H
