@@ -54,6 +54,7 @@ huks_sources = [
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_local_engine.c",
   "//base/security/huks/frameworks/huks_standard/main/core/src/hks_verifier.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_passthrough.c",
+  "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
