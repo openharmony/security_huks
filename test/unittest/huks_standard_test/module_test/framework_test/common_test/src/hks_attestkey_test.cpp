@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_base_check_test.h"
+#include "hks_attestkey_test.h"
 
 #include <gtest/gtest.h>
 
