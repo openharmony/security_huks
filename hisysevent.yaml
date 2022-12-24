@@ -14,7 +14,7 @@
 
 domain: HUKS
 
-HUKS_FAULT:
+FAULT:
     __BASE: {type: FAULT, level: CRITICAL, desc: fault event for huks}
     FUNCTION: {type: STRING, desc: function name}
     USER_ID: {type: INT32, desc: user id}
