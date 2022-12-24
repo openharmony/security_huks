@@ -22,7 +22,7 @@
 
 using namespace OHOS::HiviewDFX;
 
-static constexpr const char g_eventName[] = "HUKS_FAULT";
+static constexpr const char g_eventName[] = "FAULT";
 static constexpr const char g_tagFunction[] = "FUNCTION";
 static constexpr const char g_tagUserId[] = "USER_ID";
 static constexpr const char g_tagProcessUID[] = "PROCESS_UID";
