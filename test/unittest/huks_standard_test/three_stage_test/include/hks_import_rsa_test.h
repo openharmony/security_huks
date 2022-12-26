@@ -27,6 +27,9 @@ constexpr uint32_t TAG_KEY_SIZE_ID = 2;
 constexpr uint32_t TAG_PADDING_ID = 3;
 constexpr uint32_t TAG_DIGEST_ID = 4;
 constexpr uint32_t TAG_IMPOT_TYPE_ID = 5;
+
+constexpr uint32_t TAG_IMPORT_NEW_INDEX = 3;
+constexpr uint32_t TAG_KEY_SIZE_NEW_INDEX = 3;
 }
 
 #endif // HKS_IMPORT_RSA_TEST_H

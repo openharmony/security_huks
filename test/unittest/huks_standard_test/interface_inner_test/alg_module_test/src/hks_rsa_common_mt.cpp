@@ -22,6 +22,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "openssl_rsa_helper.h"
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -396,8 +397,14 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
         ASSERT_NE(publicKey.data, nullptr);
         (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData, &publicKey, testCaseParams.padding,
-            testCaseParams.keyDigest), testCaseParams.verifyResult);
+        if (testCaseParams.keyDigest == HKS_DIGEST_NONE) {
+            EXPECT_EQ(OpensslRsaVerifyWithNoneDegist(&publicKey, testCaseParams.padding, &plainText, &signData),
+                testCaseParams.verifyResult);
+        } else {
+            EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData,
+                &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
+                testCaseParams.verifyResult);
+        }
         HksFree(publicKey.data);
     }
 
@@ -409,9 +416,8 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
 
 void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCaseParams)
 {
-    struct HksBlob authId = {
-        .size = testCaseParams.alias.length(),
-        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
+    struct HksBlob authId = { .size = testCaseParams.alias.length(),
+                              .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(&testCaseParams.alias[0]))
     };
     struct HksParamSet *paramInSet = NULL;
     HksInitParamSet(&paramInSet);
@@ -430,9 +436,8 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
-    HksBlob plainText = {
-        .size =strlen(hexData),
-        .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
+    HksBlob plainText = { .size =strlen(hexData),
+                          .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(hexData))
     };
 
     HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
@@ -454,10 +459,14 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
             .data = static_cast<uint8_t *>(HksMalloc(rsaPublicKeyInfo.size)) };
         ASSERT_NE(publicKey.data, nullptr);
         ASSERT_EQ(memcpy_s(publicKey.data, publicKey.size, rsaPublicKeyInfo.data, rsaPublicKeyInfo.size), 0);
-
-        EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData,
-            &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
-            testCaseParams.verifyResult);
+        if (testCaseParams.keyDigest == HKS_DIGEST_NONE) {
+            EXPECT_EQ(OpensslRsaVerifyWithNoneDegist(&publicKey, testCaseParams.padding, &plainText, &signData),
+                testCaseParams.verifyResult);
+        } else {
+            EXPECT_EQ(OpensslVerifyRsa(&plainText, &signData,
+                &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
+                testCaseParams.verifyResult);
+        }
         HksFree(publicKey.data);
     }
 
@@ -501,9 +510,15 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
 
     HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(signData.data, nullptr);
-
-    EXPECT_EQ(OpensslSignRsa(&plainText, &signData, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
-        testCaseParams.signResult);
+    if (testCaseParams.keyDigest == HKS_DIGEST_NONE) {
+        EXPECT_EQ(
+            OpensslRsaSignWithNoneDegist(&privateKey, testCaseParams.padding, &plainText, &signData),
+            testCaseParams.signResult);
+    } else {
+        EXPECT_EQ(
+            OpensslSignRsa(&plainText, &signData, &privateKey, testCaseParams.padding, testCaseParams.keyDigest),
+            testCaseParams.signResult);
+    }
     if (testCaseParams.signResult == HKS_SUCCESS) {
         HksParam *pubKeyExport = NULL;
         EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
@@ -561,9 +576,15 @@ void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCa
     EXPECT_EQ(HksImportKey(&authId, paramInSet, &x509Key), HKS_SUCCESS);
 
     SaveRsaKeyToHksBlob(pkey, testCaseParams.keySize, &opensslRsaKeyInfo);
-    EXPECT_EQ(
-        OpensslSignRsa(&plainText, &signData, &opensslRsaKeyInfo, testCaseParams.padding, testCaseParams.keyDigest),
-        testCaseParams.signResult);
+    if (testCaseParams.keyDigest == HKS_DIGEST_NONE) {
+        EXPECT_EQ(
+            OpensslRsaSignWithNoneDegist(&opensslRsaKeyInfo, testCaseParams.padding, &plainText, &signData),
+            testCaseParams.signResult);
+    } else {
+        EXPECT_EQ(
+            OpensslSignRsa(&plainText, &signData, &opensslRsaKeyInfo, testCaseParams.padding, testCaseParams.keyDigest),
+            testCaseParams.signResult);
+    }
     if (testCaseParams.signResult == HKS_SUCCESS) {
         EXPECT_EQ(HksVerify(&authId, paramInSet, &plainText, &signData), testCaseParams.verifyResult);
     }

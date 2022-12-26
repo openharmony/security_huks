@@ -27,6 +27,7 @@
 #include "hks_ability.h"
 #include "hks_attest.h"
 #include "hks_auth.h"
+#include "hks_base_check.h"
 #include "hks_check_paramset.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
@@ -318,32 +319,44 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
     } else if (algParam->uint32Param == HKS_ALG_DSA) {
         return HKS_SUCCESS;
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
-        return HKS_SUCCESS;
+        return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode, paramSet);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
 }
 
-static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const struct HksBlob *srcData,
-    struct HksBlob *message, bool *needFree)
+static int32_t GetSignVerifyMessage(const struct HksParamSet *nodeParamSet, const struct HksBlob *srcData,
+    struct HksBlob *message, bool *needFree, const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    int32_t ret = HksGetParam(nodeParamSet, HKS_TAG_ALGORITHM, &algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "get param get 0x%" LOG_PUBLIC "x failed",
         HKS_TAG_ALGORITHM)
-
-    if (algParam->uint32Param != HKS_ALG_ED25519) {
-        struct HksParam *digestParam = NULL;
+    struct HksParam *digestParam = NULL;
+    ret = HksGetParam(nodeParamSet, HKS_TAG_DIGEST, &digestParam);
+    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+        HKS_LOG_E("SignVerify get digestParam failed!");
+        return HKS_ERROR_CHECK_GET_DIGEST_FAIL;
+    }
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_I("nodeParamSet get digest failed, now get digest from paramSet");
         ret = HksGetParam(paramSet, HKS_TAG_DIGEST, &digestParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "SignVerify get digestParam failed!")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "SignVerify get digestParam failed!");
+    }
 
+    if (HksCheckNeedCache(algParam->uint32Param, digestParam->uint32Param) == HKS_SUCCESS) {
+        message->size = srcData->size;
+        message->data = srcData->data;
+        *needFree = false;
+    } else {
         message->size = MAX_HASH_SIZE;
         message->data = (uint8_t *)HksMalloc(MAX_HASH_SIZE);
-        HKS_IF_NULL_LOGE_RETURN(message->data, HKS_ERROR_MALLOC_FAIL, "SignVerify malloc message data failed!")
+        if (message->data == NULL) {
+            HKS_LOG_E("SignVerify malloc message data failed!");
+            return HKS_ERROR_MALLOC_FAIL;
+        }
 
-        /* NONEwithECDSA/RSA default sha256 */
-        uint32_t digest = (digestParam->uint32Param == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : digestParam->uint32Param;
-        ret = HksCryptoHalHash(digest, srcData, message);
+        ret = HksCryptoHalHash(digestParam->uint32Param, srcData, message);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("SignVerify calc hash failed!");
             HKS_FREE_PTR(message->data);
@@ -351,12 +364,7 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *paramSet, const st
         }
 
         *needFree = true;
-    } else {
-        message->size = srcData->size;
-        message->data = srcData->data;
-        *needFree = false;
     }
-
     return HKS_SUCCESS;
 }
 
@@ -384,7 +392,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
         ret = SignVerifyPreCheck(keyNode, paramSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = GetSignVerifyMessage(keyNode->paramSet, srcData, &message, &needFree);
+        ret = GetSignVerifyMessage(keyNode->paramSet, srcData, &message, &needFree, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "SignVerify calc hash failed!")
 
         struct HksBlob rawKey = { 0, NULL };
@@ -393,8 +401,6 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
         struct HksUsageSpec usageSpec = {0};
         HksFillUsageSpec(paramSet, &usageSpec);
-        /* NONEwithECDSA/RSA default sha256 */
-        usageSpec.digest = (usageSpec.digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec.digest;
         HKS_LOG_I("Sign or verify.");
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);
@@ -845,7 +851,7 @@ int32_t HksCoreDecrypt(const struct HksBlob *key, const struct HksParamSet *para
     return Cipher(HKS_CMD_ID_DECRYPT, key, paramSet, cipherText, plainText);
 }
 
-int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct HksBlob *key)
+static int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct HksBlob *key)
 {
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "check key legality failed")

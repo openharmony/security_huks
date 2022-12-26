@@ -32,9 +32,9 @@
             #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
         #else
             #define HKS_KEY_STORE_PATH            "/storage/maindata"
-            #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"  
+            #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"
         #endif
-    #endif        
+    #endif
 #endif
 #define HKS_KEY_STORE_KEY_PATH        "key"
 #define HKS_KEY_STORE_CERTCHAIN_PATH  "certchain"

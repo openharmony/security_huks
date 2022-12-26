@@ -447,6 +447,67 @@ static struct HksParam g_pbkdf2Params019[] = {
     }
 };
 
+static struct HksParam g_genParams020[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_192
+    }
+};
+static struct HksParam g_pbkdf2Params020[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_PBKDF2
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA384
+    }, {
+        .tag = HKS_TAG_ITERATION,
+        .int32Param = DERIVE_ITERATION
+    }, {
+        .tag = HKS_TAG_SALT,
+        .blob = {
+            sizeof(g_saltdata2),
+            (uint8_t *)g_saltdata2
+        }
+    }, {
+        .tag = HKS_TAG_DERIVE_KEY_SIZE,
+        .uint32Param = DERIVE_KEY_SIZE_48
+    }
+};
+static struct HksParam g_pbkdf2FinishParams020[] = {
+    {
+        .tag = HKS_TAG_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_PERSISTENT
+    }, {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = {
+            strlen("HksPBKDF2DeriveKeyAliasTest020_2"),
+            (uint8_t *)"HksPBKDF2DeriveKeyAliasTest020_2"
+        }
+    }, {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = DERIVE_KEY_SIZE_48
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA384
+    }
+};
+
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0010
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
@@ -948,5 +1009,51 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0020, TestSize.Level0)
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&pbkdf2ParamSet);
+}
+
+/**
+ * @tc.name: HksPbkdf2DerivePart1Test.HksPbkdf2Derive020
+ * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256. and When generating the key, only the necessary parameters are passed in.
+ * @tc.type: FUNC
+ * @tc.require:issueI611S5
+ */
+HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive020, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksPbkdf2Derive020");
+    struct HksBlob keyAlias = { strlen("HksPBKDF2DeriveKeyAliasTest020_1"),
+        (uint8_t *)"HksPBKDF2DeriveKeyAliasTest020_1" };
+    int32_t ret = HKS_FAILURE;
+    /* 1. Generate Key */
+    struct HksParamSet *genParamSet = nullptr;
+    ret = InitParamSet(&genParamSet, g_genParams020, sizeof(g_genParams020) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    /* 2. PBKDF2 Three Stage */
+    struct HksParamSet *pbkdf2ParamSet = nullptr;
+    struct HksParamSet *pbkdf2FinishParamSet = nullptr;
+    ret = InitParamSet(&pbkdf2ParamSet, g_pbkdf2Params020, sizeof(g_pbkdf2Params020) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+    struct HksParam *saltParam = nullptr;
+    HksGetParam(pbkdf2ParamSet, HKS_TAG_SALT, &saltParam);
+    ret = HksGenerateRandom(NULL, &(saltParam->blob));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
+    // Finish paramset
+    ret = InitParamSet(&pbkdf2FinishParamSet, g_pbkdf2FinishParams020,
+        sizeof(g_pbkdf2FinishParams020) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+
+    // init-update-final
+    HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSet);
+    /* 3. Delete Key */
+    ret = HksDeleteKey(&keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+    struct HksBlob deleteKeyAlias = { .size = strlen("HksPBKDF2DeriveKeyAliasTest020_2"),
+        .data = (uint8_t *)"HksPBKDF2DeriveKeyAliasTest020_2"};
+    ret = HksDeleteKey(&deleteKeyAlias, NULL);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&pbkdf2ParamSet);
+    HksFreeParamSet(&pbkdf2FinishParamSet);
 }
 } // namespace Unittest::Pbkdf2Derive

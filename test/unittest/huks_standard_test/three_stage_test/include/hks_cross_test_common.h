@@ -24,6 +24,7 @@ static const std::string g_inData_32  = "Hks_Cross_Test_Rsa_000000_string";
 static const std::string g_inData = "Hks_Cross_Test_00000000000000000000000000000000000000000000000000000000000000000"
                                     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
                                     "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
+static const std::string g_hashData = "0123456789abcdef0123456789abcdef";
 static const uint32_t CROSS_COMMON_SIZE = 2048;
 static const uint32_t DSA_KEY_SIZE = 1024;
 static const uint32_t COMMON_KEY_SIZE = 256;

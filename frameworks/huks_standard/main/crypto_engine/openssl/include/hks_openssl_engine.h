@@ -28,12 +28,20 @@ extern "C" {
 #define HKS_OPENSSL_SUCCESS    1     /* openssl return 1: success */
 #define HKS_OPENSSL_ERROR_LEN 128
 #define BIT_NUM_OF_UINT8 8
+#define AFTER_HASH_LEN_16 16
+#define AFTER_HASH_LEN_20 20
+#define AFTER_HASH_LEN_28 28
+#define AFTER_HASH_LEN_32 32
+#define AFTER_HASH_LEN_48 48
+#define AFTER_HASH_LEN_64 64
 
 void HksLogOpensslError(void);
 
 int32_t HksOpensslCheckBlob(const struct HksBlob *blob);
 
 const EVP_MD *GetOpensslAlg(uint32_t alg);
+
+const EVP_MD *GetOpensslAlgFromLen(uint32_t len);
 
 #ifdef __cplusplus
 }

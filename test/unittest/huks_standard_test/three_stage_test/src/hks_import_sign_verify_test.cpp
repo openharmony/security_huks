@@ -261,6 +261,15 @@ static const uint8_t g_ed25519PriData[] = {
     0xdd, 0xde, 0xf0, 0xac, 0xdb, 0xba, 0x24, 0xfd, 0xf8, 0x3a, 0x7b, 0x32, 0x6e, 0x05, 0xe6, 0x37,
 };
 
+static const uint8_t g_x25519PubData[] = {
+    0x9c, 0xf6, 0x7a, 0x8d, 0xce, 0xc2, 0x7f, 0xa7, 0xd9, 0xfd, 0xf1, 0xad, 0xac, 0xf0, 0xb3, 0x8c,
+    0xe8, 0x16, 0xa2, 0x65, 0xcc, 0x18, 0x55, 0x60, 0xcd, 0x2f, 0xf5, 0xe5, 0x72, 0xc9, 0x3c, 0x54,
+};
+static const uint8_t g_x25519PriData[] = {
+    0x20, 0xd5, 0xbb, 0x54, 0x6f, 0x1f, 0x00, 0x30, 0x4e, 0x33, 0x38, 0xb9, 0x8e, 0x6a, 0xdf, 0xad,
+    0x33, 0x6f, 0x51, 0x23, 0xff, 0x4d, 0x95, 0x26, 0xdc, 0xb0, 0x74, 0xb2, 0x5c, 0x7e, 0x85, 0x6c,
+};
+
 static const uint8_t g_dsaPubData[] = {
     0x30, 0x82, 0x03, 0x47, 0x30, 0x82, 0x02, 0x39, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x38, 0x04,
     0x01, 0x30, 0x82, 0x02, 0x2c, 0x02, 0x82, 0x01, 0x01, 0x00, 0xa3, 0x45, 0xc9, 0x21, 0x8a, 0xce,
@@ -361,15 +370,15 @@ static int32_t CopyKey(const uint8_t *key, uint32_t size, struct HksBlob *outKey
     return HKS_SUCCESS;
 }
 
-static int32_t CopyToInner(uint32_t importType, struct HksBlob *outKey)
+static int32_t CopyToInner(uint32_t alg, uint32_t importType, struct HksBlob *outKey)
 {
     struct HksBlob dataBlob = { 0, nullptr };
     if (importType == HKS_KEY_TYPE_PRIVATE_KEY) {
-        dataBlob.data = (uint8_t *)g_ed25519PriData;
-        dataBlob.size = sizeof(g_ed25519PriData);
+        dataBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PriData : (uint8_t *)g_x25519PriData;
+        dataBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PriData) : sizeof(g_x25519PriData);
     } else {
-        dataBlob.data = (uint8_t *)g_ed25519PubData;
-        dataBlob.size = sizeof(g_ed25519PubData);
+        dataBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PubData : (uint8_t *)g_x25519PubData;
+        dataBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PubData) : sizeof(g_x25519PubData);
     }
 
     return CopyKey(dataBlob.data, dataBlob.size, outKey);
@@ -379,14 +388,20 @@ static int32_t ConstructImportedCurve25519Key(uint32_t alg, uint32_t keySize, ui
     struct HksBlob *outKey)
 {
     if ((importType == HKS_KEY_TYPE_PRIVATE_KEY) || (importType == HKS_KEY_TYPE_PUBLIC_KEY)) {
-        return CopyToInner(importType, outKey);
+        return CopyToInner(alg, importType, outKey);
     }
+    struct HksBlob pubKeyBlob = { 0, nullptr };
+    struct HksBlob privKeyBlob = { 0, nullptr };
+    privKeyBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PriData : (uint8_t *)g_x25519PriData;
+    privKeyBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PriData) : sizeof(g_x25519PriData);
+    pubKeyBlob.data = (alg == HKS_ALG_ED25519) ? (uint8_t *)g_ed25519PubData : (uint8_t *)g_x25519PubData;
+    pubKeyBlob.size = (alg == HKS_ALG_ED25519) ? sizeof(g_ed25519PubData) : sizeof(g_x25519PubData);
 
     struct HksKeyMaterial25519 material;
     material.keyAlg = (enum HksKeyAlg)alg;
     material.keySize = keySize;
-    material.pubKeySize = sizeof(g_ed25519PubData);
-    material.priKeySize = sizeof(g_ed25519PriData);
+    material.pubKeySize = pubKeyBlob.size;
+    material.priKeySize = privKeyBlob.size;
     material.reserved = 0;
 
     uint32_t size = sizeof(material) + material.pubKeySize + material.priKeySize;
@@ -403,14 +418,14 @@ static int32_t ConstructImportedCurve25519Key(uint32_t alg, uint32_t keySize, ui
 
     uint32_t offset = sizeof(material);
     // copy publicData
-    if (memcpy_s(data + offset, size - offset, g_ed25519PubData, sizeof(g_ed25519PubData)) != EOK) {
+    if (memcpy_s(data + offset, size - offset, pubKeyBlob.data, pubKeyBlob.size) != EOK) {
         HksFree(data);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.pubKeySize;
 
     // copy privateData
-    if (memcpy_s(data + offset, size - offset, g_ed25519PriData, sizeof(g_ed25519PriData)) != EOK) {
+    if (memcpy_s(data + offset, size - offset, privKeyBlob.data, privKeyBlob.size) != EOK) {
         HksFree(data);
         return HKS_ERROR_BAD_STATE;
     }
@@ -713,7 +728,7 @@ static int32_t ConstructImportedEccKey(uint32_t keySize, uint32_t importType, st
 
 static int32_t ConstructImportedKey(uint32_t alg, uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
 {
-    if (alg == HKS_ALG_ED25519) {
+    if (alg == HKS_ALG_ED25519 || alg == HKS_ALG_X25519) {
         return ConstructImportedCurve25519Key(alg, keySize, importType, outKey);
     } else if (alg == HKS_ALG_DSA) {
         return ConstructImportedDsaKey(keySize, importType, outKey);
@@ -919,7 +934,6 @@ static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest)
     (void)HksDeleteKey(&pairKeyAlias, nullptr);
     (void)HksDeleteKey(&pubKeyAlias, nullptr);
 }
-
 #ifdef _USE_OPENSSL_
 /**
  * @tc.name: HksImportSignVerifyTest.HksImportSignVerifyTest001

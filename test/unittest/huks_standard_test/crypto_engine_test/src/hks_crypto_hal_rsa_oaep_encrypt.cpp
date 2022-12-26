@@ -21,6 +21,7 @@
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
 #include "hks_mem.h"
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -1507,6 +1508,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_042, Function | 
  */
 HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_043, Function | SmallTest | Level1)
 {
+    HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_043");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_043_PARAMS);
 }
 
@@ -1517,6 +1519,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_043, Function | 
  */
 HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_044, Function | SmallTest | Level1)
 {
+    HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_044");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_044_PARAMS);
 }
 
@@ -1527,6 +1530,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_044, Function | 
  */
 HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_045, Function | SmallTest | Level1)
 {
+    HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_045");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_045_PARAMS);
 }
 
@@ -1537,6 +1541,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_045, Function | 
  */
 HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_046, Function | SmallTest | Level1)
 {
+    HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_046");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_046_PARAMS);
 }
 
@@ -1548,6 +1553,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_046, Function | 
  */
 HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_047, Function | SmallTest | Level1)
 {
+    HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_047");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_047_PARAMS);
 }
 
@@ -1558,6 +1564,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_047, Function | 
  */
 HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_048, Function | SmallTest | Level1)
 {
+    HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_048");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_048_PARAMS);
 }
 #endif
