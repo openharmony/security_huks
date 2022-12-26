@@ -277,6 +277,9 @@ static int32_t CheckGenKeyParamsByAlg(uint32_t alg, const struct HksParamSet *pa
     ret = HksCheckFixedParams(alg, HKS_CHECK_TYPE_GEN_KEY, params);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
+    ret = HksCheckGenKeyPurpose(alg, params->purpose.value);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+        "check purpose not expected, purpose =  %" LOG_PUBLIC "d", params->purpose.value);
     return HksCheckGenKeyMutableParams(alg, params);
 }
 

@@ -81,6 +81,27 @@ int32_t HksAesCipherTestDecrypt(const struct HksBlob *keyAlias,
     return HKS_SUCCESS;
 }
 
+int32_t HksAesCipherTestParamAbsentCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
+{
+    (void)decryptParamSet;
+    /* 1. Generate Key */
+    uint32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    /* 2. Encrypt, init will fail */
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+    ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
+
+    /* 3. Delete Key */
+    EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    return ret;
+}
+
 int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
@@ -91,14 +112,14 @@ int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     };
 
     struct HksParam *modeParam = nullptr;
-    HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
-    if (modeParam->uint32Param == HKS_MODE_ECB) {
+    int32_t ret = HksGetParam(genParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    if ((ret == HKS_SUCCESS) && (modeParam->uint32Param == HKS_MODE_ECB)) {
         inData.size = strlen(tmpInData);
         inData.data = reinterpret_cast<uint8_t *>(tmpInData);
     }
 
     /* 1. Generate Key */
-    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
     if (ret != HKS_SUCCESS) {
         return ret;

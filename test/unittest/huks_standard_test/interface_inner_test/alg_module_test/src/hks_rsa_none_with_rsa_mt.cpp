@@ -15,7 +15,7 @@
 
 #include <gtest/gtest.h>
 #include <openssl/rsa.h>
-
+#include "hks_log.h"
 #include "hks_rsa_common_mt.h"
 
 using namespace testing::ext;
@@ -539,6 +539,7 @@ class HksRsaNoneWithRsaMt : public HksRsaCommonMt, public testing::Test {};
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26500, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26500");
     SignLocalTestCase(HKS_RSA_MT_26500_PARAMS);
 }
 
@@ -549,6 +550,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26500, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26600, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26600");
     SignServiceTestCase(HKS_RSA_MT_26600_PARAMS);
 }
 
@@ -559,6 +561,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26600, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26700, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26700");
     VerifyLocalTestCase(HKS_RSA_MT_26700_PARAMS);
 }
 
@@ -569,6 +572,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26700, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26800, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26800");
     VerifyServiceTestCase(HKS_RSA_MT_26800_PARAMS);
 }
 
@@ -579,6 +583,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26800, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26900, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26900");
     SignLocalTestCase(HKS_RSA_MT_26900_PARAMS);
 }
 
@@ -589,6 +594,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26900, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27000, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27000");
     SignServiceTestCase(HKS_RSA_MT_27000_PARAMS);
 }
 
@@ -599,6 +605,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27000, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27100, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27100");
     VerifyLocalTestCase(HKS_RSA_MT_27100_PARAMS);
 }
 
@@ -609,6 +616,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27100, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27200, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27200");
     VerifyServiceTestCase(HKS_RSA_MT_27200_PARAMS);
 }
 
@@ -619,6 +627,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27200, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27300, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27300");
     SignLocalTestCase(HKS_RSA_MT_27300_PARAMS);
 }
 
@@ -629,6 +638,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27300, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27400, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27400");
     SignServiceTestCase(HKS_RSA_MT_27400_PARAMS);
 }
 
@@ -639,6 +649,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27400, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27500, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27500");
     VerifyLocalTestCase(HKS_RSA_MT_27500_PARAMS);
 }
 
@@ -649,6 +660,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27500, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27600, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27600");
     VerifyServiceTestCase(HKS_RSA_MT_27600_PARAMS);
 }
 
@@ -659,6 +671,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27600, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27700, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27700");
     SignLocalTestCase(HKS_RSA_MT_27700_PARAMS);
 }
 
@@ -669,6 +682,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27700, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27800, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27800");
     SignServiceTestCase(HKS_RSA_MT_27800_PARAMS);
 }
 
@@ -679,6 +693,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27800, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27900, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27900");
     VerifyLocalTestCase(HKS_RSA_MT_27900_PARAMS);
 }
 
@@ -689,6 +704,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27900, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28000, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28000");
     VerifyServiceTestCase(HKS_RSA_MT_28000_PARAMS);
 }
 
@@ -700,6 +716,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28000, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28100, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28100");
     SignLocalTestCase(HKS_RSA_MT_28100_PARAMS);
 }
 
@@ -710,6 +727,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28100, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28200, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28200");
     SignServiceTestCase(HKS_RSA_MT_28200_PARAMS);
 }
 
@@ -720,6 +738,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28200, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28300, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28300");
     VerifyLocalTestCase(HKS_RSA_MT_28300_PARAMS);
 }
 
@@ -730,6 +749,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28300, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28400, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28400");
     VerifyServiceTestCase(HKS_RSA_MT_28400_PARAMS);
 }
 
@@ -740,6 +760,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28400, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28500, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28500");
     SignLocalTestCase(HKS_RSA_MT_28500_PARAMS);
 }
 
@@ -750,6 +771,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28500, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28600, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28600");
     SignServiceTestCase(HKS_RSA_MT_28600_PARAMS);
 }
 
@@ -760,6 +782,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28600, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28700, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28700");
     VerifyLocalTestCase(HKS_RSA_MT_28700_PARAMS);
 }
 
@@ -770,6 +793,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28700, TestSize.Level1)
  */
 HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt28800, TestSize.Level1)
 {
+    HKS_LOG_E(" Enter HksRsaNoneWithRsaMt28800");
     VerifyServiceTestCase(HKS_RSA_MT_28800_PARAMS);
 }
 #endif

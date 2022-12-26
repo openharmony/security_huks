@@ -49,7 +49,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_00100_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -145,7 +145,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_00700_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -241,7 +241,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_01300_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -337,7 +337,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_01900_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -433,7 +433,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_02500_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -529,7 +529,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_03100_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -625,7 +625,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_03700_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -721,7 +721,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_04300_PARAMS = {
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     },
-    .hexData = "0123456789abcdef",
+    .hexData = "0123456789abcdef0123456789abcdef",
     .generateKeyResult = HKS_SUCCESS,
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
@@ -848,8 +848,12 @@ protected:
         HksBlob signature = { .size = ECC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(ECC_MESSAGE_SIZE) };
         ASSERT_NE(signature.data, nullptr);
 
-        EXPECT_EQ(EcdsaSign(&authId, digest, &message, &signature), testCaseParams.signResult);
-
+        if (digest == HKS_DIGEST_NONE) {
+            EXPECT_EQ(SignVerifyWithDigestNone(&authId, &message, &signature, true), testCaseParams.verifyResult);
+        } else {
+            EXPECT_EQ(EcdsaSign(&authId, digest, &message, &signature), testCaseParams.signResult);
+        }
+        
         if (storage == HKS_STORAGE_TEMP) {
             EXPECT_EQ(HksVerify(&pubKey, paramInSet, &message, &signature), testCaseParams.verifyResult);
         } else if (storage == HKS_STORAGE_PERSISTENT) {

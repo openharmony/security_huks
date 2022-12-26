@@ -55,7 +55,7 @@ int32_t HksOpensslAesEncrypt(const struct HksBlob *key, const struct HksUsageSpe
     const struct HksBlob *message, struct HksBlob *cipherText, struct HksBlob *tagAead);
 
 int32_t HksOpensslAesDecrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
-    const struct HksBlob *message, struct HksBlob *cipherText);
+    const struct HksBlob *message, struct HksBlob *plainText);
 #endif /* HKS_SUPPORT_AES_CBC_NOPADDING */
 #endif /* HKS_SUPPORT_AES_C */
 

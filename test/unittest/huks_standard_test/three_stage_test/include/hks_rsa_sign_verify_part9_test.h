@@ -13,17 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef HKS_RSA_SIGN_VERIFY_PART8_TEST_H
-#define HKS_RSA_SIGN_VERIFY_PART8_TEST_H
+#ifndef HKS_RSA_SIGN_VERIFY_PART9_TEST_H
+#define HKS_RSA_SIGN_VERIFY_PART9_TEST_H
 namespace Unittest::RsaSignVerify {
-int HksRsaSignVerifyPart8Test071(void);
-
-int HksRsaSignVerifyPart8Test072(void);
-
-int HksRsaSignVerifyPart8Test073(void);
-
-int HksRsaSignVerifyPart8Test074(void);
-
-int HksRsaSignVerifyPart8Test075(void);
+int HksRsaSignVerifyPart8Test081(void);
+int HksRsaSignVerifyPart8Test082(void);
+int HksRsaSignVerifyPart8Test083(void);
+int HksRsaSignVerifyPart8Test084(void);
+int HksRsaSignVerifyPart8Test085(void);
+int HksRsaSignVerifyPart8Test086(void);
+int HksRsaSignVerifyPart8Test087(void);
 } // namespace Unittest::RsaSignVerify
-#endif // HKS_RSA_SIGN_VERIFY_PART8_TEST_H
+#endif // HKS_RSA_SIGN_VERIFY_PART9_TEST_H

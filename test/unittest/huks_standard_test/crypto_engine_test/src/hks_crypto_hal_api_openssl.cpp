@@ -21,6 +21,7 @@
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
 #include "hks_mem.h"
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace OHOS {
@@ -442,6 +443,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTes
  */
 HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_015, Function | SmallTest | Level0)
 {
+    HKS_LOG_E("Enter HksCryptoHalApiOpenssl_015");
     uint8_t buff[HKS_KEY_BYTES(HKS_ECC_KEY_SIZE_256)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksUsageSpec signSpec = { .algType = HKS_ALG_ECC };
@@ -458,6 +460,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_015, Function | SmallTes
  */
 HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_016, Function | SmallTest | Level0)
 {
+    HKS_LOG_E("Enter HksCryptoHalApiOpenssl_016");
     HksKeySpec spec = {
         .algType = HKS_ALG_ECC,
         .keyLen = HKS_ECC_KEY_SIZE_256,
