@@ -263,4 +263,44 @@ HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest009, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_ERROR_PARAM_NOT_EXIST);
     HksFreeParamSet(&paramSet);
 }
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest010
+ * @tc.desc: tdd GetBlobFromBuffer, expect HKS_ERROR_BUFFER_TOO_SMALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest010");
+    const uint32_t blobSize = 15;
+    const uint32_t srcBlobSize = 15;
+    uint32_t index = 16;
+    uint8_t blobData[blobSize] = { 0 };
+    uint8_t srcBlobData[srcBlobSize] = { 0 };
+    struct HksBlob blob = { .size = blobSize, .data = blobData };
+    struct HksBlob srcBlob = { .size = srcBlobSize, .data = srcBlobData };
+
+    int32_t ret = GetBlobFromBuffer(&blob, &srcBlob, &index);
+    ASSERT_TRUE(ret == HKS_ERROR_BUFFER_TOO_SMALL);
+}
+
+/**
+ * @tc.name: HksIpcSerializationTest.HksIpcSerializationTest011
+ * @tc.desc: tdd GetBlobFromBuffer, expect HKS_ERROR_BUFFER_TOO_SMALL
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksIpcSerializationTest, HksIpcSerializationTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksIpcSerializationTest011");
+    const uint32_t blobSize = 15;
+    const uint32_t srcBlobSize = 15;
+    uint32_t index = 15;
+    uint8_t blobData[blobSize] = { 0 };
+    uint8_t srcBlobData[srcBlobSize] = { 0 };
+    struct HksBlob blob = { .size = blobSize, .data = blobData };
+    struct HksBlob srcBlob = { .size = srcBlobSize, .data = srcBlobData };
+
+    int32_t ret = GetBlobFromBuffer(&blob, &srcBlob, &index);
+    ASSERT_TRUE(ret == HKS_ERROR_BUFFER_TOO_SMALL);
+}
 }
