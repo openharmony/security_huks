@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef HKS_IPC_SERIALIZATRION_TEST_H
-#define HKS_IPC_SERIALIZATRION_TEST_H
+#ifndef HKS_OPENSSL_HASH_TEST_H
+#define HKS_OPENSSL_HASH_TEST_H
 
-namespace Unittest::HksIpcSerializationTest {
-int HksIpcSerializationTest001(void);
-int HksIpcSerializationTest002(void);
-int HksIpcSerializationTest003(void);
-int HksIpcSerializationTest004(void);
-int HksIpcSerializationTest005(void);
-int HksIpcSerializationTest006(void);
-int HksIpcSerializationTest007(void);
-int HksIpcSerializationTest008(void);
-int HksIpcSerializationTest009(void);
-int HksIpcSerializationTest010(void);
-int HksIpcSerializationTest011(void);
+namespace Unittest::HksFrameworkOpensslHashTest {
+void HksFrameworkOpensslHashTest001();
+void HksFrameworkOpensslHashTest002();
+void HksFrameworkOpensslHashTest003();
+void HksFrameworkOpensslHashTest004();
 }
-#endif
+#endif // HKS_OPENSSL_HASH_TEST_H
