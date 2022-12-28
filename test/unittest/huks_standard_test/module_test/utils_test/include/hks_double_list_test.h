@@ -13,20 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef HKS_IPC_SERIALIZATRION_TEST_H
-#define HKS_IPC_SERIALIZATRION_TEST_H
+#ifndef HKS_DOUBLE_LIST_TEST_H
+#define HKS_DOUBLE_LIST_TEST_H
 
-namespace Unittest::HksIpcSerializationTest {
-int HksIpcSerializationTest001(void);
-int HksIpcSerializationTest002(void);
-int HksIpcSerializationTest003(void);
-int HksIpcSerializationTest004(void);
-int HksIpcSerializationTest005(void);
-int HksIpcSerializationTest006(void);
-int HksIpcSerializationTest007(void);
-int HksIpcSerializationTest008(void);
-int HksIpcSerializationTest009(void);
-int HksIpcSerializationTest010(void);
-int HksIpcSerializationTest011(void);
+namespace Unittest::HksDoubleListTest {
+int HksDoubleListTest001(void);
+int HksDoubleListTest002(void);
+int HksDoubleListTest003(void);
+int HksDoubleListTest004(void);
 }
 #endif
