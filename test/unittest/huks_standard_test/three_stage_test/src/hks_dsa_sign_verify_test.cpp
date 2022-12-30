@@ -820,7 +820,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest009, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest009, sizeof(g_verifyParamsTest009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
+        for (uint32_t i = 1; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
             HKS_LOG_E("HksDsaSignVerifyTest009 loop: %d", i);
             ret = HksDsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, i);
         }

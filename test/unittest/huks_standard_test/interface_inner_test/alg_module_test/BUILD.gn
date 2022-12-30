@@ -65,6 +65,8 @@ ohos_moduletest("huks_mt_test") {
     defines = [ "_USE_MBEDTLS_" ]
   }
 
+  defines += [ "_HUKS_LOG_ENABLE_" ]
+
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",

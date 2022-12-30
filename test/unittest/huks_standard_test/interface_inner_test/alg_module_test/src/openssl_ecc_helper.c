@@ -23,6 +23,7 @@
 #include <openssl/x509.h>
 #include <securec.h>
 
+#include "hks_openssl_engine.h"
 #include "hks_crypto_hal.h"
 #include "hks_mem.h"
 #include "hks_log.h"
@@ -349,42 +350,74 @@ int32_t EcdsaSign(const struct HksBlob *key, int digest, const struct HksBlob *m
     return ECC_SUCCESS;
 }
 
+static EVP_PKEY_CTX *InitEcdsaCtx(const struct HksBlob *mainKey, bool sign, uint32_t len)
+{
+    const EVP_MD *opensslAlg = GetOpensslAlgFromLen(len);
+
+    if (opensslAlg == NULL) {
+        HKS_LOG_E("get openssl algorithm fail");
+        return NULL;
+    }
+
+    EC_KEY *eccKey = EccInitKey(mainKey, sign);
+    if (eccKey == NULL) {
+        return NULL;
+    }
+
+    EVP_PKEY *key = EVP_PKEY_new();
+    if (key == NULL) {
+        EC_KEY_free(eccKey);
+        return NULL;
+    }
+
+    if (EVP_PKEY_assign_EC_KEY(key, eccKey) <= 0) {
+        EC_KEY_free(eccKey);
+        EVP_PKEY_free(key);
+        return NULL;
+    }
+
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(key, NULL);
+    if (ctx == NULL) {
+        EVP_PKEY_free(key);
+        return NULL;
+    }
+    int32_t ret;
+    if (sign) {
+        ret = EVP_PKEY_sign_init(ctx);
+    } else {
+        ret = EVP_PKEY_verify_init(ctx);
+    }
+    EVP_PKEY_free(key);
+    if (ret != 1) {
+        EVP_PKEY_CTX_free(ctx);
+        return NULL;
+    }
+    if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != 1) {
+        EVP_PKEY_CTX_free(ctx);
+        return NULL;
+    }
+    return ctx;
+}
+
 int32_t SignVerifyWithDigestNone(const struct HksBlob *key, const struct HksBlob *message, struct HksBlob *signature,
     bool signing)
 {
-    HKS_LOG_E("ECC SignVerifyWithDigestNone begin");
-    int32_t ret = HKS_FAILURE;
-    EC_KEY *eccKey = EccInitKey(key, signing);
-    if (eccKey == NULL) {
-        HKS_LOG_E("EccInitKey initialize ecc key failed");
-        ret = HKS_ERROR_INVALID_KEY_INFO;
-        return ret;
-    }
+    EVP_PKEY_CTX *ctx = InitEcdsaCtx(key, signing, message->size);
 
     if (signing) {
-        uint32_t sigSize = ECDSA_size(eccKey);
-        HKS_LOG_E("signature size is short: signature size: %d, key size: %d", signature->size, sigSize);
-        if (signature->size < sigSize) {
-            EC_KEY_free(eccKey);
-            return ret;
-        }
-
-        if (ECDSA_sign(0, message->data, message->size, signature->data, &sigSize, eccKey) == 0) {
-            HKS_LOG_E("ECDSA_sign failed");
-            EC_KEY_free(eccKey);
+        size_t sigSize = (size_t)signature->size;
+        if (EVP_PKEY_sign(ctx, signature->data, &sigSize, message->data, message->size) != 1) {
+            EVP_PKEY_CTX_free(ctx);
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
-        HKS_LOG_I("real signature size %d", sigSize);
-        signature->size = sigSize;
+        signature->size = (uint32_t)sigSize;
     } else {
-        ret = ECDSA_verify(0, message->data, message->size, signature->data, signature->size, eccKey);
-        if (ret <= 0) {
-            HKS_LOG_E("ECDSA_verify failed");
-            EC_KEY_free(eccKey);
+        if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != 1) {
+            EVP_PKEY_CTX_free(ctx);
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     }
-    EC_KEY_free(eccKey);
+    EVP_PKEY_CTX_free(ctx);
     return HKS_SUCCESS;
 }
 

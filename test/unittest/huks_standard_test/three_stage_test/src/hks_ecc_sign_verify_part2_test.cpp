@@ -33,6 +33,7 @@ public:
 
 void HksEccSignVerifyPart2Test::SetUpTestCase(void)
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksEccSignVerifyPart2Test::TearDownTestCase(void)
@@ -569,7 +570,7 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest013, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest013, sizeof(g_verifyParamsTest013) / sizeof(HksParam));
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
+        for (uint32_t i = 1; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
             HKS_LOG_E("HksEccSignVerifyTest013, loop: %d", i);
             ret = HksEccSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet, i);
         }

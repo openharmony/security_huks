@@ -88,16 +88,16 @@ static int32_t OptionalParamCheck(uint32_t authTag, uint32_t alg, uint32_t purpo
         return HKS_SUCCESS;
     }
     // Parameter check is more strict than above
-    return HksCheckGenKeyMutableParams(authTag, paramValues);
+    return HksCheckGenKeyMutableParams(alg, paramValues);
 }
 
-static int32_t GetAlgAndPurposeParam(const struct HksParamSet *paramSet, struct HksParam **algParam,
-    struct HksParam **purposeParam, struct ParamsValues* paramValues)
+static int32_t GetAlgAndPurposeParam(const struct HksParamSet *keyBlobParamSet, const struct HksParamSet *paramSet,
+    struct HksParam **algParam, struct HksParam **purposeParam, struct ParamsValues* paramValues)
 {
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, algParam);
+    int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_ALGORITHM, algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL,
         "get param  0x%" LOG_PUBLIC "x failed!", HKS_TAG_ALGORITHM);
-    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, purposeParam);
+    ret = HksGetParam(keyBlobParamSet, HKS_TAG_PURPOSE, purposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
         "get param  0x%" LOG_PUBLIC "x failed!", HKS_TAG_PURPOSE);
     return GetInputParams(paramSet, paramValues);
@@ -111,9 +111,9 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksPa
     struct HksParam *requestParam = NULL;
     struct HksParam *algParam = NULL;
     struct HksParam *purposeParam = NULL;
-    struct ParamsValues paramValues = { { false, 0, false }, { true, 0, false }, { false, 0, false },
+    struct ParamsValues paramValues = { { false, 0, false }, { true, 0, false }, { true, 0, false },
         { true, 0, false }, { true, 0, false } };
-    int32_t ret = GetAlgAndPurposeParam(keyBlobParamSet, &algParam, &purposeParam, &paramValues);
+    int32_t ret = GetAlgAndPurposeParam(keyBlobParamSet, paramSet, &algParam, &purposeParam, &paramValues);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("GetAlgAndPurposeParam failed");
         return ret;

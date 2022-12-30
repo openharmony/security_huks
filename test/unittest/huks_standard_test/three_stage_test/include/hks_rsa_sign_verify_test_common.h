@@ -81,6 +81,8 @@ int32_t HksRsaSignVerifyTestParamAbsentCase(struct HksBlob keyAlias,
 
 int32_t HksRSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
+int32_t HksRSASignVerifyTestAbnormalCaseNoPadding(struct HksBlob keyAlias,
+    struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
 int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData, bool isSign);
 } // namespace Unittest::RsaSignVerify
