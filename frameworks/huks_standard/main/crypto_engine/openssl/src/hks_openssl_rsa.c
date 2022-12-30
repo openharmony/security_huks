@@ -424,11 +424,9 @@ static int32_t SetRsaPadding(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usage
     int32_t ret = GetRsaSignPadding(usageSpec->padding, &opensslPadding);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING, "Unsupport padding.")
 
-    if (usageSpec->padding == HKS_PADDING_PSS) {
-        if (EVP_PKEY_CTX_set_rsa_padding(ctx, opensslPadding) != HKS_OPENSSL_SUCCESS) {
-            HksLogOpensslError();
-            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-        }
+    if (EVP_PKEY_CTX_set_rsa_padding(ctx, opensslPadding) != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     return HKS_SUCCESS;
 }
@@ -455,10 +453,15 @@ static EVP_PKEY *InitRsaEvpKey(const struct HksBlob *key, bool signing)
     return pkey;
 }
 
-static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing)
+static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool signing,
+    uint32_t len)
 {
     const EVP_MD *opensslAlg = GetOpensslAlg(usageSpec->digest);
-    if ((usageSpec->digest != HKS_DIGEST_NONE) && (opensslAlg == NULL)) {
+    if (usageSpec->digest == HKS_DIGEST_NONE) {
+        opensslAlg = GetOpensslAlgFromLen(len);
+    }
+
+    if (opensslAlg == NULL) {
         HKS_LOG_E("get openssl algorithm fail");
         return NULL;
     }
@@ -483,8 +486,7 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
 
         ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         HKS_IF_NOT_SUCC_BREAK(SetRsaPadding(ctx, usageSpec))
-        if ((usageSpec->digest != HKS_DIGEST_NONE) &&
-            (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS)) {
+        if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != HKS_OPENSSL_SUCCESS) {
             break;
         }
         ret = HKS_SUCCESS;
@@ -502,7 +504,7 @@ static EVP_PKEY_CTX *InitRsaCtx(const struct HksBlob *key, const struct HksUsage
 int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, true);
+    EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, true, message->size);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize rsa context failed")
 
     size_t sigSize = (size_t)signature->size;
@@ -519,7 +521,7 @@ int32_t HksOpensslRsaSign(const struct HksBlob *key, const struct HksUsageSpec *
 int32_t HksOpensslRsaVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, false);
+    EVP_PKEY_CTX *ctx = InitRsaCtx(key, usageSpec, false, message->size);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize rsa context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
