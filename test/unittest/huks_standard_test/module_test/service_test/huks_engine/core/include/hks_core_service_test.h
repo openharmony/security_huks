@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,5 +27,8 @@ int HksCoreServiceTest007(void);
 int HksCoreServiceTest008(void);
 int HksCoreServiceTest009(void);
 int HksCoreServiceTest010(void);
+int HksCoreServiceTest011(void);
+int HksCoreServiceTest012(void);
+int HksCoreServiceTest013(void);
 }
 #endif
