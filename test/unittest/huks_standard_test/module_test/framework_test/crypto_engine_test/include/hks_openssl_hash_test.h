@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,5 +21,11 @@ void HksFrameworkOpensslHashTest001();
 void HksFrameworkOpensslHashTest002();
 void HksFrameworkOpensslHashTest003();
 void HksFrameworkOpensslHashTest004();
+void HksFrameworkOpensslHashTest005();
+void HksFrameworkOpensslHashTest006();
+void HksFrameworkOpensslHashTest007();
+void HksFrameworkOpensslHashTest008();
+void HksFrameworkOpensslHashTest009();
+void HksFrameworkOpensslHashTest010();
 }
 #endif // HKS_OPENSSL_HASH_TEST_H
