@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -109,5 +109,89 @@ HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest004, TestSize.L
     struct HksBlob msg  = { 0 };
     ret = HksOpensslHashFinal(&ctx, &msg, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksFrameworkOpensslHashTest.HksFrameworkOpensslHashTest005
+ * @tc.desc: test HksOpensslHashInit, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkOpensslHashTest005");
+    void *ctx = nullptr;
+    int32_t ret = HksOpensslHashInit(&ctx, HKS_DIGEST_SHA224);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksOpensslHashFreeCtx(&ctx);
+}
+
+/**
+ * @tc.name: HksFrameworkOpensslHashTest.HksFrameworkOpensslHashTest006
+ * @tc.desc: test HksOpensslHashInit, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkOpensslHashTest006");
+    void *ctx = nullptr;
+    int32_t ret = HksOpensslHashInit(&ctx, HKS_DIGEST_SHA1);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksOpensslHashFreeCtx(&ctx);
+}
+
+/**
+ * @tc.name: HksFrameworkOpensslHashTest.HksFrameworkOpensslHashTest007
+ * @tc.desc: test HksOpensslHashInit, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkOpensslHashTest007");
+    void *ctx = nullptr;
+    int32_t ret = HksOpensslHashInit(&ctx, HKS_DIGEST_SHA384);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksOpensslHashFreeCtx(&ctx);
+}
+
+/**
+ * @tc.name: HksFrameworkOpensslHashTest.HksFrameworkOpensslHashTest008
+ * @tc.desc: test HksOpensslHashInit, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkOpensslHashTest008");
+    void *ctx = nullptr;
+    int32_t ret = HksOpensslHashInit(&ctx, HKS_DIGEST_SHA512);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksOpensslHashFreeCtx(&ctx);
+}
+
+/**
+ * @tc.name: HksFrameworkOpensslHashTest.HksFrameworkOpensslHashTest009
+ * @tc.desc: test HksOpensslHashInit, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest009, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkOpensslHashTest009");
+    void *ctx = nullptr;
+    int32_t ret = HksOpensslHashInit(&ctx, HKS_DIGEST_MD5);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksOpensslHashFreeCtx(&ctx);
+}
+
+/**
+ * @tc.name: HksFrameworkOpensslHashTest.HksFrameworkOpensslHashTest010
+ * @tc.desc: test HksOpensslHashInit, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksFrameworkOpensslHashTest, HksFrameworkOpensslHashTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksFrameworkOpensslHashTest010");
+    void *ctx = nullptr;
+    int32_t ret = HksOpensslHashInit(&ctx, HKS_DIGEST_SM3);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HksOpensslHashFreeCtx(&ctx);
 }
 }
