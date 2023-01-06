@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "hks_asn1.h"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_asn1.c"
 
 #include "hks_log.h"
 #include "hks_param.h"
