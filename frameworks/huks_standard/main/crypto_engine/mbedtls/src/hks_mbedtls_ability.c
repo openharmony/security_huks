@@ -203,11 +203,6 @@ static void RegisterAbilityHmac(void)
 #endif
 }
 
-static void RegisterAbilityGetMainKey(void)
-{
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY, (void *)HksMbedtlsGetMainKey);
-}
-
 static void RegisterAbilityFillRandom(void)
 {
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM, (void *)HksMbedtlsFillRandom);
@@ -232,7 +227,6 @@ int32_t HksCryptoAbilityInit(void)
     RegisterAbilityDerive();
     RegisterAbilityHmac();
     RegisterAbilityHash();
-    RegisterAbilityGetMainKey();
     RegisterAbilityFillRandom();
     RegisterAbilityBnExpMod();
     return HKS_SUCCESS;

@@ -127,6 +127,7 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
 static uint32_t FileSize(const char *fileName)
 {
     if (IsFileExist(fileName) != HKS_SUCCESS) {
+        
         return 0;
     }
 
@@ -181,7 +182,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     return HKS_SUCCESS;
 }
 
-int32_t HksIsFileExist(const char *path, const char *fileName)
+int32_t HksTestIsFileExist(const char *path, const char *fileName)
 {
     if (fileName == NULL) {
         return HKS_ERROR_NULL_POINTER;

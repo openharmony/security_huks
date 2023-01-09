@@ -13,39 +13,68 @@
 
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
+import("//base/security/huks/build/config.gni")
 
 config("huks_config") {
   include_dirs = [ "./" ]
 }
 
-ohos_static_library("libhuks_utils_mutex_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_utils_mutex_static") {
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    ]
+    defines = [
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = [ "hks_mutex.c" ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static" ]
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+    complete_static_lib = true
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  include_dirs = [
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
-  ]
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [ "hks_mutex.c" ]
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static" ]
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
-  complete_static_lib = true
+} else {
+  ohos_static_library("libhuks_utils_mutex_static") {
+    public_configs = [ ":huks_config" ]
+
+    include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    ]
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = [ "hks_mutex.c" ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+    deps = [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
+      "//commonlibrary/utils_lite:utils",
+    ]
+    complete_static_lib = true
+  }
 }

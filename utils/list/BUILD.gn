@@ -18,22 +18,41 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_utils_list_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-  }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  sources = [ "hks_double_list.c" ]
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-  external_deps = [ "c_utils:utils" ]
+if (os_level == "standard") {
+  ohos_static_library("libhuks_utils_list_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
 
-  complete_static_lib = true
+    sources = [ "hks_double_list.c" ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    external_deps = [ "c_utils:utils" ]
+  }
+} else {
+  ohos_static_library("libhuks_utils_list_static") {
+    public_configs = [ ":huks_config" ]
+
+    sources = [ "hks_double_list.c" ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+
+    complete_static_lib = true
+    deps = [ "//commonlibrary/utils_lite:utils" ]
+  }
 }

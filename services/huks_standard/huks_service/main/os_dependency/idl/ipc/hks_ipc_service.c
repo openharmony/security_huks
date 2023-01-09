@@ -818,3 +818,8 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
+
+void HksIpcErrorResponse(const uint8_t *context)
+{
+    HksSendResponse(context, HKS_ERROR_IPC_MSG_FAIL, NULL);
+}

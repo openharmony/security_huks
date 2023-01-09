@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
@@ -18,34 +19,88 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_utils_file_operator_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_utils_file_operator_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+    include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    ]
+
+    defines = [
+      "L2_STANDARD",
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = []
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static" ]
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    sources += [ "hks_file_operator.c" ]
+
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  include_dirs = [
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
-  ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [ "hks_file_operator.c" ]
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static" ]
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
-  complete_static_lib = true
+} else {
+  ohos_static_library("libhuks_utils_file_operator_static") {
+    public_configs = [ ":huks_config" ]
+    include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    ]
+
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = []
+    cflags = [
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+
+    cflags += [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_path}\"" ]
+
+    if (huks_use_lite_storage == true) {
+      cflags += [ "-D_STORAGE_LITE_" ]
+    } else {
+      if (ohos_kernel_type == "liteos_a") {
+        cflags += [ "-D_BSD_SOURCE" ]
+      } else {
+        cflags += [ "-D_DEFAULT_SOURCE" ]
+      }
+    }
+
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static" ]
+
+    complete_static_lib = true
+
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//commonlibrary/utils_lite:utils",
+    ]
+    sources += [ "hks_file_operator_lite.c" ]
+    if (huks_config_file != "") {
+      print(huks_config_file)
+      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    }
+  }
 }

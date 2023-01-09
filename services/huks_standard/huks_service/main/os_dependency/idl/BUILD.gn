@@ -10,6 +10,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
@@ -17,50 +19,99 @@ config("huks_config") {
   include_dirs = [ "ipc" ]
 }
 
-ohos_static_library("libhuks_service_idl_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_service_idl_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+
+    include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough" ]
+    defines = [
+      "L2_STANDARD",
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = [
+      "ipc/hks_ipc_serialization.c",
+      "ipc/hks_ipc_service.c",
+      "ipc/hks_response.cpp",
+      "passthrough/huks_access.c",
+      "passthrough/huks_core_dynamic_hal.c",
+    ]
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    ]
+
+    cflags_cc = [
+      "-DHILOG_ENABLE",
+      "-Wall",
+      "-Werror",
+    ]
+    cflags = cflags_cc
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+
+    external_deps = [ "ipc:ipc_core" ]
+
+    external_deps += [ "access_token:libaccesstoken_sdk" ]
+
+    if (has_os_account_part) {
+      external_deps += [ "os_account:os_account_innerkits" ]
+      defines += [ "HAS_OS_ACCOUNT_PART" ]
+    }
+
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough" ]
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [
-    "ipc/hks_ipc_serialization.c",
-    "ipc/hks_ipc_service.c",
-    "ipc/hks_response.cpp",
-    "passthrough/huks_access.c",
-    "passthrough/huks_core_dynamic_hal.c",
-  ]
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-  ]
-  external_deps = [ "ipc:ipc_core" ]
+} else {
+  ohos_static_library("libhuks_service_idl_small_static") {
+    public_configs = [ ":huks_config" ]
 
-  external_deps += [
-    "access_token:libaccesstoken_sdk",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
+    include_dirs = [
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
+    ]
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = [
+      "ipc/hks_ipc_serialization.c",
+      "ipc/hks_ipc_service.c",
+      "ipc/hks_response_samgr.c",
+      "passthrough/huks_access.c",
+      "passthrough/huks_core_dynamic_hal.c",
+    ]
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_small_static",
+    ]
 
-  if (has_os_account_part) {
-    external_deps += [ "os_account:os_account_innerkits" ]
-    defines += [ "HAS_OS_ACCOUNT_PART" ]
+    cflags_cc = [
+      "-DHILOG_ENABLE",
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+    cflags = cflags_cc
+    complete_static_lib = true
+
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
+    ]
+    if (huks_config_file != "") {
+      print(huks_config_file)
+      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    }
   }
-
-  cflags_cc = [
-    "-DHILOG_ENABLE",
-    "-Wall",
-    "-Werror",
-  ]
-  cflags = cflags_cc
-  complete_static_lib = true
 }

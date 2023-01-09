@@ -11,27 +11,60 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
-ohos_static_library("libhuks_service_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-  }
-  subsystem_name = "security"
-  part_name = "huks"
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  public_deps = [
-    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
-  ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+if (os_level == "standard") {
+  ohos_static_library("libhuks_service_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    defines = [
+      "L2_STANDARD",
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+    ]
 
-  complete_static_lib = true
+    public_deps = [
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
+    ]
+
+    complete_static_lib = true
+
+    cflags = []
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  }
+} else {
+  ohos_static_library("libhuks_service_small_static") {
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+    ]
+
+    public_deps = [
+      "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_small_static",
+
+      # "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_small_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_small_static",
+    ]
+
+    complete_static_lib = true
+
+    cflags = []
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+    deps = [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    if (huks_config_file != "") {
+      print(huks_config_file)
+      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    }
+  }
 }

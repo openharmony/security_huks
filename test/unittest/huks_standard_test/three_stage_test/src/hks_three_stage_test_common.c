@@ -53,7 +53,6 @@ static int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct Hks
     int32_t ret = HksUpdate(handle, paramSet, inData, &tmpOutData);
     HksFree(tmpOutData.data);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksUpdate Failed.");
         return HKS_FAILURE;
     }
     struct HksBlob tmpInData = {
@@ -71,7 +70,6 @@ static int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct Hks
     }
     HksFree(tmpInData.data);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksFinish Failed.");
         return HKS_FAILURE;
     }
     return HKS_SUCCESS;
@@ -122,6 +120,7 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
     uint8_t *lastPtr = inData->data + inData->size - 1;
     struct HksBlob outDataSeg = { MAX_OUTDATA_SIZE, NULL };
     uint8_t *cur = outData->data;
+    uint32_t curSize = outData->size;
     outData->size = 0;
 
     inDataSeg.size = MAX_UPDATE_SIZE;
@@ -158,12 +157,18 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
     if (MallocAndCheckBlobData(&outDataFinish, outDataFinish.size) != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
+
     if (HksFinish(handle, paramSet, &inDataSeg, &outDataFinish) != HKS_SUCCESS) {
         HKS_LOG_E("HksFinish Failed.");
         HksFree(outDataFinish.data);
         return HKS_FAILURE;
     }
-    (void)memcpy_s(cur, outDataFinish.size, outDataFinish.data, outDataFinish.size);
+    
+    if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
+        HKS_LOG_E("memcpy_s failed, ");
+        HksFree(outDataFinish.data);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
     outData->size += outDataFinish.size;
     HksFree(outDataFinish.data);
 
@@ -182,8 +187,14 @@ int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet 
     bool isFinished = false;
 
     if (inData->size <= MAX_UPDATE_SIZE) {
+
+        HKS_LOG_E("TestUpdateFinish inData->size <= MAX_UPDATE_SIZE: %d, %d", inData->size, MAX_UPDATE_SIZE);
+
         return TestLessThanMaxSeg(handle, paramSet, purpose, inData, outData);
     }
+
+    HKS_LOG_E("after TestUpdateFinish inData->size , MAX_UPDATE_SIZE: %d, %d", inData->size, MAX_UPDATE_SIZE);
+
     while (inDataSeg.data <= lastPtr) {
         if (inDataSeg.data + MAX_UPDATE_SIZE <= lastPtr) {
             outDataSeg.size = MAX_OUTDATA_SIZE;

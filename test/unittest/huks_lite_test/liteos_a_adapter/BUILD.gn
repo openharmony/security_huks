@@ -14,12 +14,19 @@
 #
 
 import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
 import("//build/lite/config/component/lite_component.gni")
 import("//build/lite/config/test.gni")
 
 unittest("huks_3.0_test") {
   output_extension = "bin"
-  output_dir = "$root_out_dir/test/unittest/security/"
+
+  if (!hks_enable_test) {
+    output_dir = "$root_out_dir/test/unittest/security/"
+  }
+
+  defines = [ "_HUKS_LOG_ENABLE_" ]
+
   sources = [
     "hks_aes_test.cpp",
     "hks_agreement_test.cpp",
@@ -38,6 +45,8 @@ unittest("huks_3.0_test") {
     "hks_safe_cipher_key_test.cpp",
     "hks_safe_compare_key_test.cpp",
   ]
+
+  sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/hks_compatibility_test.cpp" ]
 
   sources += [
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
@@ -77,17 +86,28 @@ unittest("huks_3.0_test") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
 
+  include_dirs += [ "./include" ]
+
   deps = [
+    "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]
+
+  deps += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_generate_key:huks_test_generate_key" ]
 
   cflags = [
     "-Wall",
     "-Werror",
   ]
+
+  if (huks_config_file != "") {
+    print(huks_config_file)
+    cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+  }
+
   if (disable_authenticate == true) {
-    defines = [ "_CUT_AUTHENTICATE_" ]
+    defines += [ "_CUT_AUTHENTICATE_" ]
   }
 }
 

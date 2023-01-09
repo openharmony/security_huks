@@ -29,18 +29,21 @@
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
+#include "hks_check_white_list.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
 #include "hks_core_service_three_stage.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
+#include "hks_get_mainkey.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_secure_access.h"
 #include "hks_template.h"
+#include "hks_type_inner.h"
 #include "securec.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
@@ -401,7 +404,6 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
         struct HksUsageSpec usageSpec = {0};
         HksFillUsageSpec(paramSet, &usageSpec);
-        HKS_LOG_I("Sign or verify.");
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);
         } else {
@@ -468,8 +470,6 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
             HKS_FREE_PTR(rawKey.data);
             break;
         }
-
-        HKS_LOG_I("Encrypt or decrypt.");
 
         if (cmdId == HKS_CMD_ID_ENCRYPT) {
             ret = CipherEncrypt(&rawKey, paramSet, usageSpec, &tmpInData, outData);
@@ -1078,8 +1078,6 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
         struct HksKeySpec agreeSpec = { 0 };
         HksFillKeySpec(paramSet, &agreeSpec);
 
-        HKS_LOG_I("Agree key.");
-
         ret = HksCryptoHalAgreeKey(&key, peerPublicKey, &agreeSpec, agreedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
         HKS_FREE_PTR(key.data);
@@ -1112,8 +1110,6 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
         struct HksKeySpec derivationSpec = { 0, 0, &derParam };
         HksFillKeySpec(paramSet, &derivationSpec);
         HksFillKeyDerivationParam(paramSet, &derParam);
-
-        HKS_LOG_I("Derive key.");
 
         ret = HksCryptoHalDeriveKey(&key, &derivationSpec, derivedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
@@ -1148,8 +1144,6 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
         ret = HksGetRawKey(keyNode->paramSet, &rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "mac get raw key failed!")
 
-        HKS_LOG_I("Do hmac.");
-
         ret = HksCryptoHalHmac(&rawKey, digestParam->uint32Param, srcData, mac);
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
         HKS_FREE_PTR(rawKey.data);
@@ -1158,6 +1152,141 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     HksFreeKeyNode(&keyNode);
     return ret;
 }
+
+#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
+static bool IsToChangedTag(const uint32_t *tagList, uint32_t tagCount, uint32_t paramTag)
+{
+    uint32_t i = 0;
+    for (; i < tagCount; ++i) {
+        if (paramTag == tagList[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
+    const struct HksProcessInfo *newProcessInfo, struct HksParamSet **outParamSet)
+{
+    uint32_t deleteTags[] = { HKS_TAG_PROCESS_NAME };
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+
+    do {
+        ret = HksInitParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append init operation param set failed")
+        uint32_t i = 0;
+        bool isFault = false;
+        for (; i < paramSet->paramsCnt; ++i) {
+            if (!IsToChangedTag(deleteTags, HKS_ARRAY_SIZE(deleteTags), paramSet->params[i].tag)) {
+                ret = HksAddParams(newParamSet, &(paramSet->params[i]), 1);
+                if (ret != HKS_SUCCESS) {
+                    HKS_LOG_E("append param %" LOG_PUBLIC "u failed", paramSet->params[i].tag);
+                    isFault = true;
+                    break;
+                }
+            } else if (paramSet->params[i].tag == HKS_TAG_PROCESS_NAME){
+                struct HksParam tmpParam;
+                tmpParam.tag = HKS_TAG_PROCESS_NAME;
+                tmpParam.blob = newProcessInfo->processName;
+                ret = HksAddParams(newParamSet, &tmpParam, 1);
+                
+                if (ret != HKS_SUCCESS) {
+                    HKS_LOG_E("append process name failed");
+                    isFault = true;
+                    break;
+                }
+            } else if (paramSet->params[i].tag == HKS_TAG_KEY_VERSION) {
+                struct HksParam tmpParam;
+                tmpParam.tag = HKS_TAG_KEY_VERSION;
+                tmpParam.uint32Param = HKS_KEY_VERSION;
+                ret = HksAddParams(newParamSet, &tmpParam, 1);
+                
+                if (ret != HKS_SUCCESS) {
+                    HKS_LOG_E("append process name failed");
+                    isFault = true;
+                    break;
+                }
+            }
+        }
+        if (isFault) {
+            break;
+        }
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
+
+        *outParamSet = newParamSet;
+        return ret;
+    } while (0);
+
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksAuthWhiteList(const struct HksProcessInfo *processInfo)
+{
+    uint32_t uid = 0;
+    if (processInfo->processName.size == sizeof("0") && HksMemCmp(processInfo->processName.data, "0",
+        processInfo->processName.size) == EOK) { // for uid == 0
+        uid = 0;
+    } else if (processInfo->processName.size == sizeof(uid)) {
+        (void)memcpy_s(&uid, sizeof(uid), processInfo->processName.data, processInfo->processName.size);
+    } else {
+        return HKS_ERROR_NO_PERMISSION;
+    }
+    return HksCheckIsInWhiteList(uid);
+}
+
+static int32_t HksCheckKeyVersion(const struct HksParamSet *paramSet, uint32_t expectVersion)
+{
+    struct HksParam *keyVersion = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key version failed!");
+    if (keyVersion->uint32Param == expectVersion) {
+        return HKS_SUCCESS;
+    }
+
+    // expected old version key not exist
+    return HKS_ERROR_NOT_EXIST;
+}
+
+int32_t HksCoreChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
+    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey)
+{
+    int32_t ret = HksAuthWhiteList(newProcessInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not in white list")
+
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(oldKey);
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate key node failed!")
+
+    ret = HksCheckKeyVersion(keyNode->paramSet, HKS_KEY_BLOB_DUMMY_KEY_VERSION);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not a old key")
+
+    // to do
+    for (uint32_t i = 0; i < keyNode->paramSet->paramsCnt; ++i) {
+        HKS_LOG_I("param %u in paramSet", keyNode->paramSet->params[i].tag);
+    }
+    // to do
+
+    struct HksParamSet *newParamSet = NULL;
+    ret = HksChangeOldKeyParams(keyNode->paramSet, newProcessInfo, &newParamSet);
+    
+    ret = HksBuildKeyBlobWithOutAdd(newParamSet, newKey);
+
+    HksFreeParamSet(&newParamSet);
+    HksFreeKeyNode(&keyNode);
+
+    return ret;
+}
+
+#else
+int32_t HksCoreChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
+    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey)
+{
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
 
 int32_t HksCoreRefreshKeyInfo(void)
 {
@@ -1186,7 +1315,7 @@ static int32_t GetMacKey(const struct HksBlob *salt, struct HksBlob *macKey)
     uint8_t keyBuf[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)] = {0};
     struct HksBlob mk = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), keyBuf };
 
-    int32_t ret = HksCryptoHalGetMainKey(NULL, &mk);
+    int32_t ret = HksGetMainKey(NULL, &mk);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get kek failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksKeyDerivationParam derParam = {
@@ -1272,26 +1401,18 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
         ret = GetPublicKeyInnerFormat(wrappingKey, wrappedKeyData, &peerPublicKey, &partOffset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get peer public key of inner format failed!")
 
-        HKS_LOG_I("Agree shared key.");
-
         /* 2. agree shared key with wrappingAlias's private key and peer public key */
         ret = AgreeSharedSecretWithPeerPublicKey(wrappingKey, &peerPublicKey, unwrapSuite, &agreeSharedSecret,
             paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "agree share secret failed!")
 
-        HKS_LOG_I("Decrypt with shared key.");
-
         /* 4. decrypt kek data with agreed secret */
         ret = DecryptKekWithAgreeSharedSecret(wrappedKeyData, &agreeSharedSecret, &partOffset, &kek);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt kek with agreed secret failed!")
 
-        HKS_LOG_I("Decrypt imported key.");
-
         /* 5. decrypt imported key data with kek */
         ret = DecryptImportedKeyWithKek(wrappedKeyData, &kek, &partOffset, &originKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt origin key failed!")
-
-        HKS_LOG_I("Import key.");
 
         /* 6. call HksCoreImportKey to build key blob */
         ret = HksCoreImportKey(keyAlias, &originKey, paramSet, keyOut);

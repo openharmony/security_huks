@@ -56,7 +56,7 @@ void HksSafeCompareKeyTest::TearDown()
 {
 }
 
-const char *g_storePath = "/storage/maindata/hks_client/key/";
+const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key/";
 const char *g_testOne = "TestOne";
 const char *g_testTwo = "TestTwo";
 

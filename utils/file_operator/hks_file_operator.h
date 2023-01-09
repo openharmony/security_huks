@@ -18,6 +18,12 @@
 
 #include "hks_type.h"
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #define HKS_MAX_FILE_NAME_LEN 512
 
 #ifdef L2_STANDARD

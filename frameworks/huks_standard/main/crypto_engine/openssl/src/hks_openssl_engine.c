@@ -205,13 +205,6 @@ int32_t HksCryptoHalGetPubKey(const struct HksBlob *keyIn, struct HksBlob *keyOu
     return func(keyIn, keyOut);
 }
 
-int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
-{
-    GetMainKey func = (GetMainKey)GetAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY);
-    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
-    return func(message, mainKey);
-}
-
 int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg, struct HksBlob *mac)
 {
     if (CheckBlob(key) != HKS_SUCCESS || CheckBlob(msg) != HKS_SUCCESS) {

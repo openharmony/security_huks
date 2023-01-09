@@ -22,7 +22,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
 #include "securec.h"
 
 int32_t HuksHdiModuleInit(void)
@@ -148,6 +148,12 @@ int32_t HuksHdiMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return HksCoreMac(key, paramSet, srcData, mac);
 }
 
+int32_t HuksHdiChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
+    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey)
+{
+    return HksCoreChangeKeyOwner(oldProcessInfo, oldKey, newProcessInfo, newKey);
+}
+
 #ifdef _STORAGE_LITE_
 int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac)
@@ -192,6 +198,7 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiAgreeKey         = HuksHdiAgreeKey;
     hdiDevicePtr->HuksHdiDeriveKey        = HuksHdiDeriveKey;
     hdiDevicePtr->HuksHdiMac              = HuksHdiMac;
+    hdiDevicePtr->HuksHdiChangeKeyOwner   = HuksHdiChangeKeyOwner;
 #ifdef _STORAGE_LITE_
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif

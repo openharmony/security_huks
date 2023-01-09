@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_client_ipc.h"
 
 #include <stdbool.h>

@@ -17,6 +17,8 @@
 
 #include "samgr_lite.h"
 
+#include "hks_log.h"
+
 void __attribute__((weak)) OHOS_SystemInit(void)
 {
     SAMGR_Bootstrap();

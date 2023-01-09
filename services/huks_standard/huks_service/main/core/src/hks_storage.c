@@ -1274,7 +1274,7 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
     return ret;
 }
 
-#ifndef __LITEOS_M__
+#ifdef HKS_ENABLE_EVENT_DELETE
 static int32_t ConstructUserIdPath(const char *userId, char *userIdPath, uint32_t pathLen)
 {
     if (strncpy_s(userIdPath, pathLen, HKS_KEY_STORE_PATH, strlen(HKS_KEY_STORE_PATH)) != EOK) {

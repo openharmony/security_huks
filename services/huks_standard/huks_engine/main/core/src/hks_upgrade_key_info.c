@@ -27,6 +27,7 @@
 
 #include "hks_common_check.h"
 #include "hks_crypto_hal.h"
+#include "hks_get_mainkey.h"
 #include "hks_get_process_info.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
@@ -228,7 +229,7 @@ static int32_t GetKek(const struct HksBlob *salt, struct HksBlob *kek)
 {
     uint8_t mainKeyData[HKS_KEY_BLOB_MAIN_KEY_SIZE] = {0};
     struct HksBlob mainKey = { HKS_KEY_BLOB_MAIN_KEY_SIZE, mainKeyData };
-    int32_t ret = HksCryptoHalGetMainKey(NULL, &mainKey);
+    int32_t ret = HksGetMainKey(NULL, &mainKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get main key failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksKeyDerivationParam derParam = {
