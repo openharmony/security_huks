@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Huawei Device Co., Ltd.
+# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -142,6 +142,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_errorcode_adapter_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_param_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_template_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_common_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_hash_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/os_dependency_test/src/hks_ipc_check_test.cpp",
   ]
@@ -164,6 +165,7 @@ ohos_unittest("huks_module_test") {
   # service test
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_attestkey_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_check_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/src/huks_core_dynamic_hal_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
@@ -171,6 +173,7 @@ ohos_unittest("huks_module_test") {
 
   # engine test
   sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_asn1_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_core_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keynode_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_secure_access_test.cpp",

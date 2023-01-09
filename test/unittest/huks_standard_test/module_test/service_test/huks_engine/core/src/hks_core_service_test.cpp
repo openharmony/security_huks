@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,9 @@
 #include "hks_type_inner.h"
 
 #include "hks_client_service.h"
-#include "hks_core_service.h"
 #include "hks_storage.h"
+
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c"
 
 using namespace testing::ext;
 namespace Unittest::HksCoreServiceTest {
@@ -272,7 +273,7 @@ static const struct HksBlob g_userId = { sizeof(USER_ID_INT), (uint8_t *)(&USER_
 static const uint32_t KEY_BLOB_DEFAULT_SIZE = 4096;
 
 /**
- * @tc.name: HksCoreServiceTest.HksCoreServiceTest001
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest010
  * @tc.desc: tdd HksCoreExportPublicKey with wrong access token id, expect HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
@@ -301,5 +302,50 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest010, TestSize.Level0)
     HksFree(keyOutBlob.data);
     HksFree(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest011
+ * @tc.desc: tdd CheckAgreeKeyIn with key, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest011");
+    const uint32_t keySize = 1;
+    uint8_t keyData[keySize] = { 0 };
+    struct HksBlob key = { .size = keySize, .data = keyData };
+    int32_t ret = CheckAgreeKeyIn(&key);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest012
+ * @tc.desc: tdd CheckAgreeKeyIn with key, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest012");
+    const uint32_t tooBigger = 9999;
+    struct Hks25519KeyPair keyPair = { .privateBufferSize = tooBigger, .publicBufferSize = 0 };
+    struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
+    int32_t ret = CheckAgreeKeyIn(&key);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest013
+ * @tc.desc: tdd CheckAgreeKeyIn with key, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest013");
+    const uint32_t tooBigger = 9999;
+    struct Hks25519KeyPair keyPair = { .privateBufferSize = 0, .publicBufferSize = tooBigger };
+    struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
+    int32_t ret = CheckAgreeKeyIn(&key);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 }
