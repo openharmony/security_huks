@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,7 +272,7 @@ static int32_t MakeDirIfNotExist(const char *path)
 #ifdef HKS_SUPPORT_THREAD
 static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *fileName)
 {
-    char *fullPath = HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    char *fullPath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_RETURN(fullPath, NULL)
 
     int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
