@@ -93,6 +93,9 @@ int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct Hks
 int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac);
 
+int32_t HuksAccessChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
+    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey);
+
 #ifdef __cplusplus
 }
 #endif

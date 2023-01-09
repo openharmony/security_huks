@@ -18,58 +18,119 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_mbedtls_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-  }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
+if (os_level == "standard") {
+  ohos_static_library("libhuks_mbedtls_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
 
-  include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [
-    "src/hks_crypto_ed25519.c",
-    "src/hks_mbedtls_ability.c",
-    "src/hks_mbedtls_aes.c",
-    "src/hks_mbedtls_bn.c",
-    "src/hks_mbedtls_common.c",
-    "src/hks_mbedtls_dh.c",
-    "src/hks_mbedtls_dsa.c",
-    "src/hks_mbedtls_ecc.c",
-    "src/hks_mbedtls_ecdh.c",
-    "src/hks_mbedtls_ecdsa.c",
-    "src/hks_mbedtls_engine.c",
-    "src/hks_mbedtls_hash.c",
-    "src/hks_mbedtls_hmac.c",
-    "src/hks_mbedtls_kdf.c",
-    "src/hks_mbedtls_rsa.c",
-    "src/hks_mbedtls_x25519.c",
-  ]
+    defines = [
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+      "L2_STANDARD",
+    ]
+    sources = [
+      "src/hks_crypto_ed25519.c",
+      "src/hks_mbedtls_ability.c",
+      "src/hks_mbedtls_aes.c",
+      "src/hks_mbedtls_bn.c",
+      "src/hks_mbedtls_common.c",
+      "src/hks_mbedtls_dh.c",
+      "src/hks_mbedtls_dsa.c",
+      "src/hks_mbedtls_ecc.c",
+      "src/hks_mbedtls_ecdh.c",
+      "src/hks_mbedtls_ecdsa.c",
+      "src/hks_mbedtls_engine.c",
+      "src/hks_mbedtls_hash.c",
+      "src/hks_mbedtls_hmac.c",
+      "src/hks_mbedtls_kdf.c",
+      "src/hks_mbedtls_rsa.c",
+      "src/hks_mbedtls_x25519.c",
+    ]
 
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
-  if (huks_dependency_mbedtls_path != "") {
-    deps += [ huks_dependency_mbedtls_path ]
-  } else {
-    deps += [ "//third_party/mbedtls" ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+    if (huks_dependency_mbedtls_path != "") {
+      deps += [ huks_dependency_mbedtls_path ]
+    } else {
+      deps += [ "//third_party/mbedtls" ]
+    }
+    if (huks_dependency_openssl_path != "") {
+      deps += [ huks_dependency_openssl_path ]
+    } else {
+      deps += [ "//third_party/openssl:libcrypto_shared" ]
+    }
+    cflags = [
+      "-DHILOG_ENABLE",
+      "-Wall",
+      "-Werror",
+    ]
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
-  if (huks_dependency_openssl_path != "") {
-    deps += [ huks_dependency_openssl_path ]
-  } else {
-    deps += [ "//third_party/openssl:libcrypto_shared" ]
+} else {
+  ohos_static_library("libhuks_mbedtls_small_static") {
+    public_configs = [ ":huks_config" ]
+
+    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+      "MBEDTLS_ECP_RESTARTABLE=1",
+    ]
+    sources = [
+      "src/hks_crypto_ed25519.c",
+      "src/hks_mbedtls_ability.c",
+      "src/hks_mbedtls_aes.c",
+      "src/hks_mbedtls_bn.c",
+      "src/hks_mbedtls_common.c",
+      "src/hks_mbedtls_dh.c",
+      "src/hks_mbedtls_dsa.c",
+      "src/hks_mbedtls_ecc.c",
+      "src/hks_mbedtls_ecdh.c",
+      "src/hks_mbedtls_ecdsa.c",
+      "src/hks_mbedtls_engine.c",
+      "src/hks_mbedtls_hash.c",
+      "src/hks_mbedtls_hmac.c",
+      "src/hks_mbedtls_kdf.c",
+      "src/hks_mbedtls_rsa.c",
+      "src/hks_mbedtls_x25519.c",
+    ]
+
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
+    if (huks_dependency_mbedtls_path != "") {
+      deps += [ huks_dependency_mbedtls_path ]
+    } else {
+      deps += [ "//third_party/mbedtls:mbedtls_shared" ]
+    }
+    if (huks_dependency_openssl_path != "") {
+      deps += [ huks_dependency_openssl_path ]
+    } else {
+      deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
+    }
+    cflags = [
+      "-DHILOG_ENABLE",
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+    complete_static_lib = true
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    if (huks_config_file != "") {
+      print(huks_config_file)
+      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    }
   }
-  cflags = [
-    "-DHILOG_ENABLE",
-    "-Wall",
-    "-Werror",
-  ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  complete_static_lib = true
 }

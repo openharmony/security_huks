@@ -60,4 +60,4 @@ void HksMutexClose(HksMutex *mutex)
 
     pthread_mutex_destroy(&mutex->mutex);
     HksFree(mutex);
-}
+}

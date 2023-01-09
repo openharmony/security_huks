@@ -17,16 +17,5 @@
 #define HKS_SAMGR_CLIENT_H
 
 #include "hks_samgr_server.h"
-#include "iproxy_client.h"
-
-typedef struct {
-    INHERIT_CLIENT_IPROXY;
-    int32_t (*IpcAsyncCallBack)(IUnknown *iUnknown, enum HksMessageType type, const struct HksBlob *inBlob,
-        struct HksBlob *outBlob);
-} HksMgrClientApi;
-
-typedef struct {
-    INHERIT_IUNKNOWNENTRY(HksMgrClientApi);
-} HksMgrClientEntry;
 
 #endif

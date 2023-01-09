@@ -20,6 +20,10 @@
 #include "hks_samgr_server.h"
 #include "hks_template.h"
 
+#include <string.h>
+
+static char g_userId[] = "0";
+
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response)
 {
     if (context == NULL) {
@@ -28,27 +32,39 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     }
     HksIpcContext *ipcContext = (HksIpcContext *)context;
     IpcIo *reply = ipcContext->reply;
-    IpcIoPushInt32(reply, result);
+
+    bool ipcRet = WriteInt32(reply, result);
+    if (!ipcRet) {
+        HKS_LOG_E("write response result failed!");
+        return;
+    }
+
     if (response == NULL) {
-        IpcIoPushBool(reply, true);
+        ipcRet = WriteBool(reply, true);
+        if (!ipcRet) {
+            HKS_LOG_E("write response isHasOutData failed!");
+        }
         return;
     }
-    IpcIoPushBool(reply, false);
-    uint32_t len = response->size;
-    uint8_t *dataBuff = (uint8_t *)HksMalloc(len);
-    if (dataBuff == NULL) {
-        HKS_LOG_E("malloc fail.");
+
+    ipcRet = WriteBool(reply, false);
+    if (!ipcRet) {
+        HKS_LOG_E("write response isHasOutData failed!");
         return;
     }
-    if (memcpy_s(dataBuff, len, response->data, len) != EOK) {
-        HKS_FREE_PTR(dataBuff);
+    
+    ipcRet = WriteUint32(reply, response->size);
+    if (!ipcRet) {
+        HKS_LOG_E("write response out data size failed!");
         return;
     }
-    BuffPtr responseBuff = {
-        .buffSz = len,
-        .buff = (void *)dataBuff
-    };
-    IpcIoPushDataBuffWithFree(reply, &responseBuff, HksFree);
+
+    if (response->size > 0 && response->data != NULL) {
+        ipcRet = WriteBuffer(reply, response->data, response->size);
+        if (!ipcRet) {
+            HKS_LOG_E("write response out data failed!");
+        }
+    }
 }
 
 int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processName)
@@ -69,5 +85,30 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
     }
     processName->size = sizeof(callingUid);
     processName->data = name;
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo)
+{
+    if ((context == NULL) || (processInfo == NULL)) {
+        HKS_LOG_D("Don't need get process name in hosp.");
+        return HKS_SUCCESS;
+    }
+    HksIpcContext *ipcContext = (HksIpcContext *)context;
+    uint32_t callingUid = (uint32_t)(ipcContext->callingUid);
+    uint8_t *name = (uint8_t *)HksMalloc(sizeof(callingUid));
+    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
+    (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
+    processInfo->processName.data = name;
+    processInfo->processName.size = sizeof(callingUid);
+
+    uint8_t *userId = (uint8_t *)HksMalloc(strlen(g_userId));
+    HKS_IF_NULL_LOGE_RETURN(userId, HKS_ERROR_MALLOC_FAIL, "GetProcessUserId malloc failed.")
+    processInfo->userId.data = userId;
+    processInfo->userId.size = strlen(g_userId);
+    (void)memcpy_s(processInfo->userId.data, processInfo->userId.size, g_userId, strlen(g_userId));
+    
+    processInfo->accessTokenId = 0;
+
     return HKS_SUCCESS;
 }

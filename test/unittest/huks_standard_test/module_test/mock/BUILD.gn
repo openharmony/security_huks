@@ -33,10 +33,7 @@ ohos_unittest("huks_mock_test") {
 
   sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/ipc/src/huks_access_test.cpp" ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HUKS_LOG_ENABLE_",
-  ]
+  defines = [ "_HUKS_LOG_ENABLE_" ]
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   defines += [ "_USE_OPENSSL_" ]
 

@@ -1,0 +1,115 @@
+#
+# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
+import("//build/ohos.gni")
+
+config("public_huks_config") {
+  include_dirs = [
+    ".",
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+  ]
+}
+
+ohos_static_library("huks_test_generate_key") {
+  sources = []
+
+  sources += [
+    "./hks_test_modify_old_key.c",
+  ]
+
+  include_dirs = [
+    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+  ]
+
+  include_dirs += [ "." ]
+
+  public_configs = [ ":public_huks_config" ]
+
+  deps = [
+    "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
+  ]
+
+  sources += [
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_auth.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
+    "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
+  ]
+
+  deps += [
+    "//base/security/huks/frameworks/huks_standard/main:huks_small_frameworks",
+    "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
+    "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+    "//base/security/huks/utils/list:libhuks_utils_list_static",
+    "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+
+    # to do
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
+  ]
+ 
+  deps += 
+  [
+    "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+    "//commonlibrary/utils_lite:utils",
+  ]
+
+  include_dirs += [
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    "//commonlibrary/c_utils/base/include",
+    "//base/security/huks/utils/crypto_adapter",
+    "//base/security/huks/utils/file_operator",
+    "//base/security/huks/utils/list",
+    "//base/security/huks/utils/mutex",
+  ]
+
+  defines = []
+
+  if (huks_use_mbedtls) {
+    defines += [ "HKS_USE_MBEDTLS" ]
+  }
+
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+
+  cflags += [ "-DHKS_KEY_VERSION=1" ]
+  
+  cflags += [ "-flto" ]
+
+  if (huks_use_hardware_root_key == true) {
+    cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+  }
+  
+  cflags += [ "-D_BSD_SOURCE" ]
+  cflags += [ "-D_HUKS_LOG_ENABLE_" ]
+  cflags += [ "-DGET_DEV_UDID_ENABLE" ]
+
+  if (huks_config_file != "") {
+    print(huks_config_file)
+    cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+  }
+}

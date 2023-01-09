@@ -42,4 +42,10 @@ declare_args() {
 
   # specify the OpenSSL huks depends on
   huks_dependency_openssl_path = ""
+
+  # specify the uid white list for change key owner
+  huks_uid_white_list_define = "{}"
+
+  # specify the key version
+  huks_key_version = "2"
 }

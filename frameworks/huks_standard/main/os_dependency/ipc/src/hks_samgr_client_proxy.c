@@ -14,177 +14,161 @@
  */
 
 #include "hks_samgr_client.h"
+
+#include "hks_message_code.h"
 #include "hks_template.h"
-#include "liteipc_adapter.h"
 
-#define PER_SECOND 1000000 /* OS_SYS_US_PER_SECOND */
-#define SLEEP_SECOND_TIME (0.1 * PER_SECOND)
-#define SLEEP_SECOND_TIMEOUT (0.1 * PER_SECOND)
-#define IPC_MSG_OBJ_SZ_MAX 1
+#include "iproxy_client.h"
+#include "registry.h"
 
-volatile struct HksBlob g_outBlob;
-volatile bool g_messageRecived = false;
-volatile int32_t g_result = HKS_ERROR_UNKNOWN_ERROR;
-volatile int32_t g_sleepTimeout = SLEEP_SECOND_TIMEOUT;
+#include <unistd.h>
 
-static void UpdaeGlobalStatus(uint32_t outBlobSize, bool messageRecived, int32_t result, int32_t sleepTime)
+static int32_t SynchronizeOutput(struct HksIpcHandle *reply, struct HksBlob *outBlob)
 {
-    g_outBlob.size = outBlobSize;
-    g_result = result;
-    g_sleepTimeout = sleepTime;
-    g_messageRecived = messageRecived;
-}
-
-static int32_t SynchronizeOutput(struct HksBlob *outBlob)
-{
-    while (!g_messageRecived) {
-        g_sleepTimeout -= SLEEP_SECOND_TIME;
-        usleep(SLEEP_SECOND_TIME);
-        if (g_sleepTimeout < 0) {
-            /* Check g_outBlob.data and free mem */
-            UpdaeGlobalStatus(0, false, g_result, SLEEP_SECOND_TIMEOUT);
-            HKS_FREE_PTR(g_outBlob.data);
-            return HKS_ERROR_COMMUNICATION_TIMEOUT;
-        }
+    if (reply == NULL || reply->io == NULL) {
+        HKS_LOG_E("get ipc reply failed!");
+        return HKS_ERROR_IPC_MSG_FAIL;
     }
-    if ((outBlob != NULL) && (g_outBlob.data != NULL) && (g_outBlob.size != 0)) {
-        if (outBlob->size < g_outBlob.size) {
-            HKS_FREE_PTR(g_outBlob.data);
-            g_outBlob.size = 0;
-            return HKS_ERROR_INVALID_ARGUMENT;
-        } else {
-            if (memcpy_s(outBlob->data, outBlob->size, g_outBlob.data, g_outBlob.size) != EOK) {
-                HKS_FREE_PTR(g_outBlob.data);
-                g_outBlob.size = 0;
-                return HKS_ERROR_INVALID_ARGUMENT;
+
+    if (reply->state != HKS_IPC_MSG_OK) {
+        HKS_LOG_E("ipc reply failed, ret = %d", reply->state);
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+
+    int32_t callBackResult = HKS_ERROR_IPC_MSG_FAIL;
+    do {
+        bool ipcRet = ReadInt32(reply->io, &callBackResult);
+        if (!ipcRet) {
+            callBackResult = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
+
+        bool isNoneResponse = true;
+        ipcRet = ReadBool(reply->io, &isNoneResponse);
+        if (!ipcRet) {
+            callBackResult = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
+        if (isNoneResponse) {
+            break;
+        }
+
+        if (outBlob != NULL) {
+            uint32_t buffSize = 0;
+            ipcRet = ReadUint32(reply->io, &buffSize);
+            if (!ipcRet) {
+                callBackResult = HKS_ERROR_IPC_MSG_FAIL;
+                break;
             }
-            outBlob->size = g_outBlob.size;
-            HKS_FREE_PTR(g_outBlob.data);
-            g_outBlob.size = 0;
-            return HKS_SUCCESS;
+            if (buffSize == 0) {
+                HKS_LOG_E("ipc reply with no out data");
+                break;
+            }
+
+            // the ipc will ensure the validity of data-reading within limited and valid data size
+            const uint8_t *tmpUint8Array = ReadBuffer(reply->io, buffSize);
+            if (tmpUint8Array == NULL) {
+                callBackResult = HKS_ERROR_IPC_MSG_FAIL;
+                break;
+            }
+
+            if (memcpy_s(outBlob->data, outBlob->size, tmpUint8Array, buffSize) != EOK) {
+                callBackResult = HKS_ERROR_BUFFER_TOO_SMALL;
+                break;
+            }
+            outBlob->size = buffSize;
         }
-    }
-    UpdaeGlobalStatus(g_outBlob.size, false, g_result, SLEEP_SECOND_TIMEOUT);
-    return g_result;
+    } while (0);
+    
+    return callBackResult;
 }
 
 static int CurrentCallback(IOwner owner, int code, IpcIo *reply)
 {
-    g_result = IpcIoPopInt32(reply);
-    BOOL isNoneResponse = IpcIoPushBool(reply);
-    if (isNoneResponse) {
-        UpdaeGlobalStatus(0, true, g_result, SLEEP_SECOND_TIMEOUT);
-        g_outBlob.data = NULL;
-        return HKS_SUCCESS;
-    }
-    BuffPtr *buffRsv = IpcIoPopDataBuff(reply);
-    if (buffRsv == NULL) {
-        g_messageRecived = true;
-        return HKS_ERROR_NULL_POINTER;
-    }
-    size_t len = buffRsv->buffSz;
-    if ((buffRsv->buff == NULL) || (len == 0)) {
-        g_messageRecived = true;
+    struct HksIpcHandle *curReply = (struct HksIpcHandle *)owner;
+
+    if (memcpy_s(curReply->io->bufferCur, curReply->io->bufferLeft, reply->bufferCur, reply->bufferLeft) != EOK) {
+        HKS_LOG_E("data copy for curReply failed, cur size is %d, reply size is %d", curReply->io->bufferLeft,
+            reply->bufferLeft);
+        curReply->state = HKS_IPC_MSG_ERROR;
+        curReply->io->bufferLeft = 0;
         return HKS_ERROR_IPC_MSG_FAIL;
     }
-    uint8_t *dataBuf = HksMalloc(len);
-    if (dataBuf == NULL) {
-        g_messageRecived = true;
-        return HKS_ERROR_NULL_POINTER;
-    }
-    if (memcpy_s(dataBuf, len, buffRsv->buff, len) != EOK) {
-        HKS_FREE_PTR(dataBuf);
-        g_messageRecived = true;
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-
-    FreeBuffer(NULL, buffRsv->buff);
-    g_outBlob.data = dataBuf;
-    UpdaeGlobalStatus(len, true, g_result, SLEEP_SECOND_TIMEOUT);
+    curReply->state = HKS_IPC_MSG_OK;
+    curReply->io->bufferLeft = reply->bufferLeft;
     return HKS_SUCCESS;
 }
 
-static int32_t IpcAsyncCall(IUnknown *iUnknown, enum HksMessage type, const struct HksBlob *inBlob,
-    struct HksBlob *outBlob);
+static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct HksBlob *inBlob,
+    struct HksBlob *outBlob)
 {
     /* Check input and inBlob */
     int32_t ret = CheckBlob(inBlob);
-    HksMgrClientApi *proxy = (HksMgrClientApi *)iUnknown;
+    IClientProxy *proxy = (IClientProxy *)iUnknown;
     if ((ret != HKS_SUCCESS) || (proxy == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
 
-    /* Init Global Variables and int g_outBlob dataBuff to NULL */
-    UpdaeGlobalStatus(0, false, HKS_ERROR_UNKNOWN_ERROR, SLEEP_SECOND_TIMEOUT);
-    HKS_FREE_PTR(g_outBlob.data);
-
     IpcIo request;
-    char data[IPC_IO_DATA_MAX];
-    IpcIoInit(&request, data, IPC_IO_DATA_MAX, IPC_MSG_OBJ_SZ_MAX);
+    char dataReq[MAX_IO_SIZE];
+    IpcIoInit(&request, dataReq, MAX_IO_SIZE, MAX_OBJ_NUM);
 
-    /* Construct the data to be sent */
-    uint32_t len = inBlob->size;
-    uint8_t *dataBuff = HksMalloc(len);
-    if (dataBuff == NULL) {
-        HKS_FREE_PTR(g_outBlob.data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    uint32_t outBlobSize = 0;
+    if (outBlob != NULL) {
+        outBlobSize = outBlob->size;
     }
-    const BuffPtr requestBuff = { len, (const void*)dataBuff };
 
-    IpcIoPushDataBuffWithFree(&request, &requestBuff, HksFree);
-    ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, NULL, CurrentCallback);
-    HKS_IF_NOT_SUCC_RETURN(ret, HKS_FAILURE)
-    return SynchronizeOutput(outBlob);
-}
+    do {
+        bool ipcRet = WriteUint32(&request, outBlobSize);
+        if (!ipcRet) {
+            ret = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
 
-void *HKS_CreatClient(const char *service, const char *feature, uint32 size)
-{
-    (void)service;
-    (void)feature;
-    uint32 len = size + sizeof(HksMgrClientEntry);
-    uint8 *client = malloc(len);
-    HKS_IF_NULL_RETURN(client, NULL)
+        ipcRet = WriteUint32(&request, inBlob->size);
+        if (!ipcRet) {
+            ret = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
+        ipcRet = WriteBuffer(&request, inBlob->data, inBlob->size);
+        if (!ipcRet) {
+            ret = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
 
-    (void)memset_s(client, len, 0, len);
-    HksMgrClientEntry *entry = (HksMgrClientEntry *)&client[size];
-    entry->ver = ((uint16)CLIENT_PROXY_VER | (uint16)DEFAULT_VERSION);
-    entry->ref = 1;
-    entry->iUnknown.QueryInterface = IUNKNOWN_QueryInterface;
-    entry->iUnknown.AddRef = IUNKNOWN_AddRef;
-    entry->iUnknown.Release = IUNKNOWN_Release;
-    entry->iUnknown.Invoke = NULL;
-    entry->iUnknown.IpcAsyncCallBack = IpcAsyncCall;
-    return client;
-}
+        char dataReply[MAX_IO_SIZE];
+        IpcIo reply;
+        IpcIoInit(&reply, dataReply, MAX_IO_SIZE, MAX_OBJ_NUM);
 
-void HKS_DestroyClient(const char *service, const char *feature, void *iproxy)
-{
-    free(iproxy);
-}
+        struct HksIpcHandle replyHandle = { .io = &reply, .state = HKS_IPC_MSG_BASE };
 
-int32_t HksSamgrInitialize(void)
-{
-    int32_t ret = SAMGR_RegisterFectory(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE, HKS_CreatClient, HKS_DestroyClient);
-    HKS_IF_NOT_SUCC_RETURN(ret, HKS_FAILURE)
-    SAMGR_Bootstrap();
-    return HKS_SUCCESS;
+        ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, (IOwner)&replyHandle, CurrentCallback);
+        HKS_IF_NOT_SUCC_BREAK(ret, HKS_ERROR_IPC_MSG_FAIL)
+
+        return SynchronizeOutput(&replyHandle, outBlob);
+    } while (0);
+
+    return ret;
 }
 
 static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob)
 {
-    HksMgrClientApi *clientProxy;
+    IClientProxy *clientProxy = NULL;
     IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
-    HKS_IF_NULL_RETURN(iUnknown, HKS_ERROR_NULL_POINTER)
-
-    int32_t ret = iUnknown->QueryInterface(iUnknown, DEFAULT_VERSION, (void **)&clientProxy);
-    if ((clientProxy == NULL) || (ret != HKS_SUCCESS)) {
+    if (iUnknown == NULL) {
+        HKS_LOG_E("get HKS_SAMGR_FEATRURE api failed");
         return HKS_ERROR_NULL_POINTER;
     }
 
-    HKS_IF_NULL_RETURN(clientProxy->IpcAsyncCallBack, HKS_ERROR_NULL_POINTER)
+    int32_t ret = iUnknown->QueryInterface(iUnknown, DEFAULT_VERSION, (void **)&clientProxy);
+    if ((clientProxy == NULL) || (ret != 0)) {
+        HKS_LOG_E("get clientProxy failed");
+        return HKS_ERROR_NULL_POINTER;
+    }
 
-    ret = clientProxy->IpcAsyncCallBack((IUnknown *)clientProxy, type, inBlob, outBlob);
+    ret = HksIpcCall((IUnknown *)clientProxy, type, inBlob, outBlob);
     (void)clientProxy->Release((IUnknown *)clientProxy);
+
     return ret;
 }
 

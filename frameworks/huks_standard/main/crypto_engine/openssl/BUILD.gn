@@ -18,55 +18,112 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_openssl_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-  }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
+if (os_level == "standard") {
+  ohos_static_library("libhuks_openssl_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [
-    "src/hks_openssl_ability.c",
-    "src/hks_openssl_aes.c",
-    "src/hks_openssl_bn.c",
-    "src/hks_openssl_common.c",
-    "src/hks_openssl_curve25519.c",
-    "src/hks_openssl_dh.c",
-    "src/hks_openssl_dsa.c",
-    "src/hks_openssl_ecc.c",
-    "src/hks_openssl_ed25519tox25519.c",
-    "src/hks_openssl_engine.c",
-    "src/hks_openssl_hash.c",
-    "src/hks_openssl_hmac.c",
-    "src/hks_openssl_kdf.c",
-    "src/hks_openssl_rsa.c",
-    "src/hks_openssl_sm2.c",
-    "src/hks_openssl_sm3.c",
-    "src/hks_openssl_sm4.c",
-  ]
+    defines = [
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+      "L2_STANDARD",
+    ]
+    sources = [
+      "src/hks_openssl_ability.c",
+      "src/hks_openssl_aes.c",
+      "src/hks_openssl_bn.c",
+      "src/hks_openssl_common.c",
+      "src/hks_openssl_curve25519.c",
+      "src/hks_openssl_dh.c",
+      "src/hks_openssl_dsa.c",
+      "src/hks_openssl_ecc.c",
+      "src/hks_openssl_ed25519tox25519.c",
+      "src/hks_openssl_engine.c",
+      "src/hks_openssl_hash.c",
+      "src/hks_openssl_hmac.c",
+      "src/hks_openssl_kdf.c",
+      "src/hks_openssl_rsa.c",
+      "src/hks_openssl_sm2.c",
+      "src/hks_openssl_sm3.c",
+      "src/hks_openssl_sm4.c",
+    ]
 
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
-  if (huks_dependency_openssl_path != "") {
-    deps += [ huks_dependency_openssl_path ]
-  } else {
-    deps += [ "//third_party/openssl:libcrypto_shared" ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+
+    cflags = [
+      "-DHILOG_ENABLE",
+      "-Wall",
+      "-Werror",
+    ]
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    if (huks_dependency_openssl_path != "") {
+      deps += [ huks_dependency_openssl_path ]
+    } else {
+      deps += [ "//third_party/openssl:libcrypto_shared" ]
+    }
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
+    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   }
-  external_deps = [
-    "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
-  cflags = [
-    "-DHILOG_ENABLE",
-    "-Wall",
-    "-Werror",
-  ]
-  complete_static_lib = true
+} else {
+  ohos_static_library("libhuks_openssl_small_static") {
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+    ]
+    sources = [
+      "src/hks_openssl_ability.c",
+      "src/hks_openssl_aes.c",
+      "src/hks_openssl_bn.c",
+      "src/hks_openssl_common.c",
+      "src/hks_openssl_curve25519.c",
+      "src/hks_openssl_dh.c",
+      "src/hks_openssl_dsa.c",
+      "src/hks_openssl_ecc.c",
+      "src/hks_openssl_ed25519tox25519.c",
+      "src/hks_openssl_engine.c",
+      "src/hks_openssl_hash.c",
+      "src/hks_openssl_hmac.c",
+      "src/hks_openssl_kdf.c",
+      "src/hks_openssl_rsa.c",
+      "src/hks_openssl_sm2.c",
+      "src/hks_openssl_sm3.c",
+      "src/hks_openssl_sm4.c",
+    ]
+
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
+
+    cflags = [
+      "-DHILOG_ENABLE",
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+    complete_static_lib = true
+
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//commonlibrary/utils_lite:utils",
+    ]
+    if (huks_dependency_openssl_path != "") {
+      deps += [ huks_dependency_openssl_path ]
+    } else {
+      deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
+    }
+    if (huks_config_file != "") {
+      print(huks_config_file)
+      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    }
+  }
 }

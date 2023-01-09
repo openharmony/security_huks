@@ -27,10 +27,6 @@
 #include "hks_log.h"
 #include "hks_template.h"
 
-#ifndef _HARDWARE_ROOT_KEY_
-#include "hks_rkc.h"
-#endif
-
 /* the custom data of random seed */
 const unsigned char g_hksRandomSeedCustom[] = {
     /* H     K     S */
@@ -106,30 +102,4 @@ int32_t HksMbedtlsFillRandom(struct HksBlob *randomData)
     mbedtls_ctr_drbg_free(&ctrDrbg);
     mbedtls_entropy_free(&entropy);
     return ret;
-}
-
-int32_t HksMbedtlsGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
-{
-    (void)message;
-
-#ifndef _HARDWARE_ROOT_KEY_
-    return HksRkcGetMainKey(mainKey);
-#else
-    /*
-    * Currently, root key is implemented using stubs.
-    * Product adaptation needs to be performed based on hardware capabilities.
-    */
-    uint8_t stubBuf[] = {
-        0x0c, 0xb4, 0x29, 0x39, 0xb7, 0x46, 0xa6, 0x4b,
-        0xdd, 0xf3, 0x75, 0x4c, 0xe0, 0x73, 0x91, 0x51,
-        0xc4, 0x88, 0xbe, 0xa4, 0xe1, 0x87, 0xb5, 0x42,
-        0x06, 0x27, 0x08, 0x21, 0xe2, 0x8f, 0x9b, 0xc1,
-    };
-
-    if (memcpy_s(mainKey->data, mainKey->size, stubBuf, sizeof(stubBuf)) != EOK) {
-        HKS_LOG_E("memcpy failed, get stub main key failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    return HKS_SUCCESS;
-#endif
 }

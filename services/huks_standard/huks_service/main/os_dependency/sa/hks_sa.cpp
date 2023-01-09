@@ -21,9 +21,9 @@
 #include "system_ability_definition.h"
 
 #include "hks_client_service.h"
-#include "hks_ipc_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_message_handler.h"
 #include "hks_template.h"
 
 #ifdef SUPPORT_COMMON_EVENT
@@ -45,48 +45,6 @@ const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
 const uint32_t MAX_DELAY_TIMES = 100;
 const uint32_t DELAY_INTERVAL = 200000; /* delay 200ms waiting for system event */
 #endif
-
-using HksIpcHandlerFuncProc = void (*)(const struct HksBlob *msg, const uint8_t *context);
-
-using HksIpcThreeStageHandlerFuncProc = void (*)(const struct HksBlob *msg, struct HksBlob *outData,
-    const uint8_t *context);
-
-struct HksIpcEntryPoint {
-    enum HksMessage msgId;
-    HksIpcHandlerFuncProc handler;
-};
-
-struct HksIpcThreeStagePoint {
-    enum HksMessage msgId;
-    HksIpcThreeStageHandlerFuncProc handler;
-};
-
-static struct HksIpcThreeStagePoint g_hksIpcThreeStageHandler[] = {
-    { HKS_MSG_INIT, HksIpcServiceInit },
-    { HKS_MSG_UPDATE, HksIpcServiceUpdate },
-    { HKS_MSG_FINISH, HksIpcServiceFinish },
-    { HKS_MSG_ABORT, HksIpcServiceAbort },
-};
-
-static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
-    { HKS_MSG_GEN_KEY, HksIpcServiceGenerateKey },
-    { HKS_MSG_IMPORT_KEY, HksIpcServiceImportKey },
-    { HKS_MSG_EXPORT_PUBLIC_KEY, HksIpcServiceExportPublicKey },
-    { HKS_MSG_IMPORT_WRAPPED_KEY, HksIpcServiceImportWrappedKey },
-    { HKS_MSG_DELETE_KEY, HksIpcServiceDeleteKey },
-    { HKS_MSG_GET_KEY_PARAMSET, HksIpcServiceGetKeyParamSet },
-    { HKS_MSG_KEY_EXIST, HksIpcServiceKeyExist },
-    { HKS_MSG_GENERATE_RANDOM, HksIpcServiceGenerateRandom },
-    { HKS_MSG_SIGN, HksIpcServiceSign },
-    { HKS_MSG_VERIFY, HksIpcServiceVerify },
-    { HKS_MSG_ENCRYPT, HksIpcServiceEncrypt },
-    { HKS_MSG_DECRYPT, HksIpcServiceDecrypt },
-    { HKS_MSG_AGREE_KEY, HksIpcServiceAgreeKey },
-    { HKS_MSG_DERIVE_KEY, HksIpcServiceDeriveKey },
-    { HKS_MSG_MAC, HksIpcServiceMac },
-    { HKS_MSG_GET_KEY_INFO_LIST, HksIpcServiceGetKeyInfoList },
-    { HKS_MSG_ATTEST_KEY, HksIpcServiceAttestKey },
-};
 
 #ifdef SUPPORT_COMMON_EVENT
 static void SubscribEvent()

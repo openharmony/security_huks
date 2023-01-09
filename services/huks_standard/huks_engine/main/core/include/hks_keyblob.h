@@ -28,6 +28,10 @@
 #define HKS_KEY_BLOB_AT_HMAC_KEY_SIZE 256
 #define HKS_KEY_BLOB_AT_HMAC_KEY_BYTES 32
 
+#define HKS_KEY_BLOB_DUMMY_KEY_VERSION 1
+#define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
+#define HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL 1
+
 enum HksKeyNodeStatus {
     HKS_KEYNODE_INACTIVE = 0x0,
     HKS_KEYNODE_ACTIVE = 0x2f2f,
@@ -50,6 +54,8 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode);
 
 int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+
+int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
 int32_t HksGetEncryptKey(struct HksBlob *mainKey);
 

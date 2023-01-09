@@ -25,6 +25,7 @@
 #include <string.h>
 
 #include "hks_api_adapter.h"
+
 #include "hks_client_ipc.h"
 #include "hks_local_engine.h"
 #include "hks_ability.h"

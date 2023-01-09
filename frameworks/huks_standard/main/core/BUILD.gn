@@ -11,43 +11,77 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_core_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_core_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+
+    defines = [
+      "_HARDWARE_ROOT_KEY_",
+      "_HUKS_LOG_ENABLE_",
+      "L2_STANDARD",
+    ]
+    sources = [ "./src/hks_local_engine.c" ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    sources += [ "./src/hks_verifier.c" ]
+    include_dirs = [ "//third_party/openssl/include/" ]
+    deps += [ "//third_party/openssl:libcrypto_shared" ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  include_dirs = [
-    "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include/",
-  ]
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [
-    "./src/hks_local_engine.c",
-    "./src/hks_verifier.c",
-  ]
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//third_party/openssl:libcrypto_shared",
-  ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
-  complete_static_lib = true
+} else {
+  ohos_static_library("libhuks_core_small_static") {
+    public_configs = [ ":huks_config" ]
+
+    defines = [
+      "_HUKS_LOG_ENABLE_",
+    ]
+
+    sources = [ "./src/hks_local_engine.c" ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+      "-fPIC",
+    ]
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
+
+    complete_static_lib = true
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    if (huks_config_file != "") {
+      print(huks_config_file)
+      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    }
+    if (huks_dependency_mbedtls_path != "") {
+      deps += [ huks_dependency_mbedtls_path ]
+    } else {
+      deps += [ "//third_party/mbedtls" ]
+    }
+    if (huks_dependency_openssl_path != "") {
+      deps += [ huks_dependency_openssl_path ]
+    } else {
+      deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
+    }
+  }
 }
