@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CLIENT_SERVICE_TEST_H
-#define HKS_CLIENT_SERVICE_TEST_H
+#ifndef HKS_OPENSSL_COMMON_TEST_H
+#define HKS_OPENSSL_COMMON_TEST_H
 
-namespace Unittest::HksClientServiceTest {
-int HksClientServiceTest001(void);
-int HksClientServiceTest002(void);
-int HksClientServiceTest003(void);
-int HksClientServiceTest004(void);
-int HksClientServiceTest005(void);
-
-// error test for access token id
-int HksClientServiceTest006(void);
-int HksClientServiceTest007(void);
-int HksClientServiceTest008(void);
-
-int HksClientServiceTest009(void);
+namespace Unittest::HksFrameworkOpensslCommonTest {
+void HksFrameworkOpensslCommonTest001();
+void HksFrameworkOpensslCommonTest002();
+void HksFrameworkOpensslCommonTest003();
 }
-#endif
+#endif // HksFrameworkOpensslCommonTest
