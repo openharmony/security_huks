@@ -78,9 +78,7 @@ if (os_level == "standard") {
       cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
     }
 
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
     sources = [ "./posix/hks_mem.c" ]
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]

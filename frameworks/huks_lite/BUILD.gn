@@ -30,10 +30,9 @@ group("huks_server") {
   if (os_level == "small") {
     deps = [
       "//base/security/huks/interfaces/innerkits/huks_lite:huks_server",
-      
-      # to do
+
+      # script for transfer fils in old path to new path, in case of upgradation
       "//base/security/huks/interfaces/innerkits/huks_lite:hks_compatibility_bin",
-      # to do
 
       "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     ]

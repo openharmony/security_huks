@@ -17,7 +17,7 @@
 #define HUKS_HDI_H
 
 #include "hks_param.h"
-#include "hks_type_inner.h"
+#include "hks_type.h"
 
 struct HuksHdi {
     int32_t (*HuksHdiModuleInit)(void);
@@ -85,8 +85,8 @@ struct HuksHdi {
     int32_t (*HuksHdiMac)(const struct HksBlob *key, const struct HksParamSet *paramSet,
         const struct HksBlob *srcData, struct HksBlob *mac);
     
-    int32_t (*HuksHdiChangeKeyOwner)(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
-        const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey);
+    int32_t (*HuksHdiChangeKeyOwner)(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+        struct HksBlob *newKey);
 };
 
 #endif /* HUKS_HDI_H */

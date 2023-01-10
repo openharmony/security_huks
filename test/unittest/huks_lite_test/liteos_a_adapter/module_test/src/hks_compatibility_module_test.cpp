@@ -319,16 +319,66 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Lev
 
     HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", 12);
 
-    ret = HksDeleteKey(&keyAlias, nullptr);
-   
+    const char *userId = "0";
+    const char *processName = "123456";
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0
+    };
+
+    ret = HksServiceDeleteKey(&processInfo, &keyAlias);
+
     ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST);
 
     (void)HksTestDeleteOldKey(&keyAlias);
 }
 
+static void FreeKeyInfoList(struct HksKeyInfo **keyList, uint32_t listCount)
+{
+    for (uint32_t i = 0; i < listCount; ++i) {
+        if ((*keyList)[i].alias.data == nullptr) {
+            break;
+        }
+        HKS_FREE_PTR((*keyList)[i].alias.data);
+        if ((*keyList)[i].paramSet == nullptr) {
+            break;
+        }
+        HksFreeParamSet(&((*keyList)[i].paramSet));
+    }
+    HKS_FREE_PTR(*keyList);
+}
+
+static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t listCount)
+{
+    struct HksKeyInfo *keyList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * listCount);
+    if (keyList == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(keyList, sizeof(struct HksKeyInfo) * listCount, 0, sizeof(struct HksKeyInfo) * listCount);
+    int32_t ret = HKS_SUCCESS;
+    for (uint32_t i = 0; i < listCount; ++i) {
+        keyList[i].alias.data = (uint8_t *)HksMalloc(HKS_MAX_KEY_ALIAS_LEN);
+        if (keyList[i].alias.data == nullptr) {
+            FreeKeyInfoList(&keyList, listCount);
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        keyList[i].alias.size = HKS_MAX_KEY_ALIAS_LEN;
+        ret = HksInitParamSet(&(keyList[i].paramSet));
+        if (ret != HKS_SUCCESS) {
+            FreeKeyInfoList(&keyList, listCount);
+            return ret;
+        }
+        keyList[i].paramSet->paramSetSize = HKS_DEFAULT_PARAM_SET_SIZE;
+    }
+    *outKeyInfoList = keyList;
+    return ret;
+}
+
 /**
  * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest004
- * @tc.desc: test failed to get key to delete, and have key in old path without whiteList, then fail to delete
+ * @tc.desc: test have key in old path without whiteList, then fail to get key info list
  * @tc.type: FUNC
  */
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Level0)
@@ -354,13 +404,14 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     };
 
     uint32_t keyInfoListSize = 3;
-    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * keyInfoListSize);
-    ASSERT_NE(keyInfoList, nullptr);
-    (void)memset_s(keyInfoList, sizeof(struct HksKeyInfo) * keyInfoListSize, 0, sizeof(struct HksKeyInfo) * keyInfoListSize);
+    struct HksKeyInfo *keyInfoList = nullptr;
+    ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
 
     (void)HksTestDeleteOldKey(&keyAlias);
+    FreeKeyInfoList(&keyInfoList, keyInfoListSize);
 }
 }

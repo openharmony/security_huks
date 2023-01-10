@@ -76,9 +76,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_openssl_small_static") {
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
     sources = [
       "src/hks_openssl_ability.c",
       "src/hks_openssl_aes.c",

@@ -148,10 +148,10 @@ int32_t HuksHdiMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return HksCoreMac(key, paramSet, srcData, mac);
 }
 
-int32_t HuksHdiChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
-    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey)
+int32_t HuksHdiChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+    struct HksBlob *newKey)
 {
-    return HksCoreChangeKeyOwner(oldProcessInfo, oldKey, newProcessInfo, newKey);
+    return HksCoreChangeKeyOwner(oldKey, paramSet, newKey);
 }
 
 #ifdef _STORAGE_LITE_

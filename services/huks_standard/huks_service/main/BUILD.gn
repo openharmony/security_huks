@@ -44,9 +44,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_service_small_static") {
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
 
     public_deps = [
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_small_static",

@@ -78,9 +78,7 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
     ]
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
     sources = [
       "ipc/hks_ipc_serialization.c",
       "ipc/hks_ipc_service.c",

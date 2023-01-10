@@ -30,15 +30,20 @@
     #define HKS_KEY_STORE_PATH            "/data/service/el1/public/huks_service/maindata"
     #define HKS_KEY_STORE_BAK_PATH        "/data/service/el1/public/huks_service/bakdata"
 #else
-    #ifdef _STORAGE_LITE_
-        #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
+    #ifdef L1_SMALL
+        #define HKS_KEY_STORE_PATH            "/data/service/el1/public/huks_service/maindata"
+        #define HKS_KEY_STORE_BAK_PATH        "/data/service/el1/public/huks_service/bakdata"
     #else
-        #ifdef HKS_CONFIG_KEY_STORE_PATH
-            #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
-            #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+        #ifdef _STORAGE_LITE_
+            #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
         #else
-            #define HKS_KEY_STORE_PATH            "/storage/maindata"
-            #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"
+            #ifdef HKS_CONFIG_KEY_STORE_PATH
+                #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
+                #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+            #else
+                #define HKS_KEY_STORE_PATH            "/storage/maindata"
+                #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"
+            #endif
         #endif
     #endif
 #endif

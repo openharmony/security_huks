@@ -72,6 +72,7 @@ if (os_level == "standard") {
     sources += [
       "src/hks_attest.c",
       "src/hks_attest_utils.c",
+      "src/hks_get_mainkey.c",
       "src/hks_secure_access.c",
     ]
 
@@ -91,9 +92,7 @@ if (os_level == "standard") {
   ohos_shared_library("huks_engine_core_standard") {
     public_configs = [ ":huks_config" ]
 
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
     if (huks_use_mbedtls) {
       defines += [ "HKS_USE_MBEDTLS" ]
     }
@@ -103,10 +102,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/file_operator",
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
-
-      # to do
       "//base/security/huks/services/huks_standard/huks_service/main/core/include",
-      "//base/security/huks/frameworks/huks_standard/main/common/include",
     ]
     cflags = [
       "-Wall",
@@ -122,11 +118,11 @@ if (os_level == "standard") {
       "src/hks_core_interfaces.c",
       "src/hks_core_service.c",
       "src/hks_core_service_three_stage.c",
+      "src/hks_get_mainkey.c",
       "src/hks_keynode.c",
       "src/hks_rkc.c",
       "src/hks_rkc_rw.c",
       "src/hks_secure_access.c",
-      "src/hks_get_mainkey.c",
     ]
 
     if (huks_use_lite_storage == true) {
@@ -150,9 +146,6 @@ if (os_level == "standard") {
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-
-      # to do
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
     ]
 
     deps += [

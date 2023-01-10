@@ -101,6 +101,8 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
     if (memcpy_s(paramSet, paramSet->paramSetSize, tmpParamSet, tmpParamSet->paramSetSize) != EOK) {
         HKS_LOG_E("memcpy paramSet failed");
         ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+    } else {
+        ret = HksFreshParamSet(paramSet, false);
     }
 
     HksFreeParamSet(&tmpParamSet);
@@ -171,7 +173,39 @@ static int32_t HksConstructRootProcessInfo(struct HksProcessInfo *processInfo)
     return HKS_SUCCESS;
 }
 
-static int32_t  HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+static int32_t ConstructChangeOwnerParamSet(const struct HksProcessInfo *rootProcessInfo,
+    const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
+{
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret;
+    do {
+        ret = HksInitParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed!")
+        struct HksParam rootProcessParam;
+        rootProcessParam.tag = HKS_TAG_OLD_PROCESS_NAME;
+        rootProcessParam.blob = rootProcessInfo->processName;
+
+        ret = HksAddParams(paramSet, &rootProcessParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param rootProcessParam failed!")
+
+        struct HksParam newProcessParam;
+        newProcessParam.tag = HKS_TAG_PROCESS_NAME;
+        newProcessParam.blob = processInfo->processName;
+
+        ret = HksAddParams(paramSet, &newProcessParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param newProcessParam failed!")
+
+        ret = HksBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build param set failed!")
+
+        *outParamSet = paramSet;
+        return HKS_SUCCESS;
+    } while (0);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     int32_t mode)
 {
     HKS_LOG_I("enter HksChangeKeyOwner");
@@ -182,11 +216,16 @@ static int32_t  HksChangeKeyOwner(const struct HksProcessInfo *processInfo, cons
     struct HksBlob oldKey = { .size = 0, .data = NULL };
     struct HksBlob newKey = { .size = 0, .data = NULL };
 
+    struct HksParamSet *paramSet = NULL;
+
     do {
         ret = HksGetOldKey(&rootProcessInfo, keyAlias, &oldKey, mode);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "not have old key")
 
-        ret = HuksAccessChangeKeyOwner(&rootProcessInfo, &oldKey, processInfo, &newKey);
+        ret = ConstructChangeOwnerParamSet(&rootProcessInfo, processInfo, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct param set failed!")
+
+        ret = HuksAccessChangeKeyOwner(&oldKey, paramSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access change key owner failed!")
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
@@ -195,7 +234,7 @@ static int32_t  HksChangeKeyOwner(const struct HksProcessInfo *processInfo, cons
         // delete old key only after new key stored successfully
         (void)HksServiceDeleteKey(&rootProcessInfo, keyAlias);
     } while (0);
-
+    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(oldKey);
     HKS_FREE_BLOB(newKey);
 
@@ -302,12 +341,12 @@ static int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *par
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     (void)memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize);
-
+    ret = HksFreshParamSet(paramSet, false);
+    
     HksFreeParamSet(&outParamSet);
     return ret;
 }
 
-// to do: 宏隔离
 static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *processInfo,
     struct HksKeyInfo *keyInfoList, uint32_t *listCount, bool isExpectOldVersion)
 {
@@ -315,15 +354,15 @@ static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *proce
     (void)isExpectOldVersion;
 #endif
     int32_t ret;
-
+    uint32_t realCnt = 0;
     do {
         ret = HksCheckGetKeyInfoListParams(&processInfo->processName, keyInfoList, listCount);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksGetKeyAliasByProcessName(processInfo, keyInfoList, listCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias list from storage failed, ret = %" LOG_PUBLIC "d", ret)
-
-        for (uint32_t i = 0; i < *listCount; ++i) {
+        uint32_t i = 0;
+        for (; i < *listCount; ++i) {
             struct HksBlob keyFromFile = { 0, NULL };
             ret = GetKeyData(processInfo, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data failed, ret = %" LOG_PUBLIC "d", ret)
@@ -336,48 +375,130 @@ static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *proce
             ret = GetKeyParamSet(&keyFromFile, keyInfoList[i].paramSet);
             HKS_FREE_BLOB(keyFromFile);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key paramSet failed, ret = %" LOG_PUBLIC "d", ret)
+            ++realCnt;
         }
+        *listCount = realCnt;
+        return HKS_SUCCESS;
     } while (0);
+
+    *listCount = realCnt;
 
     return ret;
 }
 
-// to do: 编译验证
+#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
+static void FreeKeyInfoList(struct HksKeyInfo **keyInfoList, uint32_t listCount)
+{
+    for (uint32_t i = 0; i < listCount; ++i) {
+        if ((*keyInfoList)[i].alias.data == NULL) {
+            break;
+        }
+        HKS_FREE_PTR((*keyInfoList)[i].alias.data);
+        if ((*keyInfoList)[i].paramSet == NULL) {
+            break;
+        }
+        HksFreeParamSet(&((*keyInfoList)[i].paramSet));
+    }
+    HKS_FREE_PTR(*keyInfoList);
+}
+
+static int32_t ConstructHksKeyInfoBuffer(uint32_t listCount, struct HksKeyInfo **outKeyInfoList)
+{
+    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * listCount);
+    if (keyInfoList == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(keyInfoList, sizeof(struct HksKeyInfo) * listCount, 0, sizeof(struct HksKeyInfo) * listCount);
+    int32_t ret = HKS_SUCCESS;
+    for (uint32_t i = 0; i < listCount; ++i) {
+        keyInfoList[i].alias.data = (uint8_t *)HksMalloc(HKS_MAX_KEY_ALIAS_LEN);
+        if (keyInfoList[i].alias.data == NULL) {
+            FreeKeyInfoList(&keyInfoList, listCount);
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        keyInfoList[i].alias.size = HKS_MAX_KEY_ALIAS_LEN;
+        ret = HksInitParamSet(&(keyInfoList[i].paramSet));
+        if (ret != HKS_SUCCESS) {
+            FreeKeyInfoList(&keyInfoList, listCount);
+            return ret;
+        }
+        keyInfoList[i].paramSet->paramSetSize = HKS_DEFAULT_PARAM_SET_SIZE;
+    }
+    *outKeyInfoList = keyInfoList;
+    return ret;
+}
+
+// the size of outKeyInfoList is eq to keyInfoListOne plus keyInfoListTwo, ensured by calling func
+static int32_t MergeHksKeyInfoBuffer(uint32_t listCountOne, struct HksKeyInfo *keyInfoListOne, uint32_t listCountTwo,
+    struct HksKeyInfo *keyInfoListTwo, struct HksKeyInfo *outKeyInfoList)
+{
+    uint32_t i = 0;
+    for (; i < listCountOne; ++i) {
+        (void)memcpy_s(outKeyInfoList[i].alias.data, outKeyInfoList[i].alias.size, keyInfoListOne[i].alias.data,
+            keyInfoListOne[i].alias.size);
+        outKeyInfoList[i].alias.size = keyInfoListOne[i].alias.size;
+        (void)memcpy_s(outKeyInfoList[i].paramSet, outKeyInfoList[i].paramSet->paramSetSize, keyInfoListOne[i].paramSet,
+            keyInfoListOne[i].paramSet->paramSetSize);
+        outKeyInfoList[i].paramSet->paramSetSize = keyInfoListOne[i].paramSet->paramSetSize;
+    }
+    for (uint32_t j = 0; j < listCountTwo; ++j) {
+        (void)memcpy_s(outKeyInfoList[i + j].alias.data, outKeyInfoList[i + j].alias.size, keyInfoListTwo[j].alias.data,
+            keyInfoListTwo[j].alias.size);
+        outKeyInfoList[i + j].alias.size = keyInfoListTwo[j].alias.size;
+        (void)memcpy_s(outKeyInfoList[i + j].paramSet, outKeyInfoList[i + j].paramSet->paramSetSize,
+            keyInfoListTwo[j].paramSet, keyInfoListTwo[j].paramSet->paramSetSize);
+        outKeyInfoList[i + j].paramSet->paramSetSize = keyInfoListTwo[j].paramSet->paramSetSize;
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
 int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount)
 {
     int32_t ret;
-
-    do {
 #ifdef HKS_ENABLE_CHANGE_KEY_OWNER
-        // record max buffer for key list
-        uint32_t listMaxCount = *listCount;
-        // set as current buffer
+// to do ： 准备两个HksKeyInfo buffer，分别获取old和new的key info，后续再合并
+    // record max buffer for key list
+    uint32_t listMaxCount = *listCount;
+    struct HksKeyInfo *keyInfoListOne = NULL;
+    struct HksKeyInfo *keyInfoListTwo = NULL;
+    do {
         uint32_t listCountOne = listMaxCount;
+        ret = ConstructHksKeyInfoBuffer(listMaxCount, &keyInfoListOne);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct key list one failed!")
+
         // get key list one, aka the key list in new path
-        ret = HksGetkeyInfoListByProcessName(processInfo, keyInfoList, &listCountOne, false);
+        ret = HksGetkeyInfoListByProcessName(processInfo, keyInfoListOne, &listCountOne, false);
         // return success if no file in path
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key info list in new path failed!")
-       
+
         // set as current buffer, aka max minus used in one
         uint32_t listCountTwo = listMaxCount - listCountOne;
         if (HksIsProcessInfoInWhiteList(processInfo) == HKS_SUCCESS) {
             struct HksProcessInfo rootProcessInfo;
             ret = HksConstructRootProcessInfo(&rootProcessInfo);
             HKS_IF_NOT_SUCC_BREAK(ret, "construct root process info failed!")
-
-            // get key list two with moving index of keyInfoList and listCount, aka the key list in old path
-            ret = HksGetkeyInfoListByProcessName(&rootProcessInfo, keyInfoList + listCountOne, &listCountTwo, true);
+            ret = ConstructHksKeyInfoBuffer(listMaxCount, &keyInfoListTwo);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct key list two failed!")
+            ret = HksGetkeyInfoListByProcessName(&rootProcessInfo, keyInfoListTwo, &listCountTwo, true);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key info list in old path failed!")
         } else {
             listCountTwo = 0;
         }
 
+        // the size of keyInfoList is bigger than keyInfoListOne plus keyInfoListTwo
+        ret = MergeHksKeyInfoBuffer(listCountOne, keyInfoListOne, listCountTwo, keyInfoListTwo, keyInfoList);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "merge key info list failed!")
+
         *listCount = listCountOne + listCountTwo;
-#else
-        ret = HksGetkeyInfoListByProcessName(processInfo, keyInfoList, listCount);
-#endif
     } while (0);
+    FreeKeyInfoList(&keyInfoListOne, listMaxCount);
+    FreeKeyInfoList(&keyInfoListTwo, listMaxCount);
+
+#else
+    ret = HksGetkeyInfoListByProcessName(processInfo, keyInfoList, listCount, false);
+#endif
 
     HksReport(__func__, processInfo, NULL, ret);
     return ret;
@@ -1108,7 +1229,7 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 
 #ifdef HKS_ENABLE_CHANGE_KEY_OWNER
     int32_t oldRet = HKS_FAILURE;
-    if (HksIsProcessInfoInWhiteList(processInfo) == HKS_SUCCESS) {  // to do : check key version is old
+    if (HksIsProcessInfoInWhiteList(processInfo) == HKS_SUCCESS) {
         if (ret == HKS_ERROR_NOT_EXIST) {
             oldRet = DeleteOldKey(keyAlias);
             ret = (oldRet == HKS_SUCCESS) ? HKS_SUCCESS : ret;
@@ -1121,11 +1242,13 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
     return ret;
 }
 
+#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
 static int32_t IsOldKeyExist(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
 {
     // if change key owner success, the key should exist; otherwise the key not exist
     return HksChangeKeyOwner(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY);
 }
+#endif
 
 int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias)
 {

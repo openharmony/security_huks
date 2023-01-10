@@ -91,6 +91,7 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
@@ -107,7 +108,10 @@ config("soft_huks_config") {
     "L2_STANDARD",
   ]
 
-  cflags = [ "-fvisibility=default" ]
+  cflags = [
+    "-fvisibility=default",
+    "-DHKS_KEY_VERSION=${huks_key_version}",
+  ]
 
   if (disable_authenticate == true) {
     cflags += [ "-D_CUT_AUTHENTICATE_" ]
