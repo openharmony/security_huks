@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_refresh_key_info_test.h"
+#include "hks_get_key_info_list_test.h"
 
 #include <gtest/gtest.h>
 #include <thread>
