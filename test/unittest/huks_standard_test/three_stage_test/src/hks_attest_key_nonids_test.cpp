@@ -103,6 +103,13 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
+    struct HksParam *processParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_PROCESS_NAME, &processParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    uint32_t rootUid = 0;
+    ASSERT_EQ(sizeof(rootUid), processParam->blob.size);
+    ASSERT_EQ(HksMemCmp(processParam->blob.data, &rootUid, processParam->blob.size), HKS_SUCCESS);
+
     HksFreeParamSet(&paramOutSet);
 
     ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
