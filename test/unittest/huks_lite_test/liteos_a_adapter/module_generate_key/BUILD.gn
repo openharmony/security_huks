@@ -27,9 +27,7 @@ config("public_huks_config") {
 ohos_static_library("huks_test_generate_key") {
   sources = []
 
-  sources += [
-    "./hks_test_modify_old_key.c",
-  ]
+  sources += [ "./hks_test_modify_old_key.c" ]
 
   include_dirs = [
     "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
@@ -41,22 +39,20 @@ ohos_static_library("huks_test_generate_key") {
 
   public_configs = [ ":public_huks_config" ]
 
-  deps = [
-    "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
-  ]
+  deps = [ "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static" ]
 
   sources += [
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_auth.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
     "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
   ]
 
   deps += [
@@ -65,13 +61,9 @@ ohos_static_library("huks_test_generate_key") {
     "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
     "//base/security/huks/utils/list:libhuks_utils_list_static",
     "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-
-    # to do
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
   ]
- 
-  deps += 
-  [
+
+  deps += [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//commonlibrary/utils_lite:utils",
   ]
@@ -97,13 +89,13 @@ ohos_static_library("huks_test_generate_key") {
   ]
 
   cflags += [ "-DHKS_KEY_VERSION=1" ]
-  
+
   cflags += [ "-flto" ]
 
   if (huks_use_hardware_root_key == true) {
     cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
   }
-  
+
   cflags += [ "-D_BSD_SOURCE" ]
   cflags += [ "-D_HUKS_LOG_ENABLE_" ]
   cflags += [ "-DGET_DEV_UDID_ENABLE" ]

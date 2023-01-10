@@ -64,9 +64,7 @@ if (os_level == "standard") {
       "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
     ]
 
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
     sources = []
     cflags = [
       "-Wall",
@@ -76,8 +74,6 @@ if (os_level == "standard") {
     if (huks_use_hardware_root_key == true) {
       cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
     }
-
-    cflags += [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_path}\"" ]
 
     if (huks_use_lite_storage == true) {
       cflags += [ "-D_STORAGE_LITE_" ]

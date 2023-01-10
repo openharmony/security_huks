@@ -58,9 +58,7 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_utils_client_service_adapter_static") {
     public_configs = [ ":huks_config" ]
     include_dirs = [ "//third_party/openssl/include/" ]
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
     sources = [
       "hks_client_service_adapter_common.c",
       "hks_client_service_adapter_lite.c",

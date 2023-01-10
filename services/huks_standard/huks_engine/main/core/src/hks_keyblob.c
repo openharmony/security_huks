@@ -524,10 +524,6 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
         ret = BuildKeyBlobWithKeyParam(key, (enum HksKeyFlag)keyFlag, paramSet, &keyBlobParamSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        // to do
-        HKS_LOG_E("key version is %d", HKS_KEY_VERSION);
-        // to do
-
         ret = HksBuildKeyBlob2(keyBlobParamSet, paramSet, keyOut);
     } while (0);
     HksFreeParamSet(&keyBlobParamSet);

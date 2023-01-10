@@ -514,7 +514,7 @@ static int32_t RkcCreateKsf(void)
     int32_t ret;
     do {
         /* Fill some fixed field. */
-        newKsfData->version = g_hksRkcCfg.version;
+        newKsfData->version = g_hksRkcCfg.version; // 1 // 2
         newKsfData->rmkIter = g_hksRkcCfg.rmkIter;
         newKsfData->rmkHashAlg = g_hksRkcCfg.rmkHashAlg;
 

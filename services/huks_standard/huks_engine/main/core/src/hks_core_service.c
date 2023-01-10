@@ -1166,7 +1166,7 @@ static bool IsToChangedTag(const uint32_t *tagList, uint32_t tagCount, uint32_t 
 }
 
 static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
-    const struct HksProcessInfo *newProcessInfo, struct HksParamSet **outParamSet)
+    const struct HksParam *newProcessInfo, struct HksParamSet **outParamSet)
 {
     uint32_t deleteTags[] = { HKS_TAG_PROCESS_NAME };
     int32_t ret;
@@ -1186,10 +1186,7 @@ static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
                     break;
                 }
             } else if (paramSet->params[i].tag == HKS_TAG_PROCESS_NAME){
-                struct HksParam tmpParam;
-                tmpParam.tag = HKS_TAG_PROCESS_NAME;
-                tmpParam.blob = newProcessInfo->processName;
-                ret = HksAddParams(newParamSet, &tmpParam, 1);
+                ret = HksAddParams(newParamSet, newProcessInfo, 1);
                 
                 if (ret != HKS_SUCCESS) {
                     HKS_LOG_E("append process name failed");
@@ -1224,14 +1221,14 @@ static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
     return ret;
 }
 
-static int32_t HksAuthWhiteList(const struct HksProcessInfo *processInfo)
+static int32_t HksAuthWhiteList(const struct HksParam *processInfo)
 {
     uint32_t uid = 0;
-    if (processInfo->processName.size == sizeof("0") && HksMemCmp(processInfo->processName.data, "0",
-        processInfo->processName.size) == EOK) { // for uid == 0
+    if (processInfo->blob.size == sizeof("0") && HksMemCmp(processInfo->blob.data, "0",
+        processInfo->blob.size) == EOK) { // for uid == 0
         uid = 0;
-    } else if (processInfo->processName.size == sizeof(uid)) {
-        (void)memcpy_s(&uid, sizeof(uid), processInfo->processName.data, processInfo->processName.size);
+    } else if (processInfo->blob.size == sizeof(uid)) {
+        (void)memcpy_s(&uid, sizeof(uid), processInfo->blob.data, processInfo->blob.size);
     } else {
         return HKS_ERROR_NO_PERMISSION;
     }
@@ -1251,10 +1248,13 @@ static int32_t HksCheckKeyVersion(const struct HksParamSet *paramSet, uint32_t e
     return HKS_ERROR_NOT_EXIST;
 }
 
-int32_t HksCoreChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
-    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey)
+int32_t HksCoreChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
-    int32_t ret = HksAuthWhiteList(newProcessInfo);
+    struct HksParam *newProcessInfo = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &newProcessInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "no new process info in param set!")
+
+    ret = HksAuthWhiteList(newProcessInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not in white list")
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(oldKey);
@@ -1262,12 +1262,6 @@ int32_t HksCoreChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const
 
     ret = HksCheckKeyVersion(keyNode->paramSet, HKS_KEY_BLOB_DUMMY_KEY_VERSION);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not a old key")
-
-    // to do
-    for (uint32_t i = 0; i < keyNode->paramSet->paramsCnt; ++i) {
-        HKS_LOG_I("param %u in paramSet", keyNode->paramSet->params[i].tag);
-    }
-    // to do
 
     struct HksParamSet *newParamSet = NULL;
     ret = HksChangeOldKeyParams(keyNode->paramSet, newProcessInfo, &newParamSet);
@@ -1281,9 +1275,11 @@ int32_t HksCoreChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const
 }
 
 #else
-int32_t HksCoreChangeKeyOwner(const struct HksProcessInfo *oldProcessInfo, const struct HksBlob *oldKey,
-    const struct HksProcessInfo *newProcessInfo, struct HksBlob *newKey)
+int32_t HksCoreChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
+    (void)oldKey;
+    (void)paramSet;
+    (void)newKey;
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif

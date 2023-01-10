@@ -42,9 +42,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_crypto_engine_small_static") {
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
 
     if (huks_use_mbedtls) {
       public_deps = [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/mbedtls:libhuks_mbedtls_small_static" ]

@@ -473,6 +473,47 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest008, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 }
 
+static void FreeKeyInfoList(struct HksKeyInfo **infoList, uint32_t listCount)
+{
+    for (uint32_t i = 0; i < listCount; ++i) {
+        if ((*infoList)[i].alias.data == nullptr) {
+            break;
+        }
+        HKS_FREE_PTR((*infoList)[i].alias.data);
+        if ((*infoList)[i].paramSet == nullptr) {
+            break;
+        }
+        HksFreeParamSet(&((*infoList)[i].paramSet));
+    }
+    HKS_FREE_PTR(*infoList);
+}
+
+static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t listCount)
+{
+    struct HksKeyInfo *infoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * listCount);
+    if (infoList == nullptr) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memset_s(infoList, sizeof(struct HksKeyInfo) * listCount, 0, sizeof(struct HksKeyInfo) * listCount);
+    int32_t ret = HKS_SUCCESS;
+    for (uint32_t i = 0; i < listCount; ++i) {
+        infoList[i].alias.data = (uint8_t *)HksMalloc(HKS_MAX_KEY_ALIAS_LEN);
+        if (infoList[i].alias.data == nullptr) {
+            FreeKeyInfoList(&infoList, listCount);
+            return HKS_ERROR_MALLOC_FAIL;
+        }
+        infoList[i].alias.size = HKS_MAX_KEY_ALIAS_LEN;
+        ret = HksInitParamSet(&(infoList[i].paramSet));
+        if (ret != HKS_SUCCESS) {
+            FreeKeyInfoList(&infoList, listCount);
+            return ret;
+        }
+        infoList[i].paramSet->paramSetSize = HKS_DEFAULT_PARAM_SET_SIZE;
+    }
+    *outKeyInfoList = infoList;
+    return ret;
+}
+
 /**
  * @tc.name: HksCompatibilityTest.HksCompatibilityTest009
  * @tc.desc: generate key1 in old path and generate key2 in new path, get key info list
@@ -496,10 +537,12 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     // get key info list with white list, get list including key 1 and key 2
-    uint32_t keyInfoListSize = 3;
-    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * keyInfoListSize);
-    ASSERT_NE(keyInfoList, nullptr);
-    (void)memset_s(keyInfoList, sizeof(struct HksKeyInfo) * keyInfoListSize, 0, sizeof(struct HksKeyInfo) * keyInfoListSize);
+    const uint32_t keyInfoListMaxSize = 3;
+    uint32_t keyInfoListSize = keyInfoListMaxSize;
+    struct HksKeyInfo *keyInfoList = nullptr;
+    ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
     ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 2) << "keyInfoListSize is " << keyInfoListSize;
@@ -508,16 +551,17 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     uint32_t i;
     for (i = 0; i < keyInfoListSize; ++i) {
         if (keyInfoList[i].alias.data != nullptr) {
-            if (strcmp((char *)keyInfoList[i].alias.data, g_keyAlias) == 0 || strcmp((char *)keyInfoList[i].alias.data, alias2) == 0) {
+            if (HksMemCmp(keyInfoList[i].alias.data, g_keyAlias, keyInfoList[i].alias.size) == 0 ||
+                HksMemCmp(keyInfoList[i].alias.data, alias2, keyInfoList[i].alias.size) == 0) {
                 ++hitCnt;
-                HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
             }
+            HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
         }
     }
     ASSERT_EQ(hitCnt, 2) << "hit cnt is " << hitCnt;
-    HKS_FREE_PTR(keyInfoList);
     (void)HksTestDeleteOldKey(&keyAlias1);
     (void)HksDeleteKey(&keyAlias2, nullptr);
+    FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
 
 /**
@@ -537,10 +581,11 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest010, TestSize.Level0)
     HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     // get key info list with white list, get list including key 1
-    uint32_t keyInfoListSize = 3;
-    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * keyInfoListSize);
-    ASSERT_NE(keyInfoList, nullptr);
-    (void)memset_s(keyInfoList, sizeof(struct HksKeyInfo) * keyInfoListSize, 0, sizeof(struct HksKeyInfo) * keyInfoListSize);
+    const uint32_t keyInfoListMaxSize = 3;
+    uint32_t keyInfoListSize = keyInfoListMaxSize;
+    struct HksKeyInfo *keyInfoList = nullptr;
+    ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 1) << "keyInfoListSize is " << keyInfoListSize;
@@ -549,15 +594,16 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest010, TestSize.Level0)
     uint32_t i;
     for (i = 0; i < keyInfoListSize; ++i) {
         if (keyInfoList[i].alias.data != nullptr) {
-            if (strcmp((char *)keyInfoList[i].alias.data, g_keyAlias) == 0) {
+            if (HksMemCmp(keyInfoList[i].alias.data, g_keyAlias, keyInfoList[i].alias.size) == 0) {
                 ++hitCnt;
-                HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
             }
+            HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
         }
     }
     ASSERT_EQ(hitCnt, 1) << "hit cnt is " << hitCnt;
-    HKS_FREE_PTR(keyInfoList);
+
     (void)HksTestDeleteOldKey(&keyAlias1);
+    FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
 
 /**
@@ -576,10 +622,11 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
     HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     // get key info list with white list, get empty list
-    uint32_t keyInfoListSize = 3;
-    struct HksKeyInfo *keyInfoList = (struct HksKeyInfo *)HksMalloc(sizeof(struct HksKeyInfo) * keyInfoListSize);
-    ASSERT_NE(keyInfoList, nullptr);
-    (void)memset_s(keyInfoList, sizeof(struct HksKeyInfo) * keyInfoListSize, 0, sizeof(struct HksKeyInfo) * keyInfoListSize);
+    const uint32_t keyInfoListMaxSize = 3;
+    uint32_t keyInfoListSize = keyInfoListMaxSize;
+    struct HksKeyInfo *keyInfoList = nullptr;
+    ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
@@ -588,14 +635,15 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
     uint32_t i;
     for (i = 0; i < keyInfoListSize; ++i) {
         if (keyInfoList[i].alias.data != nullptr) {
-            if (strcmp((char *)keyInfoList[i].alias.data, g_keyAlias) == 0) {
+            if (HksMemCmp(keyInfoList[i].alias.data, g_keyAlias, keyInfoList[i].alias.size) == 0) {
                 ++hitCnt;
-                HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
             }
+            HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
         }
     }
     ASSERT_EQ(hitCnt, 0) << "hit cnt is " << hitCnt;
-    HKS_FREE_PTR(keyInfoList);
+
     (void)HksTestDeleteOldKey(&keyAlias1);
+    FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
 }

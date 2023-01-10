@@ -33,7 +33,7 @@ group("unittest") {
     } else {
       deps = [
         "./unittest/huks_lite_test/liteos_a_adapter:huks_3.0_test",
-        "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_test:huks_3.0_module_test"
+        "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_test:huks_3.0_module_test",
       ]
     }
   }

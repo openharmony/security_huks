@@ -52,9 +52,7 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_core_small_static") {
     public_configs = [ ":huks_config" ]
 
-    defines = [
-      "_HUKS_LOG_ENABLE_",
-    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
 
     sources = [ "./src/hks_local_engine.c" ]
     cflags = [

@@ -16,6 +16,12 @@
 #ifndef HKS_TYPE_INNER_H
 #define HKS_TYPE_INNER_H
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_type.h"
 #include "securec.h"
 
@@ -64,6 +70,10 @@ enum HksInnerTag {
     HKS_TAG_PARAM4_NULL = HKS_TAG_TYPE_BYTES | 30020,
 
     HKS_TAG_ACCESS_TOKEN_ID = HKS_TAG_TYPE_UINT | 30021,
+
+#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
+    HKS_TAG_OLD_PROCESS_NAME = HKS_TAG_TYPE_BYTES | 30022,
+#endif
 };
 
 #define HKS_PARAM_BUFFER_NULL_INTERVAL ((HKS_TAG_PARAM0_NULL) - (HKS_TAG_PARAM0_BUFFER))

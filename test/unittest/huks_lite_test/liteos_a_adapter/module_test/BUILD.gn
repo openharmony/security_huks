@@ -27,9 +27,7 @@ unittest("huks_3.0_module_test") {
 
   defines = [ "_HUKS_LOG_ENABLE_" ]
 
-  sources = [
-    "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_test/src/hks_compatibility_module_test.cpp",
-  ]
+  sources = [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_test/src/hks_compatibility_module_test.cpp" ]
 
   include_dirs = [
     "//base/security/huks/interfaces/innerkits/huks_lite",
@@ -43,7 +41,7 @@ unittest("huks_3.0_module_test") {
     "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
     "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
   ]
-  
+
   deps += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_generate_key:huks_test_generate_key" ]
 
   cflags = [
