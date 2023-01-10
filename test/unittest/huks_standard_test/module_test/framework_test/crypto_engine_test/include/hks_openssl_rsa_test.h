@@ -13,15 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef HKS_KEY_NODE_TEST_H
-#define HKS_KEY_NODE_TEST_H
+#ifndef HKS_OPENSSL_RSA_TEST_H
+#define HKS_OPENSSL_RSA_TEST_H
 
-namespace Unittest::HksKeyNodeTest {
-int HksKeyNodeTest001(void);
-int HksKeyNodeTest002(void);
-int HksKeyNodeTest003(void);
-int HksKeyNodeTest004(void);
-int HksKeyNodeTest005(void);
-int HksKeyNodeTest006(void);
+namespace Unittest::HksFrameworkRsaEngineTest {
+int HksRsaEngineTest001(void);
+int HksRsaEngineTest002(void);
+int HksRsaEngineTest003(void);
 }
-#endif
+#endif // HKS_OPENSSL_RSA_TEST_H

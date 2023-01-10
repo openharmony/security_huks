@@ -13,15 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef HKS_KEY_NODE_TEST_H
-#define HKS_KEY_NODE_TEST_H
+#ifndef HKS_OPENSSL_CURVE_TEST_H
+#define HKS_OPENSSL_CURVE_TEST_H
 
-namespace Unittest::HksKeyNodeTest {
-int HksKeyNodeTest001(void);
-int HksKeyNodeTest002(void);
-int HksKeyNodeTest003(void);
-int HksKeyNodeTest004(void);
-int HksKeyNodeTest005(void);
-int HksKeyNodeTest006(void);
+namespace Unittest::HksFrameworkCurveEngineTest {
+int HksCurveEngineTest001(void);
+int HksCurveEngineTest002(void);
+int HksCurveEngineTest003(void);
+int HksCurveEngineTest004(void);
 }
-#endif
+#endif // HKS_OPENSSL_CURVE_TEST_H

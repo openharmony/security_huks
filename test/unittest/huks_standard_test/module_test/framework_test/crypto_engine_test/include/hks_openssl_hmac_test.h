@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,15 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef HKS_KEY_NODE_TEST_H
-#define HKS_KEY_NODE_TEST_H
+#ifndef HKS_OPENSSL_HMAC_TEST_H
+#define HKS_OPENSSL_HMAC_TEST_H
 
-namespace Unittest::HksKeyNodeTest {
-int HksKeyNodeTest001(void);
-int HksKeyNodeTest002(void);
-int HksKeyNodeTest003(void);
-int HksKeyNodeTest004(void);
-int HksKeyNodeTest005(void);
-int HksKeyNodeTest006(void);
+#include <stdint.h>
+
+struct HksOpensslHmacCtx {
+    uint32_t digestLen;
+    void *append;
+};
+
+namespace Unittest::HksFrameworkHmacEngineTest {
+int HksHmacEngineTest001(void);
+int HksHmacEngineTest002(void);
 }
-#endif
+#endif // HKS_OPENSSL_HMAC_TEST_H
