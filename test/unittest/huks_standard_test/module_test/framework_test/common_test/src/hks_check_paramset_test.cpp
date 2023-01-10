@@ -234,7 +234,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest011, TestSize.Level0)
         .dSize = HKS_RSA_KEY_SIZE_4096,
     };
     key.size = sizeof(struct HksKeyMaterialRsa);
-    key.data = (uint8_t *)&materialRsa;
+    key.data = reinterpret_cast<uint8_t *>(&materialRsa);
     ret = CheckRsaKeyLen(HKS_ALG_ED25519, 0, nullptr, &key);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "HksCheckParamsetTest011 failed, ret = " << ret;
 
@@ -279,7 +279,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest012, TestSize.Level0)
 
     HksBlob key = {
         .size = sizeof(struct HksKeyMaterialRsa),
-        .data = (uint8_t *)&materialRsa,
+        .data = reinterpret_cast<uint8_t *>(&materialRsa),
     };
 
     ParamsValues values = {
@@ -323,7 +323,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest013, TestSize.Level0)
     };
     HksBlob key = {
         .size = sizeof(struct HksKeyMaterialRsa),
-        .data = (uint8_t *)&materialEcc,
+        .data = reinterpret_cast<uint8_t *>(&materialEcc),
     };
     ParamsValues values = {
         {.needCheck = true, .value = DEFAULT_VALUE, .isAbsent = false},
@@ -384,7 +384,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest014, TestSize.Level0)
     };
     HksBlob key = {
         .size = sizeof(struct HksKeyMaterialDsa),
-        .data = (uint8_t *)&materialDsa,
+        .data = reinterpret_cast<uint8_t *>(&materialDsa),
     };
     ParamsValues values = {
         {.needCheck = true, .value = DEFAULT_VALUE, .isAbsent = false},
@@ -439,7 +439,7 @@ HWTEST_F(HksCheckParamsetTest, HksCheckParamsetTest015, TestSize.Level0)
     };
     HksBlob key = {
         .size = sizeof(struct HksKeyMaterialDsa),
-        .data = (uint8_t *)&materialDsa,
+        .data = reinterpret_cast<uint8_t *>(&materialDsa),
     };
     ParamsValues values = {
         {.needCheck = true, .value = DEFAULT_VALUE, .isAbsent = false},

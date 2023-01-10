@@ -23,7 +23,6 @@
 
 #include <cstring>
 #include <gtest/gtest.h>
-#include <stddef.h>
 
 #include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/src/hks_openssl_ed25519tox25519.c"
 #include "hks_openssl_ed25519tox25519.h"
@@ -83,7 +82,7 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest002, TestSize.Level0)
     Curve25519Structure str = {
         .p = nullptr,
         .d = nullptr,
-        .negativeTwo = nullptr, 
+        .negativeTwo = nullptr,
         .negativeOne = nullptr,
         .negativeOneDivideTwo = nullptr,
         .ed25519Pubkey = nullptr,
