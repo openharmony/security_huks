@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c"
 #include "hks_keynode.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -79,4 +80,98 @@ HWTEST_F(HksKeyNodeTest, HksKeyNodeTest001, TestSize.Level0)
     EXPECT_EQ(keyNode == nullptr, true) << "HksKeyNodeTest001 HksCreateKeyNode not failed";
     HksFreeParamSet(&paramSet);
 }
+
+/**
+ * @tc.name: HksKeyNodeTest.HksKeyNodeTest002
+ * @tc.desc: tdd HksKeyNodeTest002, function is FreeKeyBlobParamSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyNodeTest, HksKeyNodeTest002, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyNodeTest002");
+    struct HksParamSet **param = nullptr;
+    FreeKeyBlobParamSet(param);
+}
+
+/**
+ * @tc.name: HksKeyNodeTest.HksKeyNodeTest003
+ * @tc.desc: tdd HksKeyNodeTest003, function is FreeParamsForBuildKeyNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyNodeTest, HksKeyNodeTest003, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyNodeTest003");
+    struct HksBlob blob = {
+        .size = sizeof(HksBlob),
+        .data = reinterpret_cast<uint8_t *>(HksMalloc(sizeof(HksBlob))),
+    };
+
+    FreeParamsForBuildKeyNode(&blob, nullptr, nullptr, nullptr);
+
+    struct HksParamSet *runtimeParamSet = reinterpret_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
+    ASSERT_EQ(runtimeParamSet == nullptr, false) << "runtimeParamSet malloc failed.";
+    FreeParamsForBuildKeyNode(&blob, &runtimeParamSet, nullptr, nullptr);
+
+    struct HksParamSet *keyBlobParamSet = reinterpret_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
+    ASSERT_EQ(keyBlobParamSet == nullptr, false) << "keyBlobParamSet malloc failed.";
+    FreeParamsForBuildKeyNode(&blob, &runtimeParamSet, &keyBlobParamSet, nullptr);
+
+    struct HuksKeyNode *keyNode = reinterpret_cast<HuksKeyNode *>(HksMalloc(sizeof(HuksKeyNode)));
+    ASSERT_EQ(keyNode == nullptr, false) << "keyNode malloc failed.";
+    FreeParamsForBuildKeyNode(&blob, &runtimeParamSet, &keyBlobParamSet, keyNode);
+}
+
+/**
+ * @tc.name: HksKeyNodeTest.HksKeyNodeTest004
+ * @tc.desc: tdd HksKeyNodeTest004, function is FreeCachedData
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyNodeTest, HksKeyNodeTest004, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyNodeTest004");
+    void *ctx = nullptr;
+    FreeCachedData(&ctx);
+
+    struct HksBlob *blob = reinterpret_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
+    ASSERT_EQ(blob == nullptr, false) << "blob malloc failed.";
+    blob->size = sizeof(HksBlob);
+    blob->data = reinterpret_cast<uint8_t *>(HksMalloc(sizeof(HksBlob)));
+    FreeCachedData(reinterpret_cast<void **>(&blob));
+}
+
+/**
+ * @tc.name: HksKeyNodeTest.HksKeyNodeTest005
+ * @tc.desc: tdd HksKeyNodeTest005, function is KeyNodeFreeCtx
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyNodeTest, HksKeyNodeTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyNodeTest005");
+    void *ctx = nullptr;
+    KeyNodeFreeCtx(HKS_KEY_PURPOSE_AGREE, HKS_ALG_RSA, false, &ctx);
+
+    KeyNodeFreeCtx(HKS_KEY_PURPOSE_DERIVE, HKS_ALG_RSA, false, &ctx);
+
+    KeyNodeFreeCtx(HKS_KEY_PURPOSE_ENCRYPT, HKS_ALG_ECC, false, &ctx);
+
+    KeyNodeFreeCtx(HKS_KEY_PURPOSE_DECRYPT, HKS_ALG_ECC, false, &ctx);
+
+    KeyNodeFreeCtx(HKS_KEY_PURPOSE_MAC, HKS_ALG_ECC, false, &ctx);
+}
+
+/**
+ * @tc.name: HksKeyNodeTest.HksKeyNodeTest006
+ * @tc.desc: tdd HksKeyNodeTest006, function is FreeRuntimeParamSet
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyNodeTest, HksKeyNodeTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyNodeTest006");
+    struct HksParamSet **paramSet = nullptr;
+    FreeRuntimeParamSet(paramSet);
+    struct HksParamSet *paramSetTwo = reinterpret_cast<HksParamSet *>(HksMalloc(sizeof(HksParamSet)));
+    ASSERT_EQ(paramSetTwo == nullptr, false) << "paramSetTwo malloc failed.";
+    FreeRuntimeParamSet(&paramSetTwo);
+}
+
 }

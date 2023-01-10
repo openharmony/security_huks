@@ -23,7 +23,6 @@
 
 #include <cstring>
 #include <gtest/gtest.h>
-#include <stddef.h>
 
 #include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/src/hks_openssl_rsa.c"
 #include "hks_openssl_rsa.h"

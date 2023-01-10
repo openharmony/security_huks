@@ -24,7 +24,6 @@
 #include <cstring>
 #include <gtest/gtest.h>
 #include <openssl/evp.h>
-#include <stddef.h>
 
 #include "hks_openssl_hmac.h"
 #include "hks_log.h"
@@ -74,10 +73,11 @@ HWTEST_F(HksHmacEngineTest, HksHmacEngineTest001, TestSize.Level0)
     ret = HksOpensslHmacFinal(&crypto, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksHmacEngineTest001 failed, ret = " << ret;
 
-    struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)HksMalloc(sizeof(struct HksOpensslHmacCtx));
+    struct HksOpensslHmacCtx *hmacCtx =
+        reinterpret_cast<struct HksOpensslHmacCtx *>(HksMalloc(sizeof(struct HksOpensslHmacCtx)));
     ASSERT_EQ(hmacCtx == nullptr, false) << "ctx malloc failed.";
     hmacCtx->append = nullptr;
-    ret = HksOpensslHmacFinal((void **)&hmacCtx, nullptr, nullptr);    
+    ret = HksOpensslHmacFinal(reinterpret_cast<void **>(&hmacCtx), nullptr, nullptr);
     ASSERT_EQ(ret, HKS_FAILURE) << "HksHmacEngineTest001 failed, ret = " << ret;
 }
 
@@ -93,13 +93,14 @@ HWTEST_F(HksHmacEngineTest, HksHmacEngineTest002, TestSize.Level0)
     HksOpensslHmacHalFreeCtx(ptr);
 
     void *ptrTwo = nullptr;
-    HksOpensslHmacHalFreeCtx((void **)&ptrTwo);
+    HksOpensslHmacHalFreeCtx(reinterpret_cast<void **>(&ptrTwo));
 
-    struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)HksMalloc(sizeof(struct HksOpensslHmacCtx));
+    struct HksOpensslHmacCtx *hmacCtx =
+        reinterpret_cast<struct HksOpensslHmacCtx *>(HksMalloc(sizeof(struct HksOpensslHmacCtx)));
     ASSERT_EQ(hmacCtx == nullptr, false) << "ctx malloc failed.";
     hmacCtx->digestLen = HKS_ALG_AES;
     hmacCtx->append = nullptr;
-    HksOpensslHmacHalFreeCtx((void **)&hmacCtx);
+    HksOpensslHmacHalFreeCtx(reinterpret_cast<void **>(&hmacCtx));
 }
 
 }

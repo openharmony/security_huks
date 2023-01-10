@@ -24,7 +24,6 @@
 #include <cstring>
 #include <gtest/gtest.h>
 #include <openssl/evp.h>
-#include <stddef.h>
 
 #include "hks_openssl_aes.h"
 #include "hks_log.h"
@@ -69,7 +68,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAesEngineTest001");
     const uint32_t dataSize = 1024;
-    void* encryptCtx = (void *)HksMalloc(dataSize);
+    void* encryptCtx = reinterpret_cast<void *>(HksMalloc(dataSize));
     ASSERT_EQ(encryptCtx == nullptr, false) << "encryptCtx malloc failed.";
     HksBlob key = { .size = 0, .data = nullptr };
     // test HKS_MODE_ECB mode
@@ -82,20 +81,16 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest001, TestSize.Level0)
         .algParam = nullptr,
     };
     int32_t ret = HksOpensslAesEncryptInit(&encryptCtx, &key, &usageSpec);
-    HKS_LOG_I("HksOpensslAesEncryptInit,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest001 failed, ret = " << ret;
 
     ret = HksOpensslAesDecryptInit(&encryptCtx, &key, &usageSpec);
-    HKS_LOG_I("HksOpensslAesDecryptInit,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest001 failed, ret = " << ret;
 
     // test HKS_MODE_CTR mode
     usageSpec.mode = HKS_MODE_CTR;
     ret = HksOpensslAesEncryptInit(&encryptCtx, &key, &usageSpec);
-    HKS_LOG_I("HksOpensslAesEncryptInit,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest001 failed, ret = " << ret;
     ret = HksOpensslAesDecryptInit(&encryptCtx, &key, &usageSpec);
-    HKS_LOG_I("HksOpensslAesDecryptInit,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest001 failed, ret = " << ret;
     HksFree(encryptCtx);
 }
@@ -109,7 +104,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAesEngineTest002");
     struct HksOpensslBlockCipherCtx *ctx =
-        (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+        reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->algType = HKS_ALG_AES;
@@ -117,21 +112,17 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest002, TestSize.Level0)
     ctx->padding = HKS_PADDING_NONE;
     ctx->append = nullptr;
 
-    int32_t ret = HksOpensslAesEncryptUpdate((void *)ctx, nullptr, nullptr);
-    HKS_LOG_I("HksOpensslAesEncryptInit,  %" LOG_PUBLIC "d", ret);
+    int32_t ret = HksOpensslAesEncryptUpdate(reinterpret_cast<void *>(ctx), nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest002 failed, ret = " << ret;
 
-    ret = HksOpensslAesDecryptUpdate((void *)ctx, nullptr, nullptr);
-    HKS_LOG_I("HksOpensslAesDecryptUpdate,  %" LOG_PUBLIC "d", ret);
+    ret = HksOpensslAesDecryptUpdate(reinterpret_cast<void *>(ctx), nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest002 failed, ret = " << ret;
 
     // test HKS_MODE_CTR mode
     ctx->mode = HKS_MODE_CTR;
-    ret = HksOpensslAesEncryptUpdate((void *)ctx, nullptr, nullptr);
-    HKS_LOG_I("HksOpensslAesEncryptInit,  %" LOG_PUBLIC "d", ret);
+    ret = HksOpensslAesEncryptUpdate(reinterpret_cast<void *>(ctx), nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest002 failed, ret = " << ret;
-    ret = HksOpensslAesDecryptUpdate((void *)ctx, nullptr, nullptr);
-    HKS_LOG_I("HksOpensslAesDecryptUpdate,  %" LOG_PUBLIC "d", ret);
+    ret = HksOpensslAesDecryptUpdate(reinterpret_cast<void *>(ctx), nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest002 failed, ret = " << ret;
     HksFree(ctx);
 }
@@ -145,7 +136,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAesEngineTest003");
     struct HksOpensslBlockCipherCtx *ctx =
-        (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+        reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->mode = HKS_MODE_ECB;
@@ -153,43 +144,43 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest003, TestSize.Level0)
 
     HksBlob* data = nullptr;
 
-    int32_t ret = HksOpensslAesEncryptFinal((void **)&ctx, data, data, data);
+    int32_t ret = HksOpensslAesEncryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest003 failed, ret = " << ret;
 
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->mode = HKS_MODE_ECB;
     ctx->append = nullptr;
-    ret = HksOpensslAesDecryptFinal((void **)&ctx, data, data, data);
+    ret = HksOpensslAesDecryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest003 failed, ret = " << ret;
 
     // test HKS_MODE_CTR mode
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->mode = HKS_MODE_CTR;
     ctx->append = nullptr;
-    ret = HksOpensslAesEncryptFinal((void **)&ctx, data, data, data);
+    ret = HksOpensslAesEncryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest003 failed, ret = " << ret;
 
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->mode = HKS_MODE_CTR;
     ctx->append = nullptr;
-    ret = HksOpensslAesDecryptFinal((void **)&ctx, data, data, data);
+    ret = HksOpensslAesDecryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest003 failed, ret = " << ret;
 
     // test invalid mode 0
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->mode = 0;
     ctx->append = nullptr;
-    ret = HksOpensslAesEncryptFinal((void **)&ctx, data, data, data);
+    ret = HksOpensslAesEncryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest003 failed, ret = " << ret;
-    ret = HksOpensslAesDecryptFinal((void **)&ctx, data, data, data);
+    ret = HksOpensslAesDecryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest003 failed, ret = " << ret;
     HksFree(ctx);
 }
@@ -207,40 +198,40 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest004, TestSize.Level0)
     HksOpensslAesHalFreeCtx(ptr);
 
     void *ptrTwo = nullptr;
-    HksOpensslAesHalFreeCtx((void **)&ptrTwo);
+    HksOpensslAesHalFreeCtx(reinterpret_cast<void **>(&ptrTwo));
  
     struct HksOpensslBlockCipherCtx *ctx =
-        (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+        reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     // test HKS_MODE_ECB mode
     ctx->mode = HKS_MODE_ECB;
     ctx->append = nullptr;
 
-    HksOpensslAesHalFreeCtx((void **)&ctx);
+    HksOpensslAesHalFreeCtx(reinterpret_cast<void **>(&ctx));
 
     // test HKS_MODE_CTR mode and append is not null
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     ctx->mode = HKS_MODE_CTR;
     EVP_CIPHER_CTX *EvpCtx = EVP_CIPHER_CTX_new();
     ASSERT_EQ(EvpCtx == nullptr, false) << "EvpCtx malloc failed.";
-    ctx->append = (void *)EvpCtx;
-    HksOpensslAesHalFreeCtx((void **)&ctx);
+    ctx->append = reinterpret_cast<void *>(EvpCtx);
+    HksOpensslAesHalFreeCtx(reinterpret_cast<void **>(&ctx));
 
     // test HKS_MODE_GCM mode and append is not null
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     ctx->mode = HKS_MODE_GCM;
     EvpCtx = EVP_CIPHER_CTX_new();
     ASSERT_EQ(EvpCtx == nullptr, false) << "EvpCtx malloc failed.";
-    ctx->append = (void *)EvpCtx;
-    HksOpensslAesHalFreeCtx((void **)&ctx);
+    ctx->append = reinterpret_cast<void *>(EvpCtx);
+    HksOpensslAesHalFreeCtx(reinterpret_cast<void **>(&ctx));
 
     // test invalid mode 0
-    ctx = (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    ctx = reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";
     ctx->mode = 0;
-    HksOpensslAesHalFreeCtx((void **)&ctx);
+    HksOpensslAesHalFreeCtx(reinterpret_cast<void **>(&ctx));
 }
 
 /**
@@ -263,21 +254,17 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest005, TestSize.Level0)
         .algParam = nullptr,
     };
     int32_t ret = HksOpensslAesEncrypt(&key, &usageSpec, nullptr, &cioherText, nullptr);
-    HKS_LOG_I("HksOpensslAesEncrypt,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest005 failed, ret = " << ret;
 
     ret = HksOpensslAesDecrypt(&key, &usageSpec, nullptr, &cioherText);
-    HKS_LOG_I("HksOpensslAesDecrypt,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest005 failed, ret = " << ret;
 
     // test HKS_MODE_CTR mode
     usageSpec.mode = HKS_MODE_CTR;
     ret = HksOpensslAesEncrypt(&key, &usageSpec, nullptr, &cioherText, nullptr);
-    HKS_LOG_I("HksOpensslAesEncrypt,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest005 failed, ret = " << ret;
 
     ret = HksOpensslAesDecrypt(&key, &usageSpec, nullptr, &cioherText);
-    HKS_LOG_I("HksOpensslAesDecrypt,  %" LOG_PUBLIC "d", ret);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest005 failed, ret = " << ret;
 }
 
