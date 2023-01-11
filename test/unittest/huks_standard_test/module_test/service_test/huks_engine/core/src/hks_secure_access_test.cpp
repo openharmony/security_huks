@@ -173,4 +173,28 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest004, TestSize.Level0)
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);
 }
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest005
+ * @tc.desc: tdd HksCoreSecureAccessInitParams, expect HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest005");
+    int32_t ret = HksCoreSecureAccessInitParams(nullptr, nullptr, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+}
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest006
+ * @tc.desc: tdd HksCoreSecureAccessVerifyParams, expect HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest006");
+    int32_t ret = HksCoreSecureAccessVerifyParams(nullptr, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
+}
 }

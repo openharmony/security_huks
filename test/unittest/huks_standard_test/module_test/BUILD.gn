@@ -159,6 +159,8 @@ ohos_unittest("huks_module_test") {
   # utils test
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_attest_utils_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_client_service_adapter_common_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_client_service_adapter_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_condition_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_double_list_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/utils_test/src/hks_file_operator_test.cpp",
