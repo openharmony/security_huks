@@ -101,6 +101,9 @@ if (os_level == "standard") {
       "//commonlibrary/c_utils/base/include",
     ]
     defines = [ "_HUKS_LOG_ENABLE_" ]
+    if (!hks_enable_test) {
+      defines += [ "_HKS_ENABLE_CHECK_OLD_PATH_" ]
+    }
     sources = [
       "src/hks_client_check.c",
       "src/hks_client_service.c",

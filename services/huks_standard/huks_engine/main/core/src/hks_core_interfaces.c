@@ -148,10 +148,10 @@ int32_t HuksHdiMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return HksCoreMac(key, paramSet, srcData, mac);
 }
 
-int32_t HuksHdiChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+int32_t HuksHdiUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
     struct HksBlob *newKey)
 {
-    return HksCoreChangeKeyOwner(oldKey, paramSet, newKey);
+    return HksCoreUpgradeKey(oldKey, paramSet, upgradeTag, newKey);
 }
 
 #ifdef _STORAGE_LITE_
@@ -198,7 +198,7 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiAgreeKey         = HuksHdiAgreeKey;
     hdiDevicePtr->HuksHdiDeriveKey        = HuksHdiDeriveKey;
     hdiDevicePtr->HuksHdiMac              = HuksHdiMac;
-    hdiDevicePtr->HuksHdiChangeKeyOwner   = HuksHdiChangeKeyOwner;
+    hdiDevicePtr->HuksHdiUpgradeKey       = HuksHdiUpgradeKey;
 #ifdef _STORAGE_LITE_
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif

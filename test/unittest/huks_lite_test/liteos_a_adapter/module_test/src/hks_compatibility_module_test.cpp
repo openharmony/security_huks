@@ -390,7 +390,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", 12);
-    
+
     const char *userId = "0";
     uint32_t uid = 999;
     uint8_t *processName = (uint8_t *)HksMalloc(sizeof(uid));

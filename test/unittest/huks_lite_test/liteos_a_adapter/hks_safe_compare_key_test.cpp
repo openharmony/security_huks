@@ -159,6 +159,9 @@ HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level0)
 
     ret = CompareKeyData(&keyAliasOne, &keyAliasTwo);
     EXPECT_NE(ret, 0);
+
+    (void)HksDeleteKey(&keyAliasOne, nullptr);
+    (void)HksDeleteKey(&keyAliasTwo, nullptr);
 }
 #endif /* _CUT_AUTHENTICATE_ */
 }

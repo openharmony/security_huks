@@ -352,6 +352,8 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
     TestFreeBlob(&nonceData);
     TestFreeBlob(&aadData);
     EXPECT_NE(ret, 0);
+
+    (void)HksDeleteKey(&keyAlias, nullptr);
 }
 #endif /* _CUT_AUTHENTICATE_ */
 }
