@@ -93,7 +93,7 @@ int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct Hks
 int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac);
 
-int32_t HuksAccessChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
     struct HksBlob *newKey);
 
 #ifdef __cplusplus

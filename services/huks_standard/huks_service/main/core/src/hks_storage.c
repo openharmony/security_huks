@@ -956,7 +956,6 @@ int32_t HksStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const s
     FileInfoFree(&fileInfo);
     return ret;
 }
-
 static int32_t GetFileCount(const char *path, uint32_t *fileCount)
 {
     if ((path == NULL) || (fileCount == NULL)) {
@@ -1273,6 +1272,13 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
     HKS_FREE_PTR(name);
     return ret;
 }
+
+#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
+int32_t HksIsOldKeyPathCleared(uint32_t *keyCount)
+{
+    return GetFileCount(HKS_KEY_STORE_PATH "/hks_client/key", keyCount);
+}
+#endif
 
 #ifdef HKS_ENABLE_EVENT_DELETE
 static int32_t ConstructUserIdPath(const char *userId, char *userIdPath, uint32_t pathLen)

@@ -1248,7 +1248,8 @@ static int32_t HksCheckKeyVersion(const struct HksParamSet *paramSet, uint32_t e
     return HKS_ERROR_NOT_EXIST;
 }
 
-int32_t HksCoreChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
+    struct HksBlob *newKey) // tag->场景。
 {
     struct HksParam *newProcessInfo = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &newProcessInfo);
@@ -1257,17 +1258,25 @@ int32_t HksCoreChangeKeyOwner(const struct HksBlob *oldKey, const struct HksPara
     ret = HksAuthWhiteList(newProcessInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not in white list")
 
-    struct HksKeyNode *keyNode = HksGenerateKeyNode(oldKey);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate key node failed!")
-
-    ret = HksCheckKeyVersion(keyNode->paramSet, HKS_KEY_BLOB_DUMMY_KEY_VERSION);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not a old key")
-
     struct HksParamSet *newParamSet = NULL;
-    ret = HksChangeOldKeyParams(keyNode->paramSet, newProcessInfo, &newParamSet);
-    
-    ret = HksBuildKeyBlobWithOutAdd(newParamSet, newKey);
+    struct HksKeyNode *keyNode = NULL;
+    do {
+        keyNode = HksGenerateKeyNode(oldKey);
+        if (keyNode == NULL) {
+            ret = HKS_ERROR_BAD_STATE;
+            HKS_LOG_E("generate key node failed!");
+            break;
+        }
 
+        ret = HksCheckKeyVersion(keyNode->paramSet, HKS_KEY_BLOB_DUMMY_KEY_VERSION);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "not a old key")
+
+        ret = HksChangeOldKeyParams(keyNode->paramSet, newProcessInfo, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "change old key param failed!")
+        
+        ret = HksBuildKeyBlobWithOutAdd(newParamSet, newKey);
+    } while (0);
+    
     HksFreeParamSet(&newParamSet);
     HksFreeKeyNode(&keyNode);
 
@@ -1275,10 +1284,12 @@ int32_t HksCoreChangeKeyOwner(const struct HksBlob *oldKey, const struct HksPara
 }
 
 #else
-int32_t HksCoreChangeKeyOwner(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
+    struct HksBlob *newKey)
 {
     (void)oldKey;
     (void)paramSet;
+    (void)upgradeTag;
     (void)newKey;
     return HKS_ERROR_NOT_SUPPORTED;
 }

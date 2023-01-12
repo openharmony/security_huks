@@ -28,5 +28,6 @@ int HksCompatibilityTest008(void);
 int HksCompatibilityTest009(void);
 int HksCompatibilityTest010(void);
 int HksCompatibilityTest011(void);
+int HksCompatibilityTest012(void);
 }
 #endif // HKS_CPMPATIBILITY_TEST_H

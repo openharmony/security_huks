@@ -646,4 +646,48 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
     (void)HksTestDeleteOldKey(&keyAlias1);
     FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
+
+/**
+ * @tc.name: HksCompatibilityTest.HksCompatibilityTest012
+ * @tc.desc: generate key1 in old path and generate key2 key3 in new path, get key info list
+ *           with white list, get list including key1 and key2, with too small buffer
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCompatibilityTest, HksCompatibilityTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCompatibilityTest012");
+    struct HksBlob keyAlias1 = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    const char *aliasName2 = "alias2_for_compatibily_test";
+    struct HksBlob keyAlias2 = { .size = strlen(aliasName2), .data = (uint8_t *)aliasName2};
+    const char *aliasName3 = "alias3_for_compatibily_test";
+    struct HksBlob keyAlias3 = { .size = strlen(aliasName3), .data = (uint8_t *)aliasName3};
+
+    // generate key1 in old path
+    int32_t ret = TestGenerateOldkey(&keyAlias1, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+
+    // generate key2 in new path
+    ret = TestGenerateNewkey(&keyAlias2, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    // generate key3 in new path
+    ret = TestGenerateNewkey(&keyAlias3, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    // get key info list with white list, get list including key 1 and key 2
+    const uint32_t keyInfoListMaxSize = 2;
+    uint32_t keyInfoListSize = keyInfoListMaxSize;
+    struct HksKeyInfo *keyInfoList = nullptr;
+    ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
+    ASSERT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
+
+    (void)HksTestDeleteOldKey(&keyAlias1);
+    (void)HksDeleteKey(&keyAlias2, nullptr);
+    (void)HksDeleteKey(&keyAlias3, nullptr);
+    FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
+}
 }
