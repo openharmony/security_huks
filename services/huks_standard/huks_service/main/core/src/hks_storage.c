@@ -1273,7 +1273,7 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
     return ret;
 }
 
-#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
 int32_t HksIsOldKeyPathCleared(uint32_t *keyCount)
 {
     return GetFileCount(HKS_KEY_STORE_PATH "/hks_client/key", keyCount);
