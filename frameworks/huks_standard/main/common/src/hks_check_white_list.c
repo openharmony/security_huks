@@ -15,6 +15,8 @@
 
 #include "hks_check_white_list.h"
 
+#include "hks_log.h"
+
 static const uint32_t g_whiteList[] = HUKS_UID_WHITE_LIST;
 
 int32_t HksCheckIsInWhiteList(uint32_t uid)
@@ -25,6 +27,7 @@ int32_t HksCheckIsInWhiteList(uint32_t uid)
     for (; i < listSize; ++i) {
         if (uid == g_whiteList[i]) {
             ret = HKS_SUCCESS;
+            HKS_LOG_I("in white list");
             break;
         }
     }

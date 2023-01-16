@@ -330,7 +330,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Lev
 
     ret = HksServiceDeleteKey(&processInfo, &keyAlias);
 
-    ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST);
+    ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST) << "ret is " << ret;
 
     (void)HksTestDeleteOldKey(&keyAlias);
 }

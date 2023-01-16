@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_CODE_H
-#define HKS_UPGRADE_KEY_CODE_H
+#ifndef HKS_UPGRADE_KEY_H
+#define HKS_UPGRADE_KEY_H
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -22,18 +22,21 @@
 #include "hks_config.h"
 #endif
 
-enum HksUpgradeKeyCode {
-    HKS_UPGRADE_CODE_BASE,
+#include "hks_param.h"
+#include "hks_type_inner.h"
+#include "hks_upgrade_key_code.h"
 
-    // to do : only change version without any other change
-    HKS_UPGRADE_CHANGE_KEH_VERSION,
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    HKS_UPGRADE_UPGRADE_KEY_OWNER,
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-    /* new code must be added before HKS_UPGRADE_CODE_MAX */
-    HKS_UPGRADE_CODE_MAX,
-};
+int32_t HksInitUpgradeKeyAbility(void);
 
-#endif /* HKS_UPGRADE_KEY_CODE_H */
+int32_t HksDoUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
+    struct HksBlob *newKey);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* HKS_UPGRADE_KEY_H */

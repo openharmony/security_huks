@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_CODE_H
-#define HKS_UPGRADE_KEY_CODE_H
+#ifndef HKS_UPGRADE_OPERATION_H
+#define HKS_UPGRADE_OPERATION_H
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -22,18 +22,28 @@
 #include "hks_config.h"
 #endif
 
-enum HksUpgradeKeyCode {
-    HKS_UPGRADE_CODE_BASE,
+#include "hks_param.h"
+#include "hks_type_inner.h"
 
-    // to do : only change version without any other change
-    HKS_UPGRADE_CHANGE_KEH_VERSION,
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    HKS_UPGRADE_UPGRADE_KEY_OWNER,
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-    /* new code must be added before HKS_UPGRADE_CODE_MAX */
-    HKS_UPGRADE_CODE_MAX,
-};
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    int32_t mode);
 
-#endif /* HKS_UPGRADE_KEY_CODE_H */
+int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias);
+
+int32_t HksGetOldKeyInfoListForSmallToService(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
+    uint32_t listMaxCnt, uint32_t *listCount);
+
+int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo);
+
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* HKS_UPGRADE_OPERATION_H */

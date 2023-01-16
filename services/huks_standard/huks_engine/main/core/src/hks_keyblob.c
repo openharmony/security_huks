@@ -530,6 +530,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
     return ret;
 }
 
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
 int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     struct HksParamSet *keyBlobParamSet = NULL;
@@ -552,6 +553,7 @@ int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct Hks
     HksFreeParamSet(&keyBlobParamSet);
     return ret;
 }
+#endif
 
 int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, struct HksParamSet **paramSet)
 {

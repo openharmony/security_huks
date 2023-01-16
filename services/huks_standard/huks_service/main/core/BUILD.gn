@@ -115,6 +115,11 @@ if (os_level == "standard") {
       "src/hks_hitrace.c",
       "src/hks_report.c",
     ]
+    sources += [
+      "src/hks_upgrade_key_manager.c",
+      "src/hks_upgrade_operation.c",
+      "src/hks_client_service_util.c",
+    ]
     if (huks_use_lite_storage == true) {
       sources += [
         "src/hks_storage_adapter.c",
@@ -133,6 +138,7 @@ if (os_level == "standard") {
       "-Wall",
       "-Werror",
       "-fPIC",
+      "-DHKS_KEY_VERSION=${huks_key_version}",
     ]
     if (huks_use_hardware_root_key == true) {
       cflags += [ "-D_HARDWARE_ROOT_KEY_" ]

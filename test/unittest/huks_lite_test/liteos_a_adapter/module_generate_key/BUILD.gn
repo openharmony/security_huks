@@ -52,6 +52,7 @@ ohos_static_library("huks_test_generate_key") {
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
     "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
   ]
 

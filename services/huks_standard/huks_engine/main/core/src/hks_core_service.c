@@ -29,7 +29,6 @@
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
-#include "hks_check_white_list.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
@@ -44,14 +43,15 @@
 #include "hks_secure_access.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+#include "hks_upgrade_key.h"
+#endif
+
 #include "securec.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
-#endif
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-#include "hks_upgrade_key_info.h"
 #endif
 
 #ifndef _CUT_AUTHENTICATE_
@@ -1153,134 +1153,11 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return ret;
 }
 
-#ifdef HKS_ENABLE_CHANGE_KEY_OWNER
-static bool IsToChangedTag(const uint32_t *tagList, uint32_t tagCount, uint32_t paramTag)
-{
-    uint32_t i = 0;
-    for (; i < tagCount; ++i) {
-        if (paramTag == tagList[i]) {
-            return true;
-        }
-    }
-    return false;
-}
-
-static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
-    const struct HksParam *newProcessInfo, struct HksParamSet **outParamSet)
-{
-    uint32_t deleteTags[] = { HKS_TAG_PROCESS_NAME };
-    int32_t ret;
-    struct HksParamSet *newParamSet = NULL;
-
-    do {
-        ret = HksInitParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append init operation param set failed")
-        uint32_t i = 0;
-        bool isFault = false;
-        for (; i < paramSet->paramsCnt; ++i) {
-            if (!IsToChangedTag(deleteTags, HKS_ARRAY_SIZE(deleteTags), paramSet->params[i].tag)) {
-                ret = HksAddParams(newParamSet, &(paramSet->params[i]), 1);
-                if (ret != HKS_SUCCESS) {
-                    HKS_LOG_E("append param %" LOG_PUBLIC "u failed", paramSet->params[i].tag);
-                    isFault = true;
-                    break;
-                }
-            } else if (paramSet->params[i].tag == HKS_TAG_PROCESS_NAME){
-                ret = HksAddParams(newParamSet, newProcessInfo, 1);
-                
-                if (ret != HKS_SUCCESS) {
-                    HKS_LOG_E("append process name failed");
-                    isFault = true;
-                    break;
-                }
-            } else if (paramSet->params[i].tag == HKS_TAG_KEY_VERSION) {
-                struct HksParam tmpParam;
-                tmpParam.tag = HKS_TAG_KEY_VERSION;
-                tmpParam.uint32Param = HKS_KEY_VERSION;
-                ret = HksAddParams(newParamSet, &tmpParam, 1);
-                
-                if (ret != HKS_SUCCESS) {
-                    HKS_LOG_E("append process name failed");
-                    isFault = true;
-                    break;
-                }
-            }
-        }
-        if (isFault) {
-            break;
-        }
-
-        ret = HksBuildParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
-
-        *outParamSet = newParamSet;
-        return ret;
-    } while (0);
-
-    HksFreeParamSet(&newParamSet);
-    return ret;
-}
-
-static int32_t HksAuthWhiteList(const struct HksParam *processInfo)
-{
-    uint32_t uid = 0;
-    if (processInfo->blob.size == sizeof("0") && HksMemCmp(processInfo->blob.data, "0",
-        processInfo->blob.size) == EOK) { // for uid == 0
-        uid = 0;
-    } else if (processInfo->blob.size == sizeof(uid)) {
-        (void)memcpy_s(&uid, sizeof(uid), processInfo->blob.data, processInfo->blob.size);
-    } else {
-        return HKS_ERROR_NO_PERMISSION;
-    }
-    return HksCheckIsInWhiteList(uid);
-}
-
-static int32_t HksCheckKeyVersion(const struct HksParamSet *paramSet, uint32_t expectVersion)
-{
-    struct HksParam *keyVersion = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key version failed!");
-    if (keyVersion->uint32Param == expectVersion) {
-        return HKS_SUCCESS;
-    }
-
-    // expected old version key not exist
-    return HKS_ERROR_NOT_EXIST;
-}
-
+#ifdef HKS_ENABLE_UPGRADE_KEY
 int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
-    struct HksBlob *newKey) // tag->场景。
+    struct HksBlob *newKey)
 {
-    struct HksParam *newProcessInfo = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &newProcessInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "no new process info in param set!")
-
-    ret = HksAuthWhiteList(newProcessInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not in white list")
-
-    struct HksParamSet *newParamSet = NULL;
-    struct HksKeyNode *keyNode = NULL;
-    do {
-        keyNode = HksGenerateKeyNode(oldKey);
-        if (keyNode == NULL) {
-            ret = HKS_ERROR_BAD_STATE;
-            HKS_LOG_E("generate key node failed!");
-            break;
-        }
-
-        ret = HksCheckKeyVersion(keyNode->paramSet, HKS_KEY_BLOB_DUMMY_KEY_VERSION);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "not a old key")
-
-        ret = HksChangeOldKeyParams(keyNode->paramSet, newProcessInfo, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "change old key param failed!")
-        
-        ret = HksBuildKeyBlobWithOutAdd(newParamSet, newKey);
-    } while (0);
-    
-    HksFreeParamSet(&newParamSet);
-    HksFreeKeyNode(&keyNode);
-
-    return ret;
+    return HksDoUpgradeKey(oldKey, paramSet, upgradeTag, newKey);
 }
 
 #else
@@ -1380,6 +1257,11 @@ int32_t HksCoreModuleInit(void)
 #ifndef _HARDWARE_ROOT_KEY_
     ret = HksRkcInit();
     HKS_IF_NOT_SUCC_LOGE(ret, "Hks rkc init failed! ret = 0x%" LOG_PUBLIC "X", ret)
+#endif
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+    ret = HksInitUpgradeKeyAbility();
+    HKS_IF_NOT_SUCC_LOGE(ret, "Hks init upgrade key ability failed! ret = 0x%" LOG_PUBLIC "X", ret)
 #endif
 
     return ret;

@@ -20,6 +20,12 @@
 
 #include "hks_type.h"
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #define HKS_KEY_BLOB_DERIVE_SALT_SIZE 16
 #define HKS_KEY_BLOB_DERIVE_CNT 1000
 #define HKS_KEY_BLOB_TAG_SIZE 16
@@ -55,7 +61,9 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode);
 int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
 int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+#endif
 
 int32_t HksGetEncryptKey(struct HksBlob *mainKey);
 
