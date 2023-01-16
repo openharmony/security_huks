@@ -373,119 +373,38 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest014, TestSize.Level0)
 
 /**
  * @tc.name: HksCoreServiceTest.HksCoreServiceTest015
- * @tc.desc: tdd GetPrivateOrPairInnerFormat with different algParam, just for condition test so we do not expect any result.
+ * @tc.desc: GetPrivateOrPairInnerFormat with different algParams, for condition test, do not expect any results.
  * @tc.type: FUNC
  */
 HWTEST_F(HksCoreServiceTest, HksCoreServiceTest015, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksCoreServiceTest013");
+    HKS_LOG_I("enter HksCoreServiceTest015");
     const uint32_t tooBigger = 9999;
     struct Hks25519KeyPair keyPair = { .privateBufferSize = 0, .publicBufferSize = tooBigger };
     struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
 
-    struct HksParam algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA};
-    struct HksParamSet *runtimeParamSet = nullptr;
-    int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    struct HksBlob innerKey = { 0, NULL };
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM2};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-    HKS_FREE_BLOB(innerKey);
-    ret = HKS_ERROR_INVALID_ARGUMENT;
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-}
-
-/**
- * @tc.name: HksCoreServiceTest.HksCoreServiceTest016
- * @tc.desc: tdd GetPrivateOrPairInnerFormat with different algParam, just for condition test so we do not expect any result.
- * @tc.type: FUNC
- */
-HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksCoreServiceTest016");
-    const uint32_t tooBigger = 9999;
-    struct Hks25519KeyPair keyPair = { .privateBufferSize = 0, .publicBufferSize = tooBigger };
-    struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
-
-    struct HksParam algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC};
-    struct HksParamSet *runtimeParamSet = nullptr;
-    int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    struct HksBlob innerKey = { 0, NULL };
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM3};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM4};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
- 
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-
-    runtimeParamSet = nullptr;
-    algParam = {.tag = HKS_TAG_ALGORITHM, .uint32Param = 0};
-    ret = BuildParamSetWithParam(&runtimeParamSet, &algParam);
-    ASSERT_EQ(ret, HKS_SUCCESS);
-    (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
-    HksFreeParamSet(&runtimeParamSet);
-    HKS_FREE_BLOB(innerKey);
-    ret = HKS_ERROR_INVALID_ARGUMENT;
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    struct HksParam algParams[] = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM2},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM3},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM4},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = 0},
+    };
+    for (int i = 0; i < sizeof(algParams) / sizeof(algParams[0]); ++i) {
+        struct HksParamSet *runtimeParamSet = nullptr;
+        int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &algParams[i]);
+        ASSERT_EQ(ret, HKS_SUCCESS);
+        struct HksBlob innerKey = { 0, nullptr };
+        (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
+        HksFreeParamSet(&runtimeParamSet);
+        HKS_FREE_BLOB(innerKey);
+    }
 }
 }
