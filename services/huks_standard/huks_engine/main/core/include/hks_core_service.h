@@ -87,7 +87,7 @@ int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct
 
 int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain);
 
-int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, 
     struct HksBlob *newKey);
 
 int32_t HksCoreGetAbility(int32_t funcType);

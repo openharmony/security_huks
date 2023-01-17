@@ -116,7 +116,6 @@ if (os_level == "standard") {
       "src/hks_report.c",
     ]
     sources += [
-      "src/hks_upgrade_key_manager.c",
       "src/hks_upgrade_operation.c",
       "src/hks_client_service_util.c",
     ]

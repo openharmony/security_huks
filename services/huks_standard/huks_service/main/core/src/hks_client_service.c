@@ -36,7 +36,6 @@
 #include "hks_template.h"
 #include "huks_access.h"
 
-#include "hks_upgrade_key_manager.h"
 #include "hks_upgrade_operation.h"
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 #include "hks_get_process_info.h"
@@ -1133,10 +1132,6 @@ int32_t HksServiceInitialize(void)
 #ifdef _STORAGE_LITE_
         ret = HksLoadFileToBuffer();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "load file to buffer failed, ret = %" LOG_PUBLIC "d", ret)
-#endif
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-        ret = HksUpgradeKeyFuncInit();
 #endif
     } while (0);
 

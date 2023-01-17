@@ -32,8 +32,8 @@ extern "C" {
 
 int32_t HksInitUpgradeKeyAbility(void);
 
-int32_t HksDoUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
-    struct HksBlob *newKey);
+int32_t HksDoUpgradeKey(const struct HksParamSet *oldKeyParamSet, const struct HksParamSet *paramSet,
+    uint32_t upgradeTag, struct HksParamSet **newKeyParamSet);
 
 #ifdef __cplusplus
 }

@@ -247,14 +247,14 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
-    uint32_t upgradeTag, struct HksBlob *newKey))
+    struct HksBlob *newKey))
 {
     HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKey, HKS_ERROR_NULL_POINTER,
         "Change key owner function is null pointer")
 
-    return g_hksHalDevicePtr->HuksHdiUpgradeKey(oldKey, paramSet, upgradeTag, newKey);
+    return g_hksHalDevicePtr->HuksHdiUpgradeKey(oldKey, paramSet, newKey);
 }
 #endif
 

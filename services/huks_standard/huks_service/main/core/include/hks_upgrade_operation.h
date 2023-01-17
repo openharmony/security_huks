@@ -39,7 +39,6 @@ int32_t HksGetOldKeyInfoListForSmallToService(const struct HksProcessInfo *proce
     uint32_t listMaxCnt, uint32_t *listCount);
 
 int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo);
-
 #endif
 
 #ifdef __cplusplus

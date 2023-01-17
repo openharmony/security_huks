@@ -23,8 +23,7 @@
 extern "C" {
 #endif
 
-int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t keyVersion,
-    struct HksBlob *newKey);
+int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey);
 
 int32_t HksIsNewestVersion(uint32_t keyVersion);
 
