@@ -43,6 +43,7 @@ public:
 
 void HksCoreServiceTest::SetUpTestCase(void)
 {
+    static_cast<void>(HksClientInitialize());
 }
 
 void HksCoreServiceTest::TearDownTestCase(void)
