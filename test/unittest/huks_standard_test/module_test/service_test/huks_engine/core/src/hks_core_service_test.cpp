@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_client_ipc.h"
 #include "hks_core_service_test.h"
 
 #include <gtest/gtest.h>
