@@ -35,6 +35,7 @@
 #include "hks_core_service_three_stage.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
+#include "hks_kds.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -1657,3 +1658,7 @@ int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob
     return HksCryptoHalFillRandom(random);
 }
 
+int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText)
+{
+    return HuksCoreChipsetPlatformDecrypt(paramSet, plainText);
+}
