@@ -21,6 +21,7 @@
 #include "hks_config.h"
 #endif
 
+#include "huks_access.h"
 #include "hks_check_white_list.h"
 #include "hks_client_service_util.h"
 #include "hks_get_process_info.h"
@@ -29,7 +30,6 @@
 #include "hks_storage.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
-#include "hks_upgrade_key_manager.h"
 
 #include "securec.h"
 
@@ -63,17 +63,10 @@ static void HksMarkOldKeyClearedIfEmpty(void)
 
 static int32_t HksIsKeyExpectedVersion(const struct HksBlob *key, uint32_t oldVersion)
 {
-    struct HksParamSet *paramSet = NULL;
-    int32_t ret;
-    do {
-        ret = HksGetParamSet((const struct HksParamSet *)key->data, key->size, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get paramSet from file failed!")
-        struct HksParam *keyVersion = NULL;
-        ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get param key version failed!")
-        ret = (keyVersion->uint32Param == oldVersion) ? HKS_SUCCESS : HKS_FAILURE;
-    } while (0);
-    HksFreeParamSet(&paramSet);
+    struct HksParam *keyVersion = NULL;
+    int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
+    ret = (keyVersion->uint32Param == oldVersion) ? HKS_SUCCESS : HKS_FAILURE;
     return ret;
 }
 
@@ -136,7 +129,10 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
         HKS_IF_NOT_SUCC_BREAK(ret)
         const uint32_t oldKeyVersion = 1;
         ret = HksIsKeyExpectedVersion(&oldKey, oldKeyVersion);
-        HKS_IF_NOT_SUCC_BREAK(ret)
+        if (ret != HKS_SUCCESS) {
+            ret = HKS_ERROR_NOT_EXIST;
+            break;
+        }
 
         ret = HksStoreDeleteKeyBlob(&rootProcessInfo, keyAlias, HKS_STORAGE_TYPE_KEY);
         if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
@@ -197,15 +193,22 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
         ret = ConstructChangeOwnerParamSet(&rootProcessInfo, processInfo, &paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct param set failed!")
 
-        ret = HksUpgradeKey(&oldKey, paramSet, 1, &newKey);
+        ret = HksIsKeyExpectedVersion(&oldKey, 1);
+        if (ret != HKS_SUCCESS) {
+            ret = HKS_ERROR_NOT_EXIST;
+            break;
+        }
+
+        ret = HuksAccessUpgradeKey(&oldKey, paramSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access change key owner failed!")
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store new key failed!")
 
+        (void)HksDeleteOldKeyForSmallToService(keyAlias);
+
         // delete old key only after new key stored successfully
         HksMarkOldKeyClearedIfEmpty();
-        (void)HksDeleteOldKeyForSmallToService(keyAlias);
     } while (0);
     HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(oldKey);

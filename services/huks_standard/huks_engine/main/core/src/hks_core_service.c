@@ -45,7 +45,7 @@
 #include "hks_type_inner.h"
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-#include "hks_upgrade_key.h"
+#include "hks_upgrade_key_manager.h"
 #endif
 
 #include "securec.h"
@@ -1154,19 +1154,17 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
 }
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
-    struct HksBlob *newKey)
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
-    return HksDoUpgradeKey(oldKey, paramSet, upgradeTag, newKey);
+    // to do : key_version
+    return HksUpgradeKey(oldKey, paramSet, newKey);
 }
 
 #else
-int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, uint32_t upgradeTag,
-    struct HksBlob *newKey)
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
     (void)oldKey;
     (void)paramSet;
-    (void)upgradeTag;
     (void)newKey;
     return HKS_ERROR_NOT_SUPPORTED;
 }
@@ -1260,7 +1258,7 @@ int32_t HksCoreModuleInit(void)
 #endif
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-    ret = HksInitUpgradeKeyAbility();
+    ret = HksUpgradeKeyFuncInit();
     HKS_IF_NOT_SUCC_LOGE(ret, "Hks init upgrade key ability failed! ret = 0x%" LOG_PUBLIC "X", ret)
 #endif
 

@@ -426,7 +426,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest006, TestSize.Level0)
     ret = TestDoEncrypt(&keyAlias, g_encryptParams001, sizeof(g_encryptParams001) / sizeof(HksParam), &plainBlob,
         &cipherBlob);
 
-    ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST);
+    ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST) << "ret is " << ret;
 
     ret = HksTestDeleteNewKeyInOldPath(&keyAlias);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;

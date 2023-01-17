@@ -48,4 +48,6 @@ declare_args() {
 
   # specify the key version
   huks_key_version = "2"
+
+  huks_enable_upgrade_key = true
 }
