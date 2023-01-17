@@ -16,6 +16,9 @@ import("//build/ohos.gni")
 
 config("huks_config") {
   include_dirs = [ "include" ]
+  include_dirs += [
+    "kds/include"
+  ]
 }
 
 ohos_shared_library("huks_engine_core_standard") {
@@ -56,7 +59,9 @@ ohos_shared_library("huks_engine_core_standard") {
     "src/hks_keynode.c",
     "src/hks_secure_access.c",
   ]
-
+  sources += [
+    "kds/src/hks_kds.c"
+  ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
