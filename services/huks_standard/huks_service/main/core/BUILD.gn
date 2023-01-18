@@ -51,6 +51,7 @@ if (os_level == "standard") {
     cflags = [
       "-Wall",
       "-Werror",
+      "-DHKS_KEY_VERSION=${huks_key_version}",
     ]
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
@@ -110,6 +111,7 @@ if (os_level == "standard") {
       "src/hks_session_manager.c",
       "src/hks_storage_file_lock.c",
       "src/hks_storage_lite.c",
+      "src/hks_upgrade_key_accesser.c",
     ]
     sources += [
       "src/hks_hitrace.c",

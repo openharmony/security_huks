@@ -21,7 +21,6 @@
 #include "hks_config.h"
 #endif
 
-#include "huks_access.h"
 #include "hks_check_white_list.h"
 #include "hks_client_service_util.h"
 #include "hks_get_process_info.h"
@@ -30,6 +29,8 @@
 #include "hks_storage.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+
+#include "hks_upgrade_key_accesser.h"
 
 #include "securec.h"
 
@@ -199,7 +200,10 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
             break;
         }
 
-        ret = HuksAccessUpgradeKey(&oldKey, paramSet, &newKey);
+        uint32_t optionCodes[] = {HKS_OPTIONAL_UPGRADE_KEY_CHANGE_KEY_OWNER};
+        struct HksOptionalUpgradeLabels upgradeLabel = { .codeNum = 1, .optionalCodes = optionCodes };
+
+        ret = HksDoUpgradeKeyAccess(&oldKey, paramSet, &upgradeLabel, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access change key owner failed!")
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
