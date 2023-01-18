@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_CODE_H
-#define HKS_UPGRADE_KEY_CODE_H
+#ifndef HKS_UPGRADE_KEY_ACCESSER_H
+#define HKS_UPGRADE_KEY_ACCESSER_H
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
@@ -22,18 +22,32 @@
 #include "hks_config.h"
 #endif
 
-enum HksUpgradeKeyCode {
-    HKS_UPGRADE_CODE_BASE,
+#include "hks_param.h"
+#include "hks_type_inner.h"
 
-    // to do : only change version without any other change
-    HKS_UPGRADE_CHANGE_KEY_VERSION,
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    HKS_UPGRADE_UPGRADE_KEY_OWNER,
+#ifdef __cplusplus
+extern "C" {
 #endif
 
-    /* new code must be added before HKS_UPGRADE_CODE_MAX */
-    HKS_UPGRADE_CODE_MAX,
+enum HksOptionalUpgradeKeyCode {
+    HKS_OPTIONAL_UPGRADE_KEY_CODE_BASE = 0,
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+    HKS_OPTIONAL_UPGRADE_KEY_CHANGE_KEY_OWNER,
+#endif
+
+    HKS_OPTIONAL_UPGRADE_KEY_CODE_MAX,
 };
 
-#endif /* HKS_UPGRADE_KEY_CODE_H */
+struct HksOptionalUpgradeLabels {
+    uint32_t codeNum;
+    uint32_t *optionalCodes;
+};
+
+int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksParamSet *srcParamSet,
+    const struct HksOptionalUpgradeLabels *optionalLabels, struct HksBlob *newKey);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* HKS_UPGRADE_KEY_ACCESSER_H */

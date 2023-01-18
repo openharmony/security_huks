@@ -21,6 +21,7 @@
 #include "hks_config.h"
 #endif
 
+#include "hks_check_white_list.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -39,6 +40,20 @@ struct HksAbility {
 static struct HksAbility g_upgradeAbilityList[HKS_UPGRADE_CODE_MAX] = { { 0 } };
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
+static int32_t HksAuthWhiteList(const struct HksParam *processInfo)
+{
+    uint32_t uid = 0;
+    if (processInfo->blob.size == sizeof("0") && HksMemCmp(processInfo->blob.data, "0",
+        processInfo->blob.size) == EOK) { // for uid == 0
+        uid = 0;
+    } else if (processInfo->blob.size == sizeof(uid)) {
+        (void)memcpy_s(&uid, sizeof(uid), processInfo->blob.data, processInfo->blob.size);
+    } else {
+        return HKS_ERROR_NO_PERMISSION;
+    }
+    return HksCheckIsInWhiteList(uid);
+}
+
 static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
     const struct HksParam *newProcessInfo, struct HksParamSet **outParamSet)
 {
@@ -47,28 +62,25 @@ static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
 
     do {
         ret = HksInitParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append init operation param set failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
         uint32_t i = 0;
-        bool isFault = false;
         for (; i < paramSet->paramsCnt; ++i) {
             if (paramSet->params[i].tag == HKS_TAG_PROCESS_NAME) {
                 ret = HksAddParams(newParamSet, newProcessInfo, 1);
                 
                 if (ret != HKS_SUCCESS) {
                     HKS_LOG_E("append key version failed");
-                    isFault = true;
                     break;
                 }
             } else {
                 ret = HksAddParams(newParamSet, &(paramSet->params[i]), 1);
                 if (ret != HKS_SUCCESS) {
                     HKS_LOG_E("append param %" LOG_PUBLIC "u failed", paramSet->params[i].tag);
-                    isFault = true;
                     break;
                 }
             }
         }
-        if (isFault) {
+        if (ret != HKS_SUCCESS) {
             break;
         }
 
@@ -83,28 +95,22 @@ static int32_t HksChangeOldKeyParams(const struct HksParamSet *paramSet,
     return ret;
 }
 
-static int32_t HksCheckKeyVersion(const struct HksParamSet *paramSet, uint32_t expectVersion)
-{
-    struct HksParam *keyVersion = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key version failed!");
-    if (keyVersion->uint32Param == expectVersion) {
-        return HKS_SUCCESS;
-    }
-
-    // expected old version key not exist
-    return HKS_ERROR_NOT_EXIST;
-}
-
 static int32_t HksUpgradeKeyOwner(const struct HksParamSet *oldKeyParamSet, const struct HksParamSet *paramSet,
     struct HksParamSet **newKeyParamSet)
 {
+    struct HksParam *isNeedUpgradeKeyOwner = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_NEED_CHANGE_KEY_OWNER, &isNeedUpgradeKeyOwner);
+    if (ret != HKS_SUCCESS || !isNeedUpgradeKeyOwner->boolParam) {
+        HKS_LOG_I("no need to upgrade key owner");
+        return HksGetParamSet(oldKeyParamSet, oldKeyParamSet->paramSetSize, newKeyParamSet);
+    }
+
     struct HksParam *newProcessInfo = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &newProcessInfo);
+    ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &newProcessInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "no new process info in param set!")
 
-    ret = HksCheckKeyVersion(oldKeyParamSet, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not a old key!")
+    ret = HksAuthWhiteList(newProcessInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not in white list!")
 
     return HksChangeOldKeyParams(oldKeyParamSet, newProcessInfo, newKeyParamSet);
 }
@@ -113,35 +119,32 @@ static int32_t HksUpgradeKeyOwner(const struct HksParamSet *oldKeyParamSet, cons
 static int32_t HksUpgradeKeyVersion(const struct HksParamSet *oldKeyParamSet, const struct HksParamSet *paramSet,
     struct HksParamSet **newKeyParamSet)
 {
+    (void)paramSet;
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
     do {
         ret = HksInitParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append init operation param set failed")
-        uint32_t i = 0;
-        bool isFault = false;
-        for (; i < paramSet->paramsCnt; ++i) {
-            if (paramSet->params[i].tag == HKS_TAG_KEY_VERSION) {
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
+        for (uint32_t i = 0; i < oldKeyParamSet->paramsCnt; ++i) {
+            if (oldKeyParamSet->params[i].tag == HKS_TAG_KEY_VERSION) {
                 struct HksParam versionParam;
                 versionParam.tag = HKS_TAG_KEY_VERSION;
                 versionParam.uint32Param = HKS_KEY_VERSION;
                 ret = HksAddParams(newParamSet, &versionParam, 1);
-
+                
                 if (ret != HKS_SUCCESS) {
                     HKS_LOG_E("append key version failed");
-                    isFault = true;
                     break;
                 }
             } else {
-                ret = HksAddParams(newParamSet, &(paramSet->params[i]), 1);
+                ret = HksAddParams(newParamSet, &(oldKeyParamSet->params[i]), 1);
                 if (ret != HKS_SUCCESS) {
-                    HKS_LOG_E("append param %" LOG_PUBLIC "u failed", paramSet->params[i].tag);
-                    isFault = true;
+                    HKS_LOG_E("append param %" LOG_PUBLIC "u failed", oldKeyParamSet->params[i].tag);
                     break;
                 }
             }
         }
-        if (isFault) {
+        if (ret != HKS_SUCCESS) {
             break;
         }
 
@@ -183,7 +186,7 @@ int32_t HksInitUpgradeKeyAbility(void)
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     ret = RegisterUpgradeKeyAbility(HKS_UPGRADE_UPGRADE_KEY_OWNER, HksUpgradeKeyOwner);
 #endif
-    ret = RegisterUpgradeKeyAbility(HKS_UPGRADE_CHANGE_KEH_VERSION, HksUpgradeKeyVersion);
+    ret = RegisterUpgradeKeyAbility(HKS_UPGRADE_CHANGE_KEY_VERSION, HksUpgradeKeyVersion);
 
     return ret;
 }

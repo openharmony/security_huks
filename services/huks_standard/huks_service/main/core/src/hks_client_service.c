@@ -36,6 +36,7 @@
 #include "hks_template.h"
 #include "huks_access.h"
 
+#include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_operation.h"
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 #include "hks_get_process_info.h"
@@ -105,13 +106,40 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     if (ret != HKS_SUCCESS) {
         if (HksIsNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
             ret = HksChangeKeyOwnerForSmallToService(processInfo, keyAlias, mode);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "u", ret);
+            }
         }
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "do upgrade operation for small to service failed!");
     }
 #endif
     ret = GetKeyFileData(processInfo, keyAlias, key, mode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
 
-    // to do : check version and upgrade key and store
+    // to do : to test
+    // check version and upgrade key if need
+    struct HksParam *keyVersion = NULL;
+    ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
+    if (keyVersion->uint32Param == HKS_KEY_VERSION) {
+        return ret;
+    }
+    if (keyVersion->uint32Param > HKS_KEY_VERSION) {
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    struct HksBlob newKey = { .size = 0, .data = NULL };
+    do {
+        ret = HksDoUpgradeKeyAccess(key, NULL, NULL, &newKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
+        ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store upgraded key blob failed!")
+
+        HKS_FREE_BLOB(*key);
+        key->data = newKey.data;
+        key->size = newKey.size;
+        return ret;
+    } while (0);
+    HKS_FREE_BLOB(newKey);
 
     return ret;
 }
