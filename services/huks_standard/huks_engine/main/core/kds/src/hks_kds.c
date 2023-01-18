@@ -215,7 +215,10 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struc
     struct HksParam *cipherTextParam = NULL;
     (void)HksGetParam(paramSecureSet, HKS_TAG_CRYPTO_CTX, &cipherTextParam);
     ret = CheckKdsText(&cipherTextParam->blob, plainText);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check text failed")
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSecureSet);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     // malloc for key
     struct HksBlob sharedKey = { .size = KDS_SHARED_KEY_SIZE, .data = (uint8_t *)HksMalloc(KDS_SHARED_KEY_SIZE) };
