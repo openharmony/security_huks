@@ -1658,7 +1658,7 @@ int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob
     return HksCryptoHalFillRandom(random);
 }
 
-int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText)
+int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText, uint32_t saltType)
 {
-    return HuksCoreChipsetPlatformDecrypt(paramSet, plainText);
+    return HuksCoreChipsetPlatformDecrypt(paramSet, plainText, saltType);
 }

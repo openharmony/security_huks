@@ -18,7 +18,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "hks_crypto_hal.h"
 #include "hks_type.h"
 
 #ifdef __cplusplus
@@ -27,22 +26,26 @@ extern "C" {
 
 // 入参规格
 #define KDS_INPUT_PARAMS_NUMBER 7
-#define KDS_SALT_SIZE 16
-#define KDS_TMP_PK_SIZE 64
-#define KDS_CUSTOM_INFO_SIZE 16
+#define KDS_SALT_SIZE 15
+#define KDS_TMP_PK_SIZE 84
+#define KDS_CUSTOM_INFO_SIZE 528
 #define KDS_IV_SIZE 12
 #define KDS_AAD_SIZE 16
 #define KDS_MAC_SIZE 16
 #define KDS_TEXT_MIN_LEN 16
 #define KDS_TEXT_MAX_LEN 512
 #define KDS_TEXT_LEN_FACTOR 16
-
+#define KDS_SALT_TYPE_TA 1U
+#define KDS_SALT_TYPE_CA 0U
+#define KDS_SALT_ADDED_BYTE_TA 0XFF
+#define KDS_SALT_ADDED_BYTE_CA 0
+#define KDS_SALT_ADDED_BYTE_SIZE 1
 // 中间参数规格
 #define KDS_PROCESS_INFO_MAX_SIZE 512
 #define KDS_SHARED_KEY_SIZE 32
 #define KDS_WRAPED_KEY_SIZE 32
 
-int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText);
+int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText, uint32_t saltType);
 
 #ifdef __cplusplus
 }
