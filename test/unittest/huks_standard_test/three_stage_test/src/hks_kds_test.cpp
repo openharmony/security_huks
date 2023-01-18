@@ -128,6 +128,34 @@ const TestCaseParams HKS_KDS_001_PARAMS = {
     .saltType = KDS_SALT_TYPE_TA,
     .kdsResult = HKS_SUCCESS,
 };
+
+// 异常1：传入空的paramSet指针
+
+// 异常2：paramSet数量不符合
+
+// 异常3：paramSet符合tag的数量不对（如出现重复）
+
+// 异常4：paramSet中的blob == null， size == 0
+
+// 异常5：saltType不符合要求
+
+// ecdh异常6： pubKey长度不符合规范
+
+// ecdh异常7: salt长度不符合规范
+
+// hmac异常8： 定制信息长度不符合规范
+
+// aes异常9： 密文明文长度不匹配
+
+// aes异常10： 密文、明文不为16整数倍
+
+// aes异常11： 密文、明文长度不符合规范
+
+// aes异常12：AAD长度错误
+
+// aes异常13：IV长度错误
+
+// aes异常14： MAC长度错误
 } // 匿名类namespace
 class HksKdsTest : public testing::Test {
 public:
