@@ -191,6 +191,10 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/src/hks_core_hal_api_test.cpp",
   ]
 
+  sources += [
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_kds_test.cpp",
+  ]
+
   defines = [
     "L2_STANDARD",
     "_HUKS_LOG_ENABLE_",

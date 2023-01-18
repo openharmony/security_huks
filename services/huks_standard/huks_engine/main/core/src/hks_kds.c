@@ -14,27 +14,29 @@
  */
 #include "hks_kds.h"
 
+#include "hks_client_service_adapter.h"
+#include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "securec.h"
 
-static const struct HksKeySpec kdsEccSpec = {
-    .algType = HKS_ALG_ECC,
-    .keyLen = HKS_ECC_KEY_SIZE_256,
-    .algParam = NULL,
-};
+// static const struct HksKeySpec KDS_ECC_SPEC = {
+//     .algType = HKS_ALG_ECC,
+//     .keyLen = HKS_ECC_KEY_SIZE_256,
+//     .algParam = NULL,
+// };
 
-static const struct HksKeySpec kdsEcdhSpec = {
+static const struct HksKeySpec KDS_ECDH_SPEC = {
     .algType = HKS_ALG_ECDH,
     .keyLen = HKS_ECC_KEY_SIZE_256,
     .algParam = NULL,
 };
 
-static enum HksKeyDigest hmacDigest = HKS_DIGEST_SHA256;
+static const enum HksKeyDigest HMAC_DIGEST = HKS_DIGEST_SHA256;
 
-static uint32_t g_kdsOrderedValidTags[] = {
+static const uint32_t KDS_ORDERED_VALID_TAGS[] = {
     HKS_TAG_SALT,
     HKS_TAG_AGREE_PUBLIC_KEY,
     HKS_TAG_INFO,
@@ -43,6 +45,21 @@ static uint32_t g_kdsOrderedValidTags[] = {
     HKS_TAG_AE_TAG,
     HKS_TAG_CRYPTO_CTX,
 };
+
+// #define KDS_PLATFORM_PRI_KEY_SIZE 51
+// static const uint8_t KDS_PLATFORM_PRI_KEY[KDS_PLATFORM_PRI_KEY_SIZE] = {
+//     48, 49, 2, 1, 1, 4, 32, 159, 140, 96, 146, 92, 151, 67, 213, 113,
+//     71, 145, 0, 245, 100, 157, 220, 165, 140, 37, 88, 170, 2, 80, 61,
+//     8, 182, 5, 77, 176, 116, 56, 10, 160, 10, 6, 8, 42, 134, 72, 206,
+//     61, 3, 1, 7
+// };
+#define KDS_PLATFORM_PRI_KEY_SIZE 116
+// static const uint8_t KDS_PLATFORM_PRI_KEY[KDS_PLATFORM_PRI_KEY_SIZE] = {
+// 2,0,0,0,0,1,0,0,32,0,0,0,32,0,0,0,32,0,0,0,40,34,254,220,207,35,20,25,22,166,
+// 190,152,29,122,17,25,37,170,188,207,1,151,147,51,181,134,108,183,230,9,154,
+// 147,185,70,213,187,107,142,3,83,192,166,45,153,61,90,16,207,141,138,236,
+// 156,57,254,213,132,55,231,68,12,244,252,173,178,241,219,39,233,216,58,182,63,214,101,27,46,198,47,103,96,231,144,103,71,138,163,3,6,31,95,201,50,75,164,154,80
+// };
 
 static int32_t CheckKdsParams(const struct HksParamSet *paramSet)
 {
@@ -56,7 +73,7 @@ static int32_t CheckKdsParams(const struct HksParamSet *paramSet)
 
     uint32_t validCount = 0;
     for (uint32_t i = 0; i < KDS_INPUT_PARAMS_NUMBER; i++) {
-        uint32_t tag = g_kdsOrderedValidTags[i];
+        uint32_t tag = KDS_ORDERED_VALID_TAGS[i];
         for (uint32_t ii = 0; ii < KDS_INPUT_PARAMS_NUMBER; ii++) {
             struct HksParam tmp = paramSet->params[ii];
             if (CheckBlob(&tmp.blob) != HKS_SUCCESS) {
@@ -92,67 +109,57 @@ static int32_t CheckKdsText(const struct HksBlob *cipherText, const struct HksBl
     return HKS_SUCCESS;
 }
 
-// oh上为写死的key，如果直接返回key，返回值可以为空
-static int32_t GetPlatformPrivateKey(const struct HksBlob *salt, struct HksBlob *platformPrivateKey)
-{
-    return HksCryptoHalGenerateKey(&kdsEccSpec, platformPrivateKey);
-}
+// oh上为写死的key，如果直接返回固定的key，返回值可以为空, TODO:salt是否要判断，返回TA私钥和CA私钥
+// static int32_t GetPlatformPrivateKey(const struct HksBlob *salt, struct HksBlob *platformPrivateKey)
+// {
+//     platformPrivateKey->size = KDS_PLATFORM_PRI_KEY_SIZE;
+//     platformPrivateKey->data = (uint8_t *)KDS_PLATFORM_PRI_KEY;
+//     return HKS_SUCCESS;
+// }
 
 static int32_t DoGenEcdhSharedKey(const struct HksBlob *pubKey,
-    const struct HksBlob *salt, struct HksBlob *sharedKey)
+    struct HksBlob *salt, struct HksBlob *sharedKey, uint32_t saltType)
 {
     if (pubKey->size != KDS_TMP_PK_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (salt->size != KDS_SALT_SIZE) {
+    // TODO: salt:15,16均可？
+    if (salt->size < KDS_SALT_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    struct HksBlob platformPrivateKey = { .size = 0, .data = NULL };
-    int32_t ret = GetPlatformPrivateKey(salt, &platformPrivateKey);
-    if (platformPrivateKey.data == NULL) {
-        return HKS_ERROR_INVALID_ARGUMENT;
+    if (saltType == KDS_SALT_TYPE_TA) {
+        (void)memset_s(salt + KDS_SALT_SIZE, KDS_SALT_ADDED_BYTE_SIZE, KDS_SALT_ADDED_BYTE_TA, KDS_SALT_ADDED_BYTE_SIZE);
     }
-    ret = HksCryptoHalAgreeKey(&platformPrivateKey, pubKey, &kdsEcdhSpec, sharedKey);
-    HksFree(platformPrivateKey.data);
+    if (saltType == KDS_SALT_TYPE_CA) {
+        (void)memset_s(salt + KDS_SALT_SIZE, KDS_SALT_ADDED_BYTE_SIZE, KDS_SALT_ADDED_BYTE_CA, KDS_SALT_ADDED_BYTE_SIZE);
+    }
+    // 平台私钥注意内存管理，如果调用hal函数，则由其申请内存，如果是写死的平台私钥，为常量，则不用管理内存
+    // struct HksBlob platformPrivateKey = { .size = 0, .data = NULL };
+    // int32_t ret = GetPlatformPrivateKey(salt, &platformPrivateKey);
+    // if (platformPrivateKey.data == NULL) {
+    //     return HKS_ERROR_INVALID_ARGUMENT;
+    // }
+    uint8_t KDS_PLATFORM_PRI_KEY[KDS_PLATFORM_PRI_KEY_SIZE] = {
+    2,0,0,0,0,1,0,0,32,0,0,0,32,0,0,0,32,0,0,0,40,34,254,220,207,35,20,25,22,166,
+    190,152,29,122,17,25,37,170,188,207,1,151,147,51,181,134,108,183,230,9,154,
+    147,185,70,213,187,107,142,3,83,192,166,45,153,61,90,16,207,141,138,236,
+    156,57,254,213,132,55,231,68,12,244,252,173,178,241,219,39,233,216,58,182,63,214,101,27,46,198,47,103,96,231,144,103,71,138,163,3,6,31,95,201,50,75,164,154,80
+    };
+    struct HksBlob platformPrivateKey = { .size = KDS_PLATFORM_PRI_KEY_SIZE, .data = KDS_PLATFORM_PRI_KEY };
+    HKS_LOG_E("DoGenEcdhSharedKey hal start");
+    int32_t ret = HksCryptoHalAgreeKey(&platformPrivateKey, pubKey, &KDS_ECDH_SPEC, sharedKey);
+    // HksFree(platformPrivateKey.data);
+    HKS_LOG_E("DoGenEcdhSharedKey end");
     return ret;
 }
 
 static int32_t DoHmacSha256(const struct HksBlob *customInfo,
     const struct HksBlob *sharedKey, struct HksBlob *wrapedKey)
 {
-    if (customInfo->size != KDS_CUSTOM_INFO_SIZE) {
+    if (customInfo->size > KDS_CUSTOM_INFO_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    struct HksBlob processInfo = { .size = KDS_PROCESS_INFO_MAX_SIZE,
-        .data = (uint8_t *)HksMalloc(KDS_PROCESS_INFO_MAX_SIZE) };
-    if (processInfo.data == NULL) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    (void)memset_s(processInfo.data, KDS_PROCESS_INFO_MAX_SIZE, 0, KDS_PROCESS_INFO_MAX_SIZE);
-    // int32_t ret = HuksGetProcessName(&processInfo);
-    // if (ret != HKS_SUCCESS) {
-    //     HksFree(processInfo.data);
-    //     return ret;
-    // }
-    int32_t ret;
-
-    uint32_t messageSize = processInfo.size + customInfo->size;
-    struct HksBlob message = { .size = messageSize, .data = (uint8_t *)HksMalloc(messageSize) };
-    if (message.data == NULL) {
-        HksFree(processInfo.data);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    uint32_t i = 0;
-    for (; i < processInfo.size; i++) {
-        message.data[i] = processInfo.data[i];
-    }
-    for (; i < messageSize; i++) {
-        message.data[i] = customInfo->data[i - processInfo.size];
-    }
-
-    ret = HksCryptoHalHmac(sharedKey, hmacDigest, &message, wrapedKey);
-    HksFree(processInfo.data);
-    HksFree(message.data);
+    int32_t ret = HksCryptoHalHmac(sharedKey, HMAC_DIGEST, customInfo, wrapedKey);
     return ret;
 }
 
@@ -198,13 +205,19 @@ static int32_t DoKdsDecrypt(const struct HksParamSet *paramSecureSet,
     return HksCryptoHalDecrypt(wrapedKey, &kdsDecryptSpec, &cipherText, plainText);
 }
 
-int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText)
+int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText, uint32_t saltType)
 {
+    HKS_LOG_E("start test");
     // basic check for plainText and paramSet
     int32_t ret = CheckBlob(plainText);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Check plainText failed")
     ret = CheckKdsParams(paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Check kds params failed")
+
+    // check saltType
+    if (saltType != KDS_SALT_TYPE_TA && saltType != KDS_SALT_TYPE_CA) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     // deep copy of paramSet
     struct HksParamSet *paramSecureSet = NULL;
@@ -240,7 +253,8 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struc
         (void)HksGetParam(paramSecureSet, HKS_TAG_SALT, &saltParam);
         struct HksParam *tmpPkParam = NULL;
         (void)HksGetParam(paramSecureSet, HKS_TAG_AGREE_PUBLIC_KEY, &tmpPkParam);
-        ret = DoGenEcdhSharedKey(&tmpPkParam->blob, &saltParam->blob, &sharedKey);
+        HKS_LOG_E("start ecdh");
+        ret = DoGenEcdhSharedKey(&tmpPkParam->blob, &saltParam->blob, &sharedKey, saltType);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ecdh get sharedKey failed")
 
         // do hmac to get wrapedKey
@@ -256,8 +270,10 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struc
 
     (void)memset_s(sharedKey.data, KDS_SHARED_KEY_SIZE, 0, KDS_SHARED_KEY_SIZE);
     (void)memset_s(wrapedKey.data, KDS_WRAPED_KEY_SIZE, 0, KDS_WRAPED_KEY_SIZE);
+    HKS_LOG_E("kds free start");
     HksFree(sharedKey.data);
     HksFree(wrapedKey.data);
     HksFreeParamSet(&paramSecureSet);
+    HKS_LOG_E("kds free end");
     return ret;
 }

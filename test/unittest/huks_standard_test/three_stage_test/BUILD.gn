@@ -78,6 +78,10 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_sign_verify_test.cpp",
   ]
 
+  sources += [
+    "src/hks_kds_test.cpp",
+  ]
+
   defines = [
     "L2_STANDARD",
     "_HUKS_LOG_ENABLE_",
@@ -117,6 +121,8 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/test/unittest/src/common/include",
+    "//base/security/huks/utils/crypto_adapter",
+    "//base/security/huks/services/huks_standard/huks_service/main/core/include"
   ]
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   deps = [
@@ -126,6 +132,11 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
+  ]
+  deps += [
+    "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
