@@ -18,6 +18,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "securec.h"
 
 static const struct HksKeySpec kdsEccSpec = {
     .algType = HKS_ALG_ECC,
@@ -127,7 +128,7 @@ static int32_t DoHmacSha256(const struct HksBlob *customInfo,
     if (processInfo.data == NULL) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-
+    (void)memset_s(processInfo.data, KDS_PROCESS_INFO_MAX_SIZE, 0, KDS_PROCESS_INFO_MAX_SIZE);
     // int32_t ret = HuksGetProcessName(&processInfo);
     // if (ret != HKS_SUCCESS) {
     //     HksFree(processInfo.data);
@@ -250,6 +251,8 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struc
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "aes decrypt failed")
     } while (0);
 
+    (void)memset_s(sharedKey.data, KDS_SHARED_KEY_SIZE, 0, KDS_SHARED_KEY_SIZE);
+    (void)memset_s(wrapedKey.data, KDS_WRAPED_KEY_SIZE, 0, KDS_WRAPED_KEY_SIZE);
     HksFree(sharedKey.data);
     HksFree(wrapedKey.data);
     HksFreeParamSet(&paramSecureSet);
