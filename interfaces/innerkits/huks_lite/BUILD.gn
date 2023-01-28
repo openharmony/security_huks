@@ -184,6 +184,10 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../utils/file_operator/hks_file_operator_lite.c",
       "../../../utils/list/hks_double_list.c",
       "../../../utils/mutex/hks_mutex.c",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_manager.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_operation.c",
     ]
     sources += [ "hks_tmp_client.c" ]
 
