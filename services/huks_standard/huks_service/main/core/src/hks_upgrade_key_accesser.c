@@ -47,7 +47,6 @@ static int32_t HksAddParamsForSmallToService(const struct HksParamSet *srcParamS
     
     return ret;
 }
-
 #endif
 
 static int32_t CheckIsOptionalCodeLabeled(const struct HksOptionalUpgradeLabels *optionalLabels,
@@ -73,6 +72,10 @@ static int32_t AddOptionalUpgradeParams(const struct HksParamSet *srcParamSet,
     const struct HksOptionalUpgradeLabels *optionalLabels, struct HksParamSet *targetParamSet)
 {
     int32_t ret = HKS_SUCCESS;
+
+    // to avoid programming warning and reserve for later use
+    (void)CheckIsOptionalCodeLabeled(NULL, 0);
+
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     if (CheckIsOptionalCodeLabeled(optionalLabels, HKS_OPTIONAL_UPGRADE_KEY_CHANGE_KEY_OWNER) == HKS_SUCCESS) {
         ret = HksAddParamsForSmallToService(srcParamSet, targetParamSet);

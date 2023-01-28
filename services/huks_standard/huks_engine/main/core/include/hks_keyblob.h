@@ -61,7 +61,7 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode);
 int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+#ifdef HKS_ENABLE_UPGRADE_KEY
 int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct HksBlob *keyOut);
 #endif
 

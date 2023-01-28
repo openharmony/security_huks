@@ -245,7 +245,7 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
     return g_hksHalDevicePtr->HuksHdiMac(key, paramSet, srcData, mac);
 }
 
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+#ifdef HKS_ENABLE_UPGRADE_KEY
 ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
     struct HksBlob *newKey))
 {
