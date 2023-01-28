@@ -690,4 +690,34 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest012, TestSize.Level0)
     (void)HksDeleteKey(&keyAlias3, nullptr);
     FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
+
+/**
+ * @tc.name: HksCompatibilityTest.HksCompatibilityTest013
+ * @tc.desc: test and have key in old path and new path, delete expect success and both keys are deleted
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCompatibilityTest, HksCompatibilityTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCompatibilityTest013");
+    struct HksBlob keyAlias = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksTestDeleteOldKey(&keyAlias);
+
+    int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
+
+    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+
+    ret = TestGenerateNewkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
+
+    ret = HksDeleteKey(&keyAlias, nullptr);
+    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
+
+    ret = HksKeyExist(&keyAlias, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
+
+    ret = HksTestOldKeyExist(&keyAlias);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
+}
 }

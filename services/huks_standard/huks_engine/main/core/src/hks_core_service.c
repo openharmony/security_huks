@@ -1156,7 +1156,6 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
 #ifdef HKS_ENABLE_UPGRADE_KEY
 int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
-    // to do : key_version
     return HksUpgradeKey(oldKey, paramSet, newKey);
 }
 
