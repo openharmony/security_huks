@@ -760,7 +760,7 @@ int32_t HksCoreCheckImportWrappedKeyParams(const struct HksBlob *key, const stru
     /* then check the origin key paramset which is the same as import key */
     struct ParamsValues params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
-    ret = CoreCheckGenKeyParams(paramSet, &params, HKS_TAG_IMPORT_KEY_TYPE);
+    ret = CoreCheckGenKeyParams(paramSet, &params, HKS_KEY_FLAG_IMPORT_KEY);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check origin key param set failed")
 
     uint32_t alg;

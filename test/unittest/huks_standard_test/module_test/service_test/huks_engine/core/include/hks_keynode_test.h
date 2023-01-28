@@ -18,5 +18,10 @@
 
 namespace Unittest::HksKeyNodeTest {
 int HksKeyNodeTest001(void);
+int HksKeyNodeTest002(void);
+int HksKeyNodeTest003(void);
+int HksKeyNodeTest004(void);
+int HksKeyNodeTest005(void);
+int HksKeyNodeTest006(void);
 }
 #endif
