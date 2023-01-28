@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_client_ipc.h"
 #include "hks_core_service_test.h"
 
 #include <gtest/gtest.h>
@@ -43,6 +44,7 @@ public:
 
 void HksCoreServiceTest::SetUpTestCase(void)
 {
+    static_cast<void>(HksClientInitialize());
 }
 
 void HksCoreServiceTest::TearDownTestCase(void)
@@ -328,7 +330,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest012, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest012");
     const uint32_t tooBigger = 9999;
-    struct Hks25519KeyPair keyPair = { .privateBufferSize = tooBigger, .publicBufferSize = 0 };
+    struct Hks25519KeyPair keyPair = { .publicBufferSize = 0, .privateBufferSize = tooBigger };
     struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
     int32_t ret = CheckAgreeKeyIn(&key);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
@@ -343,9 +345,68 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest013, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest013");
     const uint32_t tooBigger = 9999;
-    struct Hks25519KeyPair keyPair = { .privateBufferSize = 0, .publicBufferSize = tooBigger };
+    struct Hks25519KeyPair keyPair = { .publicBufferSize = tooBigger, .privateBufferSize = 0 };
     struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
     int32_t ret = CheckAgreeKeyIn(&key);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest014
+ * @tc.desc: tdd HksCoreExportPublicKey with null input, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest014, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest014");
+    struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
+    struct HksParamSet *runtimeParamSet = nullptr;
+    struct HksParam accessTokenIdRuntime = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 1 };
+    int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
+    ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, nullptr);
+    ret = HksCoreExportPublicKey(nullptr, runtimeParamSet, &keyOutBlob);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    HksFree(keyOutBlob.data);
+    HksFree(keyBlob.data);
+    HksFreeParamSet(&runtimeParamSet);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest015
+ * @tc.desc: GetPrivateOrPairInnerFormat with different algParams, for condition test, do not expect any results.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest015, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest015");
+    const uint32_t tooBigger = 9999;
+    struct Hks25519KeyPair keyPair = { .privateBufferSize = 0, .publicBufferSize = tooBigger };
+    struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
+
+    struct HksParam algParams[] = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM2},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM3},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_SM4},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ED25519},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519},
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = 0},
+    };
+    for (int i = 0; i < sizeof(algParams) / sizeof(algParams[0]); ++i) {
+        struct HksParamSet *runtimeParamSet = nullptr;
+        int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &algParams[i]);
+        ASSERT_EQ(ret, HKS_SUCCESS);
+        struct HksBlob innerKey = { 0, nullptr };
+        (void)GetPrivateOrPairInnerFormat(HKS_KEY_TYPE_PRIVATE_KEY, &key, runtimeParamSet, &innerKey);
+        HksFreeParamSet(&runtimeParamSet);
+        HKS_FREE_BLOB(innerKey);
+    }
 }
 }

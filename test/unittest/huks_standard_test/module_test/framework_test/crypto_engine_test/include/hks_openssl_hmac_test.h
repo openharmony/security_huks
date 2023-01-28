@@ -1,5 +1,5 @@
-/*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ /*
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,16 +13,18 @@
  * limitations under the License.
  */
 
-#ifndef HKS_SUCURE_ACCESS_TEST_H
-#define HKS_SUCURE_ACCESS_TEST_H
+#ifndef HKS_OPENSSL_HMAC_TEST_H
+#define HKS_OPENSSL_HMAC_TEST_H
 
-namespace Unittest::HksSecureAccessTest {
-// error test for access token id
-int HksSecureAccessTest001(void);
-int HksSecureAccessTest002(void);
-int HksSecureAccessTest003(void);
-int HksSecureAccessTest004(void);
-int HksSecureAccessTest005(void);
-int HksSecureAccessTest006(void);
+#include <stdint.h>
+
+struct HksOpensslHmacCtx {
+    uint32_t digestLen;
+    void *append;
+};
+
+namespace Unittest::HksFrameworkHmacEngineTest {
+int HksHmacEngineTest001(void);
+int HksHmacEngineTest002(void);
 }
-#endif
+#endif // HKS_OPENSSL_HMAC_TEST_H
