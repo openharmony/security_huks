@@ -79,6 +79,19 @@ int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias)
     return HksServiceDeleteKey(&processInfo, keyAlias);
 }
 
+int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias)
+{
+    const char *userId = "0";
+    const char *processName = "hks_client";
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0
+    };
+    return HksServiceKeyExist(&processInfo, keyAlias);
+}
+
 int32_t HksTestInitialize(void)
 {
     int32_t ret = HksCoreModuleInit();

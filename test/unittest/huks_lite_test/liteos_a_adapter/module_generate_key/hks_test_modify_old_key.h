@@ -24,6 +24,7 @@ extern "C" {
 
 int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
 int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias);
+int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias);
 int32_t HksTestInitialize(void);
 void HksChangeOldKeyOwner(const char *path, uint32_t uid);
 

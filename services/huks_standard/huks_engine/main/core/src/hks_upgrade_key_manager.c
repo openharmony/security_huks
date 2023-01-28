@@ -78,7 +78,7 @@ static int32_t UpgradeKeyToNewestVersion(const struct HksParamSet *oldKeyParamSe
     struct HksParamSet **newKeyParamSet)
 {
     int32_t ret;
-    ret = HksDoUpgradeKey(oldKeyParamSet, paramSet, HKS_UPGRADE_CHANGE_KEY_VERSION, newKeyParamSet);
+    ret = HksDoUpgradeKey(oldKeyParamSet, paramSet, HKS_UPGRADE_UPGRADE_KEY_VERSION, newKeyParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access change key owner failed!")
     return ret;
 }

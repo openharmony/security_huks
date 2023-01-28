@@ -850,7 +850,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
     return ret;
 }
 
-// to do：删干净老密钥后 删除hks_client/key 目录，并全局缓存标记，后续判断标记并跳过兼容操作
+// to do : to test
 int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias)
 {
     int32_t ret = HksCheckProcessNameAndKeyAlias(&processInfo->processName, keyAlias);

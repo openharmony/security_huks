@@ -25,8 +25,8 @@
 enum HksUpgradeKeyCode {
     HKS_UPGRADE_CODE_BASE,
 
-    // to do : only change version without any other change
-    HKS_UPGRADE_CHANGE_KEY_VERSION,
+    // only change version without any other change
+    HKS_UPGRADE_UPGRADE_KEY_VERSION,
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     HKS_UPGRADE_UPGRADE_KEY_OWNER,

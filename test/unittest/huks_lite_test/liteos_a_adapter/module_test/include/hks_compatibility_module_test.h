@@ -21,6 +21,7 @@ int HksCompatibilityModuleTest001(void);
 int HksCompatibilityModuleTest002(void);
 int HksCompatibilityModuleTest003(void);
 int HksCompatibilityModuleTest004(void);
+int HksCompatibilityModuleTest005(void);
 }
 #endif // HKS_CPMPATIBILITY_MODULE_TEST_H
 

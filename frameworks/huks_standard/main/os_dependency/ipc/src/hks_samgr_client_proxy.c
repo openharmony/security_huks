@@ -85,6 +85,7 @@ static int32_t SynchronizeOutput(struct HksIpcHandle *reply, struct HksBlob *out
 
 static int CurrentCallback(IOwner owner, int code, IpcIo *reply)
 {
+    (void)code;
     struct HksIpcHandle *curReply = (struct HksIpcHandle *)owner;
 
     if (memcpy_s(curReply->io->bufferCur, curReply->io->bufferLeft, reply->bufferCur, reply->bufferLeft) != EOK) {
@@ -99,15 +100,16 @@ static int CurrentCallback(IOwner owner, int code, IpcIo *reply)
     return HKS_SUCCESS;
 }
 
-static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct HksBlob *inBlob,
+static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage funcId, const struct HksBlob *inBlob,
     struct HksBlob *outBlob)
 {
     /* Check input and inBlob */
     int32_t ret = CheckBlob(inBlob);
-    IClientProxy *proxy = (IClientProxy *)iUnknown;
-    if ((ret != HKS_SUCCESS) || (proxy == NULL)) {
+    if ((ret != HKS_SUCCESS) || (iUnknown == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
+
+    IClientProxy *proxy = (IClientProxy *)iUnknown;
 
     IpcIo request;
     char dataReq[MAX_IO_SIZE];
@@ -142,7 +144,7 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct
 
         struct HksIpcHandle replyHandle = { .io = &reply, .state = HKS_IPC_MSG_BASE };
 
-        ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, (IOwner)&replyHandle, CurrentCallback);
+        ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, funcId, &request, (IOwner)&replyHandle, CurrentCallback);
         HKS_IF_NOT_SUCC_BREAK(ret, HKS_ERROR_IPC_MSG_FAIL)
 
         return SynchronizeOutput(&replyHandle, outBlob);
@@ -151,7 +153,7 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct
     return ret;
 }
 
-static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob)
+static int32_t HksSendRequestSync(enum HksMessage funcId, const struct HksBlob *inBlob, struct HksBlob *outBlob)
 {
     IClientProxy *clientProxy = NULL;
     IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
@@ -166,15 +168,15 @@ static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *in
         return HKS_ERROR_NULL_POINTER;
     }
 
-    ret = HksIpcCall((IUnknown *)clientProxy, type, inBlob, outBlob);
+    ret = HksIpcCall((IUnknown *)clientProxy, funcId, inBlob, outBlob);
     (void)clientProxy->Release((IUnknown *)clientProxy);
 
     return ret;
 }
 
-int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
+int32_t HksSendRequest(enum HksMessage funcId, const struct HksBlob *inBlob, struct HksBlob *outBlob,
     const struct HksParamSet *paramSet)
 {
     (void)paramSet;
-    return HksSendRequestSync(type, inBlob, outBlob);
+    return HksSendRequestSync(funcId, inBlob, outBlob);
 }

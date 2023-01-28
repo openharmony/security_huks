@@ -186,7 +186,7 @@ int32_t HksInitUpgradeKeyAbility(void)
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     ret = RegisterUpgradeKeyAbility(HKS_UPGRADE_UPGRADE_KEY_OWNER, HksUpgradeKeyOwner);
 #endif
-    ret = RegisterUpgradeKeyAbility(HKS_UPGRADE_CHANGE_KEY_VERSION, HksUpgradeKeyVersion);
+    ret = RegisterUpgradeKeyAbility(HKS_UPGRADE_UPGRADE_KEY_VERSION, HksUpgradeKeyVersion);
 
     return ret;
 }

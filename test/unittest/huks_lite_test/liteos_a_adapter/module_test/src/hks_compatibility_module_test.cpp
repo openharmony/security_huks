@@ -158,6 +158,25 @@ static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct H
     return ret;
 }
 
+static int32_t TestGenerateNewKeyWithProcessInfo(const struct HksBlob *keyAlias, const struct HksParam *genParams,
+    uint32_t genParamsCnt, struct HksProcessInfo *processInfo)
+{
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = HksInitParamSet(&genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(genParamSet, genParams, genParamsCnt);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksServiceGenerateKey(processInfo, keyAlias, genParamSet, nullptr);
+
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&genParamSet);
+
+    return ret;
+}
+
 static int32_t TestDoServiceEncrypt(const struct HksBlob *keyAlias, const struct HksParam *encParams,
     uint32_t encParamsCnt, struct HksBlob *plainBlob, struct HksBlob *cipherBlob)
 {
@@ -412,6 +431,64 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
 
     (void)HksTestDeleteOldKey(&keyAlias);
+    FreeKeyInfoList(&keyInfoList, keyInfoListSize);
+}
+
+/**
+ * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest005
+ * @tc.desc: test have key in old path and new path without whiteList, then only get key info list with new key
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCompatibilityModuleTest005");
+    struct HksBlob keyAlias1 = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+
+    const char *aliasName2 = "alias2_for_compatibily_test";
+    struct HksBlob keyAlias2 = { .size = strlen(aliasName2), .data = (uint8_t *)aliasName2};
+
+    const char *userId = "0";
+    uint32_t uid = 555;
+    uint8_t *processName = (uint8_t *)HksMalloc(sizeof(uid));
+    ASSERT_TRUE(processName != nullptr);
+    (void)memcpy_s(processName, sizeof(uid), &uid, sizeof(uid));
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { sizeof(uid), (uint8_t *)processName },
+        0,
+        0
+    };
+
+    int32_t ret = TestGenerateNewKeyWithProcessInfo(&keyAlias2, g_genParams001,
+        sizeof(g_genParams001) / sizeof(HksParam), &processInfo);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = TestGenerateOldkey(&keyAlias1, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t keyInfoListSize = 2;
+    struct HksKeyInfo *keyInfoList = nullptr;
+    ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &keyInfoListSize);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(keyInfoListSize, 1) << "keyInfoListSize is " << keyInfoListSize;
+
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias2);
+    (void)HksTestDeleteOldKey(&keyAlias1);
+
+    uint32_t hitCnt = 0;
+    uint32_t i;
+    for (i = 0; i < keyInfoListSize; ++i) {
+        if (keyInfoList[i].alias.data != nullptr) {
+            if (HksMemCmp(keyInfoList[i].alias.data, aliasName2, keyInfoList[i].alias.size) == 0) {
+                ++hitCnt;
+            }
+            HKS_LOG_I("get key : %s", keyInfoList[i].alias.data);
+        }
+    }
+    ASSERT_EQ(hitCnt, 1) << "hit cnt is " << hitCnt;
+
     FreeKeyInfoList(&keyInfoList, keyInfoListSize);
 }
 }
