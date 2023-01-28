@@ -22,6 +22,7 @@
 
 #define HKS_SUPPORT_THREAD
 
+// to do : 将宏定义放到产品配置仓
 #define HKS_ENABLE_UPGRADE_KEY
 
 #define HKS_LOG_ENGINE_LOG_CORE

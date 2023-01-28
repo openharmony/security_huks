@@ -30,6 +30,8 @@
 
 #include "securec.h"
 
+#ifdef HKS_ENABLE_UPGRADE_KEY
+
 typedef int32_t (*UpgradeFuncPtr)(const struct HksParamSet *oldKeyParamSet, const struct HksParamSet *paramSet,
     struct HksParamSet **newKeyParamSet);
 
@@ -146,3 +148,24 @@ int32_t HksUpgradeKeyFuncInit(void)
     RegisterUpgradeFuncAbility(HKS_UPGRADE_VERSION_MAX, UpgradeKeyToNewestVersion);
     return ret;
 }
+
+#else /* HKS_ENABLE_UPGRADE_KEY */
+int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
+{
+    (void)oldKey;
+    (void)paramSet;
+    (void)newKey;
+    return HKS_SUCCESS;
+}
+
+int32_t HksIsNewestVersion(uint32_t keyVersion)
+{
+    (void)keyVersion;
+    return HKS_SUCCESS;
+}
+
+int32_t HksUpgradeKeyFuncInit(void)
+{
+    return HKS_SUCCESS;
+}
+#endif

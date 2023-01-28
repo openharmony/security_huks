@@ -39,10 +39,17 @@ if (os_level == "standard") {
     sources = [
       "src/hks_client_check.c",
       "src/hks_client_service.c",
+      "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
       "src/hks_storage.c",
       "src/hks_storage_file_lock.c",
     ]
+
+    sources += [
+      "src/hks_upgrade_key_accesser.c",
+      "src/hks_upgrade_operation.c",
+    ]
+
     if (non_rwlock_support) {
       sources += [ "src/hks_lock_lite.c" ]
     } else {
@@ -108,19 +115,21 @@ if (os_level == "standard") {
     sources = [
       "src/hks_client_check.c",
       "src/hks_client_service.c",
+      "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
       "src/hks_storage_file_lock.c",
       "src/hks_storage_lite.c",
-      "src/hks_upgrade_key_accesser.c",
     ]
     sources += [
       "src/hks_hitrace.c",
       "src/hks_report.c",
     ]
+
     sources += [
+      "src/hks_upgrade_key_accesser.c",
       "src/hks_upgrade_operation.c",
-      "src/hks_client_service_util.c",
     ]
+
     if (huks_use_lite_storage == true) {
       sources += [
         "src/hks_storage_adapter.c",

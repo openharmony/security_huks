@@ -46,6 +46,7 @@ declare_args() {
   # specify the uid white list for change key owner
   huks_uid_white_list_define = "{}"
 
+  # to do : 放在内部参数集 huks.gni
   # specify the key version
   huks_key_version = "2"
 

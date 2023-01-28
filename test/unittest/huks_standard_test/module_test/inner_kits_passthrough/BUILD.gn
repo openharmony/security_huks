@@ -62,6 +62,7 @@ huks_sources = [
   "//base/security/huks/interfaces/innerkits/huks_standard/main/src/hks_api_adapter.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_check.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_lock.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_report.c",
@@ -69,7 +70,8 @@ huks_sources = [
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_adapter.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_file_lock.c",
-  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_storage_data.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_operation.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_dynamic_hal.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
@@ -97,7 +99,8 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_info.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_manager.c",
 ]
 
 config("soft_huks_config") {

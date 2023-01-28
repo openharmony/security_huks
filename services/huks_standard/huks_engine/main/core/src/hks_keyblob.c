@@ -530,7 +530,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
     return ret;
 }
 
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+#ifdef HKS_ENABLE_UPGRADE_KEY
 int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     struct HksParamSet *keyBlobParamSet = NULL;

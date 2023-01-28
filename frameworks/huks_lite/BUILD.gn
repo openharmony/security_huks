@@ -33,7 +33,6 @@ group("huks_server") {
 
       # script for transfer fils in old path to new path, in case of upgradation
       "//base/security/huks/interfaces/innerkits/huks_lite:hks_compatibility_bin",
-
       "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     ]
   }
