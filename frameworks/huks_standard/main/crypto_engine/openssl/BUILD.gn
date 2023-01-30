@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,11 +24,6 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
 
-    defines = [
-      "_HARDWARE_ROOT_KEY_",
-      "_HUKS_LOG_ENABLE_",
-      "L2_STANDARD",
-    ]
     sources = [
       "src/hks_openssl_ability.c",
       "src/hks_openssl_aes.c",
@@ -51,11 +46,6 @@ if (os_level == "standard") {
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
-    cflags = [
-      "-DHILOG_ENABLE",
-      "-Wall",
-      "-Werror",
-    ]
     complete_static_lib = true
 
     sanitize = {
@@ -72,11 +62,12 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hiviewdfx_hilog_native:libhilog",
     ]
-    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
   }
 } else {
   ohos_static_library("libhuks_openssl_small_static") {
-    defines = [ "_HUKS_LOG_ENABLE_" ]
     sources = [
       "src/hks_openssl_ability.c",
       "src/hks_openssl_aes.c",
@@ -99,15 +90,6 @@ if (os_level == "standard") {
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
 
-    cflags = [
-      "-DHILOG_ENABLE",
-      "-Wall",
-      "-Werror",
-      "-fPIC",
-    ]
-    if (huks_use_hardware_root_key == true) {
-      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
-    }
     complete_static_lib = true
 
     deps += [
@@ -119,9 +101,8 @@ if (os_level == "standard") {
     } else {
       deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
     }
-    if (huks_config_file != "") {
-      print(huks_config_file)
-      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
-    }
+    configs = [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
   }
 }

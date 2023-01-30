@@ -39,7 +39,6 @@ unittest("huks_3.0_module_test") {
   deps = [
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
     "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
-    "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
   ]
 
   deps += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_generate_key:huks_test_generate_key" ]

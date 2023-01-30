@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
@@ -191,11 +192,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/src/hks_core_hal_api_test.cpp",
   ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HUKS_LOG_ENABLE_",
-  ]
-
+  defines = []
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
   }
@@ -204,7 +201,9 @@ ohos_unittest("huks_module_test") {
     "//commonlibrary/c_utils/base/include",
     "//test/xts/acts/security_lite/huks/common/include",
   ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+  ]
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_attest_key_test_common.cpp",
     "//base/security/huks/utils/condition/hks_condition.c",
