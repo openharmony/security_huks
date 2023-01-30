@@ -20,7 +20,7 @@ import("//build/ohos.gni")
 config("public_huks_config") {
   include_dirs = [
     ".",
-    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+    "../../../../../services/huks_standard/huks_service/main/core/include",
   ]
 }
 
@@ -30,9 +30,9 @@ ohos_static_library("huks_test_generate_key") {
   sources += [ "./hks_test_modify_old_key.c" ]
 
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+    "../../../../../interfaces/innerkits/huks_standard/main/include",
+    "../../../../../frameworks/huks_standard/main/common/include",
+    "../../../../../services/huks_standard/huks_service/main/core/include",
   ]
 
   include_dirs += [ "." ]
@@ -42,27 +42,27 @@ ohos_static_library("huks_test_generate_key") {
   deps = []
 
   sources += [
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_auth.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_manager.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_auth.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
+    "../../../../../services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_manager.c",
   ]
 
   deps += [
-    "//base/security/huks/frameworks/huks_standard/main:huks_small_frameworks",
-    "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
-    "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
-    "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
-    "//base/security/huks/utils/list:libhuks_utils_list_static",
-    "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+    "../../../../../frameworks/huks_standard/main:huks_small_frameworks",
+    "../../../../../services/huks_standard/huks_service/main:libhuks_service_small_static",
+    "../../../../../utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
+    "../../../../../utils/file_operator:libhuks_utils_file_operator_static",
+    "../../../../../utils/list:libhuks_utils_list_static",
+    "../../../../../utils/mutex:libhuks_utils_mutex_static",
   ]
 
   deps += [
@@ -71,12 +71,12 @@ ohos_static_library("huks_test_generate_key") {
   ]
 
   include_dirs += [
-    "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    "../../../../../services/huks_standard/huks_engine/main/core/include",
     "//commonlibrary/c_utils/base/include",
-    "//base/security/huks/utils/crypto_adapter",
-    "//base/security/huks/utils/file_operator",
-    "//base/security/huks/utils/list",
-    "//base/security/huks/utils/mutex",
+    "../../../../../utils/crypto_adapter",
+    "../../../../../utils/file_operator",
+    "../../../../../utils/list",
+    "../../../../../utils/mutex",
   ]
 
   defines = []

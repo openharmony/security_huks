@@ -176,8 +176,10 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_report.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
+      "../../../services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c",
+      "../../../services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
       "../../../utils/crypto_adapter/hks_client_service_adapter_common.c",
       "../../../utils/crypto_adapter/hks_client_service_adapter_lite.c",
       "../../../utils/file_operator/hks_file_operator_lite.c",
@@ -211,7 +213,7 @@ if (ohos_kernel_type == "liteos_m") {
       "LOG_ENGINE_HILOG_MODULE_SCY",
     ]
 
-    if (huks_enable_upgrade_key) {
+    if (huks_enable_upgrade_key && !huks_use_lite_storage) {
       defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
     }
 
