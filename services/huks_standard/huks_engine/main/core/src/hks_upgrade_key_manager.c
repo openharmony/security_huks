@@ -66,6 +66,10 @@ static int32_t UpgradeFuncOneToTwo(const struct HksParamSet *oldKeyParamSet, con
     struct HksParamSet **newKeyParamSet)
 {
     int32_t ret = HKS_SUCCESS;
+    (void)oldKeyParamSet;
+    (void)paramSet;
+    (void)newKeyParamSet;
+
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     do {
         ret = HksDoUpgradeKey(oldKeyParamSet, paramSet, HKS_UPGRADE_UPGRADE_KEY_OWNER, newKeyParamSet);

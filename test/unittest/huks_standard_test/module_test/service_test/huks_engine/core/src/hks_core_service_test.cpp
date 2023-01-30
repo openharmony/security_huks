@@ -382,7 +382,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest015, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest015");
     const uint32_t tooBigger = 9999;
-    struct Hks25519KeyPair keyPair = { .privateBufferSize = 0, .publicBufferSize = tooBigger };
+    struct Hks25519KeyPair keyPair = { .publicBufferSize = tooBigger, .privateBufferSize = 0 };
     struct HksBlob key = { .size = sizeof(keyPair), .data = (uint8_t *)&keyPair };
 
     struct HksParam algParams[] = {

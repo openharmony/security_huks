@@ -98,15 +98,14 @@ config("soft_huks_config") {
     cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
   }
 
-  cflags += [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_path}\"" ]
+  cflags += [
+    "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_path}\"",
+    "-DHKS_KEY_VERSION=${huks_key_version}",
+  ]
 }
 
 config("public_huks_config") {
   include_dirs = [ "../../../interfaces/innerkits/huks_standard/main/include" ]
-}
-
-config("get_dev_udid_config") {
-  cflags = [ "-DGET_DEV_UDID_ENABLE" ]
 }
 
 #begin: add
@@ -212,6 +211,10 @@ if (ohos_kernel_type == "liteos_m") {
       "LOG_ENGINE_HILOG_MODULE_SCY",
     ]
 
+    if (huks_enable_upgrade_key) {
+      defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
+    }
+
     if (huks_enable_log == true) {
       configs += [ ":hilog_lite_dir" ]
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
@@ -222,8 +225,12 @@ if (ohos_kernel_type == "liteos_m") {
     public_configs = [ ":public_huks_config" ]
 
     configs = []
+    configs += [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
     configs += [ ":soft_huks_config" ]
-    configs += [ ":get_dev_udid_config" ]
+
+    cflags = []
 
     deps = []
     deps += [
@@ -270,18 +277,14 @@ if (ohos_kernel_type == "liteos_m") {
       "MBEDTLS_ECP_RESTARTABLE=1",
       "LOG_ENGINE_HILOG_MODULE_SCY",
     ]
-
-    cflags = [
-      "-Wall",
-      "-Werror",
-      "-fPIC",
-    ]
   }
 
   ohos_executable("huks_server") {
     configs = []
+    configs += [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
     configs += [ ":soft_huks_config" ]
-    configs += [ ":get_dev_udid_config" ]
 
     sources = []
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/service_pro_main.c" ]
@@ -290,13 +293,6 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/hks_samgr_service.c",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/hks_samgr_service_feature.c",
     ]
-
-    cflags = []
-
-    if (huks_config_file != "") {
-      print(huks_config_file)
-      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
-    }
 
     include_dirs = []
 

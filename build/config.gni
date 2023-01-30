@@ -46,9 +46,10 @@ declare_args() {
   # specify the uid white list for change key owner
   huks_uid_white_list_define = "{}"
 
-  # to do : 放在内部参数集 huks.gni
-  # specify the key version
-  huks_key_version = "2"
-
+  # whether enable key file auto-upgrade
   huks_enable_upgrade_key = true
+
+  # to do : 上库时改为false，默认不开启
+  # whether enable upgrade key file for l1 sdk to l1 service, default as false
+  huks_enable_upgrade_small_to_service = true
 }

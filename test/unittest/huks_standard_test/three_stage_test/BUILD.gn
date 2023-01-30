@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Huawei Device Co., Ltd.
+# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
@@ -78,10 +79,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_sign_verify_test.cpp",
   ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HUKS_LOG_ENABLE_",
-  ]
+  defines = []
 
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
@@ -118,7 +116,9 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/test/unittest/src/common/include",
   ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+  ]
   deps = [
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",

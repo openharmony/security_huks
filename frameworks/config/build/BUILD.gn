@@ -11,11 +11,58 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 
-config("coverage_flag") {
+config("l2_standard_common_config") {
+  cflags = []
   if (enable_coverage) {
-    cflags = [ "--coverage" ]
+    cflags += [ "--coverage" ]
     ldflags = [ "--coverage" ]
+  }
+  cflags += [
+    "-DHKS_KEY_VERSION=${huks_key_version}",
+    "-Wall",
+    "-Werror",
+    "-fPIC",
+  ]
+
+  defines = [
+    "_HARDWARE_ROOT_KEY_",
+    "_HUKS_LOG_ENABLE_",
+    "L2_STANDARD",
+  ]
+  if (huks_enable_upgrade_key) {
+    defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
+  }
+}
+
+config("l1_small_common_config") {
+  cflags = []
+  cflags += [
+    "-DHKS_KEY_VERSION=${huks_key_version}",
+    "-Wall",
+    "-Werror",
+    "-fPIC",
+  ]
+  if (huks_use_hardware_root_key == true) {
+    cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+  }
+  if (huks_config_file != "") {
+    print(huks_config_file)
+    cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+  }
+
+  cflags += [ "-DGET_DEV_UDID_ENABLE" ]
+
+  defines = [
+    "_HUKS_LOG_ENABLE_",
+    "L1_SMALL",
+  ]
+  if (huks_enable_upgrade_key) {
+    defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
+  }
+  if (huks_enable_upgrade_small_to_service) {
+    defines += [ "HKS_ENABLE_SMALL_TO_SERVICE" ]
   }
 }

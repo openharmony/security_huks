@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -24,11 +24,6 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
 
-    defines = [
-      "_HARDWARE_ROOT_KEY_",
-      "_HUKS_LOG_ENABLE_",
-      "L2_STANDARD",
-    ]
     sources = [ "./src/hks_local_engine.c" ]
     cflags = [
       "-Wall",
@@ -37,6 +32,10 @@ if (os_level == "standard") {
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
     complete_static_lib = true
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
 
     sanitize = {
       integer_overflow = true
@@ -51,26 +50,18 @@ if (os_level == "standard") {
 } else {
   ohos_static_library("libhuks_core_small_static") {
     public_configs = [ ":huks_config" ]
-
-    defines = [ "_HUKS_LOG_ENABLE_" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
 
     sources = [ "./src/hks_local_engine.c" ]
-    cflags = [
-      "-Wall",
-      "-Werror",
-      "-fPIC",
-    ]
-    if (huks_use_hardware_root_key == true) {
-      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
-    }
+    cflags = []
+
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
 
     complete_static_lib = true
     deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
-    if (huks_config_file != "") {
-      print(huks_config_file)
-      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
-    }
+
     if (huks_dependency_mbedtls_path != "") {
       deps += [ huks_dependency_mbedtls_path ]
     } else {

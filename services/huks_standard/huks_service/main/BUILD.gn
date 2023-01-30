@@ -1,4 +1,4 @@
-# Copyright (C) 2021 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -18,11 +18,6 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_service_standard_static") {
     subsystem_name = "security"
     part_name = "huks"
-    defines = [
-      "L2_STANDARD",
-      "_HARDWARE_ROOT_KEY_",
-      "_HUKS_LOG_ENABLE_",
-    ]
 
     public_deps = [
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
@@ -31,38 +26,33 @@ if (os_level == "standard") {
 
     complete_static_lib = true
 
-    cflags = []
-
     sanitize = {
       integer_overflow = true
       cfi = true
       debug = false
     }
 
-    configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
 } else {
   ohos_static_library("libhuks_service_small_static") {
-    defines = [ "_HUKS_LOG_ENABLE_" ]
-
     public_deps = [
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_small_static",
 
       # "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_small_static",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_small_static",
     ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
 
     complete_static_lib = true
 
     cflags = []
-    if (huks_use_hardware_root_key == true) {
-      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
-    }
+
     deps = [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
-    if (huks_config_file != "") {
-      print(huks_config_file)
-      cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
-    }
   }
 }
