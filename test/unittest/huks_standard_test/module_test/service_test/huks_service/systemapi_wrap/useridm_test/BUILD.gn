@@ -41,7 +41,7 @@ ohos_unittest("huks_useridm_wrap_test") {
   ]
 
   deps = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
   ]
 

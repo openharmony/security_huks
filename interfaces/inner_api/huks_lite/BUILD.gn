@@ -28,8 +28,8 @@ huks_sources = [
   "../../../frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
   "../../../frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
   "../../../frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
-  "../../../interfaces/innerkits/huks_standard/main/src/hks_api.c",
-  "../../../interfaces/innerkits/huks_standard/main/src/hks_api_adapter.c",
+  "../../../interfaces/inner_api/huks_standard/main/src/hks_api.c",
+  "../../../interfaces/inner_api/huks_standard/main/src/hks_api_adapter.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_auth.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
@@ -169,7 +169,7 @@ config("soft_huks_config") {
 }
 
 config("public_huks_config") {
-  include_dirs = [ "../../../interfaces/innerkits/huks_standard/main/include" ]
+  include_dirs = [ "../../../interfaces/inner_api/huks_standard/main/include" ]
 }
 
 config("get_dev_udid_config") {

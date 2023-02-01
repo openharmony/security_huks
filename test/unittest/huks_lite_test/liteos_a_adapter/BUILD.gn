@@ -70,7 +70,7 @@ unittest("huks_3.0_test") {
   ]
 
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_lite",
+    "//base/security/huks/interfaces/inner_api/huks_lite",
     "//base/security/huks/huawei_property/include",
     "../common/include",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include",
@@ -78,7 +78,7 @@ unittest("huks_3.0_test") {
   ]
 
   deps = [
-    "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
+    "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]
 

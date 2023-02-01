@@ -37,7 +37,7 @@ ohos_unittest("service_ipc_test") {
   sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_ipc_serialization.c" ]
 
   deps = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
