@@ -29,7 +29,7 @@ ohos_static_library("libhuks_utils_hisysevent_wrapper_static") {
   public_configs = [ ":huks_config" ]
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
   defines = [ "_HUKS_LOG_ENABLE_" ]
   sources = [

@@ -43,12 +43,12 @@ ohos_reliabilitytest("huks_stability_test") {
 
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
 
   deps = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//third_party/googletest:gtest_main",
   ]
   external_deps = [

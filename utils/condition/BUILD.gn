@@ -29,7 +29,7 @@ ohos_static_library("libhuks_utils_condition_static") {
   public_configs = [ ":huks_config" ]
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   defines = [

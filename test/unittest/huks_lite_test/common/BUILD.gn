@@ -24,7 +24,7 @@ config("hilog_lite_dir") {
 
 config("huks_test_common") {
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "include",
   ]
 }
