@@ -1229,7 +1229,9 @@ int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
 int32_t HksCoreModuleInit(void)
 {
     int32_t ret;
-    g_huksMutex = HksMutexCreate();
+    if (g_huksMutex == NULL) {
+        g_huksMutex = HksMutexCreate();
+    }
     if (g_huksMutex == NULL) {
         HKS_LOG_E("Hks mutex init failed, null pointer!");
         ret = HKS_ERROR_NULL_POINTER;
