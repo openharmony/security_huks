@@ -66,7 +66,7 @@ static int32_t BnBuildParams(
 static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
 {
     int32_t outLen = BN_num_bytes(bnX);
-    if ((outLen < 0) || (x->size < (uint32_t)outLen)) {
+    if ((outLen < 0) || (x->size < (uint32_t)outLen) || x->size > INT32_MAX) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
