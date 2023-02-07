@@ -103,5 +103,42 @@ int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct Hk
     }
     return ret;
 }
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+int32_t ConstructUpgradeKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksParamSet *srcParamSet,
+     struct HksParamSet **outParamSet)
+{
+    (void)srcParamSet;
+    struct HksParamSet *paramSet = NULL;
+    int32_t ret;
+    do {
+        ret = HksInitParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed!")
+
+        struct HksParam processNameParam;
+        processNameParam.tag = HKS_TAG_PROCESS_NAME;
+        processNameParam.blob = processInfo->processName;
+
+        ret = HksAddParams(paramSet, &processNameParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param processNameParam failed!")
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+        struct HksParam accessTokenIdParam;
+        accessTokenIdParam.tag = HKS_TAG_ACCESS_TOKEN_ID;
+        accessTokenIdParam.uint64Param = processInfo->accessTokenId;
+        ret = HksAddParams(paramSet, &accessTokenIdParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param access token id failed")
+#endif
+        ret = HksBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build param set failed!")
+
+        *outParamSet = paramSet;
+        return HKS_SUCCESS;
+    } while (0);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+#endif
+
 #endif /* _STORAGE_LITE_ */
 #endif /* _CUT_AUTHENTICATE_ */

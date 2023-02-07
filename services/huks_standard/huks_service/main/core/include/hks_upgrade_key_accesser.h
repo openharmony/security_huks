@@ -29,22 +29,8 @@
 extern "C" {
 #endif
 
-enum HksOptionalUpgradeKeyCode {
-    HKS_OPTIONAL_UPGRADE_KEY_CODE_BASE = 0,
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    HKS_OPTIONAL_UPGRADE_KEY_CHANGE_KEY_OWNER,
-#endif
-
-    HKS_OPTIONAL_UPGRADE_KEY_CODE_MAX,
-};
-
-struct HksOptionalUpgradeLabels {
-    uint32_t codeNum;
-    uint32_t *optionalCodes;
-};
-
 int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksParamSet *srcParamSet,
-    const struct HksOptionalUpgradeLabels *optionalLabels, struct HksBlob *newKey);
+    struct HksBlob *newKey);
 
 #ifdef __cplusplus
 }

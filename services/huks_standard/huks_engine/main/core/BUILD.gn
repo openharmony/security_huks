@@ -69,7 +69,6 @@ if (os_level == "standard") {
 
     sources += [
       "src/hks_upgrade_key.c",
-      "src/hks_upgrade_key_manager.c",
     ]
 
     if (enable_mock) {
@@ -120,7 +119,6 @@ if (os_level == "standard") {
 
     sources += [
       "src/hks_upgrade_key.c",
-      "src/hks_upgrade_key_manager.c",
     ]
 
     if (huks_use_lite_storage == true) {

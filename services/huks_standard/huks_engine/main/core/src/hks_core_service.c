@@ -45,7 +45,7 @@
 #include "hks_type_inner.h"
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-#include "hks_upgrade_key_manager.h"
+#include "hks_upgrade_key.h"
 #endif
 
 #include "securec.h"
@@ -1254,11 +1254,6 @@ int32_t HksCoreModuleInit(void)
 #ifndef _HARDWARE_ROOT_KEY_
     ret = HksRkcInit();
     HKS_IF_NOT_SUCC_LOGE(ret, "Hks rkc init failed! ret = 0x%" LOG_PUBLIC "X", ret)
-#endif
-
-#ifdef HKS_ENABLE_UPGRADE_KEY
-    ret = HksUpgradeKeyFuncInit();
-    HKS_IF_NOT_SUCC_LOGE(ret, "Hks init upgrade key ability failed! ret = 0x%" LOG_PUBLIC "X", ret)
 #endif
 
     return ret;

@@ -100,7 +100,6 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key_manager.c",
 ]
 
 config("soft_huks_config") {

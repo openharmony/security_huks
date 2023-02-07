@@ -30,8 +30,16 @@ extern "C" {
 
 int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet);
 
+#ifndef _STORAGE_LITE_
 int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     struct HksBlob *key, int32_t mode);
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+int32_t ConstructUpgradeKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksParamSet *srcParamSet,
+     struct HksParamSet **outParamSet);
+#endif
+
+#endif
 
 #ifdef __cplusplus
 }
