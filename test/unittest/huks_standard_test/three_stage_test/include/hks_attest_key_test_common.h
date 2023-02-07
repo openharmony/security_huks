@@ -52,7 +52,7 @@ namespace Unittest::AttestKey {
 
 void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos);
 
-int32_t TestGenerateKey(const struct HksBlob *keyAlias);
+int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t keyPadding);
 
 int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     const struct HksTestCertChain *certChainParam);

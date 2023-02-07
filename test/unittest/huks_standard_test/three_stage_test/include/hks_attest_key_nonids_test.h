@@ -24,6 +24,7 @@ int HksAttestKeyNonIdsTest004(void);
 int HksAttestKeyNonIdsTest005(void);
 int HksAttestKeyNonIdsTest006(void);
 int HksAttestKeyNonIdsTest007(void);
+int HksAttestKeyNonIdsTest008(void);
 }
 
 #endif
