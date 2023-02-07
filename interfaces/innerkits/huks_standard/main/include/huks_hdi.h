@@ -85,7 +85,6 @@ struct HuksHdi {
     int32_t (*HuksHdiMac)(const struct HksBlob *key, const struct HksParamSet *paramSet,
         const struct HksBlob *srcData, struct HksBlob *mac);
 
-    //HuksHdiUpgradeKey // 老密钥，升级场景tag，参数paramSet，出参新密钥 // (密钥属性 + 密钥密文 + owner（进程）+ 完整性签名)
     int32_t (*HuksHdiUpgradeKey)(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, 
         struct HksBlob *newKey);
 };

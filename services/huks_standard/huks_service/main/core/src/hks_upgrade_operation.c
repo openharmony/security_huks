@@ -50,9 +50,11 @@ static int32_t HksIsProcessInfoInWhiteList(const struct HksProcessInfo *processI
     return HksCheckIsInWhiteList(uid);
 }
 
+#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
+// it is ok for no mutex, because the hugest problem it can lead to is check key directory for nothing once
 static volatile bool isOldKeyCleared = false;
 
-static void HksMarkOldKeyClearedIfEmpty(void)
+void HksMarkOldKeyClearedIfEmpty(void)
 {
     uint32_t keyCount = 0;
     int32_t ret = HksIsOldKeyPathCleared(&keyCount);
@@ -62,25 +64,23 @@ static void HksMarkOldKeyClearedIfEmpty(void)
     }
 }
 
-static int32_t HksIsKeyExpectedVersion(const struct HksBlob *key, uint32_t oldVersion)
-{
-    struct HksParam *keyVersion = NULL;
-    int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
-    ret = (keyVersion->uint32Param == oldVersion) ? HKS_SUCCESS : HKS_FAILURE;
-    return ret;
-}
-
-#ifdef _HKS_ENABLE_CHECK_OLD_PATH_
 static int32_t HksIsOldKeyCleared(void) {
-    // it is ok for without mutex, because the hugest problem is check key directory for nothing
     return isOldKeyCleared ? HKS_SUCCESS : HKS_FAILURE;
 }
 #endif
 
+static int32_t HksIsKeyExpectedVersion(const struct HksBlob *key, uint32_t expectedVersion)
+{
+    struct HksParam *keyVersion = NULL;
+    int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
+    ret = (keyVersion->uint32Param == expectedVersion) ? HKS_SUCCESS : HKS_FAILURE;
+    return ret;
+}
+
 int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo)
 {
-#ifdef _HKS_ENABLE_CHECK_OLD_PATH_
+#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
     if (HksIsOldKeyCleared()) {
         return HKS_FAILURE;
     }
@@ -140,41 +140,17 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
             HKS_LOG_E("service delete main key failed, ret = %" LOG_PUBLIC "d", ret);
         }
 
+#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
         HksMarkOldKeyClearedIfEmpty();
+#endif
     } while (0);
     HKS_FREE_BLOB(oldKey);
 
     return ret;
 }
 
-static int32_t ConstructChangeOwnerParamSet(const struct HksProcessInfo *rootProcessInfo,
-    const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
-{
-    struct HksParamSet *paramSet = NULL;
-    int32_t ret;
-    do {
-        ret = HksInitParamSet(&paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed!")
-
-        struct HksParam newProcessParam;
-        newProcessParam.tag = HKS_TAG_PROCESS_NAME;
-        newProcessParam.blob = processInfo->processName;
-
-        ret = HksAddParams(paramSet, &newProcessParam, 1);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param newProcessParam failed!")
-
-        ret = HksBuildParamSet(&paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build param set failed!")
-
-        *outParamSet = paramSet;
-        return HKS_SUCCESS;
-    } while (0);
-    HksFreeParamSet(&paramSet);
-    return ret;
-}
-
-static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    int32_t mode)
+static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *keyAlias, int32_t mode)
 {
     HKS_LOG_I("enter HksChangeKeyOwner");
     struct HksProcessInfo rootProcessInfo;
@@ -184,48 +160,48 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
     struct HksBlob oldKey = { .size = 0, .data = NULL };
     struct HksBlob newKey = { .size = 0, .data = NULL };
 
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *upgradeParamSet = NULL;
 
     do {
         // get old key
         ret = GetKeyFileData(&rootProcessInfo, keyAlias, &oldKey, mode);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "not have old key")
 
-        ret = ConstructChangeOwnerParamSet(&rootProcessInfo, processInfo, &paramSet);
+        ret = ConstructUpgradeKeyParamSet(processInfo, paramSet, &upgradeParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct param set failed!")
+        const uint32_t oldKeyVersion = 1;
 
-        ret = HksIsKeyExpectedVersion(&oldKey, 1);
+        ret = HksIsKeyExpectedVersion(&oldKey, oldKeyVersion);
         if (ret != HKS_SUCCESS) {
             ret = HKS_ERROR_NOT_EXIST;
             break;
         }
 
-        uint32_t optionCodes[] = {HKS_OPTIONAL_UPGRADE_KEY_CHANGE_KEY_OWNER};
-        struct HksOptionalUpgradeLabels upgradeLabel = { .codeNum = 1, .optionalCodes = optionCodes };
-
-        ret = HksDoUpgradeKeyAccess(&oldKey, paramSet, &upgradeLabel, &newKey);
+        ret = HksDoUpgradeKeyAccess(&oldKey, upgradeParamSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access change key owner failed!")
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store new key failed!")
 
+        // delete old key only after new key stored successfully
         (void)HksDeleteOldKeyForSmallToService(keyAlias);
 
-        // delete old key only after new key stored successfully
+#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
         HksMarkOldKeyClearedIfEmpty();
+#endif
     } while (0);
-    HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&upgradeParamSet);
     HKS_FREE_BLOB(oldKey);
     HKS_FREE_BLOB(newKey);
 
     return ret;
 }
 
-int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    int32_t mode)
+int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *keyAlias, int32_t mode)
 {
     HKS_LOG_I("enter get new key");
-    return HksChangeKeyOwner(processInfo, keyAlias, mode);
+    return HksChangeKeyOwner(processInfo, paramSet, keyAlias, mode);
 }
 
 static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *processInfo,

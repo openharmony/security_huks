@@ -30,8 +30,13 @@ extern "C" {
 #endif
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
-int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    int32_t mode);
+
+#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
+void HksMarkOldKeyClearedIfEmpty(void);
+#endif
+
+int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *keyAlias, int32_t mode);
 
 int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias);
 

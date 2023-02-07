@@ -16,24 +16,14 @@
 #ifndef HKS_UPGRADE_KEY_H
 #define HKS_UPGRADE_KEY_H
 
-#ifdef HKS_CONFIG_FILE
-#include HKS_CONFIG_FILE
-#else
-#include "hks_config.h"
-#endif
-
 #include "hks_param.h"
 #include "hks_type_inner.h"
-#include "hks_upgrade_key_code.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksInitUpgradeKeyAbility(void);
-
-int32_t HksDoUpgradeKey(const struct HksParamSet *oldKeyParamSet, const struct HksParamSet *paramSet,
-    uint32_t upgradeTag, struct HksParamSet **newKeyParamSet);
+int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey);
 
 #ifdef __cplusplus
 }

@@ -60,9 +60,17 @@ config("l1_small_common_config") {
     "L1_SMALL",
   ]
   if (huks_enable_upgrade_key) {
+    # enable key upgrade
     defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
-  }
-  if (huks_enable_upgrade_small_to_service) {
-    defines += [ "HKS_ENABLE_SMALL_TO_SERVICE" ]
+
+    if (huks_enable_upgrade_small_to_service) {
+      # enable upgrade key for huks in small device to service
+      defines += [ "HKS_ENABLE_SMALL_TO_SERVICE" ]
+
+      if (!hks_enable_test) {
+        # enable if old path is empty stop upgrade operation for small_to_service
+        defines += [ "HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE" ]
+      }
+    }
   }
 }
