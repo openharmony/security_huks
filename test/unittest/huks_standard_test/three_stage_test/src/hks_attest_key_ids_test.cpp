@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -104,7 +104,7 @@ static const struct HksParam g_idsParams[] = {
  */
 HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest001, TestSize.Level0)
 {
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     ret = GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
@@ -140,7 +140,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest002, TestSize.Level0)
         HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = TestGenerateKey(&g_keyAlias);
+    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     ret = GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
@@ -180,7 +180,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest003, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
-    ret = TestGenerateKey(&g_keyAlias);
+    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, true, false, g_size };
@@ -209,7 +209,7 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest004, TestSize.Level0)
         HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = TestGenerateKey(&g_keyAlias);
+    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     HksCertChain *certChain = NULL;
     struct HksParamSet *paramSet = NULL;
@@ -240,7 +240,41 @@ HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest005, TestSize.Level0)
         HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = TestGenerateKey(&g_keyAlias);
+    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    struct HksParamSet *paramSet = NULL;
+    GenerateParamSet(&paramSet, g_idsParams, sizeof(g_idsParams) / sizeof(g_idsParams[0]));
+    HksCertChain *certChain = NULL;
+    const struct HksTestCertChain certParam = { false, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
+    ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
+    if (certChain != NULL) {
+        FreeCertChain(&certChain, certChain->certsCount);
+    }
+    certChain = NULL;
+
+    HksFreeParamSet(&paramSet);
+
+    ret = HksDeleteKey(&g_keyAlias, NULL);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyIdsTest.HksAttestKeyIdsTest006
+ * @tc.desc: attest without cert chain and fail.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyIdsTest, HksAttestKeyIdsTest006, TestSize.Level0)
+{
+    int32_t ret = SetIdsToken();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("SetSelfTokenID fail, ret is %" LOG_PUBLIC "x!", ret);
+    }
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PKCS1_V1_5);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
     struct HksParamSet *paramSet = NULL;
