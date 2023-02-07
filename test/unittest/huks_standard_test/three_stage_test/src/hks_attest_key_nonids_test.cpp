@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,7 +72,7 @@ static const uint32_t g_keyParamsetSize = 1024;
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest001");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = nullptr;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
@@ -133,7 +133,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest002");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     HksCertChain *certChain = NULL;
@@ -160,7 +160,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest002, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest003");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
@@ -187,7 +187,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest003, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest004");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
@@ -215,7 +215,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest004, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest005");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParam g_commonParams[] = {
         { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
@@ -253,7 +253,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest006");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = nullptr;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
@@ -303,7 +303,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest006, TestSize.Level0)
 HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest007, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAttestKeyNonIdsTest007");
-    int32_t ret = TestGenerateKey(&g_keyAlias);
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     static struct HksBlob dId = { sizeof(DEVICE_ID), (uint8_t *)DEVICE_ID };
     struct HksParam g_commonParams[] = {
@@ -329,6 +329,67 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest007, TestSize.Level0)
     HksFreeParamSet(&paramSet);
 
     ret = HksDeleteKey(&g_keyAlias, NULL);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest008
+ * @tc.desc: attest with right params(use pksc1_v1_5 for padding) and validate success.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest001");
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PKCS1_V1_5);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    struct HksParamSet *paramSet = nullptr;
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    HksCertChain *certChain = nullptr;
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HKS_LOG_I("Attest key success!");
+
+    struct HksParam g_getParam = {
+        .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
+        .blob = { .size = g_keyParamsetSize, .data = (uint8_t *)HksMalloc(g_keyParamsetSize) }
+    };
+    ASSERT_TRUE(g_getParam.blob.data != nullptr);
+
+    struct HksParamSet *paramOutSet = nullptr;
+    HksInitParamSet(&paramOutSet);
+    HksAddParams(paramOutSet, &g_getParam, 1);
+    HksBuildParamSet(&paramOutSet);
+    HksFree(g_getParam.blob.data);
+    ret = HksGetKeyParamSet(&g_keyAlias, nullptr, paramOutSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    struct HksParam *keySizeParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
+    struct HksParam *processParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_PROCESS_NAME, &processParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    uint32_t rootUid = 0;
+    ASSERT_EQ(sizeof(rootUid), processParam->blob.size);
+    ASSERT_EQ(HksMemCmp(processParam->blob.data, &rootUid, processParam->blob.size), HKS_SUCCESS);
+
+    HksFreeParamSet(&paramOutSet);
+
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HKS_LOG_I("Validate key success!");
+    FreeCertChain(&certChain, certChain->certsCount);
+    certChain = nullptr;
+
+    HksFreeParamSet(&paramSet);
+
+    ret = HksDeleteKey(&g_keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 }
