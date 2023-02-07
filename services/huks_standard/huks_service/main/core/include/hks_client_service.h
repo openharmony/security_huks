@@ -55,7 +55,7 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
 int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     struct HksParamSet *paramSet);
 
-int32_t HksServiceGenerateRandom(const struct HksBlob *processName, struct HksBlob *random);
+int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struct HksBlob *random);
 
 int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *key);

@@ -1002,10 +1002,49 @@ static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamS
 }
 #endif
 
+static int32_t HksCheckCompareUserId(const struct HksParamSet *blobParamSet,
+    const struct HksParamSet *runtimeParamSet)
+{
+    struct HksParam *blobUserId = NULL;
+    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_USER_ID, &blobUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "no user id in keyblob")
+
+    struct HksParam *runTimeUserId = NULL;
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_USER_ID, &runTimeUserId);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get user id form runtime paramSet failed")
+
+    ret = (blobUserId->uint32Param == runTimeUserId->uint32Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
+    return ret;
+}
+
+static int32_t HksCheckCompareKeyAlias(const struct HksParamSet *blobParamSet,
+    const struct HksParamSet *runtimeParamSet)
+{
+    struct HksParam *blobKeyAlias = NULL;
+    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_KEY_ALIAS, &blobKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "no key alias in keyblob")
+
+    struct HksParam *runTimeKeyAlias = NULL;
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_KEY_ALIAS, &runTimeKeyAlias);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get key alias form runtime paramSet failed")
+
+    if (blobKeyAlias->blob.size == runTimeKeyAlias->blob.size &&
+        HksMemCmp(blobKeyAlias->blob.data, runTimeKeyAlias->blob.data, blobKeyAlias->blob.size) == HKS_SUCCESS) {
+        return HKS_SUCCESS;
+    }
+    return HKS_ERROR_BAD_STATE;
+}
+
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE(ret, "access token compare failed")
+
+    ret = HksCheckCompareUserId(blobParamSet, runtimeParamSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "user id compare failed")
+
+    ret = HksCheckCompareKeyAlias(blobParamSet, runtimeParamSet);
+    HKS_IF_NOT_SUCC_LOGE(ret, "key alias compare failed")
 
     return ret;
 }

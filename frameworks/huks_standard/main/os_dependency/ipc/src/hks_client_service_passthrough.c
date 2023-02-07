@@ -392,8 +392,15 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
 {
     (void)paramSet;
     char *processName = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(&processName), HKS_ERROR_INTERNAL_ERROR,
-        "get process name failed")
-    struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
-    return HksServiceGenerateRandom(&processNameBlob, random);
+    char *userId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(userId), (uint8_t *)userId },
+        { strlen(processName), (uint8_t *)processName },
+        0,
+        0
+    };
+    return HksServiceGenerateRandom(&processInfo, random);
 }
