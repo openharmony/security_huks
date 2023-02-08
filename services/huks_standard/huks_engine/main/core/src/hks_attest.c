@@ -1258,7 +1258,7 @@ static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
     }
     if ((usageSpec->algType == HKS_ALG_RSA) && (usageSpec->padding != HKS_PADDING_PSS) &&
         (usageSpec->padding != HKS_PADDING_PKCS1_V1_5)) {
-        HKS_LOG_E("invalid padding\n"); 
+        HKS_LOG_E("invalid padding\n");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
