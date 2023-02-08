@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,7 +33,6 @@ extern "C" {
 #endif
 
 void *HksMalloc(size_t size);
-void HksFree(void *ptr);
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
 
 #define SELF_FREE_PTR(PTR, FREE_FUNC) \
@@ -44,11 +43,13 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
     } \
 }
 
-#define HKS_FREE_PTR(p) SELF_FREE_PTR(p, HksFree)
+#define HKS_FREE_PTR(p) SELF_FREE_PTR(p, free)
+
+#define HksFree(p) SELF_FREE_PTR(p, free)
 
 #define HKS_FREE_BLOB(blob) do { \
     if ((blob).data != HKS_NULL_POINTER) { \
-        HksFree((blob).data); \
+        free((blob).data); \
         (blob).data = HKS_NULL_POINTER; \
     } \
     (blob).size = 0; \
