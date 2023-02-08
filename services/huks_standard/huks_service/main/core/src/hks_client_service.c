@@ -358,8 +358,6 @@ static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
         accessTokenIdParam.uint64Param = processInfo->accessTokenId;
         ret = HksAddParams(newParamSet, &accessTokenIdParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add access token id failed")
-#else
-        (void)accessTokenId;
 #endif
 
         ret = HksBuildParamSet(&newParamSet);
