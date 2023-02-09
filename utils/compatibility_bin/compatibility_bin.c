@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,15 @@
 #include <sys/stat.h>
 #include <stdbool.h>
 
+/**
+ * This bin file is used in l1 device triggered when device initializing, in order to support the compatibility for old
+ * keys with version 1.
+*/
+
+#define HUKS_SERVICE_UID 12
+#define DIR_TYPE 4
+#define DEFAULT_PATH_LEN 1024
+
 void ChangeDirAndFilesPerm(const char *path)
 {
     DIR *dir;
@@ -35,14 +44,14 @@ void ChangeDirAndFilesPerm(const char *path)
         {
             continue;
         }
-        char curPath[1000] = { 0 };
+        char curPath[DEFAULT_PATH_LEN] = { 0 };
 
         strcpy(curPath, path);
         strcat(curPath, "/");
         strcat(curPath, ptr->d_name);
 
-        ret = chown(curPath, 12, 12);
-        if ((ptr->d_type != 4)) {
+        ret = chown(curPath, HUKS_SERVICE_UID, HUKS_SERVICE_UID);
+        if ((ptr->d_type != DIR_TYPE)) {
             if (chmod(curPath, S_IRUSR|S_IWUSR) < 0) {
                 printf("chmod file failed! errno = 0x% x \n", errno);
             }
@@ -58,7 +67,7 @@ void ChangeDirAndFilesPerm(const char *path)
 
 void MoveOldFileToNew(const char *srcPath, const char *tarPath)
 {
-    char buffer[1024];
+    char buffer[DEFAULT_PATH_LEN];
     FILE *in, *out;
     if ((in = fopen(srcPath, "r")) == NULL) {
         printf("open source file failed !\n");
@@ -70,7 +79,7 @@ void MoveOldFileToNew(const char *srcPath, const char *tarPath)
         return;
     }
     int len;
-    while ((len = fread(buffer, 1, 1024, in)) > 0) {
+    while ((len = fread(buffer, 1, DEFAULT_PATH_LEN, in)) > 0) {
         fwrite(buffer, 1, len, out);
     }
     fclose(out);
@@ -94,18 +103,18 @@ void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
             continue;
         }
 
-        char curPath[1000] = { 0 };
+        char curPath[DEFAULT_PATH_LEN] = { 0 };
         strcpy(curPath, srcPath);
         strcat(curPath, "/");
 
         strcat(curPath, ptr->d_name);
 
-        char desPath[1000]={ 0 };
+        char desPath[DEFAULT_PATH_LEN]={ 0 };
         strcpy(desPath, tarPath);
         strcat(desPath, "/");
 
         strcat(desPath, ptr->d_name);
-        if (ptr->d_type == 4) { // dir
+        if (ptr->d_type == DIR_TYPE) { // dir
             MoveOldFolderToNew(curPath, desPath);
         }
         else{

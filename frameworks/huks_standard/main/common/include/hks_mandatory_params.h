@@ -30,28 +30,23 @@ struct HksMandatoryParams {
     const uint32_t *params;
 };
 
-const uint32_t HKS_MANDATORY_PARAM_VERSION_ONE[] = {
+// only add mandatory params including huks parameters and key file encrypt materials
+static const uint32_t HKS_MANDATORY_PARAM_VERSION_ONE[] = {
     HKS_TAG_KEY_VERSION,
     HKS_TAG_OS_VERSION,
     HKS_TAG_OS_PATCHLEVEL,
     HKS_TAG_PROCESS_NAME,
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-    HKS_TAG_ACCESS_TOKEN_ID,
-#endif
 };
 
 // same as version one
-const uint32_t HKS_MANDATORY_PARAM_VERSION_TWO[] = {
+static const uint32_t HKS_MANDATORY_PARAM_VERSION_TWO[] = {
     HKS_TAG_KEY_VERSION,
     HKS_TAG_OS_VERSION,
     HKS_TAG_OS_PATCHLEVEL,
     HKS_TAG_PROCESS_NAME,
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-    HKS_TAG_ACCESS_TOKEN_ID,
-#endif
 };
 
-const struct HksMandatoryParams HKS_MANDATORY_PARAMS[] = {
+static const struct HksMandatoryParams HKS_MANDATORY_PARAMS[] = {
     {
         .keyVersion = 1,
         .paramsLen = HKS_ARRAY_SIZE(HKS_MANDATORY_PARAM_VERSION_ONE),

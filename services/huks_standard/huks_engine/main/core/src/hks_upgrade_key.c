@@ -31,20 +31,20 @@
 #include "securec.h"
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-static const struct HksMandatoryParams* GetMandatoryParamsThisVersion(void)
+static const struct HksMandatoryParams* GetMandatoryParams(uint32_t keyVersion)
 {
-    if (HKS_ARRAY_SIZE(HKS_MANDATORY_PARAMS) < HKS_KEY_VERSION ||
-        HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1].keyVersion != HKS_KEY_VERSION) {
-        HKS_LOG_E("get mandatory params for version %" LOG_PUBLIC "u failed!", HKS_KEY_VERSION);
+    if (HKS_ARRAY_SIZE(HKS_MANDATORY_PARAMS) < keyVersion ||
+        HKS_MANDATORY_PARAMS[keyVersion - 1].keyVersion != keyVersion) {
+        HKS_LOG_E("get mandatory params for version %" LOG_PUBLIC "u failed!", keyVersion);
         return NULL;
     }
-    return &HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1];
+    return &HKS_MANDATORY_PARAMS[keyVersion - 1];
 }
 
 static bool IsTagInMandatoryArray(uint32_t tag, uint32_t keyVersion)
 {
     uint32_t i = 0;
-    const struct HksMandatoryParams* mandatoryParams = GetMandatoryParamsThisVersion();
+    const struct HksMandatoryParams* mandatoryParams = GetMandatoryParams(keyVersion);
     if (mandatoryParams == NULL) {
         return false;
     }
@@ -102,17 +102,18 @@ static int32_t AddMandatoryParams(const struct HksParamSet *srcParamSet, const s
 {
     int32_t ret = HKS_SUCCESS;
     uint32_t i = 0;
-    for (; i < HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1].paramsLen; ++i) {
+    const struct HksMandatoryParams* mandatoryParams = GetMandatoryParams(HKS_KEY_VERSION);
+    for (; i < mandatoryParams->paramsLen; ++i) {
         struct HksParam *param = NULL;
-        ret = HksGetParam(paramSet, HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1].params[i], &param);
+        ret = HksGetParam(paramSet, mandatoryParams->params[i], &param);
         if (ret != HKS_SUCCESS) {
-            ret = HksGetParam(srcParamSet, HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1].params[i], &param);
+            ret = HksGetParam(srcParamSet, mandatoryParams->params[i], &param);
         }
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param %" LOG_PUBLIC "u from srcParamSet and paramSet failed!",
-            HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1].params[i])
+            mandatoryParams->params[i])
         ret = HksAddParams(targetParamSet, param, 1);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param %" LOG_PUBLIC "u into targetParamSet failed!",
-            HKS_MANDATORY_PARAMS[HKS_KEY_VERSION - 1].params[i])
+            mandatoryParams->params[i])
     }
     return ret;
 }
@@ -183,6 +184,7 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
         ret = AddMandatoryeParamsInCore(oldKeyBlobParamSet, paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryeParamsInCore failed!")
 
+        // the key param must be the last one added
         ret = AddMandatoryParams(oldKeyBlobParamSet, newParamSet, newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryParams failed!")
 
