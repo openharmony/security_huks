@@ -43,6 +43,7 @@ struct HksAddUpgradeParamFuncMap {
 static int32_t HksAddProcessNameToParamSet(const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
 {
+    (void)keyBlobParamSet;
     if (srcParamSet == NULL) {
         HKS_LOG_E("none params for small to service failed!");
         return HKS_FAILURE;
@@ -60,39 +61,11 @@ static int32_t HksAddProcessNameToParamSet(const struct HksParamSet *keyBlobPara
     return ret;
 }
 
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-static int32_t HksAddAccessTokenIdToParamSet(const struct HksParamSet *keyBlobParamSet,
-    const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
-{
-    if (srcParamSet == NULL) {
-        HKS_LOG_E("none params for small to service failed!");
-        return HKS_FAILURE;
-    }
-    struct HksParam *srcProcessInfo = NULL;
-    int32_t ret = HksGetParam(srcParamSet, HKS_TAG_ACCESS_TOKEN_ID, &srcProcessInfo);
-    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        HKS_LOG_I("no HKS_TAG_ACCESS_TOKEN_ID in srcParamSet, no need to add");
-        return HKS_SUCCESS;
-    }
-
-    ret = HksAddParams(targetParamSet, srcProcessInfo, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add params failed!")
-
-    return ret;
-}
-#endif
-
 static const struct HksAddUpgradeParamFuncMap HKS_ADD_MANDATORY_FUNC_LIST[] = {
     {
         .paramTag = HKS_TAG_PROCESS_NAME,
         .func = HksAddProcessNameToParamSet
     },
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-    {
-        .paramTag = HKS_TAG_ACCESS_TOKEN_ID,
-        .func = HksAddProcessNameToParamSet
-    },
-#endif
 };
 
 // add some mandatory params in service, the others mandatory params added in core
