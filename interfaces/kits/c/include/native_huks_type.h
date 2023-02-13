@@ -491,6 +491,8 @@ enum OH_Huks_SecureSignType {
  */
 enum OH_Huks_Tag {
     /** Tags for key parameters. The value range is 1 to 200. */
+    /** Invalid HUKS TAG. */
+    OH_HUKS_TAG_INVALID = OH_HUKS_TAG_TYPE_INVALID | 0,
     /** Algorithm. */
     OH_HUKS_TAG_ALGORITHM = OH_HUKS_TAG_TYPE_UINT | 1,
     /** Key purpose. */
