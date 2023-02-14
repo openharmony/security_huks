@@ -122,13 +122,6 @@ int32_t ConstructUpgradeKeyParamSet(const struct HksProcessInfo *processInfo, co
         ret = HksAddParams(paramSet, &processNameParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param processNameParam failed!")
 
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-        struct HksParam accessTokenIdParam;
-        accessTokenIdParam.tag = HKS_TAG_ACCESS_TOKEN_ID;
-        accessTokenIdParam.uint64Param = processInfo->accessTokenId;
-        ret = HksAddParams(paramSet, &accessTokenIdParam, 1);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add param access token id failed")
-#endif
         ret = HksBuildParamSet(&paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build param set failed!")
 

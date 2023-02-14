@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,15 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CPMPATIBILITY_MODULE_TEST_H
-#define HKS_CPMPATIBILITY_MODULE_TEST_H
+#ifndef HKS_UPGRADE_KEY_TEST_H
+#define HKS_UPGRADE_KEY_TEST_H
 
-namespace HksCompatibilityModuleTest {
-int HksCompatibilityModuleTest001(void);
-int HksCompatibilityModuleTest002(void);
-int HksCompatibilityModuleTest003(void);
-int HksCompatibilityModuleTest004(void);
-int HksCompatibilityModuleTest005(void);
+namespace Unittest::HksUpgradeKeyTest {
+int HksUpgradeKeyTest001(void);
+
+int HksUpgradeKeyTest002(void);
+
+int HksUpgradeKeyTest003(void);
+
+int HksUpgradeKeyTest004(void);
+
+int HksUpgradeKeyTest005(void);
+
+int HksUpgradeKeyTest006(void);
+
+int HksUpgradeKeyTest007(void);
+
+int HksUpgradeKeyTest008(void);
+
+int HksUpgradeKeyTest009(void);
 }
-#endif // HKS_CPMPATIBILITY_MODULE_TEST_H
-
+#endif

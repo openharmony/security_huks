@@ -115,7 +115,6 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-    // to do : to test
     // check version and upgrade key if need
     struct HksParam *keyVersion = NULL;
     ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
@@ -131,7 +130,6 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
 
     struct HksParamSet *upgradeParamSet = NULL;
     do {
-        // to do : 构建paramSet放入processName和accessTokenId
         ret = ConstructUpgradeKeyParamSet(processInfo, paramSet, &upgradeParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct param set failed!")
 
@@ -1292,11 +1290,14 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
             ret = HKS_ERROR_NOT_EXIST;
             break;
         }
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
         if (operation->accessTokenId != processInfo->accessTokenId) {
             HKS_LOG_E("compare access token id failed, unauthorized calling");
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
+#endif
 
         ret = HuksAccessUpdate(handle, paramSet, inData, outData);
         if (ret != HKS_SUCCESS) {
@@ -1327,11 +1328,13 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
             ret = HKS_ERROR_NOT_EXIST;
             break;
         }
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
         if (operation->accessTokenId != processInfo->accessTokenId) {
             HKS_LOG_E("compare access token id failed, unauthorized calling");
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
+#endif
     } while (0);
     return ret;
 }

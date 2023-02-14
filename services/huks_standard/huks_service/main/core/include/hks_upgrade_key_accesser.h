@@ -16,6 +16,8 @@
 #ifndef HKS_UPGRADE_KEY_ACCESSER_H
 #define HKS_UPGRADE_KEY_ACCESSER_H
 
+#ifdef HKS_ENABLE_UPGRADE_KEY
+
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -35,5 +37,7 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* HKS_ENABLE_UPGRADE_KEY */
 
 #endif /* HKS_UPGRADE_KEY_ACCESSER_H */

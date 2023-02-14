@@ -46,7 +46,7 @@ unittest("huks_3.0_test") {
     "hks_safe_compare_key_test.cpp",
   ]
 
-  sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/hks_compatibility_test.cpp" ]
+  sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/upgrade_test/version_one/hks_compatibility_test.cpp" ]
 
   sources += [
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
@@ -94,7 +94,7 @@ unittest("huks_3.0_test") {
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]
 
-  deps += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/module_generate_key:huks_test_generate_key" ]
+  deps += [ "//base/security/huks/test/unittest/modify_old_version_key_test_util:modify_old_version_key_test_util" ]
 
   cflags = [
     "-Wall",

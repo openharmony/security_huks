@@ -1306,10 +1306,11 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
 
 static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur, uint32_t *alg)
 {
-    uint32_t i;
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet == NULL")
-
     HKS_LOG_D("Get paramSet->paramsCnt %" LOG_PUBLIC "u", paramSet->paramsCnt);
+
+    uint32_t i;
+
     for (i = 0; i < paramSet->paramsCnt; i++) {
         if (paramSet->params[i].tag == HKS_TAG_PURPOSE) {
             *pur = paramSet->params[i].uint32Param;
@@ -1642,4 +1643,3 @@ int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob
     (void)paramSet;
     return HksCryptoHalFillRandom(random);
 }
-
