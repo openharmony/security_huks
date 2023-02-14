@@ -57,7 +57,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob keyOut = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
     bool isNoneResponse = false;
 
@@ -101,7 +101,7 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob key = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -127,7 +127,7 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
     struct HksBlob wrappingKeyAlias = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob wrappedKeyData = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -151,7 +151,7 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksBlob key = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -178,7 +178,7 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
 
 void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
     do {
         ret = HksGetProcessInfoForIPC(context, &processInfo);
@@ -198,7 +198,7 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -229,7 +229,7 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
 
 void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context)
 {
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -295,7 +295,7 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob unsignedData = { 0, NULL };
     struct HksBlob signature = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -326,7 +326,7 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob unsignedData = { 0, NULL };
     struct HksBlob signature = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -352,7 +352,7 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob plainText = { 0, NULL };
     struct HksBlob cipherText = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -383,7 +383,7 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob plainText = { 0, NULL };
     struct HksBlob cipherText = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -414,7 +414,7 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
     struct HksBlob peerPublicKey = { 0, NULL };
     struct HksBlob agreedKey = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -444,7 +444,7 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob masterKey = { 0, NULL };
     struct HksBlob derivedKey = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -475,7 +475,7 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob inputData = { 0, NULL };
     struct HksBlob mac = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -524,7 +524,7 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
     uint32_t inputCount = 0;
     struct HksKeyInfo *keyInfoList = NULL;
     struct HksBlob keyInfoListBlob = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -585,7 +585,7 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob certChainBlob = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
     int32_t ret;
 
     do {
@@ -653,7 +653,7 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob keyAlias        = { 0, NULL };
     struct HksBlob paramsBlob      = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
@@ -697,7 +697,7 @@ void HksIpcServiceUpdate(const struct HksBlob *paramSetBlob, struct HksBlob *out
     struct HksBlob paramsBlob      = { 0, NULL };
     struct HksBlob handle          = { 0, NULL };
     struct HksBlob inData          = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
@@ -744,7 +744,7 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
     struct HksBlob paramsBlob      = { 0, NULL };
     struct HksBlob handle          = { 0, NULL };
     struct HksBlob inData          = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
@@ -784,7 +784,7 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob handle          = { 0, NULL };
     struct HksBlob paramsBlob      = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);

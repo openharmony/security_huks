@@ -13,24 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_H
-#define HKS_UPGRADE_KEY_H
+#ifndef HKS_CPMPATIBILITY_MODULE_TEST_H
+#define HKS_CPMPATIBILITY_MODULE_TEST_H
 
-#ifdef HKS_ENABLE_UPGRADE_KEY
-
-#include "hks_param.h"
-#include "hks_type_inner.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey);
-
-#ifdef __cplusplus
+namespace HksCompatibilityModuleTest {
+int HksCompatibilityModuleTest001(void);
+int HksCompatibilityModuleTest002(void);
+int HksCompatibilityModuleTest003(void);
+int HksCompatibilityModuleTest004(void);
+int HksCompatibilityModuleTest005(void);
 }
-#endif
+#endif // HKS_CPMPATIBILITY_MODULE_TEST_H
 
-#endif /* HKS_ENABLE_UPGRADE_KEY */
-
-#endif /* HKS_UPGRADE_KEY_H */

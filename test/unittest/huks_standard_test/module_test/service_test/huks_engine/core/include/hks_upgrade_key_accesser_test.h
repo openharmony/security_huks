@@ -13,24 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_H
-#define HKS_UPGRADE_KEY_H
+#ifndef HKS_UPGRADE_KEY_ACCESSER_TEST_H
+#define HKS_UPGRADE_KEY_ACCESSER_TEST_H
 
-#ifdef HKS_ENABLE_UPGRADE_KEY
-
-#include "hks_param.h"
-#include "hks_type_inner.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey);
-
-#ifdef __cplusplus
+namespace Unittest::HksUpgradeKeyAccesserTest {
+int HksUpgradeKeyAccesserTest001(void);
 }
 #endif
-
-#endif /* HKS_ENABLE_UPGRADE_KEY */
-
-#endif /* HKS_UPGRADE_KEY_H */

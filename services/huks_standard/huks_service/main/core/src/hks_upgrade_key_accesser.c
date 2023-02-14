@@ -34,7 +34,6 @@
 typedef int32_t (*HksAddUpgradeParam)(const struct HksParamSet *keyBlobParamSet, const struct HksParamSet *srcParamSet,
     struct HksParamSet *targetParamSet);
 
-
 struct HksAddUpgradeParamFuncMap {
     uint32_t paramTag;
     HksAddUpgradeParam func;

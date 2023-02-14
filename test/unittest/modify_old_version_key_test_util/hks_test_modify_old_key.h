@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,14 +16,15 @@
 #ifndef HKS_TEST_MODIFY_OLD_KEY_H
 #define HKS_TEST_MODIFY_OLD_KEY_H
 
-#include "hks_type.h"
+#include "hks_type_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
-int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias);
+int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksProcessInfo *processInfo);
+int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo);
 int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias);
 int32_t HksTestInitialize(void);
 void HksChangeOldKeyOwner(const char *path, uint32_t uid);

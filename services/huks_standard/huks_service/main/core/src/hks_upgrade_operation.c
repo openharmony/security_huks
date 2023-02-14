@@ -38,10 +38,7 @@
 static int32_t HksIsProcessInfoInWhiteList(const struct HksProcessInfo *processInfo)
 {
     uint32_t uid = 0;
-    if (processInfo->processName.size == sizeof("0") && HksMemCmp(processInfo->processName.data, "0",
-        processInfo->processName.size) == EOK) { // for uid == 0
-        uid = 0;
-    } else if (processInfo->processName.size == sizeof(uid)) {
+    if (processInfo->processName.size == sizeof(uid)) {
         (void)memcpy_s(&uid, sizeof(uid), processInfo->processName.data, processInfo->processName.size);
     } else {
         return HKS_ERROR_NO_PERMISSION;;

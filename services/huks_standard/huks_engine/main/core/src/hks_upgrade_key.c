@@ -28,6 +28,10 @@
 #include "hks_template.h"
 #include "hks_type.h"
 
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+#include "hks_check_white_list.h"
+#endif
+
 #include "securec.h"
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
@@ -74,28 +78,6 @@ static int32_t AddParamsWithoutMandatory(uint32_t keyVersion, const struct HksPa
     }
     return ret;
 }
-
-#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
-static int32_t HksChangeProcessNameParam(const struct HksParamSet *srcParamSet, const struct HksParamSet *paramSet,
-    struct HksParamSet *targetParamSet)
-{
-    (void)srcParamSet;
-    struct HksParam *processName = NULL;
-    int32_t ret = HksGetParam(paramSet, &processName);
-    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        return HKS_SUCCESS;
-    }
-
-    struct HksParam *newProcessName = NULL;
-    ret = HksGetParam(targetParamSet, &newProcessName);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get process name failed!")
-
-    // no need to free old blob for it's mem is same as in srcParamSet
-    newProcessName->blob.data = processName->blob.data;
-    newProcessName->blob.size = processName->blob.size;
-    return ret;
-}
-#endif
 
 static int32_t AddMandatoryParams(const struct HksParamSet *srcParamSet, const struct HksParamSet *paramSet,
     struct HksParamSet *targetParamSet)
@@ -151,6 +133,38 @@ static int32_t AddMandatoryeParamsInCore(const struct HksParamSet *keyBlobParamS
     return ret;
 }
 
+static int32_t AuthChangeProcessName(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParam *oldProcessName;
+    ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_PROCESS_NAME, &oldProcessName);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get process name from old key paramset failed!")
+
+    struct HksParam *newProcessName;
+    ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &newProcessName);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not to change process name, skip the process name auth")
+
+    if (oldProcessName->blob.size != newProcessName->blob.size ||
+        HksMemCmp(oldProcessName->blob.data, newProcessName->blob.data, oldProcessName->blob.size) != HKS_SUCCESS) {
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+        uint32_t uid = 0;
+        ret = memcpy_s(&uid, sizeof(uid), newProcessName->blob.data, newProcessName->blob.size);
+        if (ret != EOK) {
+            return HKS_ERROR_NO_PERMISSION;
+        }
+        ret = HksCheckIsInWhiteList(uid);
+#else
+        return HKS_FAILURE;
+#endif
+    }
+    return ret;
+}
+
+static int32_t AuthUpgradeKey(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet)
+{
+    return AuthChangeProcessName(oldKeyBlobParamSet, paramSet);
+}
+
 int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
     HKS_LOG_I("enter HksUpgradeKey");
@@ -177,6 +191,9 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
             break;
         }
 
+        ret = AuthUpgradeKey(oldKeyBlobParamSet, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "auth upgrade key param failed!")
+
         struct HksParam *keyVersion = NULL;
         ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_KEY_VERSION, &keyVersion);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key version failed!")
@@ -191,10 +208,6 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
         ret = AddParamsWithoutMandatory(keyVersion->uint32Param, oldKeyBlobParamSet, newParamSet, newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddParamsWithoutMandatory failed!")
 
-#ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
-        ret = HksChangeProcessNameParam(oldKeyBlobParamSet, newParamSet, newKeyBlobParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksChangeProcessNameParam failed!")
-#endif
         ret = HksBuildParamSet(&newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build newKeyBlobParamSet failed!")
 

@@ -16,6 +16,8 @@
 #ifndef HKS_UPGRADE_OPERATION_H
 #define HKS_UPGRADE_OPERATION_H
 
+#ifdef HKS_ENABLE_UPGRADE_KEY
+
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -49,5 +51,7 @@ int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processIn
 #ifdef __cplusplus
 }
 #endif
+
+#endif /* HKS_ENABLE_UPGRADE_KEY */
 
 #endif /* HKS_UPGRADE_OPERATION_H */

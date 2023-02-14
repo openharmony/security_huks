@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ void HksCompatibilityModuleTest::TearDown()
 {
 }
 
-static const char *g_keyAlias = "test_compatibility_module_key";
+static const char *KEY_ALIAS = "test_compatibility_module_key";
 
 static const uint32_t IV_SIZE = 16;
 static uint8_t IV[IV_SIZE] = {0};
@@ -140,6 +140,15 @@ static struct HksParam g_decryptParams001[] = {
     }
 };
 
+const static char *USER_ID = "0";
+const static char *OLD_PROCESS_NAME = "hks_client";
+const static struct HksProcessInfo OLD_PROCESS_INFO = {
+    { strlen(USER_ID), (uint8_t *)USER_ID },
+    { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
+    0,
+    0
+};
+
 static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct HksParam *genParams,
     uint32_t genParamsCnt)
 {
@@ -151,7 +160,7 @@ static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct H
     ret = HksBuildParamSet(&genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksTestGenerateOldKey(keyAlias, genParamSet);
+    ret = HksTestGenerateOldKey(keyAlias, genParamSet, &OLD_PROCESS_INFO);
     EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&genParamSet);
 
@@ -177,7 +186,7 @@ static int32_t TestGenerateNewKeyWithProcessInfo(const struct HksBlob *keyAlias,
     return ret;
 }
 
-static int32_t TestDoServiceEncrypt(const struct HksBlob *keyAlias, const struct HksParam *encParams,
+static int32_t TestDoServiceEncryptWithOtherUid(const struct HksBlob *keyAlias, const struct HksParam *encParams,
     uint32_t encParamsCnt, struct HksBlob *plainBlob, struct HksBlob *cipherBlob)
 {
     struct HksParamSet *encryptParamSet = nullptr;
@@ -206,7 +215,7 @@ static int32_t TestDoServiceEncrypt(const struct HksBlob *keyAlias, const struct
     return ret;
 }
 
-static int32_t TestDoServiceDecrypt(const struct HksBlob *keyAlias, const struct HksParam *decParams,
+static int32_t TestDoServiceDecryptWithOtherUid(const struct HksBlob *keyAlias, const struct HksParam *decParams,
     uint32_t decParamsCnt, struct HksBlob *cipherBlob, struct HksBlob *decryptedBlob)
 {
     struct HksParamSet *decryptParamSet = nullptr;
@@ -242,9 +251,9 @@ static int32_t TestDoServiceDecrypt(const struct HksBlob *keyAlias, const struct
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest001");
-    struct HksBlob keyAlias = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
     int32_t ret = HksKeyExist(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
@@ -280,7 +289,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
     ret = HksServiceKeyExist(&processInfo2, &keyAlias);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 }
 
 /**
@@ -291,9 +300,9 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest002");
-    struct HksBlob keyAlias = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -305,20 +314,20 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Lev
     struct HksBlob plainBlob = { .size = HKS_ARRAY_SIZE(plainText), .data = plainText};
     struct HksBlob cipherBlob = { .size = HKS_ARRAY_SIZE(cipherText), .data = cipherText};
 
-    ret = TestDoServiceEncrypt(&keyAlias, g_encryptParams001, sizeof(g_encryptParams001) / sizeof(HksParam), &plainBlob,
-        &cipherBlob);
+    ret = TestDoServiceEncryptWithOtherUid(&keyAlias, g_encryptParams001, sizeof(g_encryptParams001) / sizeof(HksParam),
+        &plainBlob, &cipherBlob);
 
     ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST);
 
     uint8_t decryptedText[HKS_ARRAY_SIZE(plainText) + 1] = { 0 };
     struct HksBlob decryptedBlob = { .size = HKS_ARRAY_SIZE(decryptedText), .data = decryptedText};
 
-    ret = TestDoServiceDecrypt(&keyAlias, g_decryptParams001, sizeof(g_decryptParams001) / sizeof(HksParam),
+    ret = TestDoServiceDecryptWithOtherUid(&keyAlias, g_decryptParams001, sizeof(g_decryptParams001) / sizeof(HksParam),
         &cipherBlob, &decryptedBlob);
 
     ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST);
 
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 }
 
 /**
@@ -329,9 +338,9 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Lev
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest003");
-    struct HksBlob keyAlias = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -351,7 +360,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Lev
 
     ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST) << "ret is " << ret;
 
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 }
 
 static void FreeKeyInfoList(struct HksKeyInfo **keyList, uint32_t listCount)
@@ -403,7 +412,7 @@ static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t lis
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest004");
-    struct HksBlob keyAlias = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
 
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -430,7 +439,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
 
-    (void)HksTestDeleteOldKey(&keyAlias);
+    (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
     FreeKeyInfoList(&keyInfoList, keyInfoListSize);
 }
 
@@ -442,7 +451,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest005");
-    struct HksBlob keyAlias1 = { .size = strlen(g_keyAlias), .data = (uint8_t *)g_keyAlias};
+    struct HksBlob keyAlias1 = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
 
     const char *aliasName2 = "alias2_for_compatibily_test";
     struct HksBlob keyAlias2 = { .size = strlen(aliasName2), .data = (uint8_t *)aliasName2};
@@ -475,11 +484,10 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Lev
     ASSERT_EQ(keyInfoListSize, 1) << "keyInfoListSize is " << keyInfoListSize;
 
     (void)HksServiceDeleteKey(&processInfo, &keyAlias2);
-    (void)HksTestDeleteOldKey(&keyAlias1);
+    (void)HksTestDeleteOldKey(&keyAlias1, &OLD_PROCESS_INFO);
 
     uint32_t hitCnt = 0;
-    uint32_t i;
-    for (i = 0; i < keyInfoListSize; ++i) {
+    for (uint32_t i = 0; i < keyInfoListSize; ++i) {
         if (keyInfoList[i].alias.data != nullptr) {
             if (HksMemCmp(keyInfoList[i].alias.data, aliasName2, keyInfoList[i].alias.size) == 0) {
                 ++hitCnt;

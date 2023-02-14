@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,17 +30,10 @@
 
 #define KEY_MAX_SIZE 4096
 
-int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
+int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksProcessInfo *processInfo)
 {
     HKS_LOG_I("enter HksTestGenerateOldKey");
-    const char *userId = "0";
-    const char *processName = "hks_client";
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0
-    };
 
     struct HksParamSet *newParamSet = NULL;
     int32_t ret = HksInitParamSet(&newParamSet);
@@ -49,7 +42,7 @@ int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksPa
 
     struct HksParam tmpParam;
     tmpParam.tag = HKS_TAG_PROCESS_NAME;
-    tmpParam.blob = processInfo.processName;
+    tmpParam.blob = processInfo->processName;
 
     ret = HksAddParams(newParamSet, &tmpParam, 1);
 
@@ -60,23 +53,15 @@ int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksPa
 
     ret = HksCoreGenerateKey(keyAlias, newParamSet, NULL, &keyBlob);
 
-    ret = HksStoreKeyBlob(&processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+    ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
 
     HksFreeParamSet(&newParamSet);
     return ret;
 }
 
-int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias)
+int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
 {
-    const char *userId = "0";
-    const char *processName = "hks_client";
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0
-    };
-    return HksServiceDeleteKey(&processInfo, keyAlias);
+    return HksServiceDeleteKey(processInfo, keyAlias);
 }
 
 int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias)
