@@ -178,6 +178,8 @@ sptr<HksService> HksService::GetInstance()
 bool HksService::Init()
 {
     HKS_LOG_I("HksService::Init Ready to init");
+    int32_t ret = HksServiceInitialize();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "Init hks service failed!")
 
     if (!registerToService_) {
         sptr<HksService> ptrInstance = HksService::GetInstance();
@@ -190,9 +192,6 @@ bool HksService::Init()
         HKS_LOG_I("HksService::Init Publish service success");
         registerToService_ = true;
     }
-
-    int32_t ret = HksServiceInitialize();
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "Init hks service failed!")
 
     HKS_LOG_I("HksService::Init success.");
     return true;
