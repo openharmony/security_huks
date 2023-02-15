@@ -67,23 +67,6 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     }
 }
 
-int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processName)
-{
-    if ((context == nullptr) || (processName == nullptr)) {
-        HKS_LOG_D("Don't need get process name in hosp.");
-        return HKS_SUCCESS;
-    }
-
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    uint8_t *name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
-
-    (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
-    processName->size = sizeof(callingUid);
-    processName->data = name;
-    return HKS_SUCCESS;
-}
-
 int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo)
 {
     if ((context == nullptr) || (processInfo == nullptr)) {

@@ -988,8 +988,7 @@ static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamS
     ret = HksGetParam(runtimeParamSet, HKS_TAG_ACCESS_TOKEN_ID, &runtimeAccessTokenId);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get access token id form runtime paramSet failed")
 
-    ret = (blobAccessTokenId->uint64Param == runtimeAccessTokenId->uint64Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
-    return ret;
+    return (blobAccessTokenId->uint64Param == runtimeAccessTokenId->uint64Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
 }
 
 #else
@@ -1013,8 +1012,7 @@ static int32_t HksCheckCompareUserId(const struct HksParamSet *blobParamSet,
     ret = HksGetParam(runtimeParamSet, HKS_TAG_USER_ID, &runTimeUserId);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get user id form runtime paramSet failed")
 
-    ret = (blobUserId->uint32Param == runTimeUserId->uint32Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
-    return ret;
+    return (blobUserId->uint32Param == runTimeUserId->uint32Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
 }
 
 static int32_t HksCheckCompareKeyAlias(const struct HksParamSet *blobParamSet,
@@ -1038,13 +1036,13 @@ static int32_t HksCheckCompareKeyAlias(const struct HksParamSet *blobParamSet,
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
-    HKS_IF_NOT_SUCC_LOGE(ret, "access token compare failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access token compare failed")
 
     ret = HksCheckCompareUserId(blobParamSet, runtimeParamSet);
-    HKS_IF_NOT_SUCC_LOGE(ret, "user id compare failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "user id compare failed")
 
     ret = HksCheckCompareKeyAlias(blobParamSet, runtimeParamSet);
-    HKS_IF_NOT_SUCC_LOGE(ret, "key alias compare failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "key alias compare failed")
 
     return ret;
 }
