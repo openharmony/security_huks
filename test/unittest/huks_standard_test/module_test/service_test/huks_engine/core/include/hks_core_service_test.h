@@ -33,5 +33,6 @@ int HksCoreServiceTest013(void);
 int HksCoreServiceTest014(void);
 int HksCoreServiceTest015(void);
 int HksCoreServiceTest016(void);
+int HksCoreServiceTest017(void);
 }
 #endif

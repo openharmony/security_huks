@@ -197,4 +197,53 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest006, TestSize.Level0)
     int32_t ret = HksCoreSecureAccessVerifyParams(nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER);
 }
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest007
+ * @tc.desc: tdd HksProcessIdentityVerify, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest007");
+
+    struct HksParamSet *blobParamSet = nullptr;
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *runtimeParamSet = nullptr;
+    struct HksBlob wrongKeyAlias = { .size = strlen("0"), .data = (uint8_t *)"0"};
+    struct HksParam keyAliasRuntime = { .tag = HKS_TAG_KEY_ALIAS, .blob = wrongKeyAlias};
+    ret = BuildParamSetWithParam(&runtimeParamSet, &keyAliasRuntime);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&blobParamSet);
+    HksFreeParamSet(&runtimeParamSet);
+}
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest008
+ * @tc.desc: tdd HksProcessIdentityVerify, expect HKS_SUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest008");
+
+    struct HksParamSet *blobParamSet = nullptr;
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *runtimeParamSet = nullptr;
+    struct HksParam userIdRuntime = { .tag = HKS_TAG_USER_ID, .uint32Param = 1 };
+    ret = BuildParamSetWithParam(&runtimeParamSet, &userIdRuntime);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&blobParamSet);
+    HksFreeParamSet(&runtimeParamSet);
+}
 }
