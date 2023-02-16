@@ -293,27 +293,6 @@ static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
     return false;
 }
 
-static int32_t AppendKeyAliasParam(const struct HksBlob *keyAlias, struct HksParamSet *targetParamSet)
-{
-    if (keyAlias == NULL) {
-        return HKS_SUCCESS;
-    }
-    struct HksParam *keyAliasParam = NULL;
-    int32_t ret = HksGetParam(targetParamSet, HKS_TAG_KEY_ALIAS, &keyAliasParam);
-    if (ret == HKS_SUCCESS) {
-        keyAliasParam->blob.data = keyAlias->data;
-        keyAliasParam->blob.size = keyAlias->size;
-        return HKS_SUCCESS;
-    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        // this param added here will not become wild pointer for the blob.data is from outer
-        struct HksParam tmpKeyAliasParam = { .tag = HKS_TAG_KEY_ALIAS, .blob.data = keyAlias->data,
-            .blob.size = keyAlias->size};
-        return HksAddParams(targetParamSet, &tmpKeyAliasParam, 1);
-    } else {
-        return ret;
-    }
-}
-
 static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, struct HksParamSet **outParamSet)
 {
@@ -349,9 +328,12 @@ static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
         ret = HksAddParams(newParamSet, &userIdParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add userIdParam failed")
 
-        ret = AppendKeyAliasParam(keyAlias, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias param failed")
-
+        if (keyAlias != NULL) {
+            struct HksParam keyAliasParam = { .tag = HKS_TAG_INNER_KEY_ALIAS, .blob = *keyAlias };
+            ret = HksAddParams(newParamSet, &keyAliasParam, 1);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias inner failed")
+        }
+        
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
         struct HksParam accessTokenIdParam;
         accessTokenIdParam.tag = HKS_TAG_ACCESS_TOKEN_ID;
@@ -527,7 +509,7 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
     if (ret == HKS_ERROR_NOT_SUPPORTED) {
         struct HksParamSet *newParamSet = NULL;
         ret = AppendProcessInfoAndkeyAlias(paramSet, processInfo, keyAlias, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append tag processName failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append process info and key alias failed, ret = %" LOG_PUBLIC "d", ret)
 
         *outParamSet = newParamSet;
         return HKS_SUCCESS;
@@ -546,7 +528,7 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
         ret = AppendProcessInfoAndkeyAlias(userAuthParamSet, processInfo, keyAlias, &newInfoParamSet);
         if (ret != HKS_SUCCESS) {
             HksFreeParamSet(&userAuthParamSet);
-            HKS_LOG_E("append tag processName failed, ret = %" LOG_PUBLIC "d", ret);
+            HKS_LOG_E("append process info and key alias failed, ret = %" LOG_PUBLIC "d", ret);
             return ret;
         }
         HksFreeParamSet(&userAuthParamSet);
@@ -567,7 +549,7 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
     const struct HksParamSet *paramSet, struct HksBlob *key, struct HksParamSet **outParamSet)
 {
     int32_t ret = AppendProcessInfoAndkeyAlias(paramSet, processInfo, keyAlias, outParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append tag processName failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append process info and key alias failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = GetKeyData(processInfo, keyAlias, key, HKS_STORAGE_TYPE_KEY);
     if (ret != HKS_SUCCESS) {
@@ -1374,7 +1356,7 @@ static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct
     int32_t ret;
     do {
         ret = AppendProcessInfoAndkeyAlias(paramSet, processInfo, NULL, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append tag processName failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
 
         struct HksOperation *operation = QueryOperation(processInfo, handle);
         if (operation == NULL) {
@@ -1498,7 +1480,7 @@ int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struc
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check generate random params failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = AppendProcessInfoAndkeyAlias(NULL, processInfo, NULL, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append processName tag failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessGenerateRandom(newParamSet, random);
     } while (0);

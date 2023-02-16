@@ -461,7 +461,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest017, TestSize.Level0)
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksBlob wrongKeyAlias = { .size = strlen("0"), .data = (uint8_t *)"0"};
-    struct HksParam keyAliasRuntime = { .tag = HKS_TAG_KEY_ALIAS, .blob = wrongKeyAlias};
+    struct HksParam keyAliasRuntime = { .tag = HKS_TAG_INNER_KEY_ALIAS, .blob = wrongKeyAlias};
     ret = BuildParamSetWithParam(&runtimeParamSet, &keyAliasRuntime);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
