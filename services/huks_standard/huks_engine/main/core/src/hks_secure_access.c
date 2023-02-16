@@ -1010,7 +1010,7 @@ static int32_t HksCheckCompareUserId(const struct HksParamSet *blobParamSet,
 
     struct HksParam *runtimeUserId = NULL;
     ret = HksGetParam(runtimeParamSet, HKS_TAG_USER_ID, &runtimeUserId);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get user id form runtime paramSet failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get user id from runtime paramSet failed")
 
     return (blobUserId->uint32Param == runtimeUserId->uint32Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
 }

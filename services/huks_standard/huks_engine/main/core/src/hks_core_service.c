@@ -527,7 +527,7 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param user id failed.")
 
     ret = HksAddParams(paramSet, userIdParam, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param access token id failed.")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param user id failed.")
 
     struct HksParam *keyAliasParam = NULL;
     ret = HksGetParam(inParamSet, HKS_TAG_INNER_KEY_ALIAS, &keyAliasParam);
