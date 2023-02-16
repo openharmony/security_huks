@@ -1019,11 +1019,11 @@ static int32_t HksCheckCompareKeyAlias(const struct HksParamSet *blobParamSet,
     const struct HksParamSet *runtimeParamSet)
 {
     struct HksParam *blobKeyAlias = NULL;
-    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_KEY_ALIAS, &blobKeyAlias);
+    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_INNER_KEY_ALIAS, &blobKeyAlias);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "no key alias in keyblob")
 
     struct HksParam *runtimeKeyAlias = NULL;
-    ret = HksGetParam(runtimeParamSet, HKS_TAG_KEY_ALIAS, &runtimeKeyAlias);
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_INNER_KEY_ALIAS, &runtimeKeyAlias);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get key alias form runtime paramSet failed")
 
     if (blobKeyAlias->blob.size == runtimeKeyAlias->blob.size &&
