@@ -248,7 +248,7 @@ void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context
 
 void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *context)
 {
-    struct HksBlob processName = { 0, NULL };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL } };
     struct HksBlob random = { 0, NULL };
     int32_t ret;
 
@@ -272,10 +272,10 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
             break;
         }
 
-        ret = HksGetProcessNameForIPC(context, &processName);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessNameForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceGenerateRandom(&processName, &random);
+        ret = HksServiceGenerateRandom(&processInfo, &random);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceGenerateRandom fail, ret = %" LOG_PUBLIC "d", ret)
 
         HksSendResponse(context, ret, &random);
@@ -286,7 +286,8 @@ void HksIpcServiceGenerateRandom(const struct HksBlob *srcData, const uint8_t *c
     }
 
     HKS_FREE_BLOB(random);
-    HKS_FREE_BLOB(processName);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
