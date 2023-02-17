@@ -50,24 +50,3 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     };
     IpcIoPushDataBuffWithFree(reply, &responseBuff, HksFree);
 }
-
-int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processName)
-{
-    if ((context == NULL) || (processName == NULL)) {
-        HKS_LOG_D("Don't need get process name.");
-        return HKS_SUCCESS;
-    }
-
-    HksIpcContext *ipcContext = (HksIpcContext *)context;
-    uint32_t callingUid = (uint32_t)(ipcContext->callingUid);
-    uint8_t *name = (uint8_t *)HksMalloc(sizeof(callingUid));
-    HKS_IF_NULL_LOGE_RETURN(name, HKS_ERROR_MALLOC_FAIL, "GetProcessName malloc failed.")
-
-    if (memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid)) != EOK) {
-        HKS_FREE_PTR(name);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    processName->size = sizeof(callingUid);
-    processName->data = name;
-    return HKS_SUCCESS;
-}
