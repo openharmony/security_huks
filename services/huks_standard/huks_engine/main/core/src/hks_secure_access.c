@@ -976,6 +976,7 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
 }
 #endif
 
+#ifndef _STORAGE_LITE_
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
 static int32_t HksCheckCompareAccessTokenId(const struct HksParamSet *blobParamSet,
     const struct HksParamSet *runtimeParamSet)
@@ -1051,10 +1052,14 @@ static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet
     }
     return HKS_ERROR_BAD_STATE;
 }
+#endif /** _STORAGE_LITE_ */
 
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
-    int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
+    int32_t ret = HKS_SUCCESS;
+    
+#ifndef _STORAGE_LITE_
+    ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access token compare failed")
 
     ret = HksCheckCompareUserId(blobParamSet, runtimeParamSet);
@@ -1065,6 +1070,10 @@ int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const s
 
     ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process name compare failed")
+#else
+    (void)blobParamSet;
+    (void)runtimeParamSet;
+#endif
 
     return ret;
 }
