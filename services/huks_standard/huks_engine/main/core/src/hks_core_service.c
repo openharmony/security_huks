@@ -487,6 +487,36 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
     return ret;
 }
 
+static int32_t AddProcessIdentityInfoToParamSet(const struct HksParamSet *inParamSet, struct HksParamSet *paramSet)
+{
+    struct HksParam *accessTokenIdParam = NULL;
+    int32_t ret = HksGetParam(inParamSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenIdParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param access token id failed.")
+
+    ret = HksAddParams(paramSet, accessTokenIdParam, 1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param access token id failed.")
+
+    struct HksParam *userIdParam = NULL;
+    ret = HksGetParam(inParamSet, HKS_TAG_USER_ID, &userIdParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param user id failed.")
+
+    ret = HksAddParams(paramSet, userIdParam, 1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param user id failed.")
+
+    struct HksParam *keyAliasParam = NULL;
+    ret = HksGetParam(inParamSet, HKS_TAG_INNER_KEY_ALIAS, &keyAliasParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param key alias failed.")
+
+    ret = HksAddParams(paramSet, keyAliasParam, 1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "add param key alias failed.")
+
+    struct HksParam *processNameParam = NULL;
+    ret = HksGetParam(inParamSet, HKS_TAG_PROCESS_NAME, &processNameParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param process name failed.")
+
+    return HksAddParams(paramSet, processNameParam, 1);
+}
+
 static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
     struct HksParamSet *paramSet)
 {
@@ -515,25 +545,7 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
     int32_t ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "unwrap suite add params failed.")
 
-    struct HksParam *accessTokenIdParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenIdParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param access token id failed.")
-
-    ret = HksAddParams(paramSet, accessTokenIdParam, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param access token id failed.")
-
-    struct HksParam *userIdParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_USER_ID, &userIdParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param user id failed.")
-
-    ret = HksAddParams(paramSet, userIdParam, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param user id failed.")
-
-    struct HksParam *keyAliasParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_INNER_KEY_ALIAS, &keyAliasParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param key alias failed.")
-
-    return HksAddParams(paramSet, keyAliasParam, 1);
+    return AddProcessIdentityInfoToParamSet(inParamSet, paramSet);
 }
 
 static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,

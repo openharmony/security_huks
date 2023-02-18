@@ -865,8 +865,8 @@ int32_t HksCoreAppendAuthInfoBeforeUpdate(struct HuksKeyNode *keyNode, uint32_t 
     struct HksParam *isAppendedData = NULL;
     struct HksAppendDataInnerParams innerParams = {
         .keyNode = keyNode,
-        .inData = inData,
-        .inParamSet = inParamSet
+        .inParamSet = inParamSet,
+        .inData = inData
     };
 
     int32_t ret = CheckIfNeedAppendUpdateData(&innerParams, &isNeedAppend, &authResult, appendedData, &isAppendedData);
@@ -912,8 +912,8 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
     const struct HksBlob *inDataConst = (const struct HksBlob *)inOutData;
     struct HksAppendDataInnerParams innerParams = {
         .keyNode = keyNode,
-        .inData = inDataConst,
-        .inParamSet = inParamSet
+        .inParamSet = inParamSet,
+        .inData = inDataConst
     };
 
     int32_t ret = CheckIfNeedAppendFinishData(&innerParams, &isNeedAppend, &authResult, inOutDataOriginSize);
@@ -1033,6 +1033,25 @@ static int32_t HksCheckCompareKeyAlias(const struct HksParamSet *blobParamSet,
     return HKS_ERROR_BAD_STATE;
 }
 
+static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet,
+    const struct HksParamSet *runtimeParamSet)
+{
+    struct HksParam *blobProcessName = NULL;
+    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_PROCESS_NAME, &blobProcessName);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "no process name in keyblob")
+
+    struct HksParam *runtimeProcessName = NULL;
+    ret = HksGetParam(runtimeParamSet, HKS_TAG_PROCESS_NAME, &runtimeProcessName);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get process name form runtime paramSet failed")
+
+    if (blobProcessName->blob.size == runtimeProcessName->blob.size &&
+        HksMemCmp(blobProcessName->blob.data, runtimeProcessName->blob.data,
+            blobProcessName->blob.size) == HKS_SUCCESS) {
+        return HKS_SUCCESS;
+    }
+    return HKS_ERROR_BAD_STATE;
+}
+
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
@@ -1043,6 +1062,9 @@ int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const s
 
     ret = HksCheckCompareKeyAlias(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "key alias compare failed")
+
+    ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process name compare failed")
 
     return ret;
 }
