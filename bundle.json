@@ -64,14 +64,14 @@
             "//base/security/huks:service_group"
           ]
         },
-        "inner_kits": [
+        "inner_api": [
           {
-            "name": "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+            "name": "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
             "header": {
               "header_files": [
                 "hks_api.h"
               ],
-              "header_base": "//base/security/huks/interfaces/innerkits/huks_standard/main/include"
+              "header_base": "//base/security/huks/interfaces/inner_api/huks_standard/main/include"
             }
           }
         ],
