@@ -38,7 +38,7 @@ ohos_fuzztest("HksHashFuzzTest") {
 
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "c_utils:utils" ]

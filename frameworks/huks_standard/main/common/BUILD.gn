@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 config("huks_config") {
   include_dirs = [
     "include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 }
 
@@ -40,7 +40,7 @@ ohos_static_library("libhuks_common_standard_static") {
 
   include_dirs = [
     "//third_party/bounds_checking_function/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   sources = [

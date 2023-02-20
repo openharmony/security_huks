@@ -25,7 +25,7 @@ ohos_unittest("huks_mock_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/mock/common/include",
   ]
 

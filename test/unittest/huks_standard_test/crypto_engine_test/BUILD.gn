@@ -27,7 +27,7 @@ ohos_unittest("crypto_engine_unit_test") {
     ".",
     "include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 
   sources = [
