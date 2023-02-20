@@ -16,7 +16,7 @@ import("//build/ohos.gni")
 
 config("public_huks_config") {
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//commonlibrary/c_utils/base/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
@@ -58,8 +58,8 @@ huks_sources = [
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
   "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
-  "//base/security/huks/interfaces/innerkits/huks_standard/main/src/hks_api.c",
-  "//base/security/huks/interfaces/innerkits/huks_standard/main/src/hks_api_adapter.c",
+  "//base/security/huks/interfaces/inner_api/huks_standard/main/src/hks_api.c",
+  "//base/security/huks/interfaces/inner_api/huks_standard/main/src/hks_api_adapter.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_check.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service_util.c",

@@ -17,7 +17,7 @@ import("//build/ohos.gni")
 config("huks_config") {
   include_dirs = [
     "include",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
   ]
 }
 
@@ -30,7 +30,7 @@ if (os_level == "standard") {
         [ ":huks_config" ]  # Share include files for other gn when deps.
 
     include_dirs = [
-      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
 
     sources = [
@@ -62,7 +62,7 @@ if (os_level == "standard") {
         [ ":huks_config" ]  # Share include files for other gn when deps.
 
     include_dirs = [
-      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
 
     sources = [

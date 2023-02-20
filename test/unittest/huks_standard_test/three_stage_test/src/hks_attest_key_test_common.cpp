@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,7 +60,7 @@ void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
     }
 }
 
-int32_t TestGenerateKey(const struct HksBlob *keyAlias)
+int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t keyPadding)
 {
     struct HksParam tmpParams[] = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -68,7 +68,7 @@ int32_t TestGenerateKey(const struct HksBlob *keyAlias)
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY },
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
-        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PSS },
+        { .tag = HKS_TAG_PADDING, .uint32Param = keyPadding },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
         { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
     };

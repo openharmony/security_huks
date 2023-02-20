@@ -17,6 +17,7 @@
 #include "hks_aes_cipher_test_common.h"
 
 #include <gtest/gtest.h>
+#include "hks_log.h"
 
 using namespace testing::ext;
 namespace Unittest::AesCipher {
@@ -742,6 +743,7 @@ HWTEST_F(HksAesCipherPart1Test, HksAesCipherPart1Test007, TestSize.Level0)
  */
 HWTEST_F(HksAesCipherPart1Test, HksAesCipherPart1Test004, TestSize.Level0)
 {
+    HKS_LOG_E(" Enter HksAesCipherPart1Test004");
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest004";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 

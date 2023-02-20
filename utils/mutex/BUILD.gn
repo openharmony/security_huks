@@ -34,7 +34,7 @@ if (os_level == "standard") {
     ]
     include_dirs = [
       "//base/security/huks/frameworks/huks_standard/main/common/include",
-      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
     defines = [
       "_HARDWARE_ROOT_KEY_",
@@ -61,7 +61,7 @@ if (os_level == "standard") {
 
     include_dirs = [
       "//base/security/huks/frameworks/huks_standard/main/common/include",
-      "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
     sources = [ "hks_mutex.c" ]
 
