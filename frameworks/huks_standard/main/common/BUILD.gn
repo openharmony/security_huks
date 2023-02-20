@@ -85,6 +85,8 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
     ]
 
-    sources += [ "src/hks_check_white_list.c" ]
+    if (huks_enable_upgrade_small_to_service) {
+      sources += [ "src/hks_check_white_list.c" ]
+    }
   }
 }

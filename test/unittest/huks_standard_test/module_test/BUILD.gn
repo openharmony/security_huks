@@ -182,6 +182,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_storage_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/src/huks_core_dynamic_hal_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_upgrade_key_accesser_test.cpp",
   ]
 
   # engine test
@@ -190,7 +191,6 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_core_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keynode_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_secure_access_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_upgrade_key_accesser_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/src/hks_core_hal_api_test.cpp",
   ]
 
