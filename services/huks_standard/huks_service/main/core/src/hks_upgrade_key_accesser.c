@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,11 +53,9 @@ static int32_t HksAddProcessNameToParamSet(const struct HksParamSet *keyBlobPara
         HKS_LOG_I("no HKS_TAG_PROCESS_NAME in srcParamSet, no need to add");
         return HKS_SUCCESS;
     }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param process name failed!")
 
-    ret = HksAddParams(targetParamSet, srcProcessInfo, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add params failed!")
-
-    return ret;
+    return HksAddParams(targetParamSet, srcProcessInfo, 1);
 }
 
 static const struct HksAddUpgradeParamFuncMap HKS_ADD_MANDATORY_FUNC_LIST[] = {

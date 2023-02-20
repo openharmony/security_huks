@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,15 +64,14 @@ void HksMarkOldKeyClearedIfEmpty(void)
 static int32_t HksIsOldKeyCleared(void) {
     return isOldKeyCleared ? HKS_SUCCESS : HKS_FAILURE;
 }
-#endif
+#endif /** HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE */
 
 static int32_t HksIsKeyExpectedVersion(const struct HksBlob *key, uint32_t expectedVersion)
 {
     struct HksParam *keyVersion = NULL;
     int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
-    ret = (keyVersion->uint32Param == expectedVersion) ? HKS_SUCCESS : HKS_FAILURE;
-    return ret;
+    return (keyVersion->uint32Param == expectedVersion) ? HKS_SUCCESS : HKS_FAILURE;
 }
 
 int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo)

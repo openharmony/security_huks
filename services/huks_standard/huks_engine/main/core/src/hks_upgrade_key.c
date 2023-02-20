@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@
 #include "hks_log.h"
 #include "hks_mandatory_params.h"
 #include "hks_mem.h"
+#include "hks_secure_access.h"
 #include "hks_template.h"
 #include "hks_type.h"
 
@@ -38,6 +39,7 @@
 static const struct HksMandatoryParams* GetMandatoryParams(uint32_t keyVersion)
 {
     if (HKS_ARRAY_SIZE(HKS_MANDATORY_PARAMS) < keyVersion ||
+        keyVersion == 0 ||
         HKS_MANDATORY_PARAMS[keyVersion - 1].keyVersion != keyVersion) {
         HKS_LOG_E("get mandatory params for version %" LOG_PUBLIC "u failed!", keyVersion);
         return NULL;
@@ -104,7 +106,6 @@ static int32_t AddMandatoryeParamsInCore(const struct HksParamSet *keyBlobParamS
     const struct HksParamSet *srcParamSet, struct HksParamSet **targetParamSet)
 {
     (void)keyBlobParamSet;
-    (void)srcParamSet;
     struct HksParamSet *outParamSet = NULL;
     int32_t ret;
     do {
@@ -132,6 +133,24 @@ static int32_t AddMandatoryeParamsInCore(const struct HksParamSet *keyBlobParamS
     HksFreeParamSet(&outParamSet);
     return ret;
 }
+
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+// only enable to skip process info verify when the file-owner-change is needed and the target uid is in the white list
+static int32_t HksIsToSkipProcessVerify(const struct HksParamSet *paramSet)
+{
+    struct HksParam *processName;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_PROCESS_NAME, &processName);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get process name from paramset failed!")
+    uint32_t uid = 0;
+    if (processName->blob.size == sizeof(uid)) {
+        (void)memcpy_s(&uid, sizeof(uid), processName->blob.data, processName->blob.size);
+    } else {
+        return HKS_ERROR_NO_PERMISSION;;
+    }
+
+    return HksCheckIsInWhiteList(uid);
+}
+#endif
 
 static int32_t AuthChangeProcessName(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet)
 {
@@ -180,7 +199,19 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
             HKS_LOG_E("generate key node failed!");
             break;
         }
-        
+
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+        ret = HksIsToSkipProcessVerify(paramSet);
+        if (ret != HKS_SUCCESS) {
+#endif
+            ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
+            if (ret != HKS_SUCCESS) {
+                break;
+            }
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+        }
+#endif
+
         ret = HksInitParamSet(&newKeyBlobParamSet);
         if (ret != HKS_SUCCESS) {
             break;
@@ -213,7 +244,7 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
 
         ret = HksBuildKeyBlobWithOutAdd(newKeyBlobParamSet, newKey);
     } while (0);
-    
+
     HksFreeParamSet(&newKeyBlobParamSet);
     HksFreeParamSet(&oldKeyBlobParamSet);
     HksFreeParamSet(&newParamSet);

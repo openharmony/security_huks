@@ -18,5 +18,7 @@
 
 namespace Unittest::HksUpgradeKeyAccesserTest {
 int HksUpgradeKeyAccesserTest001(void);
+int HksUpgradeKeyAccesserTest002(void);
+int HksUpgradeKeyAccesserTest003(void);
 }
 #endif
