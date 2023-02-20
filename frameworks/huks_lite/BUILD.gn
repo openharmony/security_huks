@@ -19,7 +19,7 @@ import("//base/security/huks/huks.gni")
 group("huks_sdk") {
   if (os_level == "mini" || os_level == "small") {
     deps =
-        [ "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk" ]
+        [ "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk" ]
     if (ohos_build_type == "debug" || hks_enable_test) {
       deps += [ "//base/security/huks/test:unittest" ]
     }
@@ -29,10 +29,10 @@ group("huks_sdk") {
 group("huks_server") {
   if (os_level == "small") {
     deps = [
-      "//base/security/huks/interfaces/innerkits/huks_lite:huks_server",
+      "//base/security/huks/interfaces/inner_api/huks_lite:huks_server",
 
       # script for transfer fils in old path to new path, in case of upgradation
-      "//base/security/huks/interfaces/innerkits/huks_lite:hks_compatibility_bin",
+      "//base/security/huks/interfaces/inner_api/huks_lite:hks_compatibility_bin",
       "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     ]
   }

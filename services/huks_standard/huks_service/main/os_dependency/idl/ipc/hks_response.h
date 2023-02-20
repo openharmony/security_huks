@@ -24,8 +24,6 @@ extern "C" {
 
 void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlob *response);
 
-int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processName);
-
 int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo);
 
 int32_t SensitivePermissionCheck();

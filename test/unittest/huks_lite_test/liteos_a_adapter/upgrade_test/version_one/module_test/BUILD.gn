@@ -30,14 +30,14 @@ unittest("huks_3.0_module_test") {
   sources = [ "./src/hks_compatibility_module_test.cpp" ]
 
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_lite",
+    "//base/security/huks/interfaces/inner_api/huks_lite",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
 
   include_dirs += [ "./include" ]
 
   deps = [
-    "//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
+    "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
     "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
   ]
 

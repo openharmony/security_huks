@@ -30,7 +30,7 @@ ohos_static_library("modify_old_version_key_test_util") {
   sources += [ "./hks_test_modify_old_key.c" ]
 
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
   ]

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@ int HksAttestKeyNonIdsTest004(void);
 int HksAttestKeyNonIdsTest005(void);
 int HksAttestKeyNonIdsTest006(void);
 int HksAttestKeyNonIdsTest007(void);
+int HksAttestKeyNonIdsTest008(void);
 }
 
 #endif

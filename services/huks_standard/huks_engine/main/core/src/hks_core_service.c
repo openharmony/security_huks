@@ -519,7 +519,21 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
     ret = HksGetParam(inParamSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenIdParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param access token id failed.")
 
-    return HksAddParams(paramSet, accessTokenIdParam, 1);
+    ret = HksAddParams(paramSet, accessTokenIdParam, 1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param access token id failed.")
+
+    struct HksParam *userIdParam = NULL;
+    ret = HksGetParam(inParamSet, HKS_TAG_USER_ID, &userIdParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param user id failed.")
+
+    ret = HksAddParams(paramSet, userIdParam, 1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param user id failed.")
+
+    struct HksParam *keyAliasParam = NULL;
+    ret = HksGetParam(inParamSet, HKS_TAG_INNER_KEY_ALIAS, &keyAliasParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param key alias failed.")
+
+    return HksAddParams(paramSet, keyAliasParam, 1);
 }
 
 static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
@@ -1239,7 +1253,9 @@ int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
 int32_t HksCoreModuleInit(void)
 {
     int32_t ret;
-    g_huksMutex = HksMutexCreate();
+    if (g_huksMutex == NULL) {
+        g_huksMutex = HksMutexCreate();
+    }
     if (g_huksMutex == NULL) {
         HKS_LOG_E("Hks mutex init failed, null pointer!");
         ret = HKS_ERROR_NULL_POINTER;

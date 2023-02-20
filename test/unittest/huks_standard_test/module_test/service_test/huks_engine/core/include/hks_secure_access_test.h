@@ -24,5 +24,7 @@ int HksSecureAccessTest003(void);
 int HksSecureAccessTest004(void);
 int HksSecureAccessTest005(void);
 int HksSecureAccessTest006(void);
+int HksSecureAccessTest007(void);
+int HksSecureAccessTest008(void);
 }
 #endif

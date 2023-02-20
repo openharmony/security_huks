@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -146,7 +146,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
 
     int32_t ret = GenerateKeyNodeHandle(&keyNode->handle);
     if (ret != HKS_SUCCESS) {
-        HksFree((void *)keyNode);
+        HksFree(keyNode);
         HKS_LOG_E("get keynode handle failed");
         return NULL;
     }
@@ -154,7 +154,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     struct HksParamSet *runtimeParamSet = NULL;
     ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
     if (ret != HKS_SUCCESS) {
-        HksFree((void *)keyNode);
+        HksFree(keyNode);
         HKS_LOG_E("get runtime paramSet failed");
         return NULL;
     }
@@ -164,7 +164,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get raw key material failed, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&runtimeParamSet);
-        HksFree((void *)keyNode);
+        HksFree(keyNode);
         return NULL;
     }
 
@@ -175,7 +175,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("translate key info to paramset failed, ret = %" LOG_PUBLIC "d", ret);
         HksFreeParamSet(&runtimeParamSet);
-        HksFree((void *)keyNode);
+        HksFree(keyNode);
         return NULL;
     }
 
@@ -183,7 +183,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("add keyNode failed");
         HksFreeParamSet(&runtimeParamSet);
-        HksFree((void *)keyNode);
+        HksFree(keyNode);
         return NULL;
     }
 
@@ -208,7 +208,7 @@ static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **
     }
     
     if (keyNode != NULL) {
-        HksFree((void *)keyNode);
+        HksFree(keyNode);
     }
 }
 

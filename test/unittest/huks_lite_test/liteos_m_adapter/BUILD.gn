@@ -37,13 +37,13 @@ hctest_suite("huks_3.0_test") {
     "hks_safe_compare_key_test.c",
   ]
   include_dirs = [
-    "//base/security/huks/interfaces/innerkits/huks_lite",
-    "//base/security/huks/interfaces/innerkits/huks_standard/main/include",
+    "//base/security/huks/interfaces/inner_api/huks_lite",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "../common/include",
   ]
 
   deps = [
-    #"//base/security/huks/interfaces/innerkits/huks_lite:huks_3.0_sdk",
+    #"//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]
 
