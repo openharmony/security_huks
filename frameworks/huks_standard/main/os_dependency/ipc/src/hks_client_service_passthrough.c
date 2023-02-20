@@ -404,3 +404,11 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
     };
     return HksServiceGenerateRandom(&processInfo, random);
 }
+
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
+{
+    return HksServiceExportChipsetPlatformPublicKey(salt, scene, publicKey);
+}
+#endif

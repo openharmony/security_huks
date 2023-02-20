@@ -95,6 +95,9 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
 
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
 
+int32_t HksServiceExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
+
 #ifdef __cplusplus
 }
 #endif

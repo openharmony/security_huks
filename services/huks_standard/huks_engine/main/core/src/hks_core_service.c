@@ -35,7 +35,7 @@
 #include "hks_core_service_three_stage.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
-#include "hks_kds.h"
+#include "hks_chipset_platform_decrypt.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -1658,7 +1658,16 @@ int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob
     return HksCryptoHalFillRandom(random);
 }
 
-int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet, struct HksBlob *plainText, uint32_t saltType)
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *plainText)
 {
-    return HuksCoreChipsetPlatformDecrypt(paramSet, plainText, saltType);
+    return HuksCoreChipsetPlatformDecrypt(paramSet, scene, plainText);
 }
+
+int32_t HksCoreExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
+{
+    return HuksCoreExportChipsetPlatformPublicKey(salt, scene, publicKey);
+}
+#endif

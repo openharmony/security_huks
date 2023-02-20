@@ -49,15 +49,13 @@ ohos_shared_library("huks_engine_core_standard") {
     "src/hks_attest.c",
     "src/hks_attest_utils.c",
     "src/hks_auth.c",
+    "src/hks_chipset_platform_decrypt.c",
     "src/hks_core_interfaces.c",
     "src/hks_core_service.c",
     "src/hks_core_service_three_stage.c",
     "src/hks_keyblob.c",
     "src/hks_keynode.c",
     "src/hks_secure_access.c",
-  ]
-  sources += [
-    "src/hks_kds.c"
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",

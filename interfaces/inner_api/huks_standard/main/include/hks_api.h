@@ -106,6 +106,9 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
 
 HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
+HKS_API_EXPORT int32_t HksExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
+
 #ifdef __cplusplus
 }
 #endif

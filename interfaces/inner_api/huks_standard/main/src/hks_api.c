@@ -654,3 +654,20 @@ HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksPa
     return ret;
 }
 
+HKS_API_EXPORT int32_t HksExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
+{
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+    HKS_LOG_I("enter export chipset platform public key");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(salt), HKS_ERROR_INVALID_ARGUMENT, "invalid salt")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(publicKey), HKS_ERROR_INVALID_ARGUMENT, "invalid publicKey")
+    int32_t ret = HksClientExportChipsetPlatformPublicKey(salt, scene, publicKey);
+    HKS_LOG_I("leave export chipset platform public key, ret = %" LOG_PUBLIC "d", ret);
+    return ret;
+#else
+    (void)(salt);
+    (void)(scene);
+    (void)(publicKey);
+    return HKS_ERROR_API_NOT_SUPPORTED;
+#endif
+}
