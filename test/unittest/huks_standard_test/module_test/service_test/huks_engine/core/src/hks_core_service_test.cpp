@@ -422,10 +422,11 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0 };
     int32_t ret = TestGenerateKey(&keyAlias, &processInfo);
-    ASSERT_EQ(ret, HKS_SUCCESS);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCoreServiceTest016 ret is " << ret;
     struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
     ASSERT_NE(keyBlob.data, nullptr);
     ret = HksStoreGetKeyBlob(&processInfo, &keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksParam userIdRuntime = { .tag = HKS_TAG_USER_ID, .uint32Param = 1 };
@@ -458,11 +459,46 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest017, TestSize.Level0)
     struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
     ASSERT_NE(keyBlob.data, nullptr);
     ret = HksStoreGetKeyBlob(&processInfo, &keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCoreServiceTest017 ret is " << ret;
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksBlob wrongKeyAlias = { .size = strlen("0"), .data = (uint8_t *)"0"};
     struct HksParam keyAliasRuntime = { .tag = HKS_TAG_INNER_KEY_ALIAS, .blob = wrongKeyAlias};
     ret = BuildParamSetWithParam(&runtimeParamSet, &keyAliasRuntime);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
+
+    ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, &keyOutBlob);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+
+    HksFree(keyBlob.data);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias);
+    HksFree(keyOutBlob.data);
+    HksFreeParamSet(&runtimeParamSet);
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest018
+ * @tc.desc: tdd HksCoreExportPublicKey with key alias, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest018");
+    const char *alias = "HksCoreServiceTest018";
+    const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0 };
+    int32_t ret = TestGenerateKey(&keyAlias, &processInfo);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
+    ASSERT_NE(keyBlob.data, nullptr);
+    ret = HksStoreGetKeyBlob(&processInfo, &keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+    ASSERT_EQ(ret, HKS_SUCCESS) << "HksCoreServiceTest018 ret is " << ret;
+
+    struct HksParamSet *runtimeParamSet = nullptr;
+    struct HksBlob wrongProcessName = { .size = strlen("011"), .data = (uint8_t *)"011"};
+    struct HksParam processNameRuntime = { .tag = HKS_TAG_PROCESS_NAME, .blob = wrongProcessName};
+    ret = BuildParamSetWithParam(&runtimeParamSet, &processNameRuntime);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
 
