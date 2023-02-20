@@ -426,6 +426,10 @@ enum HksTag {
     HKS_TAG_IMPORT_KEY_TYPE = HKS_TAG_TYPE_UINT | 25, /* choose from enum HksImportKeyType */
     HKS_TAG_UNWRAP_ALGORITHM_SUITE = HKS_TAG_TYPE_UINT | 26,
 
+    /* parameters required by HuksCoreChipsetPlatformDecrypt */
+    HKS_TAG_CIPHER_TEXT = HKS_TAG_TYPE_BYTES | 27,
+    HKS_TAG_PEER_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 28,
+
     /*
      * Key authentication related TAG: 201 - 300
      *
@@ -689,6 +693,10 @@ static inline int32_t CheckBlob(const struct HksBlob *blob)
     }
     return HKS_SUCCESS;
 }
+
+enum HksChipsetPlatformDecryptScene {
+    HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA = 1,
+};
 
 #ifdef __cplusplus
 }
