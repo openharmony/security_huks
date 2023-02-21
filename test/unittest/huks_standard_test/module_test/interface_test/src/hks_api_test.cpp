@@ -29,6 +29,7 @@
 
 using namespace testing::ext;
 namespace Unittest::HksAPITest {
+constexpr uint32_t DEFAULT_CERT_COUNT = 4;
 class HksAPITest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -110,14 +111,139 @@ HWTEST_F(HksAPITest, HksAPITest004, TestSize.Level0)
 
 /**
  * @tc.name: HksAPITest.HksAPITest005
- * @tc.desc: tdd HksValidateCertChain with nullptr input, expecting HKS_ERROR_NULL_POINTER
+ * @tc.desc: tdd HksValidateCertChain with certChain nullptr input, expecting HKS_ERROR_NULL_POINTER
  * @tc.type: FUNC
  */
 HWTEST_F(HksAPITest, HksAPITest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest005");
-    int32_t ret = HksValidateCertChain(nullptr, nullptr);
+    struct HksParamSet paramSetOut = { 0, 0 };
+    int32_t ret = HksValidateCertChain(nullptr, &paramSetOut);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksValidateCertChain failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00501
+ * @tc.desc: tdd HksValidateCertChain with paramSetOut nullptr input, expecting HKS_ERROR_NULL_POINTER
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00501, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00501");
+    struct HksCertChain certChain = { nullptr, 0 };
+    int32_t ret = HksValidateCertChain(&certChain, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksValidateCertChain failed, ret = " << ret;
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00502
+ * @tc.desc: tdd HksValidateCertChain with certChain->certs nullptr input, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00502, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00502");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+
+    struct HksCertChain certChain = { nullptr, DEFAULT_CERT_COUNT };
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksValidateCertChain failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00503
+ * @tc.desc: tdd HksValidateCertChain with certChain->certsCount not 4, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00503, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00503");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+
+    uint8_t certData[] = { 0x30, 0x82 };
+    struct HksBlob cert[] = { { sizeof(certData), certData } };
+    struct HksCertChain certChain = { cert, sizeof(cert) / sizeof(cert[0]) }; /* certChain->certsCount not 4 */
+
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksValidateCertChain failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00504
+ * @tc.desc: tdd HksValidateCertChain with certChain->certs[i] blob invalid, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00504, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00504");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+
+    struct HksBlob cert[] = { { 0, nullptr }, { 0, nullptr }, { 0, nullptr }, { 0, nullptr } };
+    struct HksCertChain certChain = { cert, sizeof(cert) / sizeof(cert[0]) };
+
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksValidateCertChain failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00505
+ * @tc.desc: tdd HksValidateCertChain with paramSetOut size invalid, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00505, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00505");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+    paramSetOut->paramSetSize = sizeof(struct HksParamSet) - 1; /* paramSetOut size invalid */
+
+    uint8_t certData1[] = { 0x30, 0x82 };
+    uint8_t certData2[] = { 0x30, 0x82 };
+    uint8_t certData3[] = { 0x30, 0x82 };
+    uint8_t certData4[] = { 0x30, 0x82 };
+    struct HksBlob cert[] = {
+        { sizeof(certData1), certData1 },
+        { sizeof(certData2), certData2 },
+        { sizeof(certData3), certData3 },
+        { sizeof(certData4), certData4 }
+    };
+    struct HksCertChain certChain = { cert, sizeof(cert) / sizeof(cert[0]) };
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksValidateCertChain failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
+}
+
+/**
+ * @tc.name: HksAPITest.HksAPITest00506
+ * @tc.desc: tdd HksValidateCertChain with cert format not der or pem, expecting HKS_ERROR_VERIFICATION_FAILED
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest00506, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest00506");
+    struct HksParamSet *paramSetOut = nullptr;
+    ASSERT_EQ(HksInitParamSet(&paramSetOut), HKS_SUCCESS);
+
+    uint8_t certData1[] = { 0x20, 0x82 };
+    uint8_t certData2[] = { 0x20, 0x82 };
+    uint8_t certData3[] = { 0x20, 0x82 };
+    uint8_t certData4[] = { 0x20, 0x82 };
+    struct HksBlob cert[] = {
+        { sizeof(certData1), certData1 },
+        { sizeof(certData2), certData2 },
+        { sizeof(certData3), certData3 },
+        { sizeof(certData4), certData4 }
+    };
+    struct HksCertChain certChain = { cert, sizeof(cert) / sizeof(cert[0]) };
+    int32_t ret = HksValidateCertChain(&certChain, paramSetOut);
+    EXPECT_EQ(ret, HKS_ERROR_VERIFICATION_FAILED) << "HksValidateCertChain failed, ret = " << ret;
+    HksFreeParamSet(&paramSetOut);
 }
 
 /**
