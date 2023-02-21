@@ -251,14 +251,9 @@ sptr<HksService> HksService::GetInstance()
 bool HksService::Init()
 {
     HKS_LOG_I("HksService::Init Ready to init");
-
-    if (!registerToService_) {
-        if (!Publish(HksService::GetInstance())) {
-            HKS_LOG_E("HksService::Init Publish Failed");
-            return false;
-        }
-        HKS_LOG_I("HksService::Init Publish service success");
-        registerToService_ = true;
+    if (registerToService_) {
+        HKS_LOG_I("HksService::Init already finished");
+        return true;
     }
 
     int32_t ret = HksServiceInitialize();
@@ -267,10 +262,21 @@ bool HksService::Init()
         return false;
     }
 
+    sptr<HksService> ptrInstance = HksService::GetInstance();
+    if (!ptrInstance) {
+        HKS_LOG_E("HksService::Init instance Failed");
+        return false;
+    }
+
+    if (!Publish(HksService::GetInstance())) {
+        HKS_LOG_E("HksService::Init Publish Failed");
+        return false;
+    }
 #ifdef SUPPORT_COMMON_EVENT
     HksSubscribeSystemEvent();
 #endif
-
+    HKS_LOG_I("HksService::Init Publish service success.");
+    registerToService_ = true;
     HKS_LOG_I("HksService::Init success.");
     return true;
 }
