@@ -27,5 +27,7 @@ int HksCoreServiceTest007(void);
 int HksCoreServiceTest008(void);
 int HksCoreServiceTest009(void);
 int HksCoreServiceTest010(void);
+
+int HksCoreServiceTest018(void);
 }
 #endif

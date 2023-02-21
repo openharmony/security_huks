@@ -487,6 +487,21 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
     return ret;
 }
 
+static int32_t AddProcessIdentityInfoToParamSet(const struct HksParamSet *inParamSet, struct HksParamSet *paramSet)
+{
+    uint32_t transferTagList[] = { HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_PROCESS_NAME };
+    int32_t ret;
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(transferTagList); ++i) {
+        struct HksParam *tmpParam = NULL;
+        ret = HksGetParam(inParamSet, transferTagList[i], &tmpParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param %" LOG_PUBLIC "u failed.", i)
+
+        ret = HksAddParams(paramSet, tmpParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "add param %" LOG_PUBLIC "u failed.", i)
+    }
+    return ret;
+}
+
 static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
     struct HksParamSet *paramSet)
 {
@@ -515,11 +530,7 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
     int32_t ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "unwrap suite add params failed.")
 
-    struct HksParam *accessTokenIdParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenIdParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param access token id failed.")
-
-    return HksAddParams(paramSet, accessTokenIdParam, 1);
+    return AddProcessIdentityInfoToParamSet(inParamSet, paramSet);
 }
 
 static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
