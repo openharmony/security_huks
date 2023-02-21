@@ -27,6 +27,7 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "securec.h"
@@ -608,15 +609,41 @@ static void FreeCertChainInfo(struct HksCertInfo **certs, uint32_t certNum)
     }
 }
 
-int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
+static int32_t CheckCertChainParams(const struct HksCertChain *certChain)
 {
-    if (certChain->certsCount != HKS_DEFAULT_CERT_CHAIN_CNT) {
-        HKS_LOG_E("validate cert chain chain invalid certChain count %" LOG_PUBLIC "u", certChain->certsCount);
+    /* certChain has been checked not null */
+    if ((certChain->certs == NULL) || (certChain->certsCount != HKS_DEFAULT_CERT_CHAIN_CNT)) {
+        HKS_LOG_E("validate cert chain chain invalid certChain or count");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
+    for (uint32_t i = 0; i < certChain->certsCount; ++i) {
+        if (CheckBlob(&certChain->certs[i]) != HKS_SUCCESS) {
+            HKS_LOG_E("certChain entry[%" LOG_PUBLIC "u] invalid", i);
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t CheckValidateCertChainParams(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
+{
+    int32_t ret = CheckCertChainParams(certChain);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "certChain invalid, ret = %" LOG_PUBLIC "d", ret)
+
+    /* paramSetOut has been checked not null */
+    ret = HksCheckParamSet(paramSetOut, paramSetOut->paramSetSize);
+    HKS_IF_NOT_SUCC_LOGE(ret, "paramSetOut invalid, ret = %" LOG_PUBLIC "d", ret)
+    return ret;
+}
+
+int32_t HksClientValidateCertChain(const struct HksCertChain *certChain, struct HksParamSet *paramSetOut)
+{
+    int32_t ret = CheckValidateCertChainParams(certChain, paramSetOut);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "certChain params check failed, ret = %" LOG_PUBLIC "d", ret)
+
     struct HksCertInfo *certsInfo = NULL;
-    int32_t ret = InitCertChainInfo(certChain, &certsInfo);
+    ret = InitCertChainInfo(certChain, &certsInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get cert chain info failed")
     ret = VerifyAttestationCertChain(certsInfo, certChain->certsCount);
     if (ret != HKS_SUCCESS) {
