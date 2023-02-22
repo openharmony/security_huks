@@ -218,3 +218,19 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
     }
     return HKS_ERROR_INVALID_WRAPPED_FORMAT;
 }
+
+int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage)
+{
+    struct HksParam *storageFlag = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
+        *isNeedStorage = true;
+        return ret;
+    }
+    ret = HksGetParam(paramSet, HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_ONLY_USED_IN_HUKS)) {
+        *isNeedStorage = true;
+        return ret;
+    }
+    return ret;
+}

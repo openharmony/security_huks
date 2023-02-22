@@ -28,7 +28,7 @@ static const uint32_t DERIVE_KEY_SIZE_48 = 48;
 static const uint32_t DERIVE_KEY_SIZE_64 = 64;
 
 int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias, const struct HksParamSet *genParamSet,
-    struct HksParamSet *DeriveParamSet, struct HksParamSet *DeriveFinalParamsSet);
+    struct HksParamSet *DeriveParamSet, struct HksParamSet *DeriveFinalParamsSet, int32_t cmpRet);
 int32_t HksHkdfDeriveTestCmpCase(const struct HksBlob keyAlias, const struct HksParamSet *genParamSet,
     struct HksParamSet *DeriveParamSet, struct HksParamSet *DeriveFinalParamsSet);
 }
