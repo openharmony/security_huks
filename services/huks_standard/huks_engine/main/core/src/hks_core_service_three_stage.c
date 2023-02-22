@@ -1099,33 +1099,53 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
     return ret;
 }
 
-static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, const struct HksBlob *restoreData,
-    struct HksBlob *outData, uint8_t keyFlag)
+static int32_t DoBuildKeyBlobOrGetOutDataAction(const struct HksParamSet *paramSet, const struct HksBlob *restoreData,
+    struct HksBlob *outData, uint8_t keyFlag, bool isNeedStorage)
 {
-    bool needStore = false;
-    struct HksParam *storage = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storage);
+    if (isNeedStorage) {
+        return HksBuildKeyBlob(NULL, keyFlag, restoreData, paramSet, outData);
+    }
+    if (outData->size < restoreData->size) {
+        HKS_LOG_E("outData size is too small, size : %" LOG_PUBLIC "u", outData->size);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    outData->size = restoreData->size;
+    (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
+    return HKS_SUCCESS;
+}
+
+static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, const struct HksBlob *restoreData,
+    struct HksBlob *outData, uint8_t keyFlag, const struct HuksKeyNode *keyNode)
+{
+    bool isNeedStorageOrExported = false;
+    struct HksParam *keyStorageFlagParam = NULL;
+    uint32_t storageFlag = 0;
+    int32_t ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG, &keyStorageFlagParam);
+    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+        return ret;
+    }
     if (ret == HKS_SUCCESS) {
-        if (storage != NULL && storage->uint32Param == HKS_STORAGE_PERSISTENT) {
-            needStore = true;
-        }
+        storageFlag = keyStorageFlagParam->uint32Param;
+    } else {
+        isNeedStorageOrExported = true;
     }
 
-    do {
-        if (needStore) {
-            ret = HksBuildKeyBlob(NULL, keyFlag, restoreData, paramSet, outData);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildKeyBlob failed! ret: %" LOG_PUBLIC "d", ret)
-        } else {
-            if (outData->size < restoreData->size) {
-                HKS_LOG_E("outData size is too small, size : %" LOG_PUBLIC "u", outData->size);
-                ret = HKS_ERROR_BUFFER_TOO_SMALL;
-                break;
-            }
-            outData->size = restoreData->size;
-            (void)memcpy_s(outData->data, outData->size, restoreData->data, outData->size);
-            ret = HKS_SUCCESS;
-        }
-    } while (0);
+    bool isNeedStorage = false;
+    HksCheckKeyNeedStored(paramSet, &isNeedStorage);
+    if (isNeedStorageOrExported) {
+        // Whether the derived/agreed key needs to be stored was not specified when generating the key
+        HKS_LOG_D("default mode of storage");
+        return DoBuildKeyBlobOrGetOutDataAction(paramSet, restoreData, outData, keyFlag, isNeedStorage);
+    }
+    if ((storageFlag == HKS_STORAGE_ONLY_USED_IN_HUKS) == isNeedStorage) {
+        HKS_LOG_D("need store flag: %" LOG_PUBLIC "d", storageFlag);
+        ret = DoBuildKeyBlobOrGetOutDataAction(paramSet, restoreData, outData, keyFlag, isNeedStorage);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "DoBuildKeyBlobOrGetOutDataAction failed!")
+    } else {
+        HKS_LOG_E("store flags do not match: genKey flag is %" LOG_PUBLIC "d, use flag is %" LOG_PUBLIC "d",
+            (storageFlag == HKS_STORAGE_ONLY_USED_IN_HUKS), isNeedStorage);
+        ret = HKS_ERROR_BAD_STATE;
+    }
     return ret;
 }
 
@@ -1143,7 +1163,7 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
-    ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_DERIVE_KEY);
+    ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_DERIVE_KEY, keyNode);
 
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);
@@ -1249,7 +1269,7 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
-    ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_AGREE_KEY);
+    ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_AGREE_KEY, keyNode);
 
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);

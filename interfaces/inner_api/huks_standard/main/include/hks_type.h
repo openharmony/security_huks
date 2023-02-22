@@ -222,6 +222,8 @@ enum HksKeyFlag {
 enum HksKeyStorageType {
     HKS_STORAGE_TEMP = 0,
     HKS_STORAGE_PERSISTENT = 1,
+    HKS_STORAGE_ONLY_USED_IN_HUKS = 2,
+    HKS_STORAGE_ALLOW_KEY_EXPORTED = 3,
 };
 
 enum HksImportKeyType {
@@ -429,6 +431,7 @@ enum HksTag {
     /* parameters required by HuksCoreChipsetPlatformDecrypt */
     HKS_TAG_CIPHER_TEXT = HKS_TAG_TYPE_BYTES | 27,
     HKS_TAG_PEER_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 28,
+    HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG = HKS_TAG_TYPE_UINT | 29,
 
     /*
      * Key authentication related TAG: 201 - 300

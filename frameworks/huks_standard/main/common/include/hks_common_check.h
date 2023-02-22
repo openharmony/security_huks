@@ -62,6 +62,8 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
 
 int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t blobIndex, uint32_t totalBlobs,
     struct HksBlob *blob);
+
+int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage);
 #ifdef __cplusplus
 }
 #endif
