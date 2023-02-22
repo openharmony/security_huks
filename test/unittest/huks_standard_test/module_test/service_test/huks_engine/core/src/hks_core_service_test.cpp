@@ -399,7 +399,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest015, TestSize.Level0)
         {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519},
         {.tag = HKS_TAG_ALGORITHM, .uint32Param = 0},
     };
-    for (uint32_t i = 0; i < sizeof(algParams) / sizeof(algParams[0]); ++i) {
+    for (int32_t i = 0; i < static_cast<int32_t>(sizeof(algParams) / sizeof(algParams[0])); ++i) {
         struct HksParamSet *runtimeParamSet = nullptr;
         int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &algParams[i]);
         ASSERT_EQ(ret, HKS_SUCCESS);

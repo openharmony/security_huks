@@ -66,6 +66,9 @@ static struct HksIpcThreeStagePoint g_hksIpcThreeStageHandler[] = {
     { HKS_MSG_UPDATE, HksIpcServiceUpdate },
     { HKS_MSG_FINISH, HksIpcServiceFinish },
     { HKS_MSG_ABORT, HksIpcServiceAbort },
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+    { HKS_MSG_CHIPSET_PLATFORM_DECRYPT, HksIpcServiceExportChipsetPlatformPublicKey },
+#endif
 };
 
 static struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {

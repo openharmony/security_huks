@@ -83,6 +83,9 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
 
 int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
+int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
+
 #ifdef __cplusplus
 }
 #endif

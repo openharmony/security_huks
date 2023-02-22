@@ -32,7 +32,16 @@ ohos_static_library("libhuks_core_hal_api_static") {
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
   ]
-  sources = [ "src/hks_core_hal_api.c" ]
+  sources = [
+    "src/hks_chipset_platform_key_hardcoded.c",
+    "src/hks_core_hal_api.c",
+  ]
+  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  include_dirs = [
+    "include",
+    "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
+  ]
 
   cflags_cc = [
     "-Wall",
