@@ -39,7 +39,7 @@ void HksLogOpensslError(void)
     errCode = ERR_get_error();
     ERR_error_string_n(errCode, szErr, HKS_OPENSSL_ERROR_LEN);
 
-    HKS_LOG_E("Openssl engine fail, error code = %lu, error string = %" LOG_PUBLIC "s", errCode, szErr);
+    HKS_LOG_E("Openssl engine fail, error code = %" LOG_PUBLIC "lu, error string = %" LOG_PUBLIC "s", errCode, szErr);
 }
 
 inline int32_t HksOpensslCheckBlob(const struct HksBlob *blob)
