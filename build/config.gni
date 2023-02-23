@@ -42,4 +42,7 @@ declare_args() {
 
   # specify the OpenSSL huks depends on
   huks_dependency_openssl_path = ""
+
+  # default security level supported by huks is software
+  huks_security_level = "software"
 }
