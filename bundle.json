@@ -20,7 +20,9 @@
           "SystemCapability.Security.Huks",
           "SystemCapability.Security.Cipher"
           ], 
-      "features": ["huks_security_level"],
+      "features": [
+          "huks_security_level"
+        ],
       "adapted_system_type": [
           "standard",
           "small",
