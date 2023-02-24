@@ -16,6 +16,7 @@
 #include "hks_samgr_client.h"
 
 #include "hks_message_code.h"
+#include "hks_request.h"
 #include "hks_template.h"
 
 #include "iproxy_client.h"
