@@ -209,6 +209,9 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
 #endif /* _CUT_AUTHENTICATE_ */
 
     hdiDevicePtr->HuksHdiGenerateRandom   = HksCoreGenerateRandom;
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+    hdiDevicePtr->HuksHdiExportChipsetPlatformPublicKey = HksCoreExportChipsetPlatformPublicKey;
+#endif
 
     return hdiDevicePtr;
 }

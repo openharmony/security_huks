@@ -41,6 +41,7 @@ enum HksMessage {
     HKS_MSG_UPDATE,
     HKS_MSG_FINISH,
     HKS_MSG_ABORT,
+    HKS_MSG_CHIPSET_PLATFORM_DECRYPT,
 
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,

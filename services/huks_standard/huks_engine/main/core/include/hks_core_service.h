@@ -96,6 +96,12 @@ int32_t HksCoreGetHardwareInfo(void);
 
 HksMutex *HksCoreGetHuksMutex(void);
 
+int32_t HksCoreExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
+
+int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *plainText);
+
 struct HksCoreInitHandler {
     enum HksKeyPurpose pur;
     int32_t (*handler)(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
