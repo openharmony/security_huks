@@ -29,6 +29,7 @@
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
+#include "hks_chipset_platform_decrypt.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
@@ -36,7 +37,6 @@
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
 #include "hks_get_mainkey.h"
-#include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -487,6 +487,22 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
     return ret;
 }
 
+static int32_t AddProcessIdentityInfoToParamSet(const struct HksParamSet *inParamSet, struct HksParamSet *paramSet)
+{
+    uint32_t transferTagList[] = { HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_USER_ID, HKS_TAG_INNER_KEY_ALIAS,
+        HKS_TAG_PROCESS_NAME };
+    int32_t ret;
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(transferTagList); ++i) {
+        struct HksParam *tmpParam = NULL;
+        ret = HksGetParam(inParamSet, transferTagList[i], &tmpParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param %" LOG_PUBLIC "u failed.", i)
+
+        ret = HksAddParams(paramSet, tmpParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "add param %" LOG_PUBLIC "u failed.", i)
+    }
+    return ret;
+}
+
 static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
     struct HksParamSet *paramSet)
 {
@@ -515,25 +531,7 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
     int32_t ret = HksAddParams(paramSet, agreeParams, sizeof(agreeParams) / sizeof(struct HksParam));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "unwrap suite add params failed.")
 
-    struct HksParam *accessTokenIdParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenIdParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param access token id failed.")
-
-    ret = HksAddParams(paramSet, accessTokenIdParam, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param access token id failed.")
-
-    struct HksParam *userIdParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_USER_ID, &userIdParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param user id failed.")
-
-    ret = HksAddParams(paramSet, userIdParam, 1);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add param user id failed.")
-
-    struct HksParam *keyAliasParam = NULL;
-    ret = HksGetParam(inParamSet, HKS_TAG_INNER_KEY_ALIAS, &keyAliasParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get param key alias failed.")
-
-    return HksAddParams(paramSet, keyAliasParam, 1);
+    return AddProcessIdentityInfoToParamSet(inParamSet, paramSet);
 }
 
 static int32_t GenAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct HksParamSet *inParamSet,
@@ -1659,3 +1657,17 @@ int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob
     (void)paramSet;
     return HksCryptoHalFillRandom(random);
 }
+
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *plainText)
+{
+    return HuksCoreChipsetPlatformDecrypt(paramSet, scene, plainText);
+}
+
+int32_t HksCoreExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
+{
+    return HuksCoreExportChipsetPlatformPublicKey(salt, scene, publicKey);
+}
+#endif

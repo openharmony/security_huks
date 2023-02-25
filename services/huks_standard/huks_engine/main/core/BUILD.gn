@@ -39,6 +39,7 @@ if (os_level == "standard") {
     sources = [
       "src/hks_asn1.c",
       "src/hks_auth.c",
+      "src/hks_chipset_platform_decrypt.c",
       "src/hks_core_interfaces.c",
       "src/hks_core_service.c",
       "src/hks_core_service_three_stage.c",

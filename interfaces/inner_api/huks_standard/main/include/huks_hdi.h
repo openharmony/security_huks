@@ -87,6 +87,9 @@ struct HuksHdi {
 
     int32_t (*HuksHdiUpgradeKey)(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, 
         struct HksBlob *newKey);
+        
+    int32_t (*HuksHdiExportChipsetPlatformPublicKey)(const struct HksBlob *salt,
+        enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
 };
 
 #endif /* HUKS_HDI_H */

@@ -22,6 +22,13 @@
 #define HKS_PROCESS_INFO_LEN    128
 #define HKS_MAX_DIRENT_FILE_LEN 128
 
+static int32_t GetProcessInfo(char **processName, char **userId)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetUserId(userId), HKS_ERROR_INTERNAL_ERROR, "get user id failed")
+    return HKS_SUCCESS;
+}
+
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksClientInitialize(void)
 {
@@ -34,13 +41,6 @@ int32_t HksClientRefreshKeyInfo(void)
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(&processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
     return HksServiceRefreshKeyInfo(&processNameBlob);
-}
-
-static int32_t GetProcessInfo(char **processName, char **userId)
-{
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetUserId(userId), HKS_ERROR_INTERNAL_ERROR, "get user id failed")
-    return HKS_SUCCESS;
 }
 
 int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
@@ -404,3 +404,11 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
     };
     return HksServiceGenerateRandom(&processInfo, random);
 }
+
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
+{
+    return HksServiceExportChipsetPlatformPublicKey(salt, scene, publicKey);
+}
+#endif

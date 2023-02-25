@@ -308,3 +308,11 @@ ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, 
 
     return g_hksHalDevicePtr->HuksHdiGenerateRandom(paramSet, random);
 }
+
+#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
+ENABLE_CFI(int32_t HuksAccessExportChipsetPlatformPublicKey(const struct HksBlob *salt,
+    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey))
+{
+    return g_hksHalDevicePtr->HuksHdiExportChipsetPlatformPublicKey(salt, scene, publicKey);
+}
+#endif
