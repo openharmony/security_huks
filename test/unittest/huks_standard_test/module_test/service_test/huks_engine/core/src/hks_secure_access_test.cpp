@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,8 @@
 #include "hks_type_inner.h"
 
 #include "hks_secure_access.h"
+
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c"
 
 using namespace testing::ext;
 namespace Unittest::HksSecureAccessTest {
@@ -54,7 +56,8 @@ void HksSecureAccessTest::TearDown()
 {
 }
 
-static int32_t BuildParamSetWithParam(struct HksParamSet **paramSet, struct HksParam *param)
+static int32_t BuildParamSetWithParam(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramCnt,
+    bool isWithMandataryParams)
 {
     int32_t ret = HksInitParamSet(paramSet);
     if (ret != HKS_SUCCESS) {
@@ -62,8 +65,23 @@ static int32_t BuildParamSetWithParam(struct HksParamSet **paramSet, struct HksP
         return ret;
     }
 
-    if (param != nullptr) {
-        ret = HksAddParams(*paramSet, param, 1);
+    if (isWithMandataryParams) {
+        struct HksParam processNameBlob = {
+            .tag = HKS_TAG_PROCESS_NAME,
+            .blob = {
+                .size = strlen("0"),
+                .data = (uint8_t *)"0"
+            }
+        };
+        ret = HksAddParams(*paramSet, &processNameBlob, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            return ret;
+        }
+    }
+
+    if (params != nullptr) {
+        ret = HksAddParams(*paramSet, params, paramCnt);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksAddParams failed");
             return ret;
@@ -84,13 +102,13 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest001, TestSize.Level0)
 
     struct HksParamSet *blobParamSet = nullptr;
     struct HksParam accessTokenIdBlob = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 0 };
-    int32_t ret = BuildParamSetWithParam(&blobParamSet, &accessTokenIdBlob);
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, &accessTokenIdBlob, 1, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksParam accessTokenIdRuntime = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 0 };
 
-    ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
+    ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime, 1, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
@@ -110,12 +128,12 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest002, TestSize.Level0)
 
     struct HksParamSet *blobParamSet = nullptr;
     struct HksParam accessTokenIdBlob = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 1 };
-    int32_t ret = BuildParamSetWithParam(&blobParamSet, &accessTokenIdBlob);
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, &accessTokenIdBlob, 1, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksParam accessTokenIdRuntime = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 0 };
-    ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
+    ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime, 1, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
@@ -134,13 +152,13 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest003, TestSize.Level0)
     HKS_LOG_I("enter HksSecureAccessTest003");
 
     struct HksParamSet *blobParamSet = nullptr;
-    int32_t ret = BuildParamSetWithParam(&blobParamSet, nullptr);
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, nullptr, 0, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksParam accessTokenIdRuntime = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 0 };
 
-    ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
+    ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime, 1, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
@@ -160,16 +178,102 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest004, TestSize.Level0)
 
     struct HksParamSet *blobParamSet = nullptr;
     struct HksParam accessTokenIdBlob = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 1 };
-    int32_t ret = BuildParamSetWithParam(&blobParamSet, &accessTokenIdBlob);
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, &accessTokenIdBlob, 1, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
 
-    ret = BuildParamSetWithParam(&runtimeParamSet, nullptr);
+    ret = BuildParamSetWithParam(&runtimeParamSet, nullptr, 0, true);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     ret = HksProcessIdentityVerify(blobParamSet, runtimeParamSet);
     EXPECT_EQ(ret, HKS_ERROR_BAD_STATE);
+    HksFreeParamSet(&blobParamSet);
+    HksFreeParamSet(&runtimeParamSet);
+}
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest009
+ * @tc.desc: tdd HksCheckCompareProcessName, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest009, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest009");
+
+    int32_t ret = HksCheckCompareProcessName(NULL, NULL);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+}
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest010
+ * @tc.desc: tdd HksCheckCompareProcessName, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest010");
+    struct HksParamSet *blobParamSet = nullptr;
+    struct HksBlob processName = { .size = strlen("011"), .data = (uint8_t *)"011"};
+    struct HksParam processNameBlob = { .tag = HKS_TAG_PROCESS_NAME, .blob = processName};
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, &processNameBlob, 1, false);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksCheckCompareProcessName(blobParamSet, NULL);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+    HksFreeParamSet(&blobParamSet);
+}
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest011
+ * @tc.desc: tdd HksCheckCompareProcessName, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest011");
+    struct HksParamSet *blobParamSet = nullptr;
+    struct HksBlob processName = { .size = strlen("011"), .data = (uint8_t *)"011"};
+    struct HksParam processNameBlob = { .tag = HKS_TAG_PROCESS_NAME, .blob = processName};
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, &processNameBlob, 1, false);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *runtimeParamSet = nullptr;
+    struct HksBlob processName2 = { .size = strlen("012"), .data = (uint8_t *)"012"};
+    struct HksParam processNameRuntime = { .tag = HKS_TAG_PROCESS_NAME, .blob = processName2};
+    ret = BuildParamSetWithParam(&runtimeParamSet, &processNameRuntime, 1, false);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+
+    HksFreeParamSet(&blobParamSet);
+    HksFreeParamSet(&runtimeParamSet);
+}
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest012
+ * @tc.desc: tdd HksCheckCompareProcessName, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest012");
+    struct HksParamSet *blobParamSet = nullptr;
+    struct HksBlob processName = { .size = strlen("011"), .data = (uint8_t *)"011"};
+    struct HksParam processNameBlob = { .tag = HKS_TAG_PROCESS_NAME, .blob = processName};
+    int32_t ret = BuildParamSetWithParam(&blobParamSet, &processNameBlob, 1, false);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParamSet *runtimeParamSet = nullptr;
+    struct HksBlob processName2 = { .size = strlen("0121"), .data = (uint8_t *)"0121"};
+    struct HksParam processNameRuntime = { .tag = HKS_TAG_PROCESS_NAME, .blob = processName2};
+    ret = BuildParamSetWithParam(&runtimeParamSet, &processNameRuntime, 1, false);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);
 }
