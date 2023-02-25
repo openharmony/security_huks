@@ -45,8 +45,8 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias);
 int32_t HksGetOldKeyInfoListForSmallToService(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
     uint32_t listMaxCnt, uint32_t *listCount);
 
-int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo);
-#endif
+int32_t HksCheckNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo);
+#endif /* HKS_ENABLE_SMALL_TO_SERVICE */
 
 #ifdef __cplusplus
 }

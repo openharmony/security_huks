@@ -88,6 +88,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     (void)memcpy_s(processInfo->userId.data, processInfo->userId.size, g_userId, strlen(g_userId));
     
     processInfo->accessTokenId = 0;
+    processInfo->userIdInt = 0;
 
     return HKS_SUCCESS;
 }

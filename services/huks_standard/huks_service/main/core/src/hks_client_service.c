@@ -103,10 +103,11 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     ret = HksStoreIsKeyBlobExist(processInfo, keyAlias, mode);
     if (ret != HKS_SUCCESS) {
-        if (HksIsNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+        if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
             ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret);
+                return HKS_ERROR_NOT_EXIST;
             }
         }
     }
@@ -122,29 +123,23 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     if (keyVersion->uint32Param == HKS_KEY_VERSION) {
         return ret;
     }
-    if (keyVersion->uint32Param > HKS_KEY_VERSION) {
+    if (keyVersion->uint32Param == 0 || keyVersion->uint32Param > HKS_KEY_VERSION) {
         return HKS_ERROR_BAD_STATE;
     }
 
     struct HksBlob newKey = { .size = 0, .data = NULL };
 
-    struct HksParamSet *upgradeParamSet = NULL;
     do {
-        ret = ConstructUpgradeKeyParamSet(processInfo, paramSet, &upgradeParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct param set failed!")
-
-        ret = HksDoUpgradeKeyAccess(key, upgradeParamSet, &newKey);
+        ret = HksDoUpgradeKeyAccess(key, paramSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store upgraded key blob failed!")
 
         HKS_FREE_BLOB(*key);
-        HksFreeParamSet(&upgradeParamSet);
         key->data = newKey.data;
         key->size = newKey.size;
         return ret;
     } while (0);
-    HksFreeParamSet(&upgradeParamSet);
     HKS_FREE_BLOB(newKey);
 #endif
     return ret;
@@ -192,7 +187,7 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
     } while (0);
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    if (ret == HKS_SUCCESS && HksIsNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS && HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
         ret = HksGetOldKeyInfoListForSmallToService(processInfo, keyInfoList, listMaxCnt, listCount);
     }
 #endif
@@ -498,7 +493,7 @@ static int32_t GetKeyAndNewParamSet(const struct HksProcessInfo *processInfo, co
     int32_t ret = AppendProcessInfoAndkeyAlias(paramSet, processInfo, keyAlias, outParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append process info and key alias failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = GetKeyData(processInfo, keyAlias, paramSet, key, HKS_STORAGE_TYPE_KEY);
+    ret = GetKeyData(processInfo, keyAlias, *outParamSet, key, HKS_STORAGE_TYPE_KEY);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get key data failed, ret = %" LOG_PUBLIC "d.", ret);
         HksFreeParamSet(outParamSet);
@@ -890,7 +885,7 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
     int32_t oldRet = HKS_FAILURE;
-    if (HksIsNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+    if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
         oldRet = HksDeleteOldKeyForSmallToService(keyAlias);
         ret = (oldRet == HKS_SUCCESS) ? HKS_SUCCESS : ret;
     }
@@ -909,7 +904,7 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
     ret = HksStoreIsKeyBlobExist(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY);
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    if (HksIsNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+    if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
         if (ret == HKS_ERROR_NOT_EXIST) {
             // if change key owner success, the key should exist; otherwise the key not exist
             int32_t oldRet = HksChangeKeyOwnerForSmallToService(processInfo, NULL, keyAlias, HKS_STORAGE_TYPE_KEY);

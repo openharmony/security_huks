@@ -48,7 +48,7 @@ static int32_t HksIsProcessInfoInWhiteList(const struct HksProcessInfo *processI
 }
 
 #ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
-// it is ok for no mutex, because the hugest problem it can lead to is check key directory for nothing once
+// it is ok for no mutex lock, because the hugest problem it can lead to is checking key directory for nothing once
 static volatile bool isOldKeyCleared = false;
 
 void HksMarkOldKeyClearedIfEmpty(void)
@@ -74,7 +74,7 @@ static int32_t HksIsKeyExpectedVersion(const struct HksBlob *key, uint32_t expec
     return (keyVersion->uint32Param == expectedVersion) ? HKS_SUCCESS : HKS_FAILURE;
 }
 
-int32_t HksIsNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo)
+int32_t HksCheckNeedUpgradeForSmallToService(const struct HksProcessInfo *processInfo)
 {
 #ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
     if (HksIsOldKeyCleared()) {
@@ -204,6 +204,8 @@ static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *proce
     struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
     int32_t ret;
+
+    // the number for infos really added in keyInfoList
     uint32_t realCnt = 0;
     do {
         ret = HksGetKeyAliasByProcessName(processInfo, keyInfoList, listCount);
@@ -214,9 +216,10 @@ static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *proce
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get old key data failed, ret = %" LOG_PUBLIC "d", ret)
             const uint32_t oldKeyVersion = 1;
             if (HksIsKeyExpectedVersion(&keyFromFile, oldKeyVersion) != HKS_SUCCESS) {
-                break;
+                HKS_FREE_BLOB(keyFromFile);
+                continue;
             }
-            ret = GetKeyParamSet(&keyFromFile, keyInfoList[i].paramSet);
+            ret = GetKeyParamSet(&keyFromFile, keyInfoList[realCnt].paramSet);
             HKS_FREE_BLOB(keyFromFile);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get old key paramSet failed, ret = %" LOG_PUBLIC "d", ret)
             ++realCnt;
@@ -234,6 +237,8 @@ int32_t HksGetOldKeyInfoListForSmallToService(const struct HksProcessInfo *proce
     uint32_t listMaxCnt, uint32_t *listCount)
 {
     int32_t ret;
+
+    // remain buffer count for old key info
     uint32_t listCountOld = listMaxCnt - *listCount;
     do {
         struct HksProcessInfo rootProcessInfo;
