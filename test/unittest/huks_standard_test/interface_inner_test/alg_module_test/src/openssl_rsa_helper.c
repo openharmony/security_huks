@@ -369,6 +369,9 @@ static EVP_PKEY_CTX *InitRsaCtx(struct HksBlob *key, int padding, bool signing, 
         if (EVP_PKEY_CTX_set_rsa_padding(ctx, padding) != 1) {
             break;
         }
+        if (padding == RSA_PKCS1_PSS_PADDING && (EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, RSA_PSS_SALTLEN_MAX) != 1)) {
+            break;
+        }
         if (EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg) != 1) {
             break;
         }
@@ -449,7 +452,8 @@ int32_t OpensslSignRsa(const struct HksBlob *plainText, struct HksBlob *signData
     }
 
     if (padding == RSA_PKCS1_PSS_PADDING) {
-        if (EVP_PKEY_CTX_set_rsa_padding(EVP_MD_CTX_pkey_ctx(mctx), padding) != 1) {
+        if ((EVP_PKEY_CTX_set_rsa_padding(EVP_MD_CTX_pkey_ctx(mctx), padding) != 1) ||
+            (EVP_PKEY_CTX_set_rsa_pss_saltlen(EVP_MD_CTX_pkey_ctx(mctx), RSA_PSS_SALTLEN_MAX) != 1)) {
             EVP_MD_CTX_free(mctx);
             EVP_PKEY_free(pkey);
             return RSA_FAILED;

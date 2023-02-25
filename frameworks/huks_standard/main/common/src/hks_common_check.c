@@ -234,3 +234,45 @@ int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedSt
     }
     return ret;
 }
+
+int32_t HksCheckGenKeyAndUsekeyPeriodParam(const struct HksParamSet *keyBlobParamSet,
+    const struct HksParamSet *runtimeParamSet, uint32_t tag)
+{
+    if (keyBlobParamSet == NULL || runtimeParamSet == NULL) {
+        HKS_LOG_E("invalid params!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    bool isExistInGenKeyPeriod = true;
+    struct HksParam *saltLenParamInGenKeyPeriod = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, tag, &saltLenParamInGenKeyPeriod);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        isExistInGenKeyPeriod = false;
+    }
+    bool isExistInUseKeyPeriod = true;
+    struct HksParam *saltLenParamInUseKeyPeriod = NULL;
+    ret = HksGetParam(runtimeParamSet, tag, &saltLenParamInUseKeyPeriod);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        isExistInUseKeyPeriod = false;
+    }
+    if (isExistInGenKeyPeriod && (!isExistInUseKeyPeriod)) {
+        HKS_LOG_E("please set param in use key period");
+        return HKS_ERROR_BAD_STATE;
+    }
+    if (isExistInGenKeyPeriod && isExistInUseKeyPeriod &&
+        (saltLenParamInGenKeyPeriod->uint32Param != saltLenParamInUseKeyPeriod->uint32Param)) {
+        HKS_LOG_E("rsa pss salt length does not match");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+}
+
+void setRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
+{
+    struct HksParam *saltLenParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE, &saltLenParam);
+    if (ret == HKS_SUCCESS) {
+        usageSpec->pssSaltLen = saltLenParam->uint32Param;
+    } else {
+        usageSpec->pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX;
+    }
+}
