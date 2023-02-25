@@ -39,8 +39,7 @@
 static const struct HksMandatoryParams* GetMandatoryParams(uint32_t keyVersion)
 {
     if (HKS_ARRAY_SIZE(HKS_MANDATORY_PARAMS) < keyVersion ||
-        keyVersion == 0 ||
-        HKS_MANDATORY_PARAMS[keyVersion - 1].keyVersion != keyVersion) {
+        keyVersion == 0 || HKS_MANDATORY_PARAMS[keyVersion - 1].keyVersion != keyVersion) {
         HKS_LOG_E("get mandatory params for version %" LOG_PUBLIC "u failed!", keyVersion);
         return NULL;
     }

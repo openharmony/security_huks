@@ -100,7 +100,30 @@ static int32_t ProcessMsgToHandler(int funcId, HksIpcContext *ipcContext, const 
     return ret;
 }
 
-static int32 Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
+static int32_t ReadSrcDataFromReq(IpcIo *req, struct HksBlob *srcData)
+{
+    // read srcData size
+    uint32_t buffSize = 0;
+    bool ipcRet = ReadUint32(req, &buffSize);
+    if (!ipcRet) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+
+    srcData->size = buffSize;
+    const uint8_t *tmpUint8Array = ReadBuffer(req, srcData->size);
+    if (tmpUint8Array == NULL) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+    srcData->data = (uint8_t *)HksMalloc(srcData->size);
+    if (srcData->data == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    (void)memcpy_s(srcData->data, srcData->size, tmpUint8Array, srcData->size);
+    return HKS_SUCCESS;
+}
+
+static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
 {
     (void)iProxy;
     (void)origin;
@@ -121,36 +144,17 @@ static int32 Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, 
             break;
         }
         if (outSize > 0) {
-            outData.size = outSize;
             outData.data = (uint8_t *)HksMalloc(outSize);
             if (outData.data == NULL) {
                 HKS_LOG_E("outData malloc failed!");
                 ret = HKS_ERROR_MALLOC_FAIL;
                 break;
             }
+            outData.size = outSize;
         }
 
-        // read srcData size
-        uint32_t buffSize = 0;
-        ipcRet = ReadUint32(req, &buffSize);
-        if (!ipcRet) {
-            ret = HKS_ERROR_IPC_MSG_FAIL;
-            break;
-        }
-
-        srcData.size = buffSize;
-        const uint8_t *tmpUint8Array = ReadBuffer(req, srcData.size);
-        if (tmpUint8Array == NULL) {
-            ret = HKS_ERROR_IPC_MSG_FAIL;
-            break;
-        }
-        srcData.data = (uint8_t *)HksMalloc(srcData.size);
-        if (srcData.data == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-
-        (void)memcpy_s(srcData.data, srcData.size, tmpUint8Array, srcData.size);
+        ret = ReadSrcDataFromReq(req, &srcData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "read src data from request failed!")
 
         ret = ProcessMsgToHandler(funcId, &ipcContext, &srcData, &outData);
     } while (0);

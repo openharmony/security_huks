@@ -21,6 +21,8 @@
 #include "hks_config.h"
 #endif
 
+#ifdef HKS_ENABLE_UPGRADE_KEY
+
 #include "huks_access.h"
 #include "hks_client_service_util.h"
 #include "hks_log.h"
@@ -49,10 +51,6 @@ static int32_t HksAddProcessNameToParamSet(const struct HksParamSet *keyBlobPara
     }
     struct HksParam *srcProcessInfo = NULL;
     int32_t ret = HksGetParam(srcParamSet, HKS_TAG_PROCESS_NAME, &srcProcessInfo);
-    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        HKS_LOG_I("no HKS_TAG_PROCESS_NAME in srcParamSet, no need to add");
-        return HKS_SUCCESS;
-    }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param process name failed!")
 
     return HksAddParams(targetParamSet, srcProcessInfo, 1);
@@ -113,3 +111,4 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
     HksFreeParamSet(&keyBlobParamSet);
     return ret;
 }
+#endif /* HKS_ENABLE_UPGRADE_KEY */

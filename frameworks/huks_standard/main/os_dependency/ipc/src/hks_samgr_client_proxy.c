@@ -26,11 +26,6 @@
 
 static int32_t SynchronizeOutput(struct HksIpcHandle *reply, struct HksBlob *outBlob)
 {
-    if (reply == NULL || reply->io == NULL) {
-        HKS_LOG_E("get ipc reply failed!");
-        return HKS_ERROR_IPC_MSG_FAIL;
-    }
-
     if (reply->state != HKS_IPC_MSG_OK) {
         HKS_LOG_E("ipc reply failed, ret = %d", reply->state);
         return HKS_ERROR_IPC_MSG_FAIL;
@@ -101,7 +96,24 @@ static int CurrentCallback(IOwner owner, int code, IpcIo *reply)
     return HKS_SUCCESS;
 }
 
-static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage funcId, const struct HksBlob *inBlob,
+static int32_t WriteToIpcRequest(IpcIo *request, uint32_t outBlobSize, const struct HksBlob *inBlob)
+{
+    bool ipcRet = WriteUint32(request, outBlobSize);
+    if (!ipcRet) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+    ipcRet = WriteUint32(request, inBlob->size);
+    if (!ipcRet) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+    ipcRet = WriteBuffer(request, inBlob->data, inBlob->size);
+    if (!ipcRet) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob)
 {
     /* Check input and inBlob */
@@ -112,49 +124,51 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage funcId, const stru
 
     IClientProxy *proxy = (IClientProxy *)iUnknown;
 
-    IpcIo request;
-    char dataReq[MAX_IO_SIZE];
-    IpcIoInit(&request, dataReq, MAX_IO_SIZE, MAX_OBJ_NUM);
-
     uint32_t outBlobSize = 0;
     if (outBlob != NULL) {
         outBlobSize = outBlob->size;
     }
 
+    char *dataReq = NULL;
+    char *dataReply = NULL;
     do {
-        bool ipcRet = WriteUint32(&request, outBlobSize);
-        if (!ipcRet) {
-            ret = HKS_ERROR_IPC_MSG_FAIL;
+        dataReq = (char *)HksMalloc(MAX_IO_SIZE);
+        if (dataReq == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
+        IpcIo request;
+        IpcIoInit(&request, dataReq, MAX_IO_SIZE, MAX_OBJ_NUM);
 
-        ipcRet = WriteUint32(&request, inBlob->size);
-        if (!ipcRet) {
-            ret = HKS_ERROR_IPC_MSG_FAIL;
-            break;
-        }
-        ipcRet = WriteBuffer(&request, inBlob->data, inBlob->size);
-        if (!ipcRet) {
-            ret = HKS_ERROR_IPC_MSG_FAIL;
-            break;
-        }
+        ret = WriteToIpcRequest(&request, outBlobSize, inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write to ipc request failed!")
 
-        char dataReply[MAX_IO_SIZE];
+        dataReply = (char *)HksMalloc(MAX_IO_SIZE);
+        if (dataReply == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
         IpcIo reply;
         IpcIoInit(&reply, dataReply, MAX_IO_SIZE, MAX_OBJ_NUM);
 
         struct HksIpcHandle replyHandle = { .io = &reply, .state = HKS_IPC_MSG_BASE };
 
-        ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, funcId, &request, (IOwner)&replyHandle, CurrentCallback);
+        ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, (IOwner)&replyHandle, CurrentCallback);
         HKS_IF_NOT_SUCC_BREAK(ret, HKS_ERROR_IPC_MSG_FAIL)
+        
+        ret = SynchronizeOutput(&replyHandle, outBlob);
 
-        return SynchronizeOutput(&replyHandle, outBlob);
+        HKS_FREE_PTR(dataReq);
+        HKS_FREE_PTR(dataReply);
+        return ret;
     } while (0);
+    HKS_FREE_PTR(dataReq);
+    HKS_FREE_PTR(dataReply);
 
     return ret;
 }
 
-static int32_t HksSendRequestSync(enum HksMessage funcId, const struct HksBlob *inBlob, struct HksBlob *outBlob)
+static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob)
 {
     IClientProxy *clientProxy = NULL;
     IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
@@ -169,15 +183,15 @@ static int32_t HksSendRequestSync(enum HksMessage funcId, const struct HksBlob *
         return HKS_ERROR_NULL_POINTER;
     }
 
-    ret = HksIpcCall((IUnknown *)clientProxy, funcId, inBlob, outBlob);
+    ret = HksIpcCall((IUnknown *)clientProxy, type, inBlob, outBlob);
     (void)clientProxy->Release((IUnknown *)clientProxy);
 
     return ret;
 }
 
-int32_t HksSendRequest(enum HksMessage funcId, const struct HksBlob *inBlob, struct HksBlob *outBlob,
+int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
     const struct HksParamSet *paramSet)
 {
     (void)paramSet;
-    return HksSendRequestSync(funcId, inBlob, outBlob);
+    return HksSendRequestSync(type, inBlob, outBlob);
 }
