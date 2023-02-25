@@ -201,6 +201,14 @@ static int32_t SignVerifyAuth(const struct HuksKeyNode *keyNode, const struct Hk
         algParam->uint32Param == HKS_ALG_DSA) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_RSA) {
+        struct HksParam *padding = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_PADDING, &padding);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append sign/verify get padding param failed!")
+        if (padding->uint32Param == HKS_PADDING_PSS) {
+            ret = HksCheckGenKeyAndUsekeyPeriodParam(keyNode->keyBlobParamSet, keyNode->runtimeParamSet,
+                HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckGenKeyAndUsekeyPeriodParam failed!")
+        }
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_ED25519) {
         return HksThreeStageAuth(HKS_AUTH_ID_SIGN_VERIFY_ED25519, keyNode);
@@ -481,6 +489,7 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
     struct HksUsageSpec usageSpec;
     (void)memset_s(&usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
+    setRsaPssSaltLen(keyNode->runtimeParamSet, &usageSpec);
 
     if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
         ret = HksCryptoHalSign(&rawKey, &usageSpec, inData, outData);

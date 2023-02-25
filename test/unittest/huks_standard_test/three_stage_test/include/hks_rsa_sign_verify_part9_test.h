@@ -23,5 +23,15 @@ int HksRsaSignVerifyPart8Test084(void);
 int HksRsaSignVerifyPart8Test085(void);
 int HksRsaSignVerifyPart8Test086(void);
 int HksRsaSignVerifyPart8Test087(void);
+int HksRsaSignVerifyPart8Test088(void);
+int HksRsaSignVerifyPart8Test089(void);
+int HksRsaSignVerifyPart8Test090(void);
+int HksRsaSignVerifyPart8Test091(void);
+int HksRsaSignVerifyPart8Test092(void);
+int HksRsaSignVerifyPart8Test093(void);
+int HksRsaSignVerifyPart8Test094(void);
+int HksRsaSignVerifyPart8Test095(void);
+int HksRsaSignVerifyPart8Test096(void);
+int HksRsaSignVerifyPart8Test097(void);
 } // namespace Unittest::RsaSignVerify
 #endif // HKS_RSA_SIGN_VERIFY_PART9_TEST_H

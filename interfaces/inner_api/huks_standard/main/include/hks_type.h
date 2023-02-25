@@ -232,6 +232,12 @@ enum HksImportKeyType {
     HKS_KEY_TYPE_KEY_PAIR = 2,
 };
 
+enum Hks_RsaPssSaltLenType {
+    HKS_RSA_PSS_SALTLEN_DIGEST = 0,  /* Salt length matches digest */
+    HKS_RSA_PSS_SALTLEN_AUTO = 1,  /* Verify only: auto detect salt length */
+    HKS_RSA_PSS_SALTLEN_MAX = 2,  /* Set salt length to maximum possible, default type */
+};
+
 enum HksErrorCode {
     HKS_SUCCESS = 0,
     HKS_FAILURE = -1,
@@ -432,6 +438,7 @@ enum HksTag {
     HKS_TAG_CIPHER_TEXT = HKS_TAG_TYPE_BYTES | 27,
     HKS_TAG_PEER_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 28,
     HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG = HKS_TAG_TYPE_UINT | 29,
+    HKS_TAG_RSA_PSS_SALT_LEN_TYPE = HKS_TAG_TYPE_UINT | 30, /* only supported for PSS padding */
 
     /*
      * Key authentication related TAG: 201 - 300

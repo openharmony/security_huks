@@ -178,6 +178,24 @@ int32_t HksRsaSignVerifyTestParamAbsentCase(struct HksBlob keyAlias,
     return HKS_SUCCESS;
 }
 
+int32_t HksRsaSignVerifyTestParamPSSaltLenFailureCase(struct HksBlob keyAlias,
+    struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet)
+{
+    (void)verifyParamSet;
+    /* 1. Generate Key */
+    // Generate Key
+    int32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    /* 2. Sign Three Stage */
+    // Init will fail
+    uint8_t handleS[sizeof(uint64_t)] = {0};
+    struct HksBlob handleSign = { sizeof(uint64_t), handleS };
+    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    EXPECT_EQ(ret, HKS_ERROR_BAD_STATE) << "Init failed.";
+    return HKS_SUCCESS;
+}
+
 int32_t RSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, const uint32_t *hashAlgIndex)
 {
