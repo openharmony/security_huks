@@ -180,9 +180,9 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_check_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_storage_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_upgrade_key_accesser_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/passthrough/core/src/huks_core_dynamic_hal_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_upgrade_key_accesser_test.cpp",
   ]
 
   # engine test
@@ -196,11 +196,9 @@ ohos_unittest("huks_module_test") {
 
   if (huks_enable_upgrade_key) {
     # upgrade key test
-    sources += [
-      "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/src/hks_upgrade_key_test.cpp"
-    ]
+    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/src/hks_upgrade_key_test.cpp" ]
   }
-  
+
   defines = []
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
@@ -222,13 +220,11 @@ ohos_unittest("huks_module_test") {
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
-    "//third_party/openssl:libcrypto_shared",
     "//base/security/huks/test/unittest/modify_old_version_key_test_util:modify_old_version_key_test_util",
+    "//third_party/openssl:libcrypto_shared",
   ]
 
-  cflags = [
-    "-DREAL_HKS_KEY_VERSION=${huks_key_version}",
-  ]
+  cflags = [ "-DREAL_HKS_KEY_VERSION=${huks_key_version}" ]
 
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   if (support_jsapi) {

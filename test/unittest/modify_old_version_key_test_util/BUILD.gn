@@ -57,12 +57,12 @@ ohos_static_library("modify_old_version_key_test_util") {
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
     deps += [
       "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
       "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_standard_static",
       "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
       "//base/security/huks/utils/list:libhuks_utils_list_static",
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-      "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
     ]
 
     if (enable_mock) {
@@ -70,7 +70,6 @@ ohos_static_library("modify_old_version_key_test_util") {
     } else {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
     }
-    
   } else {
     sources += [
       "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
