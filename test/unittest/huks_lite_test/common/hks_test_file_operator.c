@@ -127,7 +127,6 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
 static uint32_t FileSize(const char *fileName)
 {
     if (IsFileExist(fileName) != HKS_SUCCESS) {
-        
         return 0;
     }
 

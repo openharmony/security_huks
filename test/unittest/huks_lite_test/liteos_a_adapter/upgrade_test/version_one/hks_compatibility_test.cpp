@@ -30,7 +30,7 @@
 #include "securec.h"
 
 using namespace testing::ext;
-namespace HksCompatibilityTest{
+namespace HksCompatibilityTest {
 class HksCompatibilityTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -141,8 +141,8 @@ const static struct HksParam DECRYPT_AES_PARAMS[] = {
     }
 };
 
-const static char *USER_ID = "0";
-const static char *OLD_PROCESS_NAME = "hks_client";
+#define USER_ID "0"
+#define OLD_PROCESS_NAME "hks_client"
 const static struct HksProcessInfo OLD_PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
     { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
@@ -178,7 +178,8 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest001, TestSize.Level0)
     HksFreeParamSet(&paramSet);
 }
 
-static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct HksParam *genParams, uint32_t genParamsCnt)
+static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct HksParam *genParams,
+    uint32_t genParamsCnt)
 {
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksInitParamSet(&genParamSet);
@@ -195,7 +196,8 @@ static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct H
     return ret;
 }
 
-static int32_t TestGenerateNewkey(const struct HksBlob *keyAlias, const struct HksParam *genParams, uint32_t genParamsCnt)
+static int32_t TestGenerateNewkey(const struct HksBlob *keyAlias, const struct HksParam *genParams,
+    uint32_t genParamsCnt)
 {
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = HksInitParamSet(&genParamSet);

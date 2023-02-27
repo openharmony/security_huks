@@ -36,7 +36,7 @@ int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct Hk
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
 int32_t ConstructUpgradeKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksParamSet *srcParamSet,
-     struct HksParamSet **outParamSet);
+    struct HksParamSet **outParamSet);
 #endif
 
 #endif

@@ -73,31 +73,26 @@ static BOOL FEATURE_OnMessage(Feature *feature, Request *msg)
 static int32_t ProcessMsgToHandler(int funcId, HksIpcContext *ipcContext, const struct HksBlob *srcData,
     struct HksBlob *outData)
 {
-    int32_t ret = HKS_FAILURE;
-    do {
-        bool isHandled = false;
-        uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
-        for (uint32_t i = 0; i < size; ++i) {
-            if (funcId == g_hksIpcMessageHandler[i].msgId) {
-                g_hksIpcMessageHandler[i].handler(srcData, (const uint8_t *)ipcContext);
-                isHandled = true;
-                ret = HKS_SUCCESS;
-                break;
-            }
+    bool isHandled = false;
+    uint32_t size = sizeof(HKS_IPC_MESSAGE_HANDLER) / sizeof(HKS_IPC_MESSAGE_HANDLER[0]);
+    for (uint32_t i = 0; i < size; ++i) {
+        if (funcId == HKS_IPC_MESSAGE_HANDLER[i].msgId) {
+            HKS_IPC_MESSAGE_HANDLER[i].handler(srcData, (const uint8_t *)ipcContext);
+            isHandled = true;
+            return HKS_SUCCESS;
         }
+    }
 
-        if (!isHandled) {
-            size = sizeof(g_hksIpcThreeStageHandler) / sizeof(g_hksIpcThreeStageHandler[0]);
-            for (uint32_t i = 0; i < size; ++i) {
-                if (funcId == g_hksIpcThreeStageHandler[i].msgId) {
-                    g_hksIpcThreeStageHandler[i].handler(srcData, outData, (const uint8_t *)ipcContext);
-                    ret = HKS_SUCCESS;
-                    break;
-                }
+    if (!isHandled) {
+        size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
+        for (uint32_t i = 0; i < size; ++i) {
+            if (funcId == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
+                HKS_IPC_THREE_STAGE_HANDLER[i].handler(srcData, outData, (const uint8_t *)ipcContext);
+                return HKS_SUCCESS;
             }
         }
-    } while (0);
-    return ret;
+    }
+    return HKS_FAILURE;
 }
 
 static int32_t ReadSrcDataFromReq(IpcIo *req, struct HksBlob *srcData)

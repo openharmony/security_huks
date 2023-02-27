@@ -61,7 +61,7 @@ void HksUpgradeKeyAccesserTest::TearDown()
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest001");
-    int32_t ret = HksAddProcessNameToParamSet(NULL, NULL, NULL);
+    int32_t ret = HksAddProcessNameToParamSet(nullptr, nullptr, nullptr);
     ASSERT_EQ(HKS_FAILURE, ret);
 }
 
@@ -73,13 +73,13 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest001, TestSize.Level
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest002");
-    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *srcParamSet = nullptr;
     int32_t ret = HksInitParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = HksAddProcessNameToParamSet(NULL, srcParamSet, NULL);
+    ret = HksAddProcessNameToParamSet(nullptr, srcParamSet, nullptr);
     ASSERT_EQ(HKS_ERROR_PARAM_NOT_EXIST, ret);
 
     HksFreeParamSet(&srcParamSet);
@@ -93,7 +93,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest002, TestSize.Level
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest003");
-    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *srcParamSet = nullptr;
     int32_t ret = HksInitParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
     const char *processNameChar = "123";
@@ -104,7 +104,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest003, TestSize.Level
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = HksAddProcessNameToParamSet(NULL, srcParamSet, NULL);
+    ret = HksAddProcessNameToParamSet(nullptr, srcParamSet, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     HksFreeParamSet(&srcParamSet);
@@ -119,7 +119,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest004");
     
-    int32_t ret = AddMandatoryeParamsInService(NULL, NULL, NULL);
+    int32_t ret = AddMandatoryeParamsInService(nullptr, nullptr, nullptr);
     ASSERT_EQ(HKS_FAILURE, ret);
 }
 }

@@ -55,14 +55,14 @@ void HksUpgradeKeyCTest::TearDown()
 
 /**
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest001
- * @tc.desc: tdd GetMandatoryParams, expect NULL
+ * @tc.desc: tdd GetMandatoryParams, expect nullptr
  * @tc.type: FUNC
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest001");
     struct HksMandatoryParams* ret = GetMandatoryParams(0);
-    ASSERT_EQ(NULL, ret);
+    ASSERT_EQ(nullptr, ret);
 }
 
 /**
@@ -75,7 +75,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest002, TestSize.Level0)
     HKS_LOG_I("enter HksUpgradeKeyCTest002");
     uint32_t tooBigKeyVersion = 999;
     struct HksMandatoryParams* ret = GetMandatoryParams(tooBigKeyVersion);
-    ASSERT_EQ(NULL, ret);
+    ASSERT_EQ(nullptr, ret);
 }
 
 /**
@@ -100,7 +100,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest004");
     uint32_t tooBigKeyVersion = 999;
-    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *srcParamSet = nullptr;
     int32_t ret = HksInitParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
     const char *processNameChar = "123";
@@ -111,7 +111,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest004, TestSize.Level0)
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = AddParamsWithoutMandatory(tooBigKeyVersion, srcParamSet, NULL, NULL);
+    ret = AddParamsWithoutMandatory(tooBigKeyVersion, srcParamSet, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 
     HksFreeParamSet(&srcParamSet);
@@ -125,7 +125,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest004, TestSize.Level0)
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest005");
-    int32_t ret = AddMandatoryParams(NULL, NULL, NULL);
+    int32_t ret = AddMandatoryParams(nullptr, nullptr, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
@@ -137,7 +137,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest005, TestSize.Level0)
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest006");
-    int32_t ret = AddMandatoryeParamsInCore(NULL, NULL, NULL);
+    int32_t ret = AddMandatoryeParamsInCore(nullptr, nullptr, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
@@ -149,7 +149,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest006, TestSize.Level0)
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest007, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest007");
-    int32_t ret = AuthChangeProcessName(NULL, NULL);
+    int32_t ret = AuthChangeProcessName(nullptr, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
@@ -161,7 +161,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest007, TestSize.Level0)
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest008, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest008");
-    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *srcParamSet = nullptr;
     int32_t ret = HksInitParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
     const char *processNameChar = "HksUpgradeKeyCTest008";
@@ -171,7 +171,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest008, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, ret);
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
-    int32_t ret = AuthChangeProcessName(srcParamSet, NULL);
+    int32_t ret = AuthChangeProcessName(srcParamSet, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
     HksFreeParamSet(&srcParamSet);
 }
@@ -184,7 +184,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest008, TestSize.Level0)
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest009, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest009");
-    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *srcParamSet = nullptr;
     int32_t ret = HksInitParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
     const char *processNameChar = "short_name";
@@ -195,7 +195,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest009, TestSize.Level0)
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
     const char *processNameChar2 = "long_name";
@@ -221,7 +221,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest009, TestSize.Level0)
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest010, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest010");
-    struct HksParamSet *srcParamSet = NULL;
+    struct HksParamSet *srcParamSet = nullptr;
     int32_t ret = HksInitParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret) << "ret is " << ret;
     const char *processNameChar = "same_leng_name_1";
@@ -232,7 +232,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest010, TestSize.Level0)
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret) << "ret is " << ret;
 
-    struct HksParamSet *paramSet = NULL;
+    struct HksParamSet *paramSet = nullptr;
     ret = HksInitParamSet(&paramSet);
     ASSERT_EQ(HKS_SUCCESS, ret) << "ret is " << ret;
     const char *processNameChar2 = "same_leng_name_2";
@@ -259,8 +259,8 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest011, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyCTest011");
     uint32_t tooBigKeySize = 4096;
-    struct HksBlob wrongKey = { .size = tooBigKeySize, .data = NULL };
-    int32_t ret = HksUpgradeKey(NULL, NULL, NULL);
+    struct HksBlob wrongKey = { .size = tooBigKeySize, .data = nullptr };
+    int32_t ret = HksUpgradeKey(nullptr, nullptr, nullptr);
     ASSERT_EQ(HKS_ERROR_BAD_STATE, ret) << "ret is " << ret;
 }
 }

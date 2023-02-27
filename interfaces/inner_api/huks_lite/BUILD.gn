@@ -331,5 +331,6 @@ if (ohos_kernel_type == "liteos_m") {
   ohos_executable("hks_compatibility_bin") {
     sources =
         [ "//base/security/huks/utils/compatibility_bin/compatibility_bin.c" ]
+    deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
   }
 }

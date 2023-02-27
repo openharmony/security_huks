@@ -27,7 +27,7 @@ struct HksIpcEntryPoint {
     HksIpcHandlerFuncProc handler;
 };
 
-const struct HksIpcEntryPoint g_hksIpcMessageHandler[] = {
+const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_GEN_KEY, HksIpcServiceGenerateKey },
     { HKS_MSG_IMPORT_KEY, HksIpcServiceImportKey },
     { HKS_MSG_EXPORT_PUBLIC_KEY, HksIpcServiceExportPublicKey },
@@ -55,7 +55,7 @@ struct HksIpcThreeStagePoint {
     HksIpcThreeStageHandlerFuncProc handler;
 };
 
-const struct HksIpcThreeStagePoint g_hksIpcThreeStageHandler[] = {
+const struct HksIpcThreeStagePoint HKS_IPC_THREE_STAGE_HANDLER[] = {
     { HKS_MSG_INIT, HksIpcServiceInit },
     { HKS_MSG_UPDATE, HksIpcServiceUpdate },
     { HKS_MSG_FINISH, HksIpcServiceFinish },

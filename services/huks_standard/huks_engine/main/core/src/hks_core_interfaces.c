@@ -148,7 +148,7 @@ int32_t HuksHdiMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return HksCoreMac(key, paramSet, srcData, mac);
 }
 
-int32_t HuksHdiUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, 
+int32_t HuksHdiUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
     struct HksBlob *newKey)
 {
     return HksCoreUpgradeKey(oldKey, paramSet, newKey);

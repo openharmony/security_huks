@@ -220,7 +220,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
-    "//base/security/huks/test/unittest/modify_old_version_key_test_util:modify_old_version_key_test_util",
+    "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util",
     "//third_party/openssl:libcrypto_shared",
   ]
 

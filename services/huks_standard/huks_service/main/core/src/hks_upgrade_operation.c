@@ -41,7 +41,7 @@ static int32_t HksIsProcessInfoInWhiteList(const struct HksProcessInfo *processI
     if (processInfo->processName.size == sizeof(uid)) {
         (void)memcpy_s(&uid, sizeof(uid), processInfo->processName.data, processInfo->processName.size);
     } else {
-        return HKS_ERROR_NO_PERMISSION;;
+        return HKS_ERROR_NO_PERMISSION;
     }
 
     return HksCheckIsInWhiteList(uid);
@@ -61,7 +61,8 @@ void HksMarkOldKeyClearedIfEmpty(void)
     }
 }
 
-static int32_t HksIsOldKeyCleared(void) {
+static int32_t HksIsOldKeyCleared(void)
+{
     return isOldKeyCleared ? HKS_SUCCESS : HKS_FAILURE;
 }
 #endif /** HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE */
