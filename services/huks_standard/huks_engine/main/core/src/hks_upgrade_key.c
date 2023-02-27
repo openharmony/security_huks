@@ -144,7 +144,7 @@ static int32_t HksIsToSkipProcessVerify(const struct HksParamSet *paramSet)
     if (processName->blob.size == sizeof(uid)) {
         (void)memcpy_s(&uid, sizeof(uid), processName->blob.data, processName->blob.size);
     } else {
-        return HKS_ERROR_NO_PERMISSION;;
+        return HKS_ERROR_NO_PERMISSION;
     }
 
     return HksCheckIsInWhiteList(uid);
@@ -180,6 +180,19 @@ static int32_t AuthChangeProcessName(const struct HksParamSet *oldKeyBlobParamSe
 
 static int32_t AuthUpgradeKey(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet)
 {
+    int32_t ret;
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+    ret = HksIsToSkipProcessVerify(paramSet);
+    if (ret != HKS_SUCCESS) {
+#endif
+        ret = HksProcessIdentityVerify(oldKeyBlobParamSet, paramSet);
+        if (ret != HKS_SUCCESS) {
+            return ret;
+        }
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+    }
+#endif
+
     return AuthChangeProcessName(oldKeyBlobParamSet, paramSet);
 }
 
@@ -198,18 +211,6 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
             HKS_LOG_E("generate key node failed!");
             break;
         }
-
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-        ret = HksIsToSkipProcessVerify(paramSet);
-        if (ret != HKS_SUCCESS) {
-#endif
-            ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
-            if (ret != HKS_SUCCESS) {
-                break;
-            }
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-        }
-#endif
 
         ret = HksInitParamSet(&newKeyBlobParamSet);
         if (ret != HKS_SUCCESS) {

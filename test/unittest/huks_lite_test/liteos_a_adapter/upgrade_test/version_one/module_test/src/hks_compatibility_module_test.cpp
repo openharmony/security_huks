@@ -30,7 +30,7 @@
 #include "securec.h"
 
 using namespace testing::ext;
-namespace HksCompatibilityModuleTest{
+namespace HksCompatibilityModuleTest {
 class HksCompatibilityModuleTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -60,7 +60,7 @@ void HksCompatibilityModuleTest::TearDown()
 {
 }
 
-static const char *KEY_ALIAS = "test_compatibility_module_key";
+#define KEY_ALIAS "test_compatibility_module_key"
 
 static const uint32_t IV_SIZE = 16;
 static uint8_t IV[IV_SIZE] = {0};
@@ -140,8 +140,8 @@ static struct HksParam g_decryptParams001[] = {
     }
 };
 
-const static char *USER_ID = "0";
-const static char *OLD_PROCESS_NAME = "hks_client";
+#define USER_ID "0"
+#define OLD_PROCESS_NAME "hks_client"
 const static struct HksProcessInfo OLD_PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
     { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },

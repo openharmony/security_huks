@@ -137,10 +137,10 @@ static struct HksParam ENCYPT_AES_PARAMS[] = {
     }
 };
 
-const static char *USER_ID = "0";
+#define USER_ID "0"
 
 // default process name for module test is hks_client
-const static char *OLD_PROCESS_NAME = "hks_client";
+#define OLD_PROCESS_NAME "hks_client"
 const static struct HksProcessInfo PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
     { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
@@ -220,7 +220,7 @@ static int32_t TestCheckKeyVersionIsExpected(struct HksBlob *keyAlias, uint32_t 
     int32_t ret = HksGetKeyParamSet(keyAlias, nullptr, paramOutSet);
     EXPECT_TRUE(ret == HKS_SUCCESS);
 
-    struct HksParam *keyVersion = NULL;
+    struct HksParam *keyVersion = nullptr;
     ret = HksGetParam(paramOutSet, HKS_TAG_KEY_VERSION, &keyVersion);
     EXPECT_TRUE(ret == HKS_SUCCESS) << "get key version failed : " << ret;
     EXPECT_EQ(keyVersion->uint32Param, expectedKeyVersion);

@@ -81,18 +81,18 @@ static inline bool IsInvalidLength(uint32_t length)
 
 static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
 {
-    uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
+    uint32_t size = sizeof(HKS_IPC_MESSAGE_HANDLER) / sizeof(HKS_IPC_MESSAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
-        if (code == g_hksIpcMessageHandler[i].msgId) {
-            g_hksIpcMessageHandler[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData),
+        if (code == HKS_IPC_MESSAGE_HANDLER[i].msgId) {
+            HKS_IPC_MESSAGE_HANDLER[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData),
                 reinterpret_cast<const uint8_t *>(&reply));
             return NO_ERROR;
         }
     }
 
-    size = sizeof(g_hksIpcThreeStageHandler) / sizeof(g_hksIpcThreeStageHandler[0]);
+    size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
-        if (code == g_hksIpcThreeStageHandler[i].msgId) {
+        if (code == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
             struct HksBlob outData = { 0, nullptr };
             if (outSize != 0) {
                 outData.size = outSize;
@@ -103,7 +103,7 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
                 HKS_IF_NULL_LOGE_RETURN(outData.data, HW_SYSTEM_ERROR, "Malloc outData failed.")
             }
-            g_hksIpcThreeStageHandler[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData), &outData,
+            HKS_IPC_THREE_STAGE_HANDLER[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData), &outData,
                 reinterpret_cast<const uint8_t *>(&reply));
             HKS_FREE_BLOB(outData);
             break;

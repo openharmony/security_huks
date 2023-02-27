@@ -32,7 +32,7 @@ int32_t RegisterAbility(uint32_t id, void *func)
         }
         g_abilityList[i].id = id;
         g_abilityList[i].func = func;
-        // HKS_LOG_I("register ability i = %" LOG_PUBLIC "d, id = 0x%" LOG_PUBLIC "x", i, id);
+        HKS_LOG_I("register ability i = %" LOG_PUBLIC "d, id = 0x%" LOG_PUBLIC "x", i, id);
         return HKS_SUCCESS;
     }
     HKS_LOG_E("register failed: exceed max number of abilities, id = 0x%" LOG_PUBLIC "x", id);

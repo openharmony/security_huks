@@ -94,7 +94,7 @@ unittest("huks_3.0_test") {
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]
 
-  deps += [ "//base/security/huks/test/unittest/modify_old_version_key_test_util:modify_old_version_key_test_util" ]
+  deps += [ "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util" ]
 
   cflags = [
     "-Wall",

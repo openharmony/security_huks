@@ -303,7 +303,7 @@ static int32_t AddCoreServiceParams(const struct HksBlob *keyInfo, enum HksKeyFl
             .tag = HKS_TAG_OS_PATCHLEVEL,
             .uint32Param = HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL
         }, {
-            .tag = HKS_TAG_KEY_FLAG, 
+            .tag = HKS_TAG_KEY_FLAG,
             .uint32Param = keyFlag
         }, {
             .tag = HKS_TAG_KEY,

@@ -159,13 +159,11 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
     }
 
     if (HksFinish(handle, paramSet, &inDataSeg, &outDataFinish) != HKS_SUCCESS) {
-        HKS_LOG_E("HksFinish Failed.");
         HksFree(outDataFinish.data);
         return HKS_FAILURE;
     }
     
     if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
-        HKS_LOG_E("memcpy_s failed, ");
         HksFree(outDataFinish.data);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
@@ -187,13 +185,8 @@ int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet 
     bool isFinished = false;
 
     if (inData->size <= MAX_UPDATE_SIZE) {
-
-        HKS_LOG_E("TestUpdateFinish inData->size <= MAX_UPDATE_SIZE: %d, %d", inData->size, MAX_UPDATE_SIZE);
-
         return TestLessThanMaxSeg(handle, paramSet, purpose, inData, outData);
     }
-
-    HKS_LOG_E("after TestUpdateFinish inData->size , MAX_UPDATE_SIZE: %d, %d", inData->size, MAX_UPDATE_SIZE);
 
     while (inDataSeg.data <= lastPtr) {
         if (inDataSeg.data + MAX_UPDATE_SIZE <= lastPtr) {

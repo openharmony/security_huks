@@ -29,6 +29,8 @@
 #include <stdio.h>
 
 #define KEY_MAX_SIZE 4096
+#define DIR_TYPE 4
+#define DEFAULT_PATH_LEN 1024
 
 int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo)
@@ -95,26 +97,38 @@ void ChangeDirAndFiles(const char *path, uint32_t uid)
     if (dir == NULL) {
         return;
     }
-    int ret;
+    int ret = EOK;
     while ((ptr = readdir(dir)) != NULL) {
-        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0)
-        {
+        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
             continue;
         }
+        char curPath[DEFAULT_PATH_LEN] = { 0 };
 
-        char curPath[1000]={0};
-
-        strcpy(curPath, path);
-        strcat(curPath, "/");
-        strcat(curPath, ptr->d_name);
+        ret = strcpy_s(curPath, DEFAULT_PATH_LEN, path);
+        if (ret != EOK) {
+            break;
+        }
+        ret = strcat_s(curPath, DEFAULT_PATH_LEN, "/");
+        if (ret != EOK) {
+            break;
+        }
+        ret = strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name);
+        if (ret != EOK) {
+            break;
+        }
 
         ret = chown(curPath, uid, uid);
-
-        if (ptr->d_type == 4) {
+        if (ret != EOK) {
+            break;
+        }
+        if (ptr->d_type == DIR_TYPE) {
             ChangeDirAndFiles(curPath, uid);
         }
     }
-    closedir(dir);
+    if (ret != EOK) {
+        printf("chmod dir and file failed! errno = 0x% x \n", errno);
+    }
+    (void)closedir(dir);
 }
 
 void HksChangeOldKeyOwner(const char *path, uint32_t uid)
