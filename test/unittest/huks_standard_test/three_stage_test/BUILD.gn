@@ -78,7 +78,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_rsa_test.cpp",
     "src/hks_import_sign_verify_test.cpp",
   ]
-  
+
   sources += [
     "src/hks_chipset_platform_decrypt_test.cpp",
     "src/hks_chipset_platform_encrypt_test.cpp",

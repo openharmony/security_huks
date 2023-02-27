@@ -52,7 +52,7 @@ declare_args() {
   # to do : 上库时改为false，默认不开启
   # whether enable upgrade key file for l1 sdk to l1 service, default as false
   huks_enable_upgrade_small_to_service = true
-  
+
   # default security level supported by huks is software
   huks_security_level = "software"
 }
