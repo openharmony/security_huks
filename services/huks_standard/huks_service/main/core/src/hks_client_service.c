@@ -328,7 +328,7 @@ static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
 
         ret = HksAddParams(newParamSet, &userIdParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add userIdParam failed")
-        
+
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
         struct HksParam accessTokenIdParam;
         accessTokenIdParam.tag = HKS_TAG_ACCESS_TOKEN_ID;
