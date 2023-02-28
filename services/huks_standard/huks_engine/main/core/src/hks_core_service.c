@@ -490,8 +490,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
 
 static int32_t AddProcessIdentityInfoToParamSet(const struct HksParamSet *inParamSet, struct HksParamSet *paramSet)
 {
-    uint32_t transferTagList[] = { HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_USER_ID, HKS_TAG_INNER_KEY_ALIAS,
-        HKS_TAG_PROCESS_NAME };
+    uint32_t transferTagList[] = { HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_USER_ID, HKS_TAG_PROCESS_NAME };
     int32_t ret;
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(transferTagList); ++i) {
         struct HksParam *tmpParam = NULL;
