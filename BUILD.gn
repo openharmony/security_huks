@@ -10,14 +10,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//build/ohos.gni")
+import("//base/security/huks/build/config.gni")
 
 group("huks_sdk_test") {
   testonly = true
   if (os_level == "standard") {
-    deps = [
-      #"//base/security/huks/test:reliability",
-      "//base/security/huks/test:unittest",
-    ]
+    if (huks_security_level == "software") {
+        deps = [
+          #"//base/security/huks/test:reliability",
+          "//base/security/huks/test:unittest",
+        ]
+    }
   } else {
   }
 }
