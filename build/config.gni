@@ -47,5 +47,5 @@ declare_args() {
   huks_security_level = "software"
 
   # default tdd running environment
-  huks_test_suite_running_environment = "software"
+  huks_test_suite_running_environment = "system"
 }
