@@ -17,7 +17,7 @@ import("//base/security/huks/build/config.gni")
 group("fuzztest") {
   testonly = true
   if (os_level == "standard") {
-    if (huks_security_level == "software") {
+    if (huks_test_suite_running_enviroment == "software") {
       deps = [
         "//base/security/huks/test/fuzz_test/hksabort_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/hksattestkey_fuzzer:fuzztest",
