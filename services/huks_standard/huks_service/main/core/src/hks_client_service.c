@@ -296,6 +296,7 @@ static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
 static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, struct HksParamSet **outParamSet)
 {
+    (void)keyAlias;
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
 
@@ -327,12 +328,6 @@ static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
 
         ret = HksAddParams(newParamSet, &userIdParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add userIdParam failed")
-
-        if (keyAlias != NULL) {
-            struct HksParam keyAliasParam = { .tag = HKS_TAG_INNER_KEY_ALIAS, .blob = *keyAlias };
-            ret = HksAddParams(newParamSet, &keyAliasParam, 1);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias inner failed")
-        }
         
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
         struct HksParam accessTokenIdParam;
