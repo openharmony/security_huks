@@ -16,7 +16,7 @@ import("//base/security/huks/build/config.gni")
 group("huks_sdk_test") {
   testonly = true
   if (os_level == "standard") {
-    if (huks_security_level == "software") {
+    if (huks_test_suite_running_enviroment == "software") {
         deps = [
           #"//base/security/huks/test:reliability",
           "//base/security/huks/test:unittest",
