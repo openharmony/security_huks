@@ -45,4 +45,7 @@ declare_args() {
 
   # default security level supported by huks is software
   huks_security_level = "software"
+
+  # default tdd running environment
+  huks_test_suite_running_environment = "system"
 }
