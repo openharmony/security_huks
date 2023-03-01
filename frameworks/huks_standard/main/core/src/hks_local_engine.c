@@ -319,7 +319,7 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
-    setRsaPssSaltLen(paramSet, &usageSpec);
+    SetRsaPssSaltLen(paramSet, &usageSpec);
     bool needFree = true;
     struct HksBlob message = { 0, NULL };
     struct HksBlob keyMaterial = { 0, NULL };
@@ -352,7 +352,7 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
-    setRsaPssSaltLen(paramSet, &usageSpec);
+    SetRsaPssSaltLen(paramSet, &usageSpec);
     bool needFree = true;
     struct HksBlob message = { 0, NULL };
     struct HksBlob keyMaterial = { 0, NULL };

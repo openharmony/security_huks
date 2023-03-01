@@ -66,10 +66,10 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
 
 int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage);
 
-int32_t HksCheckGenKeyAndUsekeyPeriodParam(const struct HksParamSet *keyBlobParamSet,
+int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *runtimeParamSet, uint32_t tag);
 
-void setRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec);
+void SetRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec);
 #ifdef __cplusplus
 }
 #endif

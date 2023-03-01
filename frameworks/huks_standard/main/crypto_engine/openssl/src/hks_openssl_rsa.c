@@ -444,7 +444,6 @@ static int32_t SetRsaPadding(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usage
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (usageSpec->padding == HKS_PADDING_PSS) {
-        HKS_LOG_E("jianjun Invalid rsa salt len %" LOG_PUBLIC "d!", usageSpec->pssSaltLen);
         if (EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, GetRsaPssSaltLen(usageSpec)) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
