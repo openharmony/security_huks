@@ -10,14 +10,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
-import("//base/security/huks/build/config.gni")
+
 #################################group#########################################
 group("fuzztest") {
   testonly = true
   if (os_level == "standard") {
-    if (huks_test_suite_running_environment == "software") {
+    if (huks_test_suite_running_environment == "system") {
       deps = [
         "//base/security/huks/test/fuzz_test/hksabort_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/hksattestkey_fuzzer:fuzztest",
