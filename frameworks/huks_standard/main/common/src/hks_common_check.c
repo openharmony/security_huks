@@ -235,38 +235,38 @@ int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedSt
     return ret;
 }
 
-int32_t HksCheckGenKeyAndUsekeyPeriodParam(const struct HksParamSet *keyBlobParamSet,
+int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *runtimeParamSet, uint32_t tag)
 {
     if (keyBlobParamSet == NULL || runtimeParamSet == NULL) {
         HKS_LOG_E("invalid params!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    bool isExistInGenKeyPeriod = true;
-    struct HksParam *saltLenParamInGenKeyPeriod = NULL;
-    int32_t ret = HksGetParam(keyBlobParamSet, tag, &saltLenParamInGenKeyPeriod);
+    bool isExistInParamsetOne = true;
+    struct HksParam *paramInParamsetOne = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, tag, &paramInParamsetOne);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        isExistInGenKeyPeriod = false;
+        isExistInParamsetOne = false;
     }
-    bool isExistInUseKeyPeriod = true;
-    struct HksParam *saltLenParamInUseKeyPeriod = NULL;
-    ret = HksGetParam(runtimeParamSet, tag, &saltLenParamInUseKeyPeriod);
+    bool isExistInParamsetTwo = true;
+    struct HksParam *paramInParamsetTwo = NULL;
+    ret = HksGetParam(runtimeParamSet, tag, &paramInParamsetTwo);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        isExistInUseKeyPeriod = false;
+        isExistInParamsetTwo = false;
     }
-    if (isExistInGenKeyPeriod && (!isExistInUseKeyPeriod)) {
-        HKS_LOG_E("please set param in use key period");
+    if (isExistInParamsetOne && (!isExistInParamsetTwo)) {
+        HKS_LOG_E("please set param in paramsetTwo");
         return HKS_ERROR_BAD_STATE;
     }
-    if (isExistInGenKeyPeriod && isExistInUseKeyPeriod &&
-        (saltLenParamInGenKeyPeriod->uint32Param != saltLenParamInUseKeyPeriod->uint32Param)) {
-        HKS_LOG_E("rsa pss salt length does not match");
+    if (isExistInParamsetOne && isExistInParamsetTwo &&
+        (paramInParamsetOne->uint32Param != paramInParamsetTwo->uint32Param)) {
+        HKS_LOG_E("values does not match");
         return HKS_ERROR_BAD_STATE;
     }
     return HKS_SUCCESS;
 }
 
-void setRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
+void SetRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
 {
     struct HksParam *saltLenParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE, &saltLenParam);

@@ -318,8 +318,8 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
         ret = HksGetParam(paramSet, HKS_TAG_PADDING, &padding);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append sign/verify get padding param failed!")
         if (padding->uint32Param == HKS_PADDING_PSS) {
-            ret = HksCheckGenKeyAndUsekeyPeriodParam(keyNode->paramSet, paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckGenKeyAndUsekeyPeriodParam failed!")
+            ret = HksCheckParamsetOneAndPatamsetTwoExist(keyNode->paramSet, paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckParamsetOneAndPatamsetTwoExist failed!")
         }
         return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode, paramSet);
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
@@ -409,7 +409,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
         struct HksUsageSpec usageSpec = {0};
         HksFillUsageSpec(paramSet, &usageSpec);
-        setRsaPssSaltLen(paramSet, &usageSpec);
+        SetRsaPssSaltLen(paramSet, &usageSpec);
         HKS_LOG_I("Sign or verify.");
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);
