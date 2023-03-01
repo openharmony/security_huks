@@ -75,7 +75,9 @@
             }
           }
         ],
-        "test": [ 
+        "test": [
+          "//base/security/huks:huks_sdk_test",
+          "//base/security/huks/test/fuzz_test:fuzztest"
         ]
       }
     }

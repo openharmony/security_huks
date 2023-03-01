@@ -10,29 +10,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import("//base/security/huks/build/config.gni")
+import("//build/ohos.gni")
 import("//build/test.gni")
 
 #################################group#########################################
 group("fuzztest") {
   testonly = true
   if (os_level == "standard") {
-    deps = [
-      "//base/security/huks/test/fuzz_test/hksabort_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksattestkey_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksbnexpmod_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksdeletekey_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksexportpublickey_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksfinish_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksgeneratekey_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksgetcertificatechain_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksgetkeyparamset_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksgetsdkversion_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hkshash_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksimportkey_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksimportwrappedkey_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksinit_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hkskeyexist_fuzzer:fuzztest",
-      "//base/security/huks/test/fuzz_test/hksupdate_fuzzer:fuzztest",
-    ]
+    if (huks_test_suite_running_environment == "system") {
+      deps = [
+        "//base/security/huks/test/fuzz_test/hksabort_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksattestkey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksbnexpmod_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksdeletekey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksexportpublickey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksfinish_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksgeneratekey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksgetcertificatechain_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksgetkeyparamset_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksgetsdkversion_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hkshash_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksimportkey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksimportwrappedkey_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksinit_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hkskeyexist_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/hksupdate_fuzzer:fuzztest",
+      ]
+    }
   }
 }
