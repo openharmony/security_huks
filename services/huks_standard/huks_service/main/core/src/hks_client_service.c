@@ -25,6 +25,7 @@
 #include <stddef.h>
 
 #include "hks_client_check.h"
+#include "hks_common_check.h"
 #include "hks_hitrace.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -729,9 +730,9 @@ static int32_t GetKeyIn(const struct HksProcessInfo *processInfo, const struct H
 }
 
 static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
-    struct HksBlob *output, struct HksBlob *outData, bool isStorage)
+    struct HksBlob *output, struct HksBlob *outData, bool isNeedStorage)
 {
-    if (!isStorage) {
+    if (!isNeedStorage) {
         if ((outData->size != 0) && (memcpy_s(outData->data, outData->size, output->data, output->size) != EOK)) {
             HKS_LOG_E("copy keyblob data fail");
             return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -1388,18 +1389,16 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 {
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     struct HksParamSet *newParamSet = NULL;
-    bool isStorage = false;
+    bool isNeedStorage = false;
     uint32_t outSize = outData->size;
-    struct HksParam *storageFlag = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
-    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
-        isStorage = true;
+    int32_t ret = HksCheckKeyNeedStored(paramSet, &isNeedStorage);
+    if (ret == HKS_SUCCESS) {
         outSize = MAX_KEY_SIZE;
     }
     struct HksBlob output = { outSize, NULL };
     do {
         if (outSize != 0) {
-            ret = InitOutputDataForFinish(&output, outData, isStorage);
+            ret = InitOutputDataForFinish(&output, outData, isNeedStorage);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init output data failed")
         }
         ret = AppendAndQueryInFinish(handle, processInfo, paramSet, &newParamSet);
@@ -1408,7 +1407,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         ret = HuksAccessFinish(handle, newParamSet, inData, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = StoreOrCopyKeyBlob(paramSet, processInfo, &output, outData, isStorage);
+        ret = StoreOrCopyKeyBlob(paramSet, processInfo, &output, outData, isNeedStorage);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "StoreOrCopyKeyBlob fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (output.data != NULL) {
