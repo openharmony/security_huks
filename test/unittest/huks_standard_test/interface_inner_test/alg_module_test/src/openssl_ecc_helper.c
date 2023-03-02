@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,26 +48,6 @@ static int32_t GetCurveId(uint32_t keyLen, int *nid)
     }
 
     return ECC_SUCCESS;
-}
-
-const EVP_MD *GetOpensslAlg(uint32_t alg)
-{
-    switch (alg) {
-        case HKS_DIGEST_MD5:
-            return EVP_md5();
-        case HKS_DIGEST_SHA1:
-            return EVP_sha1();
-        case HKS_DIGEST_SHA224:
-            return EVP_sha224();
-        case HKS_DIGEST_SHA256:
-            return EVP_sha256();
-        case HKS_DIGEST_SHA384:
-            return EVP_sha384();
-        case HKS_DIGEST_SHA512:
-            return EVP_sha512();
-        default:
-            return NULL;
-    }
 }
 
 static int32_t TransEccKeyToKeyBlob(
