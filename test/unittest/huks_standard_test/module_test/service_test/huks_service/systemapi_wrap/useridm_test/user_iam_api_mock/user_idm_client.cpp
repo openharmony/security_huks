@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include "hks_log.h"
 
+#include <pthread.h>
 #include <thread>
 #include <unistd.h>
 
@@ -60,6 +61,7 @@ int32_t UserIdmClient::GetCredentialInfo(int32_t userId, AuthType authType,
     }
     ConstructCredentialInfo();
     std::thread thObj(RunOnCredentialInfo, std::ref(callback));
+    pthread_setname_np(thObj.native_handle(), "HUKS_THOBJ2_THREAD");
     thObj.detach();
     return SUCCESS;
 }
@@ -92,6 +94,7 @@ int32_t UserIdmClient::GetSecUserInfo(int32_t userId, const std::shared_ptr<GetS
     
     ConstructSecUserInfo();
     std::thread thObj(RunOnSecUserInfo, std::ref(callback));
+    pthread_setname_np(thObj.native_handle(), "HUKS_THOBJ1_THREAD");
     thObj.detach();
     return SUCCESS;
 }
