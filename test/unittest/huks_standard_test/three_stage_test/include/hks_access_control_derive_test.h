@@ -19,5 +19,6 @@
 namespace Unittest::HksAccessControlPartTest {
 int HksAccessDerivePartTest001(void);
 int HksAccessDerivePartTest002(void);
+int HksAccessDerivePartTest003(void);
 }
 #endif // HKS_ACCESS_CONTROL_TEST_H

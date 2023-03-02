@@ -45,7 +45,11 @@ int32_t HksOpensslSm4DecryptFinal(void **cryptoCtx, const struct HksBlob *messag
     struct HksBlob *tagAead);
 
 void HksOpensslSm4HalFreeCtx(void **cryptoCtx);
+int32_t HksOpensslSm4Encrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText);
 
+int32_t HksOpensslSm4Decrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *plaintext);
 #endif /* HKS_SUPPORT_SM4_C */
 
 #ifdef __cplusplus
