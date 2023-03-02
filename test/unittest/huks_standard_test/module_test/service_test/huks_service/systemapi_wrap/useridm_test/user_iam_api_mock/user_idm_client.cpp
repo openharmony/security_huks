@@ -61,7 +61,7 @@ int32_t UserIdmClient::GetCredentialInfo(int32_t userId, AuthType authType,
     }
     ConstructCredentialInfo();
     std::thread thObj(RunOnCredentialInfo, std::ref(callback));
-    pthread_setname_np(thObj.native_handle(),"THOBJ2_THREAD");
+    pthread_setname_np(thObj.native_handle(), "HUKS_THOBJ2_THREAD");
     thObj.detach();
     return SUCCESS;
 }
@@ -94,7 +94,7 @@ int32_t UserIdmClient::GetSecUserInfo(int32_t userId, const std::shared_ptr<GetS
     
     ConstructSecUserInfo();
     std::thread thObj(RunOnSecUserInfo, std::ref(callback));
-    pthread_setname_np(thObj.native_handle(),"THOBJ1_THREAD");
+    pthread_setname_np(thObj.native_handle(), "HUKS_THOBJ1_THREAD");
     thObj.detach();
     return SUCCESS;
 }
