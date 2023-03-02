@@ -52,6 +52,21 @@ static int32_t RsaGenKeyCheckParam(const struct HksKeySpec *spec)
     }
 }
 
+static int32_t GetRsaPssSaltLen(const struct HksUsageSpec *usageSpec)
+{
+    switch (usageSpec->pssSaltLen) {
+        case HKS_RSA_PSS_SALTLEN_DIGEST:
+            return RSA_PSS_SALTLEN_DIGEST;
+        case HKS_RSA_PSS_SALTLEN_AUTO:
+            return RSA_PSS_SALTLEN_AUTO;
+        case HKS_RSA_PSS_SALTLEN_MAX:
+            return RSA_PSS_SALTLEN_MAX;
+        default:
+            HKS_LOG_E("Invalid rsa salt len %" LOG_PUBLIC "x!", usageSpec->pssSaltLen);
+            return HKS_ERROR_NOT_SUPPORTED;
+    }
+}
+
 static int32_t RsaCheckKeyMaterial(const struct HksBlob *key)
 {
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
@@ -427,6 +442,12 @@ static int32_t SetRsaPadding(EVP_PKEY_CTX *ctx, const struct HksUsageSpec *usage
     if (EVP_PKEY_CTX_set_rsa_padding(ctx, opensslPadding) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    if (usageSpec->padding == HKS_PADDING_PSS) {
+        if (EVP_PKEY_CTX_set_rsa_pss_saltlen(ctx, GetRsaPssSaltLen(usageSpec)) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
     }
     return HKS_SUCCESS;
 }

@@ -85,5 +85,7 @@ int32_t HksRSASignVerifyTestAbnormalCaseNoPadding(struct HksBlob keyAlias,
     struct HksParamSet *genParamSet, struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
 int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData, bool isSign);
+int32_t HksRsaSignVerifyTestParamPSSaltLenFailureCase(struct HksBlob keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet);
 } // namespace Unittest::RsaSignVerify
 #endif // HKS_RSA_SIGN_VERIFY_TEST_COMMON_H

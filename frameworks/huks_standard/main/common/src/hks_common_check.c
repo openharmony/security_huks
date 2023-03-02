@@ -218,3 +218,61 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
     }
     return HKS_ERROR_INVALID_WRAPPED_FORMAT;
 }
+
+int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage)
+{
+    struct HksParam *storageFlag = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
+        *isNeedStorage = true;
+        return ret;
+    }
+    ret = HksGetParam(paramSet, HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_ONLY_USED_IN_HUKS)) {
+        *isNeedStorage = true;
+        return ret;
+    }
+    return ret;
+}
+
+int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlobParamSet,
+    const struct HksParamSet *runtimeParamSet, uint32_t tag)
+{
+    if (keyBlobParamSet == NULL || runtimeParamSet == NULL) {
+        HKS_LOG_E("invalid params!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    bool isExistInParamsetOne = true;
+    struct HksParam *paramInParamsetOne = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, tag, &paramInParamsetOne);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        isExistInParamsetOne = false;
+    }
+    bool isExistInParamsetTwo = true;
+    struct HksParam *paramInParamsetTwo = NULL;
+    ret = HksGetParam(runtimeParamSet, tag, &paramInParamsetTwo);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        isExistInParamsetTwo = false;
+    }
+    if (isExistInParamsetOne && (!isExistInParamsetTwo)) {
+        HKS_LOG_E("please set param in paramsetTwo");
+        return HKS_ERROR_BAD_STATE;
+    }
+    if (isExistInParamsetOne && isExistInParamsetTwo &&
+        (paramInParamsetOne->uint32Param != paramInParamsetTwo->uint32Param)) {
+        HKS_LOG_E("values does not match");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+}
+
+void SetRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
+{
+    struct HksParam *saltLenParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE, &saltLenParam);
+    if (ret == HKS_SUCCESS) {
+        usageSpec->pssSaltLen = saltLenParam->uint32Param;
+    } else {
+        usageSpec->pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX;
+    }
+}

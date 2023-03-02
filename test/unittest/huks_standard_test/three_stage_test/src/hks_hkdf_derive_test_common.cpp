@@ -19,8 +19,8 @@
 
 using namespace testing::ext;
 namespace Unittest::HkdfDerive {
-int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias,
-    const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
+int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias, const struct HksParamSet *genParamSet,
+    struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet, int32_t cmpRet)
 {
     struct HksBlob inData = {
         g_inData.length(),
@@ -48,7 +48,7 @@ int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias,
     uint8_t outDataD[COMMON_SIZE] = {0};
     struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
     ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
+    EXPECT_EQ(ret, cmpRet) << "Finish failed.";
 
     return ret;
 }
