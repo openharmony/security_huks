@@ -33,6 +33,11 @@ int32_t HksOpensslHkdf(const struct HksBlob *mainKey, const struct HksKeySpec *d
 int32_t HksOpensslPbkdf2(const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec,
     struct HksBlob *derivedKey);
 
+#ifdef HKS_SUPPORT_KDF_SM3
+int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec,
+    struct HksBlob *derivedKey);
+#endif /* HKS_SUPPORT_KDF_SM3 */
+
 #ifdef __cplusplus
 }
 #endif

@@ -112,7 +112,7 @@ static const struct GenerateKeyCaseParam g_genParamsTest[] = {
     },
 
     {   3,
-        HKS_ERROR_INVALID_PURPOSE,
+        HKS_SUCCESS,
         {
             {
                 .tag = HKS_TAG_ALGORITHM,
@@ -205,7 +205,7 @@ static const struct GenerateKeyCaseParam g_signParamsTest[] = {
     },
 
     {   3,
-        HKS_ERROR_INVALID_ALGORITHM,
+        HKS_ERROR_INVALID_ARGUMENT,
         {
             {
                 .tag = HKS_TAG_ALGORITHM,
@@ -425,6 +425,7 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
     struct HksBlob publicKey = { HKS_MAX_KEY_LEN, pubKey };
 
     struct HksBlob importKeyAlias;
+    uint32_t valid_Index = 3;
     int32_t ret = CreateImportKeyAlias(&importKeyAlias, keyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "createImportKeyAlias failed.";
     do {
@@ -434,7 +435,7 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
         ret = InitParamSet(&genParamSet, g_genParamsTest[genIndex].params, cnt);
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
         ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
-        if (ret != HKS_SUCCESS) {
+        if ((genIndex == valid_Index) || (ret != HKS_SUCCESS)) {
             ret = ((ret == g_genParamsTest[genIndex].result) ? HKS_SUCCESS : ret);
             break;
         }

@@ -223,7 +223,7 @@ static int32_t AgreeAuth(const struct HuksKeyNode *keyNode, const struct HksPara
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append agree get alg param failed!")
 
     if (algParam->uint32Param == HKS_ALG_ECDH || algParam->uint32Param == HKS_ALG_X25519 ||
-        algParam->uint32Param == HKS_ALG_DH) {
+        algParam->uint32Param == HKS_ALG_DH || algParam->uint32Param == HKS_ALG_SM2) {
         return HksThreeStageAuth(HKS_AUTH_ID_AGREE, keyNode);
     }
     return HKS_ERROR_INVALID_ALGORITHM;
@@ -251,7 +251,7 @@ static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksPar
 
     if (algParam->uint32Param == HKS_ALG_AES) {
         return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
-    } else if (algParam->uint32Param == HKS_ALG_RSA) {
+    } else if ((algParam->uint32Param == HKS_ALG_RSA) || (algParam->uint32Param == HKS_ALG_SM2)) {
         return HksThreeStageAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
@@ -963,7 +963,7 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
 
     HKS_LOG_I("Init cache or cipher init.");
 
-    if (algParam->uint32Param == HKS_ALG_RSA) {
+    if ((algParam->uint32Param == HKS_ALG_RSA) || (algParam->uint32Param == HKS_ALG_SM2)) {
         return SetCacheModeCtx(keyNode);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreCipherInit(keyNode);
