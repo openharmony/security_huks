@@ -114,7 +114,7 @@ static void HksSubscribeSystemEvent()
         HKS_LOG_E("create thread failed");
         return;
     }
-    pthread_setname_np(subscribeThread,"SUBSCRIBE_THREAD");
+    pthread_setname_np(subscribeThread, "HUKS_SUBSCRIBE_THREAD");
     HKS_LOG_I("create thread success");
 }
 #endif
