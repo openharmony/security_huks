@@ -35,9 +35,7 @@ if (os_level == "standard") {
       "_HARDWARE_ROOT_KEY_",
       "_HUKS_LOG_ENABLE_",
     ]
-    include_dirs = [
-      "//base/security/huks/utils/crypto_adapter",
-    ]
+    include_dirs = [ "//base/security/huks/utils/crypto_adapter" ]
 
     sources = [
       "src/hks_api.c",
