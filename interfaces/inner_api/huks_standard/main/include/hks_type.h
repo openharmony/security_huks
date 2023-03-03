@@ -202,6 +202,7 @@ enum HksKeyAlg {
     HKS_ALG_HMAC = 50,
     HKS_ALG_HKDF = 51,
     HKS_ALG_PBKDF2 = 52,
+    HKS_ALG_GMKDF = 53,
 
     HKS_ALG_ECDH = 100,
     HKS_ALG_X25519 = 101,
@@ -236,6 +237,23 @@ enum HuksAlgSuite {
      *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
      */
     HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING = 2,
+
+    /* WrappedData format(Bytes Array):
+     *  |  SM2_plain_pubkey_length    (4 Byte) |  SM2_plain_pubkey   | signData_size_length (4 Byte) | signData_size
+     *  |     kek_enc_data_length     (4 Byte) |     kek_enc_data    | kek_material_size_len(4 Byte) | kek_material_size
+     *  |       factor1_data_len      (4 Byte) |    factor1_data     |  factor2_data_len    (4 Byte) | factor2_data
+     *  |       mac_data_length       (4 Byte) |       mac_data      | key_mat_enc_length   (4 Byte) | key_mat_enc_data
+     *  |          iv_data_length     (4 Byte) |            iv_data  |key_material_size_len (4 Byte) | key_material_size
+     */
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3 = 3,
+
+    /* WrappedData format(Bytes Array):
+     *  |     kek_enc_data_length     (4 Byte) |     kek_enc_data    | kek_material_size_len(4 Byte) | kek_material_size
+     *  |       factor1_data_len      (4 Byte) |    factor1_data     |  factor2_data_len    (4 Byte) | factor2_data
+     *  |       mac_data_length       (4 Byte) |       mac_data      | key_mat_enc_length   (4 Byte) | key_mat_enc_data
+     *  |          iv_data_length     (4 Byte) |            iv_data  |key_material_size_len (4 Byte) | key_material_size
+     */
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7 = 4,
 };
 
 /**

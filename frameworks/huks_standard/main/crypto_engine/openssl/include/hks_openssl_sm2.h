@@ -25,6 +25,8 @@
 extern "C" {
 #endif
 
+#define SM2_C1_SIZE 65
+#define SM2_C3_SIZE 32
 #define SM2_KEYPAIR_CNT 3
 
 #ifdef  HKS_SUPPORT_SM2_C
@@ -43,6 +45,12 @@ int32_t HksOpensslSm2Sign(const struct HksBlob *key, const struct HksUsageSpec *
     const struct HksBlob *message, struct HksBlob *signature);
 #endif
 
+#ifdef HKS_SUPPORT_SM2_ENCRYPT_DECRYPT
+int32_t HksOpensslSm2Encrypt(const struct HksBlob *keyPair, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *plainBlob, struct HksBlob *cipherBlob);
+int32_t HksOpensslSm2Decrypt(const struct HksBlob *keyPair, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *cipherBlob, struct HksBlob *plainBlob);
+#endif //HKS_SUPPORT_SM2_ENCRYPT_DECRYPT
 #endif
 #ifdef __cplusplus
 }
