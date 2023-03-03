@@ -41,6 +41,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_secure_access.h"
+#include "hks_sm_import_wrap_key.h"
 #include "hks_template.h"
 #include "securec.h"
 
@@ -298,9 +299,9 @@ static int32_t CipherAuth(const struct HksKeyNode *keyNode, const struct HksPara
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append cipher get alg param failed!")
 
-    if (algParam->uint32Param == HKS_ALG_AES) {
+    if ((algParam->uint32Param == HKS_ALG_AES) || (algParam->uint32Param == HKS_ALG_SM4)) {
         return HksAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_RSA) {
+    } else if ((algParam->uint32Param == HKS_ALG_RSA) || (algParam->uint32Param == HKS_ALG_SM2)) {
         return HksAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode, paramSet);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
@@ -461,7 +462,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
 
     do {
         ret = CipherPreCheck(keyNode, paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "cipher pre check failed!")
 
         struct HksBlob rawKey = { 0, NULL };
         ret = HksGetRawKey(keyNode->paramSet, &rawKey);
@@ -524,6 +525,11 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
         case HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING:
             alg = HKS_ALG_ECDH;
             keySize = HKS_ECC_KEY_SIZE_256;
+            break;
+        case HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7:
+        case HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3:
+            alg = HKS_ALG_SM2;
+            keySize = HKS_SM2_KEY_SIZE_256;
             break;
         default:
             HKS_LOG_E("invalid suite type use x25519 default");
@@ -1282,6 +1288,11 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
     uint32_t unwrapSuite = 0;
     int32_t ret = HksCoreCheckImportWrappedKeyParams(wrappingKey, wrappedKeyData, paramSet, keyOut, &unwrapSuite);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check import wrapped key params failed!")
+
+    if ((unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3) ||
+        (unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7)) {
+        return HksSmImportWrappedKey(keyAlias, paramSet, wrappingKey, wrappedKeyData, keyOut);
+    }
 
     struct HksBlob peerPublicKey = { 0, NULL };
     struct HksBlob agreeSharedSecret = { 0, NULL };

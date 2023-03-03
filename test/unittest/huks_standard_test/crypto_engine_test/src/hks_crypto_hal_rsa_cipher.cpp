@@ -876,15 +876,15 @@ protected:
         ASSERT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
 
         HksBlob tagAead = { .size = 0, .data = nullptr };
-
-        EXPECT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
-        EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
-            testCaseParams.encryptResult);
-        if (testCaseParams.encryptResult == HKS_SUCCESS) {
+        int32_t outResult = HksCryptoHalGenerateKey(&testCaseParams.spec, &key);
+        EXPECT_EQ(outResult, testCaseParams.generateKeyResult);
+        outResult = HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead);
+        EXPECT_EQ(outResult, testCaseParams.encryptResult);
+        if (outResult == HKS_SUCCESS) {
             HksBlob inscription = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen) };
             ASSERT_EQ(inscription.data == nullptr, false) << "inscription malloc failed.";
-            EXPECT_EQ(HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &cipherText, &inscription),
-                testCaseParams.decryptResult);
+            outResult = HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &cipherText, &inscription);
+            EXPECT_EQ(outResult, testCaseParams.decryptResult);
             EXPECT_EQ(inscription.size, message.size);
             EXPECT_EQ(HksMemCmp(message.data, inscription.data, inscription.size), HKS_SUCCESS);
             HksFree(inscription.data);

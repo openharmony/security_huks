@@ -163,6 +163,10 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
     uint32_t blobIndex = 0;
 
     for (blobIndex = 0; blobIndex < validTotalBlobs && offset < dataSize; blobIndex++) {
+        if (((dataSize - offset) < sizeof(uint32_t))) {
+            HKS_LOG_E("the residual data length is to small.");
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
         partDataLength = 0;
         (void)memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
