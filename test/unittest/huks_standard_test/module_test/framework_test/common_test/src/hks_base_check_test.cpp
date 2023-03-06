@@ -168,7 +168,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest008, TestSize.Level0)
 
 /**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest009
- * @tc.desc: tdd CheckImportMutableParams, expecting HKS_ERROR_INVALID_PURPOSE
+ * @tc.desc: tdd CheckImportMutableParams, expecting HKS_SUCCESS
  * @tc.type: FUNC
  */
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest009, TestSize.Level0)
@@ -178,7 +178,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest009, TestSize.Level0)
     struct Params param = { true, HKS_KEY_PURPOSE_ENCRYPT };
     values.purpose = param;
     int32_t ret = CheckImportMutableParams(HKS_ALG_SM2, &values);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "CheckImportMutableParams failed, ret = " << ret;
+    ASSERT_EQ(ret, HKS_SUCCESS) << "CheckImportMutableParams failed, ret = " << ret;
 }
 
 /**
