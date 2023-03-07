@@ -167,6 +167,7 @@ static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, 
     do {
         if (EVP_PKEY_assign_EC_KEY(key, sm2Key) <= 0) {
             HKS_LOG_E("assign ec key failed");
+            SELF_FREE_PTR(sm2Key, EC_KEY_free);
             break;
         }
         ret = EVP_PKEY_set_alias_type(key, EVP_PKEY_SM2);
@@ -208,7 +209,6 @@ static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, 
     SELF_FREE_PTR(key, EVP_PKEY_free);
     if (ret != HKS_SUCCESS) {
         HksLogOpensslError();
-        SELF_FREE_PTR(sm2Key, EC_KEY_free);
         SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
         return NULL;
     }
