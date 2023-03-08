@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_secure_access.h"
+#include "hks_sm_import_wrap_key.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
 
@@ -300,9 +301,9 @@ static int32_t CipherAuth(const struct HksKeyNode *keyNode, const struct HksPara
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append cipher get alg param failed!")
 
-    if (algParam->uint32Param == HKS_ALG_AES) {
+    if ((algParam->uint32Param == HKS_ALG_AES) || (algParam->uint32Param == HKS_ALG_SM4)) {
         return HksAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode, paramSet);
-    } else if (algParam->uint32Param == HKS_ALG_RSA) {
+    } else if ((algParam->uint32Param == HKS_ALG_RSA) || (algParam->uint32Param == HKS_ALG_SM2)) {
         return HksAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode, paramSet);
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
@@ -316,6 +317,13 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append cipher get alg param failed!")
 
     if (algParam->uint32Param == HKS_ALG_RSA) {
+        struct HksParam *padding = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_PADDING, &padding);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append sign/verify get padding param failed!")
+        if (padding->uint32Param == HKS_PADDING_PSS) {
+            ret = HksCheckParamsetOneAndPatamsetTwoExist(keyNode->paramSet, paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckParamsetOneAndPatamsetTwoExist failed!")
+        }
         return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode, paramSet);
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
         return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_ECC, keyNode, paramSet);
@@ -404,6 +412,8 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
         struct HksUsageSpec usageSpec = {0};
         HksFillUsageSpec(paramSet, &usageSpec);
+        SetRsaPssSaltLen(paramSet, &usageSpec);
+        HKS_LOG_I("Sign or verify.");
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);
         } else {
@@ -454,7 +464,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
 
     do {
         ret = CipherPreCheck(keyNode, paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "cipher pre check failed!")
 
         struct HksBlob rawKey = { 0, NULL };
         ret = HksGetRawKey(keyNode->paramSet, &rawKey);
@@ -489,8 +499,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
 
 static int32_t AddProcessIdentityInfoToParamSet(const struct HksParamSet *inParamSet, struct HksParamSet *paramSet)
 {
-    uint32_t transferTagList[] = { HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_USER_ID, HKS_TAG_INNER_KEY_ALIAS,
-        HKS_TAG_PROCESS_NAME };
+    uint32_t transferTagList[] = { HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_USER_ID, HKS_TAG_PROCESS_NAME };
     int32_t ret;
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(transferTagList); ++i) {
         struct HksParam *tmpParam = NULL;
@@ -516,6 +525,11 @@ static int32_t AddAgreeKeyParamSetFromUnwrapSuite(uint32_t suite, const struct H
         case HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING:
             alg = HKS_ALG_ECDH;
             keySize = HKS_ECC_KEY_SIZE_256;
+            break;
+        case HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7:
+        case HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3:
+            alg = HKS_ALG_SM2;
+            keySize = HKS_SM2_KEY_SIZE_256;
             break;
         default:
             HKS_LOG_E("invalid suite type use x25519 default");
@@ -1276,6 +1290,11 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
     uint32_t unwrapSuite = 0;
     int32_t ret = HksCoreCheckImportWrappedKeyParams(wrappingKey, wrappedKeyData, paramSet, keyOut, &unwrapSuite);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check import wrapped key params failed!")
+
+    if ((unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3) ||
+        (unwrapSuite == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7)) {
+        return HksSmImportWrappedKey(keyAlias, paramSet, wrappingKey, wrappedKeyData, keyOut);
+    }
 
     struct HksBlob peerPublicKey = { 0, NULL };
     struct HksBlob agreeSharedSecret = { 0, NULL };

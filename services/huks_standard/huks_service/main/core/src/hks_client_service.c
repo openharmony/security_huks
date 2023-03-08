@@ -26,6 +26,7 @@
 
 #include "hks_client_check.h"
 #include "hks_client_service_util.h"
+#include "hks_common_check.h"
 #include "hks_hitrace.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -235,6 +236,7 @@ static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
 static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, struct HksParamSet **outParamSet)
 {
+    (void)keyAlias;
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
 
@@ -267,12 +269,6 @@ static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
         ret = HksAddParams(newParamSet, &userIdParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add userIdParam failed")
 
-        if (keyAlias != NULL) {
-            struct HksParam keyAliasParam = { .tag = HKS_TAG_INNER_KEY_ALIAS, .blob = *keyAlias };
-            ret = HksAddParams(newParamSet, &keyAliasParam, 1);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add key alias inner failed")
-        }
-        
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
         struct HksParam accessTokenIdParam;
         accessTokenIdParam.tag = HKS_TAG_ACCESS_TOKEN_ID;
@@ -380,7 +376,7 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
             ret = HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
             break;
         }
-        
+
         if (paramSet != NULL) {
             ret = AppendToNewParamSet(paramSet, &newParamSet);
         } else {
@@ -673,9 +669,9 @@ static int32_t GetKeyIn(const struct HksProcessInfo *processInfo, const struct H
 }
 
 static int32_t StoreOrCopyKeyBlob(const struct HksParamSet *paramSet, const struct HksProcessInfo *processInfo,
-    struct HksBlob *output, struct HksBlob *outData, bool isStorage)
+    struct HksBlob *output, struct HksBlob *outData, bool isNeedStorage)
 {
-    if (!isStorage) {
+    if (!isNeedStorage) {
         if ((outData->size != 0) && (memcpy_s(outData->data, outData->size, output->data, output->size) != EOK)) {
             HKS_LOG_E("copy keyblob data fail");
             return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -1198,7 +1194,7 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     struct HksProcessInfo processInfo = {userIdBlob, *processName};
     HksReport(__func__, &processInfo, NULL, ret);
 #endif
-    
+
     return ret;
 }
 
@@ -1300,7 +1296,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
             break;
         }
     } while (0);
-    
+
     HksHitraceEnd(&traceId);
 
     HksReport(__func__, processInfo, paramSet, ret);
@@ -1353,18 +1349,16 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
 {
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     struct HksParamSet *newParamSet = NULL;
-    bool isStorage = false;
+    bool isNeedStorage = false;
     uint32_t outSize = outData->size;
-    struct HksParam *storageFlag = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
-    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
-        isStorage = true;
+    int32_t ret = HksCheckKeyNeedStored(paramSet, &isNeedStorage);
+    if (ret == HKS_SUCCESS) {
         outSize = MAX_KEY_SIZE;
     }
     struct HksBlob output = { outSize, NULL };
     do {
         if (outSize != 0) {
-            ret = InitOutputDataForFinish(&output, outData, isStorage);
+            ret = InitOutputDataForFinish(&output, outData, isNeedStorage);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init output data failed")
         }
         ret = AppendAndQueryInFinish(handle, processInfo, paramSet, &newParamSet);
@@ -1373,7 +1367,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         ret = HuksAccessFinish(handle, newParamSet, inData, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = StoreOrCopyKeyBlob(paramSet, processInfo, &output, outData, isStorage);
+        ret = StoreOrCopyKeyBlob(paramSet, processInfo, &output, outData, isNeedStorage);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "StoreOrCopyKeyBlob fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
     if (output.data != NULL) {
@@ -1406,7 +1400,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     } while (0);
 
     HksHitraceEnd(&traceId);
-    
+
     HksReport(__func__, processInfo, paramSet, ret);
 
     return ret;
@@ -1446,7 +1440,7 @@ int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struc
     } while (0);
 
     HksFreeParamSet(&newParamSet);
-    
+
 #ifdef L2_STANDARD
     HksReport(__func__, processInfo, NULL, ret);
 #endif

@@ -193,6 +193,147 @@ static struct HksParam g_agreeParams02Init008[] = {
     }
 };
 
+static struct HksBlob g_keyAlias01009 = {
+    strlen("HksDHAgreeKeyAliasTest009_1"),
+    (uint8_t *)"HksDHAgreeKeyAliasTest009_1"
+};
+static struct HksBlob g_keyAlias02009 = {
+    strlen("HksDHAgreeKeyAliasTest009_2"),
+    (uint8_t *)"HksDHAgreeKeyAliasTest009_2"
+};
+static struct HksParam g_genParams009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DH
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_DH_KEY_SIZE_2048
+    }, {
+        .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ONLY_USED_IN_HUKS
+    }
+};
+
+static struct HksParam g_agreeParams01Finish009[] = {
+    {
+        .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ONLY_USED_IN_HUKS
+    }, {
+        .tag = HKS_TAG_IS_KEY_ALIAS,
+        .boolParam = true
+    }, {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = g_keyAliasFinal1001
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }
+};
+
+static struct HksParam g_agreeParams02Finish009[] = {
+    {
+        .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ONLY_USED_IN_HUKS
+    }, {
+        .tag = HKS_TAG_IS_KEY_ALIAS,
+        .boolParam = true
+    }, {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = g_keyAliasFinal2001
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }
+};
+
+static struct HksBlob g_keyAlias01010 = {
+    strlen("HksDHAgreeKeyAliasTest010_1"),
+    (uint8_t *)"HksDHAgreeKeyAliasTest010_1"
+};
+static struct HksBlob g_keyAlias02010 = {
+    strlen("HksDHAgreeKeyAliasTest010_2"),
+    (uint8_t *)"HksDHAgreeKeyAliasTest010_2"
+};
+static struct HksParam g_genParams010[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DH
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_DH_KEY_SIZE_2048
+    }, {
+        .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ALLOW_KEY_EXPORTED
+    }
+};
+
+static struct HksParam g_agreeParamsFinish010[] = {
+    {
+        .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ALLOW_KEY_EXPORTED
+    }
+};
+
+static struct HksBlob g_keyAlias01011 = {
+    strlen("HksDHAgreeKeyAliasTest011_1"),
+    (uint8_t *)"HksDHAgreeKeyAliasTest011_1"
+};
+static struct HksBlob g_keyAlias02011 = {
+    strlen("HksDHAgreeKeyAliasTest011_2"),
+    (uint8_t *)"HksDHAgreeKeyAliasTest011_2"
+};
+static struct HksParam g_genParams011[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_DH
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_AGREE
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_DH_KEY_SIZE_2048
+    }, {
+        .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ONLY_USED_IN_HUKS
+    }
+};
+
 int32_t HksDhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
                          const struct HksParamSet *initParamSet, const struct HksParamSet *finishParamSet,
                          struct HksBlob *outData)
@@ -215,12 +356,7 @@ int32_t HksDhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob *p
         return HKS_FAILURE;
     }
 
-    ret = HksFinish(&handle, finishParamSet, &inData, outData);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
-    if (ret != HKS_SUCCESS) {
-        return HKS_FAILURE;
-    }
-    return HKS_SUCCESS;
+    return HksFinish(&handle, finishParamSet, &inData, outData);
 }
 
 int32_t HksDhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *publicKey,
@@ -693,5 +829,160 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree008, TestSize.Level0)
     HksDeleteKey(&g_keyAlias01008, genParamSet);
     HksDeleteKey(&g_keyAlias02008, genParamSet);
     HksDhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
+}
+
+/**
+ * @tc.name: HksDhAgreeTest.HksDhAgree009
+ * @tc.desc: alg-DH, genKey storage flag and use storage flag do match(key store in)
+ * @tc.type: FUNC
+ * @tc.require:issueI6DHXT
+ */
+HWTEST_F(HksDhAgreeTest, HksDhAgree009, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksDhAgree009");
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *initParamSet01 = nullptr;
+    struct HksParamSet *finishParamSet01 = nullptr;
+    struct HksParamSet *initParamSet02 = nullptr;
+    struct HksParamSet *finishParamSet02 = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+    ret = InitParamSet(&initParamSet01, g_agreeParams01Init001, sizeof(g_agreeParams01Init001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
+    ret = InitParamSet(&finishParamSet01, g_agreeParams01Finish009,
+        sizeof(g_agreeParams01Finish009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
+    ret = InitParamSet(&initParamSet02, g_agreeParams02Init001, sizeof(g_agreeParams02Init001) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
+    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish009,
+        sizeof(g_agreeParams02Finish009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
+
+    ret = HksGenerateKey(&g_keyAlias01009, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
+    ret = HksGenerateKey(&g_keyAlias02009, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
+
+    struct HksBlob publicKey01 = { .size = HKS_DH_KEY_SIZE_4096, .data = nullptr };
+    struct HksBlob publicKey02 = { .size = HKS_DH_KEY_SIZE_4096, .data = nullptr };
+    EXPECT_EQ(MallocAndCheckBlobData(&publicKey01, publicKey01.size), HKS_SUCCESS) << "Malloc publicKey01 failed.";
+    EXPECT_EQ(MallocAndCheckBlobData(&publicKey02, publicKey02.size), HKS_SUCCESS) << "Malloc publicKey02 failed.";
+    ret = HksDhAgreeExport(&g_keyAlias01009, &g_keyAlias02009, &publicKey01, &publicKey02, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
+
+    struct HksBlob outData01 = { .size = DH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = DH_COMMON_SIZE, .data = nullptr };
+    EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
+    EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
+    ret = HksDhAgreeFinish(&g_keyAlias01009, &publicKey02, initParamSet01, finishParamSet01, &outData01);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish01 failed.";
+    ret = HksDhAgreeFinish(&g_keyAlias02009, &publicKey01, initParamSet02, finishParamSet02, &outData02);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish02 failed.";
+
+    HksDeleteKey(&g_keyAlias01009, genParamSet);
+    HksDeleteKey(&g_keyAlias02009, genParamSet);
+    HksDeleteKey(&g_keyAliasFinal1001, NULL);
+    HksDeleteKey(&g_keyAliasFinal2001, NULL);
+    HksDhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
+    HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
+}
+
+/**
+ * @tc.name: HksDhAgreeTest.HksDhAgree010
+ * @tc.desc: alg-DH, genKey storage flag and use storage flag do match(key out)
+ * @tc.type: FUNC
+ * @tc.require:issueI6DHXT
+ */
+HWTEST_F(HksDhAgreeTest, HksDhAgree010, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksDhAgree010");
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *initParamSet01 = nullptr;
+    struct HksParamSet *finishParamSet01 = nullptr;
+    struct HksParamSet *initParamSet02 = nullptr;
+    struct HksParamSet *finishParamSet02 = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams010, sizeof(g_genParams010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+    ret = InitParamSet(&initParamSet01, g_agreeParams01Init004, sizeof(g_agreeParams01Init004) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
+    ret = InitParamSet(&finishParamSet01, g_agreeParamsFinish010, sizeof(g_agreeParamsFinish010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
+    ret = InitParamSet(&initParamSet02, g_agreeParams02Init004, sizeof(g_agreeParams02Init004) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
+    ret = InitParamSet(&finishParamSet02, g_agreeParamsFinish010, sizeof(g_agreeParamsFinish010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
+
+    ret = HksGenerateKey(&g_keyAlias01010, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
+    ret = HksGenerateKey(&g_keyAlias02010, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
+
+    struct HksBlob publicKey01 = { .size = HKS_DH_KEY_SIZE_4096, .data = nullptr };
+    struct HksBlob publicKey02 = { .size = HKS_DH_KEY_SIZE_4096, .data = nullptr };
+    EXPECT_EQ(MallocAndCheckBlobData(&publicKey01, publicKey01.size), HKS_SUCCESS) << "Malloc publicKey01 failed.";
+    EXPECT_EQ(MallocAndCheckBlobData(&publicKey02, publicKey02.size), HKS_SUCCESS) << "Malloc publicKey02 failed.";
+    ret = HksDhAgreeExport(&g_keyAlias01010, &g_keyAlias02010, &publicKey01, &publicKey02, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
+
+    struct HksBlob outData01 = { .size = DH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = DH_COMMON_SIZE, .data = nullptr };
+    EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
+    EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
+    ret = HksDhAgreeFinish(&g_keyAlias01010, &publicKey02, initParamSet01, finishParamSet01, &outData01);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish01 failed.";
+    ret = HksAgreeKey(initParamSet02, &g_keyAlias02010, &publicKey01, &outData02);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
+    EXPECT_EQ(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "outData01 not equals outData02";
+
+    HksDeleteKey(&g_keyAlias01010, genParamSet);
+    HksDeleteKey(&g_keyAlias02010, genParamSet);
+    HksDhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
+    HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
+}
+
+/**
+ * @tc.name: HksDhAgreeTest.HksDhAgree011
+ * @tc.desc: alg-DH, genKey storage flag and use storage flag do not match
+ * @tc.type: FUNC
+ * @tc.require:issueI6DHXT
+ */
+HWTEST_F(HksDhAgreeTest, HksDhAgree011, TestSize.Level0)
+{
+    HKS_LOG_E("Enter HksDhAgree011");
+    struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *initParamSet01 = nullptr;
+    struct HksParamSet *finishParamSet01 = nullptr;
+    struct HksParamSet *initParamSet02 = nullptr;
+    struct HksParamSet *finishParamSet02 = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams011, sizeof(g_genParams011) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+    ret = InitParamSet(&initParamSet01, g_agreeParams01Init004, sizeof(g_agreeParams01Init004) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)01 failed.";
+    ret = InitParamSet(&finishParamSet01, g_agreeParamsFinish010,
+        sizeof(g_agreeParamsFinish010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
+
+    ret = HksGenerateKey(&g_keyAlias01011, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
+    ret = HksGenerateKey(&g_keyAlias02011, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
+
+    struct HksBlob publicKey01 = { .size = HKS_DH_KEY_SIZE_4096, .data = nullptr };
+    struct HksBlob publicKey02 = { .size = HKS_DH_KEY_SIZE_4096, .data = nullptr };
+    EXPECT_EQ(MallocAndCheckBlobData(&publicKey01, publicKey01.size), HKS_SUCCESS) << "Malloc publicKey01 failed.";
+    EXPECT_EQ(MallocAndCheckBlobData(&publicKey02, publicKey02.size), HKS_SUCCESS) << "Malloc publicKey02 failed.";
+    ret = HksDhAgreeExport(&g_keyAlias01011, &g_keyAlias02011, &publicKey01, &publicKey02, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "ExportKey failed.";
+
+    struct HksBlob outData01 = { .size = DH_COMMON_SIZE, .data = nullptr };
+    struct HksBlob outData02 = { .size = DH_COMMON_SIZE, .data = nullptr };
+    EXPECT_EQ(MallocAndCheckBlobData(&outData01, outData01.size), HKS_SUCCESS) << "Malloc outData01 failed.";
+    ret = HksDhAgreeFinish(&g_keyAlias01011, &publicKey02, initParamSet01, finishParamSet01, &outData01);
+    EXPECT_EQ(ret, HKS_ERROR_BAD_STATE) << "HksDhAgree011 failed.";
+
+    HksDeleteKey(&g_keyAlias01011, genParamSet);
+    HksDeleteKey(&g_keyAlias02011, genParamSet);
+    HksDhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
+    HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
 } // namespace Unittest::DhAgree

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -11,6 +11,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ */
+
+/**
+ * @file hks_param.h
+ *
+ * @brief Declares huks struct and enum.
+ *
+ * @since 8
  */
 
 #ifndef HKS_TYPE_H
@@ -70,6 +78,9 @@ extern "C" {
 #define HKS_CERT_DEVICE_SIZE 2048
 #define HKS_CERT_APP_SIZE 4096
 
+/**
+ * @brief hks key type
+ */
 enum HksKeyType {
     HKS_KEY_TYPE_RSA_PUBLIC_KEY = 0x01001000,
     HKS_KEY_TYPE_RSA_KEYPAIR = 0x01002000,
@@ -95,6 +106,9 @@ enum HksKeyType {
     HKS_KEY_TYPE_PBKDF2 = 0x07000000,
 };
 
+/**
+ * @brief hks key purpose
+ */
 enum HksKeyPurpose {
     HKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC, AES, and SM4 keys. */
     HKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC, AES, and SM4 keys. */
@@ -107,6 +121,9 @@ enum HksKeyPurpose {
     HKS_KEY_PURPOSE_AGREE = 256,                   /* Usable with agree. */
 };
 
+/**
+ * @brief hks key digest
+ */
 enum HksKeyDigest {
     HKS_DIGEST_NONE = 0,
     HKS_DIGEST_MD5 = 1,
@@ -118,6 +135,9 @@ enum HksKeyDigest {
     HKS_DIGEST_SHA512 = 14,
 };
 
+/**
+ * @brief hks key padding
+ */
 enum HksKeyPadding {
     HKS_PADDING_NONE = 0,
     HKS_PADDING_OAEP = 1,
@@ -127,6 +147,9 @@ enum HksKeyPadding {
     HKS_PADDING_PKCS7 = 5,
 };
 
+/**
+ * @brief hks cipher mode
+ */
 enum HksCipherMode {
     HKS_MODE_ECB = 1,
     HKS_MODE_CBC = 2,
@@ -136,6 +159,9 @@ enum HksCipherMode {
     HKS_MODE_GCM = 32,
 };
 
+/**
+ * @brief hks key size
+ */
 enum HksKeySize {
     HKS_RSA_KEY_SIZE_512 = 512,
     HKS_RSA_KEY_SIZE_768 = 768,
@@ -164,6 +190,9 @@ enum HksKeySize {
     HKS_SM4_KEY_SIZE_128 = 128,
 };
 
+/**
+ * @brief hks key algorithm
+ */
 enum HksKeyAlg {
     HKS_ALG_RSA = 1,
     HKS_ALG_ECC = 2,
@@ -173,6 +202,7 @@ enum HksKeyAlg {
     HKS_ALG_HMAC = 50,
     HKS_ALG_HKDF = 51,
     HKS_ALG_PBKDF2 = 52,
+    HKS_ALG_GMKDF = 53,
 
     HKS_ALG_ECDH = 100,
     HKS_ALG_X25519 = 101,
@@ -184,6 +214,9 @@ enum HksKeyAlg {
     HKS_ALG_SM4 = 152,
 };
 
+/**
+ * @brief hks algorithm suite
+ */
 enum HuksAlgSuite {
     /* Algorithm suites of unwrapping wrapped-key by huks */
     /* Unwrap suite of key agreement type */
@@ -204,14 +237,37 @@ enum HuksAlgSuite {
      *  |   key_material_size_len     (4 Byte) |  key_material_size  |   key_mat_enc_length (4 Byte) | key_mat_enc_data
      */
     HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING = 2,
+
+    /* WrappedData format(Bytes Array):
+     *  |  SM2_plain_pubkey_length    (4 Byte) |  SM2_plain_pubkey   | signData_size_length (4 Byte) | signData_size
+     *  |     kek_enc_data_length     (4 Byte) |     kek_enc_data    | kek_material_size_len(4 Byte) | kek_material_size
+     *  |       factor1_data_len      (4 Byte) |    factor1_data     |  factor2_data_len    (4 Byte) | factor2_data
+     *  |       mac_data_length       (4 Byte) |       mac_data      | key_mat_enc_length   (4 Byte) | key_mat_enc_data
+     *  |          iv_data_length     (4 Byte) |            iv_data  |key_material_size_len (4 Byte) | key_material_size
+     */
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3 = 3,
+
+    /* WrappedData format(Bytes Array):
+     *  |     kek_enc_data_length     (4 Byte) |     kek_enc_data    | kek_material_size_len(4 Byte) | kek_material_size
+     *  |       factor1_data_len      (4 Byte) |    factor1_data     |  factor2_data_len    (4 Byte) | factor2_data
+     *  |       mac_data_length       (4 Byte) |       mac_data      | key_mat_enc_length   (4 Byte) | key_mat_enc_data
+     *  |          iv_data_length     (4 Byte) |            iv_data  |key_material_size_len (4 Byte) | key_material_size
+     */
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7 = 4,
 };
 
+/**
+ * @brief hks key generate type
+ */
 enum HksKeyGenerateType {
     HKS_KEY_GENERATE_TYPE_DEFAULT = 0,
     HKS_KEY_GENERATE_TYPE_DERIVE = 1,
     HKS_KEY_GENERATE_TYPE_AGREE = 2,
 };
 
+/**
+ * @brief hks key flag
+ */
 enum HksKeyFlag {
     HKS_KEY_FLAG_IMPORT_KEY = 1,
     HKS_KEY_FLAG_GENERATE_KEY = 2,
@@ -219,17 +275,37 @@ enum HksKeyFlag {
     HKS_KEY_FLAG_DERIVE_KEY = 4,
 };
 
+/**
+ * @brief hks key storage type
+ */
 enum HksKeyStorageType {
     HKS_STORAGE_TEMP = 0,
     HKS_STORAGE_PERSISTENT = 1,
+    HKS_STORAGE_ONLY_USED_IN_HUKS = 2,
+    HKS_STORAGE_ALLOW_KEY_EXPORTED = 3,
 };
 
+/**
+ * @brief hks import key type
+ */
 enum HksImportKeyType {
     HKS_KEY_TYPE_PUBLIC_KEY = 0,
     HKS_KEY_TYPE_PRIVATE_KEY = 1,
     HKS_KEY_TYPE_KEY_PAIR = 2,
 };
 
+/**
+ * @brief hks rsa pss salt len type
+ */
+enum HksRsaPssSaltLenType {
+    HKS_RSA_PSS_SALTLEN_DIGEST = 0,  /* Salt length matches digest */
+    HKS_RSA_PSS_SALTLEN_AUTO = 1,  /* Verify only: auto detect salt length */
+    HKS_RSA_PSS_SALTLEN_MAX = 2,  /* Set salt length to maximum possible, default type */
+};
+
+/**
+ * @brief hks error code
+ */
 enum HksErrorCode {
     HKS_SUCCESS = 0,
     HKS_FAILURE = -1,
@@ -327,6 +403,9 @@ enum HksErrorCode {
     HKS_ERROR_UNKNOWN_ERROR = -1000,
 };
 
+/**
+ * @brief hks err code
+ */
 enum HksErrCode {
     HUKS_ERR_CODE_PERMISSION_FAIL = 201,
     HUKS_ERR_CODE_ILLEGAL_ARGUMENT = 401,
@@ -349,6 +428,9 @@ enum HksErrCode {
     HUKS_ERR_CODE_CALL_SERVICE_FAILED = 12000015,
 };
 
+/**
+ * @brief hks tag type
+ */
 enum HksTagType {
     HKS_TAG_TYPE_INVALID = 0 << 28,
     HKS_TAG_TYPE_INT = 1 << 28,
@@ -358,28 +440,43 @@ enum HksTagType {
     HKS_TAG_TYPE_BYTES = 5 << 28,
 };
 
+/**
+ * @brief hks send type
+ */
 enum HksSendType {
     HKS_SEND_TYPE_ASYNC = 0,
     HKS_SEND_TYPE_SYNC,
 };
 
+/**
+ * @brief hks user auth type
+ */
 enum HksUserAuthType {
     HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
     HKS_USER_AUTH_TYPE_FACE = 1 << 1,
     HKS_USER_AUTH_TYPE_PIN = 1 << 2,
 };
 
+/**
+ * @brief hks auth access type
+ */
 enum HksAuthAccessType {
     HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD = 1 << 0,
     HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1,
 };
 
+/**
+ * @brief hks challenge type
+ */
 enum HksChallengeType {
     HKS_CHALLENGE_TYPE_NORMAL = 0,
     HKS_CHALLENGE_TYPE_CUSTOM = 1,
     HKS_CHALLENGE_TYPE_NONE = 2,
 };
 
+/**
+ * @brief hks challenge position
+ */
 enum HksChallengePosition {
     HKS_CHALLENGE_POS_0 = 0,
     HKS_CHALLENGE_POS_1,
@@ -387,10 +484,16 @@ enum HksChallengePosition {
     HKS_CHALLENGE_POS_3,
 };
 
+/**
+ * @brief hks secure sign type
+ */
 enum HksSecureSignType {
     HKS_SECURE_SIGN_WITH_AUTHINFO = 1,
 };
 
+/**
+ * @brief hks Tag
+ */
 enum HksTag {
     /* Invalid TAG */
     HKS_TAG_INVALID = HKS_TAG_TYPE_INVALID | 0,
@@ -429,6 +532,8 @@ enum HksTag {
     /* parameters required by HuksCoreChipsetPlatformDecrypt */
     HKS_TAG_CIPHER_TEXT = HKS_TAG_TYPE_BYTES | 27,
     HKS_TAG_PEER_PUBLIC_KEY = HKS_TAG_TYPE_BYTES | 28,
+    HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG = HKS_TAG_TYPE_UINT | 29,
+    HKS_TAG_RSA_PSS_SALT_LEN_TYPE = HKS_TAG_TYPE_UINT | 30, /* only supported for PSS padding */
 
     /*
      * Key authentication related TAG: 201 - 300
@@ -534,11 +639,17 @@ enum HksTag {
     HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA = HKS_TAG_TYPE_BYTES | 20003,
 };
 
+/**
+ * @brief hks blob
+ */
 struct HksBlob {
     uint32_t size;
     uint8_t *data;
 };
 
+/**
+ * @brief hks param
+ */
 struct HksParam {
     uint32_t tag;
     union {
@@ -550,22 +661,34 @@ struct HksParam {
     };
 };
 
+/**
+ * @brief hks param set
+ */
 struct HksParamSet {
     uint32_t paramSetSize;
     uint32_t paramsCnt;
     struct HksParam params[];
 };
 
+/**
+ * @brief hks certificate chain
+ */
 struct HksCertChain {
     struct HksBlob *certs;
     uint32_t certsCount;
 };
 
+/**
+ * @brief hks key info
+ */
 struct HksKeyInfo {
     struct HksBlob alias;
     struct HksParamSet *paramSet;
 };
 
+/**
+ * @brief hks public key info
+ */
 struct HksPubKeyInfo {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -574,6 +697,9 @@ struct HksPubKeyInfo {
     uint32_t placeHolder;
 };
 
+/**
+ * @brief hks rsa key material
+ */
 struct HksKeyMaterialRsa {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -582,6 +708,9 @@ struct HksKeyMaterialRsa {
     uint32_t dSize;
 };
 
+/**
+ * @brief hks ecc key material
+ */
 struct HksKeyMaterialEcc {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -590,6 +719,9 @@ struct HksKeyMaterialEcc {
     uint32_t zSize;
 };
 
+/**
+ * @brief hks dsa key material
+ */
 struct HksKeyMaterialDsa {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -600,6 +732,9 @@ struct HksKeyMaterialDsa {
     uint32_t gSize;
 };
 
+/**
+ * @brief hks dh key material
+ */
 struct HksKeyMaterialDh {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -608,6 +743,9 @@ struct HksKeyMaterialDh {
     uint32_t reserved;
 };
 
+/**
+ * @brief hks 25519 key material
+ */
 struct HksKeyMaterial25519 {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -616,6 +754,9 @@ struct HksKeyMaterial25519 {
     uint32_t reserved;
 };
 
+/**
+ * @brief hks user auth token
+ */
 typedef struct __attribute__((__packed__)) HksUserAuthToken {
     uint32_t version;
     uint8_t challenge[TOKEN_SIZE];
@@ -630,6 +771,9 @@ typedef struct __attribute__((__packed__)) HksUserAuthToken {
     uint8_t sign[SHA256_SIGN_LEN];
 } __attribute__((__packed__)) HksUserAuthToken;
 
+/**
+ * @brief hks secure sign auth info
+ */
 typedef struct __attribute__((__packed__)) HksSecureSignAuthInfo {
     uint32_t userAuthType;
     uint64_t authenticatorId;
@@ -644,6 +788,9 @@ typedef struct __attribute__((__packed__)) HksSecureSignAuthInfo {
 #define HKS_MAX_KEY_LEN (HKS_KEY_BYTES(HKS_RSA_KEY_SIZE_4096) * HKS_KEY_MATERIAL_NUM)
 #define HKS_MAX_KEY_MATERIAL_LEN (sizeof(struct HksPubKeyInfo) + HKS_MAX_KEY_LEN + HKS_AE_TAG_LEN)
 
+/**
+ * @brief hks store header info
+ */
 struct HksStoreHeaderInfo {
     uint16_t version;
     uint16_t keyCount;
@@ -653,6 +800,9 @@ struct HksStoreHeaderInfo {
     uint8_t hmac[HKS_HMAC_DIGEST_SHA512_LEN];
 };
 
+/**
+ * @brief hks store key info
+ */
 struct HksStoreKeyInfo {
     uint16_t keyInfoLen; /* current keyinfo len */
     uint16_t keySize;    /* keySize of key from crypto hal after encrypted */
@@ -671,6 +821,9 @@ struct HksStoreKeyInfo {
     uint8_t authIdSize;
 };
 
+/**
+ * @brief hks 25519 key pair
+ */
 struct Hks25519KeyPair {
     uint32_t publicBufferSize;
     uint32_t privateBufferSize;
@@ -694,6 +847,9 @@ static inline int32_t CheckBlob(const struct HksBlob *blob)
     return HKS_SUCCESS;
 }
 
+/**
+ * @brief hks chipset platform decrypt scene
+ */
 enum HksChipsetPlatformDecryptScene {
     HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA = 1,
 };

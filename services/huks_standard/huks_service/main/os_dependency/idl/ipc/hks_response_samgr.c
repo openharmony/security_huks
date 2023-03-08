@@ -52,7 +52,7 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         HKS_LOG_E("write response isHasOutData failed!");
         return;
     }
-    
+
     ipcRet = WriteUint32(reply, response->size);
     if (!ipcRet) {
         HKS_LOG_E("write response out data size failed!");
@@ -86,7 +86,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     processInfo->userId.data = userId;
     processInfo->userId.size = strlen(g_userId);
     (void)memcpy_s(processInfo->userId.data, processInfo->userId.size, g_userId, strlen(g_userId));
-    
+
     processInfo->accessTokenId = 0;
     processInfo->userIdInt = 0;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -163,6 +163,10 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
     uint32_t blobIndex = 0;
 
     for (blobIndex = 0; blobIndex < validTotalBlobs && offset < dataSize; blobIndex++) {
+        if (((dataSize - offset) < sizeof(uint32_t))) {
+            HKS_LOG_E("the residual data length is to small.");
+            return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+        }
         partDataLength = 0;
         (void)memcpy_s((uint8_t *)&partDataLength, sizeof(uint32_t), data + offset, sizeof(uint32_t));
         offset += sizeof(uint32_t);
@@ -217,4 +221,62 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
         offset += partDataLength;
     }
     return HKS_ERROR_INVALID_WRAPPED_FORMAT;
+}
+
+int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage)
+{
+    struct HksParam *storageFlag = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_PERSISTENT)) {
+        *isNeedStorage = true;
+        return ret;
+    }
+    ret = HksGetParam(paramSet, HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG, &storageFlag);
+    if ((ret == HKS_SUCCESS) && (storageFlag->uint32Param == HKS_STORAGE_ONLY_USED_IN_HUKS)) {
+        *isNeedStorage = true;
+        return ret;
+    }
+    return ret;
+}
+
+int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlobParamSet,
+    const struct HksParamSet *runtimeParamSet, uint32_t tag)
+{
+    if (keyBlobParamSet == NULL || runtimeParamSet == NULL) {
+        HKS_LOG_E("invalid params!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    bool isExistInParamsetOne = true;
+    struct HksParam *paramInParamsetOne = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, tag, &paramInParamsetOne);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        isExistInParamsetOne = false;
+    }
+    bool isExistInParamsetTwo = true;
+    struct HksParam *paramInParamsetTwo = NULL;
+    ret = HksGetParam(runtimeParamSet, tag, &paramInParamsetTwo);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        isExistInParamsetTwo = false;
+    }
+    if (isExistInParamsetOne && (!isExistInParamsetTwo)) {
+        HKS_LOG_E("please set param in paramsetTwo");
+        return HKS_ERROR_BAD_STATE;
+    }
+    if (isExistInParamsetOne && isExistInParamsetTwo &&
+        (paramInParamsetOne->uint32Param != paramInParamsetTwo->uint32Param)) {
+        HKS_LOG_E("values does not match");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+}
+
+void SetRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
+{
+    struct HksParam *saltLenParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE, &saltLenParam);
+    if (ret == HKS_SUCCESS) {
+        usageSpec->pssSaltLen = saltLenParam->uint32Param;
+    } else {
+        usageSpec->pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX;
+    }
 }

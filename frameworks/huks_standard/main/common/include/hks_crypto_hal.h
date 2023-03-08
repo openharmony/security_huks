@@ -64,6 +64,7 @@ struct HksUsageSpec {
     uint32_t padding;
     uint32_t digest;
     uint32_t purpose;
+    uint32_t pssSaltLen;
     /*
      * Different algorithms correspond to different structures,for example:
      * struct HksAeadParam for aead;

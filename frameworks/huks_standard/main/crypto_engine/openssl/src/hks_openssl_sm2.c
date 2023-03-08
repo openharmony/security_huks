@@ -36,6 +36,12 @@
 #include "hks_openssl_engine.h"
 #include "hks_template.h"
 
+#define HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(RESULT, LOG_MESSAGE, ...) \
+if ((RESULT) != HKS_OPENSSL_SUCCESS) { \
+    HKS_LOG_E(LOG_MESSAGE, ##__VA_ARGS__); \
+    break; \
+}
+
 #ifdef HKS_SUPPORT_SM2_GENERATE_KEY
 int32_t HksOpensslSm2GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
@@ -50,7 +56,6 @@ int32_t HksOpensslGetSm2PubKey(const struct HksBlob *input, struct HksBlob *outp
 }
 #endif
 
-#ifdef HKS_SUPPORT_SM2_SIGN_VERIFY
 static int GetSm2Modules(
     const uint8_t *key, uint32_t *keySize, uint32_t *publicXSize, uint32_t *publicYSize, uint32_t *privateXSize)
 {
@@ -102,7 +107,7 @@ static int32_t Sm2InitPublicKey(EC_KEY *sm2Key, const uint8_t *keyPair, uint32_t
     return ret;
 }
 
-static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
+static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, enum HksKeyPurpose keyPurpose)
 {
     /* get ecc pubX,pubY,pri */
     uint8_t *keyPair = keyBlob->data;
@@ -121,7 +126,7 @@ static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
         return NULL;
     }
 
-    if (!private) {
+    if ((keyPurpose == HKS_KEY_PURPOSE_ENCRYPT) || (keyPurpose == HKS_KEY_PURPOSE_VERIFY)) {
         if (Sm2InitPublicKey(sm2Key, keyPair, publicXSize, publicYSize) != HKS_SUCCESS) {
             HKS_LOG_E("initialize sm2 public key failed");
             SELF_FREE_PTR(sm2Key, EC_KEY_free);
@@ -129,7 +134,7 @@ static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
         }
     }
 
-    if (private) {
+    if ((keyPurpose == HKS_KEY_PURPOSE_DECRYPT) || (keyPurpose == HKS_KEY_PURPOSE_SIGN)) {
         BIGNUM *pri = BN_bin2bn(keyPair + sizeof(struct KeyMaterialEcc) + publicXSize + publicYSize, privateSize, NULL);
         if (pri == NULL || EC_KEY_set_private_key(sm2Key, pri) <= 0) {
             HKS_LOG_E("build sm2 key failed");
@@ -143,9 +148,10 @@ static EC_KEY *Sm2InitKey(const struct HksBlob *keyBlob, bool private)
     return sm2Key;
 }
 
-static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, bool sign)
+#ifdef HKS_SUPPORT_SM2_SIGN_VERIFY
+static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, enum HksKeyPurpose keyPurpose)
 {
-    EC_KEY *sm2Key = Sm2InitKey(mainKey, sign);
+    EC_KEY *sm2Key = Sm2InitKey(mainKey, keyPurpose);
     HKS_IF_NULL_LOGE_RETURN(sm2Key, NULL, "initialize sm2 key failed")
 
     EVP_PKEY *key = EVP_PKEY_new();
@@ -161,46 +167,58 @@ static EVP_PKEY_CTX *InitSm2Ctx(const struct HksBlob *mainKey, uint32_t digest, 
     do {
         if (EVP_PKEY_assign_EC_KEY(key, sm2Key) <= 0) {
             HKS_LOG_E("assign ec key failed");
+            SELF_FREE_PTR(sm2Key, EC_KEY_free);
             break;
         }
-
-        if (EVP_PKEY_set_alias_type(key, EVP_PKEY_SM2) != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("set alias type failed");
-            break;
-        }
+        ret = EVP_PKEY_set_alias_type(key, EVP_PKEY_SM2);
+        HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(ret, "set alias type failed.")
 
         ctx = EVP_PKEY_CTX_new(key, NULL);
         HKS_IF_NULL_LOGE_BREAK(ctx, "new ctx failed")
 
-        if (sign) {
-            if (EVP_PKEY_sign_init(ctx) != HKS_OPENSSL_SUCCESS) {
-                HKS_LOG_E("sign init failed");
+        switch (keyPurpose) {
+            case HKS_KEY_PURPOSE_SIGN:
+                ret = EVP_PKEY_sign_init(ctx);
+                HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(ret, "sign init failed.")
                 break;
-            }
-        } else {
-            if (EVP_PKEY_verify_init(ctx) != HKS_OPENSSL_SUCCESS) {
-                HKS_LOG_E("verify init failed");
+            case HKS_KEY_PURPOSE_VERIFY:
+                ret = EVP_PKEY_verify_init(ctx);
+                HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(ret, "verify init failed.")
                 break;
+            case HKS_KEY_PURPOSE_ENCRYPT:
+                ret = EVP_PKEY_encrypt_init(ctx);
+                HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(ret, "encrypt init failed.")
+                break;
+            case HKS_KEY_PURPOSE_DECRYPT:
+                ret = EVP_PKEY_decrypt_init(ctx);
+                HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(ret, "decrypt init failed.")
+                break;
+            default:
+                HKS_LOG_E("Not supported actionCode for SM2 keypair in huks!");
+                break;
+        }
+        if ((keyPurpose == HKS_KEY_PURPOSE_SIGN) || (keyPurpose == HKS_KEY_PURPOSE_VERIFY)) {
+            const EVP_MD *opensslAlg = GetOpensslAlg(digest);
+            if (opensslAlg != NULL) {
+                ret = EVP_PKEY_CTX_set_signature_md(ctx, opensslAlg);
+                HKS_IF_OPENSSL_ENGINE_NOT_SUCC_LOGE_BREAK(ret, "set digest type failed.")
             }
         }
         ret = HKS_SUCCESS;
     } while (0);
-
+    SELF_FREE_PTR(key, EVP_PKEY_free);
     if (ret != HKS_SUCCESS) {
         HksLogOpensslError();
-        SELF_FREE_PTR(sm2Key, EC_KEY_free);
-        SELF_FREE_PTR(key, EVP_PKEY_free);
         SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
         return NULL;
     }
-
     return ctx;
 }
 
 int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, false);
+    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
 
     if (EVP_PKEY_verify(ctx, signature->data, signature->size, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
@@ -217,7 +235,7 @@ int32_t HksOpensslSm2Verify(const struct HksBlob *key, const struct HksUsageSpec
 int32_t HksOpensslSm2Sign(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, struct HksBlob *signature)
 {
-    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, true);
+    EVP_PKEY_CTX *ctx = InitSm2Ctx(key, usageSpec->digest, usageSpec->purpose);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context failed")
 
     size_t sigSize;
@@ -240,5 +258,51 @@ int32_t HksOpensslSm2Sign(const struct HksBlob *key, const struct HksUsageSpec *
     return HKS_SUCCESS;
 }
 #endif
+
+#ifdef HKS_SUPPORT_SM2_ENCRYPT_DECRYPT
+int HksOpensslSm2Encrypt(const struct HksBlob *keyPair, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *plainBlob, struct HksBlob *cipherBlob)
+{
+    EVP_PKEY_CTX *ctx = InitSm2Ctx(keyPair, usageSpec->digest, HKS_KEY_PURPOSE_ENCRYPT);
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context when encrypt failed!")
+    // cipherLength equals c1||c2||c3 which c1 and c3 is fixed length and c2 is equals to the plainText.
+    size_t cipherSize = plainBlob->size + SM2_C1_SIZE + SM2_C3_SIZE;
+    if (EVP_PKEY_encrypt(ctx, cipherBlob->data, &cipherSize, plainBlob->data,
+        (size_t)plainBlob->size) != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("encrypt data failed");
+        HksLogOpensslError();
+        SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    cipherBlob->size = (uint32_t)cipherSize;
+    SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
+    return HKS_SUCCESS;
+}
+
+int HksOpensslSm2Decrypt(const struct HksBlob *keyPair, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *cipherBlob, struct HksBlob *plainBlob)
+{
+    if (usageSpec == NULL) {
+        HKS_LOG_E("Invalid param");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(cipherBlob),
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid param cipherBlob!");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(plainBlob), HKS_ERROR_INVALID_ARGUMENT, "Invalid param plainBlob!");
+    EVP_PKEY_CTX *ctx = InitSm2Ctx(keyPair, usageSpec->digest, HKS_KEY_PURPOSE_DECRYPT);
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_INVALID_KEY_INFO, "initialize sm2 context when decrypt failed!")
+    size_t decryptSize = plainBlob->size;
+    if (EVP_PKEY_decrypt(ctx, plainBlob->data, &decryptSize, cipherBlob->data,
+        cipherBlob->size) != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("decrypt data failed");
+        HksLogOpensslError();
+        SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    plainBlob->size  = (uint32_t)decryptSize;
+    SELF_FREE_PTR(ctx, EVP_PKEY_CTX_free);
+    return HKS_SUCCESS;
+}
+#endif //HKS_SUPPORT_SM2_ENCRYPT_DECRYPT
 
 #endif

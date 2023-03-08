@@ -75,7 +75,7 @@ static int32_t SynchronizeOutput(struct HksIpcHandle *reply, struct HksBlob *out
             outBlob->size = buffSize;
         }
     } while (0);
-    
+
     return callBackResult;
 }
 
@@ -155,7 +155,7 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct
 
         ret = (int32_t)proxy->Invoke((IClientProxy *)proxy, type, &request, (IOwner)&replyHandle, CurrentCallback);
         HKS_IF_NOT_SUCC_BREAK(ret, HKS_ERROR_IPC_MSG_FAIL)
-        
+
         ret = SynchronizeOutput(&replyHandle, outBlob);
 
         HKS_FREE_PTR(dataReq);

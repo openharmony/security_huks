@@ -515,7 +515,7 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
 {
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
-    
+
     int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CertificateChainInitBlob fail")
 

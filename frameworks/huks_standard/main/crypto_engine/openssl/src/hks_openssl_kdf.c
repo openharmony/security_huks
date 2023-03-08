@@ -22,8 +22,18 @@
 
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
+#include "hks_mem.h"
 #include "hks_openssl_engine.h"
+#include "hks_openssl_hash.h"
+#include "hks_template.h"
+#include "securec.h"
 
+#ifdef HKS_SUPPORT_KDF_SM3
+#define HKS_DIGEST_SM3_LEN 32
+#define HKS_BITS_PER_INT 32
+#define HKS_BYTE_PER_INT 4
+#define HKS_START_NUM 1
+#endif
 static const EVP_MD *GetDeriveDigestType(uint32_t digestAlg)
 {
     switch (digestAlg) {
@@ -91,3 +101,72 @@ int32_t HksOpensslHkdf(const struct HksBlob *mainKey, const struct HksKeySpec *d
     EVP_PKEY_CTX_free(pctx);
     return ret;
 }
+
+#ifdef HKS_SUPPORT_KDF_SM3
+
+static int32_t AppendKekAndFactor(const struct HksBlob *kekData, const struct HksBlob *factor,
+    struct HksBlob *appendedData)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(factor), HKS_ERROR_INVALID_ARGUMENT, "Invalid param mainKey!");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(kekData), HKS_ERROR_INVALID_ARGUMENT, "Invalid param derivedKey!");
+    struct HksBlob destData = {0, NULL};
+    destData.size = kekData->size + factor->size;
+    destData.data = (uint8_t *)HksMalloc(destData.size);
+    HKS_IF_NULL_LOGE_RETURN(destData.data, HKS_ERROR_MALLOC_FAIL, "malloc destData memory failed!");
+    (void)memcpy_s(destData.data, destData.size, kekData->data, kekData->size);
+    (void)memcpy_s(destData.data + kekData->size, destData.size - kekData->size, factor->data, factor->size);
+    appendedData->size = destData.size;
+    appendedData->data = destData.data;
+    return HKS_SUCCESS;
+}
+
+int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *derivationSpec,
+    struct HksBlob *derivedKey)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(mainKey), HKS_ERROR_INVALID_ARGUMENT, "Invalid param mainKey!");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslCheckBlob(derivedKey),
+        HKS_ERROR_INVALID_ARGUMENT, "Invalid param derivedKey!");
+    struct HksKeyDerivationParam *deriveParam = (struct HksKeyDerivationParam *)derivationSpec->algParam;
+    struct HksBlob appendedKeyData = { 0, NULL };
+    int32_t ret = AppendKekAndFactor(mainKey, &deriveParam->info, &appendedKeyData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "append data failed!")
+    int hashSize = appendedKeyData.size + HKS_BYTE_PER_INT;
+    struct HksBlob inputHashBlob = { 0, NULL };
+    inputHashBlob.size = hashSize;
+    inputHashBlob.data = (uint8_t *)HksMalloc(inputHashBlob.size);
+    if (inputHashBlob.data == NULL) {
+        HKS_FREE_PTR(appendedKeyData.data);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    (void)memcpy_s(inputHashBlob.data, inputHashBlob.size, appendedKeyData.data, appendedKeyData.size);
+
+    uint8_t digestDataArray[HKS_DIGEST_SM3_LEN] = { 0 };
+    int digestLength = HKS_DIGEST_SM3_LEN;
+    struct HksBlob cdgstBlob = {digestLength, digestDataArray};
+    int index = (derivedKey->size - 1) / HKS_DIGEST_SM3_LEN + 1; // round up
+    unsigned char counterBytes[HKS_BYTE_PER_INT] = { 0 };
+    unsigned int counter = HKS_START_NUM;
+    for (int i = 0; i < index; i++) {
+        for (int j = HKS_START_NUM; j <= HKS_BYTE_PER_INT; j++) {
+            counterBytes[j - 1] = (counter >> (HKS_BITS_PER_INT - HKS_BITS_PER_BYTE * j)) & 0xFF;
+        }
+        (void)memcpy_s(inputHashBlob.data + appendedKeyData.size, HKS_BYTE_PER_INT,
+            counterBytes, HKS_BYTE_PER_INT);
+        if (HksOpensslHash(HKS_DIGEST_SM3, &inputHashBlob, &cdgstBlob) != HKS_SUCCESS) {
+            HKS_LOG_E("Hash data failed.");
+            HKS_FREE_BLOB(appendedKeyData);
+            HKS_FREE_BLOB(inputHashBlob);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+        if ((i == (index - 1)) && (derivedKey->size % HKS_DIGEST_SM3_LEN != 0)) {
+            digestLength = (derivedKey->size) % HKS_DIGEST_SM3_LEN;
+        }
+        (void)memcpy_s(derivedKey->data + HKS_DIGEST_SM3_LEN * i, digestLength, cdgstBlob.data, digestLength);
+        counter++;
+    }
+    HKS_FREE_BLOB(appendedKeyData);
+    HKS_FREE_BLOB(inputHashBlob);
+    HKS_LOG_I("HksOpensslSmKdf success.");
+    return HKS_SUCCESS;
+}
+#endif /* HKS_SUPPORT_KDF_SM3 */

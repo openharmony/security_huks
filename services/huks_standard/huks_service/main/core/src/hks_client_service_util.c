@@ -73,9 +73,9 @@ int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     (void)memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize);
-    
+
     ret = HksFreshParamSet(paramSet, false);
-    
+
     HksFreeParamSet(&outParamSet);
     return ret;
 }

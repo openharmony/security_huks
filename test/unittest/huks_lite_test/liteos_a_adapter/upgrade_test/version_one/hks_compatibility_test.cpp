@@ -258,7 +258,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest002, TestSize.Level0)
     HKS_LOG_I("enter HksCompatibilityTest002");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
-    
+
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
     int32_t ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -521,7 +521,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     struct HksBlob keyAlias1 = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     const char *alias2 = "alias2_for_compatibily_test";
     struct HksBlob keyAlias2 = { .size = strlen(alias2), .data = (uint8_t *)alias2};
-    
+
     // generate key1 in old path
     int32_t ret = TestGenerateOldkey(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
@@ -541,7 +541,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
     ASSERT_EQ(keyInfoListSize, 2) << "keyInfoListSize is " << keyInfoListSize;
-    
+
     uint32_t hitCnt = 0;
     for (uint32_t i = 0; i < keyInfoListSize; ++i) {
         if (keyInfoList[i].alias.data != nullptr) {
@@ -568,7 +568,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest010, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest010");
     struct HksBlob keyAlias1 = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    
+
     // generate key1 in old path
     int32_t ret = TestGenerateOldkey(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
@@ -583,7 +583,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest010, TestSize.Level0)
     ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
     ASSERT_EQ(keyInfoListSize, 1) << "keyInfoListSize is " << keyInfoListSize;
-    
+
     uint32_t hitCnt = 0;
     for (uint32_t i = 0; i < keyInfoListSize; ++i) {
         if (keyInfoList[i].alias.data != nullptr) {
@@ -608,7 +608,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest011");
     struct HksBlob keyAlias1 = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    
+
     // generate key1 in old path with new version
     int32_t ret = TestGenerateNewKeyInOldPath(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
@@ -623,7 +623,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
     ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
-    
+
     uint32_t hitCnt = 0;
 
     for (uint32_t i = 0; i < keyInfoListSize; ++i) {

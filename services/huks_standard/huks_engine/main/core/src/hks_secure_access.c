@@ -821,7 +821,7 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
 
     struct HksParam *authResult = NULL;
     bool isNeedSecureAccess = true;
-    
+
     int32_t ret = CheckIfNeedVerifyParams(keyNode, &isNeedSecureAccess, &authResult);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "check if need verify params failed!")
 
@@ -1016,24 +1016,6 @@ static int32_t HksCheckCompareUserId(const struct HksParamSet *blobParamSet,
     return (blobUserId->uint32Param == runtimeUserId->uint32Param) ? HKS_SUCCESS : HKS_ERROR_BAD_STATE;
 }
 
-static int32_t HksCheckCompareKeyAlias(const struct HksParamSet *blobParamSet,
-    const struct HksParamSet *runtimeParamSet)
-{
-    struct HksParam *blobKeyAlias = NULL;
-    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_INNER_KEY_ALIAS, &blobKeyAlias);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "no key alias in keyblob")
-
-    struct HksParam *runtimeKeyAlias = NULL;
-    ret = HksGetParam(runtimeParamSet, HKS_TAG_INNER_KEY_ALIAS, &runtimeKeyAlias);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get key alias form runtime paramSet failed")
-
-    if (blobKeyAlias->blob.size == runtimeKeyAlias->blob.size &&
-        HksMemCmp(blobKeyAlias->blob.data, runtimeKeyAlias->blob.data, blobKeyAlias->blob.size) == HKS_SUCCESS) {
-        return HKS_SUCCESS;
-    }
-    return HKS_ERROR_BAD_STATE;
-}
-
 static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet,
     const struct HksParamSet *runtimeParamSet)
 {
@@ -1064,9 +1046,6 @@ int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const s
 
     ret = HksCheckCompareUserId(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "user id compare failed")
-
-    ret = HksCheckCompareKeyAlias(blobParamSet, runtimeParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "key alias compare failed")
 
     ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process name compare failed")

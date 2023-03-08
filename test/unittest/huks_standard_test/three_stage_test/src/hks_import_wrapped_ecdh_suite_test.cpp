@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,6 +237,16 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING},
     };
 
+    static struct HksParam g_encRsa4096KeyParams[] = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_4096},
+        {.tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_OAEP},
+        {.tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256},
+        {.tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR},
+        {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING},
+    };
+
     static struct HksBlob g_importedKeyAliasRsa4096 = {
         .size = strlen("test_import_key_ecdh_Rsa4096"),
         .data = (uint8_t *) "test_import_key_ecdh_Rsa4096"
@@ -466,9 +476,19 @@ namespace Unittest::ImportWrappedKey {
         importWrappedKeyTestParams002.importedPlainKey = &plainKey;
         InitCommonTestParamsAndDoImport(&importWrappedKeyTestParams002, g_importRsa4096KeyParams,
                                         sizeof(g_importRsa4096KeyParams) / sizeof(struct HksParam));
+
+        struct HksParamSet *encParams = nullptr;
+        ret = InitParamSet(&encParams, g_encRsa4096KeyParams,
+            sizeof(g_encRsa4096KeyParams) / sizeof(struct HksParam));
+        EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
+        uint8_t handleE[sizeof(uint64_t)] = {0};
+        struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+        ret = HksInit(importWrappedKeyTestParams002.importedKeyAlias, encParams, &handleEncrypt, nullptr);
+        EXPECT_EQ(ret, HKS_SUCCESS) << "importted key init failed!";
+        (void)HksAbort(&handleEncrypt, encParams);
+        HksFreeParamSet(&encParams);
         HksClearKeysForWrappedKeyTest(&importWrappedKeyTestParams002);
     }
-
 
     /**
      * @tc.name: HksImportWrappedEcdhSuiteTest.HksImportWrappedKeyTestEcdhSuite003

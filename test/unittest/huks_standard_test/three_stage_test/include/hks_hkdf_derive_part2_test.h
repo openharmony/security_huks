@@ -37,5 +37,13 @@ int HksHKDFDerive018(void);
 int HksHKDFDerive019(void);
 
 int HksHKDFDerive020(void);
+
+int HksHKDFDerive021(void);
+
+int HksHKDFDerive022(void);
+
+int HksHKDFDerive023(void);
+
+int HksHKDFDerive024(void);
 }
 #endif // HKS_HKDF_DERIVE_PART2_TEST_H
