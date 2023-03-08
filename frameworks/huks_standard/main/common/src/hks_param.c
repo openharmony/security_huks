@@ -445,15 +445,13 @@ HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, 
     return HKS_SUCCESS;
 }
 
-HKS_API_EXPORT int32_t HksDeleteTagFormParamSet(const uint32_t *tag, uint32_t tagCount,
+HKS_API_EXPORT int32_t HksDeleteTagFromParamSet(const uint32_t *tag, uint32_t tagCount,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     if (tag == NULL || paramSet == NULL || outParamSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+    int32_t ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fresh paramset failed")
 
     struct HksParamSet *newParamSet = NULL;
@@ -472,7 +470,7 @@ HKS_API_EXPORT int32_t HksDeleteTagFormParamSet(const uint32_t *tag, uint32_t ta
             ret = HksAddParams(newParamSet, &paramSet->params[i], 1);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("add in params failed");
-                HKS_FREE_PTR(newParamSet);
+                HksFreeParamSet(&newParamSet);
                 return ret;
             }
         }

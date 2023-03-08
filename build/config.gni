@@ -44,7 +44,7 @@ declare_args() {
   huks_dependency_openssl_path = ""
 
   # specify the uid white list for change key owner
-  huks_uid_white_list_define = "{}"
+  huks_uid_trust_list_define = "{}"
 
   # whether enable key file auto-upgrade
   huks_enable_upgrade_key = true

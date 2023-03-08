@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,19 @@
  * limitations under the License.
  */
 
-#include "hks_check_white_list.h"
+#include "hks_check_trust_list.h"
 
 #include "hks_log.h"
 
-static const uint32_t g_whiteList[] = HUKS_UID_WHITE_LIST;
+static const uint32_t g_trustList[] = HUKS_UID_TRUST_LIST;
 
-int32_t HksCheckIsInWhiteList(uint32_t uid)
+int32_t HksCheckIsInTrustList(uint32_t uid)
 {
-    uint32_t listSize = HKS_ARRAY_SIZE(g_whiteList);
+    uint32_t listSize = HKS_ARRAY_SIZE(g_trustList);
     int32_t ret = HKS_ERROR_NO_PERMISSION;
     uint32_t i = 0;
     for (; i < listSize; ++i) {
-        if (uid == g_whiteList[i]) {
+        if (uid == g_trustList[i]) {
             ret = HKS_SUCCESS;
             HKS_LOG_I("in white list");
             break;

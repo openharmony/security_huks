@@ -46,10 +46,6 @@
 
 #include "securec.h"
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-#include "hks_upgrade_storage_data.h"
-#endif
-
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 
 #include "hks_useridm_api_wrap.h"
@@ -123,13 +119,13 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     if (keyVersion->uint32Param == HKS_KEY_VERSION) {
         return ret;
     }
-    if (keyVersion->uint32Param == 0 || keyVersion->uint32Param > HKS_KEY_VERSION) {
-        return HKS_ERROR_BAD_STATE;
-    }
-
     struct HksBlob newKey = { .size = 0, .data = NULL };
-
     do {
+        if (keyVersion->uint32Param == 0 || keyVersion->uint32Param > HKS_KEY_VERSION) {
+            ret = HKS_ERROR_BAD_STATE;
+            break;
+        }
+
         ret = HksDoUpgradeKeyAccess(key, paramSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
@@ -140,6 +136,7 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
         key->size = newKey.size;
         return ret;
     } while (0);
+    HKS_FREE_BLOB(*key);
     HKS_FREE_BLOB(newKey);
 #endif
     return ret;
@@ -1160,10 +1157,6 @@ int32_t HksServiceInitialize(void)
 {
     int32_t ret;
     do {
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-        ret = HksUpgradeStorageData();
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks update storage data failed, ret = %" LOG_PUBLIC "d", ret)
-#endif
         ret = HuksAccessModuleInit();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks core service initialize failed! ret = %" LOG_PUBLIC "d", ret)
 
@@ -1187,10 +1180,6 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     int32_t ret = HksStoreDestroy(processName);
     HKS_LOG_I("destroy storage files ret = 0x%" LOG_PUBLIC "X", ret); /* only recode log */
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-    ret = HksDestroyOldVersionFiles();
-    HKS_LOG_I("destroy old version files ret = 0x%" LOG_PUBLIC "X", ret); /* only recode log */
-#endif
     do {
 #ifndef _HARDWARE_ROOT_KEY_
         ret = HuksAccessRefresh();

@@ -30,7 +30,7 @@
     #define HKS_KEY_STORE_PATH            "/data/service/el1/public/huks_service/maindata"
     #define HKS_KEY_STORE_BAK_PATH        "/data/service/el1/public/huks_service/bakdata"
 #else
-    #ifdef L1_SMALL
+    #ifdef HKS_L1_SMALL
         #define HKS_KEY_STORE_PATH            "/data/service/el1/public/huks_service/maindata"
         #define HKS_KEY_STORE_BAK_PATH        "/data/service/el1/public/huks_service/bakdata"
     #else

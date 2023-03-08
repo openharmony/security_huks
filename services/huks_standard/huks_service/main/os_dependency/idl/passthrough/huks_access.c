@@ -271,19 +271,6 @@ ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, c
 }
 #endif
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-ENABLE_CFI(int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo,
-    struct HksBlob *keyOut))
-{
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
-
-    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo, HKS_ERROR_NULL_POINTER,
-        "UpgradeKeyInfo function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
-}
-#endif
-
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 ENABLE_CFI(int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *certChain))
