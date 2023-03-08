@@ -77,7 +77,7 @@ if (os_level == "standard") {
     cflags = []
 
     complete_static_lib = true
-    cflags += [ "-DHUKS_UID_WHITE_LIST=${huks_uid_white_list_define}" ]
+    cflags += [ "-DHUKS_UID_TRUST_LIST=${huks_uid_trust_list_define}" ]
 
     deps = [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
 
@@ -86,7 +86,7 @@ if (os_level == "standard") {
     ]
 
     if (huks_enable_upgrade_small_to_service) {
-      sources += [ "src/hks_check_white_list.c" ]
+      sources += [ "src/hks_check_trust_list.c" ]
     }
   }
 }

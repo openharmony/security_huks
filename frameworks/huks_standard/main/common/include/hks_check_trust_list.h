@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CHECK_WHITE_LIST_H
-#define HKS_CHECK_WHITE_LIST_H
+#ifndef HKS_CHECK_TRUST_LIST_H
+#define HKS_CHECK_TRUST_LIST_H
 
 #include "hks_type_inner.h"
 
@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-int32_t HksCheckIsInWhiteList(uint32_t uid);
+int32_t HksCheckIsInTrustList(uint32_t uid);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HKS_CHECK_WHITE_LIST_H */
+#endif /* HKS_CHECK_TRUST_LIST_H */
 

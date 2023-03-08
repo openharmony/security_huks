@@ -21,7 +21,7 @@
 #include "hks_config.h"
 #endif
 
-#include "hks_check_white_list.h"
+#include "hks_check_trust_list.h"
 #include "hks_client_service_util.h"
 #include "hks_get_process_info.h"
 #include "hks_log.h"
@@ -35,7 +35,7 @@
 #include "securec.h"
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
-static int32_t HksIsProcessInfoInWhiteList(const struct HksProcessInfo *processInfo)
+static int32_t HksIsProcessInfoInTrustList(const struct HksProcessInfo *processInfo)
 {
     uint32_t uid = 0;
     if (processInfo->processName.size == sizeof(uid)) {
@@ -44,7 +44,7 @@ static int32_t HksIsProcessInfoInWhiteList(const struct HksProcessInfo *processI
         return HKS_ERROR_NO_PERMISSION;
     }
 
-    return HksCheckIsInWhiteList(uid);
+    return HksCheckIsInTrustList(uid);
 }
 
 #ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
@@ -61,9 +61,9 @@ void HksMarkOldKeyClearedIfEmpty(void)
     }
 }
 
-static int32_t HksIsOldKeyCleared(void)
+static bool HksIsOldKeyCleared(void)
 {
-    return isOldKeyCleared ? HKS_SUCCESS : HKS_FAILURE;
+    return isOldKeyCleared ? true : false;
 }
 #endif /** HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE */
 
@@ -82,7 +82,7 @@ int32_t HksCheckNeedUpgradeForSmallToService(const struct HksProcessInfo *proces
         return HKS_FAILURE;
     }
 #endif
-    return HksIsProcessInfoInWhiteList(processInfo);
+    return HksIsProcessInfoInTrustList(processInfo);
 }
 
 static int32_t HksConstructRootProcessInfo(struct HksProcessInfo *processInfo)

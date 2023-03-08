@@ -471,7 +471,7 @@ int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
 
     uint32_t authTokenDataSize = sizeof(struct HksUserAuthToken) - SHA256_SIGN_LEN;
     struct HksBlob srcDataBlob = { authTokenDataSize, (uint8_t *)authToken };
-    
+
     uint8_t computedMac[SHA256_SIGN_LEN] = {0};
     struct HksBlob macBlob = { SHA256_SIGN_LEN, computedMac };
     ret = HksCryptoHalHmac(&macKeyBlob, HKS_DIGEST_SHA256, &srcDataBlob, &macBlob);
@@ -486,8 +486,7 @@ int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
     return HKS_SUCCESS;
 }
 
-static int32_t HksBuildKeyBlob2(struct HksParamSet *keyBlobParamSet, const struct HksParamSet *paramSet,
-    struct HksBlob *keyOut)
+static int32_t HksBuildKeyBlob2(struct HksParamSet *keyBlobParamSet, struct HksBlob *keyOut)
 {
     struct HksParam *keyParam = NULL;
     int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY, &keyParam);
@@ -524,7 +523,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
         ret = BuildKeyBlobWithKeyParam(key, (enum HksKeyFlag)keyFlag, paramSet, &keyBlobParamSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = HksBuildKeyBlob2(keyBlobParamSet, paramSet, keyOut);
+        ret = HksBuildKeyBlob2(keyBlobParamSet, keyOut);
     } while (0);
     HksFreeParamSet(&keyBlobParamSet);
     return ret;
@@ -547,7 +546,10 @@ int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct Hks
         }
         keyOut->size = keyBlobParamSet->paramSetSize;
 
-        ret = HksBuildKeyBlob2(keyBlobParamSet, paramSet, keyOut);
+        ret = HksBuildKeyBlob2(keyBlobParamSet, keyOut);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(*keyOut);
+        }
     } while (0);
 
     HksFreeParamSet(&keyBlobParamSet);

@@ -126,7 +126,7 @@ void ChangeDirAndFiles(const char *path, uint32_t uid)
         }
     }
     if (ret != EOK) {
-        printf("chmod dir and file failed! errno = 0x% x \n", errno);
+        printf("chmod dir and file failed! errno = 0x%x \n", errno);
     }
     (void)closedir(dir);
 }

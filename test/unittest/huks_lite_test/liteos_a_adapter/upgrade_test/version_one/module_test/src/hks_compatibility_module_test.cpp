@@ -245,7 +245,7 @@ static int32_t TestDoServiceDecryptWithOtherUid(const struct HksBlob *keyAlias, 
 
 /**
  * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest001
- * @tc.desc: and have key in old path, test to check key existance without whiteList, expect fail
+ * @tc.desc: and have key in old path, test to check key existance without trust list, expect fail
  * @tc.type: FUNC
  */
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Level0)
@@ -294,7 +294,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
 
 /**
  * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest002
- * @tc.desc: test failed to get key to encrypt, and have key in old path without whiteList, then fail to enc or dec
+ * @tc.desc: test failed to get key to encrypt, and have key in old path without trust list, then fail to enc or dec
  * @tc.type: FUNC
  */
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Level0)
@@ -332,7 +332,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Lev
 
 /**
  * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest003
- * @tc.desc: test failed to get key to delete, and have key in old path without whiteList, then fail to delete
+ * @tc.desc: test failed to get key to delete, and have key in old path without trust list, then fail to delete
  * @tc.type: FUNC
  */
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Level0)
@@ -406,7 +406,7 @@ static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t lis
 
 /**
  * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest004
- * @tc.desc: test have key in old path without whiteList, then fail to get key info list
+ * @tc.desc: test have key in old path without trust list, then fail to get key info list
  * @tc.type: FUNC
  */
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Level0)
@@ -445,7 +445,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
 
 /**
  * @tc.name: HksCompatibilityModuleTest.HksCompatibilityModuleTest005
- * @tc.desc: test have key in old path and new path without whiteList, then only get key info list with new key
+ * @tc.desc: test have key in old path and new path without trust list, then only get key info list with new key
  * @tc.type: FUNC
  */
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Level0)

@@ -40,7 +40,7 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
         return HKS_SUCCESS;
     }
 
-#ifdef L1_SMALL
+#ifdef HKS_L1_SMALL
     g_halDeviceHandle = dlopen("libhuks_engine_core_standard.so", RTLD_NOW);
 #else
     g_halDeviceHandle = dlopen("libhuks_engine_core_standard.z.so", RTLD_NOW);

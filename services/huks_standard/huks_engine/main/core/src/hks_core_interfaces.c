@@ -162,13 +162,6 @@ int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
 }
 #endif
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HuksHdiUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut)
-{
-    return HksCoreUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
-}
-#endif
-
 struct HuksHdi *HuksCreateHdiDevicePtr(void)
 {
     struct HuksHdi *hdiDevicePtr = (struct HuksHdi *)HksMalloc(sizeof(struct HuksHdi));
@@ -203,9 +196,6 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-    hdiDevicePtr->HuksHdiUpgradeKeyInfo   = HuksHdiUpgradeKeyInfo;
-#endif
 #endif /* _CUT_AUTHENTICATE_ */
 
     hdiDevicePtr->HuksHdiGenerateRandom   = HksCoreGenerateRandom;

@@ -30,7 +30,7 @@
 #include "hks_type.h"
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
-#include "hks_check_white_list.h"
+#include "hks_check_trust_list.h"
 #endif
 
 #include "securec.h"
@@ -48,12 +48,11 @@ static const struct HksMandatoryParams* GetMandatoryParams(uint32_t keyVersion)
 
 static bool IsTagInMandatoryArray(uint32_t tag, uint32_t keyVersion)
 {
-    uint32_t i = 0;
-    const struct HksMandatoryParams* mandatoryParams = GetMandatoryParams(keyVersion);
+    const struct HksMandatoryParams *mandatoryParams = GetMandatoryParams(keyVersion);
     if (mandatoryParams == NULL) {
         return false;
     }
-    for (;i < mandatoryParams->paramsLen; ++i) {
+    for (uint32_t i = 0; i < mandatoryParams->paramsLen; ++i) {
         if (tag == mandatoryParams->params[i]) {
             return true;
         }
@@ -67,8 +66,7 @@ static int32_t AddParamsWithoutMandatory(uint32_t keyVersion, const struct HksPa
     (void)paramSet;
     int32_t ret = HKS_SUCCESS;
 
-    uint32_t i = 0;
-    for (; i < srcParamSet->paramsCnt; ++i) {
+    for (uint32_t i = 0; i < srcParamSet->paramsCnt; ++i) {
         if (!IsTagInMandatoryArray(srcParamSet->params[i].tag, keyVersion)) {
             ret = HksAddParams(targetParamSet, &(srcParamSet->params[i]), 1);
             if (ret != HKS_SUCCESS) {
@@ -101,10 +99,8 @@ static int32_t AddMandatoryParams(const struct HksParamSet *srcParamSet, const s
     return ret;
 }
 
-static int32_t AddMandatoryeParamsInCore(const struct HksParamSet *keyBlobParamSet,
-    const struct HksParamSet *srcParamSet, struct HksParamSet **targetParamSet)
+static int32_t AddMandatoryParamsInCore(const struct HksParamSet *srcParamSet, struct HksParamSet **targetParamSet)
 {
-    (void)keyBlobParamSet;
     struct HksParamSet *outParamSet = NULL;
     int32_t ret;
     do {
@@ -147,15 +143,14 @@ static int32_t HksIsToSkipProcessVerify(const struct HksParamSet *paramSet)
         return HKS_ERROR_NO_PERMISSION;
     }
 
-    return HksCheckIsInWhiteList(uid);
+    return HksCheckIsInTrustList(uid);
 }
 #endif
 
 static int32_t AuthChangeProcessName(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet)
 {
-    int32_t ret;
     struct HksParam *oldProcessName;
-    ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_PROCESS_NAME, &oldProcessName);
+    int32_t ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_PROCESS_NAME, &oldProcessName);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get process name from old key paramset failed!")
 
     struct HksParam *newProcessName;
@@ -170,7 +165,7 @@ static int32_t AuthChangeProcessName(const struct HksParamSet *oldKeyBlobParamSe
         if (ret != EOK) {
             return HKS_ERROR_NO_PERMISSION;
         }
-        ret = HksCheckIsInWhiteList(uid);
+        ret = HksCheckIsInTrustList(uid);
 #else
         return HKS_FAILURE;
 #endif
@@ -203,7 +198,7 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
     struct HksParamSet *oldKeyBlobParamSet = NULL;
     struct HksParamSet *newKeyBlobParamSet = NULL;
     struct HksKeyNode *keyNode = NULL;
-    struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *newMandatoryeParamSet = NULL;
     do {
         keyNode = HksGenerateKeyNode(oldKey);
         if (keyNode == NULL) {
@@ -229,14 +224,15 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
         ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_KEY_VERSION, &keyVersion);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key version failed!")
 
-        ret = AddMandatoryeParamsInCore(oldKeyBlobParamSet, paramSet, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryeParamsInCore failed!")
+        ret = AddMandatoryParamsInCore(paramSet, &newMandatoryeParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryParamsInCore failed!")
 
         // the key param must be the last one added
-        ret = AddMandatoryParams(oldKeyBlobParamSet, newParamSet, newKeyBlobParamSet);
+        ret = AddMandatoryParams(oldKeyBlobParamSet, newMandatoryeParamSet, newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryParams failed!")
 
-        ret = AddParamsWithoutMandatory(keyVersion->uint32Param, oldKeyBlobParamSet, newParamSet, newKeyBlobParamSet);
+        ret = AddParamsWithoutMandatory(keyVersion->uint32Param, oldKeyBlobParamSet, newMandatoryeParamSet,
+            newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddParamsWithoutMandatory failed!")
 
         ret = HksBuildParamSet(&newKeyBlobParamSet);
@@ -247,7 +243,7 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
 
     HksFreeParamSet(&newKeyBlobParamSet);
     HksFreeParamSet(&oldKeyBlobParamSet);
-    HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&newMandatoryeParamSet);
     HksFreeKeyNode(&keyNode);
 
     return ret;

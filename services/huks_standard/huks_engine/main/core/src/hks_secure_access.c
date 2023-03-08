@@ -1057,7 +1057,7 @@ static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HKS_SUCCESS;
-    
+
 #ifndef _STORAGE_LITE_
     ret = HksCheckCompareAccessTokenId(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "access token compare failed")

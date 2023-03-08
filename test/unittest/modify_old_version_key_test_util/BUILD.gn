@@ -29,6 +29,9 @@ ohos_static_library("huks_modify_old_version_key_util") {
 
   sources += [ "./hks_test_modify_old_key.c" ]
 
+  subsystem_name = "security"
+  part_name = "huks"
+
   include_dirs = [
     "../../../interfaces/inner_api/huks_standard/main/include",
     "../../../frameworks/huks_standard/main/common/include",

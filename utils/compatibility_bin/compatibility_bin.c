@@ -110,6 +110,39 @@ static void MoveOldFileToNew(const char *srcPath, const char *tarPath)
     (void)remove(srcPath);
 }
 
+static int ConstructSrcAndTargetPath(char *curPath, char *desPath, struct dirent *ptr,
+    const char *srcPath, const char *tarPath)
+{
+    int ret = strcpy_s(curPath, DEFAULT_PATH_LEN, srcPath);
+    if (ret != EOK) {
+        return ret;
+    }
+    ret = strcat_s(curPath, DEFAULT_PATH_LEN, "/");
+    if (ret != EOK) {
+        return ret;
+    }
+
+    ret = strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name);
+    if (ret != EOK) {
+        return ret;
+    }
+
+    ret = strcpy_s(desPath, DEFAULT_PATH_LEN, tarPath);
+    if (ret != EOK) {
+        return ret;
+    }
+    ret = strcat_s(desPath, DEFAULT_PATH_LEN, "/");
+    if (ret != EOK) {
+        return ret;
+    }
+
+    ret = strcat_s(desPath, DEFAULT_PATH_LEN, ptr->d_name);
+    if (ret != EOK) {
+        return ret;
+    }
+    return EOK;
+}
+
 static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
 {
     if (!opendir(tarPath)) {
@@ -118,44 +151,22 @@ static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
             return;
         }
     }
-    struct dirent* ptr;
-    DIR* dir = opendir(srcPath);
+    struct dirent *ptr;
+    DIR *dir = opendir(srcPath);
     int ret = EOK;
     while ((ptr = readdir(dir)) != NULL) {
         if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0) {
             continue;
         }
-
         char curPath[DEFAULT_PATH_LEN] = { 0 };
-        ret = strcpy_s(curPath, DEFAULT_PATH_LEN, srcPath);
-        if (ret != EOK) {
-            break;
-        }
-        ret = strcat_s(curPath, DEFAULT_PATH_LEN, "/");
-        if (ret != EOK) {
-            break;
-        }
-
-        ret = strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name);
-        if (ret != EOK) {
-            break;
-        }
-
         char desPath[DEFAULT_PATH_LEN] = { 0 };
-        ret = strcpy_s(desPath, DEFAULT_PATH_LEN, tarPath);
-        if (ret != EOK) {
-            break;
-        }
-        ret = strcat_s(desPath, DEFAULT_PATH_LEN, "/");
-        if (ret != EOK) {
-            break;
-        }
 
-        ret = strcat_s(desPath, DEFAULT_PATH_LEN, ptr->d_name);
+        ret = ConstructSrcAndTargetPath(curPath, desPath, ptr, srcPath, tarPath);
         if (ret != EOK) {
+            printf("construct src and target path failed!");
             break;
         }
-        if (ptr->d_type == DIR_TYPE) { // dir
+        if (ptr->d_type == DIR_TYPE) {
             MoveOldFolderToNew(curPath, desPath);
         } else {
             MoveOldFileToNew(curPath, desPath);

@@ -1194,14 +1194,6 @@ int32_t HksCoreRefreshKeyInfo(void)
 #endif
 }
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias,
-    const struct HksBlob *keyInfo, struct HksBlob *keyOut)
-{
-    return HksUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
-}
-#endif
-
 #ifdef _STORAGE_LITE_
 static int32_t GetMacKey(const struct HksBlob *salt, struct HksBlob *macKey)
 {
