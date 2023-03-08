@@ -25,6 +25,7 @@
 
 #include "hks_base_check.h"
 #include "hks_common_check.h"
+#include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
@@ -125,6 +126,12 @@ static uint32_t g_cipherAlg[] = {
 #ifdef HKS_SUPPORT_AES_C
     HKS_ALG_AES,
 #endif
+#ifdef HKS_SUPPORT_SM2_C
+    HKS_ALG_SM2,
+#endif
+#ifdef HKS_SUPPORT_SM4_C
+    HKS_ALG_SM4,
+#endif
 };
 #ifdef HKS_SUPPORT_API_SIGN_VERIFY
 static uint32_t g_signAlg[] = {
@@ -139,6 +146,9 @@ static uint32_t g_signAlg[] = {
 #endif
 #ifdef HKS_SUPPORT_ED25519_C
     HKS_ALG_ED25519,
+#endif
+#ifdef HKS_SUPPORT_SM2_C
+    HKS_ALG_SM2,
 #endif
 };
 #endif
@@ -174,6 +184,10 @@ static uint32_t g_unwrapSuite[] = {
 #if defined(HKS_SUPPORT_ECDH_C) && defined(HKS_SUPPORT_AES_GCM)
     HKS_UNWRAP_SUITE_ECDH_AES_256_GCM_NOPADDING,
 #endif
+#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM4_C)
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3,
+    HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7
+#endif
 };
 #endif /* _CUT_AUTHENTICATE_ */
 
@@ -183,6 +197,9 @@ static uint32_t g_deriveAlg[] = {
 #endif
 #ifdef HKS_SUPPORT_KDF_PBKDF2
     HKS_ALG_PBKDF2,
+#endif
+#ifdef HKS_SUPPORT_KDF_SM3
+    HKS_ALG_GMKDF,
 #endif
 };
 
@@ -198,6 +215,7 @@ static uint32_t g_digest[] = {
     HKS_DIGEST_SHA256,
     HKS_DIGEST_SHA384,
     HKS_DIGEST_SHA512,
+    HKS_DIGEST_SM3
 };
 static uint32_t g_macDigest[] = {
     HKS_DIGEST_SHA1,
@@ -287,8 +305,8 @@ static int32_t CheckGenKeyMacDeriveParams(
     uint32_t alg, uint32_t inputPurpose, const struct HksParamSet *paramSet, struct ParamsValues *params,
     uint32_t keyFlag)
 {
-    if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3) {
-        HKS_LOG_E("check mac or derive, not aes alg, alg: %" LOG_PUBLIC "u", alg);
+    if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3 && alg != HKS_ALG_SM4) {
+        HKS_LOG_E("check mac or derive, not valid alg, alg: %" LOG_PUBLIC "u", alg);
         return HKS_ERROR_INVALID_PURPOSE;
     }
 

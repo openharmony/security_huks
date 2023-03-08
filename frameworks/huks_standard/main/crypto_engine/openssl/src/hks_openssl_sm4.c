@@ -265,4 +265,60 @@ void HksOpensslSm4HalFreeCtx(void **cryptoCtx)
     HKS_FREE_PTR(*cryptoCtx);
 }
 
+int32_t HksOpensslSm4Encrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *cipherText)
+{
+    EVP_CIPHER_CTX *ctx = NULL;
+    struct HksBlob tmpCipherText = *cipherText;
+
+    int32_t ret;
+    switch (usageSpec->mode) {
+        case HKS_MODE_CBC:
+        case HKS_MODE_CTR:
+        case HKS_MODE_ECB:
+            ret = OpensslBlockCipherCryptInit(key, usageSpec, true, (void **)&ctx, GetSm4CipherType);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherCryptInit fail, ret = %" LOG_PUBLIC "d", ret)
+
+            ret = OpensslBlockCipherEncryptFinalThree((void **)&ctx, message, &tmpCipherText);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherEncryptFinalThree fail, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        default:
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    cipherText->size = tmpCipherText.size;
+    return ret;
+}
+
+int32_t HksOpensslSm4Decrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *plaintext)
+{
+    EVP_CIPHER_CTX *ctx = NULL;
+    struct HksBlob tmpPlaintext = *plaintext;
+
+    int32_t ret;
+    switch (usageSpec->mode) {
+        case HKS_MODE_CBC:
+        case HKS_MODE_CTR:
+        case HKS_MODE_ECB:
+            ret = OpensslBlockCipherCryptInit(key, usageSpec, false, (void **)&ctx, GetSm4CipherType);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherCryptInit fail, ret = %" LOG_PUBLIC "d", ret)
+
+            ret = OpensslBlockCipherDecryptFinalThree((void **)&ctx, message, &tmpPlaintext);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslBlockCipherDecryptFinalThree fail, ret = %" LOG_PUBLIC "d", ret)
+            break;
+        default:
+            HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);
+            return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    plaintext->size = tmpPlaintext.size;
+    return ret;
+}
+
 #endif

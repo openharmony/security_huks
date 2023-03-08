@@ -45,6 +45,7 @@ if (os_level == "standard") {
       "src/hks_core_service_three_stage.c",
       "src/hks_keyblob.c",
       "src/hks_keynode.c",
+      "src/hks_sm_import_wrap_key.c",
     ]
 
     deps = [
@@ -79,10 +80,7 @@ if (os_level == "standard") {
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
-    external_deps = [
-      "c_utils:utils",
-      "hiviewdfx_hilog_native:libhilog",
-    ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
 } else {
   ohos_shared_library("huks_engine_core_standard") {
@@ -114,6 +112,7 @@ if (os_level == "standard") {
       "src/hks_rkc.c",
       "src/hks_rkc_rw.c",
       "src/hks_secure_access.c",
+      "src/hks_sm_import_wrap_key.c",
     ]
 
     sources += [ "src/hks_upgrade_key.c" ]

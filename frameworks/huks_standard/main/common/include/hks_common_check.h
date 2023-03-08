@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 #include <stdint.h>
 
 #include "hks_type.h"
+#include "hks_crypto_hal.h"
 
 #define HKS_DIGEST_MD5_LEN 16
 #define HKS_DIGEST_SHA1_LEN 20
@@ -62,6 +63,13 @@ int32_t HksCheckWrappedDataFormatValidity(const struct HksBlob *wrappedData, uin
 
 int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t blobIndex, uint32_t totalBlobs,
     struct HksBlob *blob);
+
+int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage);
+
+int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlobParamSet,
+    const struct HksParamSet *runtimeParamSet, uint32_t tag);
+
+void SetRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec);
 #ifdef __cplusplus
 }
 #endif

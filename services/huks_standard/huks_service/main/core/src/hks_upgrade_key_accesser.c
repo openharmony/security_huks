@@ -89,7 +89,7 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
         ret = HksInitParamSet(&paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init paramSet failed!")
         const struct HksParamSet *oldKeyParamSet = (const struct HksParamSet *)oldKey->data;
-        
+
         keyBlobParamSet = (struct HksParamSet *)HksMalloc(oldKeyParamSet->paramSetSize);
         if (keyBlobParamSet == NULL) {
             ret = HKS_ERROR_MALLOC_FAIL;

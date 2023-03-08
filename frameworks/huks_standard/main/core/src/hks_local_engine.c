@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -319,6 +319,7 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
+    SetRsaPssSaltLen(paramSet, &usageSpec);
     bool needFree = true;
     struct HksBlob message = { 0, NULL };
     struct HksBlob keyMaterial = { 0, NULL };
@@ -351,7 +352,7 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
 
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
-
+    SetRsaPssSaltLen(paramSet, &usageSpec);
     bool needFree = true;
     struct HksBlob message = { 0, NULL };
     struct HksBlob keyMaterial = { 0, NULL };

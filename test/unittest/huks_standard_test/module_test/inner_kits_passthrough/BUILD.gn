@@ -185,7 +185,7 @@ ohos_static_library("libhukssdk_static") {
     external_deps += [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
-      "ipc:ipc_core",
+      "ipc:ipc_single",
     ]
   }
 }

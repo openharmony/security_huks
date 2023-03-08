@@ -174,6 +174,10 @@ static const uint32_t g_sm2Digest[] = {
     HKS_DIGEST_SM3,
     HKS_DIGEST_NONE
 };
+
+static const uint32_t g_sm2CipherPadding[] = {
+    HKS_PADDING_NONE,
+};
 #endif
 
 #ifdef HKS_SUPPORT_SM3_C
@@ -395,7 +399,9 @@ static const struct ParamsValuesChecker g_sm4ParamSet[] = {
     { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
         { true, 0, false} } },
     { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
-        { true, 0, false} } }
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm4Params[] = {
     { HKS_CHECK_TYPE_GEN_KEY, {
@@ -412,6 +418,14 @@ static const struct ExpectParamsValuesChecker g_expectSm4Params[] = {
         { true, g_sm4Purpose, HKS_ARRAY_SIZE(g_sm4Purpose) },
         { false, NULL, 0 },
         { true, g_sm4Mode, HKS_ARRAY_SIZE(g_sm4Mode) }
+        }
+    },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, {
+        { true, g_sm4KeySize, HKS_ARRAY_SIZE(g_sm4KeySize) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_sm3Digest, HKS_ARRAY_SIZE(g_sm3Digest) },
+        { false, NULL, 0 }
         }
     }
 };
@@ -581,8 +595,7 @@ static const uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_SM2_C
     {
         HKS_ALG_SM2,
-        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP | HKS_KEY_PURPOSE_UNWRAP |
-            HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_WRAP,
     },
 #endif
 #ifdef HKS_SUPPORT_SM3_C
@@ -595,7 +608,7 @@ static const uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_SM4_C
     {
         HKS_ALG_SM4,
-        HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_WRAP |
+        HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_WRAP |
             HKS_KEY_PURPOSE_UNWRAP | HKS_KEY_PURPOSE_MAC | HKS_KEY_PURPOSE_AGREE,
     },
 #endif
@@ -1501,6 +1514,10 @@ int32_t HksGetKeySize(uint32_t alg, const struct HksBlob *key, uint32_t *keySize
         case HKS_ALG_SM4:
             return CheckAndGetKeySize(key, g_sm4KeySize, HKS_ARRAY_SIZE(g_sm4KeySize), keySize);
 #endif
+#ifdef HKS_SUPPORT_SM2_C
+        case HKS_ALG_SM2:
+            return CheckAndGetKeySize(key, g_sm2KeySize, HKS_ARRAY_SIZE(g_sm2KeySize), keySize);
+#endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -1656,8 +1673,14 @@ int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inp
 
 int32_t CheckImportMutableParams(uint32_t alg, const struct ParamsValues *params)
 {
-    if (((alg == HKS_ALG_SM2) || (alg == HKS_ALG_DSA) || (alg == HKS_ALG_ED25519)) &&
+    if (((alg == HKS_ALG_DSA) || (alg == HKS_ALG_ED25519)) &&
         (params->purpose.value != HKS_KEY_PURPOSE_VERIFY)) {
+        HKS_LOG_E("Import key check purpose failed.");
+        return HKS_ERROR_INVALID_PURPOSE;
+    }
+
+    if ((alg == HKS_ALG_SM2) &&
+        ((params->purpose.value != HKS_KEY_PURPOSE_VERIFY) && (params->purpose.value != HKS_KEY_PURPOSE_ENCRYPT))) {
         HKS_LOG_E("Import key check purpose failed.");
         return HKS_ERROR_INVALID_PURPOSE;
     }
@@ -1804,6 +1827,11 @@ int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct P
             ret = CheckSm4Padding(inputParams);
             break;
 #endif
+#ifdef HKS_SUPPORT_SM2_C
+        case HKS_ALG_SM2:
+            ret = HksCheckValue(inputParams->padding.value, g_sm2CipherPadding, HKS_ARRAY_SIZE(g_sm2CipherPadding));
+            break;
+#endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -1827,6 +1855,8 @@ int32_t HksCheckCihperData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
         case HKS_ALG_SM4:
             return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_SM4);
 #endif
+        case HKS_ALG_SM2:
+            return HKS_SUCCESS;
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }

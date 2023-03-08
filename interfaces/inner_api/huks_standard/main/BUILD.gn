@@ -27,6 +27,8 @@ if (os_level == "standard") {
     }
     subsystem_name = "security"
     part_name = "huks"
+    innerapi_tags = [ "platformsdk" ]
+    version_script = "libhukssdk.map"
     public_configs = [ ":huks_config" ]
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",

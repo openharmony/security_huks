@@ -39,7 +39,7 @@ ohos_shared_library("huks_service") {
   ]
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "samgr:samgr_proxy",
   ]
 }

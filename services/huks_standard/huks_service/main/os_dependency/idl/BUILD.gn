@@ -47,7 +47,7 @@ if (os_level == "standard") {
       debug = false
     }
 
-    external_deps = [ "ipc:ipc_core" ]
+    external_deps = [ "ipc:ipc_single" ]
 
     external_deps += [ "access_token:libaccesstoken_sdk" ]
     defines = []
