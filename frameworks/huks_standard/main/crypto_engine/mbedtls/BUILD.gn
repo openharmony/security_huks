@@ -38,6 +38,7 @@ if (os_level == "standard") {
       "src/hks_mbedtls_ecdh.c",
       "src/hks_mbedtls_ecdsa.c",
       "src/hks_mbedtls_engine.c",
+      "src/hks_mbedtls_get_main_key.c",
       "src/hks_mbedtls_hash.c",
       "src/hks_mbedtls_hmac.c",
       "src/hks_mbedtls_kdf.c",
@@ -73,7 +74,10 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_mbedtls_small_static") {
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
+    include_dirs = [
+      "//commonlibrary/c_utils/base/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+    ]
 
     defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
     sources = [
@@ -88,12 +92,17 @@ if (os_level == "standard") {
       "src/hks_mbedtls_ecdh.c",
       "src/hks_mbedtls_ecdsa.c",
       "src/hks_mbedtls_engine.c",
+      "src/hks_mbedtls_get_main_key.c",
       "src/hks_mbedtls_hash.c",
       "src/hks_mbedtls_hmac.c",
       "src/hks_mbedtls_kdf.c",
       "src/hks_mbedtls_rsa.c",
       "src/hks_mbedtls_x25519.c",
+      "src/hks_rkc.c",
+      "src/hks_rkc_rw.c",
     ]
+
+    sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c" ]
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
     if (huks_dependency_mbedtls_path != "") {
@@ -107,7 +116,11 @@ if (os_level == "standard") {
       deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
     }
     complete_static_lib = true
-    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    deps += [
+      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
+      "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+    ]
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
     ]

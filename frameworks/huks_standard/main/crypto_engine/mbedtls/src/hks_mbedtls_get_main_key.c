@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,25 +19,20 @@
 #include "hks_config.h"
 #endif
 
-#include "hks_get_mainkey.h"
+#include "hks_mbedtls_get_main_key.h"
 
 #include "hks_log.h"
+#include "hks_template.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
 #endif
 
-int32_t HksGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
+int32_t HksMbedtlsGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
 {
     (void)message;
-
 #ifndef _HARDWARE_ROOT_KEY_
-#ifdef HKS_USE_MBEDTLS
     return HksRkcGetMainKey(mainKey);
-#else
-    (void)mainKey;
-    return HKS_ERROR_NOT_SUPPORTED;
-#endif
 #else
     /*
     * Currently, root key is implemented using stubs.

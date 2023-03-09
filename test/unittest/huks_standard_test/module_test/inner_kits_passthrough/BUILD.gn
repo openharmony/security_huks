@@ -27,7 +27,6 @@ config("public_huks_config") {
     "//base/security/huks/utils/list",
     "//base/security/huks/utils/mutex",
     "//base/security/huks/frameworks/huks_standard/main/core/include",
-    "//base/security/huks/frameworks/huks_standard/main/crypto_engine/mbedtls/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//commonlibrary/utils_lite/memory/include/",
@@ -93,11 +92,8 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
 ]
@@ -147,7 +143,6 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/utils/mutex",
 
     "//base/security/huks/frameworks/huks_standard/main/core/include",
-    "//base/security/huks/frameworks/huks_standard/main/crypto_engine/mbedtls/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//commonlibrary/utils_lite/memory/include/",

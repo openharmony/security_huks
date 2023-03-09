@@ -44,12 +44,16 @@ ohos_static_library("huks_modify_old_version_key_util") {
 
   deps = []
 
+  cflags = [
+    "-Wall",
+    "-Werror",
+  ]
+
   sources += [
     "../../../services/huks_standard/huks_engine/main/core/src/hks_auth.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
-    "../../../services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
@@ -73,11 +77,9 @@ ohos_static_library("huks_modify_old_version_key_util") {
     } else {
       deps += [ "../../../services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
     }
+
+    cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
   } else {
-    sources += [
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
-    ]
     deps += [
       "../../../frameworks/huks_standard/main:huks_small_frameworks",
       "../../../services/huks_standard/huks_service/main:libhuks_service_small_static",
@@ -90,6 +92,10 @@ ohos_static_library("huks_modify_old_version_key_util") {
       "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//commonlibrary/utils_lite:utils",
     ]
+
+    if (huks_use_hardware_root_key == true) {
+      cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
+    }
   }
 
   include_dirs += [
@@ -107,18 +113,9 @@ ohos_static_library("huks_modify_old_version_key_util") {
     defines += [ "HKS_USE_MBEDTLS" ]
   }
 
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-
   cflags += [ "-DHKS_KEY_VERSION=1" ]
 
   cflags += [ "-flto" ]
-
-  if (huks_use_hardware_root_key == true) {
-    cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
-  }
 
   cflags += [ "-D_BSD_SOURCE" ]
   cflags += [ "-D_HUKS_LOG_ENABLE_" ]
