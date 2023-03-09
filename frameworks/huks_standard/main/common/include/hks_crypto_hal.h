@@ -115,6 +115,8 @@ struct KeyMaterial25519 {
     uint32_t reserved;
 };
 
+typedef int32_t (*GetMainKey)(const struct HksBlob *, struct HksBlob *);
+
 typedef int32_t (*GenerateKey)(const struct HksKeySpec *, struct HksBlob *);
 
 typedef int32_t (*PubKey)(const struct HksBlob *, struct HksBlob *);
@@ -170,6 +172,8 @@ typedef int32_t (*BnExpMod)(struct HksBlob *, const struct HksBlob *,
     const struct HksBlob *, const struct HksBlob *);
 
 typedef void (*FreeCtx)(void **);
+
+int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
 
 int32_t HksCryptoHalGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key);
 

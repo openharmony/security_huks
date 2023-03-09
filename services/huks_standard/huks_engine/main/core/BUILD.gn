@@ -65,7 +65,6 @@ if (os_level == "standard") {
     sources += [
       "src/hks_attest.c",
       "src/hks_attest_utils.c",
-      "src/hks_get_mainkey.c",
       "src/hks_secure_access.c",
     ]
 
@@ -107,10 +106,7 @@ if (os_level == "standard") {
       "src/hks_core_interfaces.c",
       "src/hks_core_service.c",
       "src/hks_core_service_three_stage.c",
-      "src/hks_get_mainkey.c",
       "src/hks_keynode.c",
-      "src/hks_rkc.c",
-      "src/hks_rkc_rw.c",
       "src/hks_secure_access.c",
       "src/hks_sm_import_wrap_key.c",
     ]

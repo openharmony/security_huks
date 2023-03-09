@@ -134,11 +134,14 @@ if (ohos_kernel_type == "liteos_m") {
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_ecdh.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_ecdsa.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_engine.c",
+        "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_get_main_key.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_hash.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_hmac.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_kdf.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_rsa.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_x25519.c",
+        "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_rkc.c",
+        "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_rkc_rw.c",
       ]
 
       if (huks_dependency_mbedtls_path != "") {
@@ -166,11 +169,8 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_three_stage.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_get_mainkey.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_rkc_rw.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_sm_import_wrap_key.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_client_check.c",

@@ -36,7 +36,6 @@
 #include "hks_core_service_three_stage.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
-#include "hks_get_mainkey.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -1214,7 +1213,7 @@ static int32_t GetMacKey(const struct HksBlob *salt, struct HksBlob *macKey)
     uint8_t keyBuf[HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256)] = {0};
     struct HksBlob mk = { HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), keyBuf };
 
-    int32_t ret = HksGetMainKey(NULL, &mk);
+    int32_t ret = HksCryptoHalGetMainKey(NULL, &mk);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get kek failed, ret = %" LOG_PUBLIC "d", ret)
 
     struct HksKeyDerivationParam derParam = {

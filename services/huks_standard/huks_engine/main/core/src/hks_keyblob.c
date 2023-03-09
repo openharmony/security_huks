@@ -26,7 +26,6 @@
 
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
-#include "hks_get_mainkey.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -79,7 +78,7 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode)
 
 static int32_t GetEncryptKey(struct HksBlob *mainKey)
 {
-    return HksGetMainKey(NULL, mainKey);
+    return HksCryptoHalGetMainKey(NULL, mainKey);
 }
 
 static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBlobInfo *keyBlobInfo,
