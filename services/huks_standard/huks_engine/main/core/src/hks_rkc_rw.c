@@ -24,7 +24,8 @@
 #include "hks_template.h"
 
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
-#define HKS_RKC_KSF_BUF_LEN 258     /* the length of keystore buffer */
+#define HKS_RKC_KSF_BUF_LEN 258     /* the length of rkc keystore buffer */
+#define HKS_MK_KSF_BUF_LEN  258     /* the length of mk keystore buffer */
 #define USER_ID_ROOT_DEFAULT          "0"
 
 /* the flag of keystore file, used to identify files as HKS keystore file, don't modify. */
@@ -33,11 +34,13 @@ const uint8_t g_hksRkcKsfFlag[HKS_RKC_KSF_FLAG_LEN] = { 0x5F, 0x64, 0x97, 0x8D, 
 /* the configuration of root key component */
 struct HksRkcCfg g_hksRkcCfg = {
     .state = HKS_RKC_STATE_INVALID,
-    .version = HKS_RKC_VER,
+    .rkVersion = HKS_RKC_VER,
+    .mkVersion = HKS_MK_VER,
     .storageType = HKS_RKC_STORAGE_FILE_SYS,
     .rkCreatedTime = { 0, 0, 0, 0, 0, 0 },
     .rkExpiredTime = { 0, 0, 0, 0, 0, 0 },
-    .ksfAttr = { 0, { NULL, NULL} },
+    .ksfAttrRkc = { 0, { NULL, NULL} },
+    .ksfAttrMk = {0, {NULL, NULL} },
     .rmkIter = HKS_RKC_RMK_ITER,
     .rmkHashAlg = HKS_RKC_RMK_HMAC_SHA256,
     .mkMask = {0},
@@ -163,6 +166,8 @@ static int32_t RkcExtractKsfRk(const struct HksBlob *ksfFromFile,
 static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
     uint32_t *ksfBufOffset, struct HksRkcKsfData *ksfData)
 {
+    // todo: check filename to decide whether extract version
+
     /* Extract mkCreatedTime */
     int32_t ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->mkCreatedTime));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract mkCreatedTime failed!")
@@ -252,11 +257,20 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
     return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
 }
 
-static int32_t GetProcessInfo(char **processName, char **userId)
+static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
 {
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+    char *userId = NULL;
+    char *processName = NULL;
 
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetUserId(userId), HKS_ERROR_INTERNAL_ERROR, "get user id failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+
+    processInfo->userId->size = strlen(userId);
+    processInfo->userId->data = (uint8_t *)userId;
+    processInfo->processName->size = strlen(processName);
+    processInfo->processName->data = (uint8_t *)processName;
+    processInfo->userIdInt = 0;
+    processInfo->accessTokenId = 0;
 
     return HKS_SUCCESS;
 }
@@ -272,20 +286,14 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
 
     int32_t ret;
     do {
-        char *processName = NULL;
-        char *userId = NULL;
-        if (GetProcessInfo(&processName, &userId) != HKS_SUCCESS) {
-            HKS_LOG_E("get process info failed");
-            ret = HKS_ERROR_INTERNAL_ERROR;
-            break;
+        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        ret = GetProcessInfo(&processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(processInfo.userId);
+            HKS_FREE_BLOB(processInfo.processName);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
         }
 
-        struct HksProcessInfo processInfo = {
-            { strlen(userId), (uint8_t *)userId },
-            { strlen(processName), (uint8_t *)processName },
-            0,
-            0
-        };
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
 
         ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
@@ -297,6 +305,8 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
     /* the data of root key should be cleared after use */
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
     HKS_FREE_BLOB(tmpKsf);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
@@ -491,11 +501,11 @@ static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob
     return HKS_SUCCESS;
 }
 
-int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
+int32_t HksRkcWriteKsf(const char *ksfName, const struct HksKsfDataRkc *ksfDataRkc)
 {
     struct HksBlob ksfBuf;
     ksfBuf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
-    HKS_IF_NULL_LOGE_RETURN(ksfBuf.data, HKS_ERROR_MALLOC_FAIL, "Malloc ksf buffer failed!")
+    HKS_IF_NULL_LOGE_RETURN(ksfBuf.data, HKS_ERROR_MALLOC_FAIL, "Malloc rkc ksf buffer failed!")
 
     ksfBuf.size = HKS_RKC_KSF_BUF_LEN;
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
@@ -503,59 +513,100 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData)
     int32_t ret;
     do {
         /* Fill data into buffer */
-        ret = RkcFillKsfBuf(ksfData, &ksfBuf);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+        ret = RkcFillKsfBuf(ksfDataRkc, &ksfBuf);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill rkc ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        char *processName = NULL;
-        char *userId = NULL;
-        if (GetProcessInfo(&processName, &userId) != HKS_SUCCESS) {
-            HKS_LOG_E("get process info failed");
-            ret = HKS_ERROR_INTERNAL_ERROR;
-            break;
+        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        ret = GetProcessInfo(&processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(processInfo.userId);
+            HKS_FREE_BLOB(processInfo.processName);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
         }
-
-        struct HksProcessInfo processInfo = {
-            { strlen(userId), (uint8_t *)userId },
-            { strlen(processName), (uint8_t *)processName },
-            0,
-            0
-        };
+        
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
         ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
-        HKS_IF_NOT_SUCC_LOGE(ret, "Store ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+        HKS_IF_NOT_SUCC_LOGE(ret, "Store rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
     HKS_FREE_BLOB(ksfBuf);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
-bool RkcKsfExist(void)
+int32_t HksMkWriteKsf(const char *ksfName, const struct HksKsfDataMk *ksfDataMk)
 {
-    char *processName = NULL;
-    char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId),
-        HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+    struct HksBlob ksfBuf;
+    ksfBuf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
+    HKS_IF_NULL_LOGE_RETURN(ksfBuf.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk ksf buffer failed!")
 
-    struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
-        0,
-        0
-    };
+    ksfBuf.size = HKS_RKC_KSF_BUF_LEN;
+    (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
 
-    for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttr.num; ++i) {
-        const struct HksBlob fileNameBlob = {
-            strlen(g_hksRkcCfg.ksfAttr.name[i]),
-            (uint8_t *)(g_hksRkcCfg.ksfAttr.name[i])
-        };
+    int32_t ret;
+    do {
+        /* Fill data into buffer */
+        ret = RkcFillKsfBuf(ksfDataMk, &ksfBuf);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill mk ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        int32_t ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
-        if (ret == HKS_SUCCESS) {
-            /* return true if one exists */
-            return true;
+        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        ret = GetProcessInfo(&processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(processInfo.userId);
+            HKS_FREE_BLOB(processInfo.processName);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
         }
+
+        /* write buffer data into keystore file */
+        const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
+        ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
+        HKS_IF_NOT_SUCC_LOGE(ret, "Store mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+    } while (0);
+
+    (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
+    HKS_FREE_BLOB(ksfBuf);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+    return ret;
+}
+
+bool KsfExist(uint8_t ksfType)
+{
+    struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+    ret = GetProcessInfo(&processInfo);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_BLOB(processInfo.userId);
+        HKS_FREE_BLOB(processInfo.processName);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+    }
+
+    if (ksfType == HKS_KSF_TYPE_RKC){
+        for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrRkc.num; ++i) {
+            const struct HksBlob fileNameBlob = {
+                strlen(g_hksRkcCfg.ksfAttrRkc.name[i]),
+                (uint8_t *)(g_hksRkcCfg.ksfAttrRkc.name[i])
+            };
+        }
+    } else {
+        for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrMk.num; ++i) {
+            const struct HksBlob fileNameBlob = {
+                strlen(g_hksRkcCfg.ksfAttrMk.name[i]),
+                (uint8_t *)(g_hksRkcCfg.ksfAttrMk.name[i])
+            };
+        }
+    }        
+
+    int32_t ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+
+    if (ret == HKS_SUCCESS) {
+        /* return true if one exists */
+        return true;
     }
 
     return false;
