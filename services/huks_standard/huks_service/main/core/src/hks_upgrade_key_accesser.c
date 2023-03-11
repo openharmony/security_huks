@@ -26,7 +26,6 @@
 #include "huks_access.h"
 #include "hks_client_service_util.h"
 #include "hks_log.h"
-#include "hks_mandatory_params.h"
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"

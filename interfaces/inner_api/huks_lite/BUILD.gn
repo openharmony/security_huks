@@ -158,6 +158,7 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../frameworks/huks_standard/main/common/src/hks_common_check.c",
       "../../../frameworks/huks_standard/main/common/src/hks_crypto_adapter.c",
       "../../../frameworks/huks_standard/main/common/src/hks_param.c",
+      "../../../frameworks/huks_standard/main/common/src/hks_tags_type_manager.c",
       "../../../frameworks/huks_standard/main/core/src/hks_local_engine.c",
       "../../../frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_passthrough.c",
       "../../../frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",

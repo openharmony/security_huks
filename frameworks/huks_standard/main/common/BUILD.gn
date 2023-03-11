@@ -40,6 +40,7 @@ if (os_level == "standard") {
       "src/hks_common_check.c",
       "src/hks_crypto_adapter.c",
       "src/hks_param.c",
+      "src/hks_tags_type_manager.c",
     ]
 
     complete_static_lib = true
@@ -72,6 +73,7 @@ if (os_level == "standard") {
       "src/hks_common_check.c",
       "src/hks_crypto_adapter.c",
       "src/hks_param.c",
+      "src/hks_tags_type_manager.c",
     ]
 
     cflags = []
