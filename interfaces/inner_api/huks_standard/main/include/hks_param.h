@@ -142,7 +142,7 @@ HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, 
  */
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag);
 
-HKS_API_EXPORT int32_t HksDeleteTagFromParamSet(const uint32_t *tag, uint32_t tagCount,
+HKS_API_EXPORT int32_t HksDeleteTagsFromParamSet(const uint32_t *tag, uint32_t tagCount,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
 #ifdef __cplusplus

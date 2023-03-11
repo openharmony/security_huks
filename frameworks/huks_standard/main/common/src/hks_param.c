@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -446,7 +446,7 @@ HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, 
     return HKS_SUCCESS;
 }
 
-HKS_API_EXPORT int32_t HksDeleteTagFromParamSet(const uint32_t *tag, uint32_t tagCount,
+HKS_API_EXPORT int32_t HksDeleteTagsFromParamSet(const uint32_t *tag, uint32_t tagCount,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     if (tag == NULL || paramSet == NULL || outParamSet == NULL) {
