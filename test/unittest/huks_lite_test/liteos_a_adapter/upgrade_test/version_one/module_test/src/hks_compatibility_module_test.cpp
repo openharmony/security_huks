@@ -142,7 +142,7 @@ static struct HksParam g_decryptParams001[] = {
 
 #define USER_ID "0"
 #define OLD_PROCESS_NAME "hks_client"
-const static struct HksProcessInfo OLD_PROCESS_INFO = {
+static const struct HksProcessInfo OLD_PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
     { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
     0,
