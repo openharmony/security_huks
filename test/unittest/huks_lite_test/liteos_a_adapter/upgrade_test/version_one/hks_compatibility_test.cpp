@@ -66,7 +66,7 @@ static const char KEY_ALIAS[] = "test_compatibility_key";
 static const uint32_t IV_SIZE = 16;
 static uint8_t IV[IV_SIZE] = {0};
 
-const static struct HksParam GEN_AES_PARAMS[] = {
+static const struct HksParam GEN_AES_PARAMS[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -85,7 +85,7 @@ const static struct HksParam GEN_AES_PARAMS[] = {
     }
 };
 
-const static struct HksParam ENCYPT_AES_PARAMS[] = {
+static const struct HksParam ENCYPT_AES_PARAMS[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -113,7 +113,7 @@ const static struct HksParam ENCYPT_AES_PARAMS[] = {
     }
 };
 
-const static struct HksParam DECRYPT_AES_PARAMS[] = {
+static const struct HksParam DECRYPT_AES_PARAMS[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
@@ -143,7 +143,7 @@ const static struct HksParam DECRYPT_AES_PARAMS[] = {
 
 #define USER_ID "0"
 #define OLD_PROCESS_NAME "hks_client"
-const static struct HksProcessInfo OLD_PROCESS_INFO = {
+static const struct HksProcessInfo OLD_PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
     { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
     0,
