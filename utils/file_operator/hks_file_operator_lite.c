@@ -150,9 +150,6 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
 
-    HKS_LOG_E("write file len is %d", len);
-    HKS_LOG_E("write file size is %d", size);
-
     fsync(fd);
     close(fd);
     return HKS_SUCCESS;

@@ -157,10 +157,6 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct
         HKS_IF_NOT_SUCC_BREAK(ret, HKS_ERROR_IPC_MSG_FAIL)
 
         ret = SynchronizeOutput(&replyHandle, outBlob);
-
-        HKS_FREE_PTR(dataReq);
-        HKS_FREE_PTR(dataReply);
-        return ret;
     } while (0);
     HKS_FREE_PTR(dataReq);
     HKS_FREE_PTR(dataReply);

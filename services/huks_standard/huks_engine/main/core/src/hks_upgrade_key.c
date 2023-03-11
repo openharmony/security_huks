@@ -238,7 +238,7 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
         ret = HksBuildParamSet(&newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build newKeyBlobParamSet failed!")
 
-        ret = HksBuildKeyBlobWithOutAdd(newKeyBlobParamSet, newKey);
+        ret = HksBuildKeyBlobWithOutAddKeyParam(newKeyBlobParamSet, newKey);
     } while (0);
 
     HksFreeParamSet(&newKeyBlobParamSet);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -529,7 +529,7 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
 }
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
-int32_t HksBuildKeyBlobWithOutAdd(const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+int32_t HksBuildKeyBlobWithOutAddKeyParam(const struct HksParamSet *paramSet, struct HksBlob *keyOut)
 {
     struct HksParamSet *keyBlobParamSet = NULL;
     int32_t ret;

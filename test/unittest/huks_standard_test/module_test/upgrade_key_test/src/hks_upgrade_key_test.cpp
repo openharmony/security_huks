@@ -224,6 +224,7 @@ static int32_t TestCheckKeyVersionIsExpected(struct HksBlob *keyAlias, uint32_t 
     ret = HksGetParam(paramOutSet, HKS_TAG_KEY_VERSION, &keyVersion);
     EXPECT_TRUE(ret == HKS_SUCCESS) << "get key version failed : " << ret;
     EXPECT_EQ(keyVersion->uint32Param, expectedKeyVersion);
+    HksFreeParamSet(&paramOutSet);
     return ret;
 }
 

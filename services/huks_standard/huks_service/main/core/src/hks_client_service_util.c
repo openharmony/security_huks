@@ -64,7 +64,7 @@ int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
 
     const struct HksParamSet *tmpParamSet = (const struct HksParamSet *)key->data;
     struct HksParamSet *outParamSet = NULL;
-    int32_t ret = HksDeleteTagFromParamSet(SENSITIVE_DELETE_TAG,
+    int32_t ret = HksDeleteTagsFromParamSet(SENSITIVE_DELETE_TAG,
         sizeof(SENSITIVE_DELETE_TAG) / sizeof(SENSITIVE_DELETE_TAG[0]), tmpParamSet, &outParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "delete tag from paramSet failed, ret = %" LOG_PUBLIC "d.", ret)
 
