@@ -19,7 +19,7 @@
 #include "hks_type_inner.h"
 
 #undef HKS_ASSIGN_ENUM_VALUE
-#define HKS_ASSIGN_ENUM_VALUE(x,y) x,
+#define HKS_ASSIGN_ENUM_VALUE(x, y) x,
 
 static const uint32_t HKS_ALG_PARAMS_TAG[] = { HKS_ASSIGN_ALG_ENUM HKS_ASSIGN_INNER_TAG_ENUM };
 static const uint32_t HKS_KEY_FILE_TAGS[] = { HKS_ASSIGN_KEY_FILE_ENUM };
