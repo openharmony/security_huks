@@ -23,7 +23,6 @@ ohos_fuzztest("HksFinishFuzzTest") {
 
   include_dirs = [
     ".",
-    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "//unittest/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",

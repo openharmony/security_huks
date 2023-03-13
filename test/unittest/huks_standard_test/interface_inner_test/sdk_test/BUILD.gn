@@ -49,7 +49,6 @@ ohos_unittest("hukssdk_test") {
   ]
 
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "./include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",

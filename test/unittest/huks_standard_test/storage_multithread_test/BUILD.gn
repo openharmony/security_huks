@@ -38,7 +38,6 @@ ohos_unittest("huks_multithread_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/mutex",
-    "//commonlibrary/c_utils/base/include",
     "unittest/include",
   ]
   deps = [

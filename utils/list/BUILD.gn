@@ -54,6 +54,5 @@ if (os_level == "standard") {
     sources = [ "hks_double_list.c" ]
 
     complete_static_lib = true
-    deps = [ "//commonlibrary/utils_lite:utils" ]
   }
 }

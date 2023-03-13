@@ -27,7 +27,7 @@ int32_t HksCheckIsInTrustList(uint32_t uid)
     for (; i < listSize; ++i) {
         if (uid == g_trustList[i]) {
             ret = HKS_SUCCESS;
-            HKS_LOG_I("in white list");
+            HKS_LOG_I("uid %" LOG_PUBLIC "u is in white list", uid);
             break;
         }
     }

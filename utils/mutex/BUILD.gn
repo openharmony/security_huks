@@ -68,7 +68,6 @@ if (os_level == "standard") {
     deps = [
       "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
-      "//commonlibrary/utils_lite:utils",
     ]
     complete_static_lib = true
   }

@@ -29,7 +29,6 @@ if (os_level == "standard") {
       defines += [ "HKS_USE_MBEDTLS" ]
     }
     include_dirs = [
-      "//commonlibrary/c_utils/base/include",
       "//base/security/huks/utils/crypto_adapter",
       "//base/security/huks/utils/file_operator",
       "//base/security/huks/utils/list",
@@ -93,7 +92,6 @@ if (os_level == "standard") {
       defines += [ "HKS_USE_MBEDTLS" ]
     }
     include_dirs = [
-      "//commonlibrary/c_utils/base/include",
       "//base/security/huks/utils/crypto_adapter",
       "//base/security/huks/utils/file_operator",
       "//base/security/huks/utils/list",
@@ -136,9 +134,6 @@ if (os_level == "standard") {
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
 
-    deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//commonlibrary/utils_lite:utils",
-    ]
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
   }
 }

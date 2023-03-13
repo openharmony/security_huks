@@ -74,7 +74,6 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_small_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
-      "//commonlibrary/utils_lite:utils",
     ]
 
     if (huks_dependency_mbedtls_path != "") {

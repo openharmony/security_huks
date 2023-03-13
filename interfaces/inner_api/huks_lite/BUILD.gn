@@ -41,8 +41,6 @@ config("soft_huks_config") {
     "../../../frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "../../../services/huks_standard/huks_engine/main/core/include",
     "../../../services/huks_standard/huks_service/main/core/include",
-    "//commonlibrary/utils_lite/memory/include/",
-    "//commonlibrary/utils_lite/include/",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
     "//base/security/huks/utils/crypto_adapter",
@@ -204,7 +202,6 @@ if (ohos_kernel_type == "liteos_m") {
     }
 
     include_dirs = [
-      "//commonlibrary/c_utils/base/include",
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     ]
@@ -320,7 +317,6 @@ if (ohos_kernel_type == "liteos_m") {
     deps += [
       "//base/security/huks/frameworks/huks_standard/main:huks_small_frameworks",
       "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
-      "//commonlibrary/utils_lite:utils",
     ]
   }
 
