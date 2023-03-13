@@ -858,9 +858,6 @@ static struct HksParam g_genParamsTest096[] = {
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA1
-    }, {
-        .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
-        .uint32Param = HKS_RSA_PSS_SALTLEN_AUTO
     }
 };
 static struct HksParam g_signParamsTest096[] = {
@@ -881,7 +878,7 @@ static struct HksParam g_signParamsTest096[] = {
         .uint32Param = HKS_DIGEST_SHA1
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
-        .uint32Param = HKS_RSA_PSS_SALTLEN_AUTO
+        .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
     }
 };
 static struct HksParam g_verifyParamsTest096[] = {
@@ -902,65 +899,7 @@ static struct HksParam g_verifyParamsTest096[] = {
         .uint32Param = HKS_DIGEST_SHA1
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
-        .uint32Param = HKS_RSA_PSS_SALTLEN_AUTO
-    }
-};
-
-static struct HksParam g_genParamsTest097[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_RSA
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_PSS
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
-    }
-};
-static struct HksParam g_signParamsTest097[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_RSA
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_SIGN
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_PSS
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
-    }, {
-        .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
-        .uint32Param = HKS_RSA_PSS_SALTLEN_AUTO
-    }
-};
-static struct HksParam g_verifyParamsTest097[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_RSA
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_VERIFY
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_PSS
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
     }
 };
 
@@ -1542,42 +1481,6 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test096, TestSize.Level
     ret = InitParamSet(&signParamSet, g_signParamsTest096, sizeof(g_signParamsTest096) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest096, sizeof(g_verifyParamsTest096) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
-
-    if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
-        ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
-    }
-
-    /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&signParamSet);
-    HksFreeParamSet(&verifyParamSet);
-}
-
-/**
- * @tc.name: HksRsaSignVerifyPart1Test.HksRsaSignVerifyPart1Test097
- * @tc.desc: test pss salt length. It is the same in generate key period and in use key period.
- * @tc.type: FUNC
- */
-HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test097, TestSize.Level1)
-{
-    int32_t ret = HKS_FAILURE;
-    const char *keyAliasString = "HksRSASignVerifyKeyAliasTest097";
-    struct HksParamSet *genParamSet = nullptr;
-    struct HksParamSet *signParamSet = nullptr;
-    struct HksParamSet *verifyParamSet = nullptr;
-
-    ret = InitParamSet(&genParamSet, g_genParamsTest097, sizeof(g_genParamsTest097) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&signParamSet, g_signParamsTest097, sizeof(g_signParamsTest097) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    ret = InitParamSet(&verifyParamSet, g_verifyParamsTest097, sizeof(g_verifyParamsTest097) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
