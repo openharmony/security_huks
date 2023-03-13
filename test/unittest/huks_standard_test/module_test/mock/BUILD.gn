@@ -40,10 +40,7 @@ ohos_unittest("huks_mock_test") {
   ]
   defines += [ "_USE_OPENSSL_" ]
 
-  include_dirs += [
-    "//commonlibrary/c_utils/base/include",
-    "//test/xts/acts/security_lite/huks/common/include",
-  ]
+  include_dirs += [ "//test/xts/acts/security_lite/huks/common/include" ]
 
   sources += [
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",

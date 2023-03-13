@@ -88,10 +88,7 @@ ohos_static_library("huks_modify_old_version_key_util") {
       "../../../utils/list:libhuks_utils_list_static",
       "../../../utils/mutex:libhuks_utils_mutex_static",
     ]
-    deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//commonlibrary/utils_lite:utils",
-    ]
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
 
     if (huks_use_hardware_root_key == true) {
       cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
@@ -100,7 +97,6 @@ ohos_static_library("huks_modify_old_version_key_util") {
 
   include_dirs += [
     "../../../services/huks_standard/huks_engine/main/core/include",
-    "//commonlibrary/c_utils/base/include",
     "../../../utils/crypto_adapter",
     "../../../utils/file_operator",
     "../../../utils/list",

@@ -204,10 +204,7 @@ ohos_unittest("huks_module_test") {
     defines += [ "_USE_OPENSSL_" ]
   }
 
-  include_dirs += [
-    "//commonlibrary/c_utils/base/include",
-    "//test/xts/acts/security_lite/huks/common/include",
-  ]
+  include_dirs += [ "//test/xts/acts/security_lite/huks/common/include" ]
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]

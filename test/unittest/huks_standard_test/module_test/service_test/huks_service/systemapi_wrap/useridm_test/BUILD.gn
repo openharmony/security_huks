@@ -27,7 +27,6 @@ ohos_unittest("huks_useridm_wrap_test") {
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm/inc",

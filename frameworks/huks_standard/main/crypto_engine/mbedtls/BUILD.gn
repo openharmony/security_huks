@@ -24,8 +24,6 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [ "//commonlibrary/c_utils/base/include" ]
-
     sources = [
       "src/hks_crypto_ed25519.c",
       "src/hks_mbedtls_ability.c",
@@ -74,10 +72,7 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_mbedtls_small_static") {
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [
-      "//commonlibrary/c_utils/base/include",
-      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
-    ]
+    include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
 
     defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
     sources = [

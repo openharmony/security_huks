@@ -64,10 +64,7 @@ if (os_level == "standard") {
 
     complete_static_lib = true
 
-    deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//commonlibrary/utils_lite:utils",
-    ]
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
     sources += [
       "./sysinfo/src/hks_get_process_info_passthrough.c",
       "./sysinfo/src/hks_get_udid.c",
