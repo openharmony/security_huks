@@ -35,6 +35,8 @@
 #include "securec.h"
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
+#define HKS_OLD_KEY_VERSION_FOR_SDK_HUKS 1
+
 static int32_t HksIsProcessInfoInTrustList(const struct HksProcessInfo *processInfo)
 {
     uint32_t uid = 0;
@@ -49,7 +51,7 @@ static int32_t HksIsProcessInfoInTrustList(const struct HksProcessInfo *processI
 
 #ifdef HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE
 // it is ok for no mutex lock, because the hugest problem it can lead to is checking key directory for nothing once
-static volatile bool isOldKeyCleared = false;
+static volatile bool g_isOldKeyCleared = false;
 
 void HksMarkOldKeyClearedIfEmpty(void)
 {
@@ -57,13 +59,13 @@ void HksMarkOldKeyClearedIfEmpty(void)
     int32_t ret = HksIsOldKeyPathCleared(&keyCount);
     if (ret == HKS_SUCCESS && keyCount == 0) {
         // record mark
-        isOldKeyCleared = true;
+        g_isOldKeyCleared = true;
     }
 }
 
 static bool HksIsOldKeyCleared(void)
 {
-    return isOldKeyCleared ? true : false;
+    return g_isOldKeyCleared ? true : false;
 }
 #endif /** HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE */
 
@@ -125,8 +127,7 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
         }
         ret = HksStoreGetKeyBlob(&rootProcessInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &oldKey);
         HKS_IF_NOT_SUCC_BREAK(ret)
-        const uint32_t oldKeyVersion = 1;
-        ret = HksIsKeyExpectedVersion(&oldKey, oldKeyVersion);
+        ret = HksIsKeyExpectedVersion(&oldKey, HKS_OLD_KEY_VERSION_FOR_SDK_HUKS);
         if (ret != HKS_SUCCESS) {
             ret = HKS_ERROR_NOT_EXIST;
             break;
@@ -166,9 +167,7 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
 
         ret = ConstructUpgradeKeyParamSet(processInfo, paramSet, &upgradeParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct param set failed!")
-        const uint32_t oldKeyVersion = 1;
-
-        ret = HksIsKeyExpectedVersion(&oldKey, oldKeyVersion);
+        ret = HksIsKeyExpectedVersion(&oldKey, HKS_OLD_KEY_VERSION_FOR_SDK_HUKS);
         if (ret != HKS_SUCCESS) {
             ret = HKS_ERROR_NOT_EXIST;
             break;
@@ -215,8 +214,7 @@ static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *proce
             struct HksBlob keyFromFile = { 0, NULL };
             ret = GetKeyFileData(processInfo, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get old key data failed, ret = %" LOG_PUBLIC "d", ret)
-            const uint32_t oldKeyVersion = 1;
-            if (HksIsKeyExpectedVersion(&keyFromFile, oldKeyVersion) != HKS_SUCCESS) {
+            if (HksIsKeyExpectedVersion(&keyFromFile, HKS_OLD_KEY_VERSION_FOR_SDK_HUKS) != HKS_SUCCESS) {
                 HKS_FREE_BLOB(keyFromFile);
                 continue;
             }

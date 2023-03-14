@@ -61,7 +61,7 @@ void HksUpgradeKeyAccesserTest::TearDown()
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest001");
-    int32_t ret = HksAddProcessNameToParamSet(nullptr, nullptr, nullptr);
+    int32_t ret = HksAddProcessNameToParamSet(nullptr, nullptr);
     ASSERT_EQ(HKS_FAILURE, ret);
 }
 
@@ -79,7 +79,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest002, TestSize.Level
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = HksAddProcessNameToParamSet(nullptr, srcParamSet, nullptr);
+    ret = HksAddProcessNameToParamSet(srcParamSet, nullptr);
     ASSERT_EQ(HKS_ERROR_PARAM_NOT_EXIST, ret);
 
     HksFreeParamSet(&srcParamSet);
@@ -104,7 +104,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest003, TestSize.Level
     ret = HksBuildParamSet(&srcParamSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = HksAddProcessNameToParamSet(nullptr, srcParamSet, nullptr);
+    ret = HksAddProcessNameToParamSet(srcParamSet, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     HksFreeParamSet(&srcParamSet);
@@ -119,7 +119,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest004");
 
-    int32_t ret = AddMandatoryeParamsInService(nullptr, nullptr, nullptr);
+    int32_t ret = GetMandatoryParamsInService(nullptr, nullptr);
     ASSERT_EQ(HKS_FAILURE, ret);
 }
 }
