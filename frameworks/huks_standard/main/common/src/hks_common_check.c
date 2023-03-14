@@ -270,13 +270,13 @@ int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlob
     return HKS_SUCCESS;
 }
 
-void SetRsaPssSaltLen(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
+void SetRsaPssSaltLenType(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec)
 {
-    struct HksParam *saltLenParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE, &saltLenParam);
+    struct HksParam *saltLenTypeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE, &saltLenTypeParam);
     if (ret == HKS_SUCCESS) {
-        usageSpec->pssSaltLen = saltLenParam->uint32Param;
+        usageSpec->pssSaltLenType = saltLenTypeParam->uint32Param;
     } else {
-        usageSpec->pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX;
+        usageSpec->pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX;
     }
 }

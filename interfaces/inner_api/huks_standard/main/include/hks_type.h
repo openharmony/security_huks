@@ -299,8 +299,7 @@ enum HksImportKeyType {
  */
 enum HksRsaPssSaltLenType {
     HKS_RSA_PSS_SALTLEN_DIGEST = 0,  /* Salt length matches digest */
-    HKS_RSA_PSS_SALTLEN_AUTO = 1,  /* Verify only: auto detect salt length */
-    HKS_RSA_PSS_SALTLEN_MAX = 2,  /* Set salt length to maximum possible, default type */
+    HKS_RSA_PSS_SALTLEN_MAX = 1,  /* Set salt length to maximum possible, default type */
 };
 
 /**

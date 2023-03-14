@@ -89,24 +89,6 @@ struct KeyMaterialEcc {
     uint32_t zSize;
 };
 
-struct KeyMaterialDsa {
-    enum HksKeyAlg keyAlg;
-    uint32_t keySize;
-    uint32_t xSize;
-    uint32_t ySize;
-    uint32_t pSize;
-    uint32_t qSize;
-    uint32_t gSize;
-};
-
-struct KeyMaterialDh {
-    enum HksKeyAlg keyAlg;
-    uint32_t keySize;
-    uint32_t pubKeySize;
-    uint32_t priKeySize;
-    uint32_t reserved;
-};
-
 struct KeyMaterial25519 {
     enum HksKeyAlg keyAlg;
     uint32_t keySize;
@@ -114,64 +96,6 @@ struct KeyMaterial25519 {
     uint32_t priKeySize;
     uint32_t reserved;
 };
-
-typedef int32_t (*GetMainKey)(const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*GenerateKey)(const struct HksKeySpec *, struct HksBlob *);
-
-typedef int32_t (*PubKey)(const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*DeriveKey)(const struct HksBlob *, const struct HksKeySpec *, struct HksBlob *);
-
-typedef int32_t (*FillRandom)(struct HksBlob *);
-
-typedef int32_t (*AgreeKey)(const struct HksBlob *, const struct HksBlob *, const struct HksKeySpec *,
-    struct HksBlob *);
-
-typedef int32_t (*Sign)(const struct HksBlob *, const struct HksUsageSpec *, const struct HksBlob *,
-    struct HksBlob *);
-
-typedef int32_t (*Verify)(const struct HksBlob *, const struct HksUsageSpec *, const struct HksBlob *,
-    const struct HksBlob *);
-
-typedef int32_t (*Hmac)(const struct HksBlob *, uint32_t, const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*HmacInit)(void **, const struct HksBlob *, uint32_t);
-
-typedef int32_t (*HmacUpdate)(void *, const struct HksBlob *);
-
-typedef int32_t (*HmacFinal)(void **, const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*Hash)(uint32_t, const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*HashInit)(void **, uint32_t);
-
-typedef int32_t (*HashUpdate)(void *, const struct HksBlob *);
-
-typedef int32_t (*HashFinal)(void **, const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*Encrypt)(const struct HksBlob *, const struct HksUsageSpec *,
-    const struct HksBlob *, struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*EncryptInit)(void **, const struct HksBlob *, const struct HksUsageSpec *, const bool);
-
-typedef int32_t (*EncryptUpdate)(void *, const struct HksBlob *, struct HksBlob *, const bool);
-
-typedef int32_t (*EncryptFinal)(void **, const struct HksBlob *, struct HksBlob *, struct HksBlob *, const bool);
-
-typedef int32_t (*Decrypt)(const struct HksBlob *, const struct HksUsageSpec *,
-    const struct HksBlob *, struct HksBlob *);
-
-typedef int32_t (*DecryptInit)(void **, const struct HksBlob *, const struct HksUsageSpec *, const bool);
-
-typedef int32_t (*DecryptUpdate)(void *, const struct HksBlob *, struct HksBlob *, const bool);
-
-typedef int32_t (*DecryptFinal)(void **, const struct HksBlob *, struct HksBlob *, struct HksBlob *, const bool);
-
-typedef int32_t (*BnExpMod)(struct HksBlob *, const struct HksBlob *,
-    const struct HksBlob *, const struct HksBlob *);
-
-typedef void (*FreeCtx)(void **);
 
 int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
 
@@ -183,8 +107,6 @@ int32_t HksCryptoHalDeriveKey(const struct HksBlob *mainKey, const struct HksKey
     struct HksBlob *derivedKey);
 
 int32_t HksCryptoHalFillRandom(struct HksBlob *randomData);
-
-int32_t HksCryptoHalFillPrivRandom(struct HksBlob *randomData);
 
 int32_t HksCryptoHalAddEntropy(const struct HksBlob *entropy);
 
@@ -214,9 +136,9 @@ int32_t HksCryptoHalHashUpdate(const struct HksBlob *msg, void *ctx);
 
 int32_t HksCryptoHalHashFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *hash);
 
-void HksCryptoHalHashFreeCtx(void **ctx);
-
 int32_t HksCryptoHalHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash);
+
+void HksCryptoHalHashFreeCtx(void **ctx);
 
 int32_t HksCryptoHalEncryptInit(const struct HksBlob *key, const struct HksUsageSpec *usageSpec, void **ctx);
 

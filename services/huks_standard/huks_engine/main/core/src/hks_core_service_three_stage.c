@@ -481,7 +481,7 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
     struct HksUsageSpec usageSpec;
     (void)memset_s(&usageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
-    SetRsaPssSaltLen(keyNode->runtimeParamSet, &usageSpec);
+    SetRsaPssSaltLenType(keyNode->runtimeParamSet, &usageSpec);
 
     if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
         ret = HksCryptoHalSign(&rawKey, &usageSpec, inData, outData);
