@@ -411,7 +411,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
 
         struct HksUsageSpec usageSpec = {0};
         HksFillUsageSpec(paramSet, &usageSpec);
-        SetRsaPssSaltLen(paramSet, &usageSpec);
+        SetRsaPssSaltLenType(paramSet, &usageSpec);
         HKS_LOG_I("Sign or verify.");
         if (cmdId == HKS_CMD_ID_SIGN) {
             ret = HksCryptoHalSign(&rawKey, &usageSpec, &message, signature);

@@ -1093,7 +1093,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_053_PARAMS = {
         .padding = HKS_PADDING_PSS,
         .digest = HKS_DIGEST_SHA256,
         .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-        .pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX,
+        .pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX,
     },
     .hexData = "00112233445566778899aabbccddeeff",
 
@@ -1214,7 +1214,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_059_PARAMS = {
         .padding = HKS_PADDING_PSS,
         .digest = HKS_DIGEST_SHA384,
         .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-        .pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX,
+        .pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX,
     },
     .hexData = "00112233445566778899aabbccddeeff",
 
@@ -1241,7 +1241,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_060_PARAMS = {
         .padding = HKS_PADDING_PSS,
         .digest = HKS_DIGEST_SHA384,
         .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-        .pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX,
+        .pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX,
     },
     .hexData = "00112233445566778899aabbccddeeff",
 
@@ -1342,7 +1342,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_065_PARAMS = {
         .padding = HKS_PADDING_PSS,
         .digest = HKS_DIGEST_SHA512,
         .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-        .pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX,
+        .pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX,
     },
     .hexData = "00112233445566778899aabbccddeeff",
 
@@ -1369,7 +1369,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_066_PARAMS = {
         .padding = HKS_PADDING_PSS,
         .digest = HKS_DIGEST_SHA512,
         .purpose = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
-        .pssSaltLen = HKS_RSA_PSS_SALTLEN_MAX,
+        .pssSaltLenType = HKS_RSA_PSS_SALTLEN_MAX,
     },
     .hexData = "00112233445566778899aabbccddeeff",
 
