@@ -42,14 +42,14 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     if (response == NULL) {
         ipcRet = WriteBool(reply, true);
         if (!ipcRet) {
-            HKS_LOG_E("write response isHasOutData failed!");
+            HKS_LOG_E("write response isNoneResponse failed!");
         }
         return;
     }
 
     ipcRet = WriteBool(reply, false);
     if (!ipcRet) {
-        HKS_LOG_E("write response isHasOutData failed!");
+        HKS_LOG_E("write response isNoneResponse failed!");
         return;
     }
 
