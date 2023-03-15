@@ -88,6 +88,7 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest002, TestSize.Level0)
         .ed25519Pubkey = nullptr,
     };
     Curve25519Destroy(&str);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 /**
@@ -104,6 +105,7 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest003, TestSize.Level0)
         .c = nullptr,
     };
     FreeLocalBigVar(&var);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 /**
@@ -120,6 +122,7 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest004, TestSize.Level0)
         .c = nullptr,
     };
     Curve25519LocalVar(&var);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 }

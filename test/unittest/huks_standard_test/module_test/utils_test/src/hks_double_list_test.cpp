@@ -107,5 +107,7 @@ HWTEST_F(HksDoubleListTest, HksDoubleListTest004, TestSize.Level0)
     struct DoubleList head = { .next = nullptr, .prev = nullptr };
     RemoveDoubleListNode(nullptr);
     RemoveDoubleListNode(&head);
+    EXPECT_EQ(head.next == nullptr, true);
+    EXPECT_EQ(head.prev == nullptr, true);
 }
 }
