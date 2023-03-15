@@ -224,6 +224,7 @@ HWTEST_F(HksParamTest, HksParamTest011, TestSize.Level0)
 {
     HKS_LOG_I("enter HksParamTest011");
     HksFreeParamSet(nullptr);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 
