@@ -41,8 +41,8 @@ if (os_level == "standard") {
     ]
 
     sources += [
+      "src/hks_upgrade_helper.c",
       "src/hks_upgrade_key_accesser.c",
-      "src/hks_upgrade_operation.c",
     ]
 
     if (non_rwlock_support) {
@@ -118,8 +118,8 @@ if (os_level == "standard") {
     ]
 
     sources += [
+      "src/hks_upgrade_helper.c",
       "src/hks_upgrade_key_accesser.c",
-      "src/hks_upgrade_operation.c",
     ]
 
     if (huks_use_lite_storage == true) {
