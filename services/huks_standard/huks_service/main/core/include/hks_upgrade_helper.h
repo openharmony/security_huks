@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_OPERATION_H
-#define HKS_UPGRADE_OPERATION_H
+#ifndef HKS_UPGRADE_HELPER_H
+#define HKS_UPGRADE_HELPER_H
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
 
@@ -54,4 +54,4 @@ int32_t HksCheckNeedUpgradeForSmallToService(const struct HksProcessInfo *proces
 
 #endif /* HKS_ENABLE_UPGRADE_KEY */
 
-#endif /* HKS_UPGRADE_OPERATION_H */
+#endif /* HKS_UPGRADE_HELPER_H */
