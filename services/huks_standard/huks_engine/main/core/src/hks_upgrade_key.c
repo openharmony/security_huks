@@ -222,6 +222,17 @@ static int32_t AuthUpgradeKey(const struct HksParamSet *oldKeyBlobParamSet, cons
     return AuthChangeProcessName(oldKeyBlobParamSet, paramSet);
 }
 
+static void CleanParamSetKey(const struct HksParamSet *paramSet)
+{
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY, &keyParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key param failed!");
+        return;
+    }
+    (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
+}
+
 int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
     HKS_LOG_I("enter HksUpgradeKey");
@@ -275,11 +286,15 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build newKeyBlobParamSet failed!")
 
         ret = HksCheckParamSetTag(newKeyBlobParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check newKeyBlobParamSet param set failed!")
+        if (ret != HKS_SUCCESS) {
+            CleanParamSetKey(newKeyBlobParamSet);
+            HKS_LOG_E("check newKeyBlobParamSet param set failed!");
+            break;
+        }
 
         ret = HksBuildKeyBlobWithOutAddKeyParam(newKeyBlobParamSet, newKey);
+        CleanParamSetKey(newKeyBlobParamSet);
     } while (0);
-
     HksFreeParamSet(&newKeyBlobParamSet);
     HksFreeParamSet(&oldKeyBlobParamSet);
     HksFreeParamSet(&newMandatoryeParamSet);
