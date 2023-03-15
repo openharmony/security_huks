@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,7 @@
 #include "hks_template.h"
 
 #define MIN_CERT_COUNT 3
+#define MAX_CERT_COUNT 4
 
 int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn)
 {
@@ -171,7 +172,8 @@ int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, uint32_t
 int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksCertChain *certChain)
 {
-    if ((certChain->certs == NULL) || (certChain->certsCount < MIN_CERT_COUNT)) {
+    if ((certChain->certs == NULL) || (certChain->certsCount < MIN_CERT_COUNT) ||
+        (certChain->certsCount > MAX_CERT_COUNT)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)

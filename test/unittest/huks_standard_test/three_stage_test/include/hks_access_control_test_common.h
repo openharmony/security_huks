@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,10 +25,13 @@
 #define SHA256_SIGN_LEN 32
 #define SHA256_KEY_LEN 32
 #define AUTH_TOKEN_LEN sizeof(struct HksUserAuthToken)
+#define AUTH_TOKEN_CIPHERTEXT_LEN sizeof(struct HksCiphertextData)
 #define AUTH_TOKEN_DATA_LEN (AUTH_TOKEN_LEN - SHA256_SIGN_LEN)
 #define TOKEN_CHALLENGE_LEN 32
 #define TOKEN_CHALLENGE_LEN_PER_POS 8
 #define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
+#define HKS_AE_AAD_LEN 12
+#define HKS_AES_COMMON_SIZE 1024U
 
 struct IDMParams {
     uint64_t secureUid;
@@ -103,9 +106,12 @@ int32_t CheckAccessAgreeTest(const TestAccessCaseParams &testCaseParams, struct 
 int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams);
 
-int32_t AuthTokenImportKey();
+int32_t AuthTokenImportKey(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount);
 
-int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams, std::vector<uint8_t>& token);
+int32_t AuthTokenEncrypt(const IDMParams &testIDMParams, struct HksBlob *authChallenge, HksUserAuthToken *authTokenHal);
+
+int32_t AuthTokenSign(const IDMParams &testIDMParams,  HksUserAuthToken *authTokenHal,
+    std::vector<uint8_t>& token);
 
 int32_t AuthTokenMac(const struct HksBlob *keyAlias, const struct HksBlob *inData, HksUserAuthToken *authTokenHal);
 
