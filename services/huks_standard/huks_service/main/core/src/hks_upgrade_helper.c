@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_upgrade_operation.h"
+#include "hks_upgrade_helper.h"
 
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
