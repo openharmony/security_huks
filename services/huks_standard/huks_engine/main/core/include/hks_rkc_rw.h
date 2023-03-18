@@ -142,6 +142,8 @@ extern "C" {
 
 int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData);
 
+int32_t HksMkReadKsf(const char *ksfName, struct HksKsfDataMk *ksfData);
+
 int32_t HksRkcWriteKsf(const char *ksfName, const struct HksKsfDataRkc *ksfDataRkc);
 
 int32_t HksMkWriteKsf(const char *ksfName, const struct HksKsfDataMk *ksfDataMk);

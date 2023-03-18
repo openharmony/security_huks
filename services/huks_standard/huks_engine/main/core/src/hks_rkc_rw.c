@@ -257,6 +257,22 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
     return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
 }
 
+static int32_t MkExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksKsfDataMk *ksfData)
+{
+    uint32_t ksfBufOffset = 0;
+
+    /* Extract file flag. */
+    int32_t ret = RkcExtractKsfFileFlag(ksfFromFile, &ksfBufOffset);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    /* Extract main key data */
+    ret = RkcExtractKsfMk(ksfFromFile, &ksfBufOffset, ksfData);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    /* Extract hash */
+    return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
+}
+
 static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
 {
     char *userId = NULL;
@@ -300,6 +316,41 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         ret = RkcExtractKsfBuf(&tmpKsf, ksfData);
+    } while (0);
+
+    /* the data of root key should be cleared after use */
+    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
+    HKS_FREE_BLOB(tmpKsf);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+    return ret;
+}
+
+int32_t HksMkReadKsf(const char *ksfName, struct HksKsfDataMk *ksfData)
+{
+    struct HksBlob tmpKsf;
+    tmpKsf.data = (uint8_t *)HksMalloc(HKS_MK_KSF_BUF_LEN);
+    HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
+
+    tmpKsf.size = HKS_MK_KSF_BUF_LEN;
+    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
+
+    int32_t ret;
+    do {
+        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        ret = GetProcessInfo(&processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(processInfo.userId);
+            HKS_FREE_BLOB(processInfo.processName);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+        }
+
+        const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
+
+        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+        ret = MkExtractKsfBuf(&tmpKsf, ksfData);
     } while (0);
 
     /* the data of root key should be cleared after use */
