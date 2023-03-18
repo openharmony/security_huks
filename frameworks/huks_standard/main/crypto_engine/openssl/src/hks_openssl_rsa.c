@@ -54,15 +54,13 @@ static int32_t RsaGenKeyCheckParam(const struct HksKeySpec *spec)
 
 static int32_t GetRsaPssSaltLen(const struct HksUsageSpec *usageSpec)
 {
-    switch (usageSpec->pssSaltLen) {
+    switch (usageSpec->pssSaltLenType) {
         case HKS_RSA_PSS_SALTLEN_DIGEST:
             return RSA_PSS_SALTLEN_DIGEST;
-        case HKS_RSA_PSS_SALTLEN_AUTO:
-            return RSA_PSS_SALTLEN_AUTO;
         case HKS_RSA_PSS_SALTLEN_MAX:
             return RSA_PSS_SALTLEN_MAX;
         default:
-            HKS_LOG_E("Invalid rsa salt len %" LOG_PUBLIC "x!", usageSpec->pssSaltLen);
+            HKS_LOG_E("Invalid rsa salt len type %" LOG_PUBLIC "x!", usageSpec->pssSaltLenType);
             return HKS_ERROR_NOT_SUPPORTED;
     }
 }
