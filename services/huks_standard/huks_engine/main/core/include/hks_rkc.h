@@ -23,7 +23,8 @@
 #define HKS_RKC_RAW_KEY_LEN 64                          /* the raw key length of root key component */
 #define HKS_HARDWARE_UDID_LEN 32                        /* the length of hardware UDID */
 #define HKS_RKC_MK_ADD_DATA_LEN 8                       /* the additional data length of main key */
-#define HKS_RKC_KSF_NAME_LEN_MAX 256                    /* the max length of keystore filename */
+#define HKS_RKC_KSF_NAME_LEN_MAX 256                    /* the max length of rkc keystore filename */
+#define HKS_MK_KSF_NAME_LEN_MAX 256                     /* the max length of mk keystore filename */
 
 /* the initialization parameter of root key component */
 struct HksRkcInitParam {
@@ -53,7 +54,11 @@ int32_t HksRkcInit(void);
 
 void HksRkcDestroy(void);
 
+void HksMkDestroy(void);
+
 void HksRkcClearMem(void);
+
+void HksMkClearMem(void);
 
 int32_t HksRkcGetMainKey(struct HksBlob *mainKey);
 
