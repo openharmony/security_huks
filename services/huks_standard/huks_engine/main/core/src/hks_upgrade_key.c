@@ -150,7 +150,11 @@ static int32_t GetMandatoryParamsInCore(const struct HksParamSet *oldKeyBlobPara
         uint32_t funcArraySize = HKS_ARRAY_SIZE(HKS_ADD_MANDATORY_FUNC_LIST);
         for (uint32_t i = 0; i < funcArraySize; ++i) {
             ret = HKS_ADD_MANDATORY_FUNC_LIST[i].func(oldKeyBlobParamSet, outParamSet);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add upgrade param %" LOG_PUBLIC "u failed!", i)
+            if (ret != HKS_SUCCESS) {
+                HksFreeParamSet(&outParamSet);
+                HKS_LOG_E("add upgrade param %" LOG_PUBLIC "u failed!", i);
+                return ret;
+            }
         }
 
         *targetParamSet = outParamSet;
