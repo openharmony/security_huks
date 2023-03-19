@@ -30,14 +30,12 @@ ohos_static_library("libhuks_service_systemapi_mock_static") {
 
   sources = [ "src/hks_useridm_api_mock.cpp" ]
 
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//base/useriam/user_auth_framework/frameworks/native/client:userauth_client",
-  ]
+  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
+    "user_auth_framework:userauth_client",
   ]
 
   cflags_cc = [
