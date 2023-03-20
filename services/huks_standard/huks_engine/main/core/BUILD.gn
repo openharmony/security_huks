@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
@@ -37,7 +36,6 @@ ohos_shared_library("huks_engine_core_standard") {
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//base/security/huks/utils/crypto_adapter",
-    "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
     "//base/security/huks/utils/mutex",
   ]
