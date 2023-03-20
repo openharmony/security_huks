@@ -43,8 +43,6 @@ ohos_shared_library("huks_engine_core_standard") {
     "-Wall",
     "-Werror",
   ]
-  cflags +=
-      [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
   sources = [
     "src/hks_asn1.c",
     "src/hks_attest.c",
