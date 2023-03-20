@@ -31,8 +31,11 @@ declare_args() {
   # whether use hks config file
   huks_config_file = ""
 
-  # whether use hks key store path
+  # whether use hks key store path in lite or mini system
   huks_key_store_path = "/storage/"
+
+  # whether use hks key store patch in standard system
+  huks_key_store_standard_path = "/data/service/el1/public/huks_service"
 
   # whether huks enable log
   huks_enable_log = false

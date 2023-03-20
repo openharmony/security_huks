@@ -120,6 +120,8 @@ config("soft_huks_config") {
   cflags += [ "-D_DEFAULT_SOURCE" ]
 
   cflags += [ "-D_HUKS_LOG_ENABLE_" ]
+  cflags +=
+      [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
 }
 config("hilog_dir") {
   include_dirs =

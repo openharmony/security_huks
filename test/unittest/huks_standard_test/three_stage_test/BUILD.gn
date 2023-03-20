@@ -10,7 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
@@ -147,6 +147,6 @@ ohos_unittest("huks_UT_test") {
     # used by hks_chipset_platform_encrypt_test.cpp
     "//third_party/json:nlohmann_json_static",
   ]
-
+  cflags = [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }
