@@ -24,7 +24,7 @@
 
 #include <unistd.h>
 
-static int32_t SynchronizeOutput(struct HksIpcHandle *reply, struct HksBlob *outBlob)
+static int32_t SynchronizeOutput(const struct HksIpcHandle *reply, struct HksBlob *outBlob)
 {
     if (reply->state != HKS_IPC_MSG_OK) {
         HKS_LOG_E("ipc reply failed, ret = %d", reply->state);
@@ -57,7 +57,7 @@ static int32_t SynchronizeOutput(struct HksIpcHandle *reply, struct HksBlob *out
                 break;
             }
             if (buffSize == 0) {
-                HKS_LOG_E("ipc reply with no out data");
+                HKS_LOG_I("ipc reply with no out data");
                 break;
             }
 
@@ -83,7 +83,9 @@ static int CurrentCallback(IOwner owner, int code, IpcIo *reply)
 {
     (void)code;
     struct HksIpcHandle *curReply = (struct HksIpcHandle *)owner;
-
+    if (curReply == NULL || reply == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
     if (memcpy_s(curReply->io->bufferCur, curReply->io->bufferLeft, reply->bufferCur, reply->bufferLeft) != EOK) {
         HKS_LOG_E("data copy for curReply failed, cur size is %d, reply size is %d", curReply->io->bufferLeft,
             reply->bufferLeft);
