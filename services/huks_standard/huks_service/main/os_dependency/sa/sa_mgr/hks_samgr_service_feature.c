@@ -20,6 +20,8 @@
 
 #include "ipc_skeleton.h"
 
+const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
+
 static const char *FEATURE_GetName(Feature *feature);
 static void FEATURE_OnInitialize(Feature *feature, Service *parent, Identity identity);
 static void FEATURE_OnStop(Feature *feature, Identity identity);
@@ -105,6 +107,9 @@ static int32_t ReadSrcDataFromReq(IpcIo *req, struct HksBlob *srcData)
     }
 
     srcData->size = buffSize;
+    if (srcData->size == 0 || srcData->size > MAX_MALLOC_LEN) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     const uint8_t *tmpUint8Array = ReadBuffer(req, srcData->size);
     if (tmpUint8Array == NULL) {
         return HKS_ERROR_IPC_MSG_FAIL;
@@ -139,6 +144,10 @@ static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req
             break;
         }
         if (outSize > 0) {
+            if (outSize > MAX_MALLOC_LEN) {
+                ret = HKS_ERROR_INVALID_ARGUMENT;;
+                break;
+            }
             outData.data = (uint8_t *)HksMalloc(outSize);
             if (outData.data == NULL) {
                 HKS_LOG_E("outData malloc failed!");

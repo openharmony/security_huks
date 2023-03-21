@@ -93,7 +93,7 @@ static void MoveOldFileToNew(const char *srcPath, const char *tarPath)
     }
     if ((out = fopen(tarPath, "w")) == NULL) {
         printf("open target file failed !\n");
-        fclose(in);
+        (void)fclose(in);
         return;
     }
     int len;
@@ -101,6 +101,8 @@ static void MoveOldFileToNew(const char *srcPath, const char *tarPath)
         int size = fwrite(buffer, 1, len, out);
         if (size != len) {
             printf("move old file to new path failed!");
+            (void)fclose(out);
+            (void)fclose(in);
             return;
         }
     }
