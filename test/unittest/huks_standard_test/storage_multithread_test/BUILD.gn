@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/test.gni")
 
 module_output_path = "huks_standard/huks_standard_test"
@@ -35,11 +36,12 @@ ohos_unittest("huks_multithread_test") {
     "src/hks_storage_test.cpp",
   ]
 
+  cflags = [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
   cflags_cc = [
     "-Wall",
     "-Werror",
   ]
-  cflags = cflags_cc
+  cflags += cflags_cc
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
