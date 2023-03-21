@@ -167,7 +167,6 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
-    "//base/useriam/user_auth_framework/frameworks/native/client:userauth_client",
     "//third_party/bounds_checking_function:libsec_shared",
     "//third_party/openssl:libcrypto_shared",
   ]
@@ -178,6 +177,7 @@ ohos_static_library("libhukssdk_static") {
     "hiviewdfx_hilog_native:libhilog",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
+    "user_auth_framework:userauth_client",
   ]
   if (support_jsapi) {
     external_deps += [ "os_account:os_account_innerkits" ]
