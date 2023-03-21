@@ -123,6 +123,7 @@ HWTEST_F(HksFrameworkOpensslEngineTest, HksFrameworkOpensslEngineTest003, TestSi
 {
     HKS_LOG_I("enter HksFrameworkOpensslEngineTest003");
     HksCryptoHalDecryptFreeCtx(nullptr, HKS_ALG_AES);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 }

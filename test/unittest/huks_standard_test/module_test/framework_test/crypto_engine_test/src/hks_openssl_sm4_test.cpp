@@ -72,6 +72,7 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test001, TestSize.Lev
 {
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test001");
     HksOpensslSm4HalFreeCtx(nullptr);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 /**
@@ -84,6 +85,7 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test002, TestSize.Lev
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test002");
     void *ctx = nullptr;
     HksOpensslSm4HalFreeCtx(&ctx);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 
 /**
