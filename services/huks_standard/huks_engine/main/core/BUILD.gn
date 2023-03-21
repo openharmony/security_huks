@@ -36,7 +36,6 @@ ohos_shared_library("huks_engine_core_standard") {
   include_dirs = [
     "//commonlibrary/c_utils/base/include",
     "//base/security/huks/utils/crypto_adapter",
-    "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
     "//base/security/huks/utils/mutex",
   ]
