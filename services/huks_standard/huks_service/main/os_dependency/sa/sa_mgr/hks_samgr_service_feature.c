@@ -75,23 +75,19 @@ static BOOL FEATURE_OnMessage(Feature *feature, Request *msg)
 static int32_t ProcessMsgToHandler(int funcId, HksIpcContext *ipcContext, const struct HksBlob *srcData,
     struct HksBlob *outData)
 {
-    bool isHandled = false;
     uint32_t size = sizeof(HKS_IPC_MESSAGE_HANDLER) / sizeof(HKS_IPC_MESSAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
         if (funcId == HKS_IPC_MESSAGE_HANDLER[i].msgId) {
             HKS_IPC_MESSAGE_HANDLER[i].handler(srcData, (const uint8_t *)ipcContext);
-            isHandled = true;
             return HKS_SUCCESS;
         }
     }
 
-    if (!isHandled) {
-        size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
-        for (uint32_t i = 0; i < size; ++i) {
-            if (funcId == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
-                HKS_IPC_THREE_STAGE_HANDLER[i].handler(srcData, outData, (const uint8_t *)ipcContext);
-                return HKS_SUCCESS;
-            }
+    size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
+    for (uint32_t i = 0; i < size; ++i) {
+        if (funcId == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
+            HKS_IPC_THREE_STAGE_HANDLER[i].handler(srcData, outData, (const uint8_t *)ipcContext);
+            return HKS_SUCCESS;
         }
     }
     return HKS_FAILURE;
