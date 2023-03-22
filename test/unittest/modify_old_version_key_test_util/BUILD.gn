@@ -72,7 +72,7 @@ ohos_static_library("huks_modify_old_version_key_util") {
       "../../../utils/mutex:libhuks_utils_mutex_static",
     ]
 
-    if (enable_mock) {
+    if (enable_hks_mock) {
       deps += [ "../../../services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
     } else {
       deps += [ "../../../services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]

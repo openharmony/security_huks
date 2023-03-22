@@ -16,7 +16,7 @@ import("//base/security/huks/huks.gni")
 
 config("l2_standard_common_config") {
   cflags = []
-  if (enable_coverage) {
+  if (enable_hks_coverage) {
     cflags += [ "--coverage" ]
     ldflags = [ "--coverage" ]
   }

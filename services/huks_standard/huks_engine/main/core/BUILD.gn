@@ -69,7 +69,7 @@ if (os_level == "standard") {
 
     sources += [ "src/hks_upgrade_key.c" ]
 
-    if (enable_mock) {
+    if (enable_hks_mock) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
     } else {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]

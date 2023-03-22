@@ -98,7 +98,7 @@ ohos_unittest("huks_UT_test") {
   if (use_crypto_lib == "mbedtls") {
     defines += [ "_USE_MBEDTLS_" ]
   }
-  if (enable_mock) {
+  if (enable_hks_mock) {
     sources += [
       "src/hks_access_control_agree_test.cpp",
       "src/hks_access_control_cipher_test.cpp",

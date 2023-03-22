@@ -59,7 +59,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
 
-    if (enable_mock) {
+    if (enable_hks_mock) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
     } else {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
