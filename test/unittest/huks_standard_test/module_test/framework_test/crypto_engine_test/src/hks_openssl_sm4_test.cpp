@@ -26,6 +26,7 @@
 #include "hks_openssl_sm4.h"
 #include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/src/hks_openssl_sm4.c"
 
+#include "hks_api.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_aes.h"
@@ -72,7 +73,8 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test001, TestSize.Lev
 {
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test001");
     HksOpensslSm4HalFreeCtx(nullptr);
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -85,7 +87,8 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test002, TestSize.Lev
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test002");
     void *ctx = nullptr;
     HksOpensslSm4HalFreeCtx(&ctx);
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
