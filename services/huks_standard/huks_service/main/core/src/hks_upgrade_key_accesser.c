@@ -79,21 +79,9 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
 {
     int32_t ret = HKS_SUCCESS;
     struct HksParamSet *paramSet = NULL;
-    struct HksParamSet *keyBlobParamSet = NULL;
     do {
         ret = HksInitParamSet(&paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init paramSet failed!")
-        const struct HksParamSet *oldKeyParamSet = (const struct HksParamSet *)oldKey->data;
-
-        keyBlobParamSet = (struct HksParamSet *)HksMalloc(oldKeyParamSet->paramSetSize);
-        if (keyBlobParamSet == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-        (void)memcpy_s(keyBlobParamSet, oldKeyParamSet->paramSetSize, oldKeyParamSet, oldKeyParamSet->paramSetSize);
-
-        ret = HksFreshParamSet(keyBlobParamSet, false);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "fresh paramset from old key failed!")
 
         ret = GetMandatoryParamsInService(srcParamSet, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddUpgradeParams failed!")
@@ -103,7 +91,6 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
         ret = HuksAccessUpgradeKey(oldKey, paramSet, newKey);
     } while (0);
     HksFreeParamSet(&paramSet);
-    HksFreeParamSet(&keyBlobParamSet);
     return ret;
 }
 #endif /* HKS_ENABLE_UPGRADE_KEY */

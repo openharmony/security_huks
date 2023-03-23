@@ -27,6 +27,8 @@
 #include "hks_session_manager.h"
 #include "hks_type_inner.h"
 
+#include "../../../../../../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c"
+
 using namespace testing::ext;
 using namespace Unittest::AttestKey;
 namespace Unittest::HksClientServiceTest {
@@ -496,7 +498,7 @@ static struct HksParam g_aesEncryptParams[] = {
 
 /**
  * @tc.name: HksClientServiceTest.HksClientServiceTest008
- * @tc.desc: tdd three stage with access token id, expect HKS_SHKS_ERROR_BAD_STATEUCCESS
+ * @tc.desc: tdd three stage with access token id, expect HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
  */
 HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
@@ -533,8 +535,102 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
 
     (void)HksServiceAbort(&handle, &processInfo, encParamSet);
 
+    HKS_FREE_BLOB(handle);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encParamSet);
     (void)HksServiceDeleteKey(&processInfo, &keyAlias);
 }
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest013
+ * @tc.desc: tdd CheckAndUpgradeKeyIfNeed, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest013");
+    struct HksBlob key = { .size = 0, .data = nullptr };
+    int32_t ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest010
+ * @tc.desc: tdd CheckAndUpgradeKeyIfNeed, expect HKS_ERROR_BAD_STATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest010");
+    struct HksBlob key = { .size = 0, .data = nullptr };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    struct HksParam keyVersionParam = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = 0 };
+    ret = HksAddParams(paramSet, &keyVersionParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    key.data = (uint8_t *)HksMalloc(paramSet->paramSetSize);
+    (void)memcpy_s(key.data, paramSet->paramSetSize, paramSet, paramSet->paramSetSize);
+    ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+    HksFree(key.data);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest011
+ * @tc.desc: tdd CheckAndUpgradeKeyIfNeed, expect HKS_SHKS_ERROR_BAD_STATEUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest011");
+    struct HksBlob key = { .size = 0, .data = nullptr };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint32_t tooBigVersion = 999;
+    struct HksParam keyVersionParam = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = tooBigVersion };
+    ret = HksAddParams(paramSet, &keyVersionParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    key.data = (uint8_t *)HksMalloc(paramSet->paramSetSize);
+    (void)memcpy_s(key.data, paramSet->paramSetSize, paramSet, paramSet->paramSetSize);
+
+    ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+    HksFree(key.data);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksClientServiceTest.HksClientServiceTest012
+ * @tc.desc: tdd CheckAndUpgradeKeyIfNeed, expect HKS_SHKS_ERROR_BAD_STATEUCCESS
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientServiceTest, HksClientServiceTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientServiceTest012");
+    struct HksBlob key = { .size = 0, .data = nullptr };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint32_t version = 1;
+    struct HksParam keyVersionParam = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = version };
+    ret = HksAddParams(paramSet, &keyVersionParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    key.data = (uint8_t *)HksMalloc(paramSet->paramSetSize);
+    (void)memcpy_s(key.data, paramSet->paramSetSize, paramSet, paramSet->paramSetSize);
+    ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
+    ASSERT_EQ(ret, HKS_FAILURE);
+    HksFree(key.data);
+    HksFreeParamSet(&paramSet);
+}
+#endif /** HKS_ENABLE_UPGRADE_KEY*/
 }

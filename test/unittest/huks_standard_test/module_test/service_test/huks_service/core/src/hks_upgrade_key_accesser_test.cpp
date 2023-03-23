@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c"
+#include "../../../../../../../../services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c"
 
 #include "hks_log.h"
 #include "hks_param.h"
@@ -120,6 +120,19 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest004");
 
     int32_t ret = GetMandatoryParamsInService(nullptr, nullptr);
+    ASSERT_EQ(HKS_FAILURE, ret);
+}
+
+/**
+ * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest005
+ * @tc.desc: tdd HksDoUpgradeKeyAccess, expect HKS_FAILURE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksUpgradeKeyAccesserTest005");
+
+    int32_t ret = HksDoUpgradeKeyAccess(nullptr, nullptr, nullptr);
     ASSERT_EQ(HKS_FAILURE, ret);
 }
 }
