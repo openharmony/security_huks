@@ -66,5 +66,6 @@ int HksNativeApiCompatibilityTest068(void);
 int HksNativeApiCompatibilityTest069(void);
 int HksNativeApiCompatibilityTest070(void);
 int HksNativeApiCompatibilityTest071(void);
+int HksNativeApiCompatibilityTest072(void);
 }
 #endif

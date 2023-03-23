@@ -26,7 +26,6 @@ if (os_level == "standard") {
     public_configs = [ ":huks_config" ]
 
     include_dirs = [
-      "//base/security/huks/utils/file_operator",
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
     ]
@@ -98,7 +97,6 @@ if (os_level == "standard") {
     ]
 
     include_dirs = [
-      "//base/security/huks/utils/file_operator",
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
     ]
