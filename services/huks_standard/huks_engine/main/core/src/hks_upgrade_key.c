@@ -65,8 +65,7 @@ static int32_t AddAlgParamsTags(const struct HksParamSet *srcParamSet, struct Hk
     return ret;
 }
 
-static int32_t AddMandatoryParams(const struct HksParamSet *paramSet,
-    struct HksParamSet *targetParamSet)
+static int32_t AddMandatoryParams(const struct HksParamSet *paramSet, struct HksParamSet *targetParamSet)
 {
     uint32_t *tagList = NULL;
     uint32_t listSize = 0;
@@ -237,6 +236,60 @@ static void CleanParamSetKey(const struct HksParamSet *paramSet)
     (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
 }
 
+static int32_t CheckIsNeedToUpgradeKey(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet)
+{
+    int32_t ret = AuthUpgradeKey(oldKeyBlobParamSet, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "auth upgrade key param failed!")
+
+    struct HksParam *keyVersion = NULL;
+    ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key version failed!")
+
+    if (keyVersion->uint32Param >= HKS_KEY_VERSION) {
+        ret = HKS_FAILURE;
+        HKS_LOG_E("key version is already up to date!");
+        return HKS_FAILURE;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t ConstructNewKeyParamSet(const struct HksParamSet *oldKeyBlobParamSet, const struct HksParamSet *paramSet,
+    struct HksParamSet **outKeyBlobParamSet)
+{
+    int32_t ret;
+    struct HksParamSet *newMandatoryParamSet = NULL;
+    struct HksParamSet *newKeyBlobParamSet = NULL;
+    do {
+        ret = GetMandatoryParamsInCore(oldKeyBlobParamSet, paramSet, &newMandatoryParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetMandatoryParamsInCore failed!")
+
+        ret = HksInitParamSet(&newKeyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed!")
+
+        ret = AddAlgParamsTags(oldKeyBlobParamSet, newKeyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAlgParamsTags failed!")
+
+        // the key param must be the last one added
+        ret = AddMandatoryParams(newMandatoryParamSet, newKeyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryParams failed!")
+
+        ret = HksBuildParamSet(&newKeyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build newKeyBlobParamSet failed!")
+
+        ret = HksCheckParamSetTag(newKeyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckParamSetTag failed!")
+
+        *outKeyBlobParamSet = newKeyBlobParamSet;
+        HksFreeParamSet(&newMandatoryParamSet);
+        return HKS_SUCCESS;
+    } while (0);
+    HksFreeParamSet(&newMandatoryParamSet);
+
+    CleanParamSetKey(newKeyBlobParamSet);
+    HksFreeParamSet(&newKeyBlobParamSet);
+    return ret;
+}
+
 int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
 {
     HKS_LOG_I("enter HksUpgradeKey");
@@ -244,7 +297,6 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
     struct HksParamSet *oldKeyBlobParamSet = NULL;
     struct HksParamSet *newKeyBlobParamSet = NULL;
     struct HksKeyNode *keyNode = NULL;
-    struct HksParamSet *newMandatoryeParamSet = NULL;
     do {
         keyNode = HksGenerateKeyNode(oldKey);
         if (keyNode == NULL) {
@@ -253,55 +305,25 @@ int32_t HksUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *pa
             break;
         }
 
-        ret = HksInitParamSet(&newKeyBlobParamSet);
-        if (ret != HKS_SUCCESS) {
-            break;
-        }
-
         ret = HksGetParamSet(keyNode->paramSet, keyNode->paramSet->paramSetSize, &oldKeyBlobParamSet);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
-        ret = AuthUpgradeKey(oldKeyBlobParamSet, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "auth upgrade key param failed!")
+        ret = CheckIsNeedToUpgradeKey(oldKeyBlobParamSet, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckIsNeedToUpgradeKey failed!")
 
-        struct HksParam *keyVersion = NULL;
-        ret = HksGetParam(oldKeyBlobParamSet, HKS_TAG_KEY_VERSION, &keyVersion);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key version failed!")
-
-        if (keyVersion->uint32Param >= HKS_KEY_VERSION) {
-            ret = HKS_FAILURE;
-            HKS_LOG_E("key version is already up to date!");
-            break;
-        }
-
-        ret = GetMandatoryParamsInCore(oldKeyBlobParamSet, paramSet, &newMandatoryeParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetMandatoryParamsInCore failed!")
-
-        ret = AddAlgParamsTags(oldKeyBlobParamSet, newKeyBlobParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAlgParamsTags failed!")
-
-        // the key param must be the last one added
-        ret = AddMandatoryParams(newMandatoryeParamSet, newKeyBlobParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryParams failed!")
-
-        ret = HksBuildParamSet(&newKeyBlobParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build newKeyBlobParamSet failed!")
-
-        ret = HksCheckParamSetTag(newKeyBlobParamSet);
-        if (ret != HKS_SUCCESS) {
-            CleanParamSetKey(newKeyBlobParamSet);
-            HKS_LOG_E("check newKeyBlobParamSet param set failed!");
-            break;
-        }
+        ret = ConstructNewKeyParamSet(oldKeyBlobParamSet, paramSet, &newKeyBlobParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ConstructNewKeyParamSet failed!")
 
         ret = HksBuildKeyBlobWithOutAddKeyParam(newKeyBlobParamSet, newKey);
-        CleanParamSetKey(newKeyBlobParamSet);
     } while (0);
+    CleanParamSetKey(newKeyBlobParamSet);
     HksFreeParamSet(&newKeyBlobParamSet);
+
+    CleanParamSetKey(oldKeyBlobParamSet);
     HksFreeParamSet(&oldKeyBlobParamSet);
-    HksFreeParamSet(&newMandatoryeParamSet);
+
     HksFreeKeyNode(&keyNode);
 
     return ret;

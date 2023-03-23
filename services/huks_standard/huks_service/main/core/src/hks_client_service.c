@@ -93,29 +93,13 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
 }
 #else
 
-static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *key, int32_t mode)
-{
-    int32_t ret;
-#ifdef HKS_ENABLE_SMALL_TO_SERVICE
-    ret = HksStoreIsKeyBlobExist(processInfo, keyAlias, mode);
-    if (ret != HKS_SUCCESS) {
-        if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
-            ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret);
-                return HKS_ERROR_NOT_EXIST;
-            }
-        }
-    }
-#endif
-    ret = GetKeyFileData(processInfo, keyAlias, key, mode);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
-
 #ifdef HKS_ENABLE_UPGRADE_KEY
-    // check version and upgrade key if need
+static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key)
+{
+     // check version and upgrade key if need
     struct HksParam *keyVersion = NULL;
-    ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
+    int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
     if (keyVersion->uint32Param == HKS_KEY_VERSION) {
         return ret;
@@ -139,6 +123,32 @@ static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct
     } while (0);
     HKS_FREE_BLOB(*key);
     HKS_FREE_BLOB(newKey);
+    return ret;
+}
+#endif
+
+static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *key, int32_t mode)
+{
+    int32_t ret;
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+    ret = HksStoreIsKeyBlobExist(processInfo, keyAlias, mode);
+    if (ret != HKS_SUCCESS) {
+        if (HksCheckNeedUpgradeForSmallToService(processInfo) == HKS_SUCCESS) {
+            ret = HksChangeKeyOwnerForSmallToService(processInfo, paramSet, keyAlias, mode);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("do upgrade operation for small to service failed, ret = %" LOG_PUBLIC "d", ret);
+                return HKS_ERROR_NOT_EXIST;
+            }
+        }
+    }
+#endif
+    ret = GetKeyFileData(processInfo, keyAlias, key, mode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key fail data failed!")
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+    // check version and upgrade key if need
+    ret = CheckAndUpgradeKeyIfNeed(processInfo, keyAlias, paramSet, key);
 #endif
     return ret;
 }

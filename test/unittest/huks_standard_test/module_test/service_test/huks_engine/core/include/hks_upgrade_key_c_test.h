@@ -22,5 +22,12 @@ int HksUpgradeKeyCTest002(void);
 int HksUpgradeKeyCTest003(void);
 int HksUpgradeKeyCTest004(void);
 int HksUpgradeKeyCTest005(void);
+int HksUpgradeKeyCTest006(void);
+int HksUpgradeKeyCTest007(void);
+int HksUpgradeKeyCTest008(void);
+int HksUpgradeKeyCTest009(void);
+int HksUpgradeKeyCTest010(void);
+int HksUpgradeKeyCTest011(void);
+int HksUpgradeKeyCTest012(void);
 }
 #endif
