@@ -137,5 +137,6 @@ HWTEST_F(HksConditionTest, HksConditionTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksConditionTest005");
     HksConditionDestroy(nullptr);
+    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
 }
 }

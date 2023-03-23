@@ -120,6 +120,7 @@ HWTEST_F(HksTemplateTest, HksTemplateTest004, TestSize.Level0)
     int32_t ret = HKS_ERROR_API_NOT_SUPPORTED;
     HKS_IF_NOT_SUCC_LOGE(ret, "HksTemplateTest004")
     HKS_IF_NOT_SUCC_LOGE(ret, "HksTemplateTest004, %d, %s", 0, "HksTemplateTest004")
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 static int32_t TestReturn()

@@ -35,12 +35,12 @@ ohos_static_library("libhuks_service_systemapi_wrap_static") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
-    "//base/useriam/user_auth_framework/frameworks/native/client:userauth_client",
   ]
 
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
+    "user_auth_framework:userauth_client",
   ]
 
   complete_static_lib = true

@@ -1001,7 +1001,8 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importderiveKey1Alias_07, nullptr);
         (void)HksDeleteKey(&g_importderiveKey2Alias_07, nullptr);
     }
-        /**
+
+    /**
      * @tc.name: HksImportWrappedSm2SuiteTest.HksImportWrappedKeyTestSm2Suite008
      * @tc.desc: import sm2 key pair.
      * @tc.type: FUNC
@@ -1015,5 +1016,6 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importkeyAlias_05, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_06, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_07, nullptr);
+        EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
     }
 }

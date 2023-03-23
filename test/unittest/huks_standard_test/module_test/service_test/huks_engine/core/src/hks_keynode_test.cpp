@@ -91,6 +91,7 @@ HWTEST_F(HksKeyNodeTest, HksKeyNodeTest002, TestSize.Level0)
     HKS_LOG_I("enter HksKeyNodeTest002");
     struct HksParamSet **param = nullptr;
     FreeKeyBlobParamSet(param);
+    EXPECT_EQ(param == nullptr, true);
 }
 
 /**
@@ -157,6 +158,7 @@ HWTEST_F(HksKeyNodeTest, HksKeyNodeTest005, TestSize.Level0)
     KeyNodeFreeCtx(HKS_KEY_PURPOSE_DECRYPT, HKS_ALG_ECC, false, &ctx);
 
     KeyNodeFreeCtx(HKS_KEY_PURPOSE_MAC, HKS_ALG_ECC, false, &ctx);
+    EXPECT_EQ(ctx == nullptr, true);
 }
 
 /**

@@ -60,7 +60,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest001, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessModuleInit();
+    int32_t ret = HuksAccessModuleInit();
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -72,7 +73,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest002, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessModuleInit();
+    int32_t ret = HuksAccessModuleInit();
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -84,7 +86,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest003, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessRefresh();
+    int32_t ret = HuksAccessRefresh();
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -96,7 +99,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest004, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessRefresh();
+    int32_t ret = HuksAccessRefresh();
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -108,7 +112,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest005, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessGenerateKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessGenerateKey(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -120,7 +125,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest006, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessGenerateKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessGenerateKey(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -132,7 +138,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest007, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessImportKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessImportKey(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -144,7 +151,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest008, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessImportKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessImportKey(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -156,7 +164,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest009, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessImportWrappedKey(nullptr, nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessImportWrappedKey(nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -168,7 +177,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest010, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessImportWrappedKey(nullptr, nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessImportWrappedKey(nullptr, nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -180,7 +190,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest011, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessExportPublicKey(nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessExportPublicKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -192,7 +203,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest012, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessExportPublicKey(nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessExportPublicKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -204,7 +216,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest013, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessInit(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessInit(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -216,7 +229,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest014, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessInit(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessInit(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -228,7 +242,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest015, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessUpdate(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessUpdate(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -240,7 +255,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest016, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessUpdate(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessUpdate(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -252,7 +268,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest017, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessFinish(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessFinish(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -264,7 +281,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest018, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessFinish(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessFinish(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -276,7 +294,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest019, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessAbort(nullptr, nullptr);
+    int32_t ret = HuksAccessAbort(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -288,7 +307,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest020, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessAbort(nullptr, nullptr);
+    int32_t ret = HuksAccessAbort(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -300,7 +320,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest021, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessGetKeyProperties(nullptr, nullptr);
+    int32_t ret = HuksAccessGetKeyProperties(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -312,7 +333,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest022, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessGetKeyProperties(nullptr, nullptr);
+    int32_t ret = HuksAccessGetKeyProperties(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -324,7 +346,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest023, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessGetAbility(0);
+    int32_t ret = HuksAccessGetAbility(0);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -336,7 +359,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest024, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessGetAbility(0);
+    int32_t ret = HuksAccessGetAbility(0);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -348,7 +372,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest025, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessGetHardwareInfo();
+    int32_t ret = HuksAccessGetHardwareInfo();
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -360,7 +385,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest026, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessGetHardwareInfo();
+    int32_t ret = HuksAccessGetHardwareInfo();
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -372,7 +398,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest027, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessSign(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessSign(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -384,7 +411,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest028, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessSign(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessSign(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -396,7 +424,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest029, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessVerify(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessVerify(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -408,7 +437,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest030, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessVerify(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessVerify(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -420,7 +450,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest031, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessEncrypt(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessEncrypt(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -432,7 +463,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest032, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessEncrypt(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessEncrypt(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -444,7 +476,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest033, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessDecrypt(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessDecrypt(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -456,7 +489,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest034, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessDecrypt(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessDecrypt(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -468,7 +502,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest035, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessAgreeKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessAgreeKey(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -480,7 +515,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest036, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessAgreeKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessAgreeKey(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -492,7 +528,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest037, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessDeriveKey(nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessDeriveKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -504,7 +541,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest038, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessDeriveKey(nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessDeriveKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -516,7 +554,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest039, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessMac(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessMac(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -528,7 +567,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest040, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessMac(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessMac(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 #ifdef _STORAGE_LITE_
@@ -542,7 +582,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest041, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessCalcHeaderMac(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessCalcHeaderMac(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -554,7 +595,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest042, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessCalcHeaderMac(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessCalcHeaderMac(nullptr, nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 #endif
@@ -568,7 +610,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest045, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessAttestKey(nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessAttestKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -580,7 +623,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest046, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessAttestKey(nullptr, nullptr, nullptr);
+    int32_t ret = HuksAccessAttestKey(nullptr, nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -592,7 +636,8 @@ HWTEST_F(HuksAccessTest, HuksAccessTest047, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(false);
     HksEnableSetHid(false);
-    (void)HuksAccessGenerateRandom(nullptr, nullptr);
+    int32_t ret = HuksAccessGenerateRandom(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -604,6 +649,7 @@ HWTEST_F(HuksAccessTest, HuksAccessTest048, TestSize.Level0)
 {
     HksEnableCreateOrDestroy(true);
     HksEnableSetHid(false);
-    (void)HuksAccessGenerateRandom(nullptr, nullptr);
+    int32_t ret = HuksAccessGenerateRandom(nullptr, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
 }
 }

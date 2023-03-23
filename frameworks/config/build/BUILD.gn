@@ -27,6 +27,9 @@ config("l2_standard_common_config") {
     "-fPIC",
   ]
 
+  cflags +=
+      [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
+
   defines = [
     "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
