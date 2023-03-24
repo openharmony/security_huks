@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/test.gni")
 
 module_output_path = "huks_standard/huks_standard_test"
@@ -53,12 +54,15 @@ ohos_unittest("hukssdk_test") {
     "./include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/include",
+    "//base/security/huks/utils/file_operator",
   ]
+
+  cflags = [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
   cflags_cc = [
     "-Wall",
     "-Werror",
   ]
-  cflags = cflags_cc
+  cflags += cflags_cc
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
