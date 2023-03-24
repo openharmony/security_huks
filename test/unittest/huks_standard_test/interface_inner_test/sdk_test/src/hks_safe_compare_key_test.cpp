@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_file_operator.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_file_operator.h"
@@ -54,7 +55,7 @@ void HksSafeCompareKeyTest::TearDown()
 {
 }
 
-const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
+const char *g_storePath = HKS_KEY_STORE_PATH "/+0+0+0+0/key";
 const char *g_testOne = "TestOne";
 const char *g_testTwo = "TestTwo";
 
