@@ -449,7 +449,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
-    uint8_t *data = HksMalloc(keySize);
+    uint8_t *data = (uint8_t *)HksMalloc(keySize);
     HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
 
     (void)memcpy_s(data, keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keySize);
