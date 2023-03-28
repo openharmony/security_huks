@@ -353,7 +353,6 @@ static int32_t AppendProcessInfoAndkeyAlias(const struct HksParamSet *paramSet,
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 static int32_t AppendSecUid(struct HksParamSet *newParamSet, struct SecInfoWrap *secInfo)
 {
-    HKS_LOG_I("###GSY HKS_SUPPORT_USER_AUTH is online in hks_client_service.");
     struct HksParam secureUid;
     secureUid.tag = HKS_TAG_USER_AUTH_SECURE_UID;
     secureUid.blob.size = sizeof(uint64_t);
@@ -500,7 +499,6 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
 static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
-    HKS_LOG_I("###GSY: SUPPORT_USER_AUTH_ACCESS_CONTROL.");
     uint32_t userAuthType = 0;
     uint32_t authAccessType = 0;
     int32_t ret = HksCheckAndGetUserAuthInfo(paramSet, &userAuthType, &authAccessType);
