@@ -1899,7 +1899,6 @@ static int32_t HasValidAuthAccessType(const struct ExpectParams allowAuthAccessT
 
 static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint32_t authAccessType)
 {
-    HKS_LOG_I("###GSY HKS_SUPPORT_USER_AUTH is online in hks_base_check.");
     uint32_t valuesCnt = HKS_ARRAY_SIZE(g_expectAuthAccessParams);
     for (uint32_t i = 0; i < valuesCnt; i++) {
         struct AuthAccessTypeChecker checker = g_expectAuthAccessParams[i];
@@ -1916,7 +1915,6 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
 int32_t HksCheckUserAuthParams(uint32_t userAuthType, uint32_t authAccessType, uint32_t challengeType)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-HKS_LOG_I("###GSY HKS_SUPPORT_USER_AUTH is online in hks_base_check.");
     int32_t ret = HksCheckValue(userAuthType, g_supportUserAuthTypes, HKS_ARRAY_SIZE(g_supportUserAuthTypes));
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_AUTH_TYPE)
 
