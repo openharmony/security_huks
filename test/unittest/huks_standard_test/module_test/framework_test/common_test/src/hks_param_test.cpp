@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "hks_api.h"
 #include "hks_param.h"
 
 #include "hks_log.h"
@@ -224,7 +225,8 @@ HWTEST_F(HksParamTest, HksParamTest011, TestSize.Level0)
 {
     HKS_LOG_I("enter HksParamTest011");
     HksFreeParamSet(nullptr);
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 

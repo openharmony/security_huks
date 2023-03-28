@@ -38,7 +38,6 @@ ohos_static_library("libhuks_service_systemapi_mock_static") {
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
-    "user_auth_framework:userauth_client",
   ]
 
   cflags_cc = [
@@ -46,5 +45,9 @@ ohos_static_library("libhuks_service_systemapi_mock_static") {
     "-Werror",
   ]
   cflags = cflags_cc
+  if (enable_user_auth_framework) {
+    cflags += [ "-DHKS_SUPPORT_USER_AUTH_ACCESS_CONTROL" ]
+    external_deps += [ "user_auth_framework:userauth_client" ]
+  }
   complete_static_lib = true
 }

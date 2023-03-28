@@ -78,7 +78,8 @@ HWTEST_F(HksEventObserverTest, HksEventObserverTest001, TestSize.Level0)
     CommonEventSubscribeInfo subscribeInfo;
     SystemEventSubscriber eventSubscriber(subscribeInfo);
     eventSubscriber.OnReceiveEvent(data);
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -98,6 +99,7 @@ HWTEST_F(HksEventObserverTest, HksEventObserverTest002, TestSize.Level0)
     CommonEventSubscribeInfo subscribeInfo;
     SystemEventSubscriber eventSubscriber(subscribeInfo);
     eventSubscriber.OnReceiveEvent(data);
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 }
