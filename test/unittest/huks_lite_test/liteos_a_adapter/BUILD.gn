@@ -45,7 +45,7 @@ unittest("huks_3.0_test") {
     "hks_safe_cipher_key_test.cpp",
     "hks_safe_compare_key_test.cpp",
   ]
-  if (hks_enable_test) {
+  if (hks_enable_test && huks_enable_upgrade_small_to_service) {
     sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/upgrade_test/version_one/hks_compatibility_test.cpp" ]
   }
 
