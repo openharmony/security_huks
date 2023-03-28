@@ -20,5 +20,10 @@ namespace Unittest::HksKeyBlobTest {
 int HksKeyBlobTest001(void);
 int HksKeyBlobTest002(void);
 int HksKeyBlobTest003(void);
+int HksKeyBlobTest004(void);
+int HksKeyBlobTest005(void);
+int HksKeyBlobTest006(void);
+int HksKeyBlobTest007(void);
+int HksKeyBlobTest008(void);
 }
 #endif

@@ -18,8 +18,9 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c"
+#include "../../../../../../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c"
 
+#include "hks_api.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -100,6 +101,108 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest003, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksBuildKeyBlob2(paramSet, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+    HksFreeParamSet(&paramSet);
 }
 #endif
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest004
+ * @tc.desc: tdd CleanKey, expect not crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest004, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest004");
+    int32_t ret = HksInitialize();
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    CleanKey(nullptr);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest005
+ * @tc.desc: tdd GetSalt, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest005, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest005");
+    uint32_t exceedProcessNameLen = HKS_MAX_PROCESS_NAME_LEN + 1;
+    uint8_t name[] = { 0 };
+    struct HksParam processNameParam = { .tag = HKS_TAG_PROCESS_NAME,
+        .blob = { .size = exceedProcessNameLen, .data = (uint8_t *)name } };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &processNameParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = GetSalt(paramSet, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest006
+ * @tc.desc: tdd EncryptAndDecryptKeyBlob, expect HKS_ERROR_INVALID_KEY_INFO
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest006, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest006");
+    uint8_t keyBlobData[] = { 0 };
+    struct HksParam keyParam = { .tag = HKS_TAG_KEY,
+        .blob = { .size = HKS_ARRAY_SIZE(keyBlobData), .data = (uint8_t *)keyBlobData } };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &keyParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = EncryptAndDecryptKeyBlob(nullptr, paramSet, true);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest007
+ * @tc.desc: tdd HksGenerateKeyNode, expect nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest007, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest007");
+    struct HksBlob keyBlob = { .size = MAX_KEY_SIZE, .data = nullptr };
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(&keyBlob);
+    ASSERT_EQ(keyNode, nullptr);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest008
+ * @tc.desc: tdd EncryptAndDecryptKeyBlob, expect HKS_ERROR_INVALID_KEY_INFO
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest008, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest008");
+    uint8_t keyBlobData[] = { 0 };
+    struct HksParam keyParam = { .tag = HKS_TAG_KEY,
+        .blob = { .size = HKS_ARRAY_SIZE(keyBlobData), .data = (uint8_t *)keyBlobData } };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &keyParam, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    ret = HksGetRawKey(paramSet, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO);
+
+    HksFreeParamSet(&paramSet);
+}
 }
