@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
@@ -60,5 +61,8 @@ ohos_static_library("libhuks_common_standard_static") {
     "-Wall",
     "-Werror",
   ]
+  if (enable_user_auth_framework) {
+    cflags += [ "-DHKS_SUPPORT_USER_AUTH_ACCESS_CONTROL" ]
+  }
   complete_static_lib = true
 }
