@@ -35,6 +35,7 @@ static constexpr const uint32_t g_maxEnrolledLen = 256;
 
 static int32_t ConvertFromHksAuthType(enum HksUserAuthType hksAuthType, enum USER_IAM::AuthType *authType)
 {
+    HKS_LOG_I("###GSY HKS_SUPPORT_USER_AUTH is online in hks_useridm_api_wrap.");
     switch (hksAuthType) {
         case HKS_USER_AUTH_TYPE_FACE:
             *authType = USER_IAM::AuthType::FACE;

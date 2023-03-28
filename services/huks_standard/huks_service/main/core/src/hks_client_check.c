@@ -166,6 +166,7 @@ int32_t HksCheckAttestKeyParams(const struct HksBlob *processName, const struct 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 static int32_t CheckAuthAccessLevel(const struct HksParamSet *paramSet)
 {
+    HKS_LOG_I("###GSY HKS_SUPPORT_USER_AUTH is online in hks_client_check.");
     struct HksParam *authAccess = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &authAccess);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ACCESS_TYPE_FAILED, "get auth access type fail")
@@ -219,6 +220,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     uint32_t *authAccessType)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+    HKS_LOG_I("###GSY HKS_SUPPORT_USER_AUTH is online in hks_client_check.");
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NOT_SUPPORTED, "null init paramSet: not support user auth!")
 
     struct HksParam *noRequireAuth = NULL;
