@@ -1016,6 +1016,7 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importkeyAlias_05, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_06, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_07, nullptr);
-        EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+        int32_t ret = HksInitialize();
+        ASSERT_TRUE(ret == HKS_SUCCESS);
     }
 }

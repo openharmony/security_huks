@@ -933,7 +933,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00100, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -953,7 +954,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00200, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -973,7 +975,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00300, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -996,7 +999,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00400, TestSize.Level1)
 
     struct HksBlob authId = { (uint32_t)strlen(GENERATE_KEY), (uint8_t *)GENERATE_KEY };
     (void)HksDeleteKey(&authId, nullptr);
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -1088,7 +1092,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest00700, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -1180,7 +1185,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01000, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -1495,7 +1501,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01800, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -1515,7 +1522,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01900, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -1535,7 +1543,8 @@ HWTEST_F(ApiPressureTest, ApiPressureTest02000, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -1555,6 +1564,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest02100, TestSize.Level1)
     for (auto &t : threads) {
         t.join();
     }
-    EXPECT_EQ(HKS_SUCCESS, HKS_SUCCESS);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 }  // namespace

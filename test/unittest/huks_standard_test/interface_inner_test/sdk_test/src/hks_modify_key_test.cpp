@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_file_operator.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_cipher.h"
 #include "hks_test_common.h"
@@ -58,7 +59,9 @@ void HksModifyKeyTest::TearDown()
 const int DEFAULT_AES_CIPHER_PLAIN_SIZE = 1000;
 const int AES_DEFAULT_GCM_NONCE_LENGTH = 12;
 const int AES_DEFAULT_AAD_LEN = 4;
-const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
+
+const char *g_storePath = HKS_KEY_STORE_PATH "/+0+0+0+0/key";
+
 const char *g_testName = "TestName";
 
 static const struct HksTestCipherParams g_testCipherParams[] = {
