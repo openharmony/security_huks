@@ -81,8 +81,6 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
         ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceGenerateKey fail, ret = %" LOG_PUBLIC "d", ret)
-
-        HKS_LOG_E("key out size = %" LOG_PUBLIC "x", keyOut.size);
     } while (0);
 
     if (isNoneResponse) {
