@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { AsyncCallback } from './basic';
+import type { AsyncCallback } from './basic';
 
 /**
  * OpenHarmony Universal KeyStore

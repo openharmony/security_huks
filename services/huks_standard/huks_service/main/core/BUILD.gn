@@ -61,6 +61,9 @@ ohos_static_library("libhuks_service_core_standard_static") {
   ]
   cflags +=
       [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
+  if (enable_user_auth_framework) {
+    cflags += [ "-DHKS_SUPPORT_USER_AUTH_ACCESS_CONTROL" ]
+  }
   deps = [
     "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
