@@ -43,6 +43,9 @@ ohos_shared_library("huks_engine_core_standard") {
     "-Wall",
     "-Werror",
   ]
+  if (enable_user_auth_framework) {
+    cflags += [ "-DHKS_SUPPORT_USER_AUTH_ACCESS_CONTROL" ]
+  }
   sources = [
     "src/hks_asn1.c",
     "src/hks_attest.c",
