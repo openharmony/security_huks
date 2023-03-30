@@ -233,6 +233,8 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
         return ret;
     }
 
+    HKS_LOG_I("enter Decrypt Three Stage");
+
     /* 3. Decrypt Three Stage */
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
@@ -240,16 +242,28 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
     ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
+    HKS_LOG_I("enter Update & Finish");
+
     // Update & Finish
     uint8_t plain[AES_COMMON_SIZE] = {0};
     struct HksBlob plainText = { AES_COMMON_SIZE, plain };
     ret = TestUpdateLoopFinish(&handleDecrypt, decryptParamSet, &cipherText, &plainText);
+
+    HKS_LOG_I("enter memcmp, inData.size %d, plainText.size %d", inData.size, plainText.size);
+
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
+    EXPECT_EQ(inData.size, plainText.size) << "plainText not equals inData";
+    if (inData.size != plainText.size) {
+        HKS_LOG_E("xxxxxxxxxxx");
+        return -1;
+    }
     EXPECT_EQ(memcmp(inData.data, plainText.data, inData.size), HKS_SUCCESS) << "plainText not equals inData";
     if (ret != HKS_SUCCESS) {
         HksDeleteKey(keyAlias, genParamSet);
         return ret;
     }
+
+    HKS_LOG_I("enter HksDeleteKey");
 
     /* 3. Delete Key */
     ret = HksDeleteKey(keyAlias, genParamSet);

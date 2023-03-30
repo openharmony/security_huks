@@ -13,6 +13,12 @@
  * limitations under the License.
  */
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_client_ipc.h"
 
 #include <stdbool.h>
@@ -32,9 +38,29 @@
 #include "hks_type_inner.h"
 #include "securec.h"
 
+#ifdef HKS_L1_SMALL
+#include "hks_samgr_client.h"
+#include <unistd.h>
+
+#define HKS_MAX_RETRY_TIME 5
+#define HKS_SLEEP_TIME_FOR_RETRY 1
+#endif
+
 int32_t HksClientInitialize(void)
 {
+#ifdef HKS_L1_SMALL
+    for (uint32_t i = 0; i < HKS_MAX_RETRY_TIME; ++i) {
+        IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
+        if (iUnknown != NULL) {
+            return HKS_SUCCESS;
+        }
+        sleep(HKS_SLEEP_TIME_FOR_RETRY);
+    }
+    HKS_LOG_E("HUKS service is not ready!");
+    return HKS_ERROR_BAD_STATE;
+#else
     return HKS_SUCCESS;
+#endif
 }
 
 int32_t HksClientRefreshKeyInfo(void)
@@ -489,7 +515,7 @@ static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct Hk
 {
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
-    
+
     int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CertificateChainInitBlob fail")
 

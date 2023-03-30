@@ -20,7 +20,7 @@
 
 #include "hks_keynode.h"
 #include "hks_mutex.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
 
 #define MAX_HASH_SIZE 64
 
@@ -86,6 +86,9 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct HksBlob *key);
 
 int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain);
+
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+    struct HksBlob *newKey);
 
 int32_t HksCoreGetAbility(int32_t funcType);
 

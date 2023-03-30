@@ -39,8 +39,6 @@ int32_t HksCtrDrbgSeed(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_contex
 
 int32_t HksMbedtlsFillRandom(struct HksBlob *randomData);
 
-int32_t HksMbedtlsGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
-
 #ifdef __cplusplus
 }
 #endif

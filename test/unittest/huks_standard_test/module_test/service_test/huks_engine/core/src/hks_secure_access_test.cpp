@@ -274,7 +274,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest009, TestSize.Level0)
 {
     HKS_LOG_I("enter HksSecureAccessTest009");
 
-    int32_t ret = HksCheckCompareProcessName(NULL, NULL);
+    int32_t ret = HksCheckCompareProcessName(nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
 }
 
@@ -292,7 +292,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest010, TestSize.Level0)
     int32_t ret = BuildParamSetWithParam(&blobParamSet, &processNameBlob, 1, false);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksCheckCompareProcessName(blobParamSet, NULL);
+    ret = HksCheckCompareProcessName(blobParamSet, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
     HksFreeParamSet(&blobParamSet);
 }

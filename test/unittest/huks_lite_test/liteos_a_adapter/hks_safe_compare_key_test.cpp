@@ -56,7 +56,7 @@ void HksSafeCompareKeyTest::TearDown()
 {
 }
 
-const char *g_storePath = "/storage/maindata/hks_client/key/";
+const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key/";
 const char *g_testOne = "TestOne";
 const char *g_testTwo = "TestTwo";
 
@@ -159,6 +159,9 @@ HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level0)
 
     ret = CompareKeyData(&keyAliasOne, &keyAliasTwo);
     EXPECT_NE(ret, 0);
+
+    (void)HksDeleteKey(&keyAliasOne, nullptr);
+    (void)HksDeleteKey(&keyAliasTwo, nullptr);
 }
 #endif /* _CUT_AUTHENTICATE_ */
 }

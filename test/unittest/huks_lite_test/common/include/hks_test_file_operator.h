@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-int32_t HksIsFileExist(const char *path, const char *fileName);
+int32_t HksTestIsFileExist(const char *path, const char *fileName);
 
 uint32_t HksTestFileSize(const char *path, const char *fileName);
 

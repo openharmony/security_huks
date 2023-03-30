@@ -18,6 +18,12 @@
 
 #include <stdint.h>
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #ifdef L2_STANDARD
 #include "hitrace/trace.h"
 #endif

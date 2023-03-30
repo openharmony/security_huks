@@ -16,6 +16,8 @@
 #ifndef HKS_CONFIG_H
 #define HKS_CONFIG_H
 
+#define HKS_ENABLE_EVENT_DELETE
+
 #define HKS_SUPPORT_POSIX
 
 #define HKS_SUPPORT_THREAD

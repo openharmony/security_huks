@@ -31,6 +31,7 @@
 #include "hks_mbedtls_ecc.h"
 #include "hks_mbedtls_ecdh.h"
 #include "hks_mbedtls_ecdsa.h"
+#include "hks_mbedtls_get_main_key.h"
 #include "hks_mbedtls_hash.h"
 #include "hks_mbedtls_hmac.h"
 #include "hks_mbedtls_kdf.h"
@@ -203,11 +204,6 @@ static void RegisterAbilityHmac(void)
 #endif
 }
 
-static void RegisterAbilityGetMainKey(void)
-{
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY, (void *)HksMbedtlsGetMainKey);
-}
-
 static void RegisterAbilityFillRandom(void)
 {
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM, (void *)HksMbedtlsFillRandom);
@@ -218,6 +214,11 @@ static void RegisterAbilityBnExpMod(void)
 #ifdef HKS_SUPPORT_BN_C
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_BN_EXP_MOD, (void *)HksMbedtlsBnExpMod);
 #endif
+}
+
+static void RegisterAbilityGetMainKey(void)
+{
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY, (void *)HksMbedtlsGetMainKey);
 }
 
 int32_t HksCryptoAbilityInit(void)
@@ -232,8 +233,8 @@ int32_t HksCryptoAbilityInit(void)
     RegisterAbilityDerive();
     RegisterAbilityHmac();
     RegisterAbilityHash();
-    RegisterAbilityGetMainKey();
     RegisterAbilityFillRandom();
     RegisterAbilityBnExpMod();
+    RegisterAbilityGetMainKey();
     return HKS_SUCCESS;
 }

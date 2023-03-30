@@ -601,36 +601,6 @@ HWTEST_F(HuksAccessTest, HuksAccessTest042, TestSize.Level0)
 
 #endif
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-
-/**
- * @tc.name: HuksAccessTest.HuksAccessTest043
- * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER
- * @tc.type: FUNC
- */
-HWTEST_F(HuksAccessTest, HuksAccessTest043, TestSize.Level0)
-{
-    HksEnableCreateOrDestroy(false);
-    HksEnableSetHid(false);
-    int32_t ret = HuksAccessUpgradeKeyInfo(nullptr, nullptr, nullptr);
-    EXPECT_NE(ret, HKS_SUCCESS);
-}
-
-/**
- * @tc.name: HuksAccessTest.HuksAccessTest044
- * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER
- * @tc.type: FUNC
- */
-HWTEST_F(HuksAccessTest, HuksAccessTest044, TestSize.Level0)
-{
-    HksEnableCreateOrDestroy(true);
-    HksEnableSetHid(false);
-    int32_t ret = HuksAccessUpgradeKeyInfo(nullptr, nullptr, nullptr);
-    EXPECT_NE(ret, HKS_SUCCESS);
-}
-
-#endif
-
 /**
  * @tc.name: HuksAccessTest.HuksAccessTest045
  * @tc.desc: tdd HksCreateHuksHdiDevice, expect HKS_ERROR_NULL_POINTER

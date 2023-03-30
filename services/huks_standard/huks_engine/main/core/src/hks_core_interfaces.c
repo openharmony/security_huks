@@ -22,7 +22,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
 #include "securec.h"
 
 int32_t HuksHdiModuleInit(void)
@@ -148,18 +148,17 @@ int32_t HuksHdiMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     return HksCoreMac(key, paramSet, srcData, mac);
 }
 
+int32_t HuksHdiUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+    struct HksBlob *newKey)
+{
+    return HksCoreUpgradeKey(oldKey, paramSet, newKey);
+}
+
 #ifdef _STORAGE_LITE_
 int32_t HuksHdiCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac)
 {
     return HksCoreCalcMacHeader(paramSet, salt, srcData, mac);
-}
-#endif
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HuksHdiUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut)
-{
-    return HksCoreUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
 }
 #endif
 
@@ -192,13 +191,11 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
     hdiDevicePtr->HuksHdiAgreeKey         = HuksHdiAgreeKey;
     hdiDevicePtr->HuksHdiDeriveKey        = HuksHdiDeriveKey;
     hdiDevicePtr->HuksHdiMac              = HuksHdiMac;
+    hdiDevicePtr->HuksHdiUpgradeKey       = HuksHdiUpgradeKey;
 #ifdef _STORAGE_LITE_
     hdiDevicePtr->HuksHdiCalcMacHeader    = HuksHdiCalcMacHeader;
 #endif
 
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-    hdiDevicePtr->HuksHdiUpgradeKeyInfo   = HuksHdiUpgradeKeyInfo;
-#endif
 #endif /* _CUT_AUTHENTICATE_ */
 
     hdiDevicePtr->HuksHdiGenerateRandom   = HksCoreGenerateRandom;

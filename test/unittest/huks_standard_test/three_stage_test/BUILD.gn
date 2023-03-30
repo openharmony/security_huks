@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Huawei Device Co., Ltd.
+# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -10,6 +10,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
@@ -83,11 +84,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_chipset_platform_decrypt_test.cpp",
     "src/hks_chipset_platform_encrypt_test.cpp",
   ]
-
-  defines = [
-    "L2_STANDARD",
-    "_HUKS_LOG_ENABLE_",
-  ]
+  defines = []
 
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
@@ -101,7 +98,7 @@ ohos_unittest("huks_UT_test") {
   if (use_crypto_lib == "mbedtls") {
     defines += [ "_USE_MBEDTLS_" ]
   }
-  if (enable_mock) {
+  if (enable_hks_mock) {
     sources += [
       "src/hks_access_control_agree_test.cpp",
       "src/hks_access_control_cipher_test.cpp",
@@ -117,7 +114,6 @@ ohos_unittest("huks_UT_test") {
 
   include_dirs = [
     "//base/security/huks/test/unittest/huks_standard/three_stage_test/include",
-    "//commonlibrary/c_utils/base/include",
     "include",
     "//test/xts/acts/security_lite/huks/common/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
@@ -126,7 +122,9 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/utils/crypto_adapter",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
   ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+  ]
   deps = [
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
@@ -141,12 +139,10 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
   ]
   deps += [
-    # ld.lld: error: undefined symbol: HksRwlockClose
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
 
     # used by hks_chipset_platform_encrypt_test.cpp
     "//third_party/json:nlohmann_json_static",
   ]
-  cflags = [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
 }

@@ -14,6 +14,8 @@
  */
 
 #include "hks_samgr_server.h"
+
+#include "hks_client_service.h"
 #include "hks_template.h"
 
 #define STACK_SIZE 0x800
@@ -33,7 +35,7 @@ static BOOL Initialize(Service *service, Identity identity)
     return true;
 }
 
-static BOOL MessageHandle(Service *service, const Request *request)
+static BOOL MessageHandle(Service *service, Request *request)
 {
     (void)service;
     HKS_IF_NULL_RETURN(request, false)
@@ -57,6 +59,14 @@ static HksMgrService g_hksMgrService = {
 
 static void Init(void)
 {
-    SAMGR_GetInstance()->RegisterService((Service *)&g_hksMgrService);
+    int32_t ret = HksServiceInitialize();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("huks service initialaize failed!");
+    }
+    bool isRegistered = SAMGR_GetInstance()->RegisterService((Service *)&g_hksMgrService);
+    if (!isRegistered) {
+        HKS_LOG_E("register service failed!");
+    }
+    HKS_LOG_I("HUKS service init");
 }
-SYSEX_SERVICE_INIT(Init);
+SYS_SERVICE_INIT(Init);

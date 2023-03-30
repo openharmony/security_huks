@@ -821,7 +821,7 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
 
     struct HksParam *authResult = NULL;
     bool isNeedSecureAccess = true;
-    
+
     int32_t ret = CheckIfNeedVerifyParams(keyNode, &isNeedSecureAccess, &authResult);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "check if need verify params failed!")
 
