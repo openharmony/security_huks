@@ -141,7 +141,7 @@ static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req
         }
         if (outSize > 0) {
             if (outSize > MAX_MALLOC_LEN) {
-                ret = HKS_ERROR_INVALID_ARGUMENT;;
+                ret = HKS_ERROR_INVALID_ARGUMENT;
                 break;
             }
             outData.data = (uint8_t *)HksMalloc(outSize);
