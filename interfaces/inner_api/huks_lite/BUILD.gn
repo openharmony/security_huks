@@ -114,10 +114,7 @@ if (ohos_kernel_type == "liteos_m") {
 
     sources = []
 
-    cflags = [
-      "-Wall",
-      "-Werror",
-    ]
+    cflags = []
 
     deps = []
 
