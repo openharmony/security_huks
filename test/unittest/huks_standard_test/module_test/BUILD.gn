@@ -188,18 +188,18 @@ ohos_unittest("huks_module_test") {
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_asn1_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_core_service_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keyblob_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keynode_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_secure_access_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/src/hks_core_hal_api_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keyblob_test.cpp",
   ]
 
   if (huks_enable_upgrade_key) {
     # upgrade key test
     sources += [
-      "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/src/hks_upgrade_key_test.cpp",
       "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_upgrade_key_c_test.cpp",
       "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_upgrade_key_accesser_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/src/hks_upgrade_key_test.cpp",
     ]
   }
 
@@ -228,8 +228,8 @@ ohos_unittest("huks_module_test") {
   cflags = [ "-DREAL_HKS_KEY_VERSION=${huks_key_version}" ]
 
   external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
     "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
   ]
   if (support_jsapi) {
     sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_event_observer_test.cpp" ]
