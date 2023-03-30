@@ -29,28 +29,29 @@
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
+#include "hks_chipset_platform_decrypt.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
 #include "hks_core_service_three_stage.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
-#include "hks_chipset_platform_decrypt.h"
-#include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_secure_access.h"
 #include "hks_sm_import_wrap_key.h"
 #include "hks_template.h"
+#include "hks_type_inner.h"
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+#include "hks_upgrade_key.h"
+#endif
+
 #include "securec.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
-#endif
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-#include "hks_upgrade_key_info.h"
 #endif
 
 #ifndef _CUT_AUTHENTICATE_
@@ -478,8 +479,6 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
             HKS_FREE_PTR(rawKey.data);
             break;
         }
-
-        HKS_LOG_I("Encrypt or decrypt.");
 
         if (cmdId == HKS_CMD_ID_ENCRYPT) {
             ret = CipherEncrypt(&rawKey, paramSet, usageSpec, &tmpInData, outData);
@@ -1104,8 +1103,6 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
         struct HksKeySpec agreeSpec = { 0 };
         HksFillKeySpec(paramSet, &agreeSpec);
 
-        HKS_LOG_I("Agree key.");
-
         ret = HksCryptoHalAgreeKey(&key, peerPublicKey, &agreeSpec, agreedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
         HKS_FREE_PTR(key.data);
@@ -1138,8 +1135,6 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
         struct HksKeySpec derivationSpec = { 0, 0, &derParam };
         HksFillKeySpec(paramSet, &derivationSpec);
         HksFillKeyDerivationParam(paramSet, &derParam);
-
-        HKS_LOG_I("Derive key.");
 
         ret = HksCryptoHalDeriveKey(&key, &derivationSpec, derivedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
@@ -1174,8 +1169,6 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
         ret = HksGetRawKey(keyNode->paramSet, &rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "mac get raw key failed!")
 
-        HKS_LOG_I("Do hmac.");
-
         ret = HksCryptoHalHmac(&rawKey, digestParam->uint32Param, srcData, mac);
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
         HKS_FREE_PTR(rawKey.data);
@@ -1184,6 +1177,22 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     HksFreeKeyNode(&keyNode);
     return ret;
 }
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
+{
+    return HksUpgradeKey(oldKey, paramSet, newKey);
+}
+
+#else
+int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey)
+{
+    (void)oldKey;
+    (void)paramSet;
+    (void)newKey;
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
 
 int32_t HksCoreRefreshKeyInfo(void)
 {
@@ -1197,14 +1206,6 @@ int32_t HksCoreRefreshKeyInfo(void)
     return HKS_SUCCESS;
 #endif
 }
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias,
-    const struct HksBlob *keyInfo, struct HksBlob *keyOut)
-{
-    return HksUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
-}
-#endif
 
 #ifdef _STORAGE_LITE_
 static int32_t GetMacKey(const struct HksBlob *salt, struct HksBlob *macKey)
@@ -1305,26 +1306,18 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
         ret = GetPublicKeyInnerFormat(wrappingKey, wrappedKeyData, &peerPublicKey, &partOffset);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get peer public key of inner format failed!")
 
-        HKS_LOG_I("Agree shared key.");
-
         /* 2. agree shared key with wrappingAlias's private key and peer public key */
         ret = AgreeSharedSecretWithPeerPublicKey(wrappingKey, &peerPublicKey, unwrapSuite, &agreeSharedSecret,
             paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "agree share secret failed!")
 
-        HKS_LOG_I("Decrypt with shared key.");
-
         /* 4. decrypt kek data with agreed secret */
         ret = DecryptKekWithAgreeSharedSecret(wrappedKeyData, &agreeSharedSecret, &partOffset, &kek);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt kek with agreed secret failed!")
 
-        HKS_LOG_I("Decrypt imported key.");
-
         /* 5. decrypt imported key data with kek */
         ret = DecryptImportedKeyWithKek(wrappedKeyData, &kek, &partOffset, &originKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt origin key failed!")
-
-        HKS_LOG_I("Import key.");
 
         /* 6. call HksCoreImportKey to build key blob */
         ret = HksCoreImportKey(keyAlias, &originKey, paramSet, keyOut);
@@ -1337,10 +1330,11 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
 
 static int32_t GetPurposeAndAlgorithm(const struct HksParamSet *paramSet, uint32_t *pur, uint32_t *alg)
 {
-    uint32_t i;
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet == NULL")
-
     HKS_LOG_D("Get paramSet->paramsCnt %" LOG_PUBLIC "u", paramSet->paramsCnt);
+
+    uint32_t i;
+
     for (i = 0; i < paramSet->paramsCnt; i++) {
         if (paramSet->params[i].tag == HKS_TAG_PURPOSE) {
             *pur = paramSet->params[i].uint32Param;

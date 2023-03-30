@@ -74,7 +74,7 @@ HWTEST_F(HksDoubleListTest, HksDoubleListTest001, TestSize.Level0)
 HWTEST_F(HksDoubleListTest, HksDoubleListTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksDoubleListTest002");
-    struct DoubleList head = { .next = nullptr, .prev = nullptr };
+    struct DoubleList head = { .prev = nullptr, .next = nullptr };
     struct DoubleList node = { 0 };
     AddNodeAfterDoubleListHead(nullptr, nullptr);
     AddNodeAfterDoubleListHead(&head, &node);
@@ -89,7 +89,7 @@ HWTEST_F(HksDoubleListTest, HksDoubleListTest002, TestSize.Level0)
 HWTEST_F(HksDoubleListTest, HksDoubleListTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksDoubleListTest003");
-    struct DoubleList head = { .next = nullptr, .prev = nullptr };
+    struct DoubleList head = { .prev = nullptr, .next = nullptr };
     struct DoubleList node = { 0 };
     AddNodeAtDoubleListTail(nullptr, nullptr);
     AddNodeAtDoubleListTail(&head, &node);
@@ -104,7 +104,7 @@ HWTEST_F(HksDoubleListTest, HksDoubleListTest003, TestSize.Level0)
 HWTEST_F(HksDoubleListTest, HksDoubleListTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksDoubleListTest004");
-    struct DoubleList head = { .next = nullptr, .prev = nullptr };
+    struct DoubleList head = { .prev = nullptr, .next = nullptr };
     RemoveDoubleListNode(nullptr);
     RemoveDoubleListNode(&head);
     EXPECT_EQ(head.next == nullptr, true);

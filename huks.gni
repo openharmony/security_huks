@@ -13,9 +13,15 @@
 
 use_crypto_lib = "openssl"
 non_rwlock_support = false
-enable_mock = false
-enable_coverage = false
+enable_hks_mock = false
+enable_hks_coverage = false
 enable_user_auth_framework = true
+
+# always set as false for upload code
+hks_enable_test = false
+
+# specify the key version
+huks_key_version = "2"
 
 if (!defined(global_parts_info) ||
     defined(global_parts_info.account_os_account)) {

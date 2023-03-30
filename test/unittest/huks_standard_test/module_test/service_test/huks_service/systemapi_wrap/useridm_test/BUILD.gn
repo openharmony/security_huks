@@ -1,4 +1,4 @@
-# Copyright (C) 2022 Huawei Device Co., Ltd.
+# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
@@ -22,13 +23,10 @@ ohos_unittest("huks_useridm_wrap_test") {
 
   sources = [ "src/hks_useridm_api_wrap_test.cpp" ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HUKS_LOG_ENABLE_",
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm/inc",

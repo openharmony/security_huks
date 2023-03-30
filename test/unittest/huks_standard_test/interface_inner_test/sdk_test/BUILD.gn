@@ -49,7 +49,6 @@ ohos_unittest("hukssdk_test") {
   ]
 
   include_dirs = [
-    "//commonlibrary/c_utils/base/include",
     "//third_party/bounds_checking_function/include",
     "./include",
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
@@ -74,7 +73,9 @@ ohos_unittest("hukssdk_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
   ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+  ]
   if (support_jsapi) {
     deps += [
       "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",

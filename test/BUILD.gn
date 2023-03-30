@@ -31,7 +31,10 @@ group("unittest") {
     if (ohos_kernel_type == "liteos_m") {
       #deps = [ "./unittest/huks_lite_test/liteos_m_adapter:huks_3.0_test" ]
     } else {
-      deps = [ "./unittest/huks_lite_test/liteos_a_adapter:huks_3.0_test" ]
+      deps = [
+        "./unittest/huks_lite_test/liteos_a_adapter:huks_3.0_test",
+        "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/upgrade_test/version_one/module_test:huks_3.0_module_test",
+      ]
     }
   }
 }

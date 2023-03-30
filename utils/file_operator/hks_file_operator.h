@@ -18,21 +18,32 @@
 
 #include "hks_type.h"
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #define HKS_MAX_FILE_NAME_LEN 512
 
 #ifdef L2_STANDARD
     #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
     #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
 #else
-    #ifdef _STORAGE_LITE_
-        #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
+    #ifdef HKS_L1_SMALL
+        #define HKS_KEY_STORE_PATH            "/data/service/el1/public/huks_service/maindata"
+        #define HKS_KEY_STORE_BAK_PATH        "/data/service/el1/public/huks_service/bakdata"
     #else
-        #ifdef HKS_CONFIG_KEY_STORE_PATH
-            #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
-            #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+        #ifdef _STORAGE_LITE_
+            #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
         #else
-            #define HKS_KEY_STORE_PATH            "/storage/maindata"
-            #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"
+            #ifdef HKS_CONFIG_KEY_STORE_PATH
+                #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
+                #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+            #else
+                #define HKS_KEY_STORE_PATH            "/storage/maindata"
+                #define HKS_KEY_STORE_BAK_PATH        "/storage/bakdata"
+            #endif
         #endif
     #endif
 #endif

@@ -28,8 +28,6 @@ int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 
 int32_t HksOpensslFillRandom(struct HksBlob *randomData);
 
-int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
-
 int32_t HksOpensslFillPrivRandom(struct HksBlob *randomData);
 
 #ifdef __cplusplus

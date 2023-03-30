@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,12 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
@@ -27,10 +33,6 @@
 #include "securec.h"
 
 #ifndef _CUT_AUTHENTICATE_
-
-#define HKS_KEY_BLOB_DUMMY_KEY_VERSION 1
-#define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
-#define HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL 1
 
 /* temporarily use default hard-coded AT key by disable HKS_SUPPORT_GET_AT_KEY.
  * while in real scenario,it will generate random only in memory(in TEE)
@@ -292,7 +294,7 @@ static int32_t AddCoreServiceParams(const struct HksBlob *keyInfo, enum HksKeyFl
     struct HksParam tmpParam[] = {
         {
             .tag = HKS_TAG_KEY_VERSION,
-            .uint32Param = HKS_KEY_BLOB_DUMMY_KEY_VERSION
+            .uint32Param = HKS_KEY_VERSION
         }, {
             .tag = HKS_TAG_OS_VERSION,
             .uint32Param = HKS_KEY_BLOB_DUMMY_OS_VERSION
@@ -317,7 +319,7 @@ static int32_t AddCoreServiceParams(const struct HksBlob *keyInfo, enum HksKeyFl
     return ret;
 }
 
-static int32_t BuildClearKeyBlob(const struct HksBlob *key, enum HksKeyFlag keyFlag,
+static int32_t BuildKeyBlobWithKeyParam(const struct HksBlob *key, enum HksKeyFlag keyFlag,
     const struct HksParamSet *inParamSet, struct HksParamSet **outParamSet)
 {
     struct HksParamSet *newParamSet = NULL;
@@ -447,7 +449,7 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
-    uint8_t *data = HksMalloc(keySize);
+    uint8_t *data = (uint8_t *)HksMalloc(keySize);
     HKS_IF_NULL_LOGE_RETURN(data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
 
     (void)memcpy_s(data, keySize, keyParam->blob.data + sizeof(*keyBlobInfo), keySize);
@@ -468,7 +470,7 @@ int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
 
     uint32_t authTokenDataSize = sizeof(struct HksUserAuthToken) - SHA256_SIGN_LEN;
     struct HksBlob srcDataBlob = { authTokenDataSize, (uint8_t *)authToken };
-    
+
     uint8_t computedMac[SHA256_SIGN_LEN] = {0};
     struct HksBlob macBlob = { SHA256_SIGN_LEN, computedMac };
     ret = HksCryptoHalHmac(&macKeyBlob, HKS_DIGEST_SHA256, &srcDataBlob, &macBlob);
@@ -483,18 +485,11 @@ int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
     return HKS_SUCCESS;
 }
 
-int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
-    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+static int32_t HksBuildKeyBlob2(struct HksParamSet *keyBlobParamSet, struct HksBlob *keyOut)
 {
-    (void)keyAlias;
-    struct HksParamSet *keyBlobParamSet = NULL;
-    int32_t ret = BuildClearKeyBlob(key, (enum HksKeyFlag)keyFlag, paramSet, &keyBlobParamSet);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
     struct HksParam *keyParam = NULL;
-    ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY, &keyParam);
+    int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY, &keyParam);
     if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&keyBlobParamSet);
         HKS_LOG_E("get key param when building keyBlob failed!");
         return ret;
     }
@@ -505,20 +500,61 @@ int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const s
     if (ret != HKS_SUCCESS) {
         /* should clean the clear key if fail to encrypt key */
         (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
-        HksFreeParamSet(&keyBlobParamSet);
         return ret;
     }
 
     if (memcpy_s(keyOut->data, keyOut->size, keyBlobParamSet, keyBlobParamSet->paramSetSize) != EOK) {
-        HksFreeParamSet(&keyBlobParamSet);
         HKS_LOG_E("copy keyblob out failed!");
-        return HKS_ERROR_MALLOC_FAIL;
+        return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
     keyOut->size = keyBlobParamSet->paramSetSize;
-    HksFreeParamSet(&keyBlobParamSet);
     return HKS_SUCCESS;
 }
+
+int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    (void)keyAlias;
+    struct HksParamSet *keyBlobParamSet = NULL;
+    int32_t ret;
+    do {
+        ret = BuildKeyBlobWithKeyParam(key, (enum HksKeyFlag)keyFlag, paramSet, &keyBlobParamSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        ret = HksBuildKeyBlob2(keyBlobParamSet, keyOut);
+    } while (0);
+    HksFreeParamSet(&keyBlobParamSet);
+    return ret;
+}
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+int32_t HksBuildKeyBlobWithOutAddKeyParam(const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    struct HksParamSet *keyBlobParamSet = NULL;
+    int32_t ret;
+    do {
+        ret = HksGetParamSet(paramSet, paramSet->paramSetSize, &keyBlobParamSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        keyOut->data = (uint8_t *)HksMalloc(keyBlobParamSet->paramSetSize);
+        if (keyOut->data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            HKS_LOG_E("malloc keyblob out failed!");
+            break;
+        }
+        keyOut->size = keyBlobParamSet->paramSetSize;
+
+        ret = HksBuildKeyBlob2(keyBlobParamSet, keyOut);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(*keyOut);
+        }
+    } while (0);
+
+    HksFreeParamSet(&keyBlobParamSet);
+    return ret;
+}
+#endif
 
 int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, struct HksParamSet **paramSet)
 {
