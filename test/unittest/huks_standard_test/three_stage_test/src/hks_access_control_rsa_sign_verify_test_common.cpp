@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,13 +35,28 @@ const uint32_t SLEEP_TWO_SECOND = 2;
 static int32_t RSAAuthTokenSign(struct HksBlob *challenge,
     const IDMParams &testIDMParams, struct HksParam *tmpParams)
 {
+    HksUserAuthToken *authTokenHal = nullptr;
+
+    authTokenHal = static_cast<struct HksUserAuthToken *>(HksMalloc(AUTH_TOKEN_LEN));
+    if (authTokenHal == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int ret = HksAccessControlPartTest::AuthTokenEncrypt(testIDMParams, challenge, authTokenHal);
+    if (ret != HKS_SUCCESS) {
+        HKS_FREE_PTR(authTokenHal);
+        HKS_LOG_E("AuthTokenEncrypt Failed.");
+        return ret;
+    }
+
     std::vector<uint8_t> token;
-    // 添加authtoken
-    int32_t ret = HksAccessControlPartTest::AuthTokenSign(challenge, testIDMParams, token);
+    ret = HksAccessControlPartTest::AuthTokenSign(testIDMParams, authTokenHal, token);
+    HKS_FREE_PTR(authTokenHal);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AuthTokenSign Failed.");
         return ret;
     }
+
     uint8_t *authToken = static_cast<uint8_t *>(HksMalloc(AUTH_TOKEN_LEN));
     for (uint32_t i = 0; i < AUTH_TOKEN_LEN; i++) {
         authToken[i] = token[i];

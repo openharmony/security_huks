@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -253,8 +253,8 @@ static int32_t HksVerifyKeyChallenge(const struct HuksKeyNode *keyNode, const st
         HKS_LOG_E("check challenge too long!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (HksMemCmp(challenge->blob.data + challengePos * BYTES_PER_POS, token->challenge + challengePos * BYTES_PER_POS,
-        checkLen) != 0) {
+    if (HksMemCmp(challenge->blob.data + challengePos * BYTES_PER_POS,
+        token->plaintextData.challenge + challengePos * BYTES_PER_POS, checkLen) != 0) {
         HKS_LOG_E("verify challenge failed!");
         return HKS_ERROR_KEY_AUTH_FAILED;
     }
@@ -275,7 +275,7 @@ static int32_t HksVerifyKeyTimestamp(const struct HuksKeyNode *keyNode, const st
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get access time failed!")
 
     // ms to s
-    uint64_t authTokenTime = token->time / S_TO_MS;
+    uint64_t authTokenTime = token->plaintextData.time / S_TO_MS;
     if ((accessTime->uint64Param > authTokenTime && accessTime->uint64Param - authTokenTime > timeOutInt) ||
         (authTokenTime > accessTime->uint64Param && authTokenTime - accessTime->uint64Param > timeOutInt)) {
         HKS_LOG_E("auth token time out!");
@@ -401,7 +401,7 @@ static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
         return HKS_ERROR_BAD_STATE;
     }
 
-    if (HksMemCmp(secUid->blob.data, &authToken->secureUid, sizeof(uint64_t)) != 0) {
+    if (HksMemCmp(secUid->blob.data, &authToken->ciphertextData.secureUid, sizeof(uint64_t)) != 0) {
         HKS_LOG_E("check sec uid failed!");
         return HKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED;
     }
@@ -439,7 +439,7 @@ static int32_t VerifyEnrolledIdInfoIfNeed(const struct HksParamSet *keyBlobParam
         uint64_t enrolledId = 0;
         (void)memcpy_s(&enrolledId, sizeof(uint64_t), enrolledIdInfoBlob.data + index, sizeof(uint64_t));
         index += sizeof(uint64_t);
-        if (authType == authTokenAuthType && enrolledId == authToken->enrolledId) {
+        if (authType == authTokenAuthType && enrolledId == authToken->ciphertextData.enrolledId) {
             return HKS_SUCCESS;
         }
     }
@@ -459,7 +459,7 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get auth access type failed!")
 
     uint32_t authTokenAuthType = 0;
-    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &authTokenAuthType);
+    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &authTokenAuthType);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "invalid user iam auth type:not support!")
 
     if ((authTokenAuthType & userAuthType->uint32Param) == 0) {
@@ -544,7 +544,6 @@ static int32_t CheckIfNeedVerifyParams(const struct HuksKeyNode *keyNode, bool *
         *isNeedVerify = false;
         return HKS_SUCCESS;
     }
-
     if (authResult->uint32Param == HKS_AUTH_RESULT_SUCCESS) {
         *isNeedVerify = false;
         return HKS_SUCCESS;
@@ -670,12 +669,12 @@ static int32_t GetSecureSignAuthInfo(const struct HuksKeyNode *keyNode, struct H
 
     struct HksUserAuthToken *authToken = (struct HksUserAuthToken *)authTokenParam->blob.data;
     uint32_t hksAuthType;
-    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->authType, &hksAuthType);
+    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &hksAuthType);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "invalid user iam auth type")
 
     secureSignInfo->userAuthType = hksAuthType;
-    secureSignInfo->credentialId = authToken->credentialId;
-    secureSignInfo->authenticatorId = authToken->enrolledId;
+    secureSignInfo->credentialId = authToken->ciphertextData.credentialId;
+    secureSignInfo->authenticatorId = authToken->ciphertextData.enrolledId;
     return HKS_SUCCESS;
 }
 
@@ -841,6 +840,9 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
 
         ret = HksVerifyAuthTokenSign(authToken);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify the auth token sign failed!")
+
+        ret = HksDecryptAuthToken(authToken);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt auth token failed!")
 
         ret = VerifyChallengeOrTimeStamp(keyNode, authToken);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify challenge failed!")

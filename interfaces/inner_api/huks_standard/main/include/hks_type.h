@@ -78,6 +78,9 @@ extern "C" {
 #define HKS_CERT_DEVICE_SIZE 2048
 #define HKS_CERT_APP_SIZE 4096
 
+#define HKS_KEY_BLOB_AT_KEY_SIZE 256
+#define HKS_KEY_BLOB_AT_KEY_BYTES 32
+
 /**
  * @brief hks key type
  */
@@ -739,21 +742,46 @@ struct HksKeyMaterial25519 {
 };
 
 /**
- * @brief hks user auth token
+ * @brief hks user auth token plaintext data
  */
-typedef struct __attribute__((__packed__)) HksUserAuthToken {
-    uint32_t version;
+typedef struct HksPlaintextData {
     uint8_t challenge[TOKEN_SIZE];
-    uint64_t secureUid;
-    uint64_t enrolledId;
-    uint64_t credentialId;
     uint64_t time;
     uint32_t authTrustLevel;
     uint32_t authType;
     uint32_t authMode;
     uint32_t securityLevel;
+} __attribute__((__packed__)) HksPlaintextData;
+
+/**
+ * @brief hks user auth token ciphertext data
+ */
+typedef struct HksCiphertextData {
+    int32_t userId;
+    uint64_t secureUid;
+    uint64_t enrolledId;
+    uint64_t credentialId;
+} __attribute__((__packed__)) HksCiphertextData;
+
+/**
+ * @brief hks user auth token
+ */
+typedef struct __attribute__((__packed__)) HksUserAuthToken {
+    uint32_t version;
+    HksPlaintextData plaintextData;
+    HksCiphertextData ciphertextData;
+    uint8_t tag[HKS_AE_TAG_LEN];
+    uint8_t iv[HKS_AE_NONCE_LEN];
     uint8_t sign[SHA256_SIGN_LEN];
 } __attribute__((__packed__)) HksUserAuthToken;
+
+/**
+ * @brief hks user auth token key
+ */
+struct HksAuthTokenKey {
+    uint8_t macKey[HKS_KEY_BLOB_AT_KEY_BYTES];
+    uint8_t cipherKey[HKS_KEY_BLOB_AT_KEY_BYTES];
+};
 
 /**
  * @brief hks secure sign auth info

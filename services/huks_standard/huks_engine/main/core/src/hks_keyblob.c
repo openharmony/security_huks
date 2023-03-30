@@ -18,6 +18,8 @@
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "securec.h"
+
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -25,21 +27,18 @@
 #endif
 
 #include "hks_crypto_adapter.h"
-#include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
-#include "securec.h"
+#include "hks_mutex.h"
+
 
 #ifndef _CUT_AUTHENTICATE_
 
-/* temporarily use default hard-coded AT key by disable HKS_SUPPORT_GET_AT_KEY.
- * while in real scenario,it will generate random only in memory(in TEE)
- * at every start after enable HKS_SUPPORT_GET_AT_KEY
- */
-#define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
-#define HKS_DEFAULT_USER_AT_KEY_LEN 32
+#define HKS_KEY_BLOB_DUMMY_KEY_VERSION 1
+#define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
+#define HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL 1
 
 struct HksKeyBlobInfo {
     uint8_t salt[HKS_KEY_BLOB_DERIVE_SALT_SIZE];
@@ -460,29 +459,59 @@ int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey)
 
 int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken)
 {
-    HKS_IF_NULL_RETURN(authToken, HKS_ERROR_NULL_POINTER)
+    HKS_IF_NULL_LOGE_RETURN(authToken, HKS_ERROR_NULL_POINTER, "authToken params is null!")
 
-    uint8_t hmacKey[HKS_KEY_BLOB_AT_HMAC_KEY_BYTES] = {0};
-    struct HksBlob macKeyBlob = { HKS_KEY_BLOB_AT_HMAC_KEY_BYTES, hmacKey };
+    struct HksAuthTokenKey authTokenKey;
+    int32_t ret = HksGetAuthTokenKey(&authTokenKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get authtoken key failed!")
 
-    int32_t ret = HksGetAuthTokenKey(&macKeyBlob);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get authtoken key failed")
-
+    struct HksBlob macKeyBlob = { HKS_KEY_BLOB_AT_KEY_BYTES, authTokenKey.macKey };
     uint32_t authTokenDataSize = sizeof(struct HksUserAuthToken) - SHA256_SIGN_LEN;
     struct HksBlob srcDataBlob = { authTokenDataSize, (uint8_t *)authToken };
 
     uint8_t computedMac[SHA256_SIGN_LEN] = {0};
     struct HksBlob macBlob = { SHA256_SIGN_LEN, computedMac };
     ret = HksCryptoHalHmac(&macKeyBlob, HKS_DIGEST_SHA256, &srcDataBlob, &macBlob);
-    (void)memset_s(hmacKey, sizeof(hmacKey), 0, sizeof(hmacKey));
+    (void)memset_s(&authTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "compute authtoken data mac failed!")
 
     ret = HksMemCmp(computedMac, (uint8_t *)authToken + authTokenDataSize, SHA256_SIGN_LEN);
-    if (ret != 0) {
-        HKS_LOG_E("compute authtoken data mac failed!");
-        return HKS_ERROR_KEY_AUTH_VERIFY_FAILED;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_KEY_AUTH_VERIFY_FAILED, "compare authtoken data mac failed!")
+
     return HKS_SUCCESS;
+}
+
+int32_t HksDecryptAuthToken(struct HksUserAuthToken *authToken)
+{
+    HKS_IF_NULL_LOGE_RETURN(authToken, HKS_ERROR_NULL_POINTER, "authToken params is null!")
+
+    struct HksAuthTokenKey authTokenKey;
+    int32_t ret = HksGetAuthTokenKey(&authTokenKey);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get authtoken key failed!")
+
+    const char *aadValue = "OH_authToken";
+    struct HksBlob cipherKeyBlob = { HKS_KEY_BLOB_AT_KEY_BYTES, authTokenKey.cipherKey };
+    struct HksBlob srcDataBlob = { sizeof(struct HksCiphertextData), (uint8_t *)&authToken->ciphertextData };
+    struct HksUsageSpec usageSpec = { HKS_ALG_AES, HKS_MODE_GCM, HKS_PADDING_NONE,
+        HKS_DIGEST_NONE, HKS_KEY_PURPOSE_DECRYPT, 0, NULL };
+
+    struct HksAeadParam *aeadParam = (struct HksAeadParam *)HksMalloc(sizeof(struct HksAeadParam));
+    HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_MALLOC_FAIL, "aeadParam malloc failed!")
+
+    aeadParam->nonce.data = authToken->iv;
+    aeadParam->nonce.size = sizeof(authToken->iv);
+    aeadParam->aad.data = (uint8_t *)(unsigned long)aadValue;
+    aeadParam->aad.size = (uint32_t)strlen(aadValue);
+    aeadParam->tagDec.data = authToken->tag;
+    aeadParam->tagDec.size = sizeof(authToken->tag);
+    aeadParam->payloadLen = srcDataBlob.size;
+    usageSpec.algParam = aeadParam;
+
+    ret = HksCryptoHalDecrypt(&cipherKeyBlob, &usageSpec, &srcDataBlob, &srcDataBlob);
+    (void)memset_s(&authTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
+    HKS_IF_NOT_SUCC_LOGE(ret, "decrypt authtoken data failed!");
+    HksFree(aeadParam);
+    return ret;
 }
 
 static int32_t HksBuildKeyBlob2(struct HksParamSet *keyBlobParamSet, struct HksBlob *keyOut)
@@ -568,47 +597,52 @@ int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSe
 
 #endif /* STORAGE_LITE */
 
+static HksMutex *g_genAtKeyMutex = NULL;
+static struct HksAuthTokenKey g_cachedAuthTokenKey;
+static volatile bool g_isInitAuthTokenKey = false;
+
+/* temporarily use default hard-coded AT key by disable HKS_SUPPORT_GET_AT_KEY.
+ * while in real scenario,it will generate random only in memory(in TEE)
+ * at every start after enable HKS_SUPPORT_GET_AT_KEY
+ */
 #ifndef HKS_SUPPORT_GET_AT_KEY
-static struct HksBlob g_cachedAuthTokenKey = {
-    .size = (uint32_t)HKS_DEFAULT_USER_AT_KEY_LEN,
-    .data = (uint8_t *)HKS_DEFAULT_USER_AT_KEY
-};
-int32_t HksCoreInitAuthTokenKey(void)
+#define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
+#define HKS_DEFAULT_USER_AT_KEY_LEN 32
+static int32_t GenerateAuthTokenKey(void)
 {
+    (void)memcpy_s(g_cachedAuthTokenKey.macKey, HKS_KEY_BLOB_AT_KEY_BYTES,
+        HKS_DEFAULT_USER_AT_KEY, HKS_DEFAULT_USER_AT_KEY_LEN);
+    (void)memcpy_s(g_cachedAuthTokenKey.cipherKey, HKS_KEY_BLOB_AT_KEY_BYTES,
+        HKS_DEFAULT_USER_AT_KEY, HKS_DEFAULT_USER_AT_KEY_LEN);
     HKS_LOG_I("generate At key success!");
     return HKS_SUCCESS;
 }
 
-int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
-{
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(authTokenKey), HKS_ERROR_INVALID_ARGUMENT, "authTokenKey param is invalid!")
-
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(&g_cachedAuthTokenKey), HKS_ERROR_BAD_STATE,
-        "cached auth token key is invalid!")
-
-    if (authTokenKey->size < g_cachedAuthTokenKey.size) {
-        HKS_LOG_E("buffer is too small");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    (void)memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size);
-    authTokenKey->size = g_cachedAuthTokenKey.size;
-
-    return HKS_SUCCESS;
-}
 #else
-static HksMutex *g_genAtKeyMutex = NULL;
-static struct HksBlob g_cachedAuthTokenKey = { 0, NULL };
-static volatile bool g_isInitAuthTokenKey = false;
-
-static int32_t GenerateAuthTokenKey()
+static int32_t GenerateAuthTokenKey(void)
 {
-    struct HksKeySpec spec = { HKS_ALG_HMAC, HKS_KEY_BLOB_AT_HMAC_KEY_SIZE, NULL };
-    int32_t ret = HksCryptoHalGenerateKey(&spec, &g_cachedAuthTokenKey);
+    struct HksKeySpec macSpec = { HKS_ALG_HMAC, HKS_KEY_BLOB_AT_KEY_SIZE, NULL };
+    struct HksBlob macKey = { 0, NULL };
+    int32_t ret = HksCryptoHalGenerateKey(&macSpec, &macKey);
     HKS_IF_NOT_SUCC_LOGE(ret, "generate hmac key failed!")
 
+    struct HksKeySpec cipherSpec = { HKS_ALG_AES, HKS_KEY_BLOB_AT_KEY_SIZE, NULL };
+    struct HksBlob cipherKey = { 0, NULL };
+    ret = HksCryptoHalGenerateKey(&cipherSpec, &cipherKey);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("generate cipher key failed!");
+        HKS_MEMSET_FREE_BLOB(macKey);
+        return ret;
+    }
+
+    (void)memcpy_s(g_cachedAuthTokenKey.macKey, HKS_KEY_BLOB_AT_KEY_BYTES, macKey.data, macKey.size);
+    (void)memcpy_s(g_cachedAuthTokenKey.cipherKey, HKS_KEY_BLOB_AT_KEY_BYTES, cipherKey.data, cipherKey.size);
+    HKS_MEMSET_FREE_BLOB(macKey);
+    HKS_MEMSET_FREE_BLOB(cipherKey);
     return ret;
 }
+
+#endif /* HKS_SUPPORT_GET_AT_KEY */
 
 int32_t HksCoreInitAuthTokenKey(void)
 {
@@ -633,9 +667,9 @@ int32_t HksCoreInitAuthTokenKey(void)
     return HKS_SUCCESS;
 }
 
-int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
+int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey)
 {
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(authTokenKey), HKS_ERROR_INVALID_ARGUMENT, "authTokenKey param is invalid!")
+    HKS_IF_NULL_LOGE_RETURN(authTokenKey, HKS_ERROR_NULL_POINTER, "authTokenKey param is null!")
 
     if (g_isInitAuthTokenKey == false) {
         (void)HksMutexLock(g_genAtKeyMutex);
@@ -644,24 +678,17 @@ int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey)
         if (g_isInitAuthTokenKey == false) {
             if (GenerateAuthTokenKey() != HKS_SUCCESS) {
                 HKS_LOG_E("generate auth token key failed");
-                (void)HksMutexUnLock(g_genAtKeyMutex);
-                return ret;
+                (void)HksMutexUnlock(g_genAtKeyMutex);
+                return HKS_FAILURE;
             }
             HKS_LOG_I("generate At key success!");
             g_isInitAuthTokenKey = true;
         }
-        (void)HksMutexUnLock(g_genAtKeyMutex);
+        (void)HksMutexUnlock(g_genAtKeyMutex);
     }
 
-    if (authTokenKey->size < g_cachedAuthTokenKey.size) {
-        HKS_LOG_E("buffer is too small");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-
-    (void)memcpy_s(authTokenKey->data, authTokenKey->size, g_cachedAuthTokenKey.data, g_cachedAuthTokenKey.size);
-    authTokenKey->size = g_cachedAuthTokenKey.size;
+    (void)memcpy_s(authTokenKey, sizeof(struct HksAuthTokenKey), &g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey));
     return HKS_SUCCESS;
 }
-#endif /* HKS_SUPPORT_GET_AT_KEY */
 
 #endif /* _CUT_AUTHENTICATE_ */
