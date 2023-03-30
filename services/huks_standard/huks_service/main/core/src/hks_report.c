@@ -18,6 +18,12 @@
 #include "hks_log.h"
 #include "hks_template.h"
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #ifdef L2_STANDARD
 #include "hks_report_wrapper.h"
 #endif

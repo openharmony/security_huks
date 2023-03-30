@@ -382,6 +382,8 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest019, TestSi
 {
     ASSERT_EQ((uint32_t)OH_HUKS_STORAGE_TEMP == (uint32_t)HKS_STORAGE_TEMP, true);
     ASSERT_EQ((uint32_t)OH_HUKS_STORAGE_PERSISTENT == (uint32_t)HKS_STORAGE_PERSISTENT, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_STORAGE_ONLY_USED_IN_HUKS == (uint32_t)HKS_STORAGE_ONLY_USED_IN_HUKS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_STORAGE_ALLOW_KEY_EXPORTED == (uint32_t)HKS_STORAGE_ALLOW_KEY_EXPORTED, true);
 }
 
 /**
@@ -619,6 +621,9 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest035, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_KEY_SIZE == (uint32_t)HKS_TAG_DERIVE_KEY_SIZE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_IMPORT_KEY_TYPE == (uint32_t)HKS_TAG_IMPORT_KEY_TYPE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE == (uint32_t)HKS_TAG_UNWRAP_ALGORITHM_SUITE, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG ==
+        (uint32_t)HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_RSA_PSS_SALT_LEN_TYPE == (uint32_t)HKS_TAG_RSA_PSS_SALT_LEN_TYPE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ALL_USERS == (uint32_t)HKS_TAG_ALL_USERS, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_USER_ID == (uint32_t)HKS_TAG_USER_ID, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_NO_AUTH_REQUIRED == (uint32_t)HKS_TAG_NO_AUTH_REQUIRED, true);
@@ -629,6 +634,7 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest035, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_SECURE_SIGN_TYPE == (uint32_t)HKS_TAG_KEY_SECURE_SIGN_TYPE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_TYPE == (uint32_t)HKS_TAG_CHALLENGE_TYPE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_POS == (uint32_t)HKS_TAG_CHALLENGE_POS, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_PURPOSE == (uint32_t)HKS_TAG_KEY_AUTH_PURPOSE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_CHALLENGE == (uint32_t)HKS_TAG_ATTESTATION_CHALLENGE, true);
 
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_APPLICATION_ID == (uint32_t)HKS_TAG_ATTESTATION_APPLICATION_ID, true);
@@ -683,6 +689,8 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest036, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_KEY_SIZE == (OH_HUKS_TAG_TYPE_UINT | 24), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_IMPORT_KEY_TYPE == (OH_HUKS_TAG_TYPE_UINT | 25), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE == (OH_HUKS_TAG_TYPE_UINT | 26), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG == (OH_HUKS_TAG_TYPE_UINT | 29), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_RSA_PSS_SALT_LEN_TYPE == (OH_HUKS_TAG_TYPE_UINT | 30), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ALL_USERS == (OH_HUKS_TAG_TYPE_BOOL | 301), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_USER_ID == (OH_HUKS_TAG_TYPE_UINT | 302), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_NO_AUTH_REQUIRED == (OH_HUKS_TAG_TYPE_BOOL | 303), true);
@@ -693,6 +701,7 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest036, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_SECURE_SIGN_TYPE == (OH_HUKS_TAG_TYPE_UINT | 308), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_TYPE == (OH_HUKS_TAG_TYPE_UINT | 309), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_POS == (OH_HUKS_TAG_TYPE_UINT | 310), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_PURPOSE == (OH_HUKS_TAG_TYPE_UINT | 311), true);
     
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_CHALLENGE == (OH_HUKS_TAG_TYPE_BYTES | 501), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_APPLICATION_ID == (OH_HUKS_TAG_TYPE_BYTES | 502), true);
@@ -961,4 +970,16 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest071, TestSi
     ASSERT_EQ(sizeof(hksKeyMaterial25519.reserved) == sizeof(uint32_t), true);
 }
 
+/**
+ * @tc.name: HksNativeApiCompatibilityTest072
+ * @tc.desc: normal case to test native api(OHOS-NDK) compatibility:OH_Huks_RsaPssSaltLenType equal to
+ *           HksRsaPssSaltLenType
+ * @tc.type: FUNC
+ * @tc.require: issueI6NDUQ
+ */
+HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest072, TestSize.Level0)
+{
+    ASSERT_EQ((uint32_t)OH_HUKS_RSA_PSS_SALTLEN_DIGEST == (uint32_t)HKS_RSA_PSS_SALTLEN_DIGEST, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_RSA_PSS_SALTLEN_MAX == (uint32_t)HKS_RSA_PSS_SALTLEN_MAX, true);
+}
 }

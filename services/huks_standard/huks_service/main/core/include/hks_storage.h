@@ -91,6 +91,10 @@ int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName);
 
 int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo);
 
+#ifdef HKS_ENABLE_SMALL_TO_SERVICE
+int32_t HksIsOldKeyPathCleared(uint32_t *keyCount);
+#endif
+
 #ifdef _STORAGE_LITE_
 
 #define HKS_KEY_STORE_FILE_NAME "hks_keystore"

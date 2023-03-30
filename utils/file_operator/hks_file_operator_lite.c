@@ -149,6 +149,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
         close(fd);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
+
     fsync(fd);
     close(fd);
     return HKS_SUCCESS;
@@ -449,35 +450,6 @@ int32_t HksFileRemove(const char *path, const char *fileName)
     HKS_FREE_PTR(fullFileName);
     return ret;
 }
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-/* return < 0 error; > 0 realFileSize; == 0 no data */
-int32_t HksOldVersionFileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
-{
-    HKS_LOG_D("piling");
-    return HKS_ERROR_NOT_SUPPORTED;
-}
-
-int32_t HksOldVersionFileRemove(const char *fileName)
-{
-    HKS_LOG_D("piling");
-    return HKS_ERROR_NOT_SUPPORTED;
-}
-
-/* return < 0 error; >= 0 realFileSize */
-int32_t HksOldVersionFileSize(const char *fileName)
-{
-    HKS_LOG_D("piling");
-    return HKS_ERROR_NOT_SUPPORTED;
-}
-
-/* return true, exist; false not exist */
-bool HksOldVersionIsFileExist(const char *fileName)
-{
-    HKS_LOG_D("piling");
-    return false;
-}
-#endif
 
 int32_t HksGetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {

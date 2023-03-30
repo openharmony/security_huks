@@ -85,6 +85,7 @@ HWTEST_F(HksInnerTest, HksInnerTest004, Function | SmallTest | Level0)
     ret = HksCheckGenKeyMutableParams(HKS_ALG_AES, &values);
     values.mode = {.needCheck = true, .value = HKS_MODE_ECB};
     ret = HksCheckGenKeyMutableParams(HKS_ALG_AES, &values);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
 /**
@@ -257,6 +258,7 @@ HWTEST_F(HksInnerTest, HksInnerTest009, Function | SmallTest | Level0)
     uint32_t len;
     ret = HksGetDigestLen(HKS_DIGEST_SHA1, &len);
     ret = HksGetDigestLen(HKS_DIGEST_SHA224, &len);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
 /**
@@ -274,6 +276,7 @@ HWTEST_F(HksInnerTest, HksInnerTest010, Function | SmallTest | Level0)
     ret = HksFormatKeyFromMaterial(HKS_ALG_HMAC, &keyMaterial, nullptr);
     ret = HksFormatKeyFromMaterial(HKS_ALG_DSA, &keyMaterial, nullptr);
     ret = HksFormatKeyFromMaterial(HKS_ALG_ECC, &keyMaterial, nullptr);
+    ASSERT_NE(ret, HKS_SUCCESS);
 }
 
 /**
@@ -291,6 +294,7 @@ HWTEST_F(HksInnerTest, HksInnerTest011, Function | SmallTest | Level0)
     ret = HksFormatKeyFromMaterial(HKS_ALG_HMAC, &keyMaterial, nullptr);
     ret = HksFormatKeyFromMaterial(HKS_ALG_DSA, &keyMaterial, nullptr);
     ret = HksFormatKeyFromMaterial(HKS_ALG_ECC, &keyMaterial, nullptr);
+    ASSERT_NE(ret, HKS_SUCCESS);
 }
 
 /**

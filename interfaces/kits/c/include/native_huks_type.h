@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -321,6 +321,10 @@ enum OH_Huks_KeyStorageType {
     OH_HUKS_STORAGE_TEMP = 0,
     /** The key is managed by the HUKS service. */
     OH_HUKS_STORAGE_PERSISTENT = 1,
+    /** The key is only used in huks. */
+    OH_HUKS_STORAGE_ONLY_USED_IN_HUKS = 2,
+    /** The key can be allowed to export. */
+    OH_HUKS_STORAGE_ALLOW_KEY_EXPORTED = 3,
 };
 
 /**
@@ -337,6 +341,19 @@ enum OH_Huks_ImportKeyType {
     OH_HUKS_KEY_TYPE_PRIVATE_KEY = 1,
     /** Public and private key pair. */
     OH_HUKS_KEY_TYPE_KEY_PAIR = 2,
+};
+
+/**
+ * @brief Enumerates the key storage modes.
+ *
+ * @since 10
+ * @version 1.0
+ */
+enum OH_Huks_RsaPssSaltLenType {
+    /** Salt length matches digest. */
+    OH_HUKS_RSA_PSS_SALTLEN_DIGEST = 0,
+    /** Set salt length to maximum possible, default type. */
+    OH_HUKS_RSA_PSS_SALTLEN_MAX = 1,
 };
 
 /**
@@ -537,6 +554,10 @@ enum OH_Huks_Tag {
     OH_HUKS_TAG_IMPORT_KEY_TYPE = OH_HUKS_TAG_TYPE_UINT | 25,
     /** Algorithm suite required for encrypted imports. */
     OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE = OH_HUKS_TAG_TYPE_UINT | 26,
+    /** Storage mode of derived or agree keys. For details, see {@link OH_Huks_KeyStorageType}. */
+    OH_HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG = OH_HUKS_TAG_TYPE_UINT | 29,
+    /** Type of rsa pss salt length. */
+    OH_HUKS_TAG_RSA_PSS_SALT_LEN_TYPE = OH_HUKS_TAG_TYPE_UINT | 30,
 
     /** Tags for access control and user authentication. The value range is 301 to 500. */
     /** All users in the multi-user scenario. */
@@ -565,6 +586,9 @@ enum OH_Huks_Tag {
      *  For details, see {@link OH_Huks_ChallengePosition}.
      */
     OH_HUKS_TAG_CHALLENGE_POS = OH_HUKS_TAG_TYPE_UINT | 310,
+
+    /** Purpose of key authentication */
+    OH_HUKS_TAG_KEY_AUTH_PURPOSE = OH_HUKS_TAG_TYPE_UINT | 311,
 
     /** Tags for key attestation. The value range is 501 to 600. */
     /** Challenge value used in the attestation. */

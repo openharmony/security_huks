@@ -29,8 +29,8 @@
 #include "hks_mem.h"
 #include "hks_request.h"
 
-#define HKS_SAMGR_SERVICE "hks_service"
-#define HKS_SAMGR_FEATRURE "hks_feature"
+#define HKS_SAMGR_SERVICE "huks_service"
+#define HKS_SAMGR_FEATRURE "huks_feature"
 
 typedef struct {
     IpcIo *reply;
@@ -52,5 +52,21 @@ typedef struct {
     Identity identity;
     Service *parent;
 } HksMgrFeature;
+
+enum HksIpcCode {
+    HKS_IPC_MSG_BASE = 0x00010,
+
+    HKS_IPC_MSG_OK,
+    HKS_IPC_MSG_ERROR,
+    HKS_IPC_MSG_RECEIVED,
+
+    /* new error code must be added before HKS_MSG_MAX */
+    HKS_IPC_MSG_MAX,
+};
+
+struct HksIpcHandle {
+    IpcIo *io;
+    uint32_t state;
+};
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -101,6 +101,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_KEY_SECURE_SIGN_TYPE,
     HKS_TAG_CHALLENGE_TYPE,
     HKS_TAG_CHALLENGE_POS,
+    HKS_TAG_KEY_AUTH_PURPOSE,
 
     HKS_TAG_KEY_INIT_CHALLENGE,
     HKS_TAG_IS_USER_AUTH_ACCESS,
@@ -443,5 +444,47 @@ HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, 
         }
     }
 
+    return HKS_SUCCESS;
+}
+
+HKS_API_EXPORT int32_t HksDeleteTagsFromParamSet(const uint32_t *tag, uint32_t tagCount,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    if (tag == NULL || paramSet == NULL || outParamSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksFreshParamSet((struct HksParamSet *)paramSet, false);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fresh paramset failed")
+
+    struct HksParamSet *newParamSet = NULL;
+    ret = HksInitParamSet(&newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "init param set failed")
+
+    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
+        bool isDeleteTag = false;
+        for (uint32_t j = 0; j < tagCount; ++j) {
+            if (paramSet->params[i].tag == tag[j]) {
+                isDeleteTag = true;
+                break;
+            }
+        }
+        if (!isDeleteTag) {
+            ret = HksAddParams(newParamSet, &paramSet->params[i], 1);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("add in params failed");
+                HksFreeParamSet(&newParamSet);
+                return ret;
+            }
+        }
+    }
+
+    ret = HksBuildParamSet(&newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("build paramset failed");
+        HksFreeParamSet(&newParamSet);
+        return ret;
+    }
+
+    *outParamSet = newParamSet;
     return HKS_SUCCESS;
 }

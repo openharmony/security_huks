@@ -31,8 +31,11 @@ declare_args() {
   # whether use hks config file
   huks_config_file = ""
 
-  # whether use hks key store path
+  # config hks key store path in mini or lite system
   huks_key_store_path = "/storage/"
+
+  # config hks key store path in standard system
+  huks_key_store_standard_path = "/data/service/el1/public/huks_service"
 
   # whether huks enable log
   huks_enable_log = false
@@ -42,6 +45,15 @@ declare_args() {
 
   # specify the OpenSSL huks depends on
   huks_dependency_openssl_path = ""
+
+  # specify the uid white list for change key owner
+  huks_uid_trust_list_define = "{}"
+
+  # whether enable key file auto-upgrade
+  huks_enable_upgrade_key = true
+
+  # whether enable upgrade key file for l1 sdk to l1 service, default as false
+  huks_enable_upgrade_small_to_service = false
 
   # default security level supported by huks is software
   huks_security_level = "software"

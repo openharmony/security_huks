@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_file_operator.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_file_operator.h"
@@ -54,7 +55,7 @@ void HksSafeCompareKeyTest::TearDown()
 {
 }
 
-const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
+const char *g_storePath = HKS_KEY_STORE_PATH "/+0+0+0+0/key";
 const char *g_testOne = "TestOne";
 const char *g_testTwo = "TestTwo";
 
@@ -123,7 +124,7 @@ static int32_t CompareKeyData(struct HksBlob *keyAliasOne, struct HksBlob *keyAl
     if (bufOne == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    uint32_t sizeRead = HksFileRead(g_storePath, (char *)keyAliasOne->data, 0, bufOne, sizeOne);
+    [[maybe_unused]] uint32_t sizeRead = HksFileRead(g_storePath, (char *)keyAliasOne->data, 0, bufOne, sizeOne);
 
     uint32_t sizeTwo = HksFileSize(g_storePath, (char *)keyAliasTwo->data);
     uint8_t *bufTwo = (uint8_t *)HksTestMalloc(sizeTwo);

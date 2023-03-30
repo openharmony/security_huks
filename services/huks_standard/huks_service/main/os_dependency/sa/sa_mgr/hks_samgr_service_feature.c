@@ -14,8 +14,13 @@
  */
 
 #include "hks_ipc_service.h"
+#include "hks_message_handler.h"
 #include "hks_samgr_server.h"
 #include "hks_template.h"
+
+#include "ipc_skeleton.h"
+
+const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
 
 static const char *FEATURE_GetName(Feature *feature);
 static void FEATURE_OnInitialize(Feature *feature, Service *parent, Identity identity);
@@ -67,39 +72,114 @@ static BOOL FEATURE_OnMessage(Feature *feature, Request *msg)
     return SAMGR_SendResponse(msg, &response);
 }
 
-static int32 Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
+static int32_t ProcessMsgToHandler(int funcId, HksIpcContext *ipcContext, const struct HksBlob *srcData,
+    struct HksBlob *outData)
 {
-    BuffPtr* buffRsv = IpcIoPopDataBuff(req);
-    HKS_IF_NULL_RETURN(buffRsv, HKS_ERROR_NULL_POINTER)
-
-    uint32_t len = buffRsv->buffSz;
-    struct HksBlob srcData = { len, NULL };
-    srcData.data = HksMalloc(len);
-    HKS_IF_NULL_RETURN(srcData.data, HKS_ERROR_MALLOC_FAIL)
-
-    if (memcpy_s(srcData.data, len, buffRsv->buff, len) != EOK) {
-        HKS_FREE_PTR(srcData.data);
-        srcData.size = 0;
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    FreeBuffer(NULL, buffRsv->buff);
-    uint32_t callingUid = GetCallingUid(origin);
-    HksIpcContext ipcContext = { reply, callingUid };
-    uint32_t size = sizeof(g_hksIpcMessageHandler) / sizeof(g_hksIpcMessageHandler[0]);
+    uint32_t size = sizeof(HKS_IPC_MESSAGE_HANDLER) / sizeof(HKS_IPC_MESSAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
-        if (funcId == g_hksIpcMessageHandler[i].msgId) {
-            g_hksIpcMessageHandler[i].handler(&srcData, (const uint8_t *)&ipcContext);
-            break;
+        if (funcId == HKS_IPC_MESSAGE_HANDLER[i].msgId) {
+            HKS_IPC_MESSAGE_HANDLER[i].handler(srcData, (const uint8_t *)ipcContext);
+            return HKS_SUCCESS;
         }
     }
-    HKS_FREE_PTR(srcData.data);
-    srcData.size = 0;
+
+    size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
+    for (uint32_t i = 0; i < size; ++i) {
+        if (funcId == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
+            HKS_IPC_THREE_STAGE_HANDLER[i].handler(srcData, outData, (const uint8_t *)ipcContext);
+            return HKS_SUCCESS;
+        }
+    }
+    return HKS_FAILURE;
+}
+
+static int32_t ReadSrcDataFromReq(IpcIo *req, struct HksBlob *srcData)
+{
+    // read srcData size
+    uint32_t buffSize = 0;
+    bool ipcRet = ReadUint32(req, &buffSize);
+    if (!ipcRet) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+
+    srcData->size = buffSize;
+    if (srcData->size == 0 || srcData->size > MAX_MALLOC_LEN) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    const uint8_t *tmpUint8Array = ReadBuffer(req, srcData->size);
+    if (tmpUint8Array == NULL) {
+        return HKS_ERROR_IPC_MSG_FAIL;
+    }
+    srcData->data = (uint8_t *)HksMalloc(srcData->size);
+    if (srcData->data == NULL) {
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+
+    (void)memcpy_s(srcData->data, srcData->size, tmpUint8Array, srcData->size);
     return HKS_SUCCESS;
+}
+
+static int32_t Invoke(IServerProxy *iProxy, int funcId, void *origin, IpcIo *req, IpcIo *reply)
+{
+    (void)iProxy;
+    (void)origin;
+
+    int32_t ret = HKS_FAILURE;
+
+    uint32_t callingUid = GetCallingUid();
+    HksIpcContext ipcContext = { reply, callingUid };
+
+    struct HksBlob srcData = { 0 };
+    struct HksBlob outData = { 0 };
+    do {
+        // read outData size
+        uint32_t outSize = 0;
+        bool ipcRet = ReadUint32(req, &outSize);
+        if (!ipcRet) {
+            ret = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
+        if (outSize > 0) {
+            if (outSize > MAX_MALLOC_LEN) {
+                ret = HKS_ERROR_INVALID_ARGUMENT;
+                break;
+            }
+            outData.data = (uint8_t *)HksMalloc(outSize);
+            if (outData.data == NULL) {
+                HKS_LOG_E("outData malloc failed!");
+                ret = HKS_ERROR_MALLOC_FAIL;
+                break;
+            }
+            outData.size = outSize;
+        }
+
+        ret = ReadSrcDataFromReq(req, &srcData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "read src data from request failed!")
+
+        ret = ProcessMsgToHandler(funcId, &ipcContext, &srcData, &outData);
+    } while (0);
+
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("handle ipc msg failed!");
+        HksIpcErrorResponse((const uint8_t *)&ipcContext);
+    }
+
+    HKS_FREE_BLOB(srcData);
+    HKS_FREE_BLOB(outData);
+
+    return ret;
 }
 
 static void Init(void)
 {
-    SAMGR_GetInstance()->RegisterFeature(HKS_SAMGR_SERVICE, (Feature *)&g_hksMgrFeature);
-    SAMGR_GetInstance()->RegisterFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE, GET_IUNKNOWN(g_hksMgrFeature));
+    bool ret = SAMGR_GetInstance()->RegisterFeature(HKS_SAMGR_SERVICE, (Feature *)&g_hksMgrFeature);
+    if (!ret) {
+        HKS_LOG_E("register feature failed!");
+    }
+    ret = SAMGR_GetInstance()->RegisterFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE, GET_IUNKNOWN(g_hksMgrFeature));
+    if (!ret) {
+        HKS_LOG_E("register feature api failed!");
+    }
+    HKS_LOG_I("HUKS feature init");
 }
-SYSEX_FEATURE_INIT(Init);
+SYS_FEATURE_INIT(Init);
