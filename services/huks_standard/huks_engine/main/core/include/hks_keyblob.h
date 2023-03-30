@@ -20,11 +20,21 @@
 
 #include "hks_type.h"
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
 #define HKS_KEY_BLOB_DERIVE_SALT_SIZE 16
 #define HKS_KEY_BLOB_DERIVE_CNT 1000
 #define HKS_KEY_BLOB_TAG_SIZE 16
 #define HKS_KEY_BLOB_NONCE_SIZE 12
 #define HKS_KEY_BLOB_MAIN_KEY_SIZE 32
+
+#define HKS_KEY_BLOB_DUMMY_KEY_VERSION 1
+#define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
+#define HKS_KEY_BLOB_DUMMY_OS_PATCHLEVEL 1
 
 enum HksKeyNodeStatus {
     HKS_KEYNODE_INACTIVE = 0x0,
@@ -48,6 +58,10 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode);
 
 int32_t HksBuildKeyBlob(const struct HksBlob *keyAlias, uint8_t keyFlag, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+
+#ifdef HKS_ENABLE_UPGRADE_KEY
+int32_t HksBuildKeyBlobWithOutAddKeyParam(const struct HksParamSet *paramSet, struct HksBlob *keyOut);
+#endif
 
 int32_t HksGetEncryptKey(struct HksBlob *mainKey);
 

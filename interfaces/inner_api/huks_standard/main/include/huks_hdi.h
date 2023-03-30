@@ -262,6 +262,16 @@ struct HuksHdi {
         const struct HksBlob *srcData, struct HksBlob *mac);
 
     /**
+     * @brief Upgrade key
+     * @param oldKey old key to be upgraded
+     * @param paramSet required parameter set
+     * @param newKey new key
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiUpgradeKey)(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+        struct HksBlob *newKey);
+
+    /**
      * @brief Export chipset platform publicKey
      * @param salt salt value
      * @param scene scene

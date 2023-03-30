@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 
 #include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/src/hks_openssl_ed25519tox25519.c"
+#include "hks_api.h"
 #include "hks_openssl_ed25519tox25519.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -88,6 +89,8 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest002, TestSize.Level0)
         .ed25519Pubkey = nullptr,
     };
     Curve25519Destroy(&str);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -104,6 +107,8 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest003, TestSize.Level0)
         .c = nullptr,
     };
     FreeLocalBigVar(&var);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 /**
@@ -120,6 +125,8 @@ HWTEST_F(HksCurveEngineTest, HksCurveEngineTest004, TestSize.Level0)
         .c = nullptr,
     };
     Curve25519LocalVar(&var);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 }

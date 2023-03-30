@@ -29,6 +29,7 @@
 #include "hks_openssl_dh.h"
 #include "hks_openssl_dsa.h"
 #include "hks_openssl_ecc.h"
+#include "hks_openssl_get_main_key.h"
 #include "hks_openssl_hash.h"
 #include "hks_openssl_hmac.h"
 #include "hks_openssl_kdf.h"

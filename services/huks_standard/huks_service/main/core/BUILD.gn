@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
@@ -18,63 +19,143 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_service_core_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_service_core_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+
+    include_dirs = [
+      "//base/security/huks/utils/list",
+      "//base/security/huks/utils/mutex",
+    ]
+
+    sources = [
+      "src/hks_client_check.c",
+      "src/hks_client_service.c",
+      "src/hks_client_service_util.c",
+      "src/hks_session_manager.c",
+      "src/hks_storage.c",
+      "src/hks_storage_file_lock.c",
+    ]
+
+    sources += [
+      "src/hks_upgrade_helper.c",
+      "src/hks_upgrade_key_accesser.c",
+    ]
+
+    if (non_rwlock_support) {
+      sources += [ "src/hks_lock_lite.c" ]
+    } else {
+      sources += [ "src/hks_lock.c" ]
+    }
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+      "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+      "//base/security/huks/utils/list:libhuks_utils_list_static",
+      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+    ]
+
+    if (enable_hks_mock) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
+    } else {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
+    }
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    sources += [
+      "src/hks_hitrace.c",
+      "src/hks_report.c",
+    ]
+
+    deps += [
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
+    ]
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+    external_deps = [
+      "hitrace_native:libhitracechain",
+      "hiviewdfx_hilog_native:libhilog",
+    ]
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  include_dirs = [
-    "//base/security/huks/utils/file_operator",
-    "//base/security/huks/utils/list",
-    "//base/security/huks/utils/mutex",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper",
-    "//commonlibrary/c_utils/base/include",
-  ]
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [
-    "src/hks_client_check.c",
-    "src/hks_client_service.c",
-    "src/hks_hitrace.c",
-    "src/hks_report.c",
-    "src/hks_session_manager.c",
-    "src/hks_storage.c",
-    "src/hks_storage_file_lock.c",
-  ]
-  if (non_rwlock_support) {
-    sources += [ "src/hks_lock_lite.c" ]
-  } else {
-    sources += [ "src/hks_lock.c" ]
+} else {
+  ohos_static_library("libhuks_service_core_small_static") {
+    public_configs = [ ":huks_config" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
+
+    include_dirs = [
+      "//base/security/huks/utils/list",
+      "//base/security/huks/utils/mutex",
+    ]
+    defines = []
+
+    sources = [
+      "src/hks_client_check.c",
+      "src/hks_client_service.c",
+      "src/hks_client_service_util.c",
+      "src/hks_session_manager.c",
+      "src/hks_storage_file_lock.c",
+      "src/hks_storage_lite.c",
+    ]
+    sources += [
+      "src/hks_hitrace.c",
+      "src/hks_report.c",
+    ]
+
+    sources += [
+      "src/hks_upgrade_helper.c",
+      "src/hks_upgrade_key_accesser.c",
+    ]
+
+    if (huks_use_lite_storage == true) {
+      sources += [
+        "src/hks_storage_adapter.c",
+        "src/hks_storage_lite.c",
+      ]
+    } else {
+      sources += [ "src/hks_storage.c" ]
+    }
+    if (non_rwlock_support) {
+      sources += [ "src/hks_lock_lite.c" ]
+    } else {
+      sources += [ "src/hks_lock.c" ]
+    }
+
+    cflags = []
+
+    if (huks_use_lite_storage == true) {
+      cflags += [ "-D_STORAGE_LITE_" ]
+    } else {
+      if (ohos_kernel_type == "liteos_a") {
+        cflags += [ "-D_BSD_SOURCE" ]
+      } else {
+        cflags += [ "-D_DEFAULT_SOURCE" ]
+      }
+    }
+
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
+      "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+      "//base/security/huks/utils/list:libhuks_utils_list_static",
+      "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+    ]
+
+    complete_static_lib = true
+
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
   }
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-  deps = [
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
-    "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
-    "//base/security/huks/utils/list:libhuks_utils_list_static",
-    "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
-  ]
-  if (enable_mock) {
-    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
-  } else {
-    deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
-  }
-  external_deps = [
-    "hitrace_native:libhitracechain",
-    "hiviewdfx_hilog_native:libhilog",
-  ]
-  complete_static_lib = true
 }

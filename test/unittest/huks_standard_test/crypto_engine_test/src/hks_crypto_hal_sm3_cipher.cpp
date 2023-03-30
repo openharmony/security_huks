@@ -45,11 +45,11 @@ protected:
     {
 #if defined(_USE_OPENSSL_)
         struct HksKeyDerivationParam derParam = {
-            .digestAlg = HKS_DIGEST_SM3,
             .info = {
                 .size = strlen("The factor1"),
                 .data = (uint8_t *)"The factor1"
-            }
+            },
+            .digestAlg = HKS_DIGEST_SM3
         };
         struct HksKeySpec derivationSpec = { HKS_ALG_GMKDF, HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128), &derParam };
         EXPECT_EQ(HksOpensslSmKdf(mainKey, &derivationSpec, derivedKey), HKS_SUCCESS);

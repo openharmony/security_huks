@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -171,11 +171,14 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA", HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_IMPORT_KEY_TYPE", HKS_TAG_IMPORT_KEY_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_UNWRAP_ALGORITHM_SUITE", HKS_TAG_UNWRAP_ALGORITHM_SUITE);
+    AddInt32Property(env, tag, "HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG", HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG);
+    AddInt32Property(env, tag, "HUKS_TAG_RSA_PSS_SALT_LEN_TYPE", HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
 
     AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_ACCESS_TYPE", HKS_TAG_KEY_AUTH_ACCESS_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_SECURE_SIGN_TYPE", HKS_TAG_KEY_SECURE_SIGN_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_TYPE", HKS_TAG_CHALLENGE_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_CHALLENGE_POS", HKS_TAG_CHALLENGE_POS);
+    AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_PURPOSE", HKS_TAG_KEY_AUTH_PURPOSE);
 }
 
 static napi_value CreateHuksTag(napi_env env)
@@ -304,6 +307,8 @@ static napi_value CreateHuksKeyStorageType(napi_env env)
 
     AddInt32Property(env, keyStorageType, "HUKS_STORAGE_TEMP", HKS_STORAGE_TEMP);
     AddInt32Property(env, keyStorageType, "HUKS_STORAGE_PERSISTENT", HKS_STORAGE_PERSISTENT);
+    AddInt32Property(env, keyStorageType, "HUKS_STORAGE_ONLY_USED_IN_HUKS", HKS_STORAGE_ONLY_USED_IN_HUKS);
+    AddInt32Property(env, keyStorageType, "HUKS_STORAGE_ALLOW_KEY_EXPORTED", HKS_STORAGE_ALLOW_KEY_EXPORTED);
 
     return keyStorageType;
 }
@@ -610,6 +615,17 @@ static napi_value CreateHuksSecureSignType(napi_env env)
 
     return value;
 }
+
+static napi_value CreateHuksRsaPssSaltLenType(napi_env env)
+{
+    napi_value rsaPssSaltLenType = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &rsaPssSaltLenType));
+
+    AddInt32Property(env, rsaPssSaltLenType, "HUKS_RSA_PSS_SALTLEN_DIGEST", HKS_RSA_PSS_SALTLEN_DIGEST);
+    AddInt32Property(env, rsaPssSaltLenType, "HUKS_RSA_PSS_SALTLEN_MAX", HKS_RSA_PSS_SALTLEN_MAX);
+
+    return rsaPssSaltLenType;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -640,6 +656,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksChallengeType", CreateHuksChallengeType(env)),
         DECLARE_NAPI_PROPERTY("HuksChallengePosition", CreateHuksChallengePosition(env)),
         DECLARE_NAPI_PROPERTY("HuksSecureSignType", CreateHuksSecureSignType(env)),
+        DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
 
         DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
         DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),

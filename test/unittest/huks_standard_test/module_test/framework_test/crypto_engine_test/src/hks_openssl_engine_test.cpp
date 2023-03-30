@@ -23,6 +23,7 @@
 #include "hks_config.h"
 #endif
 
+#include "hks_api.h"
 #include "hks_openssl_engine.h"
 #include "hks_crypto_hal.h"
 
@@ -123,6 +124,8 @@ HWTEST_F(HksFrameworkOpensslEngineTest, HksFrameworkOpensslEngineTest003, TestSi
 {
     HKS_LOG_I("enter HksFrameworkOpensslEngineTest003");
     HksCryptoHalDecryptFreeCtx(nullptr, HKS_ALG_AES);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 }
