@@ -57,6 +57,7 @@ void HksUpgradeKeyAccesserTest::TearDown()
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest001
  * @tc.desc: tdd HksAddProcessNameToParamSet, expect HKS_FAILURE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest001, TestSize.Level0)
 {
@@ -69,6 +70,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest001, TestSize.Level
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest002
  * @tc.desc: tdd HksAddProcessNameToParamSet, expect HKS_ERROR_PARAM_NOT_EXIST
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest002, TestSize.Level0)
 {
@@ -89,6 +91,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest002, TestSize.Level
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest003
  * @tc.desc: tdd HksAddProcessNameToParamSet, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest003, TestSize.Level0)
 {
@@ -114,6 +117,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest003, TestSize.Level
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest004
  * @tc.desc: tdd AddMandatoryeParamsInService, expect HKS_FAILURE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level0)
 {
@@ -127,6 +131,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest005
  * @tc.desc: tdd HksDoUpgradeKeyAccess, expect HKS_FAILURE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest005, TestSize.Level0)
 {
