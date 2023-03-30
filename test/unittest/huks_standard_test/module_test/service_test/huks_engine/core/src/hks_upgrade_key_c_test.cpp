@@ -57,6 +57,7 @@ void HksUpgradeKeyCTest::TearDown()
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest001
  * @tc.desc: tdd AddAlgParamsTags, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest001, TestSize.Level0)
 {
@@ -78,6 +79,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest001, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest002
  * @tc.desc: tdd HksAddkeyToParamSet, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest002, TestSize.Level0)
 {
@@ -90,6 +92,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest002, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest003
  * @tc.desc: tdd GetMandatoryParamsInCore, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest003, TestSize.Level0)
 {
@@ -107,6 +110,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest003, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest004
  * @tc.desc: tdd AddMandatoryParams, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest004, TestSize.Level0)
 {
@@ -131,6 +135,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest004, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest005
  * @tc.desc: tdd AddMandatoryParams, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest005, TestSize.Level0)
 {
@@ -143,6 +148,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest005, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest006
  * @tc.desc: tdd GetMandatoryParamsInCore, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest006, TestSize.Level0)
 {
@@ -157,6 +163,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest006, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest007
  * @tc.desc: tdd AuthChangeProcessName, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest007, TestSize.Level0)
 {
@@ -169,6 +176,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest007, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest008
  * @tc.desc: tdd AuthChangeProcessName, expect HKS_SUCCESS
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest008, TestSize.Level0)
 {
@@ -192,6 +200,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest008, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest009
  * @tc.desc: tdd AuthChangeProcessName, expect HKS_FAILURE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest009, TestSize.Level0)
 {
@@ -229,6 +238,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest009, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest010
  * @tc.desc: tdd AuthChangeProcessName, expect HKS_FAILURE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest010, TestSize.Level0)
 {
@@ -266,6 +276,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest010, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest011
  * @tc.desc: tdd HksUpgradeKey, expect HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest011, TestSize.Level0)
 {
@@ -280,6 +291,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest011, TestSize.Level0)
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest012
  * @tc.desc: tdd AuthUpgradeKey, expect HKS_ERROR_BAD_STATE
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest012, TestSize.Level0)
 {

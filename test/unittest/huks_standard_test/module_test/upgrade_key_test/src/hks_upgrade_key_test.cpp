@@ -233,6 +233,7 @@ static int32_t TestCheckKeyVersionIsExpected(struct HksBlob *keyAlias, uint32_t 
  * @tc.desc: tdd HksUpgradeKey with key with verion one, then success enc and dec, and the key version in key file is
  *           the newest version number
  * @tc.type: FUNC
+ * @tc.require: issueI6RJBX
  */
 HWTEST_F(HksUpgradeKeyTest, HksUpgradeKeyTest001, TestSize.Level0)
 {
