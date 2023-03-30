@@ -55,6 +55,15 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
     (blob).size = 0; \
 } while (0)
 
+#define HKS_MEMSET_FREE_BLOB(blob) do { \
+    if ((blob).data != HKS_NULL_POINTER) { \
+        (void)memset_s((blob).data, (blob).size, 0, (blob).size); \
+        free((blob).data); \
+        (blob).data = HKS_NULL_POINTER; \
+    } \
+    (blob).size = 0; \
+} while (0)
+
 #ifdef __cplusplus
 }
 #endif

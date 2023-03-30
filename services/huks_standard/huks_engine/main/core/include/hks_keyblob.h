@@ -31,8 +31,6 @@
 #define HKS_KEY_BLOB_TAG_SIZE 16
 #define HKS_KEY_BLOB_NONCE_SIZE 12
 #define HKS_KEY_BLOB_MAIN_KEY_SIZE 32
-#define HKS_KEY_BLOB_AT_HMAC_KEY_SIZE 256
-#define HKS_KEY_BLOB_AT_HMAC_KEY_BYTES 32
 
 #define HKS_KEY_BLOB_DUMMY_KEY_VERSION 1
 #define HKS_KEY_BLOB_DUMMY_OS_VERSION 1
@@ -67,11 +65,13 @@ int32_t HksBuildKeyBlobWithOutAddKeyParam(const struct HksParamSet *paramSet, st
 
 int32_t HksGetEncryptKey(struct HksBlob *mainKey);
 
-int32_t HksGetAuthTokenKey(struct HksBlob *authTokenKey);
+int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey);
 
 int32_t HksCoreInitAuthTokenKey(void);
 
 int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken);
+
+int32_t HksDecryptAuthToken(struct HksUserAuthToken *authToken);
 
 int32_t HksGetRawKey(const struct HksParamSet *paramSet, struct HksBlob *rawKey);
 
