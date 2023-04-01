@@ -717,7 +717,7 @@ bool KsfExist(uint8_t ksfType)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksBlob fileNameBlob;
-    if (ksfType == HKS_KSF_TYPE_RKC){
+    if (ksfType == HKS_KSF_TYPE_RKC) {
         for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrRkc.num; ++i) {
             fileNameBlob.size = strlen(g_hksRkcCfg.ksfAttrRkc.name[i]);
             fileNameBlob.data = (uint8_t *)(g_hksRkcCfg.ksfAttrRkc.name[i]);

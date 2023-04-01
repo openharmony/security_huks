@@ -279,6 +279,34 @@ static int32_t InitMkCryptUsageSpec(uint8_t *iv, const uint32_t ivSize, struct H
     return HKS_SUCCESS;
 }
 
+static int32_t ExecuteMkCrypt(const struct HksKsfDataMk *ksfDataMk, const struct HksBlob *rmk,
+    struct HksBlob *plainText, struct HksBlob *cipherText, const bool encrypt)
+{
+    struct HksAeadParam aeadParam;
+    (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
+    struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
+    ret = InitMkCryptUsageSpec((uint8_t *)ksfDataMk->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
+    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+    const struct HksBlob key = { HKS_RKC_RMK_EK_LEN, rmk->data };
+    if (encrypt) {
+        aeadParam.tagLenEnc = HKS_AE_TAG_LEN;
+        struct HksBlob tag = { HKS_AE_TAG_LEN, cipherText->data + key.size };
+        ret = HksCryptoHalEncrypt(&key, &usageSpec, plainText, cipherText, &tag);
+    } else {
+        aeadParam.tagDec.size = HKS_AE_TAG_LEN;
+        aeadParam.tagDec.data = cipherText->data + cipherText->size - HKS_AE_TAG_LEN;
+        cipherText->size -= HKS_AE_TAG_LEN; /* the decrypt len should remove the tag len */
+        ret = HksCryptoHalDecrypt(&key, &usageSpec, cipherText, plainText);
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Crypto mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
+        ret = HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
+    }
+
+    return HKS_SUCCESS;
+}
+
 /* todo: separate code of old version using macro */
 static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
     struct HksBlob *plainText, struct HksBlob *cipherText, const bool encrypt)
@@ -295,27 +323,8 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
         ret = RkcDeriveRmk(&(ksfData->ksfDataRkc), &rmk);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Derive rmk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        struct HksAeadParam aeadParam;
-        (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
-        struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
-        ret = InitMkCryptUsageSpec((uint8_t *)ksfData->ksfDataMk.mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-        const struct HksBlob key = { HKS_RKC_RMK_EK_LEN, rmk.data };
-        if (encrypt) {
-            aeadParam.tagLenEnc = HKS_AE_TAG_LEN;
-            struct HksBlob tag = { HKS_AE_TAG_LEN, cipherText->data + key.size };
-            ret = HksCryptoHalEncrypt(&key, &usageSpec, plainText, cipherText, &tag);
-        } else {
-            aeadParam.tagDec.size = HKS_AE_TAG_LEN;
-            aeadParam.tagDec.data = cipherText->data + cipherText->size - HKS_AE_TAG_LEN;
-            cipherText->size -= HKS_AE_TAG_LEN; /* the decrypt len should remove the tag len */
-            ret = HksCryptoHalDecrypt(&key, &usageSpec, cipherText, plainText);
-        }
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Crypto mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
-        }
+        ret = ExecuteMkCrypt(ksfData->ksfDataMk, &rmk, plainText, cipherText, encrypt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Crypto mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     /* the data of root key should be cleared after use */
@@ -339,27 +348,8 @@ static int32_t RkcMkCryptV2(const struct HksKsfDataRkc *ksfDataRkc, const struct
         ret = RkcDeriveRmkV2(ksfDataRkc, &rmk);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Derive rmk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        struct HksAeadParam aeadParam;
-        (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
-        struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
-        ret = InitMkCryptUsageSpec((uint8_t *)ksfDataMk->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-        const struct HksBlob key = { HKS_RKC_RMK_EK_LEN, rmk.data };
-        if (encrypt) {
-            aeadParam.tagLenEnc = HKS_AE_TAG_LEN;
-            struct HksBlob tag = { HKS_AE_TAG_LEN, cipherText->data + key.size };
-            ret = HksCryptoHalEncrypt(&key, &usageSpec, plainText, cipherText, &tag);
-        } else {
-            aeadParam.tagDec.size = HKS_AE_TAG_LEN;
-            aeadParam.tagDec.data = cipherText->data + cipherText->size - HKS_AE_TAG_LEN;
-            cipherText->size -= HKS_AE_TAG_LEN; /* the decrypt len should remove the tag len */
-            ret = HksCryptoHalDecrypt(&key, &usageSpec, cipherText, plainText);
-        }
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Crypto mk failed! ret = 0x%" LOG_PUBLIC "X", ret);
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
-        }
+        ret = ExecuteMkCrypt(ksfDataMk, &rmk, plainText, cipherText, encrypt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Crypto mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     /* the data of root key should be cleared after use */
@@ -727,33 +717,22 @@ static char *CloneNewStr(const char *srcStr, const uint32_t strLenMax)
     return newBuf;
 }
 
-static int32_t RkcInitKsfAttr(const struct HksKsfAttrRkc *ksfAttrRkc)
+static int32_t InitKsfAttr(const struct HksKsfAttr *ksfAttr, uint8_t ksfType)
 {
     /* clone keystore filename from parameter. */
-    for (uint8_t i = 0; i < ksfAttrRkc->num; ++i) {
-        char *fileName = CloneNewStr(ksfAttrRkc->name[i], HKS_KSF_NAME_LEN_MAX);
+    for (uint8_t i = 0; i < ksfAttr->num; ++i) {
+        char *fileName = CloneNewStr(ksfAttr->name[i], HKS_KSF_NAME_LEN_MAX);
         /* the memory will be freed by hksRkcDestroy() */
         HKS_IF_NULL_RETURN(fileName, HKS_ERROR_MALLOC_FAIL)
 
-        g_hksRkcCfg.ksfAttrRkc.name[i] = fileName;
+        if (ksfType == HKS_KSF_TYPE_RKC) {
+            g_hksRkcCfg.ksfAttrRkc.name[i] = fileName;
+            g_hksRkcCfg.ksfAttrRkc.num = ksfAttr->num;
+        } else {
+            g_hksRkcCfg.ksfAttrMk.name[i] = fileName;
+            g_hksRkcCfg.ksfAttrMk.num = ksfAttr->num;
+        }
     }
-
-    g_hksRkcCfg.ksfAttrRkc.num = ksfAttrRkc->num;
-    return HKS_SUCCESS;
-}
-
-static int32_t MkInitKsfAttr(const struct HksKsfAttrMk *ksfAttrMk)
-{
-    /* clone keystore filename from parameter. */
-    for (uint8_t i = 0; i < ksfAttrMk->num; ++i) {
-        char *fileName = CloneNewStr(ksfAttrMk->name[i], HKS_KSF_NAME_LEN_MAX);
-        /* the memory will be freed by hksMkDestroy() */
-        HKS_IF_NULL_RETURN(fileName, HKS_ERROR_MALLOC_FAIL)
-
-        g_hksRkcCfg.ksfAttrMk.name[i] = fileName;
-    }
-
-    g_hksRkcCfg.ksfAttrMk.num = ksfAttrMk->num;
     return HKS_SUCCESS;
 }
 
@@ -787,7 +766,7 @@ int32_t HksRkcInit(void)
             g_hksRkcCfg.mkEncryptAlg = initParamInner->mkEncryptAlg;
 
             /* Initialize the attribute of mk keystore file */
-            ret = MkInitKsfAttr(&(initParamInner->ksfAttrRkc));
+            ret = InitKsfAttr(&(initParamInner->ksfAttrMk), HKS_KSF_TYPE_MK);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
             HKS_LOG_I("mk ksf is exist, start to read ksf");
@@ -813,7 +792,7 @@ int32_t HksRkcInit(void)
             }
 
             /* Initialize the attribute of rkc keystore file */
-            ret = RkcInitKsfAttr(&(initParamInner->ksfAttrRkc));
+            ret = InitKsfAttr(&(initParamInner->ksfAttrRkc), HKS_KSF_TYPE_RKC);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
             HKS_LOG_I("Rkc ksf is exist, start to load ksf");
@@ -945,7 +924,7 @@ int32_t HksRkcInit(void)
                 g_hksRkcCfg.mkEncryptAlg = initParamInner->mkEncryptAlg;
 
                 /* Initialize the attribute of rkc keystore file */
-                ret = RkcInitKsfAttr(&(initParamInner->ksfAttrRkc));
+                ret = InitKsfAttr(&(initParamInner->ksfAttrRkc), HKS_KSF_TYPE_RKC);
                 HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
                 HKS_LOG_I("Rkc ksf is exist, start to load ksf");
