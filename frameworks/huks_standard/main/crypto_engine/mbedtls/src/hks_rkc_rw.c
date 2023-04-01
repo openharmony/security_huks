@@ -333,109 +333,74 @@ static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
     return HKS_SUCCESS;
 }
 
-/* todo: separate code of old version using macro */
-int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
+static int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
 {
-    struct HksBlob tmpKsf;
-    tmpKsf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
-    HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
+    tmpKsf->data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
+    HKS_IF_NULL_RETURN(tmpKsf->data, HKS_ERROR_MALLOC_FAIL)
 
-    tmpKsf.size = HKS_KSF_BUF_LEN;
-    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
+    tmpKsf->size = HKS_KSF_BUF_LEN;
+    (void)memset_s(tmpKsf->data, tmpKsf->size, 0, tmpKsf->size);
 
     int32_t ret;
     do {
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_BLOB(processInfo.userId);
-            HKS_FREE_BLOB(processInfo.processName);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
 
-        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
+        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, tmpKsf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        ret = RkcExtractKsfBuf(&tmpKsf, ksfData);
-    } while (0);
+        return HKS_SUCCESS;
+    } while(0)
+
+    /* the data of root or main key should be cleared after use */
+    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
+    HKS_FREE_BLOB(tmpKsf);
+    return ret;
+}
+
+/* todo: separate code of old version using macro */
+int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
+{
+    struct HksBlob tmpKsf;
+    int32_t ret = GetKeyBlobKsf(ksfName, &tmpKsf);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
+    
+    ret = RkcExtractKsfBuf(&tmpKsf, ksfData);
 
     /* the data of root key should be cleared after use */
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
     HKS_FREE_BLOB(tmpKsf);
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
 int32_t HksReadKsfRkc(const char *ksfName, struct HksKsfDataRkcWithVer *ksfDataRkc)
 {
     struct HksBlob tmpKsf;
-    tmpKsf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
-    HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
+    int32_t ret = GetKeyBlobKsf(ksfName, &tmpKsf);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-    tmpKsf.size = HKS_KSF_BUF_LEN;
-    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
-
-    int32_t ret;
-    do {
-        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
-        ret = GetProcessInfo(&processInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_BLOB(processInfo.userId);
-            HKS_FREE_BLOB(processInfo.processName);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-        }
-
-        const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-
-        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-        ret = ExtractKsfBufRkc(&tmpKsf, ksfDataRkc);
-    } while (0);
+    ret = ExtractKsfBufRkc(&tmpKsf, ksfDataRkc);
 
     /* the data of root key should be cleared after use */
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
     HKS_FREE_BLOB(tmpKsf);
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
 int32_t HksReadKsfMk(const char *ksfName, struct HksKsfDataMkWithVer *ksfDataMk);
 {
     struct HksBlob tmpKsf;
-    tmpKsf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
-    HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
+    int32_t ret = GetKeyBlobKsf(ksfName, &tmpKsf);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-    tmpKsf.size = HKS_KSF_BUF_LEN;
-    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
-
-    int32_t ret;
-    do {
-        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
-        ret = GetProcessInfo(&processInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_BLOB(processInfo.userId);
-            HKS_FREE_BLOB(processInfo.processName);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-        }
-
-        const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-
-        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-        ret = ExtractKsfBufRkc(&tmpKsf, ksfDataMk);
-    } while (0);
+    ret = ExtractKsfBufRkc(&tmpKsf, ksfDataMk);
 
     /* the data of main key should be cleared after use */
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
     HKS_FREE_BLOB(tmpKsf);
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
@@ -691,11 +656,7 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
 
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_BLOB(processInfo.userId);
-            HKS_FREE_BLOB(processInfo.processName);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
         
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
@@ -705,8 +666,6 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
     HKS_FREE_BLOB(ksfBuf);
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
@@ -727,11 +686,7 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
 
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_BLOB(processInfo.userId);
-            HKS_FREE_BLOB(processInfo.processName);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-        }
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
@@ -741,8 +696,6 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
     HKS_FREE_BLOB(ksfBuf);
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
     return ret;
 }
 
@@ -750,11 +703,7 @@ bool KsfExist(uint8_t ksfType)
 {
     struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
     ret = GetProcessInfo(&processInfo);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_BLOB(processInfo.userId);
-        HKS_FREE_BLOB(processInfo.processName);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksBlob fileNameBlob;
     if (ksfType == HKS_KSF_TYPE_RKC){
@@ -770,9 +719,6 @@ bool KsfExist(uint8_t ksfType)
     }    
 
     int32_t ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
-
-    HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(processInfo.processName);
 
     if (ret == HKS_SUCCESS) {
         /* return true if one exists */
