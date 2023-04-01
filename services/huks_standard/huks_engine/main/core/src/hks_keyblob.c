@@ -527,6 +527,7 @@ int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, 
 
 int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
 {
+    // todo: check key version and update key derivation alg
     return DecryptKeyBlob(aad, paramSet);
 }
 
