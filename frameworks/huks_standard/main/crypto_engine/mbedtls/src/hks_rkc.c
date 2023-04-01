@@ -42,7 +42,7 @@ struct HksRkcMk g_hksRkcMk = { false, { 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0 }
 /* the additional data of main key. 'H', 'K', 'S', 'R', 'K', 'C', 'M', 'K' */
 const uint8_t g_hksRkcMkAddData[HKS_RKC_MK_ADD_DATA_LEN] = { 0x48, 0x4B, 0x53, 0x52, 0x4B, 0x43, 0x4D, 0x4B };
 
-static int32_t RkcReadAllKsf(int32_t *allKsfRet, struct HksRkcKsfData *allKsfData, uint32_t ksfCount,
+static int32_t ReadAllKsf(int32_t *allKsfRet, struct HksRkcKsfData *allKsfData, uint32_t ksfCount,
     struct HksRkcKsfData **validKsfData, uint32_t *validKsfIndex)
 {
     if (ksfCount > g_hksRkcCfg.ksfAttrRkc.num) {
@@ -96,16 +96,16 @@ static int32_t MkReadAllKsf(int32_t *allKsfRet, struct HksKsfDataMk *allKsfData,
     return (someCaseSuccess ? HKS_SUCCESS : HKS_ERROR_INVALID_KEY_FILE);
 }
 
-static int32_t RkcRecoverRkTime(const struct HksRkcKsfData *ksfData)
+static int32_t RkcRecoverRkTime(const struct HksKsfDataRkc *KsfDataRkc)
 {
     if (memcpy_s(&(g_hksRkcCfg.rkCreatedTime), sizeof(g_hksRkcCfg.rkCreatedTime),
-        &(ksfData->rkCreatedTime), sizeof(ksfData->rkCreatedTime)) != EOK) {
+        &(KsfDataRkc->rkCreatedTime), sizeof(KsfDataRkc->rkCreatedTime)) != EOK) {
         HKS_LOG_E("Memcpy rkCreatedTime failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     if (memcpy_s(&(g_hksRkcCfg.rkExpiredTime), sizeof(g_hksRkcCfg.rkExpiredTime),
-        &(ksfData->rkExpiredTime), sizeof(ksfData->rkExpiredTime)) != EOK) {
+        &(KsfDataRkc->rkExpiredTime), sizeof(KsfDataRkc->rkExpiredTime)) != EOK) {
         HKS_LOG_E("Memcpy rkExpiredTime failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -113,6 +113,7 @@ static int32_t RkcRecoverRkTime(const struct HksRkcKsfData *ksfData)
     return HKS_SUCCESS;
 }
 
+/* todo: separate code of old version using macro */
 static int32_t RkcGetFixedMaterial(struct HksBlob *material)
 {
     /* consistent with the old hks */
@@ -131,7 +132,8 @@ static int32_t RkcGetFixedMaterial(struct HksBlob *material)
     return HKS_SUCCESS;
 }
 
-static int32_t RkcGetRmkRawKey(const struct HksRkcKsfData *ksfData, struct HksBlob *rawKey)
+/* todo: separate code of old version using macro */
+static int32_t RkcGetRmkRawKey(const struct HksKsfDataRkc *KsfDataRkc, struct HksBlob *rawKey)
 {
     uint8_t material3Data[HKS_RKC_MATERIAL_LEN] = {0};
     struct HksBlob material3 = { HKS_RKC_MATERIAL_LEN, material3Data };
@@ -142,7 +144,7 @@ static int32_t RkcGetRmkRawKey(const struct HksRkcKsfData *ksfData, struct HksBl
 
     /* materials xor */
     for (uint32_t i = 0; i < HKS_RKC_MATERIAL_LEN; ++i) {
-        rawKey->data[i] = ksfData->rkMaterial1[i] ^ ksfData->rkMaterial2[i] ^ material3.data[i];
+        rawKey->data[i] = KsfDataRkc->rkMaterial1[i] ^ KsfDataRkc->rkMaterial2[i] ^ material3.data[i];
     }
 
     /* append hardware UDID */
@@ -160,7 +162,7 @@ static int32_t RkcGetRmkRawKeyV2(const struct HksKsfDataRkc *ksfDataRkc, struct 
 
     /* materials xor */
     for (uint32_t i = 0; i < HKS_RKC_MATERIAL_LEN; ++i) {
-        rawKey->data[i] = ksfData->rkMaterial1[i] ^ ksfData->rkMaterial2[i] ^ udid[i];
+        rawKey->data[i] = ksfDataRkc->rkMaterial1[i] ^ ksfDataRkc->rkMaterial2[i] ^ udid[i];
     }
 
     return HKS_SUCCESS;
@@ -176,6 +178,7 @@ static uint32_t RkcDigestToHks(const uint32_t rkcDigest)
     return HKS_DIGEST_SHA256;
 }
 
+/* todo: separate code of old version using macro */
 static int32_t RkcPbkdf2Hmac(const uint32_t hashAlg, const struct HksBlob *rawKey,
     const struct HksBlob *salt, const uint32_t iterNum, struct HksBlob *dk)
 {
@@ -191,7 +194,8 @@ static int32_t RkcPbkdf2Hmac(const uint32_t hashAlg, const struct HksBlob *rawKe
     return ret;
 }
 
-static int32_t RkcDeriveRmk(const struct HksRkcKsfData *ksfData, struct HksBlob *rmk)
+/* todo: separate code of old version using macro */
+static int32_t RkcDeriveRmk(const struct HksKsfDataRkc *ksfDataRkc, struct HksBlob *rmk)
 {
     struct HksBlob rawKey;
     rawKey.data = (uint8_t *)HksMalloc(HKS_RKC_RAW_KEY_LEN);
@@ -203,12 +207,12 @@ static int32_t RkcDeriveRmk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     int32_t ret;
     do {
         /* get the raw key */
-        ret = RkcGetRmkRawKey(ksfData, &rawKey);
+        ret = RkcGetRmkRawKey(ksfDataRkc, &rawKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get rmk raw key failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* PBKDF2-HMAC */
-        const struct HksBlob salt = { HKS_RKC_SALT_LEN, (uint8_t *)(ksfData->rmkSalt) };
-        ret = RkcPbkdf2Hmac(ksfData->rmkHashAlg, &rawKey, &salt, ksfData->rmkIter, rmk);
+        const struct HksBlob salt = { HKS_RKC_SALT_LEN, (uint8_t *)(ksfDataRkc->rmkSalt) };
+        ret = RkcPbkdf2Hmac(ksfDataRkc->rmkHashAlg, &rawKey, &salt, ksfDataRkc->rmkIter, rmk);
         HKS_IF_NOT_SUCC_LOGE(ret, "Pbkdf2 failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
@@ -249,7 +253,7 @@ static int32_t RkcDeriveRmkV2(const struct HksKsfDataRkc *ksfDataRkc, struct Hks
 
         /* HKDF-HMAC */
         const struct HksBlob salt = { HKS_RKC_SALT_LEN, (uint8_t *)(ksfDataRkc->rmkSalt) };
-        ret = RkcHkdfHmac(ksfData->rmkHashAlg, &rawKey, &salt, ksfData->rmkIter, rmk);
+        ret = RkcHkdfHmac(ksfDataRkc->rmkHashAlg, &rawKey, &salt, ksfDataRkc->rmkIter, rmk);
         HKS_IF_NOT_SUCC_LOGE(ret, "HKDF failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
@@ -275,6 +279,7 @@ static int32_t InitMkCryptUsageSpec(uint8_t *iv, const uint32_t ivSize, struct H
     return HKS_SUCCESS;
 }
 
+/* todo: separate code of old version using macro */
 static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
     struct HksBlob *plainText, struct HksBlob *cipherText, const bool encrypt)
 {
@@ -287,13 +292,13 @@ static int32_t RkcMkCrypt(const struct HksRkcKsfData *ksfData,
 
     int32_t ret;
     do {
-        ret = RkcDeriveRmk(ksfData, &rmk);
+        ret = RkcDeriveRmk(&(ksfData->ksfDataRkc), &rmk);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Derive rmk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         struct HksAeadParam aeadParam;
         (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
         struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
-        ret = InitMkCryptUsageSpec((uint8_t *)ksfData->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
+        ret = InitMkCryptUsageSpec((uint8_t *)ksfData->ksfDataMk.mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         const struct HksBlob key = { HKS_RKC_RMK_EK_LEN, rmk.data };
@@ -337,7 +342,7 @@ static int32_t RkcMkCryptV2(const struct HksKsfDataRkc *ksfDataRkc, const struct
         struct HksAeadParam aeadParam;
         (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
         struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
-        ret = InitMkCryptUsageSpec((uint8_t *)ksfData->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
+        ret = InitMkCryptUsageSpec((uint8_t *)ksfDataMk->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         const struct HksBlob key = { HKS_RKC_RMK_EK_LEN, rmk.data };
@@ -372,18 +377,8 @@ static void RkcMaskMk(const struct HksBlob *mk)
     g_hksRkcMk.valid = true;
 }
 
-static int32_t RkcRecoverMkTime(const struct HksRkcKsfData *rkcKsfData, const struct HksKsfDataRkc *ksfDataRkc, const struct HksKsfDataMk *ksfDataMk)
+static int32_t RkcRecoverMkTime(const struct HksKsfDataMk *ksfDataMk)
 {
-    // todo
-    if (rkcKsfData != NULL) {
-        // old version
-        struct HksRkcKsfData *ksfDataRkc = rkcKsfData;
-        struct Hks
-    } else {
-        // new version
-        struct HksKsfDataMk *ksfData = ksfDataMk;
-    }
-
     if (memcpy_s(&(g_hksRkcMk.mkCreatedTime), sizeof(g_hksRkcMk.mkCreatedTime),
         &(ksfDataMk->mkCreatedTime), sizeof(ksfDataMk->mkCreatedTime)) != EOK) {
         HKS_LOG_E("Memcpy mkCreatedTime failed!");
@@ -396,29 +391,7 @@ static int32_t RkcRecoverMkTime(const struct HksRkcKsfData *rkcKsfData, const st
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    struct HksBlob mk;
-    mk.data = (uint8_t *)HksMalloc(HKS_RKC_MK_LEN);
-    HKS_IF_NULL_LOGE_RETURN(mk.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk failed!")
-
-    mk.size = HKS_RKC_MK_LEN;
-
-    int32_t ret;
-    do {
-        struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
-        ret = HksCryptoHalFillPrivRandom(&mkMaskBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-        struct HksBlob mkCipherText = { HKS_RKC_MK_CIPHER_TEXT_LEN, (uint8_t *)ksfData->mkCiphertext };
-        ret = RkcMkCrypt(ksfDataRkc, &mk, &mkCipherText, false); /* false: decrypt */
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Main key crypt failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-        /* the main key in memory should be masked */
-        (void)RkcMaskMk(&mk);
-    } while (0);
-
-    (void)memset_s(mk.data, mk.size, 0, mk.size);
-    HKS_FREE_BLOB(mk);
-    return ret;
+    return HKS_SUCCESS;
 }
 
 static int32_t RkcCheckKsf(const char *ksfName, int32_t ret,
@@ -478,6 +451,32 @@ static int32_t RkcLoadKsf(void)
         ret = RkcRecoverMkTime(validKsfData, NULL);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Recover main key memory failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
+        do {
+            struct HksBlob mk;
+            mk.data = (uint8_t *)HksMalloc(HKS_RKC_MK_LEN);
+            HKS_IF_NULL_LOGE_RETURN(mk.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk failed!")
+
+            mk.size = HKS_RKC_MK_LEN;
+
+            int32_t ret;
+            do {
+                struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
+                ret = HksCryptoHalFillPrivRandom(&mkMaskBlob);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+                struct HksBlob mkCipherText = { HKS_RKC_MK_CIPHER_TEXT_LEN, (uint8_t *)ksfData->mkCiphertext };
+                ret = RkcMkCrypt(ksfDataRkc, &mk, &mkCipherText, false); /* false: decrypt */
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Main key crypt failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+                /* the main key in memory should be masked */
+                (void)RkcMaskMk(&mk);
+            } while (0);
+
+            (void)memset_s(mk.data, mk.size, 0, mk.size);
+            HKS_FREE_BLOB(mk);
+            return ret;
+        } while (0);
+
         ret = RkcCheckAllKsf(allKsfRet, allKsfData, HKS_KSF_NUM, validKsfData, validKsfIndex);
         HKS_IF_NOT_SUCC_LOGE(ret, "Check all rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
@@ -536,6 +535,32 @@ static int32_t MkLoadKsf(void)
 
         ret = RkcRecoverMkTime(NULL, validKsfData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Recover main key memory failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+        do {
+            struct HksBlob mk;
+            mk.data = (uint8_t *)HksMalloc(HKS_RKC_MK_LEN);
+            HKS_IF_NULL_LOGE_RETURN(mk.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk failed!")
+
+            mk.size = HKS_RKC_MK_LEN;
+
+            int32_t ret;
+            do {
+                struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
+                ret = HksCryptoHalFillPrivRandom(&mkMaskBlob);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+                struct HksBlob mkCipherText = { HKS_RKC_MK_CIPHER_TEXT_LEN, (uint8_t *)ksfData->mkCiphertext };
+                ret = RkcMkCrypt(ksfDataRkc, &mk, &mkCipherText, false); /* false: decrypt */
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Main key crypt failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+                /* the main key in memory should be masked */
+                (void)RkcMaskMk(&mk);
+            } while (0);
+
+            (void)memset_s(mk.data, mk.size, 0, mk.size);
+            HKS_FREE_BLOB(mk);
+            return ret;
+        } while (0);
 
         ret = RkcCheckAllKsf(allKsfRet, allKsfData, HKS_KSF_NUM, validKsfData, validKsfIndex);
         HKS_IF_NOT_SUCC_LOGE(ret, "Check all mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
@@ -799,6 +824,32 @@ int32_t HksRkcInit(void)
             // decrypt main key
             ret = RkcRecoverMkTime(NULL, validKsfData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Recover main key memory failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+            do {
+                struct HksBlob mk;
+                mk.data = (uint8_t *)HksMalloc(HKS_RKC_MK_LEN);
+                HKS_IF_NULL_LOGE_RETURN(mk.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk failed!")
+
+                mk.size = HKS_RKC_MK_LEN;
+
+                int32_t ret;
+                do {
+                    struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
+                    ret = HksCryptoHalFillPrivRandom(&mkMaskBlob);
+                    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+                    struct HksBlob mkCipherText = { HKS_RKC_MK_CIPHER_TEXT_LEN, (uint8_t *)ksfData->mkCiphertext };
+                    ret = RkcMkCrypt(ksfDataRkc, &mk, &mkCipherText, false); /* false: decrypt */
+                    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Main key crypt failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+                    /* the main key in memory should be masked */
+                    (void)RkcMaskMk(&mk);
+                } while (0);
+
+                (void)memset_s(mk.data, mk.size, 0, mk.size);
+                HKS_FREE_BLOB(mk);
+                return ret;
+            } while (0);
 
             if (validKsfData->mkVersion != HKS_MK_VER) {
                 // need update
