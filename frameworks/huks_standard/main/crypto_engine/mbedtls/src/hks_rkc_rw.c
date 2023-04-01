@@ -24,8 +24,7 @@
 #include "hks_template.h"
 
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
-#define HKS_RKC_KSF_BUF_LEN 258     /* the length of rkc keystore buffer */
-#define HKS_MK_KSF_BUF_LEN  258     /* the length of mk keystore buffer */
+#define HKS_KSF_BUF_LEN 258         /* the length of rkc or mk keystore buffer */
 #define USER_ID_ROOT_DEFAULT          "0"
 
 /* the flag of keystore file, used to identify files as HKS keystore file, don't modify. */
@@ -103,58 +102,52 @@ static int32_t RkcExtractTime(const struct HksBlob *ksfFromFile, uint32_t *ksfBu
     return HKS_SUCCESS;
 }
 
-static int32_t RkcExtractKsfRk(const struct HksBlob *ksfFromFile,
-    uint32_t *ksfBufOffset, struct HksRkcKsfData *ksfData)
+static int32_t ExtractKsfDataRkc(const struct HksBlob *ksfFromFile,
+    uint32_t *ksfBufOffset, struct HksKsfDataRkc *ksfDataRkc)
 {
-    /* Extract version */
-    if (memcpy_s(&(ksfData->version), sizeof(uint16_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint16_t)) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    *ksfBufOffset += sizeof(uint16_t);
-
     /* Extract rkCreatedTime */
-    int32_t ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->rkCreatedTime));
+    int32_t ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfDataRkc->rkCreatedTime));
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract rkExpiredTime */
-    ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->rkExpiredTime));
+    ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfDataRkc->rkExpiredTime));
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract the first material */
-    if (memcpy_s(&(ksfData->rkMaterial1), HKS_RKC_MATERIAL_LEN,
+    if (memcpy_s(&(ksfDataRkc->rkMaterial1), HKS_RKC_MATERIAL_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
     /* Extract the second material */
-    if (memcpy_s(&(ksfData->rkMaterial2), HKS_RKC_MATERIAL_LEN,
+    if (memcpy_s(&(ksfDataRkc->rkMaterial2), HKS_RKC_MATERIAL_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
     /* Extract iterator number */
-    if (memcpy_s(&(ksfData->rmkIter), sizeof(uint32_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
+    if (memcpy_s(&(ksfDataRkc->rmkIter), sizeof(uint32_t), ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Extract salt */
-    if (memcpy_s(&(ksfData->rmkSalt), HKS_RKC_SALT_LEN, ksfFromFile->data + *ksfBufOffset, HKS_RKC_SALT_LEN) != EOK) {
+    if (memcpy_s(&(ksfDataRkc->rmkSalt), HKS_RKC_SALT_LEN, ksfFromFile->data + *ksfBufOffset, HKS_RKC_SALT_LEN) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_SALT_LEN;
 
     /* Extract hash algorithm */
-    if (memcpy_s(&(ksfData->rmkHashAlg), sizeof(uint32_t),
+    if (memcpy_s(&(ksfDataRkc->rmkHashAlg), sizeof(uint32_t),
         ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Extract reserve field */
-    if (memcpy_s(&(ksfData->rkRsv), HKS_RKC_KSF_DATA_RSV_LEN,
+    if (memcpy_s(&(ksfDataRkc->rkRsv), HKS_RKC_KSF_DATA_RSV_LEN,
         ksfFromFile->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -163,11 +156,9 @@ static int32_t RkcExtractKsfRk(const struct HksBlob *ksfFromFile,
     return HKS_SUCCESS;
 }
 
-static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
-    uint32_t *ksfBufOffset, struct HksRkcKsfData *ksfData)
+static int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile,
+    uint32_t *ksfBufOffset, struct HksKsfDataMk *ksfDataMk)
 {
-    // todo: check filename to decide whether extract version
-
     /* Extract mkCreatedTime */
     int32_t ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfData->mkCreatedTime));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract mkCreatedTime failed!")
@@ -210,6 +201,40 @@ static int32_t RkcExtractKsfMk(const struct HksBlob *ksfFromFile,
     return HKS_SUCCESS;
 }
 
+static int32_t ExtractKsfVerRkc(const struct HksBlob *ksfFromFile,
+    uint32_t *ksfBufOffset, struct HksKsfDataRkcWithVer *ksfDataRkcWithVer)
+{
+    /* Extract version */
+    if (memcpy_s(&(ksfDataRkcWithVer->rkVersion), sizeof(uint16_t),
+        ksfFromFile->data + *ksfBufOffset, sizeof(uint16_t)) != EOK) {
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *ksfBufOffset += sizeof(uint16_t);
+
+    /* Extract fields of root key component */
+    int32_t ret = ExtractKsfDataRkc(ksfFromFile, ksfBufOffset, &(ksfDataRkcWithVer->ksfDataRkc));
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    return HKS_SUCCESS;
+}
+
+static int32_t ExtractKsfVerMk(const struct HksBlob *ksfFromFile,
+    uint32_t *ksfBufOffset, struct HksKsfDataMkWithVer *ksfDataMkWithVer)
+{
+    /* Extract version */
+    if (memcpy_s(&(ksfDataMkWithVer->mkVersion), sizeof(uint16_t),
+        ksfFromFile->data + *ksfBufOffset, sizeof(uint16_t)) != EOK) {
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *ksfBufOffset += sizeof(uint16_t);
+
+    /* Extract fields of main key */
+    int32_t ret = ExtractKsfDataMk(ksfFromFile, ksfBufOffset, &(ksfDataMkWithVer->ksfDataMk));
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    return HKS_SUCCESS;
+}
+
 static int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset)
 {
     /* calculate sha256, skip file flag, begin with version, end with reserve field. */
@@ -237,6 +262,39 @@ static int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ks
     return HKS_SUCCESS;
 }
 
+static int32_t ExtractKsfBufRkc(const struct HksBlob *ksfFromFile, struct HksKsfDataRkcWithVer *ksfDataRkcWithVer)
+{
+    uint32_t ksfBufOffset = 0;
+
+    /* Extract file flag. */
+    int32_t ret = RkcExtractKsfFileFlag(ksfFromFile, &ksfBufOffset);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    /* Extract root key data */
+    ret = ExtractKsfVerRkc(ksfFromFile, &ksfBufOffset, ksfDataRkcWithVer);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract ksf rkc with version failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+    /* Extract hash */
+    return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
+}
+
+static int32_t ExtractKsfBufMk(const struct HksBlob *ksfFromFile, struct HksKsfDataMkWithVer *ksfDataMkWithVer)
+{
+    uint32_t ksfBufOffset = 0;
+
+    /* Extract file flag. */
+    int32_t ret = RkcExtractKsfFileFlag(ksfFromFile, &ksfBufOffset);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    /* Extract main key data */
+    ret = ExtractKsfVerMk(ksfFromFile, &ksfBufOffset, ksfDataMkWithVer);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract ksf main key with version failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+    /* Extract hash */
+    return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
+}
+
+/* todo: separate code of old version using macro */
 static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkcKsfData *ksfData)
 {
     uint32_t ksfBufOffset = 0;
@@ -246,28 +304,12 @@ static int32_t RkcExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksRkc
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Extract root key data */
-    ret = RkcExtractKsfRk(ksfFromFile, &ksfBufOffset, ksfData);
+    ret = ExtractKsfVerRkc(ksfFromFile, &ksfBufOffset, (struct HksKsfDataRkcWithVer*)ksfData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Rkc extract ksf rk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* Extract main key data */
     ret = RkcExtractKsfMk(ksfFromFile, &ksfBufOffset, ksfData);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    /* Extract hash */
-    return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
-}
-
-static int32_t MkExtractKsfBuf(const struct HksBlob *ksfFromFile, struct HksKsfDataMk *ksfData)
-{
-    uint32_t ksfBufOffset = 0;
-
-    /* Extract file flag. */
-    int32_t ret = RkcExtractKsfFileFlag(ksfFromFile, &ksfBufOffset);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    /* Extract main key data */
-    ret = RkcExtractKsfMk(ksfFromFile, &ksfBufOffset, ksfData);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Rkc extract ksf mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* Extract hash */
     return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
@@ -291,13 +333,14 @@ static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
     return HKS_SUCCESS;
 }
 
+/* todo: separate code of old version using macro */
 int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
 {
     struct HksBlob tmpKsf;
-    tmpKsf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
+    tmpKsf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
     HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
 
-    tmpKsf.size = HKS_RKC_KSF_BUF_LEN;
+    tmpKsf.size = HKS_KSF_BUF_LEN;
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
 
     int32_t ret;
@@ -326,13 +369,13 @@ int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData)
     return ret;
 }
 
-int32_t HksMkReadKsf(const char *ksfName, struct HksKsfDataMk *ksfData)
+int32_t HksReadKsfRkc(const char *ksfName, struct HksKsfDataRkcWithVer *ksfDataRkc)
 {
     struct HksBlob tmpKsf;
-    tmpKsf.data = (uint8_t *)HksMalloc(HKS_MK_KSF_BUF_LEN);
+    tmpKsf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
     HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
 
-    tmpKsf.size = HKS_MK_KSF_BUF_LEN;
+    tmpKsf.size = HKS_KSF_BUF_LEN;
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
 
     int32_t ret;
@@ -350,10 +393,45 @@ int32_t HksMkReadKsf(const char *ksfName, struct HksKsfDataMk *ksfData)
         ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        ret = MkExtractKsfBuf(&tmpKsf, ksfData);
+        ret = ExtractKsfBufRkc(&tmpKsf, ksfDataRkc);
     } while (0);
 
     /* the data of root key should be cleared after use */
+    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
+    HKS_FREE_BLOB(tmpKsf);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(processInfo.processName);
+    return ret;
+}
+
+int32_t HksReadKsfMk(const char *ksfName, struct HksKsfDataMkWithVer *ksfDataMk);
+{
+    struct HksBlob tmpKsf;
+    tmpKsf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
+    HKS_IF_NULL_RETURN(tmpKsf.data, HKS_ERROR_MALLOC_FAIL)
+
+    tmpKsf.size = HKS_KSF_BUF_LEN;
+    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
+
+    int32_t ret;
+    do {
+        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        ret = GetProcessInfo(&processInfo);
+        if (ret != HKS_SUCCESS) {
+            HKS_FREE_BLOB(processInfo.userId);
+            HKS_FREE_BLOB(processInfo.processName);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+        }
+
+        const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
+
+        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &tmpKsf);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+        ret = ExtractKsfBufRkc(&tmpKsf, ksfDataMk);
+    } while (0);
+
+    /* the data of main key should be cleared after use */
     (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
     HKS_FREE_BLOB(tmpKsf);
     HKS_FREE_BLOB(processInfo.userId);
@@ -402,25 +480,19 @@ static int32_t RkcFillKsfTime(const struct HksTime *time, struct HksBlob *ksfBuf
     return HKS_SUCCESS;
 }
 
-static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
+static int32_t FillKsfDataRkc(const struct HksKsfDataRkc *ksfDataRkc, struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
 {
-    /* Fill version */
-    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint16_t), &(ksfData->version), sizeof(uint16_t)) != EOK) {
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    *ksfBufOffset += sizeof(uint16_t);
-
     /* Fill rkCreatedTime */
-    int32_t ret = RkcFillKsfTime(&(ksfData->rkCreatedTime), ksfBuf, ksfBufOffset);
+    int32_t ret = RkcFillKsfTime(&(ksfDataRkc->rkCreatedTime), ksfBuf, ksfBufOffset);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Fill rkExpiredTime */
-    ret = RkcFillKsfTime(&(ksfData->rkExpiredTime), ksfBuf, ksfBufOffset);
+    ret = RkcFillKsfTime(&(ksfDataRkc->rkExpiredTime), ksfBuf, ksfBufOffset);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Fill the first material */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN,
-        ksfData->rkMaterial1, HKS_RKC_MATERIAL_LEN) != EOK) {
+        ksfDataRkc->rkMaterial1, HKS_RKC_MATERIAL_LEN) != EOK) {
         HKS_LOG_E("Memcpy first material to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -428,28 +500,28 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 
     /* Fill the second material */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MATERIAL_LEN,
-        ksfData->rkMaterial2, HKS_RKC_MATERIAL_LEN) != EOK) {
+        ksfDataRkc->rkMaterial2, HKS_RKC_MATERIAL_LEN) != EOK) {
         HKS_LOG_E("Memcpy second material to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_MATERIAL_LEN;
 
     /* Fill iterator number */
-    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->rmkIter), sizeof(uint32_t)) != EOK) {
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfDataRkc->rmkIter), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy iterator number to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Fill salt */
-    if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_SALT_LEN, ksfData->rmkSalt, HKS_RKC_SALT_LEN) != EOK) {
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_SALT_LEN, ksfDataRkc->rmkSalt, HKS_RKC_SALT_LEN) != EOK) {
         HKS_LOG_E("Memcpy salt to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_SALT_LEN;
 
     /* Fill hash algorithm */
-    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->rmkHashAlg), sizeof(uint32_t)) != EOK) {
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfDataRkc->rmkHashAlg), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy hash algorithm to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -457,7 +529,7 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 
     /* Fill reserve field */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN,
-        ksfData->rkRsv, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
+        ksfDataRkc->rkRsv, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
         HKS_LOG_E("Memcpy reserve field to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -466,25 +538,25 @@ static int32_t RkcFillKsfRk(const struct HksRkcKsfData *ksfData, struct HksBlob 
     return HKS_SUCCESS;
 }
 
-static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
+static int32_t FillKsfDataMk(const struct HksKsfDataMk *ksfDataMk, struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
 {
     /* Fill mkCreatedTime */
-    int32_t ret = RkcFillKsfTime(&(ksfData->mkCreatedTime), ksfBuf, ksfBufOffset);
+    int32_t ret = RkcFillKsfTime(&(ksfDataMk->mkCreatedTime), ksfBuf, ksfBufOffset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill mk created time to ksf buf failed!")
 
     /* Fill mkExpiredTime */
-    ret = RkcFillKsfTime(&(ksfData->mkExpiredTime), ksfBuf, ksfBufOffset);
+    ret = RkcFillKsfTime(&(ksfDataMk->mkExpiredTime), ksfBuf, ksfBufOffset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill mk expired time to ksf buf failed!")
 
     /* Fill encrption algorithm */
-    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfData->mkEncryptAlg), sizeof(uint32_t)) != EOK) {
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfDataMk->mkEncryptAlg), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy encrption algorithm to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += sizeof(uint32_t);
 
     /* Fill IV */
-    if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MK_IV_LEN, ksfData->mkIv, HKS_RKC_MK_IV_LEN) != EOK) {
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MK_IV_LEN, ksfDataMk->mkIv, HKS_RKC_MK_IV_LEN) != EOK) {
         HKS_LOG_E("Memcpy iv to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -492,7 +564,7 @@ static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 
     /* Fill ciphertext */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_MK_CIPHER_TEXT_LEN,
-        ksfData->mkCiphertext, HKS_RKC_MK_CIPHER_TEXT_LEN) != EOK) {
+        ksfDataMk->mkCiphertext, HKS_RKC_MK_CIPHER_TEXT_LEN) != EOK) {
         HKS_LOG_E("Memcpy ciphertext to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -500,11 +572,43 @@ static int32_t RkcFillKsfMk(const struct HksRkcKsfData *ksfData, struct HksBlob 
 
     /* Fill reserve field */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, HKS_RKC_KSF_DATA_RSV_LEN,
-        ksfData->mkRsv, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
+        ksfDataMk->mkRsv, HKS_RKC_KSF_DATA_RSV_LEN) != EOK) {
         HKS_LOG_E("Memcpy reserve field to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     *ksfBufOffset += HKS_RKC_KSF_DATA_RSV_LEN;
+
+    return HKS_SUCCESS;
+}
+
+static int32_t FillKsfVerRkc(const struct HksKsfDataRkcWithVer *ksfataRkcWithVer,
+    struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
+{
+    /* Fill version */
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint16_t),
+        &(ksfataRkcWithVer->rkVersion), sizeof(uint16_t)) != EOK) {
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *ksfBufOffset += sizeof(uint16_t);
+
+    int32_t ret = FillKsfDataRkc(ksfataRkcWithVer->ksfDataRkc, ksfBuf, ksfBufOffset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Memcpy rkc data to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+    return HKS_SUCCESS;
+}
+
+static int32_t FillKsfVerMk(const struct HksKsfDataMkWithVer *ksfataMkWithVer,
+    struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
+{
+    /* Fill version */
+    if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint16_t),
+        &(ksfataMkWithVer->mkVersion), sizeof(uint16_t)) != EOK) {
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *ksfBufOffset += sizeof(uint16_t);
+
+    int32_t ret = FillKsfDataMk(ksfataMkWithVer->ksfDataMk, ksfBuf, ksfBufOffset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Memcpy main key data to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     return HKS_SUCCESS;
 }
@@ -526,7 +630,7 @@ static int32_t RkcFillKsfHash(struct HksBlob *ksfBuf, uint32_t *ksfBufOffset)
     return HKS_SUCCESS;
 }
 
-static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob *ksfBuf)
+static int32_t FillKsfBufRkc(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer, struct HksBlob *ksfBuf)
 {
     uint32_t ksfBufOffset = 0;
 
@@ -538,11 +642,29 @@ static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob
     ksfBufOffset += HKS_RKC_KSF_FLAG_LEN;
 
     /* Fill root key */
-    int32_t ret = RkcFillKsfRk(ksfData, ksfBuf, &ksfBufOffset);
+    int32_t ret = FillKsfVerRkc(ksfDataRkcWithVer, ksfBuf, &ksfBufOffset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill root key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
+    /* calculate and fill SHA256 result, skip file flag, begin with version, end with reserve field. */
+    ret = RkcFillKsfHash(ksfBuf, &ksfBufOffset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill hash to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+    return HKS_SUCCESS;
+}
+
+static int32_t FillKsfBufMk(const struct HksKsfDataMkWithVer *ksfDataMkWithVer, struct HksBlob *ksfBuf)
+{
+    uint32_t ksfBufOffset = 0;
+
+    /* Fill file flag */
+    if (memcpy_s(ksfBuf->data, HKS_RKC_KSF_FLAG_LEN, g_hksRkcKsfFlag, HKS_RKC_KSF_FLAG_LEN) != EOK) {
+        HKS_LOG_E("Memcpy file flag to ksd buf failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    ksfBufOffset += HKS_RKC_KSF_FLAG_LEN;
+
     /* Fill main key */
-    ret = RkcFillKsfMk(ksfData, ksfBuf, &ksfBufOffset);
+    ret = FillKsfVerMk(ksfDataMkWithVer, ksfBuf, &ksfBufOffset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill main key info to ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* calculate and fill SHA256 result, skip file flag, begin with version, end with reserve field. */
@@ -552,19 +674,19 @@ static int32_t RkcFillKsfBuf(const struct HksRkcKsfData *ksfData, struct HksBlob
     return HKS_SUCCESS;
 }
 
-int32_t HksRkcWriteKsf(const char *ksfName, const struct HksKsfDataRkc *ksfDataRkc)
+int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *ksfDataRkc)
 {
     struct HksBlob ksfBuf;
-    ksfBuf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
+    ksfBuf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
     HKS_IF_NULL_LOGE_RETURN(ksfBuf.data, HKS_ERROR_MALLOC_FAIL, "Malloc rkc ksf buffer failed!")
 
-    ksfBuf.size = HKS_RKC_KSF_BUF_LEN;
+    ksfBuf.size = HKS_KSF_BUF_LEN;
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
 
     int32_t ret;
     do {
         /* Fill data into buffer */
-        ret = RkcFillKsfBuf(ksfDataRkc, &ksfBuf);
+        ret = FillKsfBufRkc(ksfDataRkc, &ksfBuf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill rkc ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
@@ -588,20 +710,20 @@ int32_t HksRkcWriteKsf(const char *ksfName, const struct HksKsfDataRkc *ksfDataR
     return ret;
 }
 
-int32_t HksMkWriteKsf(const char *ksfName, const struct HksKsfDataMk *ksfDataMk)
+int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksfDataMk)
 {
     struct HksBlob ksfBuf;
-    ksfBuf.data = (uint8_t *)HksMalloc(HKS_RKC_KSF_BUF_LEN);
+    ksfBuf.data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
     HKS_IF_NULL_LOGE_RETURN(ksfBuf.data, HKS_ERROR_MALLOC_FAIL, "Malloc mk ksf buffer failed!")
 
-    ksfBuf.size = HKS_RKC_KSF_BUF_LEN;
+    ksfBuf.size = HKS_KSF_BUF_LEN;
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
 
     int32_t ret;
     do {
         /* Fill data into buffer */
-        ret = RkcFillKsfBuf(ksfDataMk, &ksfBuf);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill mk ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+        ret = FillKsfBufMk(ksfDataMk, &ksfBuf);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill main key ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
@@ -614,7 +736,7 @@ int32_t HksMkWriteKsf(const char *ksfName, const struct HksKsfDataMk *ksfDataMk)
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
         ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
-        HKS_IF_NOT_SUCC_LOGE(ret, "Store mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
+        HKS_IF_NOT_SUCC_LOGE(ret, "Store main key ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
@@ -634,21 +756,18 @@ bool KsfExist(uint8_t ksfType)
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
     }
 
+    struct HksBlob fileNameBlob;
     if (ksfType == HKS_KSF_TYPE_RKC){
         for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrRkc.num; ++i) {
-            const struct HksBlob fileNameBlob = {
-                strlen(g_hksRkcCfg.ksfAttrRkc.name[i]),
-                (uint8_t *)(g_hksRkcCfg.ksfAttrRkc.name[i])
-            };
+            fileNameBlob.size = strlen(g_hksRkcCfg.ksfAttrRkc.name[i]);
+            fileNameBlob.data = (uint8_t *)(g_hksRkcCfg.ksfAttrRkc.name[i]);
         }
     } else {
         for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrMk.num; ++i) {
-            const struct HksBlob fileNameBlob = {
-                strlen(g_hksRkcCfg.ksfAttrMk.name[i]),
-                (uint8_t *)(g_hksRkcCfg.ksfAttrMk.name[i])
-            };
+            fileNameBlob.size = strlen(g_hksRkcCfg.ksfAttrMk.name[i]);
+            fileNameBlob.data = (uint8_t *)(g_hksRkcCfg.ksfAttrMk.name[i]);
         }
-    }        
+    }    
 
     int32_t ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
 
