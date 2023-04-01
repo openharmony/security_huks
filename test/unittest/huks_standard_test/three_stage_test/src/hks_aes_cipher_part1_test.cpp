@@ -555,6 +555,7 @@ static struct HksParam g_decryptParams007[] = {
  */
 HWTEST_F(HksAesCipherPart1Test, HksAesCipherPart1Test001, TestSize.Level0)
 {
+    HKS_LOG_I("enter HksAesCipherPart1Test001");
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
@@ -585,6 +586,7 @@ HWTEST_F(HksAesCipherPart1Test, HksAesCipherPart1Test001, TestSize.Level0)
  */
 HWTEST_F(HksAesCipherPart1Test, HksAesCipherPart1Test002, TestSize.Level0)
 {
+    HKS_LOG_I("enter HksAesCipherPart1Test002");
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest002";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 

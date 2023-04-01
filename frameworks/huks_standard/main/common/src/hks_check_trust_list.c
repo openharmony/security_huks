@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,22 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_STORAGE_DATA_H
-#define HKS_UPGRADE_STORAGE_DATA_H
+#include "hks_check_trust_list.h"
 
-#include "hks_type_inner.h"
+#include "hks_log.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+static const uint32_t g_trustList[] = HUKS_UID_TRUST_LIST;
 
-int32_t HksUpgradeStorageData(void);
-
-int32_t HksDestroyOldVersionFiles(void);
-
-#ifdef __cplusplus
+int32_t HksCheckIsInTrustList(uint32_t uid)
+{
+    uint32_t listSize = HKS_ARRAY_SIZE(g_trustList);
+    int32_t ret = HKS_ERROR_NO_PERMISSION;
+    uint32_t i = 0;
+    for (; i < listSize; ++i) {
+        if (uid == g_trustList[i]) {
+            ret = HKS_SUCCESS;
+            break;
+        }
+    }
+    return ret;
 }
-#endif
-
-#endif /* HKS_UPGRADE_STORAGE_DATA_H */

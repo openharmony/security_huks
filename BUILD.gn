@@ -75,6 +75,8 @@ group("service_group") {
       "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
     ]
+  } else if (os_level == "small") {
+    deps = [ "//base/security/huks/frameworks/huks_lite:huks_server" ]
   }
 }
 

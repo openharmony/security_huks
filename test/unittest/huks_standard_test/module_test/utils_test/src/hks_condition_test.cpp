@@ -19,6 +19,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "hks_api.h"
 #include "hks_condition.h"
 #include "hks_log.h"
 #include "hks_type.h"
@@ -137,5 +138,7 @@ HWTEST_F(HksConditionTest, HksConditionTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksConditionTest005");
     HksConditionDestroy(nullptr);
+    int32_t ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 }

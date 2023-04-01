@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,26 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_INFO_H
-#define HKS_UPGRADE_KEY_INFO_H
+#ifndef HKS_MBEDTLS_GET_MAIN_KEY_H
+#define HKS_MBEDTLS_GET_MAIN_KEY_H
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
+#include "hks_crypto_hal.h"
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut);
+int32_t HksMbedtlsGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* HKS_UPGRADE_KEY_INFO_H */
+#endif /* HKS_MBEDTLS_GET_MAIN_KEY_H */

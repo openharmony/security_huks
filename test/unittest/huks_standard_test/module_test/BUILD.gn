@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
@@ -39,6 +40,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/os_dependency_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/include",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/include",
   ]
 
   sources = []
@@ -186,25 +188,30 @@ ohos_unittest("huks_module_test") {
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_asn1_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_core_service_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keyblob_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_keynode_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_secure_access_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core_dependency/src/hks_core_hal_api_test.cpp",
   ]
 
-  defines = [
-    "L2_STANDARD",
-    "_HUKS_LOG_ENABLE_",
-  ]
+  if (huks_enable_upgrade_key) {
+    # upgrade key test
+    sources += [
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_upgrade_key_c_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_upgrade_key_accesser_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/src/hks_upgrade_key_test.cpp",
+    ]
+  }
 
+  defines = []
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
   }
 
-  include_dirs += [
-    "//commonlibrary/c_utils/base/include",
-    "//test/xts/acts/security_lite/huks/common/include",
+  include_dirs += [ "//test/xts/acts/security_lite/huks/common/include" ]
+  configs = [
+    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_attest_key_test_common.cpp",
     "//base/security/huks/utils/condition/hks_condition.c",
@@ -214,9 +221,16 @@ ohos_unittest("huks_module_test") {
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
+    "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util",
     "//third_party/openssl:libcrypto_shared",
   ]
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+
+  cflags = [ "-DREAL_HKS_KEY_VERSION=${huks_key_version}" ]
+
+  external_deps = [
+    "hitrace_native:libhitracechain",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
   if (support_jsapi) {
     sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_event_observer_test.cpp" ]
     external_deps += [

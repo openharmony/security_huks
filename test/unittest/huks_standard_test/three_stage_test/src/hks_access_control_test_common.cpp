@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,7 +19,11 @@
 
 using namespace testing::ext;
 namespace Unittest::HksAccessControlPartTest {
-static struct HksParam AuthToken_Import_Params[] = {
+static const uint8_t NONCE[HKS_AE_NONCE_LEN + 1] = "hahahahahaha";
+static const uint8_t AAD[HKS_AE_AAD_LEN + 1] = "OH_authToken";
+static uint8_t TAG[HKS_AE_TAG_LEN] = { 0 };
+
+static struct HksParam g_authtokenImportHmacParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -35,7 +39,7 @@ static struct HksParam AuthToken_Import_Params[] = {
     }
 };
 
-static struct HksParam AuthToken_HMAC_Params[] = {
+static struct HksParam g_authtokenHmacParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_HMAC
@@ -48,11 +52,72 @@ static struct HksParam AuthToken_HMAC_Params[] = {
     }
 };
 
-int32_t AuthTokenImportKey()
+static struct HksParam g_authtokenImportAesParams[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_GCM
+    }
+};
+
+static struct HksParam g_authtokenAesParams[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_GCM
+    }, {
+        .tag = HKS_TAG_ASSOCIATED_DATA,
+        .blob = {
+            .size = HKS_AE_AAD_LEN,
+            .data = (uint8_t *)AAD
+        }
+    }, {
+        .tag = HKS_TAG_NONCE,
+        .blob = {
+            .size = HKS_AE_NONCE_LEN,
+            .data = (uint8_t *)NONCE
+        }
+    }, {
+        .tag = HKS_TAG_AE_TAG,
+        .blob = {
+            .size = HKS_AE_TAG_LEN,
+            .data = (uint8_t *)TAG
+        }
+    }
+};
+
+int32_t AuthTokenImportKey(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount)
 {
     struct HksParamSet *importParamSet = nullptr;
-    int32_t ret = InitParamSet(&importParamSet, AuthToken_Import_Params,
-        sizeof(AuthToken_Import_Params) / sizeof(HksParam));
+    int32_t ret = InitParamSet(&importParamSet, params, paramCount);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -61,15 +126,13 @@ int32_t AuthTokenImportKey()
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(HKS_DEFAULT_USER_AT_KEY))
     };
 
-    uint8_t alias[] = "AuthToken_Sign_Verify_KeyAlias";
-    struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksImportKey(&keyAlias, importParamSet, &key);
+    ret = HksImportKey(keyAlias, importParamSet, &key);
     HksFreeParamSet(&importParamSet);
     return ret;
 }
 
-static int32_t AssignAuthToken(HksUserAuthToken *authTokenHal, struct HksBlob *challenge,
-    const IDMParams &testIDMParams)
+static int32_t AssignAuthToken(struct HksBlob *cipherTextOutData, struct HksBlob *challenge,
+    const IDMParams &testIDMParams, HksUserAuthToken *authTokenHal)
 {
     uint64_t curTime = 0;
     int32_t ret = HksCoreHalElapsedRealTime(&curTime);
@@ -77,44 +140,97 @@ static int32_t AssignAuthToken(HksUserAuthToken *authTokenHal, struct HksBlob *c
         HKS_LOG_E("get elapsed real time failed!");
         return ret;
     }
-    authTokenHal->time = curTime + testIDMParams.time;
-    authTokenHal->secureUid = testIDMParams.secureUid;
-    authTokenHal->enrolledId = testIDMParams.enrolledId;
-    authTokenHal->authType = testIDMParams.authType;
 
-    if (memcpy_s(authTokenHal->challenge, TOKEN_CHALLENGE_LEN, challenge->data, challenge->size) != EOK) {
+    (void)memcpy_s(&authTokenHal->ciphertextData, AUTH_TOKEN_CIPHERTEXT_LEN,
+        cipherTextOutData->data, cipherTextOutData->size);
+    (void)memcpy_s(authTokenHal->tag, HKS_AE_TAG_LEN,
+        cipherTextOutData->data + cipherTextOutData->size, HKS_AE_TAG_LEN);
+    (void)memcpy_s(authTokenHal->iv, HKS_AE_NONCE_LEN, NONCE, HKS_AE_NONCE_LEN);
+    authTokenHal->plaintextData.time = curTime + testIDMParams.time;
+    authTokenHal->plaintextData.authType = testIDMParams.authType;
+
+    if (memcpy_s(authTokenHal->plaintextData.challenge, TOKEN_CHALLENGE_LEN, challenge->data, challenge->size) != EOK) {
         HKS_LOG_E("memcpy_s failed");
         return HKS_FAILURE;
     }
     return HKS_SUCCESS;
 }
 
-int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams, std::vector<uint8_t>& token)
+int32_t AuthTokenEncrypt(const IDMParams &testIDMParams, struct HksBlob *authChallenge, HksUserAuthToken *authTokenHal)
 {
     int32_t ret = HKS_FAILURE;
-    uint8_t alias[] = "AuthToken_Sign_Verify_KeyAlias";
+    uint8_t alias[] = "AuthToken_Encrypt_Decrypt_KeyAlias";
     const struct HksBlob keyAlias = { sizeof(alias), alias };
-    AuthTokenImportKey();
-    HksUserAuthToken *authTokenHal = nullptr;
-    struct HksParamSet *hmacParamSet = nullptr;
+    AuthTokenImportKey(&keyAlias, g_authtokenImportAesParams, sizeof(g_authtokenImportAesParams) / sizeof(HksParam));
+    HksCiphertextData *cipherTextData = nullptr;
+    struct HksParamSet *cipherParamSet = nullptr;
     do {
-        authTokenHal = static_cast<struct HksUserAuthToken *>(HksMalloc(AUTH_TOKEN_LEN));
-        if (authTokenHal == nullptr) {
+        cipherTextData = static_cast<struct HksCiphertextData *>(HksMalloc(AUTH_TOKEN_CIPHERTEXT_LEN));
+        if (cipherTextData == nullptr) {
             break;
         }
 
-        ret = AssignAuthToken(authTokenHal, challenge, testIDMParams);
+        cipherTextData->secureUid = testIDMParams.secureUid;
+        cipherTextData->enrolledId = testIDMParams.enrolledId;
+
+        uint8_t authTokenCipher[AUTH_TOKEN_CIPHERTEXT_LEN] = {0};
+        if (memcpy_s(authTokenCipher, AUTH_TOKEN_CIPHERTEXT_LEN, cipherTextData, AUTH_TOKEN_CIPHERTEXT_LEN) != EOK) {
+            break;
+        }
+        struct HksBlob inData = { AUTH_TOKEN_CIPHERTEXT_LEN, authTokenCipher };
+
+        ret = InitParamSet(&cipherParamSet, g_authtokenAesParams, sizeof(g_authtokenAesParams) / sizeof(HksParam));
         if (ret != HKS_SUCCESS) {
             break;
         }
 
+        /// Init
+        uint8_t handle[32] = {0};
+        struct HksBlob handleEncrypt = { 32, handle };
+        ret = HksInit(&keyAlias, cipherParamSet, &handleEncrypt, nullptr);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        // Update & Finish
+        uint8_t cipher[HKS_AES_COMMON_SIZE] = {0};
+        struct HksBlob cipherTextOutData = { HKS_AES_COMMON_SIZE, cipher };
+        ret = TestUpdateLoopFinish(&handleEncrypt, cipherParamSet, &inData, &cipherTextOutData);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        cipherTextOutData.size -= HKS_AE_TAG_LEN;
+        int ret = AssignAuthToken(&cipherTextOutData, authChallenge, testIDMParams, authTokenHal);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+
+        HKS_FREE_PTR(cipherTextData);
+        HksFreeParamSet(&cipherParamSet);
+        return ret;
+    } while (0);
+    (void)HksDeleteKey(&keyAlias, nullptr);
+    HKS_FREE_PTR(cipherTextData);
+    HksFreeParamSet(&cipherParamSet);
+    return ret;
+}
+
+int32_t AuthTokenSign(const IDMParams &testIDMParams,  HksUserAuthToken *authTokenHal,
+    std::vector<uint8_t>& token)
+{
+    int32_t ret = HKS_FAILURE;
+    uint8_t alias[] = "AuthToken_Sign_Verify_KeyAlias";
+    const struct HksBlob keyAlias = { sizeof(alias), alias };
+    AuthTokenImportKey(&keyAlias, g_authtokenImportHmacParams, sizeof(g_authtokenImportHmacParams) / sizeof(HksParam));
+    struct HksParamSet *hmacParamSet = nullptr;
+    do {
         uint8_t authTokenData[AUTH_TOKEN_DATA_LEN] = {0};
         if (memcpy_s(authTokenData, AUTH_TOKEN_DATA_LEN, authTokenHal, AUTH_TOKEN_DATA_LEN) != EOK) {
             break;
         }
         struct HksBlob inData = { AUTH_TOKEN_DATA_LEN, authTokenData };
 
-        ret = InitParamSet(&hmacParamSet, AuthToken_HMAC_Params, sizeof(AuthToken_HMAC_Params) / sizeof(HksParam));
+        ret = InitParamSet(&hmacParamSet, g_authtokenHmacParams, sizeof(g_authtokenHmacParams) / sizeof(HksParam));
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -144,7 +260,6 @@ int32_t AuthTokenSign(struct HksBlob *challenge, const IDMParams &testIDMParams,
         return ret;
     } while (0);
     (void)HksDeleteKey(&keyAlias, nullptr);
-    HKS_FREE_PTR(authTokenHal);
     HksFreeParamSet(&hmacParamSet);
     return ret;
 }
@@ -193,9 +308,22 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
 {
     struct HksParam tmpParams;
     std::vector<uint8_t> token;
-    int ret = AuthTokenSign(authChallenge, testIDMParams, token);
+    HksUserAuthToken *authTokenHal = nullptr;
+
+    authTokenHal = static_cast<struct HksUserAuthToken *>(HksMalloc(AUTH_TOKEN_LEN));
+    if (authTokenHal == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int ret = AuthTokenEncrypt(testIDMParams, authChallenge, authTokenHal);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AuthToeknSign Failed.");
+        HKS_FREE_PTR(authTokenHal);
+        return ret;
+    }
+
+    ret = AuthTokenSign(testIDMParams, authTokenHal, token);
+    HKS_FREE_PTR(authTokenHal);
+    if (ret != HKS_SUCCESS) {
         return ret;
     }
 
@@ -240,9 +368,22 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
     std::vector<uint8_t> token;
     struct IDMParams testIDMParams = {genAuthTokenParams->secureUid,
         genAuthTokenParams->enrolledId, genAuthTokenParams->time, genAuthTokenParams->authType};
-    int32_t ret = AuthTokenSign(genAuthTokenParams->authChallenge, testIDMParams, token);
+
+    HksUserAuthToken *authTokenHal = nullptr;
+    authTokenHal = static_cast<struct HksUserAuthToken *>(HksMalloc(AUTH_TOKEN_LEN));
+    if (authTokenHal == nullptr) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int ret = AuthTokenEncrypt(testIDMParams, genAuthTokenParams->authChallenge, authTokenHal);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AuthToeknSign Failed.");
+        HKS_FREE_PTR(authTokenHal);
+        return ret;
+    }
+
+    ret = AuthTokenSign(testIDMParams, authTokenHal, token);
+    HKS_FREE_PTR(authTokenHal);
+    if (ret != HKS_SUCCESS) {
         return ret;
     }
     uint8_t authToken[AUTH_TOKEN_LEN + 1] = {0};

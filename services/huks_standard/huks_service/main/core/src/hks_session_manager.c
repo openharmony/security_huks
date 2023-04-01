@@ -264,4 +264,3 @@ void DeleteSessionByProcessInfo(const struct HksProcessInfo *processInfo)
     }
     pthread_mutex_unlock(&g_lock);
 }
-

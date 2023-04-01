@@ -67,9 +67,6 @@ int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, struct HksB
 int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac);
 
-int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo,
-    struct HksBlob *keyOut);
-
 int32_t HuksAccessAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain);
 
 int32_t HuksAccessSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -92,6 +89,8 @@ int32_t HuksAccessDeriveKey(const struct HksParamSet *paramSet, const struct Hks
 
 int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *mac);
+
+int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey);
 
 int32_t HuksAccessExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);

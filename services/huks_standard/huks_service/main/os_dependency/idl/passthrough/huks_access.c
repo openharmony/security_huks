@@ -245,6 +245,19 @@ ENABLE_CFI(int32_t HuksAccessMac(const struct HksBlob *key, const struct HksPara
     return g_hksHalDevicePtr->HuksHdiMac(key, paramSet, srcData, mac);
 }
 
+#ifdef HKS_ENABLE_UPGRADE_KEY
+ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
+    struct HksBlob *newKey))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKey, HKS_ERROR_NULL_POINTER,
+        "Change key owner function is null pointer")
+
+    return g_hksHalDevicePtr->HuksHdiUpgradeKey(oldKey, paramSet, newKey);
+}
+#endif
+
 #ifdef _STORAGE_LITE_
 ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac))
@@ -255,19 +268,6 @@ ENABLE_CFI(int32_t HuksAccessCalcHeaderMac(const struct HksParamSet *paramSet, c
         "CalcMacHeader function is null pointer")
 
     return g_hksHalDevicePtr->HuksHdiCalcMacHeader(paramSet, salt, srcData, mac);
-}
-#endif
-
-#ifdef HKS_SUPPORT_UPGRADE_STORAGE_DATA
-ENABLE_CFI(int32_t HuksAccessUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo,
-    struct HksBlob *keyOut))
-{
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
-
-    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo, HKS_ERROR_NULL_POINTER,
-        "UpgradeKeyInfo function is null pointer")
-
-    return g_hksHalDevicePtr->HuksHdiUpgradeKeyInfo(keyAlias, keyInfo, keyOut);
 }
 #endif
 
