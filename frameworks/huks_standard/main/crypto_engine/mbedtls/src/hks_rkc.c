@@ -706,7 +706,7 @@ static int32_t RkcInitKsfAttr(const struct HksKsfAttrRkc *ksfAttrRkc)
 {
     /* clone keystore filename from parameter. */
     for (uint8_t i = 0; i < ksfAttrRkc->num; ++i) {
-        char *fileName = CloneNewStr(ksfAttrRkc->name[i], HKS_RKC_KSF_NAME_LEN_MAX);
+        char *fileName = CloneNewStr(ksfAttrRkc->name[i], HKS_KSF_NAME_LEN_MAX);
         /* the memory will be freed by hksRkcDestroy() */
         HKS_IF_NULL_RETURN(fileName, HKS_ERROR_MALLOC_FAIL)
 
@@ -721,7 +721,7 @@ static int32_t MkInitKsfAttr(const struct HksKsfAttrMk *ksfAttrMk)
 {
     /* clone keystore filename from parameter. */
     for (uint8_t i = 0; i < ksfAttrMk->num; ++i) {
-        char *fileName = CloneNewStr(ksfAttrMk->name[i], HKS_MK_KSF_NAME_LEN_MAX);
+        char *fileName = CloneNewStr(ksfAttrMk->name[i], HKS_KSF_NAME_LEN_MAX);
         /* the memory will be freed by hksMkDestroy() */
         HKS_IF_NULL_RETURN(fileName, HKS_ERROR_MALLOC_FAIL)
 

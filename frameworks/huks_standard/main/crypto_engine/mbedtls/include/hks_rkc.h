@@ -23,16 +23,15 @@
 #define HKS_RKC_RAW_KEY_LEN 64                          /* the raw key length of root key component */
 #define HKS_HARDWARE_UDID_LEN 32                        /* the length of hardware UDID */
 #define HKS_RKC_MK_ADD_DATA_LEN 8                       /* the additional data length of main key */
-#define HKS_RKC_KSF_NAME_LEN_MAX 256                    /* the max length of rkc keystore filename */
-#define HKS_MK_KSF_NAME_LEN_MAX 256                     /* the max length of mk keystore filename */
+#define HKS_KSF_NAME_LEN_MAX 256                        /* the max length of rkc keystore filename */
 
 /* the initialization parameter of root key component */
 struct HksRkcInitParam {
     uint16_t rkVersion;                                 /* the version of root key component */
     uint16_t mkVersion;                                 /* the version of main key */
     uint8_t storageType;                                /* the storage type of root key component */
-    struct HksKsfAttrRkc ksfAttrRkc;                    /* the attribute of rkc keystore file */
-    struct HksKsfAttrMk ksfAttrMk;                      /* the attribute of mk keystore file */
+    struct HksKsfAttr ksfAttrRkc;                       /* the attribute of rkc keystore file */
+    struct HksKsfAttr ksfAttrMk;                        /* the attribute of mk keystore file */
     uint32_t rmkIter;                                   /* the iterator number of times which derive Root Main Key */
     uint32_t rmkHashAlg;                                /* the hash algorithm which derive Root Main Key */
     uint32_t mkEncryptAlg;                              /* the encrption algorithm of main key */
