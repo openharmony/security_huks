@@ -13,13 +13,22 @@
 
 import("//build/ohos.gni")
 
-group("huks_standard_frameworks") {
-  if (os_level == "standard") {
+if (os_level == "standard") {
+  group("huks_standard_frameworks") {
     public_deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/core:libhuks_core_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+    ]
+  }
+} else {
+  group("huks_small_frameworks") {
+    public_deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",
+      "//base/security/huks/frameworks/huks_standard/main/core:libhuks_core_small_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_small_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
     ]
   }
 }

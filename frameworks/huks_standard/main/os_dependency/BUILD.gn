@@ -11,50 +11,67 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
   include_dirs = [
     "include",
     "ipc/include",
+    "sysinfo/include",
   ]
 }
 
-ohos_static_library("libhuks_os_dependency_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_os_dependency_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+
+    sources = [
+      "./ipc/src/hks_ipc_check.c",
+      "./ipc/src/hks_ipc_serialization.c",
+      "./ipc/src/hks_ipc_slice.c",
+      "./ipc/src/hks_request.cpp",
+      "./posix/hks_mem.c",
+    ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    sources += [ "./ipc/src/hks_client_service_ipc.c" ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+    external_deps = [
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_single",
+      "samgr:samgr_proxy",
+    ]
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  include_dirs = [ "log" ]
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  sources = [
-    "./ipc/src/hks_client_service_ipc.c",
-    "./ipc/src/hks_ipc_check.c",
-    "./ipc/src/hks_ipc_serialization.c",
-    "./ipc/src/hks_ipc_slice.c",
-    "./ipc/src/hks_request.cpp",
-    "./posix/hks_mem.c",
-  ]
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
-  external_deps = [
-    "hiviewdfx_hilog_native:libhilog",
-    "ipc:ipc_single",
-    "samgr:samgr_proxy",
-  ]
-  cflags_cc = [
-    "-DHILOG_ENABLE",
-    "-Wall",
-    "-Werror",
-  ]
-  cflags = cflags_cc
-  complete_static_lib = true
+} else {
+  ohos_static_library("libhuks_os_dependency_small_static") {
+    public_configs = [ ":huks_config" ]
+
+    sources = [ "./posix/hks_mem.c" ]
+
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
+
+    complete_static_lib = true
+
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    sources += [
+      "./sysinfo/src/hks_get_process_info_passthrough.c",
+      "./sysinfo/src/hks_get_udid.c",
+    ]
+    configs = [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
+    external_deps = [ "init_lite:libbegetutil" ]
+  }
 }

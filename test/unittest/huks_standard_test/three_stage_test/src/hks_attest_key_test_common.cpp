@@ -21,15 +21,15 @@
 using namespace testing::ext;
 
 namespace Unittest::AttestKey {
-const static uint32_t g_paramCountInKeyAttest = 4;
-const static uint32_t g_paramCountInIdAttest = 7;
-const static uint32_t g_index0 = 0;
-const static uint32_t g_index1 = 1;
-const static uint32_t g_index2 = 2;
-const static uint32_t g_index3 = 3;
-const static uint32_t g_index4 = 4;
-const static uint32_t g_index5 = 5;
-const static uint32_t g_index6 = 6;
+static const uint32_t g_paramCountInKeyAttest = 4;
+static const uint32_t g_paramCountInIdAttest = 7;
+static const uint32_t g_index0 = 0;
+static const uint32_t g_index1 = 1;
+static const uint32_t g_index2 = 2;
+static const uint32_t g_index3 = 3;
+static const uint32_t g_index4 = 4;
+static const uint32_t g_index5 = 5;
+static const uint32_t g_index6 = 6;
 
 void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
 {

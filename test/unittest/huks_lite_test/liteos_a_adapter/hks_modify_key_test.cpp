@@ -63,7 +63,7 @@ void HksModifyKeyTest::TearDown()
 const int DEFAULT_AES_CIPHER_PLAIN_SIZE = 1000;
 const int AES_DEFAULT_GCM_NONCE_LENGTH = 12;
 const int AES_DEFAULT_AAD_LEN = 4;
-const char *g_storePath = "/storage/maindata/hks_client/key";
+const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
 const char *g_testName = "TestName";
 
 const struct HksTestCipherParams g_testCipherParams[] = {
@@ -352,6 +352,8 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
     TestFreeBlob(&nonceData);
     TestFreeBlob(&aadData);
     EXPECT_NE(ret, 0);
+
+    (void)HksDeleteKey(&keyAlias, nullptr);
 }
 #endif /* _CUT_AUTHENTICATE_ */
 }

@@ -299,7 +299,7 @@ static int32_t getParamSetAuthTest(struct HksParamSet **paramOutSet, const struc
     algParam->uint32Param == HKS_ALG_DH) {
         localSecureKey.tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA;
     } else if (algParam->uint32Param == HKS_ALG_HMAC || algParam->uint32Param == HKS_ALG_SM3 ||
-     algParam->uint32Param == HKS_ALG_HKDF || algParam->uint32Param == HKS_ALG_PBKDF2) {
+    algParam->uint32Param == HKS_ALG_HKDF || algParam->uint32Param == HKS_ALG_PBKDF2) {
         localSecureKey.tag = HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA;
     }
     HksAddParams(*paramOutSet, &localSecureKey, 1);

@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "hks_api.h"
 #include "hks_log.h"
 #include "hks_template.h"
 #include "hks_type.h"
@@ -120,6 +121,8 @@ HWTEST_F(HksTemplateTest, HksTemplateTest004, TestSize.Level0)
     int32_t ret = HKS_ERROR_API_NOT_SUPPORTED;
     HKS_IF_NOT_SUCC_LOGE(ret, "HksTemplateTest004")
     HKS_IF_NOT_SUCC_LOGE(ret, "HksTemplateTest004, %d, %s", 0, "HksTemplateTest004")
+    ret = HksInitialize();
+    ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
 static int32_t TestReturn()

@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
@@ -20,45 +21,74 @@ config("huks_config") {
   ]
 }
 
-ohos_static_library("libhuks_common_standard_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
+if (os_level == "standard") {
+  ohos_static_library("libhuks_common_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+
+    public_configs =
+        [ ":huks_config" ]  # Share include files for other gn when deps.
+
+    include_dirs = [
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    ]
+
+    sources = [
+      "src/hks_ability.c",
+      "src/hks_base_check.c",
+      "src/hks_check_paramset.c",
+      "src/hks_common_check.c",
+      "src/hks_crypto_adapter.c",
+      "src/hks_param.c",
+      "src/hks_tags_type_manager.c",
+    ]
+
+    complete_static_lib = true
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+    }
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+    sources += [ "src/hks_errcode_adapter.c" ]
+    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
-  subsystem_name = "security"
-  part_name = "huks"
-  defines = [
-    "L2_STANDARD",
-    "_HARDWARE_ROOT_KEY_",
-    "_HUKS_LOG_ENABLE_",
-  ]
-  public_configs =
-      [ ":huks_config" ]  # Share include files for other gn when deps.
+} else {
+  ohos_static_library("libhuks_common_small_static") {
+    defines = [ "_HUKS_LOG_ENABLE_" ]
+    public_configs =
+        [ ":huks_config" ]  # Share include files for other gn when deps.
 
-  configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
+    include_dirs = [
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    ]
 
-  include_dirs = [
-    "//third_party/bounds_checking_function/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-  ]
+    sources = [
+      "src/hks_ability.c",
+      "src/hks_base_check.c",
+      "src/hks_check_paramset.c",
+      "src/hks_common_check.c",
+      "src/hks_crypto_adapter.c",
+      "src/hks_param.c",
+      "src/hks_tags_type_manager.c",
+    ]
 
-  sources = [
-    "src/hks_ability.c",
-    "src/hks_base_check.c",
-    "src/hks_check_paramset.c",
-    "src/hks_common_check.c",
-    "src/hks_crypto_adapter.c",
-    "src/hks_errcode_adapter.c",
-    "src/hks_param.c",
-  ]
+    cflags = []
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    complete_static_lib = true
+    cflags += [ "-DHUKS_UID_TRUST_LIST=${huks_uid_trust_list_define}" ]
 
-  cflags = [
-    "-DHILOG_ENABLE",
-    "-Wall",
-    "-Werror",
-  ]
-  complete_static_lib = true
+    deps = [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
+
+    if (huks_enable_upgrade_small_to_service) {
+      sources += [ "src/hks_check_trust_list.c" ]
+    }
+  }
 }

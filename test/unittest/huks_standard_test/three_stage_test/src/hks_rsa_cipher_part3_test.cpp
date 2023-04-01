@@ -699,6 +699,7 @@ static struct HksParam g_decryptParams030[] = {
  */
 HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test021, TestSize.Level0)
 {
+    HKS_LOG_I("enter HksRsaCipherPart3Test021");
     char tmpKeyAlias[] = "HksRSACipherKeyAliasTest021";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     struct HksBlob inData = { g_inData_32.length(),
