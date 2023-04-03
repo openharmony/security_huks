@@ -264,7 +264,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest002, TestSize.Level0)
     int32_t ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     uint8_t plainText[] = "plainText123456";
     uint8_t cipherText[1024] = { 0 };
@@ -306,7 +306,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest003, TestSize.Level0)
     int32_t ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     ret = HksDeleteKey(&keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
@@ -330,7 +330,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest004, TestSize.Level0)
     ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     ret = HksKeyExist(&keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
@@ -384,7 +384,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest005, TestSize.Level0)
     ret = TestGenerateNewKeyInOldPath(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     ret = HksKeyExist(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
@@ -411,7 +411,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest006, TestSize.Level0)
     ret = TestGenerateNewKeyInOldPath(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     uint8_t plainText[] = "plainText123456";
     uint8_t cipherText[1024] = { 0 };
@@ -446,7 +446,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest007, TestSize.Level0)
     ret = TestGenerateNewKeyInOldPath(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     ret = HksDeleteKey(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
@@ -525,7 +525,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     // generate key1 in old path
     int32_t ret = TestGenerateOldkey(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     // generate key2 in new path
     ret = TestGenerateNewkey(&keyAlias2, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -572,7 +572,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest010, TestSize.Level0)
     // generate key1 in old path
     int32_t ret = TestGenerateOldkey(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     // get key info list with white list, get list including key 1
     const uint32_t keyInfoListMaxSize = 3;
@@ -612,7 +612,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
     // generate key1 in old path with new version
     int32_t ret = TestGenerateNewKeyInOldPath(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     // get key info list with white list, get empty list
     const uint32_t keyInfoListMaxSize = 3;
@@ -658,7 +658,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest012, TestSize.Level0)
     // generate key1 in old path
     int32_t ret = TestGenerateOldkey(&keyAlias1, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     // generate key2 in new path
     ret = TestGenerateNewkey(&keyAlias2, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -699,7 +699,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest013, TestSize.Level0)
     int32_t ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
     ret = TestGenerateNewkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
