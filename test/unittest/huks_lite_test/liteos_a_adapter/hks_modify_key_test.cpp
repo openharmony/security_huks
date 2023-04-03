@@ -63,7 +63,7 @@ void HksModifyKeyTest::TearDown()
 const int DEFAULT_AES_CIPHER_PLAIN_SIZE = 1000;
 const int AES_DEFAULT_GCM_NONCE_LENGTH = 12;
 const int AES_DEFAULT_AAD_LEN = 4;
-const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
+const char *g_storePath = "/storage/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
 const char *g_testName = "TestName";
 
 const struct HksTestCipherParams g_testCipherParams[] = {
