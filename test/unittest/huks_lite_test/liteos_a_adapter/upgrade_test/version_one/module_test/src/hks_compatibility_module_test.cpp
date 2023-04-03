@@ -261,7 +261,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
     ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", 12);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", 12);
 
     const char *userId = "0";
     const char *processName1 = "123456";
@@ -307,7 +307,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Lev
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", 12);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", 12);
 
     uint8_t plainText[] = "plainText123456";
     uint8_t cipherText[1024] = { 0 };
@@ -345,7 +345,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Lev
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", 12);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", 12);
 
     const char *userId = "0";
     const char *processName = "123456";
@@ -417,7 +417,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", 12);
+    HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", 12);
 
     const char *userId = "0";
     uint32_t uid = 999;
