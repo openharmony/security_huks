@@ -62,8 +62,12 @@ struct HksTime {
 };
 
 /* the attribute of rkc or mk keystore file */
+// struct HksKsfAttr {
+//     uint8_t num;                                        /* the number of files */
+//     char *name[HKS_KSF_NUM];
+// };
+
 struct HksKsfAttr {
-    uint8_t num;                                        /* the number of files */
     char *name[HKS_KSF_NUM];
 };
 
@@ -110,23 +114,23 @@ struct HksKsfDataMkWithVer {
 }
 
 /* the configuration of root key component */
-struct HksRkcCfg {
-    uint8_t state;                                      /* system state */
-    uint16_t rkVersion;                                 /* the version of root key component */
-    uint16_t mkVersion;                                 /* the version of main key */
-    uint8_t storageType;                                /* the storage type of root key component */
-    struct HksTime rkCreatedTime;                       /* the created time of root key */
-    struct HksTime rkExpiredTime;                       /* the expired time of root key */
-    struct HksKsfAttr ksfAttrRkc;                       /* the attribute of rkc keystore file */
-    struct HksKsfAttr ksfAttrMk;                        /* the attribute of mk keystore file */
-    uint32_t rmkIter;                                   /* the iterator number of times which derive Root Main Key */
-    uint32_t rmkHashAlg;                                /* the hash algorithm which derive Root Main Key */
-    uint8_t mkMask[HKS_RKC_MK_LEN];                     /* the mask of main key */
-    uint32_t mkEncryptAlg;                              /* the encrption algorithm of main key */
-    uint8_t reserve[HKS_RKC_CFG_RSV_LEN];               /* reserve data, 32 byte */
-};
+// struct HksRkcCfg {
+//     uint8_t state;                                      /* system state */
+//     uint16_t rkVersion;                                 /* the version of root key component */
+//     uint16_t mkVersion;                                 /* the version of main key */
+//     uint8_t storageType;                                /* the storage type of root key component */
+//     struct HksTime rkCreatedTime;                       /* the created time of root key */
+//     struct HksTime rkExpiredTime;                       /* the expired time of root key */
+//     struct HksKsfAttr ksfAttrRkc;                       /* the attribute of rkc keystore file */
+//     struct HksKsfAttr ksfAttrMk;                        /* the attribute of mk keystore file */
+//     uint32_t rmkIter;                                   /* the iterator number of times which derive Root Main Key */
+//     uint32_t rmkHashAlg;                                /* the hash algorithm which derive Root Main Key */
+//     uint8_t mkMask[HKS_RKC_MK_LEN];                     /* the mask of main key */
+//     uint32_t mkEncryptAlg;                              /* the encrption algorithm of main key */
+//     uint8_t reserve[HKS_RKC_CFG_RSV_LEN];               /* reserve data, 32 byte */
+// };
 
-extern struct HksRkcCfg g_hksRkcCfg;
+// extern struct HksRkcCfg g_hksRkcCfg;
 
 #ifdef __cplusplus
 extern "C" {

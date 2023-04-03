@@ -20,6 +20,7 @@
 #include "hks_get_process_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_rkc.h"
 #include "hks_storage.h"
 #include "hks_template.h"
 
@@ -31,21 +32,21 @@
 const uint8_t g_hksRkcKsfFlag[HKS_RKC_KSF_FLAG_LEN] = { 0x5F, 0x64, 0x97, 0x8D, 0x19, 0x4F, 0x89, 0xCF };
 
 /* the configuration of root key component */
-struct HksRkcCfg g_hksRkcCfg = {
-    .state = HKS_RKC_STATE_INVALID,
-    .rkVersion = HKS_RKC_VER,
-    .mkVersion = HKS_MK_VER,
-    .storageType = HKS_RKC_STORAGE_FILE_SYS,
-    .rkCreatedTime = { 0, 0, 0, 0, 0, 0 },
-    .rkExpiredTime = { 0, 0, 0, 0, 0, 0 },
-    .ksfAttrRkc = { 0, { NULL, NULL} },
-    .ksfAttrMk = {0, {NULL, NULL} },
-    .rmkIter = HKS_RKC_RMK_ITER,
-    .rmkHashAlg = HKS_RKC_RMK_HMAC_SHA256,
-    .mkMask = {0},
-    .mkEncryptAlg = HKS_RKC_MK_CRYPT_ALG_AES256_GCM,
-    .reserve = {0}
-};
+// static struct HksRkcCfg g_hksRkcCfg = {
+//     .state = HKS_RKC_STATE_INVALID,
+//     .rkVersion = HKS_RKC_VER,
+//     .mkVersion = HKS_MK_VER,
+//     .storageType = HKS_RKC_STORAGE_FILE_SYS,
+//     .rkCreatedTime = { 0, 0, 0, 0, 0, 0 },
+//     .rkExpiredTime = { 0, 0, 0, 0, 0, 0 },
+//     .ksfAttrRkc = { 0, { NULL, NULL} },
+//     .ksfAttrMk = {0, {NULL, NULL} },
+//     .rmkIter = HKS_RKC_RMK_ITER,
+//     .rmkHashAlg = HKS_RKC_RMK_HMAC_SHA256,
+//     .mkMask = {0},
+//     .mkEncryptAlg = HKS_RKC_MK_CRYPT_ALG_AES256_GCM,
+//     .reserve = {0}
+// };
 
 static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
 {
@@ -718,14 +719,14 @@ bool KsfExist(uint8_t ksfType)
 
     struct HksBlob fileNameBlob;
     if (ksfType == HKS_KSF_TYPE_RKC) {
-        for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrRkc.num; ++i) {
-            fileNameBlob.size = strlen(g_hksRkcCfg.ksfAttrRkc.name[i]);
-            fileNameBlob.data = (uint8_t *)(g_hksRkcCfg.ksfAttrRkc.name[i]);
+        for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
+            fileNameBlob.size = strlen(rkc->name[i]);
+            fileNameBlob.data = (uint8_t *)(rkc->name[i]);
         }
     } else {
-        for (uint32_t i = 0; i < g_hksRkcCfg.ksfAttrMk.num; ++i) {
-            fileNameBlob.size = strlen(g_hksRkcCfg.ksfAttrMk.name[i]);
-            fileNameBlob.data = (uint8_t *)(g_hksRkcCfg.ksfAttrMk.name[i]);
+        for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
+            fileNameBlob.size = strlen(mk->name[i]);
+            fileNameBlob.data = (uint8_t *)(mk->name[i]);
         }
     }    
 
