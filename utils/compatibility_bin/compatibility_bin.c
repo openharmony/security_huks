@@ -183,7 +183,7 @@ static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
 int main()
 {
     const char *oldPath = "/storage/maindata";
-    const char *newPath = "/data/service/el1/public/huks_service/maindata";
+    const char *newPath = "/storage/data/service/el1/public/huks_service/maindata";
 
     // move directories and files form old path to new path
     MoveOldFolderToNew(oldPath, newPath);
