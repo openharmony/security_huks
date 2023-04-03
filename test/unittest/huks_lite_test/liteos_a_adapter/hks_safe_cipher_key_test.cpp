@@ -54,7 +54,7 @@ void HksSafeCipherKeyTest::TearDown()
 {
 }
 
-const char *g_storePath = "/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
+const char *g_storePath = "/storage/data/service/el1/public/huks_service/maindata/+0+0+0+0/key";
 const char *g_testEd25519 = "test_ed25519";
 
 static int32_t CompareTwoKey(const struct HksBlob *keyAliasOne, const struct HksBlob *keyAliasTwo)
