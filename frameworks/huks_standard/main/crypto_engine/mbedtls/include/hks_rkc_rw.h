@@ -61,12 +61,6 @@ struct HksTime {
     uint8_t hksSec;
 };
 
-/* the attribute of rkc or mk keystore file */
-// struct HksKsfAttr {
-//     uint8_t num;                                        /* the number of files */
-//     char *name[HKS_KSF_NUM];
-// };
-
 struct HksKsfAttr {
     char *name[HKS_KSF_NUM];
 };
@@ -93,51 +87,32 @@ struct HksKsfDataMk {
     uint8_t mkRsv[HKS_RKC_KSF_DATA_RSV_LEN];            /* mk_rsv data for main key, 32 byte */
 }
 
-/* todo: separate code of old version using macro */
-/* the keystore file data of root key component (old struct) */
-struct HksRkcKsfData {
-    uint16_t version;                                   /* version */
-    struct HksKsfDataRkc ksfDataRkc;                    /* fields of root key */
-    struct HksKsfDataMk ksfDataMk;                      /* fields of main key */
-};
-
-/* the keystore file data of root key (new struct) */
+/* the keystore file data of root key (since version 2) */
 struct HksKsfDataRkcWithVer {
     uint16_t rkVersion;                                 /* the version of root key */
     struct HksKsfDataRkc ksfDataRkc;                    /* fields of root key */
 }
 
-/* the keystore file data of main key (new struct) */
+/* the keystore file data of main key (since version 2) */
 struct HksKsfDataMkWithVer {
     uint16_t mkVersion;                                 /* the version of main key */
     struct HksKsfDataMk ksfDataMk;                      /* fields of main key */
 }
 
-/* the configuration of root key component */
-// struct HksRkcCfg {
-//     uint8_t state;                                      /* system state */
-//     uint16_t rkVersion;                                 /* the version of root key component */
-//     uint16_t mkVersion;                                 /* the version of main key */
-//     uint8_t storageType;                                /* the storage type of root key component */
-//     struct HksTime rkCreatedTime;                       /* the created time of root key */
-//     struct HksTime rkExpiredTime;                       /* the expired time of root key */
-//     struct HksKsfAttr ksfAttrRkc;                       /* the attribute of rkc keystore file */
-//     struct HksKsfAttr ksfAttrMk;                        /* the attribute of mk keystore file */
-//     uint32_t rmkIter;                                   /* the iterator number of times which derive Root Main Key */
-//     uint32_t rmkHashAlg;                                /* the hash algorithm which derive Root Main Key */
-//     uint8_t mkMask[HKS_RKC_MK_LEN];                     /* the mask of main key */
-//     uint32_t mkEncryptAlg;                              /* the encrption algorithm of main key */
-//     uint8_t reserve[HKS_RKC_CFG_RSV_LEN];               /* reserve data, 32 byte */
-// };
-
-// extern struct HksRkcCfg g_hksRkcCfg;
+/* todo: separate code of old version using macro */
+/* the keystore file data of root key component (version 1) */
+struct HksRkcKsfDataV1 {
+    uint16_t version;                                   /* version */
+    struct HksKsfDataRkc ksfDataRkc;                    /* fields of root key */
+    struct HksKsfDataMk ksfDataMk;                      /* fields of main key */
+};
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 /* todo: separate code of old version using macro */
-int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData);
+int32_t HksRkcReadKsfV1(const char *ksfName, struct HksRkcKsfDataV1 *ksfData);
 
 int32_t HksReadKsfRkc(const char *ksfName, struct HksKsfDataRkcWithVer *ksfDataRkc);
 
