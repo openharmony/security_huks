@@ -625,7 +625,6 @@ static int32_t UpgradeMkIfNeeded(uint32_t mkVersion, const struct HksBlob *mk)
         return HKS_SUCCESS; // no need upgrade
     }
     // reserved function for future upgrade, e.g. version 2->3
-    // keystore filename should be upgraded before calling RkcWriteAllKsf
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
@@ -663,7 +662,6 @@ static int32_t RkcLoadKsf()
         HKS_IF_NOT_SUCC_BREAK(ret);
 
         ret = UpgradeMkIfNeeded(validKsfDataMk->mkVersion, &mk);
-        // todo delete old files
     } while (0);
 
     HKS_MEMSET_FREE_PTR(validKsfDataRkc, sizeof(struct HksKsfDataRkc));
@@ -697,15 +695,38 @@ static int32_t RkcLoadKsfV1(void)
 }
 
 /* todo: separate code of old version using macro */
+static int32_t RkcDeleteAllKsfV1()
+{
+    struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+    ret = GetProcessInfo(&processInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+
+    struct HksBlob fileNameBlob = { strlen("info1.data"), "info1.data" };
+    ret = HksStoreDeleteKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+    if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
+        HKS_LOG_E("delete rkc keystore file failed, ret = %" LOG_PUBLIC "d", ret);
+    }
+
+    fileNameBlob.size = strlen("info2.data");
+    fileNameBlob.data = "info2.data";
+    ret = HksStoreDeleteKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+    if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
+        HKS_LOG_E("delete rkc keystore file failed, ret = %" LOG_PUBLIC "d", ret);
+    }
+
+    return ret;
+}
+
+/* todo: separate code of old version using macro */
 static int32_t UpgradeV1ToV2(void)
 {
     HKS_LOG_I("Rkc ksf is exist, start to load ksf");
-    ret = RkcLoadKsfV1();
+    int32_t ret = RkcLoadKsfV1();
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, "Load rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     // generate new materials and encrypt main key
-    struct HksKsfDataRkc *newKsfDataRkcWithVer = NULL;
-    struct HksKsfDataMk *newKsfDataMkWithVer = NULL;
+    struct HksKsfDataRkcWithVer *newKsfDataRkcWithVer = NULL;
+    struct HksKsfDataMkWithVer *newKsfDataMkWithVer = NULL;
 
     do {
         newKsfDataRkcWithVer = CreateNewKsfDataRkcWithVer();
@@ -718,13 +739,10 @@ static int32_t UpgradeV1ToV2(void)
         ret = RkcMkCrypt(&newKsfDataRkcWithVer, &newKsfDataMkWithVer, &tempMkBlob, &cipherTextBlob, true); /* true: encrypt */
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Encrypt mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        /* init keystore file name */
+        /* Initialize rkc keystore file name (mk already done in HksRkcInit) */
         struct HksKsfAttr ksfAttrRkc = { "rinfo1_v2.data", "rinfo2_v2.data" };
         ret = InitKsfAttr(&ksfAttrRkc, HKS_KSF_TYPE_RKC);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-        struct HksKsfAttr ksfAttrMk = { "minfo1_v2.data", "minfo2_v2.data" };
-        ret = InitKsfAttr(&ksfAttrMk, HKS_KSF_TYPE_MK);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of mk keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* Write the root key component and the main key data into all keystore files */
         ret = RkcWriteAllKsf(&newKsfDataRkcWithVer, &newKsfDataMkWithVer);
@@ -737,15 +755,17 @@ static int32_t UpgradeV1ToV2(void)
     HKS_MEMSET_FREE_PTR(newKsfDataRkcWithVer);
     HKS_MEMSET_FREE_PTR(newKsfDataMkWithVer);
 
-    // todo delete old files
+    /* delete all old rkc keystore files */
+    ret = RkcDeleteAllKsfV1()
     return ret;
 }
 
 static int32_t RkcCreateKsf(void)
 {
+    int32_t ret;
     struct HksKsfDataRkcWithVer *newKsfDataRkcWithVer = NULL;
     struct HksKsfDataMkWithVer *newKsfDataMkWithVer = NULL;
-    int32_t ret;
+
     do {
         newKsfDataRkcWithVer = CreateNewKsfDataRkcWithVer();
         HKS_IF_NULL_LOGE_BREAK(newKsfDataRkcWithVer, HKS_ERROR_MALLOC_FAIL, "Malloc rkc ksf data failed!")
@@ -756,13 +776,10 @@ static int32_t RkcCreateKsf(void)
         ret = RkcMakeMk(&(newKsfDataRkcWithVer->ksfDataRkc), &(newKsfDataMkWithVer->ksfDataMk));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "make mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        /* init keystore file name */
+        /* Initialize rkc keystore file name (mk already done in HksRkcInit) */
         struct HksKsfAttr ksfAttrRkc = { "rinfo1_v2.data", "rinfo2_v2.data" };
         ret = InitKsfAttr(&ksfAttrRkc, HKS_KSF_TYPE_RKC);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-        struct HksKsfAttr ksfAttrMk = { "minfo1_v2.data", "minfo2_v2.data" };
-        ret = InitKsfAttr(&ksfAttrMk, HKS_KSF_TYPE_MK);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of mk keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* Write the root key component and the main key data into all keystore files */
         ret = RkcWriteAllKsf(newKsfDataRkcWithVer, newKsfDataMkWithVer);
