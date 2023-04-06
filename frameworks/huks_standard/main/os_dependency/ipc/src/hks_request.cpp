@@ -24,14 +24,12 @@
 
 using namespace OHOS;
 
-sptr<IRemoteObject> GetHksProxy();
-
 namespace {
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
 }
 
-sptr<IRemoteObject> GetHksProxy()
+static sptr<IRemoteObject> GetHksProxy()
 {
     auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     HKS_IF_NULL_LOGE_RETURN(registry, nullptr, "GetHksProxy registry is null")
