@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,7 @@
 /* the flag of keystore file, used to identify files as HKS keystore file, don't modify. */
 const uint8_t g_hksRkcKsfFlag[HKS_RKC_KSF_FLAG_LEN] = { 0x5F, 0x64, 0x97, 0x8D, 0x19, 0x4F, 0x89, 0xCF };
 
-static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
+int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
 {
     char *userId = NULL;
     char *processName = NULL;
@@ -39,17 +39,17 @@ static int32_t GetProcessInfo(struct HksProcessInfo *processInfo)
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetUserId(userId), HKS_ERROR_INTERNAL_ERROR, "get user id failed")
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
 
-    processInfo->userId->size = strlen(userId);
-    processInfo->userId->data = (uint8_t *)userId;
-    processInfo->processName->size = strlen(processName);
-    processInfo->processName->data = (uint8_t *)processName;
+    processInfo->userId.size = strlen(userId);
+    processInfo->userId.data = (uint8_t *)userId;
+    processInfo->processName.size = strlen(processName);
+    processInfo->processName.data = (uint8_t *)processName;
     processInfo->userIdInt = 0;
     processInfo->accessTokenId = 0;
 
     return HKS_SUCCESS;
 }
 
-static int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
+int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
 {
     tmpKsf->data = (uint8_t *)HksMalloc(HKS_KSF_BUF_LEN);
     HKS_IF_NULL_RETURN(tmpKsf->data, HKS_ERROR_MALLOC_FAIL)
@@ -77,7 +77,7 @@ static int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
     return ret;
 }
 
-static int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset)
+int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset)
 {
     uint8_t fileFlag[HKS_RKC_KSF_FLAG_LEN] = {0};
 
@@ -186,7 +186,7 @@ static int32_t ExtractKsfDataRkc(const struct HksBlob *ksfFromFile,
     return HKS_SUCCESS;
 }
 
-static int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile,
+int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile,
     uint32_t *ksfBufOffset, struct HksKsfDataMk *ksfDataMk)
 {
     /* Extract mkCreatedTime */
@@ -231,7 +231,7 @@ static int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile,
     return HKS_SUCCESS;
 }
 
-static int32_t ExtractKsfRkcWithVer(const struct HksBlob *ksfFromFile,
+int32_t ExtractKsfRkcWithVer(const struct HksBlob *ksfFromFile,
     uint32_t *ksfBufOffset, struct HksKsfDataRkcWithVer *ksfDataRkcWithVer)
 {
     /* Extract version */
@@ -265,7 +265,7 @@ static int32_t ExtractKsfMkWithVer(const struct HksBlob *ksfFromFile,
     return HKS_SUCCESS;
 }
 
-static int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset)
+int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset)
 {
     /* calculate sha256, skip file flag, begin with version, end with reserve field. */
     uint8_t hashResult[HKS_RKC_HASH_LEN] = {0};
@@ -322,53 +322,6 @@ static int32_t ExtractKsfBufMk(const struct HksBlob *ksfFromFile, struct HksKsfD
 
     /* Extract hash */
     return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
-}
-
-/* todo: separate code of old version using macro */
-static int32_t ExtractKsfNoVerMk(const struct HksBlob *ksfFromFile,
-    uint32_t *ksfBufOffset, struct HksKsfDataMk *ksfDataMk)
-{
-    /* Extract fields of main key */
-    int32_t ret = ExtractKsfDataMk(ksfFromFile, ksfBufOffset, ksfDataMk);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    return HKS_SUCCESS;
-}
-
-/* todo: separate code of old version using macro */
-static int32_t RkcExtractKsfBufV1(const struct HksBlob *ksfFromFile, struct HksRkcKsfDataV1 *ksfData)
-{
-    uint32_t ksfBufOffset = 0;
-
-    /* Extract file flag. */
-    int32_t ret = RkcExtractKsfFileFlag(ksfFromFile, &ksfBufOffset);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    /* Extract root key data */
-    ret = ExtractKsfRkcWithVer(ksfFromFile, &ksfBufOffset, (struct HksKsfDataRkcWithVer*)ksfData);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Rkc extract ksf rk failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-    /* Extract main key data */
-    ret = ExtractKsfNoVerMk(ksfFromFile, &ksfBufOffset, &(ksfData->ksfDataMk));
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Rkc extract ksf mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
-    /* Extract hash */
-    return RkcExtractKsfHash(ksfFromFile, &ksfBufOffset);
-}
-
-/* todo: separate code of old version using macro */
-int32_t HksRkcReadKsfV1(const char *ksfName, struct HksRkcKsfDataV1 *ksfData)
-{
-    struct HksBlob tmpKsf;
-    int32_t ret = GetKeyBlobKsf(ksfName, &tmpKsf);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-    
-    ret = RkcExtractKsfBufV1(&tmpKsf, ksfData);
-
-    /* the data of root key should be cleared after use */
-    (void)memset_s(tmpKsf.data, tmpKsf.size, 0, tmpKsf.size);
-    HKS_FREE_BLOB(tmpKsf);
-    return ret;
 }
 
 int32_t HksReadKsfRkc(const char *ksfName, struct HksKsfDataRkcWithVer *ksfDataRkc)
