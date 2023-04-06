@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifndef CIPHER_LOG_H
+#define CIPHER_LOG_H
+
 #include "securec.h"
 
 #ifdef __cplusplus
@@ -42,3 +45,5 @@ void CipherLog(uint32_t logLevel, const char *funcName, uint32_t lineNo, const c
 #ifdef __cplusplus
 }
 #endif
+
+#endif // CIPHER_LOG_H
