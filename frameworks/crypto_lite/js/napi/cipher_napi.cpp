@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -68,9 +68,9 @@ struct AesAsyncContext {
 };
 
 static const char g_failCode[] = "System error";
-static const int g_errorCode = 200;
-static const int g_failArg = 2;
-static const int g_ivLen = 16;
+static const int ERROR_CODE = 200;
+static const int FAIL_ARG = 2;
+static const int IV_LEN = 16;
 
 #define SELF_FREE_PTR(PTR, FREE_FUNC) \
 { \
@@ -200,7 +200,7 @@ static int32_t ReadAesData(napi_env env, AesAsyncContext *context)
     }
 
     (void)context->ivLen_napi;
-    context->ivLen = g_ivLen;
+    context->ivLen = IV_LEN;
 
     len = 0;
     ret = GetString(env, context->iv_napi, &context->ivBuf, &len);
@@ -443,7 +443,7 @@ static int32_t RsaExcute(RsaAsyncContext *asyncContext)
         return ERROR_CODE_GENERAL;
     }
 
-    asyncContext->textOut->data = (char *)malloc(asyncContext->textOut->length);
+    asyncContext->textOut->data = static_cast<char *>(malloc(asyncContext->textOut->length));
     if (asyncContext->textOut->data == nullptr) {
         return ERROR_CODE_GENERAL;
     }
@@ -490,11 +490,11 @@ void SetFail(napi_env env, CallbackContext *asyncContext)
     napi_create_string_utf8(env, g_failCode, sizeof(g_failCode), &result);
 
     napi_value errorCode = nullptr;
-    napi_create_int32(env, g_errorCode, &errorCode);
+    napi_create_int32(env, ERROR_CODE, &errorCode);
     
-    napi_value params[g_failArg] = { result, errorCode };
+    napi_value params[FAIL_ARG] = { result, errorCode };
     napi_get_reference_value(env, asyncContext->callbackFail, &callback);
-    napi_call_function(env, nullptr, callback, g_failArg, params, &ret);
+    napi_call_function(env, nullptr, callback, FAIL_ARG, params, &ret);
     napi_delete_reference(env, asyncContext->callbackFail);
 }
 
