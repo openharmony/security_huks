@@ -207,6 +207,9 @@ if (ohos_kernel_type == "liteos_m") {
       "MBEDTLS_ECP_RESTARTABLE=1",
       "LOG_ENGINE_HILOG_MODULE_SCY",
     ]
+    if (product_name == "wifiiot_hispark_pegasus") {
+      defines += [ "USE_HISI_MBED" ]
+    }
 
     if (huks_enable_upgrade_key && !huks_use_lite_storage) {
       defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
