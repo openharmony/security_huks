@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -57,6 +57,27 @@ extern "C" {
 struct HksKsfAttr *GetGlobalKsfAttrRkc();
 
 struct HksKsfAttr *GetGlobalKsfAttrMk();
+
+int32_t RkcRecoverRkTime(const struct HksKsfDataRkc *ksfDataRkc);
+
+int32_t RkcRecoverMkTime(const struct HksKsfDataMk *ksfDataMk);
+
+int32_t ExecuteMkCrypt(const struct HksKsfDataMk *ksfDataMk, const struct HksBlob *rmk,
+    struct HksBlob *plainText, struct HksBlob *cipherText, const bool encrypt);
+
+int32_t RkcMkCrypt(const struct HksKsfDataRkc *ksfDataRkc, const struct HksKsfDataMk *ksfDataMk,
+    struct HksBlob *plainText, struct HksBlob *cipherText, const bool encrypt);
+
+int32_t RkcMaskMk(const struct HksBlob *mk);
+
+int32_t InitKsfAttr(const struct HksKsfAttr *ksfAttr, uint8_t ksfType);
+
+struct HksKsfDataRkcWithVer *CreateNewKsfDataRkcWithVer(void);
+
+struct HksKsfDataMkWithVer *CreateNewKsfDataMkWithVer(void);
+
+int32_t RkcWriteAllKsf(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer,
+    const struct HksKsfDataMkWithVer *ksfDataMkWithVer);
 
 int32_t HksRkcInit(void);
 

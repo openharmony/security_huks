@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,7 +49,7 @@ enum HksRkcState {
 enum HksKsfType {
     HKS_KSF_TYPE_RKC = 0,
     HKS_KSF_TYPE_MK = 1,
-}
+};
 
 /* time */
 struct HksTime {
@@ -75,7 +75,7 @@ struct HksKsfDataRkc {
     uint8_t rmkSalt[HKS_RKC_SALT_LEN];                  /* the salt which derive root main key */
     uint32_t rmkHashAlg;                                /* the hash algorithm which derive root main key */
     uint8_t rkRsv[HKS_RKC_KSF_DATA_RSV_LEN];            /* mk_rsv data for root key, 32 byte */
-}
+};
 
 /* the fields of main key */
 struct HksKsfDataMk {
@@ -85,25 +85,17 @@ struct HksKsfDataMk {
     uint8_t mkIv[HKS_RKC_MK_IV_LEN];                    /* the IV of main key */
     uint8_t mkCiphertext[HKS_RKC_MK_CIPHER_TEXT_LEN];   /* the ciphertext of main key */
     uint8_t mkRsv[HKS_RKC_KSF_DATA_RSV_LEN];            /* mk_rsv data for main key, 32 byte */
-}
+};
 
 /* the keystore file data of root key (since version 2) */
 struct HksKsfDataRkcWithVer {
     uint16_t rkVersion;                                 /* the version of root key */
     struct HksKsfDataRkc ksfDataRkc;                    /* fields of root key */
-}
+};
 
 /* the keystore file data of main key (since version 2) */
 struct HksKsfDataMkWithVer {
     uint16_t mkVersion;                                 /* the version of main key */
-    struct HksKsfDataMk ksfDataMk;                      /* fields of main key */
-}
-
-/* todo: separate code of old version using macro */
-/* the keystore file data of root key component (version 1) */
-struct HksRkcKsfDataV1 {
-    uint16_t version;                                   /* version */
-    struct HksKsfDataRkc ksfDataRkc;                    /* fields of root key */
     struct HksKsfDataMk ksfDataMk;                      /* fields of main key */
 };
 
@@ -111,14 +103,25 @@ struct HksRkcKsfDataV1 {
 extern "C" {
 #endif
 
-/* todo: separate code of old version using macro */
-int32_t HksRkcReadKsfV1(const char *ksfName, struct HksRkcKsfDataV1 *ksfData);
+int32_t GetProcessInfo(struct HksProcessInfo *processInfo);
+
+int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf);
+
+int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset);
+
+int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset,
+    struct HksKsfDataMk *ksfDataMk);
+
+int32_t ExtractKsfRkcWithVer(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset,
+    struct HksKsfDataRkcWithVer *ksfDataRkcWithVer);
+
+int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset);
 
 int32_t HksReadKsfRkc(const char *ksfName, struct HksKsfDataRkcWithVer *ksfDataRkc);
 
-int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *ksfDataRkc);
-
 int32_t HksReadKsfMk(const char *ksfName, struct HksKsfDataMkWithVer *ksfDataMk);
+
+int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *ksfDataRkc);
 
 int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksfDataMk);
 
