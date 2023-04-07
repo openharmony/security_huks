@@ -29,6 +29,7 @@
 #include "hks_ability.h"
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
+#include "hks_mem.h"
 #include "hks_template.h"
 
 void HksLogOpensslError(void)
@@ -512,4 +513,52 @@ int32_t HksCryptoHalGetMainKey(const struct HksBlob *message, struct HksBlob *ma
     GetMainKey func = (GetMainKey)GetAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY);
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(message, mainKey);
+}
+
+// Note: `out` memory will be allocated, you MUST free out->data after using.
+int32_t GetBnBinpadFromPkey(const EVP_PKEY *pkey, const char *keyName, struct HksBlob *out)
+{
+    if (pkey == NULL || keyName == NULL || out == NULL) {
+        HKS_LOG_E("args NULL");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    BIGNUM *bn = BN_new();
+    if (!bn) {
+        HKS_LOG_E("BN_new NULL");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    do {
+        int osRet = EVP_PKEY_get_bn_param(pkey, keyName, &bn);
+        if (osRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("EVP_PKEY_get_bn_param ret = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+        int len = BN_num_bytes(bn);
+        if (len <= 0) {
+            HKS_LOG_E("BN_num_bytes failed %" LOG_PUBLIC "d", len);
+            break;
+        }
+        if (len >= HKS_MAX_KEY_LEN) {
+            HKS_LOG_E("malloc size too large %" LOG_PUBLIC "d", len);
+            break;
+        }
+        out->data = HksMalloc(len);
+        if (!out->data) {
+            HKS_LOG_E("HksMalloc %d failed", len);
+            break;
+        }
+        osRet = BN_bn2binpad(bn, out->data, len);
+        if (osRet != len) {
+            HKS_LOG_E("BN_bn2binpad ret = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osRet, ERR_reason_error_string(ERR_get_error()));
+            HksFree(out->data);
+            break;
+        }
+        out->size = (uint32_t)(len);
+        ret = HKS_SUCCESS;
+    } while (false);
+    SELF_FREE_PTR(bn, BN_free)
+    return ret;
 }

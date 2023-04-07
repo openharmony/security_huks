@@ -21,7 +21,6 @@ config("public_huks_config") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
-    "//third_party/openssl/include",
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",
@@ -104,6 +103,7 @@ config("soft_huks_config") {
     "_FORTIFY_SOURCE = 2",
     "HAS_OS_ACCOUNT_PART",
     "SUPPORT_COMMON_EVENT",
+    "OPENSSL_SUPPRESS_DEPRECATED",
   ]
 
   cflags = [ "-fvisibility=default" ]
@@ -136,7 +136,6 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
-    "//third_party/openssl/include",
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/utils/list",

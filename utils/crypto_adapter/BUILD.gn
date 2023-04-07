@@ -29,10 +29,12 @@ if (os_level == "standard") {
     subsystem_name = "security"
     part_name = "huks"
     public_configs = [ ":huks_config" ]
-    include_dirs = [ "//third_party/openssl/include/" ]
+    include_dirs =
+        [ "../../frameworks/huks_standard/main/crypto_engine/openssl/include" ]
     defines = [
       "_HARDWARE_ROOT_KEY_",
       "_HUKS_LOG_ENABLE_",
+      "OPENSSL_SUPPRESS_DEPRECATED",
     ]
     sources = [
       "hks_client_service_adapter.c",
@@ -59,7 +61,9 @@ if (os_level == "standard") {
 } else {
   ohos_static_library("libhuks_utils_client_service_adapter_static") {
     public_configs = [ ":huks_config" ]
-    include_dirs = [ "//third_party/openssl/include/" ]
+    defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+    include_dirs =
+        [ "../../frameworks/huks_standard/main/crypto_engine/include/" ]
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
     ]

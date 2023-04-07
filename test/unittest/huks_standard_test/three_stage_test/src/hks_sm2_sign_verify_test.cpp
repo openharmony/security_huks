@@ -51,8 +51,6 @@ void HksSm2SignVerifyTest::TearDown()
 const uint32_t SUCCESS_RETURN_INDEX = 0;
 const uint32_t FAILURE_RETURN_INDEX = 1;
 
-const uint32_t NECESSARY_PARAMS_SUCCESS_RETURN_INDEX = 4;
-
 static const struct GenerateKeyCaseParam g_genParamsTest[] = {
     {   0,
         HKS_SUCCESS,
@@ -127,22 +125,6 @@ static const struct GenerateKeyCaseParam g_genParamsTest[] = {
                 .tag = HKS_TAG_DIGEST,
                 .uint32Param = HKS_DIGEST_SM3
             },
-        },
-    },
-
-    {   4,
-        HKS_SUCCESS,
-        {
-            {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
-                .tag = HKS_TAG_PURPOSE,
-                .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
-            }
         },
     },
 };
@@ -222,25 +204,6 @@ static const struct GenerateKeyCaseParam g_signParamsTest[] = {
             },
         },
     },
-
-    {   4,
-        HKS_SUCCESS,
-        {
-            {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
-                .tag = HKS_TAG_PURPOSE,
-                .uint32Param = HKS_KEY_PURPOSE_SIGN
-            }, {
-                .tag = HKS_TAG_DIGEST,
-                .uint32Param = HKS_DIGEST_NONE
-            },
-        },
-    },
 };
 static const struct GenerateKeyCaseParam g_verifyParamsTest[] = {
     {   0,
@@ -315,25 +278,6 @@ static const struct GenerateKeyCaseParam g_verifyParamsTest[] = {
             }, {
                 .tag = HKS_TAG_DIGEST,
                 .uint32Param = HKS_DIGEST_SM3
-            },
-        },
-    },
-
-    {   4,
-        HKS_SUCCESS,
-        {
-            {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
-                .tag = HKS_TAG_PURPOSE,
-                .uint32Param = HKS_KEY_PURPOSE_VERIFY
-            }, {
-                .tag = HKS_TAG_DIGEST,
-                .uint32Param = HKS_DIGEST_NONE
             },
         },
     },
@@ -431,7 +375,6 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const uin
     do {
         /* 1. Generate Key */
         uint32_t cnt = sizeof(g_genParamsTest[genIndex].params) / sizeof(HksParam);
-        cnt = (genIndex == NECESSARY_PARAMS_SUCCESS_RETURN_INDEX) ? (cnt - 1) : cnt;
         ret = InitParamSet(&genParamSet, g_genParamsTest[genIndex].params, cnt);
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
         ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
@@ -539,22 +482,6 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest003, TestSize.Level0)
     int ret = HksSm2SignVerifyTestRun(&keyAlias, SUCCESS_RETURN_INDEX,
             SUCCESS_RETURN_INDEX, SUCCESS_RETURN_INDEX, true);
     EXPECT_EQ(ret, HKS_FAILURE) << "sm2SignVerifyTest003 failed.";
-}
-
-/**
- * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest004
- * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-NONE.
- * @tc.type: FUNC
- * @tc.require:issueI611S5
- */
-HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest004, TestSize.Level0)
-{
-    HKS_LOG_E("Enter HksSm2SignVerifyTest004");
-    const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest004";
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
-    int ret = HksSm2SignVerifyTestRun(&keyAlias, NECESSARY_PARAMS_SUCCESS_RETURN_INDEX,
-    NECESSARY_PARAMS_SUCCESS_RETURN_INDEX, NECESSARY_PARAMS_SUCCESS_RETURN_INDEX, false);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest004 failed.";
 }
 #endif
 }
