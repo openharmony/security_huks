@@ -37,6 +37,7 @@ config("soft_huks_config") {
     "../../../frameworks/huks_standard/main/common/include",
     "../../../frameworks/huks_standard/main/core/include",
     "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include",
+    "../../../frameworks/huks_standard/main/crypto_engine/openssl/include",
     "../../../frameworks/huks_standard/main/os_dependency/ipc/include",
     "../../../frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "../../../services/huks_standard/huks_engine/main/core/include",

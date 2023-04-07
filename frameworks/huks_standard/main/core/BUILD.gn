@@ -43,7 +43,6 @@ if (os_level == "standard") {
       debug = false
     }
     sources += [ "./src/hks_verifier.c" ]
-    include_dirs = [ "//third_party/openssl/include/" ]
     deps += [ "//third_party/openssl:libcrypto_shared" ]
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }

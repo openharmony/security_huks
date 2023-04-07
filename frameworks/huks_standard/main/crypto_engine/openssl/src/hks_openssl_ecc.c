@@ -211,7 +211,7 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 }
 #endif
 
-#ifdef HKS_SUPPORT_ECC_GET_PUBLIC_KEY
+#if defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY) || defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
 int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;

@@ -119,19 +119,34 @@ static const uint8_t g_zData521[] = {
     0x88, 0x5e,
 };
 
-static const uint8_t g_sm2XData[] = {
+static constexpr uint8_t g_sm2XDataOpenssl1[] = {
     0xa4, 0x3e, 0x4b, 0x83, 0x63, 0x72, 0xfb, 0xc8, 0x08, 0xa8, 0xc1, 0xe7, 0x2b, 0x99, 0xa6, 0x34,
     0x3e, 0xd0, 0x56, 0x66, 0xa9, 0xd0, 0x60, 0x3c, 0x95, 0xcb, 0x76, 0xce, 0x23, 0x70, 0xb6, 0xf6,
 };
 
-static const uint8_t g_sm2YData[] = {
+static constexpr uint8_t g_sm2YDataOpenssl1[] = {
     0x25, 0xd5, 0x4e, 0xdf, 0x8c, 0x2e, 0x1a, 0x55, 0x05, 0x9f, 0x2b, 0xed, 0xaf, 0x43, 0x92, 0x34,
     0x74, 0xd1, 0x4c, 0xee, 0x7e, 0xa6, 0x04, 0xdd, 0x6c, 0x3d, 0x19, 0x20, 0x52, 0xf4, 0xb3, 0x3b,
 };
 
-static const uint8_t g_sm2ZData[] = {
+static constexpr uint8_t g_sm2ZDataOpenssl1[] = {
     0x37, 0x92, 0x24, 0xee, 0xef, 0x90, 0x59, 0xdb, 0x37, 0x83, 0x58, 0x66, 0xd9, 0xa0, 0xc1, 0xd4,
     0xfa, 0xfc, 0x18, 0xea, 0x87, 0xfd, 0x55, 0x19, 0xce, 0xf9, 0x27, 0xe9, 0x48, 0x43, 0x68, 0xae,
+};
+
+static constexpr uint8_t g_sm2XDataOpenssl3[] = {
+    0x57, 0x2F, 0xC1, 0x18, 0x81, 0x54, 0x19, 0xB1, 0x01, 0x33, 0x6B, 0x38, 0xE1, 0xCE, 0xCD, 0x4B,
+    0xCE, 0xB9, 0xC0, 0xEB, 0x14, 0x5B, 0x9C, 0xBC, 0x55, 0x0A, 0xCC, 0x9E, 0x14, 0x49, 0x94, 0x96,
+};
+
+static constexpr uint8_t g_sm2YDataOpenssl3[] = {
+    0xDC, 0xD3, 0xA8, 0x66, 0xBC, 0x8B, 0x5C, 0xAE, 0xA6, 0xE0, 0x06, 0xF3, 0x9F, 0xE8, 0xD5, 0x18,
+    0x7C, 0x61, 0xA7, 0xD9, 0xDA, 0x83, 0x9B, 0x70, 0xD3, 0x19, 0x98, 0xBF, 0x79, 0x7C, 0x05, 0x83,
+};
+
+static constexpr uint8_t g_sm2ZDataOpenssl3[] = {
+    0xDA, 0x06, 0xBE, 0xE8, 0x89, 0x36, 0x92, 0x48, 0xF0, 0x81, 0xB7, 0x44, 0xC3, 0xFC, 0x76, 0x95,
+    0xC1, 0xB5, 0x8A, 0x0A, 0xAF, 0x80, 0x49, 0xC7, 0x40, 0x34, 0xD6, 0x8C, 0x6B, 0x25, 0x01, 0xF7,
 };
 
 static const uint8_t g_pubData224[] = {
@@ -175,13 +190,22 @@ static const uint8_t g_pubData521[] = {
     0x7e, 0x9b, 0x0d, 0x5c, 0x67, 0x54, 0xc6, 0xf4, 0xcf, 0xa5, 0x32, 0x17, 0x08, 0xc6,
 };
 
-static const uint8_t g_pubSm2Data[] = {
+static constexpr uint8_t g_pubSm2DataOpenssl1[] = {
     0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a,
     0x81, 0x1c, 0xcf, 0x55, 0x01, 0x82, 0x2d, 0x03, 0x42, 0x00, 0x04, 0xa4, 0x3e, 0x4b, 0x83, 0x63,
     0x72, 0xfb, 0xc8, 0x08, 0xa8, 0xc1, 0xe7, 0x2b, 0x99, 0xa6, 0x34, 0x3e, 0xd0, 0x56, 0x66, 0xa9,
     0xd0, 0x60, 0x3c, 0x95, 0xcb, 0x76, 0xce, 0x23, 0x70, 0xb6, 0xf6, 0x25, 0xd5, 0x4e, 0xdf, 0x8c,
     0x2e, 0x1a, 0x55, 0x05, 0x9f, 0x2b, 0xed, 0xaf, 0x43, 0x92, 0x34, 0x74, 0xd1, 0x4c, 0xee, 0x7e,
     0xa6, 0x04, 0xdd, 0x6c, 0x3d, 0x19, 0x20, 0x52, 0xf4, 0xb3, 0x3b,
+};
+
+static constexpr uint8_t g_pubSm2DataOpenssl3[] = {
+    0x30, 0x5A, 0x30, 0x14, 0x06, 0x08, 0x2A, 0x81, 0x1C, 0xCF, 0x55, 0x01, 0x82, 0x2D, 0x06, 0x08,
+    0x2A, 0x81, 0x1C, 0xCF, 0x55, 0x01, 0x82, 0x2D, 0x03, 0x42, 0x00, 0x04, 0x57, 0x2F, 0xC1, 0x18,
+    0x81, 0x54, 0x19, 0xB1, 0x01, 0x33, 0x6B, 0x38, 0xE1, 0xCE, 0xCD, 0x4B, 0xCE, 0xB9, 0xC0, 0xEB,
+    0x14, 0x5B, 0x9C, 0xBC, 0x55, 0x0A, 0xCC, 0x9E, 0x14, 0x49, 0x94, 0x96, 0xDC, 0xD3, 0xA8, 0x66,
+    0xBC, 0x8B, 0x5C, 0xAE, 0xA6, 0xE0, 0x06, 0xF3, 0x9F, 0xE8, 0xD5, 0x18, 0x7C, 0x61, 0xA7, 0xD9,
+    0xDA, 0x83, 0x9B, 0x70, 0xD3, 0x19, 0x98, 0xBF, 0x79, 0x7C, 0x05, 0x83,
 };
 
 static const uint8_t g_xData[] = {
@@ -618,19 +642,31 @@ static int32_t ConstructEcKey(const struct HksBlob *xDataBlob, const struct HksB
     return HKS_SUCCESS;
 }
 
-static int32_t ConstructImportedSm2Key(uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
+struct Sm2TestKeyData {
+    const uint8_t *pubData;
+    const uint32_t pubSize;
+    const uint8_t *xData;
+    const uint32_t xSize;
+    const uint8_t *yData;
+    const uint32_t ySize;
+    const uint8_t *zData;
+    const uint32_t zSize;
+};
+
+static int32_t ConstructImportedSm2Key(uint32_t keySize, uint32_t importType, struct HksBlob *outKey,
+    Sm2TestKeyData *sm2Key)
 {
     if (importType == HKS_KEY_TYPE_PUBLIC_KEY) {
-        return CopyKey(g_pubSm2Data, sizeof(g_pubSm2Data), outKey);
+        return CopyKey(sm2Key->pubData, sm2Key->pubSize, outKey);
     }
 
     bool isPriKey = (importType == HKS_KEY_TYPE_PRIVATE_KEY) ? true : false;
     struct HksKeyMaterialEcc material;
     material.keyAlg = HKS_ALG_SM2;
     material.keySize = keySize;
-    material.xSize = isPriKey ? 0 : sizeof(g_sm2XData);
-    material.ySize = isPriKey ? 0 : sizeof(g_sm2YData);
-    material.zSize = sizeof(g_sm2ZData);
+    material.xSize = isPriKey ? 0 : sm2Key->xSize;
+    material.ySize = isPriKey ? 0 : sm2Key->ySize;
+    material.zSize = sm2Key->zSize;
 
     uint32_t size = sizeof(material) + material.xSize + material.ySize + material.zSize;
     uint8_t *data = (uint8_t *)HksMalloc(size);
@@ -647,14 +683,14 @@ static int32_t ConstructImportedSm2Key(uint32_t keySize, uint32_t importType, st
     uint32_t offset = sizeof(material);
     if (!isPriKey) {
         // copy xData
-        if (memcpy_s(data + offset, size - offset, g_sm2XData, sizeof(g_sm2XData)) != EOK) {
+        if (memcpy_s(data + offset, size - offset, sm2Key->xData, sm2Key->xSize) != EOK) {
             HksFree(data);
             return HKS_ERROR_BAD_STATE;
         }
 
         offset += material.xSize;
         // copy yData
-        if (memcpy_s(data + offset, size - offset, g_sm2YData, sizeof(g_sm2YData)) != EOK) {
+        if (memcpy_s(data + offset, size - offset, sm2Key->yData, sm2Key->ySize) != EOK) {
             HksFree(data);
             return HKS_ERROR_BAD_STATE;
         }
@@ -662,7 +698,7 @@ static int32_t ConstructImportedSm2Key(uint32_t keySize, uint32_t importType, st
     }
 
     // copy zData
-    if (memcpy_s(data + offset, size - offset, g_sm2ZData, sizeof(g_sm2ZData)) != EOK) {
+    if (memcpy_s(data + offset, size - offset, sm2Key->zData, sm2Key->zSize) != EOK) {
         HksFree(data);
         return HKS_ERROR_BAD_STATE;
     }
@@ -670,6 +706,36 @@ static int32_t ConstructImportedSm2Key(uint32_t keySize, uint32_t importType, st
     outKey->data = data;
     outKey->size = size;
     return HKS_SUCCESS;
+}
+
+static int32_t ConstructImportedSm2KeyForOpenssl1(uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
+{
+    struct Sm2TestKeyData keyData = {
+        .pubData = g_pubSm2DataOpenssl1,
+        .pubSize = sizeof(g_pubSm2DataOpenssl1),
+        .xData = g_sm2XDataOpenssl1,
+        .xSize = sizeof(g_sm2XDataOpenssl1),
+        .yData = g_sm2YDataOpenssl1,
+        .ySize = sizeof(g_sm2YDataOpenssl1),
+        .zData = g_sm2ZDataOpenssl1,
+        .zSize = sizeof(g_sm2ZDataOpenssl1),
+    };
+    return ConstructImportedSm2Key(keySize, importType, outKey, &keyData);
+}
+
+static int32_t ConstructImportedSm2KeyForOpenssl3(uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
+{
+    struct Sm2TestKeyData keyData = {
+        .pubData = g_pubSm2DataOpenssl3,
+        .pubSize = sizeof(g_pubSm2DataOpenssl3),
+        .xData = g_sm2XDataOpenssl3,
+        .xSize = sizeof(g_sm2XDataOpenssl3),
+        .yData = g_sm2YDataOpenssl3,
+        .ySize = sizeof(g_sm2YDataOpenssl3),
+        .zData = g_sm2ZDataOpenssl3,
+        .zSize = sizeof(g_sm2ZDataOpenssl3),
+    };
+    return ConstructImportedSm2Key(keySize, importType, outKey, &keyData);
 }
 
 static int32_t ConstructImportedEccKey(uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
@@ -726,7 +792,8 @@ static int32_t ConstructImportedEccKey(uint32_t keySize, uint32_t importType, st
     }
 }
 
-static int32_t ConstructImportedKey(uint32_t alg, uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
+static int32_t ConstructImportedKey(uint32_t alg, uint32_t keySize, uint32_t importType, struct HksBlob *outKey,
+    bool sm2CompabilityTest)
 {
     if (alg == HKS_ALG_ED25519 || alg == HKS_ALG_X25519) {
         return ConstructImportedCurve25519Key(alg, keySize, importType, outKey);
@@ -735,7 +802,13 @@ static int32_t ConstructImportedKey(uint32_t alg, uint32_t keySize, uint32_t imp
     } else if (alg == HKS_ALG_ECC) {
         return ConstructImportedEccKey(keySize, importType, outKey);
     } else if (alg == HKS_ALG_SM2) {
-        return ConstructImportedSm2Key(keySize, importType, outKey);
+        if (sm2CompabilityTest) {
+            HKS_LOG_I("compability test for sm2, using key from openssl 1.1.1");
+            return ConstructImportedSm2KeyForOpenssl1(keySize, importType, outKey);
+        } else {
+            HKS_LOG_I("normal test for sm2, using key from openssl 3.0.7");
+            return ConstructImportedSm2KeyForOpenssl3(keySize, importType, outKey);
+        }
     } else {
         return HKS_ERROR_INVALID_ALGORITHM;
     }
@@ -766,7 +839,8 @@ static void ModifyinitOp2Params(uint32_t alg, uint32_t purpose, uint32_t keySize
     g_initOp2Params[TAG_DIGEST_ID].uint32Param = digest;
 }
 
-static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount)
+static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount,
+    bool sm2CompabilityTest)
 {
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = InitParamSet(&paramSet, params, paramCount);
@@ -778,7 +852,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *
 
     // The caller guarantees that the access will not cross the border
     ret = ConstructImportedKey(params[TAG_ALG_ID].uint32Param, params[TAG_KEY_SIZE_ID].uint32Param,
-        params[TAG_IMPOT_TYPE_ID].uint32Param, &key);
+        params[TAG_IMPOT_TYPE_ID].uint32Param, &key, sm2CompabilityTest);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         return ret;
@@ -890,7 +964,7 @@ static int32_t DoOperation(const struct HksBlob *priKeyAlias, const struct HksBl
     return ret;
 }
 
-static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest)
+static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest, bool sm2CompabilityTest)
 {
     uint32_t purposePri = HKS_KEY_PURPOSE_SIGN;
     uint32_t purposePair = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY;
@@ -900,21 +974,24 @@ static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest)
     uint8_t priAlias[] = "import_dsa_private_key";
     struct HksBlob priKeyAlias = { sizeof(priAlias), priAlias };
     ModifyImportParams(alg, purposePri, keySize, digest, HKS_KEY_TYPE_PRIVATE_KEY);
-    int32_t ret = ImportKey(&priKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam));
+    int32_t ret = ImportKey(&priKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam),
+        sm2CompabilityTest);
     EXPECT_EQ(ret, HKS_SUCCESS) << "import pri key failed";
 
     // import rsa key-pair
     uint8_t pairAlias[] = "import_dsa_key_pair";
     struct HksBlob pairKeyAlias = { sizeof(pairAlias), pairAlias };
     ModifyImportParams(alg, purposePair, keySize, digest, HKS_KEY_TYPE_KEY_PAIR);
-    ret = ImportKey(&pairKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam));
+    ret = ImportKey(&pairKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam),
+        sm2CompabilityTest);
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key pair failed";
 
     // import rsa pubKey
     uint8_t pubAlias[] = "import_dsa_public_key";
     struct HksBlob pubKeyAlias = { sizeof(pubAlias), pubAlias };
     ModifyImportParams(alg, purposePub, keySize, digest, HKS_KEY_TYPE_PUBLIC_KEY);
-    ret = ImportKey(&pubKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam));
+    ret = ImportKey(&pubKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam),
+        sm2CompabilityTest);
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key public failed";
 
     uint32_t purposeOp1 = HKS_KEY_PURPOSE_SIGN;
@@ -935,20 +1012,23 @@ static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest)
     (void)HksDeleteKey(&pubKeyAlias, nullptr);
 }
 
-static void ImportInvalidPurposePlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest, uint32_t purpose)
+static void ImportInvalidPurposePlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest, uint32_t purpose,
+    bool sm2CompabilityTest)
 {
     // import private-key
     uint8_t priAlias[] = "import_private_key_1";
     struct HksBlob priKeyAlias = { sizeof(priAlias), priAlias };
     ModifyImportParams(alg, purpose, keySize, digest, HKS_KEY_TYPE_PRIVATE_KEY);
-    int32_t ret = ImportKey(&priKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam));
+    int32_t ret = ImportKey(&priKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam),
+        sm2CompabilityTest);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "import pri key failed";
 
     // import key-pair
     uint8_t pairAlias[] = "import_key_pair_1";
     struct HksBlob pairKeyAlias = { sizeof(pairAlias), pairAlias };
     ModifyImportParams(alg, purpose, keySize, digest, HKS_KEY_TYPE_KEY_PAIR);
-    ret = ImportKey(&pairKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam));
+    ret = ImportKey(&pairKeyAlias, g_importKeyParams, sizeof(g_importKeyParams) / sizeof(struct HksParam),
+        sm2CompabilityTest);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "import key pair failed";
 }
 #ifdef _USE_OPENSSL_
@@ -959,7 +1039,7 @@ static void ImportInvalidPurposePlainKeyTest(uint32_t alg, uint32_t keySize, uin
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest001, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_DSA, HKS_RSA_KEY_SIZE_2048, HKS_DIGEST_SHA256);
+    ImportPlainKeyTest(HKS_ALG_DSA, HKS_RSA_KEY_SIZE_2048, HKS_DIGEST_SHA256, false);
 }
 
 /**
@@ -969,7 +1049,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest001, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest002, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_ED25519, HKS_CURVE25519_KEY_SIZE_256, HKS_DIGEST_SHA256);
+    ImportPlainKeyTest(HKS_ALG_ED25519, HKS_CURVE25519_KEY_SIZE_256, HKS_DIGEST_SHA256, false);
 }
 #endif
 
@@ -980,7 +1060,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest002, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest003, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_224, HKS_DIGEST_SHA256);
+    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_224, HKS_DIGEST_SHA256, false);
 }
 
 /**
@@ -990,7 +1070,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest003, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest004, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_256, HKS_DIGEST_SHA384);
+    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_256, HKS_DIGEST_SHA384, false);
 }
 
 /**
@@ -1000,7 +1080,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest004, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest005, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_384, HKS_DIGEST_SHA512);
+    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_384, HKS_DIGEST_SHA512, false);
 }
 
 /**
@@ -1010,7 +1090,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest005, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest006, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_521, HKS_DIGEST_SHA224);
+    ImportPlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_521, HKS_DIGEST_SHA224, false);
 }
 
 #ifdef _USE_OPENSSL_
@@ -1021,7 +1101,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest006, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest007, TestSize.Level0)
 {
-    ImportPlainKeyTest(HKS_ALG_SM2, HKS_SM2_KEY_SIZE_256, HKS_DIGEST_SM3);
+    ImportPlainKeyTest(HKS_ALG_SM2, HKS_SM2_KEY_SIZE_256, HKS_DIGEST_SM3, false);
 }
 #endif
 
@@ -1033,7 +1113,7 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest007, TestSize.Level0)
  */
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest008, TestSize.Level0)
 {
-    ImportInvalidPurposePlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_256, HKS_DIGEST_NONE, HKS_KEY_PURPOSE_UNWRAP);
+    ImportInvalidPurposePlainKeyTest(HKS_ALG_ECC, HKS_ECC_KEY_SIZE_256, HKS_DIGEST_NONE, HKS_KEY_PURPOSE_UNWRAP, false);
 }
 
 /**
@@ -1045,6 +1125,18 @@ HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest008, TestSize.Level0)
 HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest009, TestSize.Level0)
 {
     ImportInvalidPurposePlainKeyTest(HKS_ALG_X25519, HKS_CURVE25519_KEY_SIZE_256, HKS_DIGEST_SHA256,
-        HKS_KEY_PURPOSE_UNWRAP);
+        HKS_KEY_PURPOSE_UNWRAP, false);
 }
+
+#ifdef _USE_OPENSSL_
+/**
+ * @tc.name: HksImportSignVerifyTest.HksImportSignVerifyTest010
+ * @tc.desc: import SM2-256
+ * @tc.type: FUNC normal, compatibility test for openssl 1.1.1 and 3.0.7
+ */
+HWTEST_F(HksImportSignVerifyTest, HksImportSignVerifyTest010, TestSize.Level0)
+{
+    ImportPlainKeyTest(HKS_ALG_SM2, HKS_SM2_KEY_SIZE_256, HKS_DIGEST_SM3, true);
+}
+#endif
 } // namespace Unittest::ImportSignVerifyTest
