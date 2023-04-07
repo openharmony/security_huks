@@ -22,7 +22,7 @@ void __attribute__((weak)) OHOS_SystemInit(void)
     SAMGR_Bootstrap();
 };
 
-int main()
+int main(void)
 {
     OHOS_SystemInit();
     pause();
