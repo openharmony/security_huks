@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,9 @@ namespace Unittest::HksAccessControlPartTest {
 int HksAccessAgreePartTest001(void);
 int HksAccessAgreePartTest002(void);
 int HksAccessAgreePartTest003(void);
+int HksAccessAgreePartTest004(void);
+int HksAccessAgreePartTest005(void);
+int HksAccessAgreePartTest006(void);
 }
 #endif // HKS_ACCESS_CONTROL_TEST_H
 

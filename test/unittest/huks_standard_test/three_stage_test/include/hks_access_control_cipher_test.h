@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -19,5 +19,16 @@
 namespace Unittest::HksAccessControlPartTest {
 int HksAccessCipherPartTest001(void);
 int HksAccessCipherPartTest002(void);
+int HksAccessCipherPartTest003(void);
+int HksAccessCipherPartTest004(void);
+int HksAccessCipherPartTest005(void);
+int HksAccessCipherPartTest006(void);
+int HksAccessCipherPartTest007(void);
+int HksAccessCipherPartTest008(void);
+int HksAccessCipherPartTest009(void);
+int HksAccessCipherPartTest010(void);
+int HksAccessCipherPartTest011(void);
+int HksAccessCipherPartTest012(void);
+int HksAccessCipherPartTest013(void);
 }
 #endif // HKS_ACCESS_CONTROL_TEST_H

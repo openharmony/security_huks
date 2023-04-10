@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -70,6 +70,19 @@ struct AuthAccessTypeChecker {
     const struct ExpectParams allowAuthAccessTypes;
 };
 
+struct KeyInfoParams {
+    bool needCheck;
+    enum HksTag tag;
+    const uint32_t *values;
+    uint32_t valueCnt;
+};
+
+struct AuthAcceessKeyInfoChecker {
+    enum HksKeyAlg keyAlg;
+    const struct KeyInfoParams *params;
+    uint32_t paramsCnt;
+};
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -110,6 +123,8 @@ int32_t GetInputParams(const struct HksParamSet *paramSet, struct ParamsValues *
 int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool isAbsent, struct HksParam *param);
 
 int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest);
+
+int32_t HksCheckUserAuthKeyInfoValidity(const struct HksParamSet *paramSet);
 #ifdef __cplusplus
 }
 #endif

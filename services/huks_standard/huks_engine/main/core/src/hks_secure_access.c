@@ -86,6 +86,32 @@ static int32_t CheckChallengeTypeValidity(const struct HksParam *blobChallengeTy
     return HKS_SUCCESS;
 }
 
+static int32_t IsNeedSkipUserAuthAccessControl(const struct HksParamSet *keyBlobParamSet,
+    const struct HksParamSet *initParamSet)
+{
+    // step 1. Judge whether the user auth key purpose is set.
+    struct HksParam *userAuthKeyPurposeParam = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY_AUTH_PURPOSE, &userAuthKeyPurposeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not set key auth purpose: default need user auth access control!")
+
+    // step 2. Judge the validify of symmetric and asymmetric algorithm settings for purpose.
+    ret = HksCheckUserAuthKeyInfoValidity(initParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckUserAuthKeyInfoValidity failed!")
+
+    // step 3. Determine if user auth access control needs to be skipped, and the keyPurpose is not 0.
+    struct HksParam *keyPurposeParam = NULL;
+    ret = HksGetParam(initParamSet, HKS_TAG_PURPOSE, &keyPurposeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key purpose param failed!")
+
+    if ((keyPurposeParam->uint32Param | userAuthKeyPurposeParam->uint32Param) ==
+        userAuthKeyPurposeParam->uint32Param) {
+        HKS_LOG_E("it needs to skip user auth access control base on the current value of key purpose!");
+        return HKS_ERROR_NEED_SKIP_ACCESS_CONTROL;
+    }
+
+    return HKS_SUCCESS;
+}
+
 static int32_t CheckInitParamSetValidityAndGet(const struct HksParamSet *keyBlobParamSet,
     struct HksSecureAccessInnerParams *innerParams)
 {
@@ -98,8 +124,17 @@ static int32_t CheckInitParamSetValidityAndGet(const struct HksParamSet *keyBlob
         innerParams->outToken->size = 0;
         return HKS_SUCCESS;
     }
-
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get blob user auth type failed!")
+
+    // Fine-grained access control: determine if access to skip access control is necessary.
+    ret = IsNeedSkipUserAuthAccessControl(keyBlobParamSet, innerParams->initParamSet);
+    if (ret == HKS_ERROR_NEED_SKIP_ACCESS_CONTROL) {
+        innerParams->isUserAuthAccess = false;
+        innerParams->isSecureSign = false;
+        innerParams->outToken->size = 0;
+        return HKS_SUCCESS;
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "unable to judge whether access control is required!")
 
     struct HksParam *blobChallengeType = NULL;
     ret = HksGetParam(keyBlobParamSet, HKS_TAG_CHALLENGE_TYPE, &blobChallengeType);
