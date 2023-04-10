@@ -243,7 +243,7 @@ HWTEST_F(HksUpgradeKeyTest, HksUpgradeKeyTest001, TestSize.Level0)
     int32_t ret = TestGenerateOldkey(&keyAliasTest001, GEN_AES_PARAMS, HKS_ARRAY_SIZE(GEN_AES_PARAMS));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    HksChangeOldKeyOwner("/data/service/el1/public/huks_service/maindata", HUKS_UID);
+    HksChangeOldKeyOwner(HKS_CONFIG_KEY_STORE_PATH "/maindata", HUKS_UID);
 
     uint8_t plainText[] = "plainText123457";
     uint8_t cipherText[DEFAULT_CIPHER_BUFFER] = { 0 };
