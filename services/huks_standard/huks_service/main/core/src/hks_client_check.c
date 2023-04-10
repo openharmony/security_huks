@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -251,6 +251,39 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
     (void)paramSet;
     (void)userAuthType;
     (void)authAccessType;
+    return HKS_SUCCESS;
+#endif
+}
+
+int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
+{
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
+
+    // step 1. Judge whether the user auth key purpose is set.
+    struct HksParam *userAuthKeyPurposeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_PURPOSE, &userAuthKeyPurposeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not set key auth purpose: default need user auth access control!")
+
+    // step 2. Judge whether the user auth key purpose is within the range of alogrithm key purpose.
+    struct HksParam *keyPurposeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &keyPurposeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key purpose param failed!")
+
+    uint32_t keyPurpose = keyPurposeParam->uint32Param;
+    if ((userAuthKeyPurposeParam->uint32Param == 0) ||
+        (userAuthKeyPurposeParam->uint32Param | keyPurpose) != keyPurpose) {
+        HKS_LOG_E("key auth purpose is invalid!");
+        return HKS_ERROR_INVALID_PURPOSE;
+    }
+
+    // step 3. Judge the validify of symmetric and asymmetric algorithm settings for purpose.
+    ret = HksCheckUserAuthKeyInfoValidity(paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckUserAuthKeyInfoValidity failed!")
+
+    return HKS_SUCCESS;
+#else
+    (void)paramSet;
     return HKS_SUCCESS;
 #endif
 }
