@@ -16,6 +16,7 @@
 #ifndef HKS_RKC_H
 #define HKS_RKC_H
 
+#include "hks_rkc_rw.h"
 #include "hks_type_inner.h"
 
 #define HKS_RKC_RMK_LEN 64                              /* the length of root main key */
@@ -57,6 +58,10 @@ extern "C" {
 struct HksKsfAttr *GetGlobalKsfAttrRkc();
 
 struct HksKsfAttr *GetGlobalKsfAttrMk();
+
+uint8_t *GetMkWithMask();
+
+uint32_t RkcDigestToHks(const uint32_t rkcDigest);
 
 int32_t RkcRecoverRkTime(const struct HksKsfDataRkc *ksfDataRkc);
 

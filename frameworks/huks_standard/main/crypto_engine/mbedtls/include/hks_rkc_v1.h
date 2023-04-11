@@ -17,6 +17,7 @@
 #define HKS_RKC_V1_H
 
 #include "hks_rkc_rw.h"
+#include "hks_type_inner.h"
 
 /* the keystore file data of root key component (version 1) */
 struct HksRkcKsfDataV1 {
