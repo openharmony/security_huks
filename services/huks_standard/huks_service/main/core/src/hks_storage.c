@@ -1062,7 +1062,7 @@ static void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCou
 
 static int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t keyCount)
 {
-    if (((UINT32_MAX / (sizeof(struct HksFileEntry))) < keyCount) || (keyCount == 0)) {
+    if ((keyCount > (UINT32_MAX / (sizeof(struct HksFileEntry)))) || (keyCount == 0)) {
         HKS_LOG_E("keyCount too big or is zero.");
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
