@@ -142,7 +142,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 }
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-int32_t SensitivePermissionCheck()
+int32_t SensitivePermissionCheck(void)
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
     int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId,
