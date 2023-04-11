@@ -1197,7 +1197,8 @@ int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet
 int32_t HksCoreRefreshKeyInfo(void)
 {
 #ifndef _HARDWARE_ROOT_KEY_
-    HksRkcDestroy();
+    HksCfgDestroy();
+    HksMkDestroy();
     int32_t ret = HksRkcInit();
     HKS_IF_NOT_SUCC_LOGE(ret, "Hks rkc refresh info failed! ret = 0x%" LOG_PUBLIC "X", ret)
 

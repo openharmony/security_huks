@@ -21,7 +21,6 @@
 #include "hks_get_udid.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_rkc_rw.h"
 #include "hks_rkc_v1.h"
 #include "hks_template.h"
 
@@ -55,6 +54,11 @@ struct HksKsfAttr *GetGlobalKsfAttrMk()
 /* the data of main key */
 struct HksRkcMk g_hksRkcMk = { false, { 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0 }, {0} };
 
+uint8_t *GetMkWithMask()
+{
+    return &(g_hksRkcMk.mkWithMask);
+}
+
 /* the additional data of main key. 'H', 'K', 'S', 'R', 'K', 'C', 'M', 'K' */
 const uint8_t g_hksRkcMkAddData[HKS_RKC_MK_ADD_DATA_LEN] = { 0x48, 0x4B, 0x53, 0x52, 0x4B, 0x43, 0x4D, 0x4B };
 
@@ -79,7 +83,7 @@ static int32_t ReadAllKsfRkc(struct HksKsfDataRkcWithVer **validKsfData)
 
     for (uint32_t i = 0; i < HKS_KSF_NUM; i++) {
         if (readRet[i] != HKS_SUCCESS) {
-            int32_t ret = HksWriteKsfRkc(g_hksRkcCfg.ksfAttrRkc.name[i], allRkcData[validIndex]);
+            int32_t ret = HksWriteKsfRkc(g_hksRkcCfg.ksfAttrRkc.name[i], &allRkcData[validIndex]);
             HKS_IF_NOT_SUCC_LOGE(ret, "rewrite rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
         }
     }
@@ -89,7 +93,7 @@ static int32_t ReadAllKsfRkc(struct HksKsfDataRkcWithVer **validKsfData)
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memcpy_s(*validKsfData, sizeof(struct HksKsfDataRkcWithVer),
-        allRkcData[validIndex], sizeof(struct HksKsfDataRkcWithVer));
+        &allRkcData[validIndex], sizeof(struct HksKsfDataRkcWithVer));
     return HKS_SUCCESS;
 }
 
@@ -114,7 +118,7 @@ static int32_t ReadAllKsfMk(struct HksKsfDataMkWithVer **validKsfData)
 
     for (uint32_t i = 0; i < HKS_KSF_NUM; i++) {
         if (readRet[i] != HKS_SUCCESS) {
-            int32_t ret = HksWriteKsfMk(g_hksRkcCfg.ksfAttrMk.name[i], allMkData[validIndex]);
+            int32_t ret = HksWriteKsfMk(g_hksRkcCfg.ksfAttrMk.name[i], &allMkData[validIndex]);
             HKS_IF_NOT_SUCC_LOGE(ret, "rewrite mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
         }
     }
@@ -124,14 +128,14 @@ static int32_t ReadAllKsfMk(struct HksKsfDataMkWithVer **validKsfData)
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memcpy_s(*validKsfData, sizeof(struct HksKsfDataMkWithVer),
-        allMkData[validIndex], sizeof(struct HksKsfDataMkWithVer));
+        &allMkData[validIndex], sizeof(struct HksKsfDataMkWithVer));
     return HKS_SUCCESS;
 }
 
 static int32_t RkcGetRmkRawKey(const struct HksKsfDataRkc *ksfDataRkc, struct HksBlob *rawKey)
 {
     uint8_t udid[HKS_HARDWARE_UDID_LEN] = {0};
-    ret = HksGetHardwareUdid(&udid, HKS_HARDWARE_UDID_LEN);
+    int32_t ret = HksGetHardwareUdid(udid, HKS_HARDWARE_UDID_LEN);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get hardware udid failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     /* materials xor */
@@ -142,7 +146,7 @@ static int32_t RkcGetRmkRawKey(const struct HksKsfDataRkc *ksfDataRkc, struct Hk
     return HKS_SUCCESS;
 }
 
-static uint32_t RkcDigestToHks(const uint32_t rkcDigest)
+uint32_t RkcDigestToHks(const uint32_t rkcDigest)
 {
     if (rkcDigest == HKS_RKC_RMK_HMAC_SHA256) {
         return HKS_DIGEST_SHA256;
@@ -283,8 +287,8 @@ int32_t ExecuteMkCrypt(const struct HksKsfDataMk *ksfDataMk, const struct HksBlo
     struct HksAeadParam aeadParam;
     (void)memset_s(&aeadParam, sizeof(aeadParam), 0, sizeof(aeadParam));
     struct HksUsageSpec usageSpec = { .algParam = (void *)(&aeadParam) };
-    ret = InitMkCryptUsageSpec((uint8_t *)ksfDataMk->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
-    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
+    int32_t ret = InitMkCryptUsageSpec((uint8_t *)ksfDataMk->mkIv, HKS_RKC_MK_IV_LEN, &usageSpec);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Init mk crypt usageSpec failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     const struct HksBlob key = { HKS_RKC_RMK_EK_LEN, rmk->data };
     if (encrypt) {
@@ -334,7 +338,7 @@ int32_t RkcMaskMk(const struct HksBlob *mk)
 {
     struct HksBlob mkMaskBlob = { HKS_RKC_MK_LEN, g_hksRkcCfg.mkMask };
     int32_t ret = HksCryptoHalFillPrivRandom(&mkMaskBlob);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, "Generate mk mask failed! ret = 0x%" LOG_PUBLIC "X", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Generate mk mask failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
     for (uint32_t i = 0; i < HKS_RKC_MK_LEN; ++i) {
         g_hksRkcMk.mkWithMask[i] = mk->data[i] ^ g_hksRkcCfg.mkMask[i];
@@ -437,8 +441,8 @@ static int32_t UpgradeMkIfNeeded(uint32_t mkVersion, const struct HksBlob *mk)
 static int32_t RkcLoadKsf()
 {
     int32_t ret;
-    struct HksKsfDataMkWithVer *validKsfDataMkWithVer = NULL;
     struct HksKsfDataRkcWithVer *validKsfDataRkcWithVer = NULL;
+    struct HksKsfDataMkWithVer *validKsfDataMkWithVer = NULL;
     do {
         ret = ReadAllKsfMk(&validKsfDataMkWithVer);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "All mk ksf file are invalid! ret = 0x%" LOG_PUBLIC "X", ret)
@@ -460,44 +464,44 @@ static int32_t RkcLoadKsf()
         // decrypt main key
         struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, g_hksRkcMk.mkWithMask };
         struct HksBlob mkCipherText = { HKS_RKC_MK_CIPHER_TEXT_LEN, validKsfDataMkWithVer->ksfDataMk.mkCiphertext };
-        ret = RkcMkCrypt(&(validKsfDataRkcWithVer->ksfDataRkc), &tempMkBlob, &mkCipherText, false); /* false: decrypt */
+        ret = RkcMkCrypt(&(validKsfDataRkcWithVer->ksfDataRkc), &(validKsfDataMkWithVer->ksfDataMk), &tempMkBlob, &mkCipherText, false); /* false: decrypt */
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Main key decrypt failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* the main key in memory should be masked */
         ret = RkcMaskMk(&tempMkBlob);
         HKS_IF_NOT_SUCC_BREAK(ret);
 
-        ret = UpgradeMkIfNeeded(validKsfDataMk->mkVersion, &mk);
+        ret = UpgradeMkIfNeeded(validKsfDataMkWithVer->mkVersion, &tempMkBlob);
     } while (0);
 
-    HKS_MEMSET_FREE_PTR(validKsfDataRkc, sizeof(struct HksKsfDataRkc));
-    HKS_MEMSET_FREE_PTR(validKsfDataMk, sizeof(struct HksKsfDataMk));
+    HKS_MEMSET_FREE_PTR(validKsfDataRkcWithVer, sizeof(struct HksKsfDataRkcWithVer));
+    HKS_MEMSET_FREE_PTR(validKsfDataMkWithVer, sizeof(struct HksKsfDataMkWithVer));
     return ret;
 }
 
 struct HksKsfDataRkcWithVer *CreateNewKsfDataRkcWithVer(void)
 {
-    struct HksKsfDataRkcWithVer *newKsfDataRkc = (struct HksKsfDataRkcWithVer *)HksMalloc(sizeof(struct HksKsfDataRkcWithVer));
-    HKS_IF_NULL_LOGE_RETURN(newKsfDataRkc, NULL, "Malloc rkc ksf data failed!")
+    struct HksKsfDataRkcWithVer *newKsfDataRkcWithVer = (struct HksKsfDataRkcWithVer *)HksMalloc(sizeof(struct HksKsfDataRkcWithVer));
+    HKS_IF_NULL_LOGE_RETURN(newKsfDataRkcWithVer, NULL, "Malloc rkc ksf data failed!")
 
-    (void)memset_s(newKsfDataRkc, sizeof(struct HksKsfDataRkcWithVer), 0, sizeof(struct HksKsfDataRkcWithVer));
-    newKsfDataRkc->rkVersion = g_hksRkcCfg.rkVersion;
-    newKsfDataRkc->ksfDataRkc.rmkIter = g_hksRkcCfg.rmkIter;
-    newKsfDataRkc->ksfDataRkc.rmkHashAlg = g_hksRkcCfg.rmkHashAlg;
+    (void)memset_s(newKsfDataRkcWithVer, sizeof(struct HksKsfDataRkcWithVer), 0, sizeof(struct HksKsfDataRkcWithVer));
+    newKsfDataRkcWithVer->rkVersion = g_hksRkcCfg.rkVersion;
+    newKsfDataRkcWithVer->ksfDataRkc.rmkIter = g_hksRkcCfg.rmkIter;
+    newKsfDataRkcWithVer->ksfDataRkc.rmkHashAlg = g_hksRkcCfg.rmkHashAlg;
 
     do {
         /* Two material are generated by random number. */
-        ret = RkcMakeRandomMaterial(&(newKsfDataRkc->ksfDataRkc));
+        int32_t ret = RkcMakeRandomMaterial(&(newKsfDataRkcWithVer->ksfDataRkc));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate material failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* The salt value is generated by random number. */
-        struct HksBlob salt = { HKS_RKC_SALT_LEN, newKsfDataRkc->ksfDataRkc.rmkSalt };
+        struct HksBlob salt = { HKS_RKC_SALT_LEN, newKsfDataRkcWithVer->ksfDataRkc.rmkSalt };
         ret = HksCryptoHalFillPrivRandom(&salt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate salt failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        return newKsfDataRkc;
+        return newKsfDataRkcWithVer;
     } while (0);
-    HKS_MEMSET_FREE_PTR(newKsfDataRkc);
+    HKS_MEMSET_FREE_PTR(newKsfDataRkcWithVer, sizeof(struct HksKsfDataRkcWithVer));
     return NULL;
 }
 
@@ -516,11 +520,13 @@ struct HksKsfDataMkWithVer *CreateNewKsfDataMkWithVer(void)
 int32_t RkcWriteAllKsf(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer, const struct HksKsfDataMkWithVer *ksfDataMkWithVer)
 {
     bool isSuccess = false;
+    int32_t ret;
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
-        int32_t ret = HksWriteKsfRkc(g_hksRkcCfg.ksfAttrRkc.name[i], ksfDataRkc);
+        ret = HksWriteKsfRkc(g_hksRkcCfg.ksfAttrRkc.name[i], ksfDataRkcWithVer);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_WRITE_FILE_FAIL, "make mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
     }
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
-        int32_t ret = HksWriteKsfMk(g_hksRkcCfg.ksfAttrMk.name[i], ksfDataMk);
+        ret = HksWriteKsfMk(g_hksRkcCfg.ksfAttrMk.name[i], ksfDataMkWithVer);
         if (ret == HKS_SUCCESS) {
             isSuccess = true;
         }
@@ -532,15 +538,15 @@ int32_t RkcWriteAllKsf(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer, con
 
 static int32_t RkcCreateKsf(void)
 {
-    int32_t ret;
+    int32_t ret = HKS_SUCCESS;
     struct HksKsfDataRkcWithVer *newKsfDataRkcWithVer = NULL;
     struct HksKsfDataMkWithVer *newKsfDataMkWithVer = NULL;
 
     do {
         newKsfDataRkcWithVer = CreateNewKsfDataRkcWithVer();
-        HKS_IF_NULL_LOGE_BREAK(newKsfDataRkcWithVer, HKS_ERROR_MALLOC_FAIL, "Malloc rkc ksf data failed!")
+        HKS_IF_NULL_LOGE_BREAK(newKsfDataRkcWithVer, "Malloc rkc ksf data failed!")
         newKsfDataMkWithVer = CreateNewKsfDataMkWithVer();
-        HKS_IF_NULL_LOGE_BREAK(newKsfDataMkWithVer, HKS_ERROR_MALLOC_FAIL, "Malloc mk ksf data failed!")
+        HKS_IF_NULL_LOGE_BREAK(newKsfDataMkWithVer, "Malloc mk ksf data failed!")
 
         /* make main key. */
         ret = RkcMakeMk(&(newKsfDataRkcWithVer->ksfDataRkc), &(newKsfDataMkWithVer->ksfDataMk));
@@ -557,39 +563,41 @@ static int32_t RkcCreateKsf(void)
     } while (0);
 
     /* the data of root & main key should be cleared after use */
-    HKS_MEMSET_FREE_PTR(newKsfDataRkcWithVer);
-    HKS_MEMSET_FREE_PTR(newKsfDataMkWithVer);
+    HKS_MEMSET_FREE_PTR(newKsfDataRkcWithVer, sizeof(struct HksKsfDataRkcWithVer));
+    HKS_MEMSET_FREE_PTR(newKsfDataMkWithVer, sizeof(struct HksKsfDataMkWithVer));
     return ret;
 }
 
 int32_t HksRkcInit(void)
 {
     if (g_hksRkcCfg.state == HKS_RKC_STATE_VALID) {
-        HKS_LOG_I("Hks rkc is running!");NULL
+        HKS_LOG_I("Hks rkc is running!");
         return HKS_SUCCESS;
     }
 
-    /* Initialize the attribute of mk keystore file */
-    struct HksKsfAttr ksfAttrMk = { "minfo1_v2.data", "minfo2_v2.data" };
-    ret = InitKsfAttr(&ksfAttrMk, HKS_KSF_TYPE_MK);
-    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of mk keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
     int32_t ret;
-    if (KsfExist(HKS_KSF_TYPE_MK)) {
-        ret = RkcLoadKsf();
-    } else {
-        /* Initialize the attribute of rkc keystore file */
-        struct HksKsfAttr ksfAttrRkcV1 = { "info1.data", "info2.data" };
-        ret = InitKsfAttr(&ksfAttrRkcV1, HKS_KSF_TYPE_RKC);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
+    do {
+        /* Initialize the attribute of mk keystore file */
+        struct HksKsfAttr ksfAttrMk = { "minfo1_v2.data", "minfo2_v2.data" };
+        ret = InitKsfAttr(&ksfAttrMk, HKS_KSF_TYPE_MK);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of mk keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        if (KsfExist(HKS_KSF_TYPE_RKC)) { // mk ksf not exists, rkc ksf exists => version 1
-            ret = UpgradeV1ToV2();
-        } else { // latest version
-            ret = RkcCreateKsf();
+        if (KsfExist(HKS_KSF_TYPE_MK)) {
+            ret = RkcLoadKsf();
+        } else {
+            /* Initialize the attribute of rkc keystore file */
+            struct HksKsfAttr ksfAttrRkcV1 = { "info1.data", "info2.data" };
+            ret = InitKsfAttr(&ksfAttrRkcV1, HKS_KSF_TYPE_RKC);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
+
+            if (KsfExist(HKS_KSF_TYPE_RKC)) { // mk ksf not exists, rkc ksf exists => version 1
+                ret = UpgradeV1ToV2();
+            } else { // latest version
+                ret = RkcCreateKsf();
+            }
         }
-    }
-
+    } while (0);
+    
     if (ret != HKS_SUCCESS) {
         (void)HksCfgDestroy();
         (void)HksMkDestroy();
