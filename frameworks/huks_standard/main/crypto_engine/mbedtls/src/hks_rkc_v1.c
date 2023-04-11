@@ -262,7 +262,7 @@ int32_t UpgradeV1ToV2(void)
         HKS_IF_NULL_LOGE_BREAK(newKsfDataRkcWithVer, "Malloc rkc ksf data failed!")
         newKsfDataMkWithVer = CreateNewKsfDataMkWithVer();
         HKS_IF_NULL_LOGE_BREAK(newKsfDataMkWithVer, "Malloc mk ksf data failed!")
-
+        
         struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
         struct HksBlob cipherTextBlob = { HKS_RKC_MK_CIPHER_TEXT_LEN, newKsfDataMkWithVer->ksfDataMk.mkCiphertext };
         ret = RkcMkCrypt(&(newKsfDataRkcWithVer->ksfDataRkc), &(newKsfDataMkWithVer->ksfDataMk), &tempMkBlob, &cipherTextBlob, true); /* true: encrypt */

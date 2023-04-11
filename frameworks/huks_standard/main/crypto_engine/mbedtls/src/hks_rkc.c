@@ -56,7 +56,7 @@ struct HksRkcMk g_hksRkcMk = { false, { 0, 0, 0, 0, 0, 0 }, { 0, 0, 0, 0, 0, 0 }
 
 uint8_t *GetMkWithMask()
 {
-    return &(g_hksRkcMk.mkWithMask);
+    return g_hksRkcMk.mkWithMask;
 }
 
 /* the additional data of main key. 'H', 'K', 'S', 'R', 'K', 'C', 'M', 'K' */
