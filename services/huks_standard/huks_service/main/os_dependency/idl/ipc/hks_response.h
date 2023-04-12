@@ -28,7 +28,7 @@ int32_t HksGetProcessNameForIPC(const uint8_t *context, struct HksBlob *processN
 
 int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo);
 
-int32_t SensitivePermissionCheck();
+int32_t SensitivePermissionCheck(void);
 
 #ifdef __cplusplus
 }
