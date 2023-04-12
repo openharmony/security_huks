@@ -411,7 +411,7 @@ int32_t InitKsfAttr(const struct HksKsfAttr *ksfAttr, uint8_t ksfType)
     for (uint8_t i = 0; i < HKS_KSF_NUM; ++i) {
         char *fileName = CloneNewStr(ksfAttr->name[i], HKS_KSF_NAME_LEN_MAX);
         /* the memory will be freed by HksCfgDestroy() */
-        if (fileName != NULL) {
+        if (fileName == NULL) {
             initRet = HKS_ERROR_MALLOC_FAIL;
             break;
         }
