@@ -92,9 +92,9 @@ static int32_t HksConstructRootProcessInfo(struct HksProcessInfo *processInfo)
     char *processName = NULL;
     char *userId = NULL;
     int32_t ret = HksGetProcessName(&processName);
-    HKS_IF_NULL_LOGE_RETURN(processName, HKS_ERROR_BAD_STATE, "get old process name failed");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get old process name failed");
     ret = HksGetUserId(&userId);
-    HKS_IF_NULL_LOGE_RETURN(userId, HKS_ERROR_BAD_STATE, "get old user if failed");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get old user if failed");
 
     processInfo->processName.data = (uint8_t *)processName;
     processInfo->processName.size = strlen(processName);
