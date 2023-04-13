@@ -103,8 +103,8 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
     return ret;
 }
 
-static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct HksKeyBlobInfo *keyBlobInfo,
-    struct HksBlob *derivedKey, enum HksKeyAlg deriveAlg)
+static int32_t GetDeriveKey(enum HksKeyAlg deriveAlg, const struct HksParamSet *paramSet,
+    const struct HksKeyBlobInfo *keyBlobInfo, struct HksBlob *derivedKey)
 {
     struct HksBlob salt = { 0, NULL };
     int32_t ret = GetSalt(paramSet, keyBlobInfo, &salt);
@@ -224,15 +224,15 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     struct HksBlob srcKey = { keySize, keyParam->blob.data + sizeof(*keyBlobInfo) };
     struct HksBlob encKey = srcKey;
 
-    struct HksBlob derivedKey = { 0, NULL };
     enum HksKeyAlg deriveAlg = HKS_ALG_HKDF;
-
 #ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
     if (CheckIsNeedToUpgradeKey(paramSet)) {
         deriveAlg = HKS_ALG_PBKDF2;
     }
 #endif
-    ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey, deriveAlg);
+
+    struct HksBlob derivedKey = { 0, NULL };
+    ret = GetDeriveKey(deriveAlg, paramSet, keyBlobInfo, &derivedKey);
 
     if (ret != HKS_SUCCESS) {
         HksFreeUsageSpec(&usageSpec);
@@ -708,7 +708,8 @@ int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey)
         (void)HksMutexUnlock(g_genAtKeyMutex);
     }
 
-    (void)memcpy_s(authTokenKey, sizeof(struct HksAuthTokenKey), &g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey));
+    (void)memcpy_s(authTokenKey, sizeof(struct HksAuthTokenKey),
+        &g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey));
     return HKS_SUCCESS;
 }
 
