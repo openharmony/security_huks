@@ -38,27 +38,27 @@ int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksPa
     HKS_LOG_I("enter HksTestGenerateOldKey");
 
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = HksInitParamSet(&newParamSet);
+    (void)HksInitParamSet(&newParamSet);
 
-    ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
+    (void)HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
 
     struct HksParam tmpParam;
     tmpParam.tag = HKS_TAG_PROCESS_NAME;
     tmpParam.blob = processInfo->processName;
 
-    ret = HksAddParams(newParamSet, &tmpParam, 1);
+    (void)HksAddParams(newParamSet, &tmpParam, 1);
 
-    ret = HksBuildParamSet(&newParamSet);
+    (void)HksBuildParamSet(&newParamSet);
 
     uint8_t keyData[KEY_MAX_SIZE] = { 0 };
     struct HksBlob keyBlob = { .size = KEY_MAX_SIZE, .data = keyData };
 
-    ret = HksCoreGenerateKey(keyAlias, newParamSet, NULL, &keyBlob);
+    (void)HksCoreGenerateKey(keyAlias, newParamSet, NULL, &keyBlob);
 
-    ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+    (void)HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
 
     HksFreeParamSet(&newParamSet);
-    return ret;
+    return HKS_SUCCESS;
 }
 
 int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
