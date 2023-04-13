@@ -246,7 +246,7 @@ static int32_t SignVerifyMacUnpack(const struct HksBlob *srcData, struct HksBlob
     struct HksBlob *inputData, uint32_t *offset)
 {
     int32_t ret = GetKeyAndParamSetFromBuffer(srcData, key, paramSet, offset);
-    HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndParamSetFromBuffer failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyAndParamSetFromBuffer failed")
 
     ret = GetBlobFromBuffer(inputData, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "get unsignedData failed")
@@ -282,7 +282,7 @@ int32_t HksEncryptDecryptUnpack(const struct HksBlob *srcData, struct HksBlob *k
 {
     uint32_t offset = 0;
     int32_t ret = GetKeyAndParamSetFromBuffer(srcData, key, paramSet, &offset);
-    HKS_IF_NOT_SUCC_LOGE(ret, "getKeyAndParamSetFromBuffer failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "getKeyAndParamSetFromBuffer failed")
 
     ret = GetBlobFromBuffer(inputText, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get inputText failed")
@@ -417,7 +417,7 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
 {
     uint32_t offset = 0;
     int32_t ret = GetKeyAndParamSetFromBuffer(srcData, keyAlias, paramSet, &offset);
-    HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndParamSetFromBuffer failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyAndParamSetFromBuffer failed")
 
     ret = MallocBlobFromBuffer(srcData, certChainBlob, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "malloc certChainBlob data failed")
