@@ -176,6 +176,7 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
 static bool CheckIsNeedToUpgradeKey(struct HksParamSet *paramSet)
 {
     struct HksParam *keyVersion = NULL;
@@ -187,6 +188,7 @@ static bool CheckIsNeedToUpgradeKey(struct HksParamSet *paramSet)
     }
     return false;
 }
+#endif
 
 static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet, bool isEncrypt)
 {
@@ -223,12 +225,14 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     struct HksBlob encKey = srcKey;
 
     struct HksBlob derivedKey = { 0, NULL };
-    bool needUpgrade = CheckIsNeedToUpgradeKey(paramSet);
-    if (needUpgrade) {
-        ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey, HKS_ALG_PBKDF2);
-    } else {
-        ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey, HKS_ALG_HKDF);
+    enum HksKeyAlg deriveAlg = HKS_ALG_HKDF;
+
+#ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
+    if (CheckIsNeedToUpgradeKey(paramSet)) {
+        deriveAlg = HKS_ALG_PBKDF2;
     }
+#endif
+    ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey, deriveAlg);
 
     if (ret != HKS_SUCCESS) {
         HksFreeUsageSpec(&usageSpec);

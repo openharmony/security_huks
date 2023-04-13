@@ -77,5 +77,10 @@ config("l1_small_common_config") {
         defines += [ "HKS_ENABLE_MARK_CLEARED_FOR_SMALL_TO_SERVICE" ]
       }
     }
+
+    if (huks_enable_upgrade_derive_key_alg) {
+      # enable upgrade key derivation algorithm from PBKDF2 to HKDF
+      defines += [ "HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF" ]
+    }
   }
 }
