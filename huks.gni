@@ -21,7 +21,7 @@ enable_user_auth_framework = true
 hks_enable_test = true
 
 # specify the key version
-huks_key_version = "2"
+huks_key_version = "3"
 
 if (!defined(global_parts_info) ||
     defined(global_parts_info.account_os_account)) {

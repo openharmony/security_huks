@@ -104,7 +104,7 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
 }
 
 static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct HksKeyBlobInfo *keyBlobInfo,
-    struct HksBlob *derivedKey)
+    struct HksBlob *derivedKey, enum HksKeyAlg deriveAlg)
 {
     struct HksBlob salt = { 0, NULL };
     int32_t ret = GetSalt(paramSet, keyBlobInfo, &salt);
@@ -116,7 +116,7 @@ static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct Hks
         .digestAlg = HKS_DIGEST_SHA256,
     };
 
-    struct HksKeySpec derivationSpec = { HKS_ALG_PBKDF2, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), &derParam };
+    struct HksKeySpec derivationSpec = { deriveAlg, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), &derParam };
 
     uint8_t encryptKeyData[HKS_KEY_BLOB_MAIN_KEY_SIZE] = {0};
     struct HksBlob encryptKey = { HKS_KEY_BLOB_MAIN_KEY_SIZE, encryptKeyData };
@@ -176,6 +176,18 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
     return HKS_SUCCESS;
 }
 
+static bool CheckIsNeedToUpgradeKey(struct HksParamSet *paramSet)
+{
+    struct HksParam *keyVersion = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(false, ret, "get key version failed!")
+
+    if (keyVersion->uint32Param < HKS_KEY_VERSION) {
+        return true;
+    }
+    return false;
+}
+
 static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet, bool isEncrypt)
 {
     struct HksParam *keyParam = NULL;
@@ -211,7 +223,13 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     struct HksBlob encKey = srcKey;
 
     struct HksBlob derivedKey = { 0, NULL };
-    ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey);
+    bool needUpgrade = CheckIsNeedToUpgradeKey(paramSet);
+    if (needUpgrade) {
+        ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey, HKS_ALG_PBKDF2);
+    } else {
+        ret = GetDeriveKey(paramSet, keyBlobInfo, &derivedKey, HKS_ALG_HKDF);
+    }
+
     if (ret != HKS_SUCCESS) {
         HksFreeUsageSpec(&usageSpec);
         return ret;
@@ -223,7 +241,6 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
     } else {
         ret = HksCryptoHalDecrypt(&derivedKey, usageSpec, &encKey, &srcKey);
     }
-
     HKS_IF_NOT_SUCC_LOGE(ret, "cipher key[0x%" LOG_PUBLIC "x] failed!", isEncrypt)
 
     (void)memset_s(derivedKey.data, derivedKey.size, 0, derivedKey.size);
@@ -592,7 +609,6 @@ int32_t HksGetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *aad, 
 
 int32_t HksDecryptKeyBlob(const struct HksBlob *aad, struct HksParamSet *paramSet)
 {
-    // todo: check key version and update key derivation alg
     return DecryptKeyBlob(aad, paramSet);
 }
 
