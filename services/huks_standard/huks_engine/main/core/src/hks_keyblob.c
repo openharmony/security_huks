@@ -177,13 +177,14 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *aad, const struct Hks
 }
 
 #ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
-static bool CheckIsNeedToUpgradeKey(struct HksParamSet *paramSet)
+static bool KekDerivedByPBKDF2(struct HksParamSet *paramSet)
 {
     struct HksParam *keyVersion = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
     HKS_IF_NOT_SUCC_LOGE_RETURN(false, ret, "get key version failed!")
 
-    if (keyVersion->uint32Param < HKS_KEY_VERSION) {
+    uint32_t kekDerivedByHkdfSinceVersion = 3;
+    if (keyVersion->uint32Param < kekDerivedByHkdfSinceVersion) {
         return true;
     }
     return false;
@@ -226,7 +227,7 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
 
     enum HksKeyAlg deriveAlg = HKS_ALG_HKDF;
 #ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
-    if (CheckIsNeedToUpgradeKey(paramSet)) {
+    if (KekDerivedByPBKDF2(paramSet)) {
         deriveAlg = HKS_ALG_PBKDF2;
     }
 #endif
