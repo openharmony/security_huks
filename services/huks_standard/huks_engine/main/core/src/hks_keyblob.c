@@ -624,7 +624,7 @@ static int32_t GenerateAuthTokenKey(void)
     struct HksKeySpec macSpec = { HKS_ALG_HMAC, HKS_KEY_BLOB_AT_KEY_SIZE, NULL };
     struct HksBlob macKey = { 0, NULL };
     int32_t ret = HksCryptoHalGenerateKey(&macSpec, &macKey);
-    HKS_IF_NOT_SUCC_LOGE(ret, "generate hmac key failed!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "generate hmac key failed!")
 
     struct HksKeySpec cipherSpec = { HKS_ALG_AES, HKS_KEY_BLOB_AT_KEY_SIZE, NULL };
     struct HksBlob cipherKey = { 0, NULL };

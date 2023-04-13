@@ -17,7 +17,7 @@
 #define HKS_MESSAGE_CODE_H
 
 enum HksMessage {
-    HKS_MSG_BASE = 0x3a400,
+    HKS_MSG_BASE = 0,
 
     HKS_MSG_GEN_KEY = HKS_MSG_BASE,
     HKS_MSG_IMPORT_KEY,

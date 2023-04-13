@@ -1183,10 +1183,12 @@ int32_t HksServiceInitialize(void)
 
 int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
 {
-    int32_t ret = HksStoreDestroy(processName);
-    HKS_LOG_I("destroy storage files ret = 0x%" LOG_PUBLIC "X", ret); /* only recode log */
+    int32_t ret;
 
     do {
+        ret = HksStoreDestroy(processName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "destroy storage files ret = 0x%" LOG_PUBLIC "X", ret)
+
 #ifndef _HARDWARE_ROOT_KEY_
         ret = HuksAccessRefresh();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Hks core service refresh info failed! ret = 0x%" LOG_PUBLIC "X", ret)
