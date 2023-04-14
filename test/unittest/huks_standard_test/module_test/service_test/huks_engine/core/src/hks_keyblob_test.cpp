@@ -183,7 +183,7 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest007, TestSize.Level0)
 
 /**
  * @tc.name: HksKeyBlobTest.HksKeyBlobTest008
- * @tc.desc: tdd EncryptAndDecryptKeyBlob, expect HKS_ERROR_INVALID_KEY_INFO
+ * @tc.desc: tdd HksGetRawKey, expect HKS_ERROR_INVALID_KEY_INFO
  * @tc.type: FUNC
  */
 HWTEST_F(HksKeyBlobTest, HksKeyBlobTest008, TestSize.Level0)
@@ -205,4 +205,64 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest008, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 }
+
+#ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest009
+ * @tc.desc: tdd KekDerivedByPBKDF2, expect false
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest009, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest009");
+    bool ret = KekDerivedByPBKDF2(nullptr);
+    ASSERT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest010
+ * @tc.desc: tdd KekDerivedByPBKDF2, expect true
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest010");
+    struct HksParam keyVersion = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = 1 };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &keyVersion, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    bool retDeriveAlg = KekDerivedByPBKDF2(paramSet);
+    ASSERT_EQ(retDeriveAlg, true);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest011
+ * @tc.desc: tdd KekDerivedByPBKDF2, expect false
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest011");
+    struct HksParam keyVersion = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = 3 };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &keyVersion, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    bool retDeriveAlg = KekDerivedByPBKDF2(paramSet);
+    ASSERT_EQ(retDeriveAlg, false);
+
+    HksFreeParamSet(&paramSet);
+}
+#endif
 }
