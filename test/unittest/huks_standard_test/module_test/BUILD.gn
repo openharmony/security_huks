@@ -199,7 +199,6 @@ ohos_unittest("huks_module_test") {
     sources += [
       "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_upgrade_key_c_test.cpp",
       "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_upgrade_key_accesser_test.cpp",
-      "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/src/hks_upgrade_key_test.cpp",
     ]
   }
 
@@ -221,11 +220,8 @@ ohos_unittest("huks_module_test") {
     "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
-    "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util",
     "//third_party/openssl:libcrypto_shared",
   ]
-
-  cflags = [ "-DREAL_HKS_KEY_VERSION=${huks_key_version}" ]
 
   external_deps = [
     "hitrace_native:libhitracechain",
