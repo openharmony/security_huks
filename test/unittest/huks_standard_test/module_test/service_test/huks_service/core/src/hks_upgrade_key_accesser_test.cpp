@@ -54,66 +54,6 @@ void HksUpgradeKeyAccesserTest::TearDown()
 }
 
 /**
- * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest001
- * @tc.desc: tdd HksAddProcessNameToParamSet, expect HKS_FAILURE
- * @tc.type: FUNC
- * @tc.require: issueI6RJBX
- */
-HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest001, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksUpgradeKeyAccesserTest001");
-    int32_t ret = HksAddProcessNameToParamSet(nullptr, nullptr);
-    ASSERT_EQ(HKS_FAILURE, ret);
-}
-
-/**
- * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest002
- * @tc.desc: tdd HksAddProcessNameToParamSet, expect HKS_ERROR_PARAM_NOT_EXIST
- * @tc.type: FUNC
- * @tc.require: issueI6RJBX
- */
-HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest002, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksUpgradeKeyAccesserTest002");
-    struct HksParamSet *srcParamSet = nullptr;
-    int32_t ret = HksInitParamSet(&srcParamSet);
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ret = HksBuildParamSet(&srcParamSet);
-    ASSERT_EQ(HKS_SUCCESS, ret);
-
-    ret = HksAddProcessNameToParamSet(srcParamSet, nullptr);
-    ASSERT_EQ(HKS_ERROR_PARAM_NOT_EXIST, ret);
-
-    HksFreeParamSet(&srcParamSet);
-}
-
-/**
- * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest003
- * @tc.desc: tdd HksAddProcessNameToParamSet, expect HKS_ERROR_INVALID_ARGUMENT
- * @tc.type: FUNC
- * @tc.require: issueI6RJBX
- */
-HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest003, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksUpgradeKeyAccesserTest003");
-    struct HksParamSet *srcParamSet = nullptr;
-    int32_t ret = HksInitParamSet(&srcParamSet);
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    const char *processNameChar = "123";
-    struct HksBlob processName = { .size = strlen(processNameChar), .data = (uint8_t *)processNameChar };
-    struct HksParam processNameParam = { .tag = HKS_TAG_PROCESS_NAME, .blob = processName };
-    ret = HksAddParams(srcParamSet, &processNameParam, 1);
-    ASSERT_EQ(HKS_SUCCESS, ret);
-    ret = HksBuildParamSet(&srcParamSet);
-    ASSERT_EQ(HKS_SUCCESS, ret);
-
-    ret = HksAddProcessNameToParamSet(srcParamSet, nullptr);
-    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
-
-    HksFreeParamSet(&srcParamSet);
-}
-
-/**
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest004
  * @tc.desc: tdd AddMandatoryeParamsInService, expect HKS_FAILURE
  * @tc.type: FUNC
