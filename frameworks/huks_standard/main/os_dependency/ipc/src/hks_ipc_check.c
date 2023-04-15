@@ -32,7 +32,7 @@ int32_t HksCheckIpcGenerateKey(const struct HksBlob *keyAlias, const struct HksP
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSetIn failed")
 
     if ((keyAlias->size > MAX_PROCESS_SIZE) ||
-        ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
+        ((sizeof(keyAlias->size) + keyAlias->size + paramSetIn->paramSetSize +
         sizeof(uint32_t)) > MAX_PROCESS_SIZE)) {
         HKS_LOG_E("ipc generate key check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -50,8 +50,8 @@ int32_t HksCheckIpcImportKey(const struct HksBlob *keyAlias, const struct HksPar
     if ((keyAlias->size > MAX_PROCESS_SIZE) || (key->size > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-        sizeof(key->size) + ALIGN_SIZE(key->size) > MAX_PROCESS_SIZE)) {
+    if ((sizeof(keyAlias->size) + keyAlias->size + paramSet->paramSetSize +
+        sizeof(key->size) + key->size > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -68,9 +68,9 @@ int32_t HksCheckIpcImportWrappedKey(const struct HksBlob *keyAlias, const struct
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
-         sizeof(wrappingKeyAlias->size) + ALIGN_SIZE(wrappingKeyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-         sizeof(wrappedKeyData->size) + ALIGN_SIZE(wrappedKeyData->size)) > MAX_PROCESS_SIZE) {
+    if ((sizeof(keyAlias->size) + keyAlias->size +
+        sizeof(wrappingKeyAlias->size) + wrappingKeyAlias->size + paramSet->paramSetSize +
+        sizeof(wrappedKeyData->size) + wrappedKeyData->size) > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -82,7 +82,7 @@ int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct 
     if (keyAlias->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(key->size)) > MAX_PROCESS_SIZE) {
+    if ((sizeof(keyAlias->size) + keyAlias->size + sizeof(key->size)) > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -97,7 +97,7 @@ int32_t HksCheckIpcGetKeyParamSet(const struct HksBlob *keyAlias, struct HksPara
     if (paramSet->paramSetSize == 0) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(paramSet->paramSetSize)) > MAX_PROCESS_SIZE) {
+    if ((sizeof(keyAlias->size) + keyAlias->size + sizeof(paramSet->paramSetSize)) > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -112,8 +112,8 @@ int32_t HksCheckIpcAgreeKey(const struct HksParamSet *paramSet, const struct Hks
     if ((privateKey->size > MAX_PROCESS_SIZE) || (peerPublicKey->size > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((ALIGN_SIZE(paramSet->paramSetSize) + sizeof(privateKey->size) + ALIGN_SIZE(privateKey->size) +
-        sizeof(peerPublicKey->size) + ALIGN_SIZE(peerPublicKey->size) + sizeof(agreedKey->size) > MAX_PROCESS_SIZE)) {
+    if ((paramSet->paramSetSize + sizeof(privateKey->size) + privateKey->size +
+        sizeof(peerPublicKey->size) + peerPublicKey->size + sizeof(agreedKey->size) > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -128,7 +128,7 @@ int32_t HksCheckIpcDeriveKey(const struct HksParamSet *paramSet, const struct Hk
     if (mainKey->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((ALIGN_SIZE(paramSet->paramSetSize) + sizeof(mainKey->size) + ALIGN_SIZE(mainKey->size) +
+    if ((paramSet->paramSetSize + sizeof(mainKey->size) + mainKey->size +
         sizeof(derivedKey->size)) > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -157,14 +157,14 @@ int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, uint32_t
             (IsAdditionOverflow(keyInfoList[i].paramSet->paramSetSize, DEFAULT_ALIGN_MASK_SIZE))) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (IsAdditionOverflow(keyInfoBufSize, ALIGN_SIZE(keyInfoList[i].alias.size))) {
+        if (IsAdditionOverflow(keyInfoBufSize, keyInfoList[i].alias.size)) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        keyInfoBufSize += ALIGN_SIZE(keyInfoList[i].alias.size);
-        if (IsAdditionOverflow(keyInfoBufSize, ALIGN_SIZE(keyInfoList[i].paramSet->paramSetSize))) {
+        keyInfoBufSize += keyInfoList[i].alias.size;
+        if (IsAdditionOverflow(keyInfoBufSize, keyInfoList[i].paramSet->paramSetSize)) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        keyInfoBufSize += ALIGN_SIZE(keyInfoList[i].paramSet->paramSetSize);
+        keyInfoBufSize += keyInfoList[i].paramSet->paramSetSize;
     }
     return HKS_SUCCESS;
 }
@@ -178,8 +178,8 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
     }
     HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
     if ((keyAlias->size > MAX_PROCESS_SIZE) ||
-        ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
-        ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
+        ((sizeof(keyAlias->size) + keyAlias->size +
+        paramSet->paramSetSize) > MAX_PROCESS_SIZE)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -193,10 +193,10 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
         if (IsAdditionOverflow(certChain->certs[i].size, DEFAULT_ALIGN_MASK_SIZE)) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        if (IsAdditionOverflow(certBufSize, ALIGN_SIZE(certChain->certs[i].size))) {
+        if (IsAdditionOverflow(certBufSize, certChain->certs[i].size)) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
-        certBufSize += ALIGN_SIZE(certChain->certs[i].size);
+        certBufSize += certChain->certs[i].size;
     }
     return HKS_SUCCESS;
 }
