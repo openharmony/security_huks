@@ -202,10 +202,12 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struc
         ret = HksGetOldKeyInfoListForSmallToService(processInfo, keyInfoList, listMaxCnt, listCount);
     }
 #endif
+
 #ifdef L2_STANDARD
     HksReport(__func__, processInfo, NULL, ret);
-    return ret;
 #endif
+
+    return ret;
 }
 #endif
 #endif /* _CUT_AUTHENTICATE_ */
