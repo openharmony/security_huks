@@ -63,7 +63,7 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level
 {
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest004");
 
-    int32_t ret = GetMandatoryParamsInService(nullptr, nullptr);
+    int32_t ret = AddMandatoryParamsInService(nullptr, nullptr);
     ASSERT_EQ(HKS_FAILURE, ret);
 }
 
