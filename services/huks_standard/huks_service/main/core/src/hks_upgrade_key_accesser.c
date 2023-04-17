@@ -33,7 +33,7 @@
 #include "securec.h"
 
 // add some mandatory params in service, the others mandatory params added in core
-static int32_t GetMandatoryParamsInService(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
+static int32_t AddMandatoryParamsInService(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
 {
     return HksAddParams(targetParamSet, srcParamSet->params, srcParamSet->paramsCnt);
 }
@@ -47,7 +47,7 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
         ret = HksInitParamSet(&paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init paramSet failed!")
 
-        ret = GetMandatoryParamsInService(srcParamSet, paramSet);
+        ret = AddMandatoryParamsInService(srcParamSet, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddUpgradeParams failed!")
 
         ret = HksBuildParamSet(&paramSet);
