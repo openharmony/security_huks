@@ -21,6 +21,9 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   module_out_path = module_output_path
   fuzz_config_file = "//base/security/huks/test/fuzz_test/ipc_entry_fuzzer"
 
+  subsystem_name = "security"
+  part_name = "huks"
+
   include_dirs = [
     ".",
     "//third_party/bounds_checking_function/include",
