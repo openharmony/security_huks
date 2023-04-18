@@ -181,9 +181,8 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
             }
             if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data,
                 processInfo->processName.size) != EOK) {
-                HKS_LOG_E("copy process name failed!");
-                ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-                break;
+                HKS_LOG_E("process name is no int, default as 0");
+                processName = 0;
             }
         }
         struct EventValues eventValues = { userId, processName, algorithmTag, errorCode };
