@@ -90,7 +90,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest002, TestSize.Level0)
 
 /**
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest003
- * @tc.desc: tdd GetMandatoryParamsInCore, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd AddMandatoryParamsInCore, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  * @tc.require: issueI6RJBX
  */
@@ -102,7 +102,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest003, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, ret);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_EQ(HKS_SUCCESS, ret);
-    ret = GetMandatoryParamsInCore(nullptr, paramSet, nullptr);
+    ret = AddMandatoryParamsInCore(nullptr, paramSet, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
@@ -146,7 +146,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest005, TestSize.Level0)
 
 /**
  * @tc.name: HksUpgradeKeyCTest.HksUpgradeKeyCTest006
- * @tc.desc: tdd GetMandatoryParamsInCore, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd AddMandatoryParamsInCore, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  * @tc.require: issueI6RJBX
  */
@@ -155,7 +155,7 @@ HWTEST_F(HksUpgradeKeyCTest, HksUpgradeKeyCTest006, TestSize.Level0)
     HKS_LOG_I("enter HksUpgradeKeyCTest006");
     uint32_t exceedCnt = HKS_DEFAULT_PARAM_CNT + 1;
     struct HksParamSet paramSet = { .paramSetSize = 0, .paramsCnt = exceedCnt, .params = {} };
-    int32_t ret = GetMandatoryParamsInCore(nullptr, &paramSet, nullptr);
+    int32_t ret = AddMandatoryParamsInCore(nullptr, &paramSet, nullptr);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 

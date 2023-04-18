@@ -27,6 +27,8 @@
 #include "hks_session_manager.h"
 #include "hks_type_inner.h"
 
+#include "hks_test_modify_old_key.h"
+
 #include "../../../../../../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c"
 
 using namespace testing::ext;
@@ -154,6 +156,8 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
 
+static const uint32_t HUKS_UID = 3510;
+
 /**
  * @tc.name: HksClientServiceTest.HksClientServiceTest002
  * @tc.desc: tdd HksServiceDeleteProcessInfo, expect HKS_ERROR_INVALID_ARGUMENT
@@ -175,6 +179,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest002, TestSize.Level0)
     HksServiceDeleteProcessInfo(&processInfo2);
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
+    HksChangeOldKeyOwner(HKS_CONFIG_KEY_STORE_PATH "/maindata", HUKS_UID);
 }
 
 static const uint32_t g_defaultCertSize = 10240;
