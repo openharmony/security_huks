@@ -32,9 +32,6 @@ static bool IsSliceCmd(uint32_t cmdId)
 
 static uint32_t GetBlobBufSize(const struct HksBlob *blob, uint32_t *bufSize)
 {
-    if (IsAdditionOverflow(blob->size, DEFAULT_ALIGN_MASK_SIZE)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
     if (IsAdditionOverflow(blob->size, sizeof(blob->size))) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
