@@ -217,7 +217,7 @@ HWTEST_F(HksUpgradeRkcTest, HksUpgradeRkcTest002, TestSize.Level0)
     struct HksBlob cipherBlob = { .size = HKS_ARRAY_SIZE(cipherText), .data = cipherText};
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
 
-    ret = TestDoEncrypt(&keyAlias, ENCYPT_AES_PARAMS, sizeof(ENCYPT_AES_PARAMS) / sizeof(HksParam), &plainBlob,
+    int32_t ret = TestDoEncrypt(&keyAlias, ENCYPT_AES_PARAMS, sizeof(ENCYPT_AES_PARAMS) / sizeof(HksParam), &plainBlob,
         &cipherBlob);
 
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
