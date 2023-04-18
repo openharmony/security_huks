@@ -139,11 +139,10 @@ static struct HksParam ENCYPT_AES_PARAMS[] = {
 
 #define USER_ID "0"
 
-// default process name for module test is hks_client
-#define OLD_PROCESS_NAME "hks_client"
+static const uint32_t TEST_PROCESS_UID = 0;
 static const struct HksProcessInfo PROCESS_INFO = {
     { strlen(USER_ID), (uint8_t *)USER_ID },
-    { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
+    { sizeof(TEST_PROCESS_UID), (uint8_t *)&TEST_PROCESS_UID },
     0,
     0
 };

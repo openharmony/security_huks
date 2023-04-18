@@ -134,7 +134,7 @@ static const struct HksAddUpgradeParamFuncMap HKS_ADD_MANDATORY_FUNC_LIST[] = {
     },
 };
 
-static int32_t GetMandatoryParamsInCore(const struct HksParamSet *oldKeyBlobParamSet,
+static int32_t AddMandatoryParamsInCore(const struct HksParamSet *oldKeyBlobParamSet,
     const struct HksParamSet *srcParamSet, struct HksParamSet **targetParamSet)
 {
     struct HksParamSet *outParamSet = NULL;
@@ -260,8 +260,8 @@ static int32_t ConstructNewKeyParamSet(const struct HksParamSet *oldKeyBlobParam
     struct HksParamSet *newMandatoryParamSet = NULL;
     struct HksParamSet *newKeyBlobParamSet = NULL;
     do {
-        ret = GetMandatoryParamsInCore(oldKeyBlobParamSet, paramSet, &newMandatoryParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetMandatoryParamsInCore failed!")
+        ret = AddMandatoryParamsInCore(oldKeyBlobParamSet, paramSet, &newMandatoryParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddMandatoryParamsInCore failed!")
 
         ret = HksInitParamSet(&newKeyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed!")
