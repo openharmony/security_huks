@@ -18,7 +18,7 @@ enable_hks_coverage = false
 enable_user_auth_framework = true
 
 # always set as false for upload code
-hks_enable_test = true
+hks_enable_test = false
 
 # specify the key version
 huks_key_version = "3"
