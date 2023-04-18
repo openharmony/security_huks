@@ -103,7 +103,7 @@ static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     if (*srcOffset > srcBlob->size || ((srcBlob->size - *srcOffset) < sizeof(struct HksParamSet))) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    
+
     *paramSet = (struct HksParamSet*)(srcBlob->data + *srcOffset);
     if ((*paramSet)->paramSetSize > (srcBlob->size - *srcOffset) ||
         HksFreshParamSet(*paramSet, false) != HKS_SUCCESS) {

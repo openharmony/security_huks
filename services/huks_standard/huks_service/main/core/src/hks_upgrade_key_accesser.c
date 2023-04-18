@@ -32,46 +32,10 @@
 
 #include "securec.h"
 
-typedef int32_t (*HksAddUpgradeParam)(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet);
-
-struct HksAddUpgradeParamFuncMap {
-    uint32_t paramTag;
-    HksAddUpgradeParam func;
-};
-
-static int32_t HksAddProcessNameToParamSet(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
-{
-    if (srcParamSet == NULL) {
-        HKS_LOG_E("none params for small to service failed!");
-        return HKS_FAILURE;
-    }
-    struct HksParam *srcProcessInfo = NULL;
-    int32_t ret = HksGetParam(srcParamSet, HKS_TAG_PROCESS_NAME, &srcProcessInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param process name failed!")
-
-    return HksAddParams(targetParamSet, srcProcessInfo, 1);
-}
-
-static const struct HksAddUpgradeParamFuncMap HKS_ADD_MANDATORY_FUNC_LIST[] = {
-    {
-        .paramTag = HKS_TAG_PROCESS_NAME,
-        .func = HksAddProcessNameToParamSet
-    },
-};
-
 // add some mandatory params in service, the others mandatory params added in core
-static int32_t GetMandatoryParamsInService(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
+static int32_t AddMandatoryParamsInService(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
 {
-    int32_t ret = HKS_SUCCESS;
-
-    uint32_t funcArraySize = HKS_ARRAY_SIZE(HKS_ADD_MANDATORY_FUNC_LIST);
-    uint32_t i = 0;
-    for (; i < funcArraySize; ++i) {
-        ret = HKS_ADD_MANDATORY_FUNC_LIST[i].func(srcParamSet, targetParamSet);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add upgrade param %" LOG_PUBLIC "u failed!", i)
-    }
-
-    return ret;
+    return HksAddParams(targetParamSet, srcParamSet->params, srcParamSet->paramsCnt);
 }
 
 int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksParamSet *srcParamSet,
@@ -83,7 +47,7 @@ int32_t HksDoUpgradeKeyAccess(const struct HksBlob *oldKey, const struct HksPara
         ret = HksInitParamSet(&paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init paramSet failed!")
 
-        ret = GetMandatoryParamsInService(srcParamSet, paramSet);
+        ret = AddMandatoryParamsInService(srcParamSet, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddUpgradeParams failed!")
 
         ret = HksBuildParamSet(&paramSet);

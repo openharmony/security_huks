@@ -57,6 +57,7 @@ ohos_static_library("huks_modify_old_version_key_util") {
     "../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
+    "../../../services/huks_standard/huks_engine/main/core/src/hks_sm_import_wrap_key.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
   ]
 
@@ -77,6 +78,13 @@ ohos_static_library("huks_modify_old_version_key_util") {
     } else {
       deps += [ "../../../services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
     }
+
+    sources += [
+      "../../../services/huks_standard/huks_engine/main/core/src/hks_asn1.c",
+      "../../../services/huks_standard/huks_engine/main/core/src/hks_attest.c",
+      "../../../services/huks_standard/huks_engine/main/core/src/hks_attest_utils.c",
+      "../../../services/huks_standard/huks_engine/main/core/src/hks_chipset_platform_decrypt.c",
+    ]
 
     cflags += [ "-D_HARDWARE_ROOT_KEY_" ]
   } else {
