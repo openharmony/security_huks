@@ -35,6 +35,9 @@
 // add some mandatory params in service, the others mandatory params added in core
 static int32_t AddMandatoryParamsInService(const struct HksParamSet *srcParamSet, struct HksParamSet *targetParamSet)
 {
+    if (srcParamSet == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     return HksAddParams(targetParamSet, srcParamSet->params, srcParamSet->paramsCnt);
 }
 

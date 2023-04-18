@@ -104,7 +104,7 @@ int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
 
     int error = hksProxy->SendRequest(type, data, reply, option);
     if (error != 0) {
-        return error;
+        return HKS_ERROR_IPC_MSG_FAIL;
     }
 
     return HksReadRequestReply(reply, outBlob);

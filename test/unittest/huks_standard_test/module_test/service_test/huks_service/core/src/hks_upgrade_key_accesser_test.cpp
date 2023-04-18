@@ -55,7 +55,7 @@ void HksUpgradeKeyAccesserTest::TearDown()
 
 /**
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest004
- * @tc.desc: tdd AddMandatoryeParamsInService, expect HKS_FAILURE
+ * @tc.desc: tdd AddMandatoryeParamsInService, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  * @tc.require: issueI6RJBX
  */
@@ -64,12 +64,12 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest004, TestSize.Level
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest004");
 
     int32_t ret = AddMandatoryParamsInService(nullptr, nullptr);
-    ASSERT_EQ(HKS_FAILURE, ret);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
 /**
  * @tc.name: HksUpgradeKeyAccesserTest.HksUpgradeKeyAccesserTest005
- * @tc.desc: tdd HksDoUpgradeKeyAccess, expect HKS_FAILURE
+ * @tc.desc: tdd HksDoUpgradeKeyAccess, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  * @tc.require: issueI6RJBX
  */
@@ -78,6 +78,6 @@ HWTEST_F(HksUpgradeKeyAccesserTest, HksUpgradeKeyAccesserTest005, TestSize.Level
     HKS_LOG_I("enter HksUpgradeKeyAccesserTest005");
 
     int32_t ret = HksDoUpgradeKeyAccess(nullptr, nullptr, nullptr);
-    ASSERT_EQ(HKS_FAILURE, ret);
+    ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 }
