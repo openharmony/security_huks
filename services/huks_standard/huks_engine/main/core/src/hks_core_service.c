@@ -1627,6 +1627,7 @@ int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct
     return HksCheckKeyValidity(paramSet, key);
 }
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
 static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *certChain)
 {
@@ -1641,6 +1642,7 @@ static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksP
 
     return HKS_SUCCESS;
 }
+#endif
 
 int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
