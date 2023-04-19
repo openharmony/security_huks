@@ -76,7 +76,7 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
 
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSetIn->paramSetSize) +
+    inBlob.size = sizeof(keyAlias->size) + keyAlias->size + paramSetIn->paramSetSize +
         sizeof(outBlob.size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
@@ -109,8 +109,8 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcImportKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
-        sizeof(key->size) + ALIGN_SIZE(key->size);
+    inBlob.size = sizeof(keyAlias->size) + keyAlias->size + paramSet->paramSetSize +
+        sizeof(key->size) + key->size;
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
@@ -132,7 +132,7 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcExportPublicKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(key->size);
+    inBlob.size = sizeof(keyAlias->size) + keyAlias->size + sizeof(key->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
@@ -154,10 +154,10 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksClientImportWrappedKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
-                  sizeof(wrappingKeyAlias->size) + ALIGN_SIZE(wrappingKeyAlias->size) +
-                  ALIGN_SIZE(paramSet->paramSetSize) +
-                  sizeof(wrappedKeyData->size) + ALIGN_SIZE(wrappedKeyData->size);
+    inBlob.size = sizeof(keyAlias->size) + keyAlias->size +
+                sizeof(wrappingKeyAlias->size) + wrappingKeyAlias->size +
+                paramSet->paramSetSize +
+                sizeof(wrappedKeyData->size) + wrappedKeyData->size;
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
@@ -189,7 +189,7 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamS
 
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { paramSetOut->paramSetSize, (uint8_t *)paramSetOut };
-    inBlob.size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(paramSetOut->paramSetSize);
+    inBlob.size = sizeof(keyAlias->size) + keyAlias->size + sizeof(paramSetOut->paramSetSize);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
@@ -389,8 +389,8 @@ int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBl
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcAgreeKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = ALIGN_SIZE(paramSet->paramSetSize) + sizeof(privateKey->size) + ALIGN_SIZE(privateKey->size) +
-        sizeof(peerPublicKey->size) + ALIGN_SIZE(peerPublicKey->size) + sizeof(agreedKey->size);
+    inBlob.size = paramSet->paramSetSize + sizeof(privateKey->size) + privateKey->size +
+        sizeof(peerPublicKey->size) + peerPublicKey->size + sizeof(agreedKey->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
 
@@ -412,7 +412,7 @@ int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksB
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckIpcDeriveKey fail")
 
     struct HksBlob inBlob = { 0, NULL };
-    inBlob.size = ALIGN_SIZE(paramSet->paramSetSize) + sizeof(mainKey->size) + ALIGN_SIZE(mainKey->size) +
+    inBlob.size = paramSet->paramSetSize + sizeof(mainKey->size) + mainKey->size +
         sizeof(derivedKey->size);
     inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
     HKS_IF_NULL_RETURN(inBlob.data, HKS_ERROR_MALLOC_FAIL)
@@ -459,8 +459,8 @@ int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCo
     struct HksBlob outBlob = { 0, NULL };
     outBlob.size += sizeof(*listCount);
     for (uint32_t i = 0; i < *listCount; ++i) {
-        outBlob.size += sizeof(keyInfoList[i].alias.size) + ALIGN_SIZE(keyInfoList[i].alias.size) +
-            ALIGN_SIZE(keyInfoList[i].paramSet->paramSetSize);
+        outBlob.size += sizeof(keyInfoList[i].alias.size) + keyInfoList[i].alias.size +
+            keyInfoList[i].paramSet->paramSetSize;
     }
 
     outBlob.data = (uint8_t *)HksMalloc(outBlob.size);
@@ -492,10 +492,10 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
 
     uint32_t certBufSize = sizeof(certChain->certsCount);
     for (uint32_t i = 0; i < certChain->certsCount; ++i) {
-        certBufSize += sizeof(certChain->certs[i].size) + ALIGN_SIZE(certChain->certs[i].size);
+        certBufSize += sizeof(certChain->certs[i].size) + certChain->certs[i].size;
     }
 
-    inBlob->size = sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + ALIGN_SIZE(paramSet->paramSetSize) +
+    inBlob->size = sizeof(keyAlias->size) + keyAlias->size + paramSet->paramSetSize +
         sizeof(certBufSize);
     inBlob->data = (uint8_t *)HksMalloc(inBlob->size);
     HKS_IF_NULL_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL)

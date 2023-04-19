@@ -1328,15 +1328,15 @@ static int32_t CreateHwAttestCert(const struct HksAttestSpec *attestSpec, struct
 
 static int32_t CopyBlobToBuffer(const struct HksBlob *blob, struct HksBlob *buf)
 {
-    if (buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size)) {
+    if (buf->size < sizeof(blob->size) + blob->size) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     (void)memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size));
     buf->data += sizeof(blob->size);
     buf->size -= sizeof(blob->size);
     (void)memcpy_s(buf->data, buf->size, blob->data, blob->size);
-    buf->data += ALIGN_SIZE(blob->size);
-    buf->size -= ALIGN_SIZE(blob->size);
+    buf->data += blob->size;
+    buf->size -= blob->size;
     return HKS_SUCCESS;
 }
 
