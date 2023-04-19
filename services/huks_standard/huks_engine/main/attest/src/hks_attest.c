@@ -318,6 +318,40 @@ static enum HksTag g_idAttestList[] = {
     HKS_TAG_ATTESTATION_ID_VERSION_INFO,
 };
 
+static inline uint32_t GetYearIndex(uint32_t year)
+{
+    if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0))) { /* 4/100/400 check whether it is a leap year */
+        return 1;
+    } else {
+        return 0;
+    }
+}
+
+static inline uint32_t GetLeapDays(uint32_t year)
+{
+    return ((year / 4) - (year / 100) + (year / 400)); /* 4/100/400 check whether it is a leap year */
+}
+
+static inline bool IsSignPurpose(enum HksKeyPurpose purpose)
+{
+    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_SIGN) == HKS_KEY_PURPOSE_SIGN) ||
+        (((uint32_t)purpose & HKS_KEY_PURPOSE_VERIFY) == HKS_KEY_PURPOSE_VERIFY));
+}
+
+static inline bool IsCipherPurpose(enum HksKeyPurpose purpose)
+{
+    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_ENCRYPT) == HKS_KEY_PURPOSE_ENCRYPT) ||
+        (((uint32_t)purpose & HKS_KEY_PURPOSE_DECRYPT) == HKS_KEY_PURPOSE_DECRYPT) ||
+        (((uint32_t)purpose & HKS_KEY_PURPOSE_WRAP) == HKS_KEY_PURPOSE_WRAP) ||
+        (((uint32_t)purpose & HKS_KEY_PURPOSE_UNWRAP) == HKS_KEY_PURPOSE_UNWRAP));
+}
+
+static inline bool IsAgreementPurpose(enum HksKeyPurpose purpose)
+{
+    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_DERIVE) == HKS_KEY_PURPOSE_DERIVE) ||
+        (((uint32_t)purpose & HKS_KEY_PURPOSE_AGREE) == HKS_KEY_PURPOSE_AGREE));
+}
+
 static void GetTimeStampTee(uint8_t *timeStamp, const struct DataTime *time)
 {
     int i = 0;
@@ -1378,7 +1412,7 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     return HKS_SUCCESS;
 }
 
-static int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
+int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
     struct HksBlob *certChain)
 {
     struct HksAttestSpec *attestSpec = NULL;
@@ -1396,42 +1430,5 @@ static int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct 
     ret = FormatAttestChain(&attestCert, attestSpec, certChain);
     HKS_FREE_BLOB(attestCert);
     FreeAttestSpec(&attestSpec);
-    return ret;
-}
-
-static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    struct HksBlob *certChain)
-{
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "invalid key!")
-
-    if ((CheckBlob(certChain) != HKS_SUCCESS) || (certChain->size < HKS_ATTEST_CERT_SIZE)) {
-        HKS_LOG_E("invalid cert chain!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSetValidity(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid paramSet!")
-
-    return HKS_SUCCESS;
-}
-
-int32_t HksSoftAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain)
-{
-    int32_t ret = CheckAttestKeyParams(key, paramSet, certChain);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate keynode failed")
-
-    ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("access control failed");
-        HksFreeKeyNode(&keyNode);
-        return ret;
-    }
-
-    ret = CreateHwAttestCertChain(keyNode, paramSet, certChain);
-    HKS_IF_NOT_SUCC_LOGE(ret, "create attest cert chain failed!")
-
-    HksFreeKeyNode(&keyNode);
     return ret;
 }
