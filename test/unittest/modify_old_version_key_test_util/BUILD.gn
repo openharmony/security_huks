@@ -80,9 +80,9 @@ ohos_static_library("huks_modify_old_version_key_util") {
     }
 
     sources += [
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_asn1.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_attest.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_attest_utils.c",
+      "../../../services/huks_standard/huks_engine/main/attest/src/hks_asn1.c",
+      "../../../services/huks_standard/huks_engine/main/attest/src/hks_attest.c",
+      "../../../services/huks_standard/huks_engine/main/attest/src/hks_attest_utils.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_chipset_platform_decrypt.c",
     ]
 
@@ -105,6 +105,7 @@ ohos_static_library("huks_modify_old_version_key_util") {
 
   include_dirs += [
     "../../../services/huks_standard/huks_engine/main/core/include",
+    "../../../services/huks_standard/huks_engine/main/attest/include",
     "../../../utils/crypto_adapter",
     "../../../utils/file_operator",
     "../../../utils/list",
