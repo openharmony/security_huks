@@ -18,7 +18,7 @@ import("//build/ohos.gni")
 config("huks_config") {
   include_dirs = [
     "include",
-    "../attest/include",
+    "../cert_manager/include",
   ]
 }
 
@@ -64,9 +64,9 @@ if (os_level == "standard") {
       debug = false
     }
     sources += [
-      "../attest/src/hks_asn1.c",
-      "../attest/src/hks_attest.c",
-      "../attest/src/hks_attest_utils.c",
+      "../cert_manager/src/dcm_asn1.c",
+      "../cert_manager/src/dcm_attest.c",
+      "../cert_manager/src/dcm_attest_utils.c",
     ]
 
     sources += [ "src/hks_upgrade_key.c" ]
