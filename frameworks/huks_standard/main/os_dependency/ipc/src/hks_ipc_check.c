@@ -153,7 +153,10 @@ int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, uint32_t
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         keyInfoBufSize += sizeof(keyInfoList[i].alias.size);
-
+        if ((IsAdditionOverflow(keyInfoList[i].alias.size, DEFAULT_ALIGN_MASK_SIZE)) ||
+            (IsAdditionOverflow(keyInfoList[i].paramSet->paramSetSize, DEFAULT_ALIGN_MASK_SIZE))) {
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
         if (IsAdditionOverflow(keyInfoBufSize, keyInfoList[i].alias.size)) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
@@ -187,6 +190,9 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
         }
         certBufSize += sizeof(certChain->certs[i].size);
 
+        if (IsAdditionOverflow(certChain->certs[i].size, DEFAULT_ALIGN_MASK_SIZE)) {
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
         if (IsAdditionOverflow(certBufSize, certChain->certs[i].size)) {
             return HKS_ERROR_INVALID_ARGUMENT;
         }
