@@ -539,8 +539,8 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
 
         keyInfoListBlob.size = sizeof(listCount);
         for (uint32_t i = 0; i < listCount; ++i) {
-            keyInfoListBlob.size += sizeof(keyInfoList[i].alias.size) + keyInfoList[i].alias.size +
-                keyInfoList[i].paramSet->paramSetSize;
+            keyInfoListBlob.size += sizeof(keyInfoList[i].alias.size) + ALIGN_SIZE(keyInfoList[i].alias.size) +
+                ALIGN_SIZE(keyInfoList[i].paramSet->paramSetSize);
         }
 
         keyInfoListBlob.data = (uint8_t *)HksMalloc(keyInfoListBlob.size);

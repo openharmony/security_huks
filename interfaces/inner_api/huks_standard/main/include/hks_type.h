@@ -44,6 +44,13 @@ extern "C" {
 
 #define HKS_SDK_VERSION "2.0.0.4"
 
+/*
+ * Align to 4-tuple
+ * Before calling this function, ensure that the size does not overflow after 3 is added.
+ */
+#define ALIGN_SIZE(size) ((((uint32_t)(size) + 3) >> 2) << 2)
+#define DEFAULT_ALIGN_MASK_SIZE 3
+
 #define HKS_AE_TAG_LEN 16
 #define HKS_BITS_PER_BYTE 8
 #define MAX_KEY_SIZE 2048
