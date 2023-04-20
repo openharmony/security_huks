@@ -44,7 +44,7 @@ int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint3
 static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
     if ((*destOffset > destBlob->size) ||
-        ((destBlob->size - *destOffset) < (sizeof(blob->size) + blob->size))) {
+        ((destBlob->size - *destOffset) < (sizeof(blob->size) + ALIGN_SIZE(blob->size)))) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
@@ -52,7 +52,7 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
     *destOffset += sizeof(blob->size);
 
     (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size);
-    *destOffset += blob->size;
+    *destOffset += ALIGN_SIZE(blob->size);
 
     return HKS_SUCCESS;
 }
@@ -60,12 +60,12 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
 static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
     const struct HksBlob *destBlob, uint32_t *destOffset)
 {
-    if ((*destOffset > destBlob->size) || (destBlob->size - *destOffset < paramSet->paramSetSize)) {
+    if ((*destOffset > destBlob->size) || (destBlob->size - *destOffset < ALIGN_SIZE(paramSet->paramSetSize))) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
     (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, paramSet, paramSet->paramSetSize);
-    *destOffset += paramSet->paramSetSize;
+    *destOffset += ALIGN_SIZE(paramSet->paramSetSize);
 
     return HKS_SUCCESS;
 }
@@ -88,13 +88,13 @@ static int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *src
     }
 
     uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
-    if (size > (srcBlob->size - *srcOffset - sizeof(blob->size))) {
+    if (ALIGN_SIZE(size) > (srcBlob->size - *srcOffset - sizeof(blob->size))) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     blob->size = size;
     *srcOffset += sizeof(blob->size);
     blob->data = (uint8_t *)(srcBlob->data + *srcOffset);
-    *srcOffset += blob->size;
+    *srcOffset += ALIGN_SIZE(blob->size);
 
     return HKS_SUCCESS;
 }
@@ -107,10 +107,10 @@ static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     }
 
     *paramSet = (struct HksParamSet *)(srcBlob->data + *srcOffset);
-    if ((*paramSet)->paramSetSize > (srcBlob->size - *srcOffset)) {
+    if (ALIGN_SIZE((*paramSet)->paramSetSize) > (srcBlob->size - *srcOffset)) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    *srcOffset += (*paramSet)->paramSetSize;
+    *srcOffset += ALIGN_SIZE((*paramSet)->paramSetSize);
 
     return HKS_SUCCESS;
 }

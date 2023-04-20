@@ -48,6 +48,7 @@ extern "C" {
  * Align to 4-tuple
  * Before calling this function, ensure that the size does not overflow after 3 is added.
  */
+#define ALIGN_SIZE(size) ((((uint32_t)(size) + 3) >> 2) << 2)
 #define DEFAULT_ALIGN_MASK_SIZE 3
 
 #define HKS_AE_TAG_LEN 16
