@@ -97,13 +97,13 @@ do { \
 extern "C" {
 #endif
 
-int32_t HksAsn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, const struct HksAsn1Blob *tlv);
+int32_t DcmAsn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, const struct HksAsn1Blob *tlv);
 
-int32_t HksAsn1WriteFinal(struct HksBlob *final, const struct HksAsn1Blob *tlv);
+int32_t DcmAsn1WriteFinal(struct HksBlob *final, const struct HksAsn1Blob *tlv);
 
-int32_t HksAsn1GetObj(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data);
+int32_t DcmAsn1GetObj(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data);
 
-int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data,
+int32_t DcmAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data,
     uint32_t expectedTag);
 
 static inline int32_t CheckAsn1Blob(const struct HksAsn1Blob *blob)
