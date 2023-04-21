@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "hks_asn1.h"
+#include "dcm_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
 #include "hks_type.h"
@@ -120,7 +120,7 @@ struct HksAttestSpec {
 extern "C" {
 #endif
 
-int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
+int32_t CreateAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
     struct HksBlob *certChain);
 
 #ifdef __cplusplus
