@@ -88,6 +88,9 @@ static int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *src
     }
 
     uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
+    if (IsAdditionOverflow(size, DEFAULT_ALIGN_MASK_SIZE)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     if (ALIGN_SIZE(size) > (srcBlob->size - *srcOffset - sizeof(blob->size))) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
@@ -107,6 +110,9 @@ static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     }
 
     *paramSet = (struct HksParamSet *)(srcBlob->data + *srcOffset);
+    if (IsAdditionOverflow((*paramSet)->paramSetSize, DEFAULT_ALIGN_MASK_SIZE)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     if (ALIGN_SIZE((*paramSet)->paramSetSize) > (srcBlob->size - *srcOffset)) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
