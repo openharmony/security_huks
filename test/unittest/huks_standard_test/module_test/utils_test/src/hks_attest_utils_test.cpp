@@ -13,14 +13,14 @@
  * limitations under the License.
  */
 
-#include "hks_attest.h"
+#include "dcm_attest.h"
 #include "hks_attest_utils_test.h"
 
 #include <gtest/gtest.h>
 #include <thread>
 #include <unistd.h>
 
-#include "hks_attest_utils.h"
+#include "dcm_attest_utils.h"
 #include "hks_log.h"
 #include "hks_type.h"
 

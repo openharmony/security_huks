@@ -18,13 +18,13 @@
 #else
 #endif
 
-#include "hks_attest.h"
+#include "dcm_attest.h"
+#include "dcm_attest_utils.h"
 
 #include <stddef.h>
 #include <sys/time.h>
 
-#include "hks_attest_utils.h"
-#include "hks_certs_and_key.h"
+#include "dcm_certs_and_key.h"
 #include "hks_common_check.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
@@ -1412,7 +1412,7 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     return HKS_SUCCESS;
 }
 
-int32_t CreateHwAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
+int32_t CreateAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
     struct HksBlob *certChain)
 {
     struct HksAttestSpec *attestSpec = NULL;

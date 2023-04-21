@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_asn1.h"
+#include "dcm_asn1.h"
 #include "hks_log.h"
 #include "hks_template.h"
 #include "securec.h"
@@ -24,7 +24,6 @@
 #define ASN_1_TAG_TYPE_EXTRA_IDENTIFIER 0x1F
 #define TLV_HEADER_TYPE_2_LEN 4
 #define BASE128_ENCODE_BIT_LEN 7
-
 
 static void BuildTlvHeader(struct HksAsn1Blob *header, const struct HksAsn1Blob *tlv)
 {

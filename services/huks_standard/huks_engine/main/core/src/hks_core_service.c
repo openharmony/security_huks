@@ -25,7 +25,7 @@
 #include <stddef.h>
 
 #include "hks_ability.h"
-#include "hks_attest.h"
+#include "dcm_attest.h"
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
@@ -1660,7 +1660,7 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
         return ret;
     }
 
-    ret = CreateHwAttestCertChain(keyNode, paramSet, certChain);
+    ret = CreateAttestCertChain(keyNode, paramSet, certChain);
     HksFreeKeyNode(&keyNode);
     return ret;
 #else
