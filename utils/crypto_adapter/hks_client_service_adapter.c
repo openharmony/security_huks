@@ -692,7 +692,7 @@ static int32_t EvpPkeyToHksPubKeyInfo(
             break;
         }
         // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(keyLen)
-        // e.g. assuming that HKS_KEY_BYTES(keyLen) is 32, x size might be 32, 31, 30, etc. 
+        // e.g. assuming that HKS_KEY_BYTES(keyLen) is 32, x size might be 32, 31, 30, etc.
         uint32_t rawInfoLen = sizeof(struct HksPubKeyInfo) + pubXBlob.size + pubYBlob.size;
         uint8_t *rawInfo = (uint8_t *)HksMalloc(rawInfoLen);
         if (!rawInfo) {

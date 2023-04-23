@@ -192,7 +192,7 @@ static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMateria
         // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
 
         // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(size->keySize)
-        // e.g. assuming that HKS_KEY_BYTES(size->keySize) is 32, x size might be 32, 31, 30, etc. 
+        // e.g. assuming that HKS_KEY_BYTES(size->keySize) is 32, x size might be 32, 31, 30, etc.
         uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
         errno_t memRet = memcpy_s(uncompressedPublicKey + 1 + HKS_KEY_BYTES(size->keySize) - size->xSize, size->xSize,
             keyPair + sizeof(struct KeyMaterialEcc), size->xSize);
