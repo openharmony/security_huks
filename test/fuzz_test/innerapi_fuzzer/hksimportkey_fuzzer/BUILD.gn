@@ -19,7 +19,8 @@ module_output_path = "security/huks"
 ##############################fuzztest##########################################
 ohos_fuzztest("HksImportKeyFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksimportkey_fuzzer"
+  fuzz_config_file =
+      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksimportkey_fuzzer"
 
   include_dirs = [
     ".",

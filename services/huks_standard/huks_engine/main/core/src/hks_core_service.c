@@ -25,7 +25,7 @@
 #include <stddef.h>
 
 #include "hks_ability.h"
-#include "hks_attest.h"
+#include "dcm_attest.h"
 #include "hks_auth.h"
 #include "hks_base_check.h"
 #include "hks_check_paramset.h"
@@ -1627,10 +1627,42 @@ int32_t HksCoreGetKeyProperties(const struct HksParamSet *paramSet, const struct
     return HksCheckKeyValidity(paramSet, key);
 }
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *certChain)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "invalid key!")
+
+    if ((CheckBlob(certChain) != HKS_SUCCESS) || (certChain->size < HKS_ATTEST_CERT_SIZE)) {
+        HKS_LOG_E("invalid cert chain!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSetValidity(paramSet), HKS_ERROR_INVALID_ARGUMENT, "invalid paramSet!")
+
+    return HKS_SUCCESS;
+}
+#endif
+
 int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
-    return HksSoftAttestKey(key, paramSet, certChain);
+    int32_t ret = CheckAttestKeyParams(key, paramSet, certChain);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate keynode failed")
+
+    ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("access control failed");
+        HksFreeKeyNode(&keyNode);
+        return ret;
+    }
+
+    ret = CreateAttestCertChain(keyNode, paramSet, certChain);
+    HksFreeKeyNode(&keyNode);
+    return ret;
 #else
     (void)key;
     (void)paramSet;

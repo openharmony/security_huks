@@ -24,7 +24,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "hks_asn1.h"
+#include "dcm_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
 #include "hks_type.h"
@@ -120,44 +120,8 @@ struct HksAttestSpec {
 extern "C" {
 #endif
 
-static inline uint32_t GetYearIndex(uint32_t year)
-{
-    if ((year % 4 == 0) && ((year % 100 != 0) || (year % 400 == 0))) { /* 4/100/400 check whether it is a leap year */
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-static inline uint32_t GetLeapDays(uint32_t year)
-{
-    return ((year / 4) - (year / 100) + (year / 400)); /* 4/100/400 check whether it is a leap year */
-}
-
-static inline bool IsSignPurpose(enum HksKeyPurpose purpose)
-{
-    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_SIGN) == HKS_KEY_PURPOSE_SIGN) ||
-        (((uint32_t)purpose & HKS_KEY_PURPOSE_VERIFY) == HKS_KEY_PURPOSE_VERIFY));
-}
-
-static inline bool IsCipherPurpose(enum HksKeyPurpose purpose)
-{
-    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_ENCRYPT) == HKS_KEY_PURPOSE_ENCRYPT) ||
-        (((uint32_t)purpose & HKS_KEY_PURPOSE_DECRYPT) == HKS_KEY_PURPOSE_DECRYPT) ||
-        (((uint32_t)purpose & HKS_KEY_PURPOSE_WRAP) == HKS_KEY_PURPOSE_WRAP) ||
-        (((uint32_t)purpose & HKS_KEY_PURPOSE_UNWRAP) == HKS_KEY_PURPOSE_UNWRAP));
-}
-
-static inline bool IsAgreementPurpose(enum HksKeyPurpose purpose)
-{
-    return ((((uint32_t)purpose & HKS_KEY_PURPOSE_DERIVE) == HKS_KEY_PURPOSE_DERIVE) ||
-        (((uint32_t)purpose & HKS_KEY_PURPOSE_AGREE) == HKS_KEY_PURPOSE_AGREE));
-}
-
-int32_t HksCreateHwAttestCert(struct HksBlob *attestCert, const struct HksKeyNode *attestKey,
-    struct HksBlob *devKey, struct HksAttestSpec *attestSpec);
-
-int32_t HksSoftAttestKey(const struct HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *certChain);
+int32_t CreateAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
+    struct HksBlob *certChain);
 
 #ifdef __cplusplus
 }

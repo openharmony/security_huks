@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_asn1.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_asn1.c"
 
 #include "hks_log.h"
 #include "hks_param.h"
@@ -55,7 +55,7 @@ void HksAsn1Test::TearDown()
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test001
- * @tc.desc: tdd HksAsn1InsertValue, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1InsertValue, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test001, TestSize.Level0)
@@ -66,13 +66,13 @@ HWTEST_F(HksAsn1Test, HksAsn1Test001, TestSize.Level0)
     struct HksBlob buf = { .size = sizeof(bufData), .data = bufData };
     uint8_t tlvData[ASN_1_MAX_SIZE + 1] = { 0 };
     struct HksAsn1Blob tlv = { .type = 0, .size = sizeof(tlvData), .data = tlvData };
-    int32_t ret = HksAsn1InsertValue(&buf, nullptr, &tlv);
+    int32_t ret = DcmAsn1InsertValue(&buf, nullptr, &tlv);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test002
- * @tc.desc: tdd HksAsn1InsertValue, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1InsertValue, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test002, TestSize.Level0)
@@ -81,25 +81,25 @@ HWTEST_F(HksAsn1Test, HksAsn1Test002, TestSize.Level0)
     const uint32_t bufSize = 16;
     uint8_t bufData[bufSize] = { 0 };
     struct HksBlob buf = { .size = sizeof(bufData), .data = bufData };
-    int32_t ret = HksAsn1InsertValue(&buf, nullptr, nullptr);
+    int32_t ret = DcmAsn1InsertValue(&buf, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test003
- * @tc.desc: tdd HksAsn1InsertValue, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1InsertValue, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAsn1Test003");
-    int32_t ret = HksAsn1InsertValue(nullptr, nullptr, nullptr);
+    int32_t ret = DcmAsn1InsertValue(nullptr, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test004
- * @tc.desc: tdd HksAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test004, TestSize.Level0)
@@ -112,13 +112,13 @@ HWTEST_F(HksAsn1Test, HksAsn1Test004, TestSize.Level0)
     const uint32_t dataSize = 1;
     uint8_t dataData[dataSize] = { 0 };
     struct HksBlob data = { .size = sizeof(dataData), .data = dataData };
-    int32_t ret = HksAsn1ExtractTag(&next, &obj, &data, 0);
+    int32_t ret = DcmAsn1ExtractTag(&next, &obj, &data, 0);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test005
- * @tc.desc: tdd HksAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test005, TestSize.Level0)
@@ -128,13 +128,13 @@ HWTEST_F(HksAsn1Test, HksAsn1Test005, TestSize.Level0)
     uint8_t nextData[nextSize] = { 0 };
     struct HksBlob next = { .size = sizeof(nextData), .data = nextData };
     struct HksAsn1Obj obj;
-    int32_t ret = HksAsn1ExtractTag(&next, &obj, nullptr, 0);
+    int32_t ret = DcmAsn1ExtractTag(&next, &obj, nullptr, 0);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test006
- * @tc.desc: tdd HksAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test006, TestSize.Level0)
@@ -143,19 +143,19 @@ HWTEST_F(HksAsn1Test, HksAsn1Test006, TestSize.Level0)
     const uint32_t nextSize = 16;
     uint8_t nextData[nextSize] = { 0 };
     struct HksBlob next = { .size = sizeof(nextData), .data = nextData };
-    int32_t ret = HksAsn1ExtractTag(&next, nullptr, nullptr, 0);
+    int32_t ret = DcmAsn1ExtractTag(&next, nullptr, nullptr, 0);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 
 /**
  * @tc.name: HksAsn1Test.HksAsn1Test007
- * @tc.desc: tdd HksAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd DcmAsn1ExtractTag, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksAsn1Test, HksAsn1Test007, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAsn1Test007");
-    int32_t ret = HksAsn1ExtractTag(nullptr, nullptr, nullptr, 0);
+    int32_t ret = DcmAsn1ExtractTag(nullptr, nullptr, nullptr, 0);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
 }
 }

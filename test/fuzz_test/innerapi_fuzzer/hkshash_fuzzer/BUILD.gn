@@ -20,7 +20,8 @@ module_output_path = "security/huks"
 ohos_fuzztest("HksHashFuzzTest") {
   module_out_path = module_output_path
 
-  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hkshash_fuzzer"
+  fuzz_config_file =
+      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hkshash_fuzzer"
   include_dirs = [
     ".",
     "//third_party/bounds_checking_function/include",
