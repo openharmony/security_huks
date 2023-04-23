@@ -213,6 +213,13 @@ static int32_t ConstructSm2ParamsPushPubKey(OSSL_PARAM_BLD *paramBld,
             HKS_LOG_E("set zero fail");
             break;
         }
+
+        // https://www.mail-archive.com/openssl-users@openssl.org/msg90185.html
+        // Unfortunately supplying x and y separately is not supported for import.
+        // You have to instead use OSSL_PKEY_PARAM_PUB_KEY.
+        // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
+        // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
+
         // NOTICE: x size is less than or equal to HKS_KEY_BYTES(keySize),
         // and such cases means that x has leading zeros, so does y.
         uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
