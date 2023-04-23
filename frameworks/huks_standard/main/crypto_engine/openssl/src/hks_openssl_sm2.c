@@ -185,6 +185,12 @@ static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMateria
             break;
         }
 
+        // https://www.mail-archive.com/openssl-users@openssl.org/msg90185.html
+        // Unfortunately supplying x and y separately is not supported for import.
+        // You have to instead use OSSL_PKEY_PARAM_PUB_KEY.
+        // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
+        // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
+
         // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(size->keySize)
         // e.g. assuming that HKS_KEY_BYTES(size->keySize) is 32, x size might be 32, 31, 30, etc. 
         uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
