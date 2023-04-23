@@ -274,8 +274,10 @@ int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
     HKS_IF_NULL_LOGE_RETURN(dsa, HKS_ERROR_CRYPTO_ENGINE_ERROR, "DSA structure is NULL.")
 
     do {
+        HKS_LOG_I("spec->keyLen = %" LOG_PUBLIC "u", spec->keyLen);
         ret = DSA_generate_parameters_ex(dsa, spec->keyLen, NULL, 0, NULL, NULL, NULL);
         if (ret != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("DSA_generate_parameters_ex fail %" LOG_PUBLIC "d", ret);
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
@@ -283,6 +285,7 @@ int32_t HksOpensslDsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 
         ret = DSA_generate_key(dsa);
         if (ret != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("DSA_generate_key fail %" LOG_PUBLIC "d", ret);
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;

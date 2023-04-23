@@ -29,6 +29,7 @@ namespace Security {
 namespace Huks {
 namespace UnitTest {
 const uint32_t KEY_LEN_256 = 256;
+constexpr uint32_t DSA_KEY_LEN_512 = 512;
 class HksCryptoHalApiOpenssl : public HksCryptoHalCommon, public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -404,10 +405,10 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTes
 {
     HksKeySpec spec = {
         .algType = HKS_ALG_DSA,
-        .keyLen = KEY_LEN_256,
+        .keyLen = DSA_KEY_LEN_512,
     };
 
-    uint8_t buff[HKS_KEY_BYTES(KEY_LEN_256)] = {0};
+    uint8_t buff[HKS_KEY_BYTES(DSA_KEY_LEN_512)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksUsageSpec signSpec = { .algType = HKS_ALG_DSA };
     HksBlob message = { .size = 1, .data = buff };
@@ -427,7 +428,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_013, Function | SmallTes
  */
 HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_014, Function | SmallTest | Level0)
 {
-    uint8_t buff[HKS_KEY_BYTES(KEY_LEN_256)] = {0};
+    uint8_t buff[HKS_KEY_BYTES(DSA_KEY_LEN_512)] = {0};
     HksBlob key = { .size = sizeof(buff), .data = buff };
     HksUsageSpec signSpec = { .algType = HKS_ALG_DSA };
     HksBlob message = { .size = 1, .data = buff };
