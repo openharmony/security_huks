@@ -844,15 +844,15 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
     (void)processName;
     /* only record log, continue delete */
     if (HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME) != HKS_SUCCESS) {
-        HKS_LOG_E(ret, "remove key store file failed")
+        HKS_LOG_E("remove key store file failed");
     }
 
     if (HksFileRemove(HKS_KEY_STORE_PATH, "info1.data") != HKS_SUCCESS) {
-        HKS_LOG_E(ret, "remove info1 file failed")
+        HKS_LOG_E("remove info1 file failed");
     }
 
     if (HksFileRemove(HKS_KEY_STORE_PATH, "info2.data") != HKS_SUCCESS) {
-        HKS_LOG_E(ret, "remove info2 file failed")
+        HKS_LOG_E("remove info2 file failed");
     }
     return HKS_SUCCESS;
 }
