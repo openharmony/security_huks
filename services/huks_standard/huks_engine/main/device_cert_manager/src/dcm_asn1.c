@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_asn1.h"
+#include "dcm_asn1.h"
 #include "hks_log.h"
 #include "hks_template.h"
 #include "securec.h"
@@ -24,7 +24,6 @@
 #define ASN_1_TAG_TYPE_EXTRA_IDENTIFIER 0x1F
 #define TLV_HEADER_TYPE_2_LEN 4
 #define BASE128_ENCODE_BIT_LEN 7
-
 
 static void BuildTlvHeader(struct HksAsn1Blob *header, const struct HksAsn1Blob *tlv)
 {
@@ -95,7 +94,7 @@ static int32_t Asn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, cons
     return HKS_SUCCESS;
 }
 
-int32_t HksAsn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, const struct HksAsn1Blob *tlv)
+int32_t DcmAsn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, const struct HksAsn1Blob *tlv)
 {
     if ((CheckBlob(buf) != HKS_SUCCESS) || (CheckAsn1Blob(tlv) != HKS_SUCCESS) || (tlv->size > ASN_1_MAX_SIZE)) {
         HKS_LOG_E("invalid buf or tlv.");
@@ -115,12 +114,12 @@ int32_t HksAsn1InsertValue(struct HksBlob *buf, struct HksAsn1Obj *obj, const st
     return Asn1InsertValue(buf, obj, tlv);
 }
 
-int32_t HksAsn1WriteFinal(struct HksBlob *final, const struct HksAsn1Blob *tlv)
+int32_t DcmAsn1WriteFinal(struct HksBlob *final, const struct HksAsn1Blob *tlv)
 {
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(final), HKS_ERROR_INVALID_ARGUMENT, "invalid asn1 final buf.")
 
     struct HksBlob tmp = { final->size, final->data };
-    int32_t ret = HksAsn1InsertValue(&tmp, NULL, tlv);
+    int32_t ret = DcmAsn1InsertValue(&tmp, NULL, tlv);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert value fail\n")
 
     final->size -= tmp.size;
@@ -169,7 +168,7 @@ static int32_t Asn1GetObj(struct HksBlob *next, struct HksAsn1Obj *obj, const st
     return HKS_SUCCESS;
 }
 
-int32_t HksAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data,
+int32_t DcmAsn1ExtractTag(struct HksBlob *next, struct HksAsn1Obj *obj, const struct HksBlob *data,
     uint32_t expectedTag)
 {
     if ((next == NULL) || (obj == NULL) || (data == NULL) || (data->size < ASN_1_MIN_HEADER_LEN)) {

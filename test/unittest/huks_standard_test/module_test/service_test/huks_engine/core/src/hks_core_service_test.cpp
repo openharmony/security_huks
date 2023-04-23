@@ -442,4 +442,46 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     HksFreeParamSet(&runtimeParamSet);
     (void)HksServiceDeleteKey(&processInfo, &keyAlias);
 }
+
+/**
+ * @tc.name: HksCoreServiceTest.HksCoreServiceTest017
+ * @tc.desc: test HksCoreAttestKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest017, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest017");
+    // invalid certchain size
+    uint8_t buffer[HKS_ATTEST_CERT_SIZE - 1] = {0};
+    struct HksBlob blob = { HKS_ATTEST_CERT_SIZE - 1, buffer };
+    int32_t ret = HksCoreAttestKey(&blob, nullptr, &blob);
+    ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey success" << ret;
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksKeyAttest002
+ * @tc.desc: test HksCoreAttestKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest018");
+    int32_t ret = HksCoreAttestKey(nullptr, nullptr, nullptr);
+    ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey success" << ret;
+}
+
+/**
+ * @tc.name: HksCoreServiceTest.HksKeyAttest003
+ * @tc.desc: test HksCoreAttestKey
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCoreServiceTest, HksCoreServiceTest019, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksCoreServiceTest019");
+    // invalid paramSet
+    uint8_t buffer[HKS_ATTEST_CERT_SIZE] = {0};
+    struct HksBlob blob = {HKS_ATTEST_CERT_SIZE, buffer};
+    int32_t ret = HksCoreAttestKey(&blob, nullptr, &blob);
+    ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey not null pointer" << ret;
+}
 }

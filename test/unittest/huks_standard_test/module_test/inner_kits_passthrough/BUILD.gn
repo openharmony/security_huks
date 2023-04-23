@@ -20,6 +20,7 @@ config("public_huks_config") {
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    "//base/security/huks/services/huks_standard/huks_engine/main/device_cert_manager/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
     "//third_party/openssl/include",
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include",
@@ -86,9 +87,6 @@ huks_sources = [
 ]
 
 huks_core_sources = [
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_asn1.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_attest.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_attest_utils.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_auth.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c",
@@ -97,6 +95,9 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_secure_access.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_asn1.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_attest.c",
+  "//base/security/huks/services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_attest_utils.c",
 ]
 
 config("soft_huks_config") {
