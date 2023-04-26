@@ -36,7 +36,7 @@ static int32_t RsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksPa
     struct HksBlob finishInData = { 0, tmpIn };
 
     if (param.isUseIndataAfterHash) {
-        inData.size = g_inDataArrayAfterHashLen[param.hashAlgIndex];
+        inData.size = DATA_ARRAY_AFTER_HASH_LEN[param.hashAlgIndex];
         inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[param.hashAlgIndex]);
     }
 
@@ -206,7 +206,7 @@ int32_t RSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSe
     struct HksBlob finishInData = { 0, NULL };
 
     if (hashAlgIndex != nullptr) {
-        inData.size = g_inDataArrayAfterHashLen[*hashAlgIndex];
+        inData.size = DATA_ARRAY_AFTER_HASH_LEN[*hashAlgIndex];
         inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[*hashAlgIndex]);
     }
 

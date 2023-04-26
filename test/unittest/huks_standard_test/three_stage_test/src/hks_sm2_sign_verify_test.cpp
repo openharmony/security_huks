@@ -15,8 +15,8 @@
 
 #include "hks_sm2_sign_verify_test.h"
 #include "hks_type.h"
-#include "stdint.h"
 
+#include <cstdint>
 #include <gtest/gtest.h>
 
 using namespace testing::ext;
@@ -555,7 +555,8 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest003, TestSize.Level0)
 
 /**
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest004
- * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-NONE, message size is SM3 digest size
+ * @tc.desc: normal parameter test case : alg-SM2, pur-Sign/Verify,
+ *           keySize-256 and dig-NONE, message size is SM3 digest size
  * @tc.type: FUNC
  * @tc.require:issueI611S5
  */
@@ -564,7 +565,7 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest004, TestSize.Level0)
     HKS_LOG_E("Enter HksSm2SignVerifyTest004");
     const char *keyAliasString = "HksSM2SignVerifyKeyAliasTest004";
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
-    struct HksBlob inData = { sizeof(g_inDataAfterSha256Hash), (uint8_t *)g_inDataAfterSha256Hash };
+    struct HksBlob inData = { sizeof(DATA_AFTER_SHA256_HASH), (uint8_t *)DATA_AFTER_SHA256_HASH };
     GenSignVerifyParam param { NON_DIGEST_CASE_GEN_PARAM, NON_DIGEST_CASE_SIGN_PARAM, NON_DIGEST_CASE_VERIFY_PARAM };
     int ret = HksSm2SignVerifyTestRun(&keyAlias, param, false, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "sm2SignVerifyTest004 failed.";
@@ -572,7 +573,8 @@ HWTEST_F(HksSm2SignVerifyTest, HksSm2SignVerifyTest004, TestSize.Level0)
 
 /**
  * @tc.name: HksSm2SignVerifyTest.HksSm2SignVerifyTest005
- * @tc.desc: abnormal parameter test case : alg-SM2, pur-Sign/Verify, keySize-256 and dig-NONE, message size isn't SM3 digest size
+ * @tc.desc: abnormal parameter test case : alg-SM2, pur-Sign/Verify,
+ *           keySize-256 and dig-NONE, message size isn't SM3 digest size
  * @tc.type: FUNC
  * @tc.require:issueI611S5
  */
