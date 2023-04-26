@@ -614,7 +614,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest011, TestSize.Level0)
 
 /**
  * @tc.name: HksClientServiceTest.HksClientServiceTest012
- * @tc.desc: tdd CheckAndUpgradeKeyIfNeed, expect HKS_SHKS_ERROR_BAD_STATEUCCESS
+ * @tc.desc: tdd CheckAndUpgradeKeyIfNeed, expect HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksClientServiceTest, HksClientServiceTest012, TestSize.Level0)
@@ -633,7 +633,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest012, TestSize.Level0)
     key.data = (uint8_t *)HksMalloc(paramSet->paramSetSize);
     (void)memcpy_s(key.data, paramSet->paramSetSize, paramSet, paramSet->paramSetSize);
     ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
-    ASSERT_EQ(ret, HKS_FAILURE);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
     HksFree(key.data);
     HksFreeParamSet(&paramSet);
 }

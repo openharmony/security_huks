@@ -42,6 +42,7 @@ config("soft_huks_config") {
     "../../../services/huks_standard/huks_engine/main/core/include",
     "../../../services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
+    "//base/security/huks/services/huks_standard/huks_engine/main/device_cert_manager/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
     "//base/security/huks/utils/crypto_adapter",
     "//base/security/huks/utils/file_operator",
