@@ -16,7 +16,10 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "../device_cert_manager/include",
+  ]
 }
 
 if (os_level == "standard") {
@@ -35,7 +38,6 @@ if (os_level == "standard") {
     ]
 
     sources = [
-      "src/hks_asn1.c",
       "src/hks_auth.c",
       "src/hks_chipset_platform_decrypt.c",
       "src/hks_core_interfaces.c",
@@ -43,6 +45,7 @@ if (os_level == "standard") {
       "src/hks_core_service_three_stage.c",
       "src/hks_keyblob.c",
       "src/hks_keynode.c",
+      "src/hks_secure_access.c",
       "src/hks_sm_import_wrap_key.c",
     ]
 
@@ -61,9 +64,9 @@ if (os_level == "standard") {
       debug = false
     }
     sources += [
-      "src/hks_attest.c",
-      "src/hks_attest_utils.c",
-      "src/hks_secure_access.c",
+      "../device_cert_manager/src/dcm_asn1.c",
+      "../device_cert_manager/src/dcm_attest.c",
+      "../device_cert_manager/src/dcm_attest_utils.c",
     ]
 
     sources += [ "src/hks_upgrade_key.c" ]

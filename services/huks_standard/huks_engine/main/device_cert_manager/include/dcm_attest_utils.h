@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-#include "hks_asn1.h"
+#include "dcm_asn1.h"
 #include "hks_crypto_hal.h"
 #include "hks_type.h"
 
@@ -64,10 +64,10 @@ enum KmTag {
 extern "C" {
 #endif
 
-int32_t HksInsertClaim (struct HksBlob *out, const struct HksBlob *oid, const struct HksAsn1Blob *value,
+int32_t DcmInsertClaim(struct HksBlob *out, const struct HksBlob *oid, const struct HksAsn1Blob *value,
     uint32_t secLevel);
 
-int32_t HksGetPublicKey (struct HksBlob *key, const struct HksPubKeyInfo *info, const struct HksUsageSpec *usageSpec);
+int32_t DcmGetPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info, const struct HksUsageSpec *usageSpec);
 
 #ifdef __cplusplus
 }
