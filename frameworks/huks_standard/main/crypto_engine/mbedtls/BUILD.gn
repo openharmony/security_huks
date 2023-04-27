@@ -108,7 +108,11 @@ if (os_level == "standard") {
     if (huks_dependency_openssl_path != "") {
       deps += [ huks_dependency_openssl_path ]
     } else {
-      deps += [ "//third_party/openssl:libcrypto_shared" ]
+      if (ohos_kernel_type == "liteos_a" && ohos_kernel_type != "linux") {
+        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+      } else {
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
+      }
     }
     complete_static_lib = true
     deps += [

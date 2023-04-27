@@ -27,12 +27,24 @@
 
 #include "hks_crypto_ed25519.h"
 
-#include <crypto/ecx.h>
 
 #include "hks_crypto_hal.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
+
+#if defined(__LITEOS__) && !defined(__linux__)
+#include <ec_local.h>
+#define ED25519_PUBLIC_FROM_PRIVATE(pub, priv) ED25519_public_from_private((pub), (priv))
+#define ED25519_SIGN(sig, msgData, msgSize, pub, priv) ED25519_sign((sig), (msgData), (msgSize), (pub), (priv))
+#define ED25519_VERIFY(msgData, msgSize, sig, pub) ED25519_verify((msgData), (msgSize), (sig), (pub))
+#else
+#include <crypto/ecx.h>
+#define ED25519_PUBLIC_FROM_PRIVATE(pub, priv) ossl_ed25519_public_from_private(NULL, (pub), (priv), NULL)
+#define ED25519_SIGN(sig, msgData, msgSize, pub, priv) \
+    ossl_ed25519_sign((sig), (msgData), (msgSize), (pub), (priv), NULL, NULL)
+#define ED25519_VERIFY(msgData, msgSize, sig, pub) ossl_ed25519_verify((msgData), (msgSize), (sig), (pub), NULL, NULL)
+#endif
 
 #define CRYPTO_SUCCESS 1
 #define ED25519_PRIVATE_KEY_LEN 32
@@ -96,7 +108,7 @@ int32_t HksEd25519GenerateKey(const struct HksKeySpec *spec, struct HksBlob *key
     int32_t ret = HksCryptoHalFillPrivRandom(&tmp);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    ossl_ed25519_public_from_private(NULL, pubKeyBlob.data, priKeyBlob.data, NULL);
+    ED25519_PUBLIC_FROM_PRIVATE(pubKeyBlob.data, priKeyBlob.data);
     if (IsBlobZero(&pubKeyBlob) || IsBlobZero(&priKeyBlob)) {
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
@@ -177,10 +189,9 @@ int32_t HksEd25519Sign(const struct HksBlob *key, const struct HksUsageSpec *usa
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    ret = ossl_ed25519_sign(signature->data, message->data, message->size,
+    ret = ED25519_SIGN(signature->data, message->data, message->size,
         key->data + sizeof(struct KeyMaterial25519),
-        key->data + sizeof(struct KeyMaterial25519) + ED25519_PUBLIC_KEY_LEN,
-        NULL, NULL);
+        key->data + sizeof(struct KeyMaterial25519) + ED25519_PUBLIC_KEY_LEN);
     if (ret != CRYPTO_SUCCESS) {
         HKS_LOG_E("ED25519_sign failed");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -200,8 +211,8 @@ int32_t HksEd25519Verify(const struct HksBlob *key, const struct HksUsageSpec *u
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    ret = ossl_ed25519_verify(message->data, message->size, signature->data,
-        key->data + sizeof(struct KeyMaterial25519), NULL, NULL);
+    ret = ED25519_VERIFY(message->data, message->size, signature->data,
+        key->data + sizeof(struct KeyMaterial25519));
     if (ret != CRYPTO_SUCCESS) {
         HKS_LOG_E("ED25519_verify failed");
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
