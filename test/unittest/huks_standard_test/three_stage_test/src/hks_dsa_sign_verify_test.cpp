@@ -468,7 +468,7 @@ static int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct Hk
     ret = HksGetParam(signParamSet, HKS_TAG_DIGEST, &digestAlg);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
     if (digestAlg->uint32Param == HKS_DIGEST_NONE) {
-        inData.size = g_inDataArrayAfterHashLen[loopIndex];
+        inData.size = DATA_ARRAY_AFTER_HASH_LEN[loopIndex];
         inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[loopIndex]);
     }
 

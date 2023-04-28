@@ -266,7 +266,7 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
         return DSA_FAILED;
     }
 
-    DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+    const DSA *dsa = EVP_PKEY_get0_DSA(pkey);
     if (dsa == NULL) {
         EVP_PKEY_free(pkey);
         return DSA_FAILED;
@@ -318,8 +318,9 @@ int32_t X509ToDsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
 bool DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
     uint8_t *tmp = NULL;
-    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
-    if (x509Key->size < length) {
+    int ret = i2d_PUBKEY(pkey, &tmp);
+    uint32_t length = (uint32_t)(ret);
+    if (ret <= 0 || x509Key->size < length) {
         OPENSSL_free(tmp);
         return false;
     }
@@ -338,7 +339,7 @@ bool DsaGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
 
 int32_t SaveDsaKeyToHksBlob(EVP_PKEY *pkey, const uint32_t keySize, struct HksBlob *key)
 {
-    DSA *dsa = EVP_PKEY_get0_DSA(pkey);
+    const DSA *dsa = EVP_PKEY_get0_DSA(pkey);
     if (dsa == NULL) {
         return DSA_FAILED;
     }

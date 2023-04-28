@@ -16,6 +16,7 @@ import("//build/ohos.gni")
 
 config("huks_config") {
   include_dirs = [ "include" ]
+  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
 }
 
 if (os_level == "standard") {
