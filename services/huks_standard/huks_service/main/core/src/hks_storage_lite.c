@@ -842,18 +842,19 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
 int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     (void)processName;
-    int32_t ret = HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME);
     /* only record log, continue delete */
-    HKS_IF_NOT_SUCC_LOGE(ret, "remove key store file failed")
+    if (HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME) != HKS_SUCCESS) {
+        HKS_LOG_E("remove key store file failed");
+    }
 
-    ret = HksFileRemove(HKS_KEY_STORE_PATH, "info1.data");
-    /* only record log, continue delete */
-    HKS_IF_NOT_SUCC_LOGE(ret, "remove info1 file failed")
+    if (HksFileRemove(HKS_KEY_STORE_PATH, "info1.data") != HKS_SUCCESS) {
+        HKS_LOG_E("remove info1 file failed");
+    }
 
-    ret = HksFileRemove(HKS_KEY_STORE_PATH, "info2.data");
-    HKS_IF_NOT_SUCC_LOGE(ret, "remove info2 file failed")
-
-    return ret;
+    if (HksFileRemove(HKS_KEY_STORE_PATH, "info2.data") != HKS_SUCCESS) {
+        HKS_LOG_E("remove info2 file failed");
+    }
+    return HKS_SUCCESS;
 }
 #endif /* _STORAGE_LITE_ */
 

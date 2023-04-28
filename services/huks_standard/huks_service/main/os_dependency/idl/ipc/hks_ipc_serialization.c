@@ -86,6 +86,9 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
     }
 
     uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
+    if (IsAdditionOverflow(size, DEFAULT_ALIGN_MASK_SIZE)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     if (ALIGN_SIZE(size) > srcBlob->size - *srcOffset - sizeof(uint32_t)) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
@@ -100,16 +103,19 @@ int32_t GetBlobFromBuffer(struct HksBlob *blob, const struct HksBlob *srcBlob, u
 static int32_t GetParamSetFromBuffer(struct HksParamSet **paramSet,
     const struct HksBlob *srcBlob, uint32_t *srcOffset)
 {
-    if (*srcOffset > srcBlob->size || ((srcBlob->size - *srcOffset) < sizeof(uint32_t))) {
+    if (*srcOffset > srcBlob->size || ((srcBlob->size - *srcOffset) < sizeof(struct HksParamSet))) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-
-    uint32_t size = *((uint32_t *)(srcBlob->data + *srcOffset));
-    if (ALIGN_SIZE(size) > srcBlob->size - *srcOffset) {
+    
+    *paramSet = (struct HksParamSet*)(srcBlob->data + *srcOffset);
+    if (IsAdditionOverflow((*paramSet)->paramSetSize, DEFAULT_ALIGN_MASK_SIZE)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (ALIGN_SIZE((*paramSet)->paramSetSize) > (srcBlob->size - *srcOffset) ||
+        HksFreshParamSet(*paramSet, false) != HKS_SUCCESS) {
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    *paramSet = (struct HksParamSet*)(srcBlob->data + *srcOffset);
     *srcOffset += ALIGN_SIZE((*paramSet)->paramSetSize);
     return HKS_SUCCESS;
 }
@@ -246,7 +252,7 @@ static int32_t SignVerifyMacUnpack(const struct HksBlob *srcData, struct HksBlob
     struct HksBlob *inputData, uint32_t *offset)
 {
     int32_t ret = GetKeyAndParamSetFromBuffer(srcData, key, paramSet, offset);
-    HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndParamSetFromBuffer failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyAndParamSetFromBuffer failed")
 
     ret = GetBlobFromBuffer(inputData, srcData, offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "get unsignedData failed")
@@ -282,7 +288,7 @@ int32_t HksEncryptDecryptUnpack(const struct HksBlob *srcData, struct HksBlob *k
 {
     uint32_t offset = 0;
     int32_t ret = GetKeyAndParamSetFromBuffer(srcData, key, paramSet, &offset);
-    HKS_IF_NOT_SUCC_LOGE(ret, "getKeyAndParamSetFromBuffer failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "getKeyAndParamSetFromBuffer failed")
 
     ret = GetBlobFromBuffer(inputText, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get inputText failed")
@@ -417,7 +423,7 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
 {
     uint32_t offset = 0;
     int32_t ret = GetKeyAndParamSetFromBuffer(srcData, keyAlias, paramSet, &offset);
-    HKS_IF_NOT_SUCC_LOGE(ret, "GetKeyAndParamSetFromBuffer failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetKeyAndParamSetFromBuffer failed")
 
     ret = MallocBlobFromBuffer(srcData, certChainBlob, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "malloc certChainBlob data failed")
