@@ -103,8 +103,9 @@ EVP_PKEY *GenerateRsaKey(const uint32_t keySize)
 bool OpensslGetx509PubKey(EVP_PKEY *pkey, struct HksBlob *x509Key)
 {
     uint8_t *tmp = NULL;
-    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
-    if (x509Key->size < length) {
+    int ret = i2d_PUBKEY(pkey, &tmp);
+    uint32_t length = (uint32_t)(ret);
+    if (ret <= 0 || x509Key->size < length) {
         OPENSSL_free(tmp);
         return false;
     }
@@ -129,7 +130,7 @@ int32_t X509ToRsaPublicKey(struct HksBlob *x509Key, struct HksBlob *publicKey)
     if (pkey == NULL) {
         return RSA_FAILED;
     }
-    RSA *rsa = EVP_PKEY_get0_RSA(pkey);
+    const RSA *rsa = EVP_PKEY_get0_RSA(pkey);
     if (rsa == NULL) {
         EVP_PKEY_free(pkey);
         return RSA_FAILED;

@@ -43,6 +43,9 @@ const EVP_MD *GetOpensslAlg(uint32_t alg);
 
 const EVP_MD *GetOpensslAlgFromLen(uint32_t len);
 
+// Note: `out` memory will be allocated, you MUST free out->data after using.
+int32_t GetBnBinpadFromPkey(const EVP_PKEY *pkey, const char *keyName, struct HksBlob *out);
+
 #ifdef __cplusplus
 }
 #endif

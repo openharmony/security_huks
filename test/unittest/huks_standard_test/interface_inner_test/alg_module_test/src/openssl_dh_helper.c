@@ -227,7 +227,7 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
         return DH_FAILED;
     }
 
-    DH *dh = EVP_PKEY_get0_DH(pkey);
+    const DH *dh = EVP_PKEY_get0_DH(pkey);
     if (dh == NULL) {
         EVP_PKEY_free(pkey);
         return DH_FAILED;
@@ -285,12 +285,13 @@ int32_t DhHksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     }
 
     uint8_t *tmp = NULL;
-    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
-    x509Key->size = length;
-    if (tmp == NULL) {
+    int ret = i2d_PUBKEY(pkey, &tmp);
+    if (ret <= 0 || tmp == NULL) {
         EVP_PKEY_free(pkey);
         return DH_FAILED;
     }
+    uint32_t length = (uint32_t)(ret);
+    x509Key->size = length;
     if (memcpy_s(x509Key->data, x509Key->size, tmp, length) != 0) {
         EVP_PKEY_free(pkey);
         free(tmp);
