@@ -53,6 +53,31 @@ void HksClientCheckTest::TearDown()
 {
 }
 
+static int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam *params, uint32_t paramcount)
+{
+    int32_t ret = HksInitParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    ret = HksAddParams(*paramSet, params, paramcount);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksAddParams failed");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed!");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+
+    return ret;
+}
+
 /**
  * @tc.name: HksClientCheckTest.HksClientCheckTest001
  * @tc.desc: tdd HksCheckGetKeyParamSetParams, expect HKS_ERROR_INVALID_ARGUMENT
@@ -208,5 +233,264 @@ HWTEST_F(HksClientCheckTest, HksClientCheckTest009, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksCheckAndGetUserAuthInfo(paramSet, nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest010
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, not set HKS_TAG_KEY_AUTH_PURPOSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest010");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_RSA
+        }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest011
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set invalid HKS_TAG_KEY_AUTH_PURPOSE
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest011");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_SIGN
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_RSA
+        }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
+}
+
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest012
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set valid HKS_TAG_KEY_AUTH_PURPOSE for RSA
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest012");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_RSA
+        }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest013
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set valid HKS_TAG_KEY_AUTH_PURPOSE for AES CBC
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest013");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_AES
+        }, {
+            .tag = HKS_TAG_BLOCK_MODE,
+            .uint32Param = HKS_MODE_CBC
+        }
+    };
+
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest014
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set valid HKS_TAG_KEY_AUTH_PURPOSE for AES GCM
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest014, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest014");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_AES
+        }, {
+            .tag = HKS_TAG_BLOCK_MODE,
+            .uint32Param = HKS_MODE_GCM
+        }
+    };
+
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest015
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set valid HKS_TAG_KEY_AUTH_PURPOSE for AES
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest015, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest015");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_AES
+        }
+    };
+
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest016
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set valid HKS_TAG_KEY_AUTH_PURPOSE for AES
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest016, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest016");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_MAC
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_MAC
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_AES
+        }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest017
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set HKS_TAG_KEY_AUTH_PURPOSE is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest017, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest017");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = 0
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_MAC
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_AES
+        }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
+}
+
+/**
+ * @tc.name: HksClientCheckTest.HksClientCheckTest018
+ * @tc.desc: tdd HksCheckUserAuthKeyPurposeValidity, set HKS_TAG_PURPOSE is 0
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksClientCheckTest, HksClientCheckTest018, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksClientCheckTest018");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_MAC
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = 0
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_AES
+        }
+    };
+    struct HksParamSet *paramSet = nullptr;
+    int ret = InitParamSet(&paramSet, parmas, sizeof(parmas) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+    HksFreeParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_PURPOSE);
 }
 }

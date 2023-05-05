@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -468,6 +468,11 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
 
     if (ret == HKS_SUCCESS) {
         HKS_LOG_I("support secure access");
+
+        // Fine-grained access control: only valid user auth key purpose allowed to be set.
+        ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user auth key purpose validity failed")
+
         ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "UserIAM do not support current user auth or not enrolled cur auth info")
 
