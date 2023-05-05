@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -588,6 +588,78 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest008, TestSize.
         .authType = 4
     };
     EXPECT_EQ(HksAcRsaSignVerifyTestAbnormalCase(HKS_ACCESS_TEST_RSA_SIGN_008_PARAMS, RSAIDMParams003),
+        HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest009
+ * @tc.desc: supports fine-grained access control, pin test, verify need to access control.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI6UFG5
+ */
+HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest009, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAcRsaSignVerifyTest009");
+    const IDMParams RSAIDMParams001 = {
+        .secureUid = 1,
+        .enrolledId = 1,
+        .time = 0,
+        .authType = 1
+    };
+    struct TestAccessCaseRSAParams testAccessCaseParams(HKS_ACCESS_TEST_RSA_SIGN_001_PARAMS);
+    testAccessCaseParams.genParams.push_back(
+        { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY }
+    );
+    EXPECT_EQ(HksAcRsaSignVerifyTestNormalCase(testAccessCaseParams, RSAIDMParams001),
+        HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest010
+ * @tc.desc: supports fine-grained access control, fingerprint test, verify need to access control.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI6UFG5
+ */
+HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest010, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAcRsaSignVerifyTest010");
+    const IDMParams RSAIDMParams002 = {
+        .secureUid = 1,
+        .enrolledId = 2,
+        .time = 0,
+        .authType = 4
+    };
+    struct TestAccessCaseRSAParams testAccessCaseParams(HKS_ACCESS_TEST_RSA_SIGN_002_PARAMS);
+    testAccessCaseParams.genParams.push_back(
+        { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY }
+    );
+    EXPECT_EQ(HksAcRsaSignVerifyTestNormalCase(testAccessCaseParams, RSAIDMParams002),
+        HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAccessControlRsaSignVerifyTest.HksAcRsaSignVerifyTest011
+ * @tc.desc: supports fine-grained access control, face test, verify need to access control.
+ * @tc.type: FUNC
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI6UFG5
+ */
+HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest011, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAcRsaSignVerifyTest011");
+    const IDMParams RSAIDMParams003 = {
+        .secureUid = 1,
+        .enrolledId = 1,
+        .time = 0,
+        .authType = 2
+    };
+    struct TestAccessCaseRSAParams testAccessCaseParams(HKS_ACCESS_TEST_RSA_SIGN_003_PARAMS);
+    testAccessCaseParams.genParams.push_back(
+        { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_VERIFY }
+    );
+    EXPECT_EQ(HksAcRsaSignVerifyTestAbnormalCase(testAccessCaseParams, RSAIDMParams003),
         HKS_SUCCESS);
 }
 }

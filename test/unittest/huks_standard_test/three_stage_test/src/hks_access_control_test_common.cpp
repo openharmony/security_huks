@@ -421,13 +421,26 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
 int32_t AddAuthtokenUpdateFinish(struct HksBlob *handle,
     struct HksParamSet *initParamSet, uint32_t posNum)
 {
-    struct HksBlob inData = { g_inData.length(),
-        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(initParamSet, HKS_TAG_ALGORITHM, &algParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksGetParam failed!\n");
+        return ret;
+    }
+
+    struct HksBlob inData;
     uint8_t outDataS[DATA_COMMON_SIZE] = {0};
     struct HksBlob outDataSign = { DATA_COMMON_SIZE, outDataS };
     (void)posNum;
-
-    int ret = TestUpdateLoopFinish(handle, initParamSet, &inData, &outDataSign);
+    if (algParam->uint32Param == HKS_ALG_RSA) {
+        inData = { g_inData_32.length(),
+            const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData_32.c_str())) };
+        ret = TestUpdateFinish(handle, initParamSet, HKS_KEY_PURPOSE_ENCRYPT, &inData, &outDataSign);
+    } else {
+        inData = { g_inData.length(),
+            const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str())) };
+        ret = TestUpdateLoopFinish(handle, initParamSet, &inData, &outDataSign);
+    }
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("TestUpdateLoopFinish failed, ret : %" LOG_PUBLIC "d", ret);
     }
@@ -633,7 +646,6 @@ static int32_t UpdateAndFinishForDeriveTest(const struct HksBlob *handleDerive, 
     return ret;
 }
 
-
 int32_t CheckAccessDeriveTest(const TestAccessCaseParams &testCaseParams, struct HksParamSet *finishParamSet,
     const IDMParams &testIDMParams)
 {
@@ -770,7 +782,6 @@ int32_t ConstructEd25519KeyPair(uint32_t keySize, uint32_t alg, struct HksBlob *
     outKey->size = size;
     return HKS_SUCCESS;
 }
-
 
 int32_t ConstructDsaKeyPair(uint32_t keySize, const struct TestDsaKeyParams *params, struct HksBlob *outKey)
 {

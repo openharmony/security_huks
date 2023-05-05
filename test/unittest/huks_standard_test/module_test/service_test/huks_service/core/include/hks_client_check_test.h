@@ -26,5 +26,14 @@ int HksClientCheckTest006(void);
 int HksClientCheckTest007(void);
 int HksClientCheckTest008(void);
 int HksClientCheckTest009(void);
+int HksClientCheckTest010(void);
+int HksClientCheckTest011(void);
+int HksClientCheckTest012(void);
+int HksClientCheckTest013(void);
+int HksClientCheckTest014(void);
+int HksClientCheckTest015(void);
+int HksClientCheckTest016(void);
+int HksClientCheckTest017(void);
+int HksClientCheckTest018(void);
 }
 #endif

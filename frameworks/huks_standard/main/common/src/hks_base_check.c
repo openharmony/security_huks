@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -725,6 +725,51 @@ static const uint32_t g_supportUserAuthTypes[] = {
 
 static const uint32_t g_supportSecureSignType[] = {
     HKS_SECURE_SIGN_WITH_AUTHINFO
+};
+
+#ifdef HKS_SUPPORT_AES_C
+static const uint32_t g_supportAesPurpose[] = {
+    HKS_KEY_PURPOSE_ENCRYPT,
+    HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_DERIVE,
+    HKS_KEY_PURPOSE_MAC
+};
+
+static const uint32_t g_supportAesCipherMode[] = {
+    HKS_MODE_CBC
+};
+
+static const struct KeyInfoParams g_validAesKeyInfo[] = {
+    { true, HKS_TAG_PURPOSE, g_supportAesPurpose, HKS_ARRAY_SIZE(g_supportAesPurpose) },
+    { true, HKS_TAG_BLOCK_MODE, g_supportAesCipherMode, HKS_ARRAY_SIZE(g_supportAesCipherMode) }
+};
+#endif
+
+#ifdef HKS_SUPPORT_SM4_C
+static const uint32_t g_supportSm4Purpose[] = {
+    HKS_KEY_PURPOSE_ENCRYPT,
+    HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+};
+
+static const uint32_t g_supportSm4CipherMode[] = {
+    HKS_MODE_CBC
+};
+
+static const struct KeyInfoParams g_validSm4KeyInfo[] = {
+    { true, HKS_TAG_PURPOSE, g_supportSm4Purpose, HKS_ARRAY_SIZE(g_supportSm4Purpose) },
+    { true, HKS_TAG_BLOCK_MODE, g_supportSm4CipherMode, HKS_ARRAY_SIZE(g_supportSm4CipherMode) }
+};
+#endif
+
+static const struct AuthAcceessKeyInfoChecker g_validKeyInfo[] = {
+#ifdef HKS_SUPPORT_AES_C
+    { HKS_ALG_AES, g_validAesKeyInfo, HKS_ARRAY_SIZE(g_validAesKeyInfo) },
+#endif
+#ifdef HKS_SUPPORT_SM4_C
+    { HKS_ALG_SM4, g_validSm4KeyInfo, HKS_ARRAY_SIZE(g_validSm4KeyInfo) }
+#endif
 };
 #endif
 
@@ -1950,4 +1995,47 @@ int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest)
         return HKS_SUCCESS;
     }
     return HKS_FAILURE;
+}
+
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static int32_t CheckUserAuthKeyInfoValidity(const struct HksParamSet *paramSet,
+    const struct KeyInfoParams *params, uint32_t paramsCnt)
+{
+    for (uint32_t i = 0; i < paramsCnt; i++) {
+        if (params[i].needCheck) {
+            struct HksParam *param = NULL;
+            int32_t ret = HksGetParam(paramSet, params[i].tag, &param);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "tag is empty and no need to check!")
+
+            ret = HksCheckValue(param->uint32Param, params[i].values, params[i].valueCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "not support tag %" LOG_PUBLIC "u and value is %" LOG_PUBLIC "u",
+                params[i].tag, param->uint32Param)
+        }
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t HksCheckUserAuthKeyInfoValidity(const struct HksParamSet *paramSet)
+{
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize),
+    HKS_ERROR_INVALID_ARGUMENT, "invalid paramSet!")
+
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get alg param failed!")
+
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_validKeyInfo); i++) {
+        if (algParam->uint32Param == g_validKeyInfo[i].keyAlg) {
+            ret = CheckUserAuthKeyInfoValidity(paramSet, g_validKeyInfo[i].params, g_validKeyInfo[i].paramsCnt);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "not support set key auth purpose!")
+        }
+    }
+    HKS_LOG_I("support set key auth purpose!");
+    return ret;
+#else
+    (void)paramSet;
+    return HKS_SUCCESS;
+#endif
 }
