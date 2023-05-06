@@ -1326,7 +1326,7 @@ declare namespace huks {
      * @syscap SystemCapability.Security.Huks
      * @since 10
      */
-    HUKS_STORAGE_ALLOW_KEY_EXPORTED = 3
+    HUKS_STORAGE_KEY_EXPORT_ALLOWED = 3
   }
 
   /**
@@ -1350,8 +1350,8 @@ declare namespace huks {
    * @since 10
    */
   export enum HuksRsaPssSaltLenType {
-    HUKS_RSA_PSS_SALTLEN_DIGEST = 0,
-    HUKS_RSA_PSS_SALTLEN_MAX = 1
+    HUKS_RSA_PSS_SALT_LEN_DIGEST = 0,
+    HUKS_RSA_PSS_SALT_LEN_MAX = 1
   }
 
   /**
@@ -1531,7 +1531,7 @@ declare namespace huks {
      * @syscap SystemCapability.Security.Huks
      * @since 10
      */
-    HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG = HuksTagType.HUKS_TAG_TYPE_UINT | 29,
+    HUKS_TAG_DERIVED_AGREED_KEY_STORAGE_FLAG = HuksTagType.HUKS_TAG_TYPE_UINT | 29,
 
     /**
      * @syscap SystemCapability.Security.Huks
