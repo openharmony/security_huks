@@ -171,7 +171,7 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA", HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA);
     AddInt32Property(env, tag, "HUKS_TAG_IMPORT_KEY_TYPE", HKS_TAG_IMPORT_KEY_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_UNWRAP_ALGORITHM_SUITE", HKS_TAG_UNWRAP_ALGORITHM_SUITE);
-    AddInt32Property(env, tag, "HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG", HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG);
+    AddInt32Property(env, tag, "HUKS_TAG_DERIVED_AGREED_KEY_STORAGE_FLAG", HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG);
     AddInt32Property(env, tag, "HUKS_TAG_RSA_PSS_SALT_LEN_TYPE", HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
 
     AddInt32Property(env, tag, "HUKS_TAG_KEY_AUTH_ACCESS_TYPE", HKS_TAG_KEY_AUTH_ACCESS_TYPE);
@@ -308,7 +308,7 @@ static napi_value CreateHuksKeyStorageType(napi_env env)
     AddInt32Property(env, keyStorageType, "HUKS_STORAGE_TEMP", HKS_STORAGE_TEMP);
     AddInt32Property(env, keyStorageType, "HUKS_STORAGE_PERSISTENT", HKS_STORAGE_PERSISTENT);
     AddInt32Property(env, keyStorageType, "HUKS_STORAGE_ONLY_USED_IN_HUKS", HKS_STORAGE_ONLY_USED_IN_HUKS);
-    AddInt32Property(env, keyStorageType, "HUKS_STORAGE_ALLOW_KEY_EXPORTED", HKS_STORAGE_ALLOW_KEY_EXPORTED);
+    AddInt32Property(env, keyStorageType, "HUKS_STORAGE_KEY_EXPORT_ALLOWED", HKS_STORAGE_ALLOW_KEY_EXPORTED);
 
     return keyStorageType;
 }
@@ -621,8 +621,8 @@ static napi_value CreateHuksRsaPssSaltLenType(napi_env env)
     napi_value rsaPssSaltLenType = nullptr;
     NAPI_CALL(env, napi_create_object(env, &rsaPssSaltLenType));
 
-    AddInt32Property(env, rsaPssSaltLenType, "HUKS_RSA_PSS_SALTLEN_DIGEST", HKS_RSA_PSS_SALTLEN_DIGEST);
-    AddInt32Property(env, rsaPssSaltLenType, "HUKS_RSA_PSS_SALTLEN_MAX", HKS_RSA_PSS_SALTLEN_MAX);
+    AddInt32Property(env, rsaPssSaltLenType, "HUKS_RSA_PSS_SALT_LEN_DIGEST", HKS_RSA_PSS_SALTLEN_DIGEST);
+    AddInt32Property(env, rsaPssSaltLenType, "HUKS_RSA_PSS_SALT_LEN_MAX", HKS_RSA_PSS_SALTLEN_MAX);
 
     return rsaPssSaltLenType;
 }
