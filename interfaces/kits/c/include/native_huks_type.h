@@ -324,7 +324,7 @@ enum OH_Huks_KeyStorageType {
     /** The key is only used in huks. */
     OH_HUKS_STORAGE_ONLY_USED_IN_HUKS = 2,
     /** The key can be allowed to export. */
-    OH_HUKS_STORAGE_ALLOW_KEY_EXPORTED = 3,
+    OH_HUKS_STORAGE_KEY_EXPORT_ALLOWED = 3,
 };
 
 /**
@@ -351,9 +351,9 @@ enum OH_Huks_ImportKeyType {
  */
 enum OH_Huks_RsaPssSaltLenType {
     /** Salt length matches digest. */
-    OH_HUKS_RSA_PSS_SALTLEN_DIGEST = 0,
+    OH_HUKS_RSA_PSS_SALT_LEN_DIGEST = 0,
     /** Set salt length to maximum possible, default type. */
-    OH_HUKS_RSA_PSS_SALTLEN_MAX = 1,
+    OH_HUKS_RSA_PSS_SALT_LEN_MAX = 1,
 };
 
 /**
@@ -555,7 +555,7 @@ enum OH_Huks_Tag {
     /** Algorithm suite required for encrypted imports. */
     OH_HUKS_TAG_UNWRAP_ALGORITHM_SUITE = OH_HUKS_TAG_TYPE_UINT | 26,
     /** Storage mode of derived or agree keys. For details, see {@link OH_Huks_KeyStorageType}. */
-    OH_HUKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG = OH_HUKS_TAG_TYPE_UINT | 29,
+    OH_HUKS_TAG_DERIVED_AGREED_KEY_STORAGE_FLAG = OH_HUKS_TAG_TYPE_UINT | 29,
     /** Type of rsa pss salt length. */
     OH_HUKS_TAG_RSA_PSS_SALT_LEN_TYPE = OH_HUKS_TAG_TYPE_UINT | 30,
 
