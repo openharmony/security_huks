@@ -89,9 +89,7 @@ if (os_level == "standard") {
 
     complete_static_lib = true
 
-    deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
-    ]
+    deps += [ "//foundation/systemabilitymgr/samgr_lite/samgr:samgr" ]
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
   }
 }
