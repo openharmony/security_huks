@@ -38,6 +38,7 @@
           "bundle_framework",
           "common",
           "common_event_service",
+          "hilog_native",
           "hisysevent_native",
           "hitrace_native",
           "hiviewdfx_hilog_native",
