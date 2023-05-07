@@ -268,12 +268,14 @@ if (ohos_kernel_type == "liteos_m") {
 
     configs += [ ":hilog_dir" ]
     deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
       "//third_party/bounds_checking_function:libsec_shared",
     ]
 
-    external_deps = [ "init_lite:libbegetutil" ]
+    external_deps = [
+      "hilog_featured_lite:hilog_shared",
+      "init_lite:libbegetutil",
+    ]
 
     defines = [
       "MBEDTLS_ECP_RESTARTABLE=1",
@@ -305,21 +307,18 @@ if (ohos_kernel_type == "liteos_m") {
 
     deps = []
     deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//foundation/communication/ipc/interfaces/innerkits/c/ipc:ipc_single",
       "//foundation/systemabilitymgr/samgr_lite/samgr:samgr",
     ]
 
     configs += [ ":hilog_dir" ]
-    deps += [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-      "//third_party/bounds_checking_function:libsec_shared",
-    ]
+    deps += [ "//third_party/bounds_checking_function:libsec_shared" ]
 
     deps += [
       "//base/security/huks/frameworks/huks_standard/main:huks_small_frameworks",
       "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
     ]
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
   }
 
   if (ohos_build_type == "debug") {

@@ -59,6 +59,6 @@ static_library("huks_3.0_test_common") {
       "-Werror",
     ]
     configs += [ ":hilog_dir" ]
-    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
   }
 }
