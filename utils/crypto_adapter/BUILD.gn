@@ -74,12 +74,12 @@ if (os_level == "standard") {
     ]
 
     deps = [
-      "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_small_static",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static",
     ]
 
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
     if (huks_dependency_mbedtls_path != "") {
       deps += [ huks_dependency_mbedtls_path ]
     } else {

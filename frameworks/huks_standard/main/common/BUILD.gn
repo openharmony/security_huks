@@ -81,7 +81,7 @@ if (os_level == "standard") {
     complete_static_lib = true
     cflags += [ "-DHUKS_UID_TRUST_LIST=${huks_uid_trust_list_define}" ]
 
-    deps = [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
 
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
