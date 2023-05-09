@@ -29,8 +29,8 @@
       "hisysevent_config": [
           "//base/security/huks/hisysevent.yaml"
         ],
-      "rom": "1280KByte",
-      "ram": "4823KByte",
+      "rom": "5120KByte",
+      "ram": "4828KByte",
       "deps": {
         "components": [
           "ability_base",
