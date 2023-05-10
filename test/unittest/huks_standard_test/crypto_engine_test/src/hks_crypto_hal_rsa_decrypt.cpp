@@ -516,6 +516,7 @@ void HksCryptoHalRsaDecrypt::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_001
  * @tc.name      : HksCryptoHalRsaDecrypt_001
@@ -545,6 +546,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_003, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_DECRYPT_003_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_004
@@ -578,6 +580,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_006, Function | SmallTes
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_007
  * @tc.name      : HksCryptoHalRsaDecrypt_007
@@ -607,6 +610,7 @@ HWTEST_F(HksCryptoHalRsaDecrypt, HksCryptoHalRsaDecrypt_009, Function | SmallTes
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_DECRYPT_009_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaDecrypt_010
