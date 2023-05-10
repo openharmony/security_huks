@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+import("//build/ohos.gni")
+
 config("hilog_dir") {
   include_dirs =
       [ "//base/hiviewdfx/hilog_lite/interfaces/native/innerkits/hilog/" ]
@@ -29,7 +31,7 @@ config("huks_test_common") {
   ]
 }
 
-static_library("huks_3.0_test_common") {
+ohos_static_library("huks_3.0_test_common") {
   sources = [
     "hks_test_aes.c",
     "hks_test_api_performance.c",
@@ -43,7 +45,7 @@ static_library("huks_3.0_test_common") {
 
   deps = []
 
-  configs += [ ":huks_test_common" ]
+  configs = [ ":huks_test_common" ]
 
   if (ohos_kernel_type == "liteos_m") {
     cflags = [
@@ -59,6 +61,6 @@ static_library("huks_3.0_test_common") {
       "-Werror",
     ]
     configs += [ ":hilog_dir" ]
-    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
   }
 }

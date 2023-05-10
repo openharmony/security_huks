@@ -28,7 +28,7 @@ namespace Security {
 namespace Huks {
 namespace UnitTest {
 namespace {
-const uint32_t DSA_SIZE_256 = 256;
+constexpr uint32_t DSA_SIZE_512 = 512;
 const uint32_t SIGNATURE_SIZE = 1024;
 const uint32_t PUB_KEY_SIZE = 1024;
 const HksUsageSpec HKS_CRYPTO_HAL_DSA_SIGN_001_SPEC = {
@@ -83,7 +83,7 @@ protected:
     {
         HksKeySpec spec = {
             .algType = HKS_ALG_DSA,
-            .keyLen = DSA_SIZE_256,
+            .keyLen = DSA_SIZE_512,
             .algParam = nullptr,
         };
 

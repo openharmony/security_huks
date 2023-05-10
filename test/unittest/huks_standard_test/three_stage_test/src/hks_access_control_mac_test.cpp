@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,11 +111,11 @@ const TestAccessCaseParams HKS_ACCESS_TEST_002_PARAMS = {
 
 /**
  * @tc.name: HksAccessControlMacTest.HksAccessMacPartTest001
- * @tc.desc: alg-AES gen-pur-Encrypt.
+ * @tc.desc: alg-HMAC gen-pur-HMC.
  * @tc.type: FUNC
  * @tc.auth_type: FACE
  * @tc.result:HKS_SUCCESS
- * @tc.require: issueI5NY0M
+ * @tc.require: issueI6UFG5
  */
 HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest001, TestSize.Level0)
 {
@@ -131,7 +131,7 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksAccessControlMacTest.HksAccessMacPartTest002
- * @tc.desc: alg-AES gen-pur-Encrypt.
+ * @tc.desc: alg-SM3 gen-pur-HMC.
  * @tc.type: FUNC
  * @tc.auth_type: PIN
  * @tc.result:HKS_SUCCESS
@@ -149,6 +149,57 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest002, TestSize.Level0)
         .authType = 1
     };
     ASSERT_EQ(CheckAccessHmacTest(HKS_ACCESS_TEST_002_PARAMS, testIDMParams), HKS_SUCCESS);
+#endif
+}
+
+/**
+ * @tc.name: HksAccessControlMacTest.HksAccessMacPartTest003
+ * @tc.desc: supports fine-grained access control, alg-HMAC gen-pur-HMC.
+ * @tc.type: FUNC
+ * @tc.auth_type: FACE
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI6UFG5
+ */
+HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest003, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAccessMacPartTest003");
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 3,
+        .time = 0,
+        .authType = 2
+    };
+    struct TestAccessCaseParams testAccessCaseParams(HKS_ACCESS_TEST_001_PARAMS);
+    testAccessCaseParams.genParams.push_back(
+        { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC }
+    );
+    ASSERT_EQ(CheckAccessHmacTest(testAccessCaseParams, testIDMParams), HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAccessControlMacTest.HksAccessMacPartTest004
+ * @tc.desc: supports fine-grained access control, alg-SM3 gen-pur-HMC.
+ * @tc.type: FUNC
+ * @tc.auth_type: PIN
+ * @tc.result:HKS_SUCCESS
+ * @tc.require: issueI6UFG5
+ */
+HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest004, TestSize.Level0)
+{
+#ifdef _USE_OPENSSL_
+    /* mbedtls engine don't support SM3 alg */
+    HKS_LOG_I("Enter HksAccessMacPartTest004");
+    const IDMParams testIDMParams = {
+        .secureUid = 1,
+        .enrolledId = 1,
+        .time = 0,
+        .authType = 1
+    };
+    struct TestAccessCaseParams testAccessCaseParams(HKS_ACCESS_TEST_002_PARAMS);
+    testAccessCaseParams.genParams.push_back(
+        { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC }
+    );
+    ASSERT_EQ(CheckAccessHmacTest(testAccessCaseParams, testIDMParams), HKS_SUCCESS);
 #endif
 }
 }

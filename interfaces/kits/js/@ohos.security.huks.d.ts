@@ -1305,8 +1305,28 @@ declare namespace huks {
    * @since 8
    */
   export enum HuksKeyStorageType {
+    /**
+     * @syscap SystemCapability.Security.Huks
+     * @since 8
+     * @deprecated since 10
+     */
     HUKS_STORAGE_TEMP = 0,
-    HUKS_STORAGE_PERSISTENT = 1
+    /**
+     * @syscap SystemCapability.Security.Huks
+     * @since 8
+     * @deprecated since 10
+     */
+    HUKS_STORAGE_PERSISTENT = 1,
+    /**
+     * @syscap SystemCapability.Security.Huks
+     * @since 10
+     */
+    HUKS_STORAGE_ONLY_USED_IN_HUKS = 2,
+    /**
+     * @syscap SystemCapability.Security.Huks
+     * @since 10
+     */
+    HUKS_STORAGE_KEY_EXPORT_ALLOWED = 3
   }
 
   /**
@@ -1320,6 +1340,18 @@ declare namespace huks {
     HUKS_KEY_TYPE_PUBLIC_KEY = 0,
     HUKS_KEY_TYPE_PRIVATE_KEY = 1,
     HUKS_KEY_TYPE_KEY_PAIR = 2
+  }
+
+  /**
+   * Enum for rsa salt len type.
+   *
+   * @enum { number }
+   * @syscap SystemCapability.Security.Huks
+   * @since 10
+   */
+  export enum HuksRsaPssSaltLenType {
+    HUKS_RSA_PSS_SALT_LEN_DIGEST = 0,
+    HUKS_RSA_PSS_SALT_LEN_MAX = 1
   }
 
   /**
@@ -1495,6 +1527,18 @@ declare namespace huks {
      */
     HUKS_TAG_UNWRAP_ALGORITHM_SUITE = HuksTagType.HUKS_TAG_TYPE_UINT | 26,
 
+    /**
+     * @syscap SystemCapability.Security.Huks
+     * @since 10
+     */
+    HUKS_TAG_DERIVED_AGREED_KEY_STORAGE_FLAG = HuksTagType.HUKS_TAG_TYPE_UINT | 29,
+
+    /**
+     * @syscap SystemCapability.Security.Huks
+     * @since 10
+     */
+    HUKS_TAG_RSA_PSS_SALT_LEN_TYPE = HuksTagType.HUKS_TAG_TYPE_UINT | 30,
+
     /*
      * Key authentication related TAG: 201 - 300
      *
@@ -1563,6 +1607,14 @@ declare namespace huks {
      * @since 9
      */
     HUKS_TAG_CHALLENGE_POS = HuksTagType.HUKS_TAG_TYPE_UINT | 310,
+
+    /**
+     * Supported key secure access control purpose tag, the value from enum HuksKeyPurpose.
+     *
+     * @syscap SystemCapability.Security.Huks
+     * @since 10
+     */
+    HUKS_TAG_KEY_AUTH_PURPOSE = HuksTagType.HUKS_TAG_TYPE_UINT | 311,
 
     /* Attestation related TAG: 501 - 600 */
     HUKS_TAG_ATTESTATION_CHALLENGE = HuksTagType.HUKS_TAG_TYPE_BYTES | 501,

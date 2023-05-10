@@ -43,7 +43,6 @@ if (os_level == "standard") {
       debug = false
     }
     sources += [ "./src/hks_verifier.c" ]
-    include_dirs = [ "//third_party/openssl/include/" ]
     deps += [ "//third_party/openssl:libcrypto_shared" ]
     external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
   }
@@ -60,7 +59,7 @@ if (os_level == "standard") {
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
 
     complete_static_lib = true
-    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared" ]
+    external_deps = [ "hilog_featured_lite:hilog_shared" ]
 
     if (huks_dependency_mbedtls_path != "") {
       deps += [ huks_dependency_mbedtls_path ]
@@ -70,7 +69,11 @@ if (os_level == "standard") {
     if (huks_dependency_openssl_path != "") {
       deps += [ huks_dependency_openssl_path ]
     } else {
-      deps += [ "//build/lite/config/component/openssl:openssl_shared" ]
+      if (ohos_kernel_type == "liteos_a" && ohos_kernel_type != "linux") {
+        deps += [ "//third_party/openssl/ohos_lite:openssl_shared" ]
+      } else {
+        deps += [ "//third_party/openssl:libcrypto_shared" ]
+      }
     }
   }
 }
