@@ -350,4 +350,45 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest012, TestSize.Level0)
     HksFreeParamSet(&blobParamSet);
     HksFreeParamSet(&runtimeParamSet);
 }
+
+/**
+ * @tc.name: HksSecureAccessTest.HksSecureAccessTest013
+ * @tc.desc: tdd HksCoreSecureAccessInitParams, skip user auth access control
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksSecureAccessTest, HksSecureAccessTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksSecureAccessTest013");
+    struct HksParam parmas[] = {
+        {
+            .tag = HKS_TAG_USER_AUTH_TYPE,
+            .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT
+        },
+        {
+            .tag = HKS_TAG_KEY_AUTH_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+        }, {
+            .tag = HKS_TAG_PURPOSE,
+            .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+        }, {
+            .tag = HKS_TAG_ALGORITHM,
+            .uint32Param = HKS_ALG_SM4
+        }, {
+            .tag = HKS_TAG_BLOCK_MODE,
+            .uint32Param = HKS_MODE_CBC
+        }
+    };
+    struct HksBlob token = { 0, nullptr };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksSecureAccessTest013 HksInitParamSet failed";
+    ret = HksAddParams(paramSet, parmas, sizeof(parmas) / sizeof(parmas[0]));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksSecureAccessTest013 HksAddParams failed";
+    ret = HksBuildParamSet(&paramSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksSecureAccessTest013 HksBuildParamSet failed";
+    struct HuksKeyNode keyNode = { { nullptr, nullptr }, paramSet, nullptr, nullptr, 0 };
+    ret = HksCoreSecureAccessInitParams(&keyNode, paramSet, &token);
+    ASSERT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
+    HksFreeParamSet(&paramSet);
+}
 }

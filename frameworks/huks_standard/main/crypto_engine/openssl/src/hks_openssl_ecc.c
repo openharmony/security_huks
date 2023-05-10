@@ -162,25 +162,16 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const struct HksKeySpec 
 
 int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *key)
 {
-    int curveId;
-    switch (spec->algType) {
-#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GENERATE_KEY)
-        case HKS_ALG_SM2:
-            if (spec->keyLen != HKS_SM2_KEY_SIZE_256) {
-                HKS_LOG_E("Sm2 Invalid Param!");
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-            curveId = NID_sm2;
-            break;
-#endif
-        default:
-            HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
-                HKS_ERROR_INVALID_ARGUMENT, "Ecc Invalid Param!")
-
-            HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslGetCurveId(spec->keyLen, &curveId),
-                HKS_ERROR_INVALID_ARGUMENT, "Ecc get curveId failed!")
-            break;
+    if (spec->algType != HKS_ALG_ECC) {
+        HKS_LOG_E("invalid alg type %" LOG_PUBLIC "u", spec->algType);
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslEccCheckKeyLen(spec->keyLen),
+        HKS_ERROR_INVALID_ARGUMENT, "Ecc Invalid Param!")
+
+    int curveId = 0;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(HksOpensslGetCurveId(spec->keyLen, &curveId),
+        HKS_ERROR_INVALID_ARGUMENT, "Ecc get curveId failed!")
 
     EC_KEY *eccKey = NULL;
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -211,7 +202,7 @@ int32_t HksOpensslEccGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 }
 #endif
 
-#ifdef HKS_SUPPORT_ECC_GET_PUBLIC_KEY
+#if defined(HKS_SUPPORT_ECC_GET_PUBLIC_KEY) || defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
 int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
 {
     struct KeyMaterialEcc *keyMaterial = (struct KeyMaterialEcc *)input->data;

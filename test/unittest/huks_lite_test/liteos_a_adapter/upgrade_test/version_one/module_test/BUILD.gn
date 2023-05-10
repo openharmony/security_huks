@@ -36,12 +36,11 @@ unittest("huks_3.0_module_test") {
 
   include_dirs += [ "./include" ]
 
-  deps = [
-    "../../../../../../../interfaces/inner_api/huks_lite:huks_3.0_sdk",
-    "//base/hiviewdfx/hilog_lite/frameworks/featured:hilog_shared",
-  ]
+  deps = [ "../../../../../../../interfaces/inner_api/huks_lite:huks_3.0_sdk" ]
 
   deps += [ "../../../../../modify_old_version_key_test_util:huks_modify_old_version_key_util" ]
+
+  external_deps = [ "hilog_featured_lite:hilog_shared" ]
 
   cflags = [
     "-Wall",

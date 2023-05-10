@@ -450,7 +450,7 @@ int32_t GetEccPubKey(const struct HksBlob *input, struct HksBlob *output)
     return ECC_SUCCESS;
 }
 
-static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
+static int32_t EcKeyToPublicKey(const EC_KEY *ecKey, struct HksBlob *eccPublicKey)
 {
     BIGNUM *x = BN_new();
     BIGNUM *y = BN_new();
@@ -499,8 +499,8 @@ static int32_t EcKeyToPublicKey(EC_KEY *ecKey, struct HksBlob *eccPublicKey)
         HKS_FREE_PTR(keyBuffer);
     } while (0);
 
-    SELF_FREE_PTR(x, BN_free);
-    SELF_FREE_PTR(y, BN_free);
+    SELF_FREE_PTR(x, BN_free)
+    SELF_FREE_PTR(y, BN_free)
     return ret;
 }
 
@@ -517,7 +517,7 @@ int32_t X509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey)
         return ECC_FAILED;
     }
 
-    EC_KEY *ecKey = EVP_PKEY_get0_EC_KEY(pkey);
+    const EC_KEY *ecKey = EVP_PKEY_get0_EC_KEY(pkey);
     if (ecKey == NULL) {
         EVP_PKEY_free(pkey);
         return ECC_FAILED;
@@ -572,13 +572,14 @@ int32_t HksBlobToX509(const struct HksBlob *key, struct HksBlob *x509Key)
     }
 
     uint8_t *tmp = NULL;
-    uint32_t length = (uint32_t)i2d_PUBKEY(pkey, &tmp);
-    x509Key->size = length;
-    if (tmp == NULL) {
+    int ret = i2d_PUBKEY(pkey, &tmp);
+    if (ret <= 0 || tmp == NULL) {
         EVP_PKEY_free(pkey);
         return ECC_FAILED;
     }
 
+    uint32_t length = (uint32_t)(ret);
+    x509Key->size = length;
     if (memcpy_s(x509Key->data, x509Key->size, tmp, length) != 0) {
         EVP_PKEY_free(pkey);
         OPENSSL_free(tmp);

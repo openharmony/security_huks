@@ -97,7 +97,7 @@ static void RegisterAbilityGetPublicKey(void)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_DSA), HksOpensslGetDsaPubKey);
 #endif
 #if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_SM2), HksOpensslGetSm2PubKey);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_PUBLIC_KEY(HKS_ALG_SM2), HksOpensslGetEccPubKey);
 #endif
 }
 

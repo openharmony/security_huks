@@ -62,7 +62,10 @@ ohos_moduletest("huks_mt_test") {
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
   if (use_crypto_lib == "openssl") {
-    defines = [ "_USE_OPENSSL_" ]
+    defines = [
+      "_USE_OPENSSL_",
+      "OPENSSL_SUPPRESS_DEPRECATED",
+    ]
   }
   if (use_crypto_lib == "mbedtls") {
     defines = [ "_USE_MBEDTLS_" ]
@@ -72,7 +75,6 @@ ohos_moduletest("huks_mt_test") {
 
   include_dirs = [
     "//third_party/bounds_checking_function/include",
-    "//third_party/openssl/include/",
     "../unittest/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "include",
