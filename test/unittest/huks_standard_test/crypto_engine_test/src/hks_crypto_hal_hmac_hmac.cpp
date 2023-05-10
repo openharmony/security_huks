@@ -161,6 +161,7 @@ void HksCryptoHalHmacHmac::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalHmacHmac_001
  * @tc.name      : HksCryptoHalHmacHmac_001
@@ -180,6 +181,7 @@ HWTEST_F(HksCryptoHalHmacHmac, HksCryptoHalHmacHmac_002, Function | SmallTest | 
 {
     RunTestCase(HKS_CRYPTO_HAL_HMAC_HMAC_002_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalHmacHmac_003

@@ -625,6 +625,7 @@ HWTEST_F(HksAesCipherMt, HksAesCipherMt01500, TestSize.Level0)
     RunTestCase(HUKS_AES_CIPER_MT_01500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksAesCipherMt.HksAesCipherMt01600
  * @tc.name      : HksAesCipherMt01600
@@ -646,6 +647,7 @@ HWTEST_F(HksAesCipherMt, HksAesCipherMt01700, TestSize.Level0)
 {
     RunTestCase(HUKS_AES_CIPER_MT_01700_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksAesCipherMt.HksAesCipherMt01800
