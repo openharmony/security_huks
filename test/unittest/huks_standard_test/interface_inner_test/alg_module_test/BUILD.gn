@@ -58,6 +58,9 @@ ohos_moduletest("huks_mt_test") {
     "src/openssl_hmac_helper.c",
     "src/openssl_rsa_helper.c",
   ]
+  if (huks_security_level == "software") {
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ] 
+  }
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]

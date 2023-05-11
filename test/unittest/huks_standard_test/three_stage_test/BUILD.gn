@@ -85,6 +85,9 @@ ohos_unittest("huks_UT_test") {
     "src/hks_chipset_platform_encrypt_test.cpp",
   ]
   defines = []
+  if (huks_security_level == "software") {
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ] 
+  }
 
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
