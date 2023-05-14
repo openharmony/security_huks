@@ -696,6 +696,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest019, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0020
  * @tc.desc: alg-ECC pur-Sign.
@@ -761,6 +762,7 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest021, TestSize.Level0)
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0022

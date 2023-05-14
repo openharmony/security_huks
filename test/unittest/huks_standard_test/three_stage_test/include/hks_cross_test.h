@@ -102,7 +102,7 @@ static struct HksParam g_rsaGenParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS1_V1_5
@@ -123,7 +123,7 @@ static struct HksParam g_rsaEncryParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS1_V1_5
@@ -144,7 +144,7 @@ static struct HksParam g_rsaDecryParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS1_V1_5
@@ -169,7 +169,7 @@ static struct HksParam g_dsaSVGenParams[] = {
         .uint32Param = Unittest::CrossTest::DSA_KEY_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_dsaSVSignParams[] = {
@@ -181,7 +181,7 @@ static struct HksParam g_dsaSVSignParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_dsaSVVerParams[] = {
@@ -196,7 +196,7 @@ static struct HksParam g_dsaSVVerParams[] = {
         .uint32Param = Unittest::CrossTest::DSA_KEY_SIZE
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -209,7 +209,7 @@ static struct HksParam g_eccSVGenParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_224
+        .uint32Param = HKS_ECC_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_NONE
@@ -224,7 +224,7 @@ static struct HksParam g_eccSVSignParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_224
+        .uint32Param = HKS_ECC_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_NONE
@@ -239,7 +239,7 @@ static struct HksParam g_eccSVVerParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_224
+        .uint32Param = HKS_ECC_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_NONE
@@ -258,7 +258,7 @@ static struct HksParam g_ed25519SVGenParams[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_ed25519SVSignParams[] = {
@@ -273,7 +273,7 @@ static struct HksParam g_ed25519SVSignParams[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_ed25519SVVerParams[] = {
@@ -288,7 +288,7 @@ static struct HksParam g_ed25519SVVerParams[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -301,13 +301,13 @@ static struct HksParam g_rsaSVGenParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS1_V1_5
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_MD5
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -320,13 +320,13 @@ static struct HksParam g_rsaSVSignParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS1_V1_5
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_MD5
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -339,13 +339,13 @@ static struct HksParam g_rsaSVVerParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS1_V1_5
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_MD5
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -358,7 +358,7 @@ static struct HksParam g_hmacGenParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_MAC
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_KEY_SIZE,
         .uint32Param = Unittest::CrossTest::CROSS_COMMON_SIZE
@@ -373,7 +373,7 @@ static struct HksParam g_hmacParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_MAC
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 

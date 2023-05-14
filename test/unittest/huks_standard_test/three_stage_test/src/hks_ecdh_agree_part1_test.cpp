@@ -601,6 +601,7 @@ static struct HksParam g_agreeParams02Finish005[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEcdhAgreePart1Test.HksEcdhAgree001
  * @tc.desc: alg-ECDH, pur-AGREE
@@ -654,6 +655,7 @@ HWTEST_F(HksEcdhAgreePart1Test, HksEcdhAgree001, TestSize.Level0)
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
+#endif
 
 /**
  * @tc.name: HksEcdhAgreePart1Test.HksEcdhAgree002
@@ -817,6 +819,7 @@ HWTEST_F(HksEcdhAgreePart1Test, HksEcdhAgree004, TestSize.Level0)
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEcdhAgreePart1Test.HksEcdhAgree005
  * @tc.desc: alg-EDCH, pur-AGREE, size-521
@@ -869,4 +872,5 @@ HWTEST_F(HksEcdhAgreePart1Test, HksEcdhAgree005, TestSize.Level0)
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
+#endif
 } // namespace Unittest::EcdhAgree

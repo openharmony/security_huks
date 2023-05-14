@@ -53,7 +53,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_001_PARAMS = {
         {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
-            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_OAEP },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
@@ -62,7 +62,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_001_PARAMS = {
         {
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
-            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_OAEP },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
@@ -311,6 +311,7 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest003, TestSize.Level0)
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_003_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksAuthPartTest.HksCheckPurposeTest004
  * @tc.desc: alg-DSA gen-pur-Sign init-pur-Encrypt.
@@ -325,6 +326,7 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest004, TestSize.Level0)
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_004_PARAMS), HKS_SUCCESS);
 #endif
 }
+#endif
 
 /**
  * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest005
@@ -338,6 +340,7 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest005, TestSize.Level0)
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_005_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksAuthPartTest.HksCheckPurposeTest006
  * @tc.desc: alg-DSA gen-pur-Sign init-pur-Agree.
@@ -352,6 +355,7 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest006, TestSize.Level0)
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_006_PARAMS), HKS_SUCCESS);
 #endif
 }
+#endif
 
 /**
  * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest007
