@@ -497,6 +497,7 @@ protected:
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccKeyMt.HksEccKeyMt00100
  * @tc.name      : HksEccKeyMt00100
@@ -562,6 +563,7 @@ HWTEST_F(HksEccKeyMt, HksEccKeyMt00600, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_KEY_MT_00600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccKeyMt.HksEccKeyMt00700
@@ -574,6 +576,7 @@ HWTEST_F(HksEccKeyMt, HksEccKeyMt00700, TestSize.Level0)
     RunTestCase(HUKS_ECC_KEY_MT_00700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccKeyMt.HksEccKeyMt00800
  * @tc.name      : HksEccKeyMt00800
@@ -595,6 +598,7 @@ HWTEST_F(HksEccKeyMt, HksEccKeyMt00900, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_KEY_MT_00900_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccKeyMt.HksEccKeyMt01000
@@ -640,6 +644,7 @@ HWTEST_F(HksEccKeyMt, HksEccKeyMt01300, TestSize.Level0)
     RunTestCase(HUKS_ECC_KEY_MT_01300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccKeyMt.HksEccKeyMt01400
  * @tc.name      : HksEccKeyMt01400
@@ -661,6 +666,7 @@ HWTEST_F(HksEccKeyMt, HksEccKeyMt01500, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_KEY_MT_01500_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccKeyMt.HksEccKeyMt01600

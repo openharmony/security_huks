@@ -58,7 +58,7 @@ static struct HksParam g_genParamsTest081[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }
 };
 static struct HksParam g_signParamsTest081[] = {
@@ -70,7 +70,7 @@ static struct HksParam g_signParamsTest081[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
@@ -88,7 +88,7 @@ static struct HksParam g_verifyParamsTest081[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
@@ -107,7 +107,7 @@ static struct HksParam g_genParamsTest082[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_768
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }
 };
 static struct HksParam g_signParamsTest082[] = {
@@ -119,13 +119,13 @@ static struct HksParam g_signParamsTest082[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_768
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_verifyParamsTest082[] = {
@@ -137,13 +137,13 @@ static struct HksParam g_verifyParamsTest082[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_768
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -540,13 +540,13 @@ static struct HksParam g_genParamsTest091[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     },
 };
 static struct HksParam g_signParamsTest091[] = {
@@ -558,13 +558,13 @@ static struct HksParam g_signParamsTest091[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -579,13 +579,13 @@ static struct HksParam g_verifyParamsTest091[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -601,13 +601,13 @@ static struct HksParam g_genParamsTest092[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -622,13 +622,13 @@ static struct HksParam g_signParamsTest092[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_verifyParamsTest092[] = {
@@ -640,13 +640,13 @@ static struct HksParam g_verifyParamsTest092[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -659,13 +659,13 @@ static struct HksParam g_genParamsTest093[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -680,13 +680,13 @@ static struct HksParam g_signParamsTest093[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -701,13 +701,13 @@ static struct HksParam g_verifyParamsTest093[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -723,13 +723,13 @@ static struct HksParam g_genParamsTest094[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
@@ -744,13 +744,13 @@ static struct HksParam g_signParamsTest094[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -765,13 +765,13 @@ static struct HksParam g_verifyParamsTest094[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_DIGEST
@@ -787,13 +787,13 @@ static struct HksParam g_genParamsTest095[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
@@ -808,13 +808,13 @@ static struct HksParam g_signParamsTest095[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
@@ -829,13 +829,13 @@ static struct HksParam g_verifyParamsTest095[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
@@ -851,13 +851,13 @@ static struct HksParam g_genParamsTest096[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_signParamsTest096[] = {
@@ -869,13 +869,13 @@ static struct HksParam g_signParamsTest096[] = {
         .uint32Param = HKS_KEY_PURPOSE_SIGN
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
@@ -890,19 +890,20 @@ static struct HksParam g_verifyParamsTest096[] = {
         .uint32Param = HKS_KEY_PURPOSE_VERIFY
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_RSA_KEY_SIZE_512
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PSS
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag = HKS_TAG_RSA_PSS_SALT_LEN_TYPE,
         .uint32Param = HKS_RSA_PSS_SALTLEN_MAX
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test081
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-MD5.
@@ -940,10 +941,11 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test081, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test082
- * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-SHA1.
+ * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-SHA256.
  * @tc.type: FUNC
  * @tc.require:issueI611S5
  */
@@ -979,6 +981,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test082, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test083
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PSS and digest-SHA224.
@@ -1016,6 +1019,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test083, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test084
@@ -1131,6 +1135,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test086, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart9Test.HksRsaSignVerifyPart9Test087
  * @tc.desc: rsa sign and verify; alg-RSA, pad-PKCS1_V1_5 and digest-MD5.
@@ -1282,6 +1287,7 @@ HWTEST_F(HksRsaSignVerifyPart9Test, HksRsaSignVerifyPart9Test090, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart1Test.HksRsaSignVerifyPart1Test091

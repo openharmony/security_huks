@@ -146,14 +146,6 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_errorcode_adapter_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_param_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_template_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_aes_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_common_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_curve_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_engine_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_hash_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_hmac_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_rsa_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_sm4_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/os_dependency_test/src/hks_ipc_check_test.cpp",
   ]
 
@@ -210,7 +202,17 @@ ohos_unittest("huks_module_test") {
   }
 
   if (huks_security_level == "software") {
-    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ] 
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    sources += [
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_aes_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_common_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_curve_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_engine_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_hash_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_hmac_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_rsa_test.cpp",
+      "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_sm4_test.cpp",
+    ]
   }
 
   include_dirs += [ "//test/xts/acts/security_lite/huks/common/include" ]

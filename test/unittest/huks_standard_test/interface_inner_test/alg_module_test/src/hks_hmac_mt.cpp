@@ -356,6 +356,7 @@ protected:
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksHmacMt.HksHmacMt00100
  * @tc.name      : HksHmacMt00100
@@ -375,6 +376,7 @@ HWTEST_F(HksHmacMt, HksHmacMt00200, TestSize.Level0)
 {
     RunTestCase(HUKS_HMAC_MT_00200_PARAMS, 0);
 }
+#endif
 
 /**
  * @tc.number    : HksHmacMt.HksHmacMt00300
@@ -406,6 +408,7 @@ HWTEST_F(HksHmacMt, HksHmacMt00500, TestSize.Level0)
     RunTestCase(HUKS_HMAC_MT_00500_PARAMS, 0);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksHmacMt.HksHmacMt00600
  * @tc.name      : HksHmacMt00600
@@ -425,6 +428,7 @@ HWTEST_F(HksHmacMt, HksHmacMt00700, TestSize.Level0)
 {
     RunTestCase(HUKS_HMAC_MT_00700_PARAMS, 1);
 }
+#endif
 
 /**
  * @tc.number    : HksHmacMt.HksHmacMt00800
@@ -456,6 +460,7 @@ HWTEST_F(HksHmacMt, HksHmacMt01000, TestSize.Level0)
     RunTestCase(HUKS_HMAC_MT_01000_PARAMS, 1);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksHmacMt.HksHmacMt01100
  * @tc.name      : HksHmacMt01100
@@ -475,6 +480,7 @@ HWTEST_F(HksHmacMt, HksHmacMt01200, TestSize.Level0)
 {
     RunTestCase(HUKS_HMAC_MT_01200_PARAMS, 0);
 }
+#endif
 
 /**
  * @tc.number    : HksHmacMt.HksHmacMt01300
