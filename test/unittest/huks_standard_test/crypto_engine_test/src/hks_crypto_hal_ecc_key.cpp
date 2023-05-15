@@ -123,6 +123,7 @@ void HksCryptoHalEccKey::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalEccKey_001
  * @tc.name      : HksCryptoHalEccKey_001
@@ -132,6 +133,7 @@ HWTEST_F(HksCryptoHalEccKey, HksCryptoHalEccKey_001, Function | SmallTest | Leve
 {
     RunTestCase(HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalEccKey_002

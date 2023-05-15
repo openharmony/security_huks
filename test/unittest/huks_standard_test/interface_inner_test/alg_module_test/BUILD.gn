@@ -25,7 +25,6 @@ ohos_moduletest("huks_mt_test") {
     "src/hks_aes_encrypt_mt.cpp",
     "src/hks_aes_key_mt.cpp",
     "src/hks_agree_mt.cpp",
-    "src/hks_dsa_mt.cpp",
     "src/hks_ecc_key_mt.cpp",
     "src/hks_ecc_sign_mt.cpp",
     "src/hks_ecc_verify_mt.cpp",
@@ -33,18 +32,11 @@ ohos_moduletest("huks_mt_test") {
     "src/hks_rsa_common_mt.cpp",
     "src/hks_rsa_ecb_nopadding_mt.cpp",
     "src/hks_rsa_ecb_oaep_padding_mt.cpp",
-    "src/hks_rsa_ecb_oaep_sha1_mt.cpp",
-    "src/hks_rsa_ecb_oaep_sha224_mt.cpp",
     "src/hks_rsa_ecb_oaep_sha256_mt.cpp",
     "src/hks_rsa_ecb_oaep_sha384_mt.cpp",
     "src/hks_rsa_ecb_oaep_sha512_mt.cpp",
     "src/hks_rsa_ecb_pkcs1_padding_mt.cpp",
-    "src/hks_rsa_md5_with_rsa_mt.cpp",
     "src/hks_rsa_none_with_rsa_mt.cpp",
-    "src/hks_rsa_sha1_with_rsa_mt.cpp",
-    "src/hks_rsa_sha1_with_rsa_pss_mt.cpp",
-    "src/hks_rsa_sha224_with_rsa_mt.cpp",
-    "src/hks_rsa_sha224_with_rsa_pss_mt.cpp",
     "src/hks_rsa_sha256_with_rsa_mt.cpp",
     "src/hks_rsa_sha256_with_rsa_pss_mt.cpp",
     "src/hks_rsa_sha384_with_rsa_mt.cpp",
@@ -58,17 +50,31 @@ ohos_moduletest("huks_mt_test") {
     "src/openssl_hmac_helper.c",
     "src/openssl_rsa_helper.c",
   ]
+  defines = []
+  if (huks_security_level == "software") {
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    sources += [
+      "src/hks_dsa_mt.cpp",
+      "src/hks_rsa_ecb_oaep_sha1_mt.cpp",
+      "src/hks_rsa_ecb_oaep_sha224_mt.cpp",
+      "src/hks_rsa_md5_with_rsa_mt.cpp",
+      "src/hks_rsa_sha1_with_rsa_mt.cpp",
+      "src/hks_rsa_sha1_with_rsa_pss_mt.cpp",
+      "src/hks_rsa_sha224_with_rsa_mt.cpp",
+      "src/hks_rsa_sha224_with_rsa_pss_mt.cpp",
+    ]
+  }
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
   if (use_crypto_lib == "openssl") {
-    defines = [
+    defines += [
       "_USE_OPENSSL_",
       "OPENSSL_SUPPRESS_DEPRECATED",
     ]
   }
   if (use_crypto_lib == "mbedtls") {
-    defines = [ "_USE_MBEDTLS_" ]
+    defines += [ "_USE_MBEDTLS_" ]
   }
 
   defines += [ "_HUKS_LOG_ENABLE_" ]

@@ -520,6 +520,7 @@ HWTEST_F(HksAesDecryptMt, HksAesDecryptMt00300, TestSize.Level0)
     RunTestCase(HUKS_AES_DECRYPT_MT_00300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksAesDecryptMt.HksAesDecryptMt00400
  * @tc.name      : HksAesDecryptMt00400
@@ -541,6 +542,7 @@ HWTEST_F(HksAesDecryptMt, HksAesDecryptMt00500, TestSize.Level0)
 {
     RunTestCase(HUKS_AES_DECRYPT_MT_00500_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksAesDecryptMt.HksAesDecryptMt00600
@@ -586,6 +588,7 @@ HWTEST_F(HksAesDecryptMt, HksAesDecryptMt00900, TestSize.Level0)
     RunTestCase(HUKS_AES_DECRYPT_MT_00900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksAesDecryptMt.HksAesDecryptMt01000
  * @tc.name      : HksAesDecryptMt01000
@@ -607,6 +610,7 @@ HWTEST_F(HksAesDecryptMt, HksAesDecryptMt01100, TestSize.Level0)
 {
     RunTestCase(HUKS_AES_DECRYPT_MT_01100_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksAesDecryptMt.HksAesDecryptMt01200
@@ -651,6 +655,8 @@ HWTEST_F(HksAesDecryptMt, HksAesDecryptMt01500, TestSize.Level0)
 {
     RunTestCase(HUKS_AES_DECRYPT_MT_01500_PARAMS);
 }
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksAesDecryptMt.HksAesDecryptMt01600
  * @tc.name      : HksAesDecryptMt01600
@@ -672,6 +678,7 @@ HWTEST_F(HksAesDecryptMt, HksAesDecryptMt01700, TestSize.Level0)
 {
     RunTestCase(HUKS_AES_DECRYPT_MT_01700_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksAesDecryptMt.HksAesDecryptMt01800

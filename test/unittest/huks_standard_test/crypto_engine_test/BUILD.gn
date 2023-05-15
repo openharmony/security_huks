@@ -72,6 +72,10 @@ ohos_unittest("crypto_engine_unit_test") {
     defines += [ "_USE_MBEDTLS_" ]
   }
 
+  if (huks_security_level == "software") {
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+  }
+
   configs = [
     "//commonlibrary/c_utils/base:utils_config",
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",

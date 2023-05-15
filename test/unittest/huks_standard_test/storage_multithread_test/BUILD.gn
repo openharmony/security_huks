@@ -33,6 +33,11 @@ ohos_unittest("huks_multithread_test") {
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
+
+  if (huks_security_level == "software") {
+    defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+  }
+
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",

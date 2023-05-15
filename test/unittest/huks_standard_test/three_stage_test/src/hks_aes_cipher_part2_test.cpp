@@ -673,6 +673,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test012, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test013
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-ECB pad-NONE size-192.
@@ -733,6 +734,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test014, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 #endif
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 #else
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test011

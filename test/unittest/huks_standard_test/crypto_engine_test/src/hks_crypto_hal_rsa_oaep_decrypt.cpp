@@ -1314,6 +1314,7 @@ void HksCryptoHalRsaOaepDecrypt::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_013
  * @tc.name      : HksCryptoHalRsaOaepDecrypt_013
@@ -1343,6 +1344,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_015, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_015_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_016
@@ -1376,6 +1378,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_018, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_019
  * @tc.name      : HksCryptoHalRsaOaepDecrypt_019
@@ -1436,7 +1439,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_024, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_024_PARAMS);
 }
-#endif
+#endif //CUT_RSA_4096_TEST
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_025
@@ -1467,6 +1470,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_027, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_027_PARAMS);
 }
+#endif //HKS_UNTRUSTED_RUNNING_ENV
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_028
@@ -1500,6 +1504,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_030, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_031
  * @tc.name      : HksCryptoHalRsaOaepDecrypt_031
@@ -1529,6 +1534,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_033, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_033_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_034
@@ -1562,6 +1568,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_036, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_037
  * @tc.name      : HksCryptoHalRsaOaepDecrypt_037
@@ -1591,6 +1598,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_039, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_039_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_040
@@ -1624,6 +1632,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_042, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_043
  * @tc.name      : HksCryptoHalRsaOaepDecrypt_043
@@ -1653,6 +1662,7 @@ HWTEST_F(HksCryptoHalRsaOaepDecrypt, HksCryptoHalRsaOaepDecrypt_045, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_045_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepDecrypt_046

@@ -32,7 +32,6 @@ ohos_unittest("huks_UT_test") {
     "src/hks_cross_test.cpp",
     "src/hks_cross_test_common.cpp",
     "src/hks_dh_agree_test.cpp",
-    "src/hks_ecc_sign_verify_part1_test.cpp",
     "src/hks_ecc_sign_verify_part2_test.cpp",
     "src/hks_ecc_sign_verify_part3_test.cpp",
     "src/hks_ecc_sign_verify_test_common.cpp",
@@ -59,10 +58,6 @@ ohos_unittest("huks_UT_test") {
     "src/hks_rsa_cipher_part4_test.cpp",
     "src/hks_rsa_cipher_part5_test.cpp",
     "src/hks_rsa_cipher_test_common.cpp",
-    "src/hks_rsa_sign_verify_part1_test.cpp",
-    "src/hks_rsa_sign_verify_part2_test.cpp",
-    "src/hks_rsa_sign_verify_part3_test.cpp",
-    "src/hks_rsa_sign_verify_part4_test.cpp",
     "src/hks_rsa_sign_verify_part5_test.cpp",
     "src/hks_rsa_sign_verify_part6_test.cpp",
     "src/hks_rsa_sign_verify_part7_test.cpp",
@@ -77,7 +72,6 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_agree_test.cpp",
     "src/hks_import_key_test.cpp",
     "src/hks_import_rsa_test.cpp",
-    "src/hks_import_sign_verify_test.cpp",
   ]
 
   sources += [
@@ -85,15 +79,28 @@ ohos_unittest("huks_UT_test") {
     "src/hks_chipset_platform_encrypt_test.cpp",
   ]
   defines = []
+  if (huks_security_level == "software") {
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    sources += [
+      "src/hks_ecc_sign_verify_part1_test.cpp",
+      "src/hks_import_sign_verify_test.cpp",
+      "src/hks_rsa_sign_verify_part1_test.cpp",
+      "src/hks_rsa_sign_verify_part2_test.cpp",
+      "src/hks_rsa_sign_verify_part3_test.cpp",
+      "src/hks_rsa_sign_verify_part4_test.cpp",
+    ]
+  }
 
   if (use_crypto_lib == "openssl") {
     defines += [ "_USE_OPENSSL_" ]
     sources += [
-      "src/hks_dsa_sign_verify_test.cpp",
       "src/hks_sm2_sign_verify_test.cpp",
       "src/hks_sm4_cipher_part_test.cpp",
       "src/hks_sm4_cipher_test_common.cpp",
     ]
+    if (huks_security_level == "software") {
+      sources += [ "src/hks_dsa_sign_verify_test.cpp" ]
+    }
   }
   if (use_crypto_lib == "mbedtls") {
     defines += [ "_USE_MBEDTLS_" ]
