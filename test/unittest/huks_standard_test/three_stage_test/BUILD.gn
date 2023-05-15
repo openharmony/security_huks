@@ -99,9 +99,7 @@ ohos_unittest("huks_UT_test") {
       "src/hks_sm4_cipher_test_common.cpp",
     ]
     if (huks_security_level == "software") {
-      sources += [
-        "src/hks_dsa_sign_verify_test.cpp",
-      ]
+      sources += [ "src/hks_dsa_sign_verify_test.cpp" ]
     }
   }
   if (use_crypto_lib == "mbedtls") {

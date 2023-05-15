@@ -73,7 +73,7 @@ ohos_unittest("crypto_engine_unit_test") {
   }
 
   if (huks_security_level == "software") {
-    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ] 
+    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
   }
 
   configs = [

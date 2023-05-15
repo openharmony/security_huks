@@ -48,7 +48,7 @@ ohos_unittest("hukssdk_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
   if (huks_security_level == "software") {
-    defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ] 
+    defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
   }
   include_dirs = [
     "//third_party/bounds_checking_function/include",
