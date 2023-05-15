@@ -874,6 +874,7 @@ protected:
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt00100
  * @tc.name      : HksEccVerifyMt00100
@@ -939,6 +940,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt00600, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_00600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt00700
@@ -951,6 +953,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt00700, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_00700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt00800
  * @tc.name      : HksEccVerifyMt00800
@@ -972,6 +975,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt00900, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_00900_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt01000
@@ -1017,6 +1021,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt01300, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_01300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt01400
  * @tc.name      : HksEccVerifyMt01400
@@ -1038,6 +1043,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt01500, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_01500_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt01600
@@ -1083,6 +1089,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt01900, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_01900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt02000
  * @tc.name      : HksEccVerifyMt02000
@@ -1104,6 +1111,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt02100, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_02100_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt02200
@@ -1149,6 +1157,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt02500, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_02500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt02600
  * @tc.name      : HksEccVerifyMt02600
@@ -1203,6 +1212,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt03000, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_03000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt03100
@@ -1215,6 +1225,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt03100, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_03100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt03200
  * @tc.name      : HksEccVerifyMt03200
@@ -1236,6 +1247,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt03300, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_03300_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt03400
@@ -1281,6 +1293,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt03700, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_03700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt03800
  * @tc.name      : HksEccVerifyMt03800
@@ -1302,6 +1315,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt03900, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_03900_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt04000
@@ -1347,6 +1361,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt04300, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_04300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt04400
  * @tc.name      : HksEccVerifyMt04400
@@ -1368,6 +1383,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt04500, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_VERIFY_MT_04500_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt04600

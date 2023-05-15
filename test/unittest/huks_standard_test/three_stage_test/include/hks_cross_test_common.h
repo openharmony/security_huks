@@ -80,7 +80,7 @@ static struct HksParam g_ecdhGenParams[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_224
+        .uint32Param = HKS_ECC_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_NONE
@@ -101,7 +101,7 @@ static struct HksParam g_ecdhInitParams01[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_224
+        .uint32Param = HKS_ECC_KEY_SIZE_256
     }
 };
 static struct HksParam g_ecdhFinishParams01[] = {
@@ -119,7 +119,7 @@ static struct HksParam g_ecdhInitParams02[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_224
+        .uint32Param = HKS_ECC_KEY_SIZE_256
     }
 };
 static struct HksParam g_ecdhFinishParams02[] = {

@@ -960,6 +960,7 @@ static void ImportRsaPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uin
     return RsaImportPlainKeyAnotherTest(purpose, keySize, padding, digest);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksImportRsaTest.HksImportRsaTest001
  * @tc.desc: import rsa 512-sign/verify-pss-sha256
@@ -992,6 +993,7 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest003, TestSize.Level0)
     ImportRsaPlainKeyTest(HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, HKS_RSA_KEY_SIZE_1024,
         HKS_PADDING_PSS, HKS_DIGEST_SHA512);
 }
+#endif
 
 /**
  * @tc.name: HksImportRsaTest.HksImportRsaTest004
@@ -1026,6 +1028,7 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest006, TestSize.Level0)
         HKS_PADDING_OAEP, HKS_DIGEST_SHA256);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksImportRsaTest.HksImportRsaTest007
  * @tc.desc: import rsa 512-sign/verify-pss-sha256
@@ -1064,4 +1067,5 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest009, TestSize.Level0)
     ImportRsaPlainKeyAnotherTest(HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, HKS_RSA_KEY_SIZE_1024,
         HKS_PADDING_PSS, HKS_DIGEST_SHA384);
 }
+#endif
 } // namespace Unittest::ImportRsaTest

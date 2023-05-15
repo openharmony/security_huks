@@ -416,6 +416,7 @@ static struct HksParam g_verifyParamsTest016[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart2Test.HksEccSignVerifyTest009
  * @tc.desc: alg-ECC pur-Sign.
@@ -448,6 +449,7 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest009, TestSize.Level0)
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksEccSignVerifyPart2Test.HksEccSignVerifyTest0010
@@ -585,6 +587,7 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest013, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart2Test.HksEccSignVerifyTest0014
  * @tc.desc: alg-ECC pur-Sign.
@@ -650,6 +653,7 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest015, TestSize.Level0)
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksEccSignVerifyPart2Test.HksEccSignVerifyTest0016

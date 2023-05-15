@@ -200,7 +200,7 @@ namespace Unittest::ImportWrappedKey {
         {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT},
         {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048},
         {.tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_OAEP},
-        {.tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1},
+        {.tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256},
         {.tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR},
         {.tag = HKS_TAG_UNWRAP_ALGORITHM_SUITE, .uint32Param = HKS_UNWRAP_SUITE_X25519_AES_256_GCM_NOPADDING},
     };

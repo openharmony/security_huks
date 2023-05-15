@@ -370,7 +370,7 @@ static int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, str
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle1, newParamSet1, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
- 
+
     ret = AddSignParamCustomCase(&signParams, paramSet2, &newParamSet2, param.testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle2, newParamSet2, &inData);

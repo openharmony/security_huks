@@ -160,6 +160,7 @@ void HksCryptoHalEcdhAgree::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalEcdhAgree_001
  * @tc.name      : HksCryptoHalEcdhAgree_001
@@ -169,6 +170,7 @@ HWTEST_F(HksCryptoHalEcdhAgree, HksCryptoHalEcdhAgree_001, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_ECDH_AGREE_001_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalEcdhAgree_002

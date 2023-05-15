@@ -591,6 +591,7 @@ static struct HksParam g_verifyParamsTest070[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test061
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
@@ -626,6 +627,7 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test061, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test062
@@ -663,6 +665,7 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test062, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test063
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-SHA1.
@@ -734,6 +737,7 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test064, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test065
@@ -773,7 +777,7 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test065, TestSize.Level
 
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test066
- * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
+ * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-SHA384.
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test066, TestSize.Level1)
@@ -843,6 +847,7 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test067, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test068
  * @tc.desc: alg-RSA pur-Sign pad-PSS digest-SHA1.
@@ -914,10 +919,11 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test069, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test070
- * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
+ * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-SHA256.
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test070, TestSize.Level1)
