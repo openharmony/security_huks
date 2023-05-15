@@ -230,7 +230,7 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher002, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef _USE_OPENSSL_
 /**
  * @tc.name: HksCrossTest.HksCrossTestDsaSignVerify001
