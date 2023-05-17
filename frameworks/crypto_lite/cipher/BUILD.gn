@@ -20,6 +20,7 @@ ohos_shared_library("cipher_shared") {
     part_name = "huks"
   }
 
+  innerapi_tags = [ "platformsdk" ]
   sources = [
     "src/cipher_aes.c",
     "src/cipher_rsa.c",
