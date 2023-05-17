@@ -21,8 +21,11 @@
 #include "hks_get_udid.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_rkc_v1.h"
 #include "hks_template.h"
+
+#ifdef HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG
+#include "hks_rkc_v1.h"
+#endif
 
 /* the configuration of root key component */
 static struct HksRkcCfg g_hksRkcCfg = {
@@ -589,12 +592,15 @@ int32_t HksRkcInit(void)
             struct HksKsfAttr ksfAttrRkcV1 = { "info1.data", "info2.data" };
             ret = InitKsfAttr(&ksfAttrRkcV1, HKS_KSF_TYPE_RKC);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-
+#ifdef HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG
             if (KsfExist(HKS_KSF_TYPE_RKC)) { // mk ksf not exists, rkc ksf exists => version 1
                 ret = UpgradeV1ToV2();
             } else { // latest version
+#endif
                 ret = RkcCreateKsf();
+#ifdef HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG
             }
+#endif
         }
     } while (0);
     
