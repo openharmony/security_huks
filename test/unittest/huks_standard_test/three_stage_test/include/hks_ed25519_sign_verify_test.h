@@ -39,7 +39,7 @@ static struct HksParam g_genParamsTest001[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_signParamsTest001[] = {
@@ -54,7 +54,7 @@ static struct HksParam g_signParamsTest001[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_verifyParamsTest001[] = {
@@ -69,7 +69,7 @@ static struct HksParam g_verifyParamsTest001[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -85,7 +85,7 @@ static struct HksParam g_genParamsTest002[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_signParamsTest002[] = {
@@ -100,7 +100,7 @@ static struct HksParam g_signParamsTest002[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_verifyParamsTest002[] = {
@@ -115,7 +115,7 @@ static struct HksParam g_verifyParamsTest002[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_genParamsTest003[] = {
@@ -130,7 +130,7 @@ static struct HksParam g_genParamsTest003[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_signParamsTest003[] = {
@@ -145,7 +145,7 @@ static struct HksParam g_signParamsTest003[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 
@@ -161,7 +161,7 @@ static struct HksParam g_genParamsTest004[] = {
         .uint32Param = HKS_CURVE25519_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA1
+        .uint32Param = HKS_DIGEST_SHA256
     }
 };
 static struct HksParam g_signParamsTest004[] = {

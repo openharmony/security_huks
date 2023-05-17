@@ -700,6 +700,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test043, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test044
  * @tc.desc: alg-RSA pur-Sign pad-PSS digest-SHA1.
@@ -771,10 +772,11 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test045, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test046
- * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
+ * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-SHA256.
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test046, TestSize.Level1)
@@ -880,6 +882,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test048, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test049
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
@@ -915,6 +918,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test049, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test050

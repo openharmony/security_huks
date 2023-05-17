@@ -199,7 +199,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest004, TestSize.Level0)
 
     void *ptrTwo = nullptr;
     HksOpensslAesHalFreeCtx(reinterpret_cast<void **>(&ptrTwo));
- 
+
     struct HksOpensslBlockCipherCtx *ctx =
         reinterpret_cast<struct HksOpensslBlockCipherCtx *>(HksMalloc(sizeof(HksOpensslBlockCipherCtx)));
     ASSERT_EQ(ctx == nullptr, false) << "ctx malloc failed.";

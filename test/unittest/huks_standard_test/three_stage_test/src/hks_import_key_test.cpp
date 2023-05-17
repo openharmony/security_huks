@@ -701,6 +701,7 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest003, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_003_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksImportKeyTest, HksImportKeyTest004, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_004_PARAMS), HKS_SUCCESS);
@@ -711,16 +712,6 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest005, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_005_PARAMS), HKS_SUCCESS);
 }
 
-HWTEST_F(HksImportKeyTest, HksImportKeyTest006, TestSize.Level0)
-{
-    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_006_PARAMS), HKS_SUCCESS);
-}
-
-HWTEST_F(HksImportKeyTest, HksImportKeyTest007, TestSize.Level0)
-{
-    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_007_PARAMS), HKS_SUCCESS);
-}
-
 HWTEST_F(HksImportKeyTest, HksImportKeyTest008, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_008_PARAMS), HKS_SUCCESS);
@@ -729,6 +720,17 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest008, TestSize.Level0)
 HWTEST_F(HksImportKeyTest, HksImportKeyTest009, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_009_PARAMS), HKS_SUCCESS);
+}
+#endif
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest006, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_006_PARAMS), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest007, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_007_PARAMS), HKS_SUCCESS);
 }
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest010, TestSize.Level0)
@@ -766,6 +768,7 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest016, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_016_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksImportKeyTest, HksImportKeyTest017, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_017_PARAMS), HKS_SUCCESS);
@@ -775,6 +778,7 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest018, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_018_PARAMS), HKS_SUCCESS);
 }
+#endif
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest019, TestSize.Level0)
 {
