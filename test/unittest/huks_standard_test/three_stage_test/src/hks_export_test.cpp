@@ -230,6 +230,7 @@ const TestCaseParams g_huksExportKey01700Params = {
 };
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksExportTest00100
  * @tc.name      : HksExportTest00100
@@ -259,6 +260,7 @@ HWTEST_F(HksExportTest, HksExportTest00300, TestSize.Level0)
 {
     EXPECT_EQ(RunTestCase(g_huksExportKey00300Params), HKS_SUCCESS);
 }
+#endif
 
 /**
  * @tc.number    : HksExportTest00400
@@ -280,6 +282,7 @@ HWTEST_F(HksExportTest, HksExportTest00500, TestSize.Level1)
     EXPECT_EQ(RunTestCase(g_huksExportKey00500Params), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksExportTest00600
  * @tc.name      : HksExportTest00600
@@ -298,6 +301,8 @@ HWTEST_F(HksExportTest, HksExportTest00700, TestSize.Level0)
 {
     EXPECT_EQ(RunTestCase(g_huksExportKey00700Params), HKS_SUCCESS);
 }
+#endif
+
 /**
  * @tc.number    : HksExportTest00800
  * @tc.name      : HksExportTest00800

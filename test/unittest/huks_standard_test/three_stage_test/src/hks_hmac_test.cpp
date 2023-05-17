@@ -380,6 +380,7 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     return ret;
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef L2_STANDARD
 /**
  * @tc.name: HksHmacTest.HksHmacTest001
@@ -427,6 +428,7 @@ HWTEST_F(HksHmacTest, HksHmacTest002, TestSize.Level0)
     HksFreeParamSet(&hmacParamSet);
 }
 #endif
+#endif //HKS_UNTRUSTED_RUNNING_ENV
 
 /**
  * @tc.name: HksHmacTest.HksHmacTest003

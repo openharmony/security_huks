@@ -571,6 +571,7 @@ void HksCryptoHalEcdsaSign::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalEcdsaSign_001
  * @tc.name      : HksCryptoHalEcdsaSign_001
@@ -579,36 +580,6 @@ void HksCryptoHalEcdsaSign::TearDown()
 HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_001, Function | SmallTest | Level0)
 {
     RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS);
-}
-
-/**
- * @tc.number    : HksCryptoHalEcdsaSign_002
- * @tc.name      : HksCryptoHalEcdsaSign_002
- * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-NONE key.
- */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_002, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_002_PARAMS);
-}
-
-/**
- * @tc.number    : HksCryptoHalEcdsaSign_003
- * @tc.name      : HksCryptoHalEcdsaSign_003
- * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-NONE key.
- */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_003, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_003_PARAMS);
-}
-
-/**
- * @tc.number    : HksCryptoHalEcdsaSign_004
- * @tc.name      : HksCryptoHalEcdsaSign_004
- * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-NONE key.
- */
-HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_004, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_004_PARAMS);
 }
 
 /**
@@ -690,6 +661,38 @@ HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_012, Function | SmallTest 
 {
     RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_012_PARAMS);
 }
+#endif
+
+/**
+ * @tc.number    : HksCryptoHalEcdsaSign_002
+ * @tc.name      : HksCryptoHalEcdsaSign_002
+ * @tc.desc      : Using HksCryptoHalSign Sign ECC-256-NONE key.
+ */
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_002, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_002_PARAMS);
+}
+
+/**
+ * @tc.number    : HksCryptoHalEcdsaSign_003
+ * @tc.name      : HksCryptoHalEcdsaSign_003
+ * @tc.desc      : Using HksCryptoHalSign Sign ECC-384-NONE key.
+ */
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_003, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_003_PARAMS);
+}
+
+/**
+ * @tc.number    : HksCryptoHalEcdsaSign_004
+ * @tc.name      : HksCryptoHalEcdsaSign_004
+ * @tc.desc      : Using HksCryptoHalSign Sign ECC-521-NONE key.
+ */
+HWTEST_F(HksCryptoHalEcdsaSign, HksCryptoHalEcdsaSign_004, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_ECDSA_SIGN_004_PARAMS);
+}
+
 
 /**
  * @tc.number    : HksCryptoHalEcdsaSign_013

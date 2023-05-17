@@ -46,19 +46,19 @@ int32_t HksCrossTestAesEncrypt(const struct HksBlob *keyAlias,
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
     int32_t ret = HksInit(keyAlias, encryptParamSet, &handle, nullptr);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AesEncry Init failed.");
+        HKS_LOG_E("AesEncrypt Init failed.");
         return HKS_FAILURE;
     }
 
     ret = TestUpdateLoopFinish(&handle, encryptParamSet, inData, cipherText);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AesEncry TestUpdateLoopFinish failed.");
+        HKS_LOG_E("AesEncrypt TestUpdateLoopFinish failed.");
         return HKS_FAILURE;
     }
 
     ret = HksMemCmp(inData->data, cipherText->data, cipherText->size);
     if (ret == HKS_SUCCESS) {
-        HKS_LOG_E("AesEncry inData equals cipherText.");
+        HKS_LOG_E("AesEncrypt inData equals cipherText.");
     }
 
     return HKS_SUCCESS;

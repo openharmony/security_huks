@@ -1511,6 +1511,7 @@ void HksCryptoHalRsaSign::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaSign_001
  * @tc.name      : HksCryptoHalRsaSign_001
@@ -1602,6 +1603,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_009, Function | SmallTest | Le
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_SIGN_009_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaSign_010
@@ -1635,6 +1637,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_012, Function | SmallTest | Le
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaSign_013
  * @tc.name      : HksCryptoHalRsaSign_013
@@ -1788,6 +1791,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_027, Function | SmallTest | Le
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_SIGN_027_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaSign_028
@@ -1821,6 +1825,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_030, Function | SmallTest | Le
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaSign_031
  * @tc.name      : HksCryptoHalRsaSign_031
@@ -1840,6 +1845,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_032, Function | SmallTest | Le
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_SIGN_032_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaSign_033
@@ -1873,6 +1879,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_035, Function | SmallTest | Le
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaSign_036
  * @tc.name      : HksCryptoHalRsaSign_036
@@ -2078,6 +2085,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_055, Function | SmallTest | Le
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_SIGN_055_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaSign_056
@@ -2111,6 +2119,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_058, Function | SmallTest | Le
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaSign_059
  * @tc.name      : HksCryptoHalRsaSign_059
@@ -2140,6 +2149,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_061, Function | SmallTest | Le
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_SIGN_061_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaSign_062
@@ -2173,6 +2183,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_064, Function | SmallTest | Le
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaSign_065
  * @tc.name      : HksCryptoHalRsaSign_065
@@ -2192,6 +2203,7 @@ HWTEST_F(HksCryptoHalRsaSign, HksCryptoHalRsaSign_066, Function | SmallTest | Le
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_SIGN_066_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaSign_067

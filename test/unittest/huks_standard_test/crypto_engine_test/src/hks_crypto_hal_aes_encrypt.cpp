@@ -478,6 +478,7 @@ HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_003, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_003_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalAesEncrypt_004
  * @tc.name      : HksCryptoHalAesEncrypt_004
@@ -498,6 +499,47 @@ HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_005, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_005_PARAMS);
 }
 
+/**
+ * @tc.number    : HksCryptoHalAesEncrypt_010
+ * @tc.name      : HksCryptoHalAesEncrypt_010
+ * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-192-ECB-NOPADDING key.
+ */
+HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_010, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_010_PARAMS);
+}
+
+/**
+ * @tc.number    : HksCryptoHalAesEncrypt_011
+ * @tc.name      : HksCryptoHalAesEncrypt_011
+ * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-192-ECB-PKCS7PADDING key.
+ */
+HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_011, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_011_PARAMS);
+}
+
+
+/**
+ * @tc.number    : HksCryptoHalAesEncrypt_016
+ * @tc.name      : HksCryptoHalAesEncrypt_016
+ * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-256-ECB-NOPADDING key.
+ */
+HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_016, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_016_PARAMS);
+}
+
+/**
+ * @tc.number    : HksCryptoHalAesEncrypt_017
+ * @tc.name      : HksCryptoHalAesEncrypt_017
+ * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-256-ECB-PKCS7PADDING key.
+ */
+HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_017, Function | SmallTest | Level0)
+{
+    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_017_PARAMS);
+}
+#endif
 /**
  * @tc.number    : HksCryptoHalAesEncrypt_006
  * @tc.name      : HksCryptoHalAesEncrypt_006
@@ -538,25 +580,6 @@ HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_009, Function | SmallTes
     RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_009_PARAMS);
 }
 
-/**
- * @tc.number    : HksCryptoHalAesEncrypt_010
- * @tc.name      : HksCryptoHalAesEncrypt_010
- * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-192-ECB-NOPADDING key.
- */
-HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_010, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_010_PARAMS);
-}
-
-/**
- * @tc.number    : HksCryptoHalAesEncrypt_011
- * @tc.name      : HksCryptoHalAesEncrypt_011
- * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-192-ECB-PKCS7PADDING key.
- */
-HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_011, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_011_PARAMS);
-}
 
 /**
  * @tc.number    : HksCryptoHalAesEncrypt_012
@@ -596,26 +619,6 @@ HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_014, Function | SmallTes
 HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_015, Function | SmallTest | Level0)
 {
     RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_015_PARAMS);
-}
-
-/**
- * @tc.number    : HksCryptoHalAesEncrypt_016
- * @tc.name      : HksCryptoHalAesEncrypt_016
- * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-256-ECB-NOPADDING key.
- */
-HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_016, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_016_PARAMS);
-}
-
-/**
- * @tc.number    : HksCryptoHalAesEncrypt_017
- * @tc.name      : HksCryptoHalAesEncrypt_017
- * @tc.desc      : Using HksCryptoHalEncrypt Encrypt AES-256-ECB-PKCS7PADDING key.
- */
-HWTEST_F(HksCryptoHalAesEncrypt, HksCryptoHalAesEncrypt_017, Function | SmallTest | Level0)
-{
-    RunTestCase(HKS_CRYPTO_HAL_AES_ENCRYPT_017_PARAMS);
 }
 
 /**

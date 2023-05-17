@@ -286,7 +286,7 @@ static struct HksParam g_signParamsTest075[] = {
 
 /**
  * @tc.name: HksRsaSignVerifyPart8Test.HksRsaSignVerifyPart8Test071
- * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
+ * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-SHA384.
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test071, TestSize.Level1)
@@ -322,7 +322,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test071, TestSize.Level
 
 /**
  * @tc.name: HksRsaSignVerifyPart8Test.HksRsaSignVerifyPart8Test072
- * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5.
+ * @tc.desc: alg-RSA pur-Sign pad-PSS digest-SHA512.
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test072, TestSize.Level1)
@@ -358,7 +358,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test072, TestSize.Level
 
 /**
  * @tc.name: HksRsaSignVerifyPart8Test.HksRsaSignVerifyPart8Test073
- * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-MD5. Verify-Abort
+ * @tc.desc: alg-RSA pur-Sign pad-PSS digest-SHA512. Verify-Abort
  * @tc.type: FUNC
  */
 HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level1)

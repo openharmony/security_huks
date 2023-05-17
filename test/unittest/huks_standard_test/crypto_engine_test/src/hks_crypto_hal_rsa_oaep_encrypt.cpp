@@ -1191,6 +1191,7 @@ void HksCryptoHalRsaOaepEncrypt::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_013
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_013
@@ -1313,7 +1314,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_024, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_024_PARAMS);
 }
-#endif
+#endif //CUT_RSA_4096_TEST
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_025
@@ -1344,6 +1345,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_027, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_027_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_028
@@ -1377,6 +1379,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_030, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_031
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_031
@@ -1406,6 +1409,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_033, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_033_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_034
@@ -1439,6 +1443,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_036, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_037
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_037
@@ -1468,6 +1473,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_039, Function | 
 {
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_039_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_040
@@ -1501,6 +1507,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_042, Function | 
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_043
  * @tc.name      : HksCryptoHalRsaOaepEncrypt_043
@@ -1533,6 +1540,7 @@ HWTEST_F(HksCryptoHalRsaOaepEncrypt, HksCryptoHalRsaOaepEncrypt_045, Function | 
     HKS_LOG_E("Enter HksCryptoHalRsaOaepEncrypt_045");
     RunTestCase(HKS_CRYPTO_HAL_RSA_OAEP_ENCRYPT_045_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksCryptoHalRsaOaepEncrypt_046
