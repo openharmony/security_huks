@@ -138,8 +138,27 @@ static int32_t FillContextInDataAndOutBlob(napi_env env, napi_value *argv, Updat
 
 static int32_t GetCallBackFunction(napi_env env, napi_value object, UpdateAsyncContext context)
 {
+    napi_valuetype valueType = napi_undefined;
+    napi_status status = napi_typeof(env, object, &valueType);
+    if (status != napi_ok) {
+        HKS_LOG_E("could not get object type");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (valueType != napi_valuetype::napi_function) {
+        if (valueType != napi_valuetype::napi_null && valueType != napi_valuetype::napi_undefined) {
+            HKS_LOG_E("invalid type");
+            napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+                "invalid arguments");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        } else {
+            HKS_LOG_I("no callback fun, process as promise func");
+            return HKS_SUCCESS;
+        }
+    }
+
     napi_ref ref = nullptr;
-    napi_status status = napi_create_reference(env, object, 1, &ref);
+    status = napi_create_reference(env, object, 1, &ref);
     if (status != napi_ok) {
         HKS_LOG_E("could not create reference");
         return HKS_ERROR_BAD_STATE;
@@ -197,17 +216,14 @@ static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncCon
 
             index++;
             if (index < maxIndex) { /* has arg 4: can only be callback */
-                status = napi_typeof(env, argv[index], &valueType);
-                if (status != napi_ok) {
-                    HKS_LOG_E("could not get object type");
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
-
-                if (valueType != napi_valuetype::napi_function) {
-                    HKS_LOG_E("check param4 failed, param4 is not func");
-                    break;
-                }
-
+                return GetCallBackFunction(env, argv[index], context);
+            }
+            return HKS_SUCCESS;
+        }
+        case napi_valuetype::napi_undefined: {
+            HKS_LOG_I("param %" LOG_PUBLIC "zu is undefined", index);
+            index++;
+            if (index < maxIndex) { /* has arg 4: can only be callback */
                 return GetCallBackFunction(env, argv[index], context);
             }
             return HKS_SUCCESS;
