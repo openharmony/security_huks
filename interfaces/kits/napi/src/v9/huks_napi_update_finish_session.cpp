@@ -222,6 +222,7 @@ static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncCon
         }
         case napi_valuetype::napi_undefined: {
             HKS_LOG_I("param %" LOG_PUBLIC "zu is undefined", index);
+            // if param 3 is undefined, ignore this and try to get param 4 as callback func
             index++;
             if (index < maxIndex) { /* has arg 4: can only be callback */
                 return GetCallBackFunction(env, argv[index], context);
