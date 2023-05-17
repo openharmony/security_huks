@@ -146,15 +146,8 @@ static int32_t GetCallBackFunction(napi_env env, napi_value object, UpdateAsyncC
     }
 
     if (valueType != napi_valuetype::napi_function) {
-        if (valueType != napi_valuetype::napi_null && valueType != napi_valuetype::napi_undefined) {
-            HKS_LOG_E("invalid type");
-            napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
-                "invalid arguments");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        } else {
-            HKS_LOG_I("no callback fun, process as promise func");
-            return HKS_SUCCESS;
-        }
+        HKS_LOG_I("no callback fun, process as promise func");
+        return HKS_SUCCESS;
     }
 
     napi_ref ref = nullptr;
