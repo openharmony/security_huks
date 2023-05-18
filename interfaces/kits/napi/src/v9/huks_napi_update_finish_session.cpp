@@ -223,12 +223,11 @@ static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncCon
             return HKS_SUCCESS;
         }
         default:
-            break;
+            HKS_LOG_I("param %" LOG_PUBLIC "zu is invalid type", index);
+            // if param 3 is invalid type, process as redundant params
+            return HKS_SUCCESS;
     }
 
-    napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
-        "the type of token or callbakc is wrong");
-    HKS_LOG_E("the type of token or callbakc is wrong");
     return HKS_ERROR_BAD_STATE;
 }
 
