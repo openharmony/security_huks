@@ -21,7 +21,7 @@
 using namespace testing::ext;
 
 namespace Unittest::AttestKey {
-static const uint32_t g_paramCountInKeyAttest = 4;
+static const uint32_t g_paramCountInKeyAttest = 5;
 static const uint32_t g_paramCountInIdAttest = 7;
 static const uint32_t g_index0 = 0;
 static const uint32_t g_index1 = 1;
@@ -181,11 +181,13 @@ static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertCh
     HKS_LOG_I("challenge is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
     HKS_LOG_I("version is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index2].blob.data));
     HKS_LOG_I("alias is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
+    HKS_LOG_I("appId is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
     if (ret == HKS_SUCCESS) {
         ret |= strcmp(SEC_INFO_DATA, reinterpret_cast<char *>(paramSet->params[g_index0].blob.data));
         ret |= strcmp(CHALLENGE_DATA, reinterpret_cast<char *>(paramSet->params[g_index1].blob.data));
         ret |= strcmp(VERSION_DATA, reinterpret_cast<char *>(paramSet->params[g_index2].blob.data));
         ret |= strcmp(ALIAS, reinterpret_cast<char *>(paramSet->params[g_index3].blob.data));
+        ret |= strcmp(APP_ID, reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));
     }
     if (type == IDS_PARAM) {
         HKS_LOG_I("udid is %" LOG_PUBLIC "s\n", reinterpret_cast<char *>(paramSet->params[g_index4].blob.data));

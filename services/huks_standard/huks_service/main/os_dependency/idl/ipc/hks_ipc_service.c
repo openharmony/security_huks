@@ -37,21 +37,6 @@
 
 #define MAX_KEY_SIZE         2048
 
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-static enum HksTag g_idList[] = {
-    HKS_TAG_ATTESTATION_ID_BRAND,
-    HKS_TAG_ATTESTATION_ID_DEVICE,
-    HKS_TAG_ATTESTATION_ID_PRODUCT,
-    HKS_TAG_ATTESTATION_ID_SERIAL,
-    HKS_TAG_ATTESTATION_ID_IMEI,
-    HKS_TAG_ATTESTATION_ID_MEID,
-    HKS_TAG_ATTESTATION_ID_MANUFACTURER,
-    HKS_TAG_ATTESTATION_ID_MODEL,
-    HKS_TAG_ATTESTATION_ID_SOCID,
-    HKS_TAG_ATTESTATION_ID_UDID,
-};
-#endif
-
 void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
@@ -565,20 +550,6 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
-{
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-    for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
-        for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
-            if (paramSet->params[j].tag == g_idList[i]) {
-                return SensitivePermissionCheck();
-            }
-        }
-    }
-#endif
-    return HKS_SUCCESS;
-}
-
 void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
@@ -594,8 +565,10 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksAttestAccessControl(inParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAttestAccessControl fail, ret = %" LOG_PUBLIC "d", ret)
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+        ret = SensitivePermissionCheck();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check AccessToken permission fail, ret = %" LOG_PUBLIC "d", ret)
+#endif
 
         ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAttestKey fail, ret = %" LOG_PUBLIC "d", ret)
