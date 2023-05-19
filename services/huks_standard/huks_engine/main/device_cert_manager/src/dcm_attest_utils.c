@@ -209,6 +209,15 @@ static int32_t GetX25519PublicKey(struct HksBlob *key, const struct HksPubKeyInf
     return DcmAsn1WriteFinal(key, &seqDataBlob);
 }
 
+static int32_t GetSm2PublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info)
+{
+    if (info->keySize != HKS_SM2_KEY_SIZE_256) {
+        HKS_LOG_E("sm2 not supported key size: %" LOG_PUBLIC "u\n", info->keySize);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return GetEcPublicKey(key, info);
+}
+
 int32_t DcmGetPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info, const struct HksUsageSpec *usageSpec)
 {
     if ((CheckBlob(key) != HKS_SUCCESS) || (info == NULL) || (usageSpec == NULL)) {
@@ -222,6 +231,8 @@ int32_t DcmGetPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info, c
         return GetEcPublicKey(key, info);
     } else if (info->keyAlg == HKS_ALG_X25519) {
         return GetX25519PublicKey(key, info);
+    } else if (info->keyAlg == HKS_ALG_SM2) {
+        return GetSm2PublicKey(key, info);
     } else {
         HKS_LOG_E("alg %" LOG_PUBLIC "u not supported to export public key\n", info->keyAlg);
         return HKS_ERROR_NOT_SUPPORTED;

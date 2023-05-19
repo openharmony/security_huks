@@ -77,6 +77,7 @@ if (os_level == "standard") {
     ]
 
     deps += [
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
     ]

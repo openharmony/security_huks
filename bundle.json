@@ -46,10 +46,12 @@
           "safwk",
           "samgr",
           "c_utils",
-          "user_auth_framework"
+          "user_auth_framework",
+          "bundle_framework"
         ],
         "third_party": [ 
-          "bounds_checking_function"
+          "bounds_checking_function",
+          "cJSON"
         ]
       },
       "build": {
