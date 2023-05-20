@@ -95,6 +95,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_003_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_004_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_AES,
@@ -128,6 +129,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_005_PARAMS = {
     .decryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParamsForGcm HKS_CRYPTO_HAL_AES_DECRYPT_006_PARAMS = {
     .keyData = "933c213c1f8c844ffcc03f5f7e146a88",
@@ -182,6 +184,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_009_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_010_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_AES,
@@ -215,6 +218,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_011_PARAMS = {
     .decryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParamsForGcm HKS_CRYPTO_HAL_AES_DECRYPT_012_PARAMS = {
     .keyData = "7be3cb2c4c900fb318e9c89f828baf9b91783f47c6e8d088",
@@ -269,6 +273,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_015_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_016_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_AES,
@@ -302,6 +307,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_DECRYPT_017_PARAMS = {
     .decryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParamsForGcm HKS_CRYPTO_HAL_AES_DECRYPT_018_PARAMS = {
     .keyData = "57095bd2ba60c34eaafaa77d694eb809af366810fba500ea660a5048b14b212f",

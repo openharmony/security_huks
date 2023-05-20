@@ -37,6 +37,7 @@ struct TestCaseParams {
     HksErrorCode encryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_001_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -119,6 +120,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_003_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_004_PARAMS = {
     .usageSpec = {
@@ -269,6 +271,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_006_PARAMS = {
 #endif
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_007_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -334,6 +337,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_009_PARAMS = {
 
     .encryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_010_PARAMS = {
     .usageSpec = {

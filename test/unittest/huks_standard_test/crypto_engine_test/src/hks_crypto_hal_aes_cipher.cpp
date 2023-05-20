@@ -123,6 +123,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_003_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_004_PARAMS = {
     .spec = {
         .algType = HKS_ALG_AES,
@@ -171,6 +172,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_005_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_006_PARAMS = {
     .spec = {
@@ -267,6 +269,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_009_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_010_PARAMS = {
     .spec = {
         .algType = HKS_ALG_AES,
@@ -315,6 +318,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_011_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_012_PARAMS = {
     .spec = {
@@ -404,6 +408,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_015_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_016_PARAMS = {
     .spec = {
         .algType = HKS_ALG_AES,
@@ -452,6 +457,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_017_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_AES_CIPHER_018_PARAMS = {
     .spec = {

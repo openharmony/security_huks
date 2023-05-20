@@ -398,7 +398,7 @@ static struct HksParam g_decryptParams005[] = {
         }
     }
 };
-
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -545,7 +545,8 @@ static struct HksParam g_decryptParams007[] = {
         }
     }
 };
-#endif
+#endif // _USE_OPENSSL_
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 
 /**

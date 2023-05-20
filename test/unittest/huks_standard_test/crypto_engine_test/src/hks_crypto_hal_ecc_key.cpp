@@ -34,6 +34,7 @@ struct TestCaseParams {
     HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -46,6 +47,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS = {
     .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_002_PARAMS = {
     .spec = {

@@ -95,6 +95,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_003_PARAMS = {
     .importKeyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 004: ase-256-encrypt-decrypt-ecb-none */
 const ImportKeyCaseParams HKS_IMPORT_TEST_004_PARAMS = {
     .params =
@@ -122,6 +123,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_005_PARAMS = {
     .keySize = HKS_AES_KEY_SIZE_256 / HKS_BITS_PER_BYTE,
     .importKeyResult = HKS_SUCCESS,
 };
+#endif
 
 /* 006: ase-256-encrypt-decrypt-ctr-none */
 const ImportKeyCaseParams HKS_IMPORT_TEST_006_PARAMS = {
@@ -150,6 +152,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_007_PARAMS = {
     .importKeyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 008: hmac-256-sha1 */
 const ImportKeyCaseParams HKS_IMPORT_TEST_008_PARAMS = {
     .params =
@@ -175,6 +178,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_009_PARAMS = {
     .keySize = HKS_AES_KEY_SIZE_256 / HKS_BITS_PER_BYTE,
     .importKeyResult = HKS_SUCCESS,
 };
+#endif
 
 /* 010: hmac-256-sha256 */
 const ImportKeyCaseParams HKS_IMPORT_TEST_010_PARAMS = {
@@ -269,6 +273,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_016_PARAMS = {
     .importKeyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 017: sm4-128-ecb-none */
 const ImportKeyCaseParams HKS_IMPORT_TEST_017_PARAMS = {
     .params =
@@ -296,6 +301,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_018_PARAMS = {
     .keySize = HKS_SM4_KEY_SIZE_128 / HKS_BITS_PER_BYTE,
     .importKeyResult = HKS_SUCCESS,
 };
+#endif
 
 /* 019: sm4-128-ctr-none */
 const ImportKeyCaseParams HKS_IMPORT_TEST_019_PARAMS = {

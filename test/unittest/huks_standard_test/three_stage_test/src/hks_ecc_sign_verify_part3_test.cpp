@@ -187,6 +187,7 @@ static struct HksParam g_verifyParamsTest019[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest020[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -278,6 +279,7 @@ static struct HksParam g_verifyParamsTest021[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest022[] = {
     {

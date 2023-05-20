@@ -41,6 +41,8 @@ struct TestCaseParams {
 
 const uint32_t SIGNATURE_SIZE = 521;
 const uint32_t MAX_PUB_KEY_SIZE = 218;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -59,6 +61,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_001_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_002_PARAMS = {
     .spec = {
@@ -117,6 +120,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_004_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_005_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -268,6 +272,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_012_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_ECDSA_SIGN_013_PARAMS = {
     .spec = {

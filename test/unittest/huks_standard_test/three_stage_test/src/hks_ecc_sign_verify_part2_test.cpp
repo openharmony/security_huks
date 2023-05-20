@@ -48,6 +48,7 @@ void HksEccSignVerifyPart2Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest009[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -93,6 +94,7 @@ static struct HksParam g_verifyParamsTest009[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest010[] = {
     {
@@ -278,6 +280,7 @@ static struct HksParam g_verifyParamsTest013[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest014[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -369,6 +372,7 @@ static struct HksParam g_verifyParamsTest015[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest016[] = {
     {
