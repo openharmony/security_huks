@@ -48,6 +48,7 @@ void HksHmacTest::TearDown()
 }
 
 #ifdef L2_STANDARD
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -103,6 +104,7 @@ static struct HksParam g_hmacParams002[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 #ifdef L2_STANDARD
 static struct HksParam g_genParams003[] = {

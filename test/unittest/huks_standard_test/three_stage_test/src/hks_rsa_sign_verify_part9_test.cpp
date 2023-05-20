@@ -49,6 +49,7 @@ void HksRsaSignVerifyPart9Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest081[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -97,6 +98,7 @@ static struct HksParam g_verifyParamsTest081[] = {
         .uint32Param = HKS_DIGEST_MD5
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest082[] = {
     {
@@ -147,6 +149,7 @@ static struct HksParam g_verifyParamsTest082[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest083[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -195,6 +198,7 @@ static struct HksParam g_verifyParamsTest083[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest084[] = {
     {
@@ -343,6 +347,7 @@ static struct HksParam g_verifyParamsTest086[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest087[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -530,6 +535,7 @@ static struct HksParam g_verifyParamsTest090[] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest091[] = {
     {

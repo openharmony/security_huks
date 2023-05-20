@@ -70,6 +70,7 @@ public:
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams g_huksExportKey00100Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
@@ -99,6 +100,7 @@ const TestCaseParams g_huksExportKey00300Params = {
         { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
     },
 };
+#endif
 
 const TestCaseParams g_huksExportKey00400Params = {
     .params = {
@@ -120,6 +122,7 @@ const TestCaseParams g_huksExportKey00500Params = {
     },
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams g_huksExportKey00600Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
@@ -138,6 +141,7 @@ const TestCaseParams g_huksExportKey00700Params = {
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
     },
 };
+#endif
 
 const TestCaseParams g_huksExportKey00800Params = {
     .params = {

@@ -399,12 +399,14 @@ static struct HksParam g_importRsaKeyParams[] = {
     { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_importRsaKeyAnotherParams[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
     { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_512 },
     { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
 };
+#endif
 
 static struct HksParam g_initOp1Params[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
@@ -592,12 +594,14 @@ static void ModifyImportParams(uint32_t purpose, uint32_t keySize, uint32_t padd
     g_importRsaKeyParams[TAG_IMPOT_TYPE_ID].uint32Param = importType;
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static void ModifyImportAnotherParams(uint32_t purpose, uint32_t keySize, uint32_t importType)
 {
     g_importRsaKeyAnotherParams[TAG_PURPOSE_ID].uint32Param = purpose;
     g_importRsaKeyAnotherParams[TAG_KEY_SIZE_ID].uint32Param = keySize;
     g_importRsaKeyAnotherParams[TAG_IMPORT_NEW_INDEX].uint32Param = importType;
 }
+#endif
 
 static void ModifyinitOp1Params(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
@@ -637,6 +641,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *
     return ret;
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static int32_t ImportKeyNew(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount)
 {
     struct HksParamSet *paramSet = nullptr;
@@ -658,6 +663,7 @@ static int32_t ImportKeyNew(const struct HksBlob *keyAlias, const struct HksPara
     HksFreeParamSet(&paramSet);
     return ret;
 }
+#endif
 
 static int32_t ConstructPurpose(uint32_t inputPurpose, uint32_t &outPurposePri, uint32_t &outPurposePair,
     uint32_t &outPurposePub)
@@ -834,6 +840,7 @@ static int32_t DoOperation(const struct HksBlob *priKeyAlias, const struct HksBl
     return ret;
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static void RsaImportPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
     uint32_t purposePri;
@@ -894,6 +901,7 @@ static void RsaImportPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uin
     (void)HksDeleteKey(&pairKeyAlias, nullptr);
     (void)HksDeleteKey(&pubKeyAlias, nullptr);
 }
+#endif
 
 static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
@@ -955,12 +963,11 @@ static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t p
     return RsaImportPlainKeyTest(purpose, keySize, padding, digest);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static void ImportRsaPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
 {
     return RsaImportPlainKeyAnotherTest(purpose, keySize, padding, digest);
 }
-
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksImportRsaTest.HksImportRsaTest001
  * @tc.desc: import rsa 512-sign/verify-pss-sha256

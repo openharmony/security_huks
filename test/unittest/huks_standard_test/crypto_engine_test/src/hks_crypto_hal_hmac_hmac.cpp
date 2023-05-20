@@ -39,6 +39,8 @@ struct TestCaseParams {
 
 const uint32_t HMAC_KEY_SIZE = 256;
 const uint32_t SIGNATURE_SIZE = 1024;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
@@ -62,6 +64,7 @@ const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_002_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .hmacResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_003_PARAMS = {
     .spec = {

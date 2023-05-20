@@ -37,6 +37,8 @@ struct TestCaseParams {
 };
 const uint32_t ALISE_KEY_SIZE = 256;
 const uint32_t BOB_KEY_SIZE = 256;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -51,6 +53,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_001_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_002_PARAMS = {
     .spec = {

@@ -38,6 +38,7 @@ struct TestCaseParams {
     HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -120,6 +121,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_003_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_004_PARAMS = {
     .spec = {
@@ -221,6 +223,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_006_PARAMS = {
 #endif
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_007_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -283,6 +286,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_009_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_010_PARAMS = {
     .spec = {
@@ -347,6 +351,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_012_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_013_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -409,6 +414,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_015_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_016_PARAMS = {
     .spec = {
@@ -473,6 +479,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_018_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_019_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -535,6 +542,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_021_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_022_PARAMS = {
     .spec = {
@@ -599,6 +607,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_024_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_025_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -640,6 +649,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_026_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_027_PARAMS = {
     .spec = {
@@ -704,6 +714,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_029_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -724,6 +735,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_030_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_CIPHER_031_PARAMS = {
     .spec = {

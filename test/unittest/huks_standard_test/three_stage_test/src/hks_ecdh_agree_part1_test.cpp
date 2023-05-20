@@ -47,6 +47,7 @@ void HksEcdhAgreePart1Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksBlob g_keyAlias01001 = {
     strlen("HksECDHAgreeKeyAliasTest001_1"),
     (uint8_t *)"HksECDHAgreeKeyAliasTest001_1"
@@ -168,6 +169,7 @@ static struct HksParam g_agreeParams02Finish001[] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
+#endif
 
 static struct HksBlob g_keyAlias01002 = {
     strlen("HksECDHAgreeKeyAliasTest002_1"),
@@ -535,6 +537,7 @@ static struct HksParam g_agreeParams02Finish004[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksBlob g_keyAlias01005 = {
     strlen("HksECDHAgreeKeyAliasTest005_1"),
     (uint8_t *)"HksECDHAgreeKeyAliasTest005_1"
@@ -600,6 +603,7 @@ static struct HksParam g_agreeParams02Finish005[] = {
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
+#endif
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
