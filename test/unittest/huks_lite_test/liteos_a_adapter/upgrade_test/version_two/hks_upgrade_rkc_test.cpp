@@ -22,6 +22,9 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
+#include "hks_rkc.h"
+#include "hks_rkc_rw.c"
+#include "hks_rkc_v1.c"
 
 #include "cstring"
 #include "unistd.h"
@@ -57,183 +60,90 @@ void HksUpgradeRkcTest::TearDown()
 {
 }
 
-static const char KEY_ALIAS[] = "test_rkc_compatibility_key";
-static const uint32_t IV_SIZE = 16;
-static uint8_t IV[IV_SIZE] = {0};
-
-static const struct HksParam GEN_AES_PARAMS[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }
-};
-
-static const struct HksParam ENCYPT_AES_PARAMS[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = IV_SIZE,
-            .data = (uint8_t *)IV
-        }
-    }
-};
-
-static const struct HksParam DECRYPT_AES_PARAMS[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = IV_SIZE,
-            .data = (uint8_t *)IV
-        }
-    }
-};
-
-static int32_t TestGeneratekey(const struct HksBlob *keyAlias, const struct HksParam *genParams,
-    uint32_t genParamsCnt)
+static void TestGetMkFromOldKsfFile(const HksBlob *oldKsfBlob, const uint8_t mkPlaintext[HKS_RKC_MK_LEN])
 {
-    struct HksParamSet *genParamSet = nullptr;
-    int32_t ret = HksInitParamSet(&genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = HksAddParams(genParamSet, genParams, genParamsCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = HksBuildParamSet(&genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    // step1. parse old ksf file
+    struct HksRkcKsfDataV1 ksfDataV1 = { 0 };
+    int32_t ret = RkcExtractKsfBufV1(&oldKsfBlob, &ksfDataV1);
+    ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    HksFreeParamSet(&genParamSet);
-
-    return ret;
+    // step1. decrypt mk
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
+    struct HksBlob cipherTextBlob = { sizeof(ksfDataV1.ksfDataMk.mkCiphertext), ksfDataV1.ksfDataMk.mkCiphertext };
+    ret = RkcMkCryptV1(&ksfDataV1, &tempMkBlob, &cipherTextBlob, false);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+    ASSERT_EQ(0, HksMemCmp(mkPlaintext, GetMkWithMask(), HKS_RKC_MK_LEN));
 }
 
-static int32_t TestDoEncrypt(const struct HksBlob *keyAlias, const struct HksParam *encParams, uint32_t encParamsCnt,
-    struct HksBlob *plainBlob, struct HksBlob *cipherBlob)
+static void TestStoreNewKsfFile(HksBlob *rkcBlob, HksBlob *mkBlob)
 {
-    struct HksParamSet *encryptParamSet = nullptr;
-    int32_t ret = HksInitParamSet(&encryptParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = HksAddParams(encryptParamSet, encParams, encParamsCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = HksBuildParamSet(&encryptParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    // step3. create new rkc material
+    struct HksKsfDataRkcWithVer *newRkc = CreateNewKsfDataRkcWithVer();
+    ASSERT_NE(HKS_NULL_POINTER, newRkc);
 
-    ret = HksEncrypt(keyAlias, encryptParamSet, plainBlob, cipherBlob);
+    // step4. encrypt mk with new rkc
+    struct HksKsfDataMkWithVer *newMk = CreateNewKsfDataMkWithVer();
+    ASSERT_NE(HKS_NULL_POINTER, newMk);
 
-    HksFreeParamSet(&encryptParamSet);
-    return ret;
+    struct HksBlob cipherTextBlob = { sizeof(newMk->ksfDataMk.mkCiphertext), newMk->ksfDataMk.mkCiphertext };
+    int32_t ret = RkcMkCrypt(&(newRkc->ksfDataRkc), &(newMk->ksfDataMk), &tempMkBlob, &cipherTextBlob, true);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+
+    // step5. store new rkc and mk file
+    ret = FillKsfBufRkc(newRkc, rkcBlob);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+
+    ret = FillKsfBufMk(newMk, mkBlob);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+
+    HKS_MEMSET_FREE_PTR(newRkc, sizeof(struct HksKsfDataRkcWithVer));
+    HKS_MEMSET_FREE_PTR(newMk, sizeof(struct HksKsfDataMkWithVer));
 }
 
-static int32_t TestDoDecrypt(const struct HksBlob *keyAlias, const struct HksParam *decParams, uint32_t decParamsCnt,
-    struct HksBlob *cipherBlob, struct HksBlob *decryptedBlob)
+static void TestGetMkFromNewKsfFile(const HksBlob *rkcBlob, const HksBlob *mkBlob,
+    const uint8_t mkPlaintext[HKS_RKC_MK_LEN])
 {
-    struct HksParamSet *decryptParamSet = nullptr;
-    int32_t ret = HksInitParamSet(&decryptParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = HksAddParams(decryptParamSet, decParams, decParamsCnt);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    ret = HksBuildParamSet(&decryptParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    // step6. read new rkc and mk file
+    struct HksKsfDataRkcWithVer newRkc = { 0 };
+    int32_t ret = ExtractKsfBufRkc(rkcBlob, &newRkc);
+    ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = HksDecrypt(keyAlias, decryptParamSet, cipherBlob, decryptedBlob);
+    struct HksKsfDataMkWithVer newMk = { 0 };
+    ret = ExtractKsfBufMk(mkBlob, &newMk);
+    ASSERT_EQ(HKS_SUCCESS, ret);
 
-    HksFreeParamSet(&decryptParamSet);
-    return ret;
+    // step7. decrypt mk
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
+    struct HksBlob cipherTextBlob = { sizeof(newMk.ksfDataMk.mkCiphertext), newMk.ksfDataMk.mkCiphertext };
+    ret = RkcMkCrypt(&newRkc.ksfDataRkc, &newMk.ksfDataMk, &tempMkBlob, &cipherTextBlob, false);
+    ASSERT_EQ(HKS_SUCCESS, ret);
+    ASSERT_EQ(0, HksMemCmp(mkPlaintext, GetMkWithMask(), HKS_RKC_MK_LEN));
 }
 
 /**
  * @tc.name: HksUpgradeRkcTest.HksUpgradeRkcTest001
- * @tc.desc: generate key with old rkc
+ * @tc.desc: rewrite rkc&mk file and check mkPlaintext's consistency
  * @tc.type: FUNC
  */
 HWTEST_F(HksUpgradeRkcTest, HksUpgradeRkcTest001, TestSize.Level0)
 {
-    HKS_LOG_I("enter HksUpgradeRkcTest001");
-    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    uint8_t oldKsfFile[] = {
+        0// todo: add old ksf file content here
+    };
 
-    int32_t ret = TestGeneratekey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
-    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-}
+    uint8_t mkPlaintext[] = {
+        0// todo: add old mk here
+    };
 
-/**
- * @tc.name: HksUpgradeRkcTest.HksUpgradeRkcTest002
- * @tc.desc: access key with new rkc
- * @tc.type: FUNC
- */
-HWTEST_F(HksUpgradeRkcTest, HksUpgradeRkcTest002, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksUpgradeRkcTest002");
+    HksBlob oldKsfBlob = { sizeof(oldKsfFile), oldKsfFile };
+    TestGetMkFromOldKsfFile(&oldKsfBlob, mkPlaintext);
 
-    uint8_t plainText[] = "plainText123456";
-    uint8_t cipherText[1024] = { 0 };
-    struct HksBlob plainBlob = { .size = HKS_ARRAY_SIZE(plainText), .data = plainText};
-    struct HksBlob cipherBlob = { .size = HKS_ARRAY_SIZE(cipherText), .data = cipherText};
-    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    uint8_t rkcFile[HKS_KSF_BUF_LEN] = { 0 };
+    struct HksBlob rkcBlob = { HKS_KSF_BUF_LEN, rkcFile };
+    uint8_t mkFile[HKS_KSF_BUF_LEN] = { 0 };
+    struct HksBlob mkBlob = { HKS_KSF_BUF_LEN, mkFile };
+    TestStoreNewKsfFile(&rkcBlob, &mkBlob);
 
-    int32_t ret = TestDoEncrypt(&keyAlias, ENCYPT_AES_PARAMS, sizeof(ENCYPT_AES_PARAMS) / sizeof(HksParam), &plainBlob,
-        &cipherBlob);
-
-    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-
-    uint8_t decryptedText[HKS_ARRAY_SIZE(plainText) + 1] = { 0 };
-    struct HksBlob decryptedBlob = { .size = HKS_ARRAY_SIZE(decryptedText), .data = decryptedText};
-
-    ret = TestDoDecrypt(&keyAlias, DECRYPT_AES_PARAMS, sizeof(DECRYPT_AES_PARAMS) / sizeof(HksParam), &cipherBlob,
-        &decryptedBlob);
-
-    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-
-    ret = HksMemCmp(decryptedText, plainText, HKS_ARRAY_SIZE(plainText));
-
-    ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    TestGetMkFromNewKsfFile(&rkcBlob, &mkBlob, mkPlaintext);
 }
 }
