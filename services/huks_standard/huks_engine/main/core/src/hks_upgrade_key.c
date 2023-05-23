@@ -246,7 +246,6 @@ static int32_t CheckIsNeedToUpgradeKey(const struct HksParamSet *oldKeyBlobParam
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key version failed!")
 
     if (keyVersion->uint32Param >= HKS_KEY_VERSION) {
-        ret = HKS_FAILURE;
         HKS_LOG_E("key version is already up to date!");
         return HKS_FAILURE;
     }
