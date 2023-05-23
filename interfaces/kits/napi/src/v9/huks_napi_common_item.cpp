@@ -344,9 +344,7 @@ napi_ref GetCallback(napi_env env, napi_value object)
     }
 
     if (valueType != napi_valuetype::napi_function) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
-            "the type of callback isn't function");
-        HKS_LOG_E("invalid type");
+        HKS_LOG_I("no callback fun, process as promise func");
         return nullptr;
     }
 
