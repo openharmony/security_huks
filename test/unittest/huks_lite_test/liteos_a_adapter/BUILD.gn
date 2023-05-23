@@ -97,6 +97,7 @@ unittest("huks_3.0_test") {
   if (huks_enable_upgrade_rkc_1to2) {
     include_dirs += [
       "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include",
+      "../../../../frameworks/huks_standard/main/os_dependency/sysinfo/include",
       "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src",
     ]
   }
@@ -104,7 +105,10 @@ unittest("huks_3.0_test") {
   deps = [
     "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
+    "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls:libhuks_mbedtls_small_static",
   ]
+
+  deps += [ "//third_party/mbedtls:mbedtls_shared" ]
 
   deps += [ "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util" ]
 

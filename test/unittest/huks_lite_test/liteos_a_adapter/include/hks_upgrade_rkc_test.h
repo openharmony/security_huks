@@ -18,6 +18,5 @@
 
 namespace HksUpgradeRkcTest {
 int HksUpgradeRkcTest001(void);
-int HksUpgradeRkcTest002(void);
 }
 #endif // HKS_UPGRADE_RKC_TEST_H
