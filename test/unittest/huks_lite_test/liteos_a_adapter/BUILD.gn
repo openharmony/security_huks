@@ -97,7 +97,6 @@ unittest("huks_3.0_test") {
   if (huks_enable_upgrade_rkc_1to2) {
     include_dirs += [
       "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include",
-      "../../../../frameworks/huks_standard/main/os_dependency/sysinfo/include",
       "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src",
     ]
   }
