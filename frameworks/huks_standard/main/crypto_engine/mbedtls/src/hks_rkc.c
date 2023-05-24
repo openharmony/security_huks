@@ -241,14 +241,14 @@ static int32_t RkcMakeRandomMaterial(struct HksKsfDataRkc *ksfDataRkc)
     struct HksBlob random2 = { HKS_RKC_MATERIAL_LEN, ksfDataRkc->rkMaterial2 };
 
     int32_t ret;
-    do {
-        /* Generate 32 * 2 random number: R1 + R2 and fill material */
-        ret = HksCryptoHalFillPrivRandom(&random1);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate random1 failed! ret = 0x%" LOG_PUBLIC "X", ret)
-        ret = HksCryptoHalFillPrivRandom(&random2);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate random2 failed! ret = 0x%" LOG_PUBLIC "X", ret)
-    } while (0);
-
+    /* Generate 32 * 2 random number: R1 + R2 and fill material */
+    ret = HksCryptoHalFillPrivRandom(&random1);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Generate random1 failed! ret = 0x%" LOG_PUBLIC "X", ret)
+    ret = HksCryptoHalFillPrivRandom(&random2);
+    HKS_LOG_E("Generate random2 failed! ret = 0x%" LOG_PUBLIC "X", ret);
+    if (ret != HKS_SUCCESS) {
+        (void)memset_s(&random1, HKS_RKC_MATERIAL_LEN, 0, HKS_RKC_MATERIAL_LEN);
+    }
     return ret;
 }
 
