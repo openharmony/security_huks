@@ -197,7 +197,7 @@ int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile,
     ret = RkcExtractTime(ksfFromFile, ksfBufOffset, &(ksfDataMk->mkExpiredTime));
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Extract mkExpiredTime failed!")
 
-    /* Fill encrption algorithm */
+    /* Fill encryption algorithm */
     if (memcpy_s(&(ksfDataMk->mkEncryptAlg), sizeof(uint32_t),
         ksfFromFile->data + *ksfBufOffset, sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy mkEncryptAlg failed!");
@@ -461,7 +461,7 @@ static int32_t FillKsfDataMk(const struct HksKsfDataMk *ksfDataMk, struct HksBlo
     ret = RkcFillKsfTime(&(ksfDataMk->mkExpiredTime), ksfBuf, ksfBufOffset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Fill mk expired time to ksf buf failed!")
 
-    /* Fill encrption algorithm */
+    /* Fill encryption algorithm */
     if (memcpy_s(ksfBuf->data + *ksfBufOffset, sizeof(uint32_t), &(ksfDataMk->mkEncryptAlg), sizeof(uint32_t)) != EOK) {
         HKS_LOG_E("Memcpy encrption algorithm to ksf buf failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -605,7 +605,7 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
-        
+
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
         ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
@@ -654,27 +654,33 @@ bool KsfExist(uint8_t ksfType)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksBlob fileNameBlob;
+    int32_t checkRet[HKS_KSF_NUM] = { 0 };
     if (ksfType == HKS_KSF_TYPE_RKC) {
         struct HksKsfAttr *rkcFileName = GetGlobalKsfAttrRkc();
         for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
             fileNameBlob.size = strlen(rkcFileName->name[i]);
             fileNameBlob.data = (uint8_t *)(rkcFileName->name[i]);
+            checkRet[i] = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
         }
     } else {
         struct HksKsfAttr *mkFileName = GetGlobalKsfAttrMk();
         for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
             fileNameBlob.size = strlen(mkFileName->name[i]);
             fileNameBlob.data = (uint8_t *)(mkFileName->name[i]);
+            checkRet[i] = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
         }
-    }    
-
-    ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
-
-    if (ret == HKS_SUCCESS) {
-        /* return true if one exists */
-        return true;
     }
 
-    return false;
+    uint32_t validIndex = 0;
+    for (; validIndex < HKS_KSF_NUM; validIndex++) {
+        if (checkRet[validIndex] == HKS_SUCCESS) {
+            break
+        }
+    }
+    if (validIndex == HKS_KSF_NUM) {
+        return false;
+    }
+    /* return true if one exists */
+    return true;
 }
 #endif /* _CUT_AUTHENTICATE_ */
