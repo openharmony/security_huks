@@ -674,7 +674,7 @@ bool KsfExist(uint8_t ksfType)
     uint32_t validIndex = 0;
     for (; validIndex < HKS_KSF_NUM; validIndex++) {
         if (checkRet[validIndex] == HKS_SUCCESS) {
-            break
+            break;
         }
     }
     if (validIndex == HKS_KSF_NUM) {
