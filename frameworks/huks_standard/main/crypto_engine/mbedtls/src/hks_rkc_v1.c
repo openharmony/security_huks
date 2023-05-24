@@ -59,7 +59,7 @@ static int32_t HksRkcReadKsfV1(const char *ksfName, struct HksRkcKsfDataV1 *ksfD
     struct HksBlob tmpKsf;
     int32_t ret = GetKeyBlobKsf(ksfName, &tmpKsf);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
-    
+
     ret = RkcExtractKsfBufV1(&tmpKsf, ksfData);
 
     /* the data of root key should be cleared after use */
@@ -262,7 +262,7 @@ int32_t UpgradeV1ToV2(void)
         HKS_IF_NULL_LOGE_BREAK(newKsfDataRkcWithVer, "Malloc rkc ksf data failed!")
         newKsfDataMkWithVer = CreateNewKsfDataMkWithVer();
         HKS_IF_NULL_LOGE_BREAK(newKsfDataMkWithVer, "Malloc mk ksf data failed!")
-        
+
         struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
         struct HksBlob cipherTextBlob = { HKS_RKC_MK_CIPHER_TEXT_LEN, newKsfDataMkWithVer->ksfDataMk.mkCiphertext };
         ret = RkcMkCrypt(&(newKsfDataRkcWithVer->ksfDataRkc), &(newKsfDataMkWithVer->ksfDataMk), &tempMkBlob, &cipherTextBlob, true); /* true: encrypt */
@@ -276,7 +276,7 @@ int32_t UpgradeV1ToV2(void)
         /* Write the root key component and the main key data into all keystore files */
         ret = RkcWriteAllKsf(newKsfDataRkcWithVer, newKsfDataMkWithVer);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Write rkc & mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
-        
+
         ret = RkcMaskMk(&tempMkBlob);
     } while (0);
 
