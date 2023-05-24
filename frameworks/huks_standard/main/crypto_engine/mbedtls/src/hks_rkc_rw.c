@@ -654,33 +654,28 @@ bool KsfExist(uint8_t ksfType)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksBlob fileNameBlob;
-    int32_t checkRet[HKS_KSF_NUM] = { 0 };
     if (ksfType == HKS_KSF_TYPE_RKC) {
         struct HksKsfAttr *rkcFileName = GetGlobalKsfAttrRkc();
         for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
             fileNameBlob.size = strlen(rkcFileName->name[i]);
             fileNameBlob.data = (uint8_t *)(rkcFileName->name[i]);
-            checkRet[i] = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+            ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+            if (ret == HKS_SUCCESS) {
+                return true;
+            }
         }
     } else {
         struct HksKsfAttr *mkFileName = GetGlobalKsfAttrMk();
         for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
             fileNameBlob.size = strlen(mkFileName->name[i]);
             fileNameBlob.data = (uint8_t *)(mkFileName->name[i]);
-            checkRet[i] = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+            ret = HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY);
+            if (ret == HKS_SUCCESS) {
+                return true;
+            }
         }
     }
 
-    uint32_t validIndex = 0;
-    for (; validIndex < HKS_KSF_NUM; validIndex++) {
-        if (checkRet[validIndex] == HKS_SUCCESS) {
-            break;
-        }
-    }
-    if (validIndex == HKS_KSF_NUM) {
-        return false;
-    }
-    /* return true if one exists */
-    return true;
+    return false;
 }
 #endif /* _CUT_AUTHENTICATE_ */
