@@ -17,6 +17,7 @@
 
 #include "hks_upgrade_rkc_test.h"
 
+#include "hks_ability.h"
 #include "hks_api.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -25,7 +26,7 @@
 #include "hks_rkc.h"
 #include "hks_rkc_rw.c"
 #include "hks_rkc_v1.c"
-#include "hks_ability.h"
+
 
 #include "cstring"
 #include "unistd.h"
