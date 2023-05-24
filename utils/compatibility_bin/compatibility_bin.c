@@ -174,6 +174,7 @@ static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
             MoveOldFileToNew(curPath, desPath);
         }
     }
+    (void)closedir(dir);
     if (ret != EOK) {
         printf("chmod dir and file failed! errno = 0x% x \n", errno);
     }
