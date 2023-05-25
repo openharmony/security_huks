@@ -40,7 +40,7 @@ namespace OHOS {
         dataParcel.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
         dataParcel.WriteUint32(static_cast<uint32_t>(size));
         dataParcel.WriteBuffer(data, size);
-        
+
         // 调用函数
         int error;
         for (uint32_t msgcode = HKS_MSG_BASE; msgcode <= HKS_MSG_MAX; msgcode++) {
