@@ -61,7 +61,9 @@ ohos_shared_library("huks") {
     "src/v9/huks_napi_update_finish_session.cpp",
   ]
 
-  deps = [ "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk" ]
+  deps = [
+    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+  ]
 
   external_deps = [
     "c_utils:utils",

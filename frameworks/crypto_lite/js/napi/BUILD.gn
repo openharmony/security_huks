@@ -30,9 +30,7 @@ ohos_shared_library("cipher_napi") {
     "//base/hiviewdfx/hilog/interfaces/native/innerkits//include",
     "log",
   ]
-  deps = [
-    "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
-  ]
+  deps = [ "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared" ]
 
   external_deps = [ "napi:ace_napi" ]
 
