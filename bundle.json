@@ -46,7 +46,9 @@
           "safwk",
           "samgr",
           "c_utils",
-          "user_auth_framework"
+          "user_auth_framework",
+          "thirdparty_openssl",
+          "thirdparty_mbedtls"
         ],
         "third_party": [ 
           "bounds_checking_function"

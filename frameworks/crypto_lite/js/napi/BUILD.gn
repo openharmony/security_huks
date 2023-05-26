@@ -32,8 +32,9 @@ ohos_shared_library("cipher_napi") {
   ]
   deps = [
     "//base/security/huks/frameworks/crypto_lite/cipher:cipher_shared",
-    "//foundation/arkui/napi:ace_napi",
   ]
+
+  external_deps = [ "napi:ace_napi" ]
 
   cflags_cc = [
     "-Wall",
