@@ -29,14 +29,14 @@ namespace OHOS {
         const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
         sptr<OHOS::Security::Hks::HksService> ptrInstance = OHOS::Security::Hks::HksService::GetInstance();
 
-        // 构造测试用例
-        MessageParcel dataParcel;
-        MessageParcel replyParcel;
-        MessageOption optionSync = MessageOption::TF_SYNC;
-        MessageOption optionAsync = MessageOption::TF_ASYNC;
-
         // 调用函数
         for (uint32_t msgcode = HKS_MSG_BASE; msgcode < HKS_MSG_MAX; msgcode++) {
+            // 构造测试用例
+            MessageParcel dataParcel;
+            MessageParcel replyParcel;
+            MessageOption optionSync = MessageOption::TF_SYNC;
+            MessageOption optionAsync = MessageOption::TF_ASYNC;
+
             // Sync
             dataParcel.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
             dataParcel.WriteUint32(0); // outData
