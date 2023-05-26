@@ -55,9 +55,10 @@ ohos_shared_library("huks_ndk") {
     "src/native_huks_param.c",
   ]
 
+  deps = [ "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk" ]
+
   external_deps = [
     "hiviewdfx_hilog_native:libhilog",
-    "huks:libhukssdk",
   ]
 
   cflags_cc = [
