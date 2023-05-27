@@ -16,5 +16,5 @@ import("//build/ohos/sa_profile/sa_profile.gni")
 ohos_sa_profile("huks_sa_profile") {
   part_name = "huks"
 
-  sources = [ "huks_service.xml" ]
+  sources = [ "3510.json" ]
 }

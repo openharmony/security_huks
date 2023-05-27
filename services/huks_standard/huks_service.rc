@@ -14,7 +14,7 @@
 on post-fs-data
     start huks_service
 
-service huks_service /system/bin/sa_main /system/profile/huks_service.xml
+service huks_service /system/bin/sa_main /system/profile/huks_service.json
     class z_core
     user system
     group system shell
