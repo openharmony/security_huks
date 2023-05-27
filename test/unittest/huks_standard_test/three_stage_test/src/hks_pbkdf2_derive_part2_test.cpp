@@ -56,6 +56,8 @@ static struct HksParam g_pbkdf2StorageParams[] = {
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams010[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -95,6 +97,8 @@ static struct HksParam g_pbkdf2Params010[] = {
         .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
+#endif
+
 static struct HksParam g_genParams011[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -173,6 +177,8 @@ static struct HksParam g_pbkdf2Params012[] = {
         .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams013[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -251,6 +257,7 @@ static struct HksParam g_pbkdf2Params014[] = {
         .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
+#endif
 static struct HksParam g_genParams015[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -290,6 +297,7 @@ static struct HksParam g_pbkdf2Params015[] = {
         .uint32Param = DERIVE_KEY_SIZE_48
     }
 };
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams016[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -368,6 +376,7 @@ static struct HksParam g_pbkdf2Params017[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
+#endif
 static struct HksParam g_genParams018[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -407,6 +416,7 @@ static struct HksParam g_pbkdf2Params018[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams019[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -446,6 +456,7 @@ static struct HksParam g_pbkdf2Params019[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
+#endif
 
 static struct HksParam g_genParams020[] = {
     {
@@ -508,6 +519,7 @@ static struct HksParam g_pbkdf2FinishParams020[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0010
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
@@ -550,6 +562,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0010, TestSize.Level0)
     HksFreeParamSet(&pbkdf2ParamSet);
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0011
@@ -636,6 +649,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0012, TestSize.Level0)
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0013
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
@@ -721,6 +735,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0014, TestSize.Level0)
     HksFreeParamSet(&pbkdf2ParamSet);
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0015
@@ -765,6 +780,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0015, TestSize.Level0)
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0015
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
@@ -850,6 +866,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0017, TestSize.Level0)
     HksFreeParamSet(&pbkdf2ParamSet);
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0018
@@ -894,6 +911,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0018, TestSize.Level0)
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0019
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256.
@@ -950,6 +968,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0019, TestSize.Level0)
     HksFreeParamSet(&pbkdf2ParamSet);
     HksFreeParamSet(&pbkdf2AbortParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksPbkdf2DerivePart2Test.HksPbkdf2Derive0020

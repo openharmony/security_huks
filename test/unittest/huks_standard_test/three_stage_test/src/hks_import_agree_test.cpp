@@ -1197,7 +1197,9 @@ static void TestImportKey(uint32_t alg, uint32_t keySize, uint32_t importType)
 static void ImportAgreeTest(uint32_t alg, uint32_t keySize)
 {
     TestImportKey(alg, keySize, HKS_KEY_TYPE_PUBLIC_KEY);
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
     TestImportKey(alg, keySize, HKS_KEY_TYPE_PRIVATE_KEY);
+#endif
     TestImportKey(alg, keySize, HKS_KEY_TYPE_KEY_PAIR);
 }
 

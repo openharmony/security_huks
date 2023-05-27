@@ -141,6 +141,7 @@ static struct HksParam g_verifyParamsTest018[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest019[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -187,7 +188,6 @@ static struct HksParam g_verifyParamsTest019[] = {
     }
 };
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest020[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -661,6 +661,8 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest018, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0019
  * @tc.desc: alg-ECC pur-Sign.
@@ -698,7 +700,6 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest019, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0020
  * @tc.desc: alg-ECC pur-Sign.

@@ -609,6 +609,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_040_PARAMS = {
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 041: dh-invalid-keysize2 */
 const ImportKeyCaseParams HKS_IMPORT_TEST_041_PARAMS = {
     .params =
@@ -617,19 +618,6 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_041_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
             { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
-        },
-    .keySize = HKS_DH_KEY_SIZE_2048 / HKS_BITS_PER_BYTE,
-    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
-};
-
-/* 042: dh-invalid-keysize2 */
-const ImportKeyCaseParams HKS_IMPORT_TEST_042_PARAMS = {
-    .params =
-        {
-            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
-            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
-            { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR },
         },
     .keySize = HKS_DH_KEY_SIZE_2048 / HKS_BITS_PER_BYTE,
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
@@ -646,6 +634,20 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_043_PARAMS = {
             { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_PRIVATE_KEY },
         },
     .keySize = HKS_SM2_KEY_SIZE_256 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
+};
+#endif
+
+/* 042: dh-invalid-keysize2 */
+const ImportKeyCaseParams HKS_IMPORT_TEST_042_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
+            { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR },
+        },
+    .keySize = HKS_DH_KEY_SIZE_2048 / HKS_BITS_PER_BYTE,
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
 };
 
@@ -866,6 +868,7 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest034, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_034_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef _USE_OPENSSL_
 HWTEST_F(HksImportKeyTest, HksImportKeyTest035, TestSize.Level0)
 {
@@ -881,6 +884,7 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest037, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_037_PARAMS), HKS_SUCCESS);
 }
+#endif
 #endif
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest038, TestSize.Level0)
@@ -898,19 +902,21 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest040, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_040_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksImportKeyTest, HksImportKeyTest041, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_041_PARAMS), HKS_SUCCESS);
 }
 
-HWTEST_F(HksImportKeyTest, HksImportKeyTest042, TestSize.Level0)
-{
-    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_042_PARAMS), HKS_SUCCESS);
-}
-
 HWTEST_F(HksImportKeyTest, HksImportKeyTest043, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_043_PARAMS), HKS_SUCCESS);
+}
+#endif
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest042, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_042_PARAMS), HKS_SUCCESS);
 }
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest044, TestSize.Level0)

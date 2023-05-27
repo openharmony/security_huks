@@ -202,7 +202,7 @@ static struct HksParam g_hkdfGenParams[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_hkdfInitParams[] = {

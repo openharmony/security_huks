@@ -144,6 +144,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_004_PARAMS = {
 #endif
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 005: gen ecc for sign; init for agree */
 const TestPurposeCaseParams HKS_PURPOE_TEST_005_PARAMS = {
     .genParams =
@@ -167,7 +168,6 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_005_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ARGUMENT
 };
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef _USE_OPENSSL_
 /* mbedtls engine don't support DSA alg */
 /* 006: gen dsa for sign; init for agree */
@@ -332,6 +332,7 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest004, TestSize.Level0)
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest005
  * @tc.desc: alg-ECC gen-pur-Sign init-pur-Agree.
@@ -344,7 +345,6 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest005, TestSize.Level0)
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_005_PARAMS), HKS_SUCCESS);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksAuthPartTest.HksCheckPurposeTest006
  * @tc.desc: alg-DSA gen-pur-Sign init-pur-Agree.
