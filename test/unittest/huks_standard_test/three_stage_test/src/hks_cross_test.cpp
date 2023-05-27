@@ -795,6 +795,7 @@ HWTEST_F(HksCrossTest, HksCrossTestPbkdf2Derive001, TestSize.Level0)
     HksFreeParamSet(&finishParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksCrossTest.HksCrossTestHmac001
  * @tc.desc: HMAC
@@ -820,4 +821,5 @@ HWTEST_F(HksCrossTest, HksCrossTestHmac001, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
+#endif
 } // namespace Unittest::CrossTest

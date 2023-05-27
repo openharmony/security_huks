@@ -542,7 +542,7 @@ static struct HksParam g_verifyParamsTest049[] = {
     }
 };
 #endif
-
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest050[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -597,6 +597,7 @@ static struct HksParam g_verifyParamsTest050[] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test041
@@ -926,6 +927,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test049, TestSize.Level
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test050
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-NONE.
@@ -961,4 +963,5 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test050, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 } // namespace Unittest::RsaSignVerify

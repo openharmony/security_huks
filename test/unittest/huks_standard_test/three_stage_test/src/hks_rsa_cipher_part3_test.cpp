@@ -48,6 +48,7 @@ void HksRsaCipherPart3Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams021[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -111,6 +112,7 @@ static struct HksParam g_decryptParams021[] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
+#endif
 
 #ifdef _USE_OPENSSL_
 static struct HksParam g_genParams022[] = {
@@ -242,6 +244,7 @@ static struct HksParam g_decryptParams023[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams024[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -369,6 +372,7 @@ static struct HksParam g_decryptParams025[] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
+#endif
 
 static struct HksParam g_genParams026[] = {
     {
@@ -692,6 +696,7 @@ static struct HksParam g_decryptParams030[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaCipherPart3Test.HksRsaCipherPart3Test021
  * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-1024 pad-OAEP dig-SHA512 mode-ECB.
@@ -723,6 +728,7 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test021, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 
 #ifdef _USE_OPENSSL_
 /**
@@ -790,6 +796,7 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test023, TestSize.Level1)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaCipherPart3Test.HksRsaCipherPart3Test024
  * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-2048 pad-OAEP dig-SHA1 mode-ECB.
@@ -853,6 +860,7 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test025, TestSize.Level1)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaCipherPart3Test.HksRsaCipherPart3Test026
