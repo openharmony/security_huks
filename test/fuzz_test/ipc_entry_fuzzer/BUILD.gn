@@ -23,7 +23,10 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
 
   include_dirs = [
     ".",
+    "../../../interfaces/inner_api/huks_standard/main/include/",
     "../../../frameworks/huks_standard/main/common/include/",
+    "../../../services/huks_standard/huks_service/main/os_dependency/sa/",
+    "../../../services/huks_standard/huks_service/main/core/include/",
     "//third_party/bounds_checking_function/include",
   ]
   cflags = [
@@ -35,10 +38,11 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   sources = [ "hks_service_on_remote_request_fuzzer.cpp" ]
 
   deps = [
-    "../../../frameworks/huks_standard/main:huks_standard_frameworks",
-    "../../../services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
+    "../../../services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
+    "../../../services/huks_standard/huks_service/main:libhuks_service_standard_static",
     "//third_party/bounds_checking_function:libsec_static",
   ]
+
   external_deps = [ "c_utils:utils" ]
 }
 
