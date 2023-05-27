@@ -76,11 +76,6 @@ if (os_level == "standard") {
 
     defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
 
-    if (huks_enable_upgrade_rkc_1to2) {
-      # enable upgrade rkc derivation algorithm from PBKDF2 to HKDF
-      defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
-    }
-
     sources = [
       "src/hks_crypto_ed25519.c",
       "src/hks_mbedtls_ability.c",
@@ -106,6 +101,9 @@ if (os_level == "standard") {
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c" ]
 
     if (huks_enable_upgrade_rkc_1to2) {
+      # enable upgrade rkc derivation algorithm from PBKDF2 to HKDF
+      defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
+      # compile code of old version
       sources += [ "src/hks_rkc_v1.c" ]
     }
 
