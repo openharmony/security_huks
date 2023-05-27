@@ -107,13 +107,15 @@ int32_t GetProcessInfo(struct HksProcessInfo *processInfo);
 
 int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf);
 
+int32_t ExtractFieldFromBuffer(const struct HksBlob *srcBlob, uint32_t *srcOffset, void *dest, uint32_t destSize);
+
+int32_t FillFieldToBuffer(const void *src, uint32_t srcSize, struct HksBlob *destBlob, uint32_t *destOffset);
+
+int32_t ExtractKsfDataRkc(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset, struct HksKsfDataRkc *ksfDataRkc);
+
+int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset, struct HksKsfDataMk *ksfDataMk);
+
 int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset);
-
-int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset,
-    struct HksKsfDataMk *ksfDataMk);
-
-int32_t ExtractKsfRkcWithVer(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset,
-    struct HksKsfDataRkcWithVer *ksfDataRkcWithVer);
 
 int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset);
 

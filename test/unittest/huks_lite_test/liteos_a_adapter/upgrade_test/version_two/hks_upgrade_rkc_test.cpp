@@ -70,37 +70,36 @@ static void TestGetMkFromOldKsfFile(const HksBlob *oldKsfBlob, const uint8_t mkP
     ASSERT_EQ(HKS_SUCCESS, ret);
 
     // step2. decrypt mk
-    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
+    uint8_t mk[HKS_RKC_MK_LEN] = { 0 };
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, mk };
     struct HksBlob cipherTextBlob = { sizeof(ksfDataV1.ksfDataMk.mkCiphertext), ksfDataV1.ksfDataMk.mkCiphertext };
     ret = RkcMkCryptV1(&ksfDataV1, &tempMkBlob, &cipherTextBlob, false);
     ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_EQ(0, HksMemCmp(mkPlaintext, GetMkWithMask(), HKS_RKC_MK_LEN));
+    ASSERT_EQ(0, HksMemCmp(mkPlaintext, tempMkBlob.data, HKS_RKC_MK_LEN));
 }
 
-static void TestStoreNewKsfFile(HksBlob *rkcBlob, HksBlob *mkBlob)
+static void TestStoreNewKsfFile(HksBlob *rkcBlob, HksBlob *mkBlob, const uint8_t mkPlaintext[HKS_RKC_MK_LEN])
 {
     // step3. create new rkc material
-    struct HksKsfDataRkcWithVer *newRkc = CreateNewKsfDataRkcWithVer();
-    ASSERT_NE(HKS_NULL_POINTER, newRkc);
+    struct HksKsfDataRkcWithVer newRkc = { 0 };
+    int32_t ret = FillKsfDataRkcWithVer(&newRkc);
+    ASSERT_EQ(HKS_SUCCESS, ret);
 
     // step4. encrypt mk with new rkc
-    struct HksKsfDataMkWithVer *newMk = CreateNewKsfDataMkWithVer();
-    ASSERT_NE(HKS_NULL_POINTER, newMk);
+    struct HksKsfDataMkWithVer newMk = { 0 };
+    FillKsfDataMkWithVer(&newMk);
 
-    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
-    struct HksBlob cipherTextBlob = { sizeof(newMk->ksfDataMk.mkCiphertext), newMk->ksfDataMk.mkCiphertext };
-    int32_t ret = RkcMkCrypt(&(newRkc->ksfDataRkc), &(newMk->ksfDataMk), &tempMkBlob, &cipherTextBlob, true);
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, (uint8_t *)mkPlaintext };
+    struct HksBlob cipherTextBlob = { sizeof(newMk.ksfDataMk.mkCiphertext), newMk.ksfDataMk.mkCiphertext };
+    ret = RkcMkCrypt(&(newRkc.ksfDataRkc), &(newMk.ksfDataMk), &tempMkBlob, &cipherTextBlob, true);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
     // step5. store new rkc and mk file
-    ret = FillKsfBufRkc(newRkc, rkcBlob);
+    ret = FillKsfBufRkc(&newRkc, rkcBlob);
     ASSERT_EQ(HKS_SUCCESS, ret);
 
-    ret = FillKsfBufMk(newMk, mkBlob);
+    ret = FillKsfBufMk(&newMk, mkBlob);
     ASSERT_EQ(HKS_SUCCESS, ret);
-
-    HKS_MEMSET_FREE_PTR(newRkc, sizeof(struct HksKsfDataRkcWithVer));
-    HKS_MEMSET_FREE_PTR(newMk, sizeof(struct HksKsfDataMkWithVer));
 }
 
 static void TestGetMkFromNewKsfFile(const HksBlob *rkcBlob, const HksBlob *mkBlob,
@@ -116,11 +115,12 @@ static void TestGetMkFromNewKsfFile(const HksBlob *rkcBlob, const HksBlob *mkBlo
     ASSERT_EQ(HKS_SUCCESS, ret);
 
     // step7. decrypt mk
-    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, GetMkWithMask() };
+    uint8_t mk[HKS_RKC_MK_LEN] = { 0 };
+    struct HksBlob tempMkBlob = { HKS_RKC_MK_LEN, mk };
     struct HksBlob cipherTextBlob = { sizeof(newMk.ksfDataMk.mkCiphertext), newMk.ksfDataMk.mkCiphertext };
     ret = RkcMkCrypt(&newRkc.ksfDataRkc, &newMk.ksfDataMk, &tempMkBlob, &cipherTextBlob, false);
     ASSERT_EQ(HKS_SUCCESS, ret);
-    ASSERT_EQ(0, HksMemCmp(mkPlaintext, GetMkWithMask(), HKS_RKC_MK_LEN));
+    ASSERT_EQ(0, HksMemCmp(mkPlaintext, tempMkBlob.data, HKS_RKC_MK_LEN));
 }
 
 /**
@@ -162,7 +162,7 @@ HWTEST_F(HksUpgradeRkcTest, HksUpgradeRkcTest001, TestSize.Level0)
     struct HksBlob rkcBlob = { HKS_KSF_BUF_LEN, rkcFile };
     uint8_t mkFile[HKS_KSF_BUF_LEN] = { 0 };
     struct HksBlob mkBlob = { HKS_KSF_BUF_LEN, mkFile };
-    TestStoreNewKsfFile(&rkcBlob, &mkBlob);
+    TestStoreNewKsfFile(&rkcBlob, &mkBlob, mkPlaintext);
 
     TestGetMkFromNewKsfFile(&rkcBlob, &mkBlob, mkPlaintext);
 }

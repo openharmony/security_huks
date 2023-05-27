@@ -55,17 +55,15 @@ struct HksRkcMk {
 extern "C" {
 #endif
 
-struct HksKsfAttr *GetGlobalKsfAttrRkc();
+const struct HksKsfAttr *GetGlobalKsfAttrRkc();
 
-struct HksKsfAttr *GetGlobalKsfAttrMk();
-
-uint8_t *GetMkWithMask();
+const struct HksKsfAttr *GetGlobalKsfAttrMk();
 
 uint32_t RkcDigestToHks(const uint32_t rkcDigest);
 
-int32_t RkcRecoverRkTime(const struct HksKsfDataRkc *ksfDataRkc);
+void RkcRecoverRkTime(struct HksTime createdTime, struct HksTime expiredTime);
 
-int32_t RkcRecoverMkTime(const struct HksKsfDataMk *ksfDataMk);
+void RkcRecoverMkTime(struct HksTime createdTime, struct HksTime expiredTime);
 
 int32_t ExecuteMkCrypt(const struct HksKsfDataMk *ksfDataMk, const struct HksBlob *rmk,
     struct HksBlob *plainText, struct HksBlob *cipherText, const bool encrypt);
@@ -77,9 +75,9 @@ int32_t RkcMaskMk(const struct HksBlob *mk);
 
 int32_t InitKsfAttr(const struct HksKsfAttr *ksfAttr, uint8_t ksfType);
 
-struct HksKsfDataRkcWithVer *CreateNewKsfDataRkcWithVer(void);
+int32_t FillKsfDataRkcWithVer(struct HksKsfDataRkcWithVer *ksfDataRkcWithVer);
 
-struct HksKsfDataMkWithVer *CreateNewKsfDataMkWithVer(void);
+void FillKsfDataMkWithVer(struct HksKsfDataMkWithVer *ksfDataMkWithVer);
 
 int32_t RkcWriteAllKsf(const struct HksKsfDataRkcWithVer *ksfDataRkcWithVer,
     const struct HksKsfDataMkWithVer *ksfDataMkWithVer);
