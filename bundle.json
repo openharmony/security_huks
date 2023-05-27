@@ -49,7 +49,9 @@
           "user_auth_framework"
         ],
         "third_party": [ 
-          "bounds_checking_function"
+          "bounds_checking_function",
+          "openssl",
+          "mbedtls"
         ]
       },
       "build": {
