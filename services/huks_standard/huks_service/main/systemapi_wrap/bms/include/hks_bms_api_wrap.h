@@ -28,4 +28,4 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
 }
 #endif
 
-#endif // HKS_USERIDM_API_WRAP_H
+#endif // HKS_BMS_API_WRAP_H

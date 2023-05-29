@@ -224,8 +224,8 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
         { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
         { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
         { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
-        { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true },
         { .tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = g_appInfo },
+        { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true },
     };
     struct HksParamSet *paramSet = NULL;
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
@@ -235,7 +235,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
 
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_BASE64_PARAM);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
     FreeCertChain(&certChain, certChain->certsCount);

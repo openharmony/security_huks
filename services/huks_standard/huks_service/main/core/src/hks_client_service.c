@@ -1309,11 +1309,7 @@ static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, st
     struct HksParamSet *newParamSet = NULL;
 
     do {
-        if (paramSet != NULL) {
-            ret = AppendToNewParamSet(paramSet, &newParamSet);
-        } else {
-            ret = HksInitParamSet(&newParamSet);
-        }
+        ret = AppendToNewParamSet(paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
 
         ret = HksGetHapInfo(processInfo, &hapInfo);
@@ -1331,11 +1327,11 @@ static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, st
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
 
         *outParamSet = newParamSet;
-        HKS_FREE_PTR(hapInfo.data);
+        HKS_FREE_BLOB(hapInfo);
         return ret;
     } while (0);
 
-    HKS_FREE_PTR(hapInfo.data);
+    HKS_FREE_BLOB(hapInfo);
     HksFreeParamSet(&newParamSet);
     return ret;
 }

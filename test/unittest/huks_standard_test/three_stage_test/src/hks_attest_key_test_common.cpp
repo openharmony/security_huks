@@ -21,6 +21,7 @@
 using namespace testing::ext;
 
 namespace Unittest::AttestKey {
+static const uint32_t g_paramCount = 6;
 static const uint32_t g_paramCountInKeyAttest = 5;
 static const uint32_t g_paramCountInIdAttest = 7;
 static const uint32_t g_index0 = 0;
@@ -217,6 +218,8 @@ int32_t ValidateCertChainTest(const struct HksCertChain *certChain,
             paramCount = g_paramCountInIdAttest;
         } else if (type == NON_IDS_PARAM) {
             paramCount = g_paramCountInKeyAttest;
+        } else if (type == NON_IDS_BASE64_PARAM) {
+            paramCount = g_paramCount;
         }
         ret = HksAddParams(paramSet, tmpParam, paramCount);
         if (ret != HKS_SUCCESS) {
