@@ -23,9 +23,14 @@
 #include "hks_template.h"
 #include "securec.h"
 
-static const uint8_t g_p256SpkiHeader[] = {
+static const uint8_t g_p256SpkiHeaderForEcc[] = {
     0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a,
     0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04
+};
+
+static const uint8_t g_p256SpkiHeaderForSm2[] = {
+    0x30, 0x5a, 0x30, 0x14, 0x06, 0x08, 0x2a, 0x81, 0x1c, 0xcf, 0x55, 0x01, 0x82, 0x2d,
+    0x06, 0x08, 0x2a, 0x81, 0x1c, 0xcf, 0x55, 0x01, 0x82, 0x2d, 0x03, 0x42, 0x00, 0x04
 };
 
 static const uint8_t g_p384SpkiHeader[] = {
@@ -82,24 +87,30 @@ int32_t DcmInsertClaim(struct HksBlob *out, const struct HksBlob *oid, const str
 
 static int32_t GetEcPublicKey(struct HksBlob *key, const struct HksPubKeyInfo *info)
 {
-    uint8_t *spkiHeader = NULL;
+    const uint8_t *spkiHeader = NULL;
     uint32_t spkiHeaderLen;
-    switch (info->keySize) {
-        case HKS_ECC_KEY_SIZE_256:
-            spkiHeader = (uint8_t *)g_p256SpkiHeader;
-            spkiHeaderLen = sizeof(g_p256SpkiHeader);
-            break;
-        case HKS_ECC_KEY_SIZE_384:
-            spkiHeader = (uint8_t *)g_p384SpkiHeader;
-            spkiHeaderLen = sizeof(g_p384SpkiHeader);
-            break;
-        case HKS_ECC_KEY_SIZE_521:
-            spkiHeader = (uint8_t *)g_p521SpkiHeader;
-            spkiHeaderLen = sizeof(g_p521SpkiHeader);
-            break;
-        default:
-            HKS_LOG_E("ec curve not supported: %" LOG_PUBLIC "u\n", info->keySize);
-            return HKS_ERROR_NOT_SUPPORTED;
+
+    if (info->keyAlg == HKS_ALG_SM2) {
+        spkiHeader = (const uint8_t *)g_p256SpkiHeaderForSm2;
+        spkiHeaderLen = sizeof(g_p256SpkiHeaderForSm2);
+    } else {
+        switch (info->keySize) {
+            case HKS_ECC_KEY_SIZE_256:
+                spkiHeader = (const uint8_t *)g_p256SpkiHeaderForEcc;
+                spkiHeaderLen = sizeof(g_p256SpkiHeaderForEcc);
+                break;
+            case HKS_ECC_KEY_SIZE_384:
+                spkiHeader = (const uint8_t *)g_p384SpkiHeader;
+                spkiHeaderLen = sizeof(g_p384SpkiHeader);
+                break;
+            case HKS_ECC_KEY_SIZE_521:
+                spkiHeader = (const uint8_t *)g_p521SpkiHeader;
+                spkiHeaderLen = sizeof(g_p521SpkiHeader);
+                break;
+            default:
+                HKS_LOG_E("ec curve not supported: %" LOG_PUBLIC "u\n", info->keySize);
+                return HKS_ERROR_NOT_SUPPORTED;
+        }
     }
 
     uint32_t totalSize = spkiHeaderLen + info->nOrXSize + info->eOrYSize;

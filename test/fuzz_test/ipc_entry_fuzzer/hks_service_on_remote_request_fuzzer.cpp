@@ -12,49 +12,45 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "hks_service_on_remote_request_fuzzer.h"
 
 #include <securec.h>
 
-#include "hks_mem.h"
+#include "hks_client_service.h"
 #include "hks_message_code.h"
-#include "hks_param.h"
-#include "hks_type.h"
-#include "iservice_registry.h"
-
-namespace {
-constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
-const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
-}
+#include "hks_sa.h"
 
 namespace OHOS {
-    static sptr<IRemoteObject> GetHksProxy()
-    {
-        auto registry = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-        sptr<IRemoteObject> hksProxy = registry->GetSystemAbility(SA_ID_KEYSTORE_SERVICE);
-        return hksProxy;
-    }
-
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        // 构造测试用例
-        MessageParcel dataParcel;
-        MessageParcel replyParcel;
-        MessageOption optionSync = MessageOption::TF_SYNC;
-        MessageOption optionAsync = MessageOption::TF_ASYNC;
+        // 初始化HUKS服务
+        HksServiceInitialize();
+        const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
+        sptr<OHOS::Security::Hks::HksService> ptrInstance = OHOS::Security::Hks::HksService::GetInstance();
 
-        dataParcel.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
-        dataParcel.WriteUint32(static_cast<uint32_t>(size));
-        dataParcel.WriteBuffer(data, size);
-        
         // 调用函数
-        sptr<IRemoteObject> hksProxy = GetHksProxy();
-        int error;
-        for (uint32_t msgcode = HKS_MSG_BASE; msgcode <= HKS_MSG_MAX; msgcode++) {
-            error = hksProxy->SendRequest(msgcode, dataParcel, replyParcel, optionSync);
-            error = hksProxy->SendRequest(msgcode, dataParcel, replyParcel, optionAsync);
-        }
+        for (uint32_t msgcode = HKS_MSG_BASE; msgcode < HKS_MSG_MAX; msgcode++) {
+            // 构造测试用例
+            MessageParcel dataParcel;
+            MessageParcel replyParcel;
+            MessageOption optionSync = MessageOption::TF_SYNC;
+            MessageOption optionAsync = MessageOption::TF_ASYNC;
 
+            // Sync
+            dataParcel.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
+            dataParcel.WriteUint32(0); // outData
+            dataParcel.WriteUint32(static_cast<uint32_t>(size)); // inData
+            dataParcel.WriteBuffer(data, size);
+            (void)ptrInstance->OnRemoteRequest(msgcode, dataParcel, replyParcel, optionSync);
+
+            // Async
+            dataParcel.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
+            dataParcel.WriteUint32(0); // outData
+            dataParcel.WriteUint32(static_cast<uint32_t>(size)); // inData
+            dataParcel.WriteBuffer(data, size);
+            (void)ptrInstance->OnRemoteRequest(msgcode, dataParcel, replyParcel, optionAsync);
+        }
         return true;
     }
 }

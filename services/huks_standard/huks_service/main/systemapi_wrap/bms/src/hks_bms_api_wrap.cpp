@@ -23,10 +23,7 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "hap_token_info.h"
-
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 #include "bundle_mgr_proxy.h"
-#endif
 
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -38,7 +35,6 @@
 #include "hks_config.h"
 #endif
 
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 using namespace OHOS;
 using namespace Security::AccessToken;
 
@@ -74,16 +70,14 @@ static int32_t ConvertHapInfoToJson(const std::string &appIdStr, const std::stri
     }
 
     char *jsonStr = cJSON_PrintUnformatted(jsonObj);
-    uint8_t *hapInfoData = static_cast<uint8_t *>(HksMalloc(strlen(jsonStr)));
-    if (hapInfoData == nullptr) {
-        HKS_LOG_E("hapInfoData malloc failed.");
+    if (jsonStr == nullptr) {
+        HKS_LOG_E("cJSON_PrintUnformatted failed.");
         cJSON_Delete(jsonObj);
-        return HKS_ERROR_MALLOC_FAIL;
+        return HKS_ERROR_NULL_POINTER;
     }
 
-    (void)memcpy_s(hapInfoData, strlen(jsonStr), jsonStr, strlen(jsonStr));
     hapInfo->size = strlen(jsonStr);
-    hapInfo->data = hapInfoData;
+    hapInfo->data = (uint8_t *)jsonStr;
     cJSON_Delete(jsonObj);
     return HKS_SUCCESS;
 }
@@ -104,7 +98,7 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
     if (callingResult != HKS_SUCCESS) {
         HKS_LOG_E("Get hap info failed from access token kit.");
-        return HKS_ERROR_GET_HAP_INFO_FAILED;
+        return HKS_ERROR_BAD_STATE;
     }
 
     sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgrProxy();
@@ -116,7 +110,7 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_HASH_VALUE, bundleInfo, processInfo->userIdInt);
     if (!isGetInfoSuccess) {
         HKS_LOG_E("GetBundleInfo failed.");
-        return HKS_ERROR_GET_HAP_INFO_FAILED;
+        return HKS_ERROR_BAD_STATE;
     }
 
     // The appid is concatenated from the bundle name and the developer's public key certificate.
@@ -125,11 +119,3 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
 
     return HKS_SUCCESS;
 }
-#else
-int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo)
-{
-    (void)processInfo;
-    (void)hapInfo;
-    return HKS_SUCCESS;
-}
-#endif // HKS_SUPPORT_GET_BUNDLE_INFO

@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
+# Copyright (C) 2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -39,16 +39,11 @@ ohos_static_library("libhuks_bms_systemapi_wrap_static") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "bundle_framework:appexecfwk_base",
+    "bundle_framework:appexecfwk_core",
     "hiviewdfx_hilog_native:libhilog",
     "ipc:ipc_single",
   ]
-
-  if (enable_bundle_framework) {
-    external_deps += [
-      "bundle_framework:appexecfwk_base",
-      "bundle_framework:appexecfwk_core",
-    ]
-  }
 
   complete_static_lib = true
 }
