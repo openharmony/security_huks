@@ -220,7 +220,7 @@ static int32_t RkcLoadKsfV1(struct HksBlob *mkBlob)
     return ret;
 }
 
-static int32_t RkcDeleteAllKsfV1()
+static int32_t RkcDeleteAllKsfV1(void)
 {
     struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
     int32_t ret = GetProcessInfo(&processInfo);
