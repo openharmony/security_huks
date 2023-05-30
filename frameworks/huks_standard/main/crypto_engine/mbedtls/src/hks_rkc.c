@@ -392,7 +392,7 @@ static int32_t UpgradeMkIfNeeded(uint32_t mkVersion, const struct HksBlob *mk)
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
-static int32_t RkcLoadKsf()
+static int32_t RkcLoadKsf(void)
 {
     int32_t ret;
     struct HksKsfDataRkcWithVer *validKsfDataRkcWithVer =
