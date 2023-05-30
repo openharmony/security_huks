@@ -74,7 +74,7 @@ int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         return HKS_SUCCESS;
-    } while(0);
+    } while (0);
 
     /* the data of root or main key should be cleared after use */
     (void)memset_s(tmpKsf->data, tmpKsf->size, 0, tmpKsf->size);
@@ -232,7 +232,7 @@ int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffs
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     /* Fill reserve field */
-    return ExtractFieldFromBuffer(ksfFromFile, ksfBufOffset, ksfDataMk->mkRsv, sizeof(ksfDataMk->mkRsv));;
+    return ExtractFieldFromBuffer(ksfFromFile, ksfBufOffset, ksfDataMk->mkRsv, sizeof(ksfDataMk->mkRsv));
 }
 
 int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset)
