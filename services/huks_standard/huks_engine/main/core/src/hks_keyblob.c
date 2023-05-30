@@ -234,7 +234,6 @@ static int32_t EncryptAndDecryptKeyBlob(const struct HksBlob *aad, struct HksPar
 
     struct HksBlob derivedKey = { 0, NULL };
     ret = GetDeriveKey(deriveAlg, paramSet, keyBlobInfo, &derivedKey);
-
     if (ret != HKS_SUCCESS) {
         HksFreeUsageSpec(&usageSpec);
         return ret;
