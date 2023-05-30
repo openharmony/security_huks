@@ -28,21 +28,21 @@
 #endif
 
 /* the configuration of root key component */
-static struct HksRkcCfg g_hksRkcCfg = {{
+static struct HksRkcCfg g_hksRkcCfg = {
     .state = HKS_RKC_STATE_INVALID,
     .rkVersion = HKS_RKC_VER,
     .mkVersion = HKS_MK_VER,
     .storageType = HKS_RKC_STORAGE_FILE_SYS,
     .rkCreatedTime = { 0, 0, 0, 0, 0, 0 },
     .rkExpiredTime = { 0, 0, 0, 0, 0, 0 },
-    .ksfAttrRkc = {{ NULL, NULL }},
-    .ksfAttrMk = {{ NULL, NULL }},
+    .ksfAttrRkc = { NULL, NULL },
+    .ksfAttrMk = { NULL, NULL },
     .rmkIter = HKS_RKC_RMK_ITER,
     .rmkHashAlg = HKS_RKC_RMK_HMAC_SHA256,
     .mkMask = {0},
     .mkEncryptAlg = HKS_RKC_MK_CRYPT_ALG_AES256_GCM,
     .reserve = {0}
-}};
+};
 
 const struct HksKsfAttr *GetGlobalKsfAttrRkc(void)
 {
@@ -412,7 +412,7 @@ static int32_t RkcLoadKsf()
             validKsfDataMkWithVer->ksfDataMk.mkExpiredTime);
 
         /* Initialize the attribute of rkc keystore file */
-        struct HksKsfAttr ksfAttrRkc = {{ "rinfo1_v2.data", "rinfo2_v2.data" }};
+        struct HksKsfAttr ksfAttrRkc = { "rinfo1_v2.data", "rinfo2_v2.data" };
         ret = InitKsfAttr(&ksfAttrRkc, HKS_KSF_TYPE_RKC);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
@@ -515,7 +515,7 @@ static int32_t RkcCreateKsf(void)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "make mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* Initialize rkc keystore file name (mk already done in HksRkcInit) */
-        struct HksKsfAttr ksfAttrRkc = {{ "rinfo1_v2.data", "rinfo2_v2.data" }};
+        struct HksKsfAttr ksfAttrRkc = { "rinfo1_v2.data", "rinfo2_v2.data" };
         ret = InitKsfAttr(&ksfAttrRkc, HKS_KSF_TYPE_RKC);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
@@ -540,7 +540,7 @@ int32_t HksRkcInit(void)
     int32_t ret;
     do {
         /* Initialize the attribute of mk keystore file */
-        struct HksKsfAttr ksfAttrMk = {{ "minfo1_v2.data", "minfo2_v2.data" }};
+        struct HksKsfAttr ksfAttrMk = { "minfo1_v2.data", "minfo2_v2.data" };
         ret = InitKsfAttr(&ksfAttrMk, HKS_KSF_TYPE_MK);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of mk keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
@@ -548,7 +548,7 @@ int32_t HksRkcInit(void)
             ret = RkcLoadKsf();
         } else {
             /* Initialize the attribute of rkc keystore file */
-            struct HksKsfAttr ksfAttrRkcV1 = {{ "info1.data", "info2.data" }};
+            struct HksKsfAttr ksfAttrRkcV1 = { "info1.data", "info2.data" };
             ret = InitKsfAttr(&ksfAttrRkcV1, HKS_KSF_TYPE_RKC);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
                 "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
