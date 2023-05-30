@@ -388,7 +388,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest013, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSecureAccessTest013 HksBuildParamSet failed";
     struct HuksKeyNode keyNode = { { nullptr, nullptr }, paramSet, nullptr, nullptr, 0 };
     ret = HksCoreSecureAccessInitParams(&keyNode, paramSet, &token);
-    ASSERT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
+    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
     HksFreeParamSet(&paramSet);
 }
 }
