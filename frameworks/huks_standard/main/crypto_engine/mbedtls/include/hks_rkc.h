@@ -55,9 +55,9 @@ struct HksRkcMk {
 extern "C" {
 #endif
 
-const struct HksKsfAttr *GetGlobalKsfAttrRkc();
+const struct HksKsfAttr *GetGlobalKsfAttrRkc(void);
 
-const struct HksKsfAttr *GetGlobalKsfAttrMk();
+const struct HksKsfAttr *GetGlobalKsfAttrMk(void);
 
 uint32_t RkcDigestToHks(const uint32_t rkcDigest);
 
