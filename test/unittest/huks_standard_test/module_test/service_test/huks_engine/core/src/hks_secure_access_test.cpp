@@ -353,7 +353,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest012, TestSize.Level0)
 
 /**
  * @tc.name: HksSecureAccessTest.HksSecureAccessTest013
- * @tc.desc: tdd HksCoreSecureAccessInitParams, skip user auth access control
+ * @tc.desc: tdd HksCoreSecureAccessInitParams, need user auth access control
  * @tc.type: FUNC
  */
 HWTEST_F(HksSecureAccessTest, HksSecureAccessTest013, TestSize.Level0)
@@ -366,7 +366,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest013, TestSize.Level0)
         },
         {
             .tag = HKS_TAG_KEY_AUTH_PURPOSE,
-            .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+            .uint32Param = HKS_KEY_PURPOSE_DECRYPT
         }, {
             .tag = HKS_TAG_PURPOSE,
             .uint32Param = HKS_KEY_PURPOSE_DECRYPT
@@ -388,7 +388,7 @@ HWTEST_F(HksSecureAccessTest, HksSecureAccessTest013, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSecureAccessTest013 HksBuildParamSet failed";
     struct HuksKeyNode keyNode = { { nullptr, nullptr }, paramSet, nullptr, nullptr, 0 };
     ret = HksCoreSecureAccessInitParams(&keyNode, paramSet, &token);
-    ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
+    EXPECT_EQ(ret, HKS_ERROR_PARAM_NOT_EXIST);
     HksFreeParamSet(&paramSet);
 }
 }
