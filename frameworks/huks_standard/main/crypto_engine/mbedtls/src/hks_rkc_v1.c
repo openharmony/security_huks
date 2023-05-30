@@ -272,7 +272,7 @@ int32_t UpgradeV1ToV2(void)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Encrypt mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* Initialize rkc keystore file name (mk already done in HksRkcInit) */
-        struct HksKsfAttr ksfAttrRkc = { "rinfo1_v2.data", "rinfo2_v2.data" };
+        struct HksKsfAttr ksfAttrRkc = {{ "rinfo1_v2.data", "rinfo2_v2.data" }};
         ret = InitKsfAttr(&ksfAttrRkc, HKS_KSF_TYPE_RKC);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
