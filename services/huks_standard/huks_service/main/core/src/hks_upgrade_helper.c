@@ -173,6 +173,12 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
             break;
         }
 
+        newKey.data = HksMalloc(MAX_KEY_SIZE);
+        if (newKey.data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        newKey.size = MAX_KEY_SIZE;
         ret = HksDoUpgradeKeyAccess(&oldKey, upgradeParamSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access change key owner failed!")
 
