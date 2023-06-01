@@ -114,7 +114,7 @@ static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo
             break;
         }
 
-        newKey.data = HksMalloc(MAX_KEY_SIZE);
+        newKey.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
         if (newKey.data == NULL) {
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
