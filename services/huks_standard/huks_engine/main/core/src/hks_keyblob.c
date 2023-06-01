@@ -103,6 +103,23 @@ static int32_t GetSalt(const struct HksParamSet *paramSet, const struct HksKeyBl
     return ret;
 }
 
+static void GetDeriveKeyAlg(const struct HksParamSet *paramSet, uint32_t *algType)
+{
+    *algType = HKS_ALG_HKDF;
+#ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
+    struct HksParam *keyVersion = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_VERSION, &keyVersion);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_W("Get key version failed! Use the default derive algorithm.");
+        return;
+    }
+    const uint32_t hkdfStartVersion = 3;
+    if (keyVersion->uint32Param < hkdfStartVersion) {
+        *algType = HKS_ALG_PBKDF2;
+    }
+#endif
+}
+
 static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct HksKeyBlobInfo *keyBlobInfo,
     struct HksBlob *derivedKey)
 {
@@ -116,7 +133,8 @@ static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct Hks
         .digestAlg = HKS_DIGEST_SHA256,
     };
 
-    struct HksKeySpec derivationSpec = { HKS_ALG_PBKDF2, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), &derParam };
+    struct HksKeySpec derivationSpec = { HKS_ALG_HKDF, HKS_KEY_BYTES(HKS_AES_KEY_SIZE_256), &derParam };
+    GetDeriveKeyAlg(paramSet, &derivationSpec.algType);
 
     uint8_t encryptKeyData[HKS_KEY_BLOB_MAIN_KEY_SIZE] = {0};
     struct HksBlob encryptKey = { HKS_KEY_BLOB_MAIN_KEY_SIZE, encryptKeyData };
@@ -566,18 +584,7 @@ int32_t HksBuildKeyBlobWithOutAddKeyParam(const struct HksParamSet *paramSet, st
         ret = HksGetParamSet(paramSet, paramSet->paramSetSize, &keyBlobParamSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        keyOut->data = (uint8_t *)HksMalloc(keyBlobParamSet->paramSetSize);
-        if (keyOut->data == NULL) {
-            ret = HKS_ERROR_MALLOC_FAIL;
-            HKS_LOG_E("malloc keyblob out failed!");
-            break;
-        }
-        keyOut->size = keyBlobParamSet->paramSetSize;
-
         ret = HksBuildKeyBlob2(keyBlobParamSet, keyOut);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_BLOB(*keyOut);
-        }
     } while (0);
 
     HksFreeParamSet(&keyBlobParamSet);
