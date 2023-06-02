@@ -103,7 +103,7 @@ static int32_t IsNeedSkipUserAuthAccessControl(const struct HksParamSet *keyBlob
     ret = HksGetParam(initParamSet, HKS_TAG_PURPOSE, &keyPurposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key purpose param failed!")
 
-    if ((keyPurposeParam->uint32Param | userAuthKeyPurposeParam->uint32Param) ==
+    if ((keyPurposeParam->uint32Param | userAuthKeyPurposeParam->uint32Param) !=
         userAuthKeyPurposeParam->uint32Param) {
         HKS_LOG_E("it needs to skip user auth access control base on the current value of key purpose!");
         return HKS_ERROR_NEED_SKIP_ACCESS_CONTROL;

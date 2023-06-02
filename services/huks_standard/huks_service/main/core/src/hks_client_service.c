@@ -114,6 +114,12 @@ static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo
             break;
         }
 
+        newKey.data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+        if (newKey.data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        newKey.size = MAX_KEY_SIZE;
         ret = HksDoUpgradeKeyAccess(key, paramSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "do upgrade access failed!")
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
