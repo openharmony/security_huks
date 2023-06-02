@@ -58,8 +58,8 @@ declare_args() {
   # whether enable upgrade root key component from V1 to V2, default as false
   huks_enable_upgrade_rkc_v1tov2 = false
 
-  # whether enable upgrade key derivation algorithm, default as false
-  huks_enable_upgrade_derive_key_alg = false
+  # whether enable upgrade key derivation algorithm
+  huks_enable_upgrade_derive_key_alg = true
 
   # default security level supported by huks is software
   huks_security_level = "software"
