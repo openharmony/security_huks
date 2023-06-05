@@ -173,6 +173,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
 
     struct HksBlob tempKey = { size, buffer };
     struct HksKeyNode *keyNode = HksGenerateKeyNode(&tempKey);
+    (void)memset_s(buffer, size, 0, size);
     HKS_FREE_PTR(buffer);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generating keynode with agree key failed")
 

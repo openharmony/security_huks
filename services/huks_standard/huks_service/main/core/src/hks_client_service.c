@@ -766,6 +766,9 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     } while (0);
 
     HKS_FREE_PTR(keyOutBuffer);
+    if (keyIn.data != NULL) {
+        (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
+    }
     HKS_FREE_PTR(keyIn.data);
     HksFreeParamSet(&newParamSet);
 
