@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_core_hal_api.h"
 #include "hks_log.h"
 #include "hks_type_inner.h"
@@ -36,10 +37,12 @@ public:
 
 void HksCoreHalApiTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCoreHalApiTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCoreHalApiTest::SetUp()

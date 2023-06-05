@@ -16,6 +16,7 @@
 #include "hks_import_sign_verify_test.h"
 
 #include <gtest/gtest.h>
+#include "file_ex.h"
 
 using namespace testing::ext;
 namespace Unittest::ImportSignVerifyTest {
@@ -32,10 +33,12 @@ public:
 
 void HksImportSignVerifyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksImportSignVerifyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksImportSignVerifyTest::SetUp()

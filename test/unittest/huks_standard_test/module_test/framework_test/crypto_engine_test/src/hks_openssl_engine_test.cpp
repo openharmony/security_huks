@@ -23,6 +23,7 @@
 #include "hks_config.h"
 #endif
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_openssl_engine.h"
 #include "hks_crypto_hal.h"
@@ -48,10 +49,12 @@ public:
 
 void HksFrameworkOpensslEngineTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFrameworkOpensslEngineTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFrameworkOpensslEngineTest::SetUp()

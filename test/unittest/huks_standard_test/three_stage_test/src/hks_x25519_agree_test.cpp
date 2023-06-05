@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "file_ex.h"
 #include "hks_x25519_agree_test.h"
 
 #include <gtest/gtest.h>
@@ -32,10 +33,12 @@ public:
 
 void HksX25519AgreeTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksX25519AgreeTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksX25519AgreeTest::SetUp()

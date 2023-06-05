@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_attest_key_test_common.h"
 
 using namespace testing::ext;
@@ -38,10 +39,12 @@ public:
 
 void HksAttestKeyNonIdsTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAttestKeyNonIdsTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAttestKeyNonIdsTest::SetUp()

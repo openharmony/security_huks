@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::AesCipher {
 class HksAesCipherPart3Test : public testing::Test {
@@ -33,10 +35,12 @@ public:
 
 void HksAesCipherPart3Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAesCipherPart3Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAesCipherPart3Test::SetUp()

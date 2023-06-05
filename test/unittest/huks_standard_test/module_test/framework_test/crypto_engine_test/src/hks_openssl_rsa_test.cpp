@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 
 #include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/src/hks_openssl_rsa.c"
+#include "file_ex.h"
 #include "hks_openssl_rsa.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -45,10 +46,12 @@ public:
 
 void HksRsaEngineTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksRsaEngineTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksRsaEngineTest::SetUp()

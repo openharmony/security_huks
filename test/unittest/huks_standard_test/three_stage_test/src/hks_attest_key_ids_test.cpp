@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_attest_key_test_common.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -44,10 +45,12 @@ public:
 
 void HksAttestKeyIdsTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAttestKeyIdsTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAttestKeyIdsTest::SetUp()

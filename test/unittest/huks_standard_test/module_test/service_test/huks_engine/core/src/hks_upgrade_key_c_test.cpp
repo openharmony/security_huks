@@ -20,6 +20,7 @@
 
 #include "../../../../../../../../services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c"
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"
@@ -39,10 +40,12 @@ public:
 
 void HksUpgradeKeyCTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksUpgradeKeyCTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksUpgradeKeyCTest::SetUp()

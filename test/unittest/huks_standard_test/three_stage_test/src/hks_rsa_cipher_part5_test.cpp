@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "file_ex.h"
 #include "hks_rsa_cipher_part5_test.h"
 #include "hks_rsa_cipher_test_common.h"
 
@@ -34,10 +35,12 @@ public:
 
 void HksRsaCipherPart5Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksRsaCipherPart5Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksRsaCipherPart5Test::SetUp()

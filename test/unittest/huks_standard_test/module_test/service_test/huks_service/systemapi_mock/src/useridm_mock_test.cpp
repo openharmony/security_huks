@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_type.h"
 #include "hks_useridm_api_wrap.h"
@@ -36,10 +37,12 @@ public:
 
 void HksServiceUseridmMockTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksServiceUseridmMockTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksServiceUseridmMockTest::SetUp()

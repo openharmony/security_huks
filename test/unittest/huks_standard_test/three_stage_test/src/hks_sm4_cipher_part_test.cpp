@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "file_ex.h"
 #include "hks_sm4_cipher_part_test.h"
 
 #include <gtest/gtest.h>
@@ -34,10 +35,12 @@ public:
 
 void HksSm4CipherPartTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSm4CipherPartTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSm4CipherPartTest::SetUp()

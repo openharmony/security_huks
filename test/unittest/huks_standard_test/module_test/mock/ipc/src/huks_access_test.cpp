@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "huks_access.h"
 #include "huks_core_hal_mock.h"
 
@@ -37,10 +38,12 @@ public:
 
 void HuksAccessTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HuksAccessTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HuksAccessTest::SetUp()

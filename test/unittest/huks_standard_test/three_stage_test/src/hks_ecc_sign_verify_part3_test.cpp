@@ -19,6 +19,8 @@
 #include <gtest/gtest.h>
 #include "hks_log.h"
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::EccSifnVerify {
 class HksEccSignVerifyPart3Test : public testing::Test {
@@ -34,11 +36,13 @@ public:
 
 void HksEccSignVerifyPart3Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksEccSignVerifyPart3Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksEccSignVerifyPart3Test::SetUp()

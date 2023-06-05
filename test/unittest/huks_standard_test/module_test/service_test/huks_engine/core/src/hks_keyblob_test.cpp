@@ -20,6 +20,7 @@
 
 #include "../../../../../../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -41,10 +42,12 @@ public:
 
 void HksKeyBlobTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksKeyBlobTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksKeyBlobTest::SetUp()

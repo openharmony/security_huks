@@ -19,6 +19,8 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::AccessControlRsaSignVerify {
 class HksAccessControlRsaSignVerifyTest : public testing::Test {
@@ -34,10 +36,12 @@ public:
 
 void HksAccessControlRsaSignVerifyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAccessControlRsaSignVerifyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAccessControlRsaSignVerifyTest::SetUp()

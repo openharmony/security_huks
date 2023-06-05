@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "file_ex.h"
 #include "hks_sm2_sign_verify_test.h"
 #include "hks_type.h"
 
@@ -34,10 +35,12 @@ public:
 
 void HksSm2SignVerifyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSm2SignVerifyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSm2SignVerifyTest::SetUp()
