@@ -216,7 +216,7 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest009, TestSize.Level0)
 {
     HKS_LOG_I("enter HksKeyBlobTest009");
     uint32_t alg;
-    GetDeriveKeyAlg(nullptr, alg);
+    GetDeriveKeyAlg(nullptr, &alg);
     ASSERT_EQ(alg, HKS_ALG_HKDF);
 }
 
@@ -238,7 +238,7 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest010, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     uint32_t alg;
-    GetDeriveKeyAlg(paramSet, alg);
+    GetDeriveKeyAlg(paramSet, &alg);
     ASSERT_EQ(alg, HKS_ALG_PBKDF2);
 
     HksFreeParamSet(&paramSet);
@@ -262,7 +262,7 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest011, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     uint32_t alg;
-    GetDeriveKeyAlg(paramSet, alg);
+    GetDeriveKeyAlg(paramSet, &alg);
     ASSERT_EQ(alg, HKS_ALG_HKDF);
 
     HksFreeParamSet(&paramSet);
