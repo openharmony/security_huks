@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 
+#include "file_ex.h"
 #include "hks_chipset_platform_test.h"
 #include "hks_client_service.h"
 #include "hks_mem.h"
@@ -478,11 +479,13 @@ public:
 
 void HksChipsetPlatformDecryptTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
     HKS_LOG_E("set up cases");
 }
 
 void HksChipsetPlatformDecryptTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksChipsetPlatformDecryptTest::SetUp()

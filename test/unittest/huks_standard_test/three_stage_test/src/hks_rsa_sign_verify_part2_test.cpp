@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "file_ex.h"
 #include "hks_rsa_sign_verify_part2_test.h"
 #include "hks_rsa_sign_verify_test_common.h"
 
@@ -33,10 +34,12 @@ public:
 
 void HksRsaSignVerifyPart2Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksRsaSignVerifyPart2Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksRsaSignVerifyPart2Test::SetUp()

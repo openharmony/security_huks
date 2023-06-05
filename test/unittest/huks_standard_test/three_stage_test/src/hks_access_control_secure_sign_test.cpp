@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_import_wrapped_test_common.h"
 #include "hks_three_stage_test_common.h"
 #include "hks_access_control_test_common.h"
@@ -40,10 +41,12 @@ public:
 
 void HksAccessControlSecureSignTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAccessControlSecureSignTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAccessControlSecureSignTest::SetUp()

@@ -17,6 +17,7 @@
 
 #include "hks_generate_random_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
@@ -39,10 +40,12 @@ public:
 
 void HksGenerateRandomTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksGenerateRandomTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksGenerateRandomTest::SetUp()

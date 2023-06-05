@@ -20,6 +20,8 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::HksAccessControlPartTest {
 class HksAccessControlDeriveTest : public testing::Test {
@@ -35,10 +37,12 @@ public:
 
 void HksAccessControlDeriveTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAccessControlDeriveTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAccessControlDeriveTest::SetUp()

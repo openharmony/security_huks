@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 #include <hks_log.h>
+#include "file_ex.h"
 
 using namespace testing::ext;
 namespace Unittest::ImportRsaTest {
@@ -33,10 +34,12 @@ public:
 
 void HksImportRsaTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksImportRsaTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksImportRsaTest::SetUp()

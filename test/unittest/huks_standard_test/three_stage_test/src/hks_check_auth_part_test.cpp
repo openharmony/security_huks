@@ -17,6 +17,8 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::CheckAuthTest {
 class HksCheckAuthPartTest : public testing::Test {
@@ -32,10 +34,12 @@ public:
 
 void HksCheckAuthPartTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCheckAuthPartTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCheckAuthPartTest::SetUp()

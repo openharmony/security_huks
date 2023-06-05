@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <cstring>
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_type_inner.h"
 #include "hks_param.h"
@@ -39,10 +40,12 @@ public:
 
 void HksStorageTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksStorageTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksStorageTest::SetUp()

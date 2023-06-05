@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::EcdhAgree {
 class HksEcdhAgreePart1Test : public testing::Test {
@@ -33,10 +35,12 @@ public:
 
 void HksEcdhAgreePart1Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksEcdhAgreePart1Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksEcdhAgreePart1Test::SetUp()

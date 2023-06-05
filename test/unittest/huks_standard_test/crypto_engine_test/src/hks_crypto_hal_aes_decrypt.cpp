@@ -18,6 +18,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
@@ -512,10 +513,12 @@ protected:
 
 void HksCryptoHalAesDecrypt::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalAesDecrypt::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalAesDecrypt::SetUp()

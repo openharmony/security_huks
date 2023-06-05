@@ -18,6 +18,8 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
+
 using namespace testing::ext;
 namespace Unittest::HkdfDerive {
 class HksHkdfDerivePart2Test : public testing::Test {
@@ -33,10 +35,12 @@ public:
 
 void HksHkdfDerivePart2Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksHkdfDerivePart2Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksHkdfDerivePart2Test::SetUp()

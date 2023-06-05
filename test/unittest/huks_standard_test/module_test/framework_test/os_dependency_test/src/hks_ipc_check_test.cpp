@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_ipc_check.h"
 #include "hks_ipc_serialization.h"
 #include "hks_log.h"
@@ -40,10 +41,12 @@ public:
 
 void HksFrameworkIpcCheckTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFrameworkIpcCheckTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFrameworkIpcCheckTest::SetUp()

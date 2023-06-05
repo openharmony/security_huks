@@ -15,6 +15,7 @@
 
 #include "hks_pbkdf2_derive_part2_test.h"
 #include "hks_pbkdf2_derive_test_common.h"
+#include "file_ex.h"
 
 #include <gtest/gtest.h>
 
@@ -33,10 +34,12 @@ public:
 
 void HksPbkdf2DerivePart2Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksPbkdf2DerivePart2Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksPbkdf2DerivePart2Test::SetUp()
