@@ -1279,6 +1279,16 @@ int32_t HksCoreModuleInit(void)
     return ret;
 }
 
+int32_t HksCoreModuleDestroy(void)
+{
+    HksMutexClose(g_huksMutex);
+    HksCoreDestroyAuthTokenKey();
+#ifndef _HARDWARE_ROOT_KEY_
+    HksRkcDestroy();
+#endif
+    return HKS_SUCCESS;
+}
+
 int32_t HksCoreRefresh(void)
 {
     return HksCoreRefreshKeyInfo();
