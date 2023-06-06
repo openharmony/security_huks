@@ -674,6 +674,16 @@ int32_t HksCoreInitAuthTokenKey(void)
     return HKS_SUCCESS;
 }
 
+void HksCoreDestroyAuthTokenKey(void)
+{
+    if (g_genAtKeyMutex != NULL) {
+        HksMutexClose(g_genAtKeyMutex);
+        g_genAtKeyMutex = NULL;
+    }
+    g_isInitAuthTokenKey = false;
+    (void)memset_s(&g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
+}
+
 int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey)
 {
     HKS_IF_NULL_LOGE_RETURN(authTokenKey, HKS_ERROR_NULL_POINTER, "authTokenKey param is null!")

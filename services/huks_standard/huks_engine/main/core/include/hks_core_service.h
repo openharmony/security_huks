@@ -67,6 +67,8 @@ int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
 
 int32_t HksCoreModuleInit(void);
 
+int32_t HksCoreModuleDestroy(void);
+
 int32_t HksCoreRefresh(void);
 
 int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKey,
