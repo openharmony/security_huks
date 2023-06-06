@@ -1281,7 +1281,10 @@ int32_t HksCoreModuleInit(void)
 
 int32_t HksCoreModuleDestroy(void)
 {
-    HksMutexClose(g_huksMutex);
+    if (g_huksMutex != NULL) {
+        HksMutexClose(g_huksMutex);
+        g_huksMutex = NULL;
+    }
     HksCoreDestroyAuthTokenKey();
 #ifndef _HARDWARE_ROOT_KEY_
     HksRkcDestroy();
