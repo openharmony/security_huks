@@ -676,9 +676,12 @@ int32_t HksCoreInitAuthTokenKey(void)
 
 void HksCoreDestroyAuthTokenKey(void)
 {
-    HksMutexClose(g_genAtKeyMutex);
+    if (g_genAtKeyMutex != NULL) {
+        HksMutexClose(g_genAtKeyMutex);
+        g_genAtKeyMutex = NULL;
+    }
     g_isInitAuthTokenKey = false;
-    (void)memset_s(g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
+    (void)memset_s(&g_cachedAuthTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
 }
 
 int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey)
