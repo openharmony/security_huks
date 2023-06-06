@@ -30,6 +30,11 @@ int32_t HuksHdiModuleInit(void)
     return HksCoreModuleInit();
 }
 
+int32_t HuksHdiModuleDestroy(void)
+{
+    return HksCoreModuleDestroy();
+}
+
 int32_t HuksHdiRefresh(void)
 {
     return HksCoreRefresh();
@@ -171,6 +176,7 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
 
 #ifndef _CUT_AUTHENTICATE_
     hdiDevicePtr->HuksHdiModuleInit       = HuksHdiModuleInit;
+    hdiDevicePtr->HuksHdiModuleDestroy    = HuksHdiModuleDestroy;
     hdiDevicePtr->HuksHdiRefresh          = HuksHdiRefresh;
     hdiDevicePtr->HuksHdiGenerateKey      = HuksHdiGenerateKey;
     hdiDevicePtr->HuksHdiImportKey        = HuksHdiImportKey;

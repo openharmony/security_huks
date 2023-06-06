@@ -69,6 +69,8 @@ int32_t HksGetAuthTokenKey(struct HksAuthTokenKey *authTokenKey);
 
 int32_t HksCoreInitAuthTokenKey(void);
 
+void HksCoreDestroyAuthTokenKey(void);
+
 int32_t HksVerifyAuthTokenSign(const struct HksUserAuthToken *authToken);
 
 int32_t HksDecryptAuthToken(struct HksUserAuthToken *authToken);

@@ -25,6 +25,8 @@ extern "C" {
 
 int32_t HuksAccessModuleInit(void);
 
+int32_t HuksAccessModuleDestroy(void);
+
 int32_t HuksAccessRefresh(void);
 
 int32_t HuksAccessGenerateKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
