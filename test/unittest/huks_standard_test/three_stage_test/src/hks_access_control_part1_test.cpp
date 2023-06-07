@@ -45,7 +45,7 @@ void HksAccessControlPart1Test::SetUpTestCase(void)
 
 void HksAccessControlPart1Test::TearDownTestCase(void)
 {
-    #ifdef L2_STANDARD
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 #endif
 }

@@ -44,7 +44,7 @@ void HksRsaCipherPart5Test::SetUpTestCase(void)
 
 void HksRsaCipherPart5Test::TearDownTestCase(void)
 {
-    #ifdef L2_STANDARD
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 #endif
 }

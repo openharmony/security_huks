@@ -43,7 +43,7 @@ void HksEd25519SignVerifyTest::SetUpTestCase(void)
 
 void HksEd25519SignVerifyTest::TearDownTestCase(void)
 {
-    #ifdef L2_STANDARD
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 #endif
 }
