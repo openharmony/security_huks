@@ -44,7 +44,7 @@ void HksPbkdf2DerivePart1Test::SetUpTestCase(void)
 
 void HksPbkdf2DerivePart1Test::TearDownTestCase(void)
 {
-    #ifdef L2_STANDARD
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 #endif
 }
