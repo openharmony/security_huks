@@ -17,7 +17,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::CheckAuthTest {
@@ -34,12 +36,16 @@ public:
 
 void HksCheckAuthPartTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksCheckAuthPartTest::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksCheckAuthPartTest::SetUp()

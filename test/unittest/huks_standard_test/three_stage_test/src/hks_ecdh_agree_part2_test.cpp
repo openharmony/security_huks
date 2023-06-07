@@ -18,7 +18,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::EcdhAgree {
@@ -35,12 +37,16 @@ public:
 
 void HksEcdhAgreePart2Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksEcdhAgreePart2Test::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksEcdhAgreePart2Test::SetUp()

@@ -161,4 +161,5 @@ ohos_unittest("huks_UT_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
   ]
+  defines += [ "L2_STANDARD" ]
 }

@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 #include "hks_sm4_cipher_part_test.h"
 
 #include <gtest/gtest.h>
@@ -35,12 +37,16 @@ public:
 
 void HksSm4CipherPartTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksSm4CipherPartTest::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksSm4CipherPartTest::SetUp()

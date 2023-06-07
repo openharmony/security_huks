@@ -18,7 +18,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::HkdfDerive {
@@ -35,12 +37,16 @@ public:
 
 void HksHkdfDerivePart1Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksHkdfDerivePart1Test::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksHkdfDerivePart1Test::SetUp()

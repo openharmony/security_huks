@@ -17,7 +17,9 @@
 
 #include <gtest/gtest.h>
 #include <hks_log.h>
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::ImportRsaTest {
@@ -34,12 +36,16 @@ public:
 
 void HksImportRsaTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksImportRsaTest::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksImportRsaTest::SetUp()
