@@ -17,7 +17,9 @@
 #include "hks_pbkdf2_derive_test_common.h"
 
 #include <gtest/gtest.h>
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 #include "hks_log.h"
 
 using namespace testing::ext;
@@ -35,12 +37,16 @@ public:
 
 void HksPbkdf2DerivePart1Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksPbkdf2DerivePart1Test::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksPbkdf2DerivePart1Test::SetUp()

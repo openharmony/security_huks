@@ -18,7 +18,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::EccSifnVerify {
@@ -35,13 +37,17 @@ public:
 
 void HksEccSignVerifyPart2Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksEccSignVerifyPart2Test::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksEccSignVerifyPart2Test::SetUp()

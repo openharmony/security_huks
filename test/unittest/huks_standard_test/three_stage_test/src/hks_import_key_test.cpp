@@ -16,7 +16,9 @@
 #include "hks_import_key_test.h"
 
 #include <gtest/gtest.h>
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::ImportKeyTest {
@@ -33,12 +35,16 @@ public:
 
 void HksImportKeyTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksImportKeyTest::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksImportKeyTest::SetUp()

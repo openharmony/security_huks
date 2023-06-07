@@ -16,7 +16,9 @@
 #include "hks_import_sign_verify_test.h"
 
 #include <gtest/gtest.h>
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::ImportSignVerifyTest {
@@ -33,12 +35,16 @@ public:
 
 void HksImportSignVerifyTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksImportSignVerifyTest::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksImportSignVerifyTest::SetUp()

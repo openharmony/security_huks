@@ -16,7 +16,9 @@
 #include "hks_cross_test.h"
 
 #include <gtest/gtest.h>
+#ifdef L2_STANDARD
 #include "file_ex.h"
+#endif
 #include "hks_log.h"
 
 using namespace testing::ext;
@@ -34,13 +36,17 @@ public:
 
 void HksCrossTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksCrossTest::TearDownTestCase(void)
 {
+    #ifdef L2_STANDARD
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksCrossTest::SetUp()
