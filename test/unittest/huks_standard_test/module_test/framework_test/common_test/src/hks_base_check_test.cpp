@@ -19,6 +19,7 @@
 
 #include "hks_base_check.h"
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_cmd_id.h"
@@ -41,10 +42,12 @@ public:
 
 void HksBaseCheckTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksBaseCheckTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksBaseCheckTest::SetUp()

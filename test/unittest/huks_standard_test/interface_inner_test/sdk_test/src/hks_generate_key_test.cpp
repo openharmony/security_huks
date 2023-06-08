@@ -17,6 +17,7 @@
 
 #include "hks_generate_key_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
@@ -38,10 +39,12 @@ public:
 
 void HksGenerateKeyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksGenerateKeyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksGenerateKeyTest::SetUp()

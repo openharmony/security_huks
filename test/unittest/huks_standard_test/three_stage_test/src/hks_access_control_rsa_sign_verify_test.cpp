@@ -19,6 +19,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::AccessControlRsaSignVerify {
 class HksAccessControlRsaSignVerifyTest : public testing::Test {
@@ -34,10 +38,16 @@ public:
 
 void HksAccessControlRsaSignVerifyTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksAccessControlRsaSignVerifyTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksAccessControlRsaSignVerifyTest::SetUp()

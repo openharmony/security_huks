@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_sm4_cipher_part_test.h"
 
 #include <gtest/gtest.h>
@@ -34,10 +37,16 @@ public:
 
 void HksSm4CipherPartTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksSm4CipherPartTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksSm4CipherPartTest::SetUp()
@@ -107,6 +116,7 @@ static struct HksParam g_genParams003[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -157,6 +167,7 @@ static struct HksParam g_genParams006[] = {
         .uint32Param = HKS_SM4_KEY_SIZE_128
     }
 };
+#endif
 
 static uint8_t g_hksSm4TestIv[HKS_SM4_IV_SIZE] = {0};
 
@@ -235,6 +246,7 @@ static struct HksParam g_encryptParams003[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_encryptParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -309,6 +321,7 @@ static struct HksParam g_encryptParams006[] = {
         }
     }
 };
+#endif
 
 static struct HksParam g_decryptParams001[] = {
     {
@@ -385,6 +398,7 @@ static struct HksParam g_decryptParams003[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_decryptParams004[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -459,6 +473,7 @@ static struct HksParam g_decryptParams006[] = {
         }
     }
 };
+#endif
 
 static const struct FailureCaseParam g_genFailParams[] = {
     {   0,
@@ -791,6 +806,7 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest003, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest004, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest004";
@@ -840,6 +856,7 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest005, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 
 HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest006, TestSize.Level0)
 {
@@ -928,6 +945,7 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest008, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksSm4CipherPartTest.HksSm4CipherPartTest009
  * @tc.desc: normal parameter test case. And When generating the key, only the necessary parameters are passed in.
@@ -959,5 +977,6 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest009, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif //HKS_UNTRUSTED_RUNNING_ENV
 #endif
 }

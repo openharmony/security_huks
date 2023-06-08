@@ -16,6 +16,9 @@
 #include "hks_cross_test.h"
 
 #include <gtest/gtest.h>
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_log.h"
 
 using namespace testing::ext;
@@ -33,11 +36,17 @@ public:
 
 void HksCrossTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksCrossTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksCrossTest::SetUp()
@@ -795,6 +804,7 @@ HWTEST_F(HksCrossTest, HksCrossTestPbkdf2Derive001, TestSize.Level0)
     HksFreeParamSet(&finishParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksCrossTest.HksCrossTestHmac001
  * @tc.desc: HMAC
@@ -820,4 +830,5 @@ HWTEST_F(HksCrossTest, HksCrossTestHmac001, TestSize.Level0)
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }
+#endif
 } // namespace Unittest::CrossTest

@@ -19,6 +19,7 @@
 #include <thread>
 #include <unistd.h>
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_log.h"
 #include "hks_type.h"
@@ -38,10 +39,12 @@ public:
 
 void HksRefreshKeyInfoTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksRefreshKeyInfoTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksRefreshKeyInfoTest::SetUp()

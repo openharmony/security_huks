@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keynode.c"
+#include "file_ex.h"
 #include "hks_keynode.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -40,10 +41,12 @@ public:
 
 void HksKeyNodeTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksKeyNodeTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksKeyNodeTest::SetUp()

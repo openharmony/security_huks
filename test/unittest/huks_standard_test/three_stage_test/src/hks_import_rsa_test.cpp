@@ -17,6 +17,9 @@
 
 #include <gtest/gtest.h>
 #include <hks_log.h>
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 
 using namespace testing::ext;
 namespace Unittest::ImportRsaTest {
@@ -33,10 +36,16 @@ public:
 
 void HksImportRsaTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksImportRsaTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksImportRsaTest::SetUp()
@@ -48,6 +57,7 @@ void HksImportRsaTest::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static const uint8_t g_eData[] = { 0x01, 0x00, 0x01 };
 
 static const uint8_t g_nData512[] = {
@@ -959,8 +969,6 @@ static void ImportRsaPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uin
 {
     return RsaImportPlainKeyAnotherTest(purpose, keySize, padding, digest);
 }
-
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksImportRsaTest.HksImportRsaTest001
  * @tc.desc: import rsa 512-sign/verify-pss-sha256
@@ -993,7 +1001,6 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest003, TestSize.Level0)
     ImportRsaPlainKeyTest(HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, HKS_RSA_KEY_SIZE_1024,
         HKS_PADDING_PSS, HKS_DIGEST_SHA512);
 }
-#endif
 
 /**
  * @tc.name: HksImportRsaTest.HksImportRsaTest004
@@ -1027,6 +1034,7 @@ HWTEST_F(HksImportRsaTest, HksImportRsaTest006, TestSize.Level0)
     ImportRsaPlainKeyTest(HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT, HKS_RSA_KEY_SIZE_4096,
         HKS_PADDING_OAEP, HKS_DIGEST_SHA256);
 }
+#endif
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**

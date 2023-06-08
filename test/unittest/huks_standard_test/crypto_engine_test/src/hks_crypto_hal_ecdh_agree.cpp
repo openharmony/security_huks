@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
@@ -37,6 +38,8 @@ struct TestCaseParams {
 };
 const uint32_t ALISE_KEY_SIZE = 256;
 const uint32_t BOB_KEY_SIZE = 256;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -51,6 +54,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_001_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_ECDH_AGREE_002_PARAMS = {
     .spec = {
@@ -145,10 +149,12 @@ protected:
 
 void HksCryptoHalEcdhAgree::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalEcdhAgree::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalEcdhAgree::SetUp()

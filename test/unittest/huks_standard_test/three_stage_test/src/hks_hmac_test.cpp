@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::Hmac {
 class HksHmacTest : public testing::Test {
@@ -32,10 +36,16 @@ public:
 
 void HksHmacTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksHmacTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksHmacTest::SetUp()
@@ -48,6 +58,7 @@ void HksHmacTest::TearDown()
 }
 
 #ifdef L2_STANDARD
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -103,6 +114,7 @@ static struct HksParam g_hmacParams002[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 #ifdef L2_STANDARD
 static struct HksParam g_genParams003[] = {

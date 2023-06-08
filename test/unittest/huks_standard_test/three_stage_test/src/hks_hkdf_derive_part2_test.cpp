@@ -18,6 +18,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::HkdfDerive {
 class HksHkdfDerivePart2Test : public testing::Test {
@@ -33,10 +37,16 @@ public:
 
 void HksHkdfDerivePart2Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksHkdfDerivePart2Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksHkdfDerivePart2Test::SetUp()
@@ -61,6 +71,8 @@ static struct HksParam g_hkdfFinishStorageParams[] = {
         .uint32Param = HKS_STORAGE_ALLOW_KEY_EXPORTED
     }
 };
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams010[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -151,6 +163,7 @@ static struct HksParam g_hkdfParams012[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
+#endif
 static struct HksParam g_genParams013[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -181,6 +194,7 @@ static struct HksParam g_hkdfParams013[] = {
         .uint32Param = DERIVE_KEY_SIZE_32
     }
 };
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams014[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -241,6 +255,7 @@ static struct HksParam g_hkdfParams015[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
+#endif
 static struct HksParam g_genParams016[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -485,7 +500,7 @@ static struct HksParam g_hkdfParams023[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
-
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams024[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -543,7 +558,9 @@ static struct HksParam g_hkdfFinishParams024[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
+#endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0010
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
@@ -657,6 +674,7 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0012, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
+#endif
 /**
  * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0013  unnormal
  * @tc.desc: alg-HMAC pur-MAC dig-SHA512.
@@ -695,6 +713,8 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0013, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0014
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256.
@@ -771,6 +791,7 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive0015, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
+#endif
 /**
  * @tc.name: HksHkdfDerivePart2Test.HksHKDFDerive0016
  * @tc.desc: alg-HKDF pur-Derive dig-SHA512.
@@ -1091,6 +1112,7 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive023, TestSize.Level0)
     HksFreeParamSet(&hkdfFinishParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive024
  * @tc.desc: alg-HKDF genKey storage flag and use storage flag do match(storage)
@@ -1131,4 +1153,5 @@ HWTEST_F(HksHkdfDerivePart2Test, HksHKDFDerive024, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
+#endif
 } // namespace Unittest::HkdfDerive

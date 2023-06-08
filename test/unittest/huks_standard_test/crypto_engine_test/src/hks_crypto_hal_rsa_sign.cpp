@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
@@ -41,6 +42,7 @@ struct TestCaseParams {
 
 const uint32_t SIGNATURE_SIZE = 512;
 const uint32_t MAX_PUB_KEY_SIZE = 1044;
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -220,6 +222,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_009_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_010_PARAMS = {
     .spec = {
@@ -281,6 +284,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_012_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_013_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -580,6 +584,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_027_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_028_PARAMS = {
     .spec = {
@@ -641,6 +646,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_030_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_031_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -680,6 +686,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_032_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_033_PARAMS = {
     .spec = {
@@ -741,6 +748,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_035_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_036_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -1141,6 +1149,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_055_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_056_PARAMS = {
     .spec = {
@@ -1202,6 +1211,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_058_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_059_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -1269,6 +1279,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_061_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_062_PARAMS = {
     .spec = {
@@ -1330,6 +1341,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_064_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_065_PARAMS = {
     .spec = {
         .algType = HKS_ALG_RSA,
@@ -1377,6 +1389,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_066_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_SIGN_067_PARAMS = {
     .spec = {
@@ -1496,10 +1509,12 @@ protected:
 
 void HksCryptoHalRsaSign::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalRsaSign::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalRsaSign::SetUp()

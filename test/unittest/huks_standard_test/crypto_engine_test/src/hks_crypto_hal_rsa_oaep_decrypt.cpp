@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
@@ -36,6 +37,7 @@ struct TestCaseParams {
     HksErrorCode decryptResult = HksErrorCode::HKS_SUCCESS;
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_013_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -103,6 +105,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_015_PARAMS = {
 
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_016_PARAMS = {
     .usageSpec = {
@@ -237,6 +240,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_018_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_019_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -504,6 +508,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_027_PARAMS = {
 
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_028_PARAMS = {
     .usageSpec = {
@@ -638,6 +643,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_030_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_031_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -703,6 +709,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_033_PARAMS = {
 
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_034_PARAMS = {
     .usageSpec = {
@@ -837,6 +844,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_036_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_037_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -901,6 +909,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_039_PARAMS = {
         "7e8871f8ef19784c21970236be43656feec81bae8577aff26937cdcf924dc8624f7e6a03fe",
     .decryptResult = HKS_ERROR_CRYPTO_ENGINE_ERROR,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_040_PARAMS = {
     .usageSpec = {
@@ -1035,6 +1044,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_042_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_043_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_RSA,
@@ -1114,6 +1124,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_045_PARAMS = {
     .decryptResult = HKS_ERROR_INVALID_DIGEST,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_RSA_OAEP_DECRYPT_046_PARAMS = {
     .usageSpec = {
@@ -1299,10 +1310,12 @@ protected:
 
 void HksCryptoHalRsaOaepDecrypt::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalRsaOaepDecrypt::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalRsaOaepDecrypt::SetUp()

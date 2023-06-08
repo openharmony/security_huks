@@ -103,6 +103,7 @@ const TestCaseParams HUKS_AES_ENCRYPT_MT_00300_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AES_ENCRYPT_MT_00400_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -147,6 +148,7 @@ const TestCaseParams HUKS_AES_ENCRYPT_MT_00500_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HUKS_AES_ENCRYPT_MT_00600_PARAMS = {
     .params = {
@@ -229,6 +231,7 @@ const TestCaseParams HUKS_AES_ENCRYPT_MT_00900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AES_ENCRYPT_MT_01000_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -273,6 +276,7 @@ const TestCaseParams HUKS_AES_ENCRYPT_MT_01100_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HUKS_AES_ENCRYPT_MT_01200_PARAMS = {
     .params = {
@@ -355,6 +359,7 @@ const TestCaseParams HUKS_AES_ENCRYPT_MT_01500_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AES_ENCRYPT_MT_01600_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -399,6 +404,7 @@ const TestCaseParams HUKS_AES_ENCRYPT_MT_01700_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HUKS_AES_ENCRYPT_MT_01800_PARAMS = {
     .params = {

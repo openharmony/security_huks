@@ -18,6 +18,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::AesCipher {
 class HksAesCipherPart3Test : public testing::Test {
@@ -33,10 +37,16 @@ public:
 
 void HksAesCipherPart3Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksAesCipherPart3Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksAesCipherPart3Test::SetUp()
@@ -399,6 +409,7 @@ static struct HksParam g_decryptParams019[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams020[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -546,6 +557,7 @@ static struct HksParam g_decryptParams021[] = {
     }
 };
 #endif
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 
 static struct HksParam g_genParams022[] = {
