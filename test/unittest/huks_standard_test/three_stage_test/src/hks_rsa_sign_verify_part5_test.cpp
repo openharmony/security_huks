@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_rsa_sign_verify_part5_test.h"
 #include "hks_rsa_sign_verify_test_common.h"
 
@@ -33,10 +36,16 @@ public:
 
 void HksRsaSignVerifyPart5Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksRsaSignVerifyPart5Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksRsaSignVerifyPart5Test::SetUp()
@@ -212,6 +221,7 @@ static struct HksParam g_verifyParamsTest043[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest044[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -320,6 +330,8 @@ static struct HksParam g_verifyParamsTest045[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
+
 static struct HksParam g_genParamsTest046[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -483,6 +495,7 @@ static struct HksParam g_verifyParamsTest048[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest049[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -537,6 +550,8 @@ static struct HksParam g_verifyParamsTest049[] = {
         .uint32Param = HKS_DIGEST_MD5
     }
 };
+#endif
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest050[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -591,6 +606,7 @@ static struct HksParam g_verifyParamsTest050[] = {
         .uint32Param = HKS_DIGEST_NONE
     }
 };
+#endif
 
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test041
@@ -920,6 +936,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test049, TestSize.Level
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart5Test.HksRsaSignVerifyPart5Test050
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-NONE.
@@ -955,4 +972,5 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test050, TestSize.Level
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
 }
+#endif
 } // namespace Unittest::RsaSignVerify

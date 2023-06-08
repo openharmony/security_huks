@@ -18,6 +18,7 @@
 #include <gtest/gtest.h>
 #include <cstring>
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_attest_key_test_common.h"
 #include "hks_client_service.h"
@@ -47,10 +48,12 @@ public:
 
 void HksClientServiceTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksClientServiceTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksClientServiceTest::SetUp()

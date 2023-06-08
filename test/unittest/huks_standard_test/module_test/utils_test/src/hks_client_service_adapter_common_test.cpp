@@ -19,6 +19,7 @@
 #include <string>
 
 #include "base/security/huks/utils/crypto_adapter/hks_client_service_adapter_common.c"
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -40,10 +41,12 @@ public:
 
 void HksClientServiceAdapterCommonTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksClientServiceAdapterCommonTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksClientServiceAdapterCommonTest::SetUp()

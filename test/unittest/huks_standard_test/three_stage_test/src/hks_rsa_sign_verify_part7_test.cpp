@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_rsa_sign_verify_part7_test.h"
 #include "hks_rsa_sign_verify_test_common.h"
 
@@ -33,10 +36,16 @@ public:
 
 void HksRsaSignVerifyPart7Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksRsaSignVerifyPart7Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksRsaSignVerifyPart7Test::SetUp()
@@ -48,6 +57,7 @@ void HksRsaSignVerifyPart7Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest061[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -102,6 +112,9 @@ static struct HksParam g_verifyParamsTest061[] = {
         .uint32Param = HKS_DIGEST_MD5
     }
 };
+#endif
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest062[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -264,6 +277,7 @@ static struct HksParam g_verifyParamsTest064[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 static struct HksParam g_genParamsTest065[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -427,6 +441,7 @@ static struct HksParam g_verifyParamsTest067[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest068[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -535,6 +550,7 @@ static struct HksParam g_verifyParamsTest069[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest070[] = {
     {
@@ -629,6 +645,7 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test061, TestSize.Level
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test062
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-NONE.
@@ -665,7 +682,6 @@ HWTEST_F(HksRsaSignVerifyPart7Test, HksRsaSignVerifyPart7Test062, TestSize.Level
     HksFreeParamSet(&verifyParamSet);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaSignVerifyPart7Test.HksRsaSignVerifyPart7Test063
  * @tc.desc: alg-RSA pur-Sign pad-PKCS1_V1_5 digest-SHA1.

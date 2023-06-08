@@ -18,6 +18,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::EccSifnVerify {
 class HksEccSignVerifyPart2Test : public testing::Test {
@@ -33,11 +37,17 @@ public:
 
 void HksEccSignVerifyPart2Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksEccSignVerifyPart2Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksEccSignVerifyPart2Test::SetUp()
@@ -48,6 +58,7 @@ void HksEccSignVerifyPart2Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest009[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -93,6 +104,7 @@ static struct HksParam g_verifyParamsTest009[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest010[] = {
     {
@@ -232,6 +244,7 @@ static struct HksParam g_verifyParamsTest012[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest013[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -369,6 +382,7 @@ static struct HksParam g_verifyParamsTest015[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest016[] = {
     {
@@ -550,6 +564,7 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest012, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart2Test.HksEccSignVerifyTest0013
  * @tc.desc: alg-ECC pur-Sign.
@@ -587,7 +602,6 @@ HWTEST_F(HksEccSignVerifyPart2Test, HksEccSignVerifyTest013, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart2Test.HksEccSignVerifyTest0014
  * @tc.desc: alg-ECC pur-Sign.

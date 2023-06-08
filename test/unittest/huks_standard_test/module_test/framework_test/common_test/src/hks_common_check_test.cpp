@@ -19,6 +19,7 @@
 
 #include "hks_common_check.h"
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -41,10 +42,12 @@ public:
 
 void HksCommonCheckTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCommonCheckTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCommonCheckTest::SetUp()

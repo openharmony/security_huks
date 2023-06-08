@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_client_service.h"
 #include "hks_log.h"
@@ -41,10 +42,12 @@ public:
 
 void HksUpgradeKeyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksUpgradeKeyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksUpgradeKeyTest::SetUp()

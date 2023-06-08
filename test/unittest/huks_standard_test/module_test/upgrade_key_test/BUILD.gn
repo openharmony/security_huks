@@ -38,5 +38,8 @@ ohos_unittest("huks_upgrade_key_test") {
     "../../../../../test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
 }

@@ -28,10 +28,11 @@
 using namespace testing::ext;
 namespace Unittest::ExportKey {
 const int SET_SIZE_4096 = 4096;
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef _USE_OPENSSL_
 const uint32_t DSA_COMMON_SIZE = 1024;
 #endif
-
+#endif
 struct TestCaseParams {
     std::vector<HksParam> params;
 };
@@ -70,6 +71,7 @@ public:
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams g_huksExportKey00100Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
@@ -99,6 +101,7 @@ const TestCaseParams g_huksExportKey00300Params = {
         { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
     },
 };
+#endif
 
 const TestCaseParams g_huksExportKey00400Params = {
     .params = {
@@ -120,6 +123,7 @@ const TestCaseParams g_huksExportKey00500Params = {
     },
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams g_huksExportKey00600Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
@@ -138,6 +142,7 @@ const TestCaseParams g_huksExportKey00700Params = {
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
     },
 };
+#endif
 
 const TestCaseParams g_huksExportKey00800Params = {
     .params = {
@@ -182,6 +187,7 @@ const TestCaseParams g_huksExportKey01200Params = {
     },
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef _USE_OPENSSL_
 // mbedtls engine don't support DSA alg
 const TestCaseParams g_huksExportKey01300Params = {
@@ -193,15 +199,6 @@ const TestCaseParams g_huksExportKey01300Params = {
     },
 };
 #endif
-
-const TestCaseParams g_huksExportKey01400Params = {
-    .params = {
-        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
-    },
-};
-
 const TestCaseParams g_huksExportKey01500Params = {
     .params = {
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
@@ -217,6 +214,16 @@ const TestCaseParams g_huksExportKey01600Params = {
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
     },
 };
+#endif
+
+const TestCaseParams g_huksExportKey01400Params = {
+    .params = {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+    },
+};
+
 
 #ifdef _USE_OPENSSL_
 /* mbedtls engine don't support SM2 alg */
@@ -352,6 +359,7 @@ HWTEST_F(HksExportTest, HksExportTest01200, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKey01200Params), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksExportTest01300
  * @tc.name      : HksExportTest01300
@@ -364,6 +372,7 @@ HWTEST_F(HksExportTest, HksExportTest01300, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKey01300Params), HKS_SUCCESS);
 #endif
 }
+#endif
 
 /**
  * @tc.number    : HksExportTest01400
@@ -375,6 +384,7 @@ HWTEST_F(HksExportTest, HksExportTest01400, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKey01400Params), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksExportTest01500
  * @tc.name      : HksExportTest01500
@@ -394,6 +404,7 @@ HWTEST_F(HksExportTest, HksExportTest01600, TestSize.Level0)
 {
     EXPECT_EQ(RunTestCase(g_huksExportKey01600Params), HKS_SUCCESS);
 }
+#endif
 
 /**
  * @tc.number    : HksExportTest01700

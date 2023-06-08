@@ -20,6 +20,7 @@
 
 #include "hks_file_operator.h"
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type.h"
@@ -41,10 +42,12 @@ public:
 
 void HksFileOperatorTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFileOperatorTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFileOperatorTest::SetUp()

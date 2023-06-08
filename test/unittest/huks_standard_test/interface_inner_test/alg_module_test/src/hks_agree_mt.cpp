@@ -84,6 +84,7 @@ int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, co
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_00100_PARAMS = {
     .generateKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -106,6 +107,7 @@ const TestCaseParams HUKS_AGREE_MT_00100_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_AGREE_MT_00200_PARAMS = {
     .generateKeyParams = {
@@ -176,6 +178,7 @@ const TestCaseParams HUKS_AGREE_MT_00400_PARAMS = {
     .agreeResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_00500_PARAMS = {
     .generateKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -198,6 +201,7 @@ const TestCaseParams HUKS_AGREE_MT_00500_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_AGREE_MT_00600_PARAMS = {
     .generateKeyParams = {
@@ -268,6 +272,7 @@ const TestCaseParams HUKS_AGREE_MT_00800_PARAMS = {
     .agreeResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_00900_PARAMS = {
     .generateKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -290,6 +295,7 @@ const TestCaseParams HUKS_AGREE_MT_00900_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_AGREE_MT_01000_PARAMS = {
     .generateKeyParams = {

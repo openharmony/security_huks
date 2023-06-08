@@ -43,7 +43,10 @@ ohos_unittest("huks_useridm_wrap_test") {
     "//base/security/huks/utils/condition:libhuks_utils_condition_static",
   ]
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
   if (enable_user_auth_framework) {
     external_deps += [ "user_auth_framework:userauth_client" ]
     cflags = [ "-DHKS_SUPPORT_USER_AUTH_ACCESS_CONTROL" ]

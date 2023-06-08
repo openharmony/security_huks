@@ -41,6 +41,7 @@ struct TestCaseParams {
 
 const char ECC_KEY[] = "This is a ECC key";
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_KEY_MT_00100_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -136,6 +137,7 @@ const TestCaseParams HUKS_ECC_KEY_MT_00600_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_KEY_MT_00700_PARAMS = {
     .params = {
@@ -153,6 +155,7 @@ const TestCaseParams HUKS_ECC_KEY_MT_00700_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_KEY_MT_00800_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -184,6 +187,7 @@ const TestCaseParams HUKS_ECC_KEY_MT_00900_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_KEY_MT_01000_PARAMS = {
     .params = {
@@ -249,6 +253,7 @@ const TestCaseParams HUKS_ECC_KEY_MT_01300_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_KEY_MT_01400_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -280,6 +285,7 @@ const TestCaseParams HUKS_ECC_KEY_MT_01500_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_KEY_MT_01600_PARAMS = {
     .params = {

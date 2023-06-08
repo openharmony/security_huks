@@ -292,6 +292,7 @@ namespace Unittest::ImportWrappedKey {
         .size = strlen("test_import_Key_alias_04"),
         .data = (uint8_t *)"test_import_Key_alias_04"};
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
     /* ------------------ 5 -------------------- */
 
     static struct HksBlob g_callerKeyAlias_05 = {
@@ -317,6 +318,7 @@ namespace Unittest::ImportWrappedKey {
     static struct HksBlob g_importkeyAlias_05 = {
         .size = strlen("test_import_Key_alias_05"),
         .data = (uint8_t *)"test_import_Key_alias_05"};
+#endif
 
     /* ------------------ 6 -------------------- */
 
@@ -893,6 +895,7 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&importKeyAlias, nullptr);
     }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
     /**
      * @tc.name: HksImportWrappedSm2SuiteTest.HksImportWrappedKeyTestSm2Suite005
      * @tc.desc: import sm2 private key.
@@ -929,6 +932,7 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importderiveKey1Alias_05, nullptr);
         (void)HksDeleteKey(&g_importderiveKey2Alias_05, nullptr);
     }
+#endif
 
     /**
      * @tc.name: HksImportWrappedSm2SuiteTest.HksImportWrappedKeyTestSm2Suite005
@@ -1013,7 +1017,9 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importkeyAlias_02, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_03, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_04, nullptr);
+        #ifdef HKS_UNTRUSTED_RUNNING_ENV
         (void)HksDeleteKey(&g_importkeyAlias_05, nullptr);
+        #endif
         (void)HksDeleteKey(&g_importkeyAlias_06, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_07, nullptr);
         int32_t ret = HksInitialize();
