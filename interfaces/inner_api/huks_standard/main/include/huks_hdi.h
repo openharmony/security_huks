@@ -27,6 +27,290 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
+#define HDI_ADAPTER_PARAM(oldParamPtr, newParamPtr) ((oldParamPtr) == NULL ?  NULL : (newParamPtr))
+
+#define HDI_CONVERTER_PARAM_IN_BLOB(fromHksBlobPtr, toHuksBlob) \
+    if ((fromHksBlobPtr) != NULL) {     \
+        (toHuksBlob).data = (fromHksBlobPtr)->data;            \
+        (toHuksBlob).dataLen = (fromHksBlobPtr)->size;         \
+    }
+
+#define HDI_CONVERTER_PARAM_IN_PARAMSET(fromHksParamSetPtr, toHuksParamSet)               \
+    if ((fromHksParamSetPtr) != NULL && (fromHksParamSetPtr)->paramSetSize >= sizeof(struct HksParamSet)) {  \
+        (toHuksParamSet).data = (uint8_t *)(fromHksParamSetPtr);                         \
+        (toHuksParamSet).dataLen = (fromHksParamSetPtr)->paramSetSize;                   \
+    }
+
+#define HDI_CONVERTER_PARAM_OUT_BLOB(fromHuksBlob, toHksBlobPtr)  \
+    if ((toHksBlobPtr) != NULL) {       \
+        (toHksBlobPtr)->data = (fromHuksBlob).data;              \
+        (toHksBlobPtr)->size = (fromHuksBlob).dataLen;           \
+    }
+
+
+#define HDI_CONVERTER_FUNC_GENERATEKEY(keyAlias, paramSet, keyIn, keyOut, ret, func) \
+    struct HuksBlob keyAliasCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob keyInCore = {0};  \
+    struct HuksBlob keyOutCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyAlias, keyAliasCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyIn, keyInCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyOut, keyOutCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(keyAlias, &keyAliasCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(keyIn, &keyInCore),        \
+                 HDI_ADAPTER_PARAM(keyOut, &keyOutCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(keyOutCore, keyOut)
+
+#define HDI_CONVERTER_FUNC_IMPORTKEY(keyAlias, key, paramSet, keyOut, ret, func) \
+    struct HuksBlob keyAliasCore = {0};   \
+    struct HuksParamSet paramSetCore = {0};   \
+    struct HuksBlob keyCore = {0};   \
+    struct HuksBlob keyOutCore = {0};   \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyAlias, keyAliasCore)   \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)   \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)   \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyOut, keyOutCore)   \
+    ret = (func)(HDI_ADAPTER_PARAM(keyAlias, &keyAliasCore), \
+                 HDI_ADAPTER_PARAM(key, &keyCore),   \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore), \
+                 HDI_ADAPTER_PARAM(keyOut, &keyOutCore));   \
+    HDI_CONVERTER_PARAM_OUT_BLOB(keyOutCore, keyOut)
+
+#define HDI_CONVERTER_FUNC_IMPORTWRAPPEDKEY(wrappedKeyAlias, key, wrappedKeyData, paramSet, keyOut, ret, func)   \
+    struct HuksBlob wrappingKeyAliasCore = {0};  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksBlob wrappedKeyDataCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob keyOutCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(wrappingKeyAlias, wrappingKeyAliasCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(wrappedKeyData, wrappedKeyDataCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyOut, keyOutCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(wrappingKeyAlias, &wrappedKeyDataCore),  \
+                 HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(wrappedKeyData, &wrappedKeyDataCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(keyOut, &keyOutCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(keyOutCore, keyOut)
+
+#define HDI_CONVERTER_FUNC_EXPORTPUBLICKEY(key, paramSet, keyOut, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob keyOutCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(keyOut, keyOutCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(keyOut, &keyOutCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(keyOutCore, keyOut)
+
+#define HDI_CONVERTER_FUNC_INIT(key, paramSet, handle, token, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob handleCore = {0};  \
+    struct HuksBlob tokenCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(handle, handleCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(token, tokenCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(handle, &handleCore),  \
+                 HDI_ADAPTER_PARAM(token, &tokenCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(handleCore, handle)  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(tokenCore, token)
+
+#define HDI_CONVERTER_FUNC_UPDATE(handle, paramSet, inData, outData, ret, func)  \
+    struct HuksBlob handleCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob inDataCore = {0};  \
+    struct HuksBlob outDataCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(handle, handleCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(inData, inDataCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(outData, outDataCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(handle, &handleCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(inData, &inDataCore),  \
+                 HDI_ADAPTER_PARAM(outData, &outDataCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(outDataCore, outData)
+
+#define HDI_CONVERTER_FUNC_FINISH(handle, paramSet, inData, outData, ret, func)  \
+    struct HuksBlob handleCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob inDataCore = {0};  \
+    struct HuksBlob outDataCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(handle, handleCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(inData, inDataCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(outData, outDataCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(handle, &handleCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(inData, &inDataCore),  \
+                 HDI_ADAPTER_PARAM(outData, &outDataCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(outDataCore, outData)
+
+#define HDI_CONVERTER_FUNC_ABORT(handle, paramSet, ret, func)  \
+    struct HuksBlob handleCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(handle, handleCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(handle, &handleCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore));
+
+#define HDI_CONVERTER_FUNC_CHECKKEYVALIDITY(paramSet, key, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(key, &keyCore));
+
+#define HDI_CONVERTER_FUNC_ATTESTKEY(key, paramSet, certChain, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob certChainCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(certChain, certChainCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(certChain, &certChainCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(certChainCore, certChain)
+
+#define HDI_CONVERTER_FUNC_GENERATERANDOM(paramSet, random, ret, func)  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob randomCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(random, randomCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(random, &randomCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(randomCore, random)
+
+#define HDI_CONVERTER_FUNC_SIGN(key, paramSet, srcData, signature, ret, func) \
+    struct HuksBlob keyCore = {0}; \
+    struct HuksParamSet paramSetCore = {0}; \
+    struct HuksBlob srcDataCore = {0}; \
+    struct HuksBlob signatureCore = {0}; \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore) \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore) \
+    HDI_CONVERTER_PARAM_IN_BLOB(srcData, srcDataCore) \
+    HDI_CONVERTER_PARAM_IN_BLOB(signature, signatureCore) \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore), \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore), \
+                 HDI_ADAPTER_PARAM(srcData, &srcDataCore), \
+                 HDI_ADAPTER_PARAM(signature, &signatureCore)); \
+    HDI_CONVERTER_PARAM_OUT_BLOB(signatureCore, signature)
+
+#define HDI_CONVERTER_FUNC_VERIFY(key, paramSet, srcData, signature, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob srcDataCore = {0};  \
+    struct HuksBlob signatureCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(srcData, srcDataCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(signature, signatureCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(srcData, &srcDataCore),  \
+                 HDI_ADAPTER_PARAM(signature, &signatureCore));
+    
+#define HDI_CONVERTER_FUNC_ENCRYPT(key, paramSet, plainText, cipherText, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob plainTextCore = {0};  \
+    struct HuksBlob cipherTextCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(plainText, plainTextCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(cipherText, cipherTextCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(plainText, &plainTextCore),  \
+                 HDI_ADAPTER_PARAM(cipherText, &cipherTextCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(cipherTextCore, cipherText)
+
+#define HDI_CONVERTER_FUNC_DECRYPT(key, paramSet, cipherText, plainText, ret, func)  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob cipherTextCore = {0};  \
+    struct HuksBlob plainTextCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(cipherText, cipherTextCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(plainText, plainTextCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(cipherText, &cipherTextCore),  \
+                 HDI_ADAPTER_PARAM(plainText, &plainTextCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(plainTextCore, plainText)
+
+#define HDI_CONVERTER_FUNC_AGREEKEY(paramSet, privateKey, peerPublicKey, agreedKey, ret, func)  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob privateKeyCore = {0};  \
+    struct HuksBlob peerPublicKeyCore = {0};  \
+    struct HuksBlob agreedKeyCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(privateKey, privateKeyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(peerPublicKey, peerPublicKeyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(agreedKey, agreedKeyCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(privateKey, &privateKeyCore),  \
+                 HDI_ADAPTER_PARAM(peerPublicKey, &peerPublicKeyCore),  \
+                 HDI_ADAPTER_PARAM(agreedKey, &agreedKeyCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(agreedKeyCore, agreedKey)
+
+
+#define HDI_CONVERTER_FUNC_DERIVEKEY(paramSet, kdfKey, derivedKey, ret, func)  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob kdfKeyCore = {0};  \
+    struct HuksBlob derivedKeyCore = {0};  \
+    ret = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(kdfKey, &kdfKeyCore),  \
+                 HDI_ADAPTER_PARAM(derivedKey, &derivedKeyCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(derivedKeyCore, derivedKey)
+
+#define HDI_CONVERTER_FUNC_MAC(key, paramSet, srcData, mac, ret, func)  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob keyCore = {0};  \
+    struct HuksBlob srcDataCore = {0};  \
+    struct HuksBlob macCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(key, keyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(srcData, srcDataCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(mac, macCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(key, &keyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(srcData, &srcDataCore),  \
+                 HDI_ADAPTER_PARAM(mac, &macCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(macCore, mac)
+
+#define HDI_CONVERTER_FUNC_UPGRADEKEY(oldKey, paramSet, newKey, ret, func)  \
+    struct HuksParamSet paramSetCore = {0};  \
+    struct HuksBlob oldKeyCore = {0};  \
+    struct HuksBlob newKeyCore = {0};  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(oldKey, oldKeyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(newKey, newKeyCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(oldKey, &oldKeyCore),  \
+                 HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+                 HDI_ADAPTER_PARAM(newKey, &newKeyCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(newKeyCore, newKey)
+
+#define HDI_CONVERTER_FUNC_EXPORTCHIPSETPLATFORMPUBLICKEY(salt, scene, publicKey, ret, func)  \
+    struct HuksBlob saltCore = {0};  \
+    struct HuksBlob publicKeyCore = {0};  \
+    uint32_t sceneInt = (uint32_t) scene;  \
+    ret = (func)(HDI_ADAPTER_PARAM(salt, &saltCore),  \
+              sceneInt,  \
+              HDI_ADAPTER_PARAM(publicKey, &publicKeyCore));  \
+    HDI_CONVERTER_PARAM_OUT_BLOB(publicKeyCore, publicKey)
+
 struct HuksHdi {
     /**
      * @brief HUKS initialize

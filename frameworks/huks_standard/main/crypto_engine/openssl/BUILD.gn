@@ -54,6 +54,7 @@ if (os_level == "standard") {
       integer_overflow = true
       cfi = true
       debug = false
+      cfi_cross_dso = true
     }
     if (huks_dependency_openssl_path != "") {
       deps += [ huks_dependency_openssl_path ]

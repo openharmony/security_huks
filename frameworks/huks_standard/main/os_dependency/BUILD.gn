@@ -43,6 +43,7 @@ if (os_level == "standard") {
       integer_overflow = true
       cfi = true
       debug = false
+      cfi_cross_dso = true
     }
     sources += [ "./ipc/src/hks_client_service_ipc.c" ]
     configs = [
