@@ -13,8 +13,8 @@
 # limitations under the License.
 #
 
-import("//build/ohos.gni")
 import("//base/security/huks/build/config.gni")
+import("//build/ohos.gni")
 
 ROOT_PATH = "../../../../../.."
 
@@ -49,7 +49,8 @@ ohos_static_library("ace_kit_huks") {
 
   if (huks_enable_log == true) {
     defines += [ "_HUKS_LOG_ENABLE_" ]
-    deps += [ "$ROOT_PATH/base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+    deps +=
+        [ "$ROOT_PATH/base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
   }
 
   include_dirs += [
