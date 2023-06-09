@@ -377,7 +377,6 @@ static int32_t HdiProxyUpgradeKey(const struct HuksBlob *oldKey, const struct Hu
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->UpgradeKey, HKS_ERROR_NULL_POINTER,
         "Change key owner function is null pointer")
     return g_hksHdiProxyInstance->UpgradeKey(g_hksHdiProxyInstance, oldKey, paramSet, newKey);
-
 }
 
 ENABLE_CFI(int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
