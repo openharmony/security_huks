@@ -31,9 +31,19 @@ if (os_level == "standard") {
       "ipc/hks_ipc_serialization.c",
       "ipc/hks_ipc_service.c",
       "ipc/hks_response.cpp",
-      "passthrough/huks_access.c",
-      "passthrough/huks_core_dynamic_hal.c",
     ]
+
+    if (huks_security_level == "software") {
+      sources += [
+        "passthrough/huks_hdi_access.c",
+      ]
+    } else {
+      sources += [
+        "passthrough/huks_access.c",
+        "passthrough/huks_core_dynamic_hal.c",
+      ]
+    }
+
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
@@ -45,6 +55,7 @@ if (os_level == "standard") {
       integer_overflow = true
       cfi = true
       debug = false
+      cfi_cross_dso = true
     }
 
     external_deps = [ "ipc:ipc_single" ]
@@ -60,7 +71,10 @@ if (os_level == "standard") {
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
-    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps += [
+      "hiviewdfx_hilog_native:libhilog",
+      "drivers_interface_huks:libhuks_proxy_1.0",
+      ]
   }
 } else {
   ohos_static_library("libhuks_service_idl_small_static") {

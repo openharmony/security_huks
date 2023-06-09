@@ -24,6 +24,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
     integer_overflow = true
     cfi = true
     debug = false
+    cfi_cross_dso = true
   }
   subsystem_name = "security"
   part_name = "huks"
@@ -34,6 +35,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
   sources = [
     "src/hks_chipset_platform_key_hardcoded.c",
     "src/hks_core_hal_api.c",
+    "src/hks_core_useriam_wrap.cpp",
   ]
   deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
   include_dirs = [
@@ -43,5 +45,8 @@ ohos_static_library("libhuks_core_hal_api_static") {
   ]
 
   complete_static_lib = true
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "hiviewdfx_hilog_native:libhilog",
+    "drivers_interface_user_auth:libuser_auth_proxy_1.1",
+    ]
 }

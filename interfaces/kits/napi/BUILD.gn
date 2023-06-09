@@ -18,6 +18,7 @@ ohos_shared_library("huks") {
     integer_overflow = true
     cfi = true
     debug = false
+    cfi_cross_dso = true
   }
   defines = [
     "HUKS_NAPI_ERRORCODE_WITH_MESSAGE",

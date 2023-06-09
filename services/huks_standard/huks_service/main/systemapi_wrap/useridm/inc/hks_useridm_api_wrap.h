@@ -18,27 +18,9 @@
 
 #include "hks_type.h"
 
-#define DEFAULT_ENROLLED_INFO_LEN 2
-#define DEFAULT_CREDENTIAL_INFO_LEN 2
-
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-enum HksUserIamType {
-    HKS_AUTH_TYPE = 0,
-};
-
-struct EnrolledInfoWrap {
-    enum HksUserAuthType authType;
-    uint64_t enrolledId;
-};
-
-struct SecInfoWrap {
-    uint64_t secureUid;
-    uint32_t enrolledInfoLen;
-    struct EnrolledInfoWrap enrolledInfo[DEFAULT_ENROLLED_INFO_LEN];
-};
 
 int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo);
 
