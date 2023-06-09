@@ -221,6 +221,7 @@ void HksService::OnStart()
 #endif
 
     runningState_ = STATE_RUNNING;
+    IPCSkeleton::SetMaxWorkThreadNum(2);
     HKS_LOG_I("HksService start success.");
 }
 
