@@ -24,6 +24,9 @@ group("huks_sdk") {
       deps += [ "//base/security/huks/test:unittest" ]
     }
   }
+  if (os_level == "mini" && enable_huks_lite_hap) {
+    deps += [ "//base/security/huks/interfaces/kits/liteapi:ace_kit_huks" ]
+  }
 }
 
 group("huks_server") {

@@ -37,6 +37,9 @@
         #ifdef _STORAGE_LITE_
             #define HKS_KEY_STORE_PATH                HKS_CONFIG_KEY_STORE_PATH
         #else
+            #ifdef HKS_ENABLE_LITE_HAP
+                #define HKS_KEY_STORE_LITE_HAP        HKS_CONFIG_LITE_HAP_STORE_PATH
+            #endif
             #ifdef HKS_CONFIG_KEY_STORE_PATH
                 #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
                 #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
@@ -60,6 +63,9 @@ struct HksFileDirentInfo {
 enum HksStoragePathType {
     HKS_STORAGE_MAIN_PATH,
     HKS_STORAGE_BACKUP_PATH,
+#ifdef HKS_ENABLE_LITE_HAP
+    HKS_STORAGE_LITE_HAP_PATH,
+#endif
 };
 
 #ifdef __cplusplus

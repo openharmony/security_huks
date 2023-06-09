@@ -63,4 +63,7 @@ declare_args() {
 
   # default tdd running environment
   huks_test_suite_running_environment = "system"
+
+  # config lite hap key store path in mini or lite system
+  huks_lite_hap_store_path = "user/ace/data"
 }
