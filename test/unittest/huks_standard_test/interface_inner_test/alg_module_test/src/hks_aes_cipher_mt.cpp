@@ -23,6 +23,10 @@
 #include "hks_param.h"
 #include "openssl_aes_helper.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -464,7 +468,26 @@ protected:
         HksFree(cipherText.data);
         HksFreeParamSet(&paramInSet);
     }
+
+public:
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksAesCipherMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksAesCipherMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 /**
  * @tc.number    : HksAesCipherMt.HksAesCipherMt00100
