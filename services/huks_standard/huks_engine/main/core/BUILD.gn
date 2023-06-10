@@ -62,6 +62,7 @@ if (os_level == "standard") {
       integer_overflow = true
       cfi = true
       debug = false
+      cfi_cross_dso = true
     }
     sources += [
       "../device_cert_manager/src/dcm_asn1.c",
@@ -70,12 +71,6 @@ if (os_level == "standard") {
     ]
 
     sources += [ "src/hks_upgrade_key.c" ]
-
-    if (enable_hks_mock) {
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
-    } else {
-      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
-    }
 
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
