@@ -465,7 +465,6 @@ static struct HksParam g_pbkdf2Params019[] = {
         .uint32Param = DERIVE_KEY_SIZE_64
     }
 };
-#endif
 
 static struct HksParam g_genParams020[] = {
     {
@@ -527,6 +526,7 @@ static struct HksParam g_pbkdf2FinishParams020[] = {
         .uint32Param = HKS_DIGEST_SHA384
     }
 };
+#endif
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
@@ -1039,6 +1039,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0020, TestSize.Level0)
     HksFreeParamSet(&pbkdf2ParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksPbkdf2DerivePart1Test.HksPbkdf2Derive020
  * @tc.desc: alg-PBKDF2 pur-Derive dig-SHA256. and When generating the key, only the necessary parameters are passed in.
@@ -1084,4 +1085,5 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive020, TestSize.Level0)
     HksFreeParamSet(&pbkdf2ParamSet);
     HksFreeParamSet(&pbkdf2FinishParamSet);
 }
+#endif
 } // namespace Unittest::Pbkdf2Derive

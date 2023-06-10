@@ -22,6 +22,10 @@
 
 #include "hks_import_wrapped_ecdh_suite_test.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::ImportWrappedKey {
     class HksImportWrappedEcdhSuiteTest : public testing::Test {
@@ -37,10 +41,16 @@ namespace Unittest::ImportWrappedKey {
 
     void HksImportWrappedEcdhSuiteTest::SetUpTestCase(void)
     {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     }
 
     void HksImportWrappedEcdhSuiteTest::TearDownTestCase(void)
     {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
     }
 
     void HksImportWrappedEcdhSuiteTest::SetUp()
