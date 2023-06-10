@@ -33,10 +33,8 @@ if (os_level == "standard") {
       "ipc/hks_response.cpp",
     ]
 
-    if (huks_security_level == "software") {
-      sources += [
-        "passthrough/huks_hdi_access.c",
-      ]
+    if (huks_security_level == "software" && has_huks_hdi_driver) {
+      sources += [ "passthrough/huks_hdi_access.c" ]
     } else {
       sources += [
         "passthrough/huks_access.c",
@@ -71,10 +69,11 @@ if (os_level == "standard") {
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
-    external_deps += [
-      "hiviewdfx_hilog_native:libhilog",
-      "drivers_interface_huks:libhuks_proxy_1.0",
-      ]
+    external_deps += [ "hiviewdfx_hilog_native:libhilog" ]
+
+    if (huks_security_level == "software" && has_huks_hdi_driver) {
+      external_deps += [ "drivers_interface_huks:libhuks_proxy_1.0" ]
+    }
   }
 } else {
   ohos_static_library("libhuks_service_idl_small_static") {

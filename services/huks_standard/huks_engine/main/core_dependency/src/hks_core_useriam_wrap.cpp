@@ -24,6 +24,7 @@
 #include "hks_template.h"
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+#ifdef HKS_CORE_ENABLE_HDI_DRIVER
 #include "v1_0/user_auth_types.h"
 
 using AuthType = OHOS::HDI::UserAuth::V1_0::AuthType;
@@ -60,6 +61,15 @@ int32_t HksCoreConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t us
     }
     return HKS_ERROR_NOT_SUPPORTED;
 }
+#else
+
+#include "hks_useridm_api_wrap.h"
+
+int32_t HksCoreConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue)
+{
+    return HksConvertUserIamTypeToHksType(type, userIamValue, hksValue);
+}
+#endif
 #else
 
 int32_t HksCoreConvertUserIamTypeToHksType(enum HksUserIamType type, uint32_t userIamValue, uint32_t *hksValue)
