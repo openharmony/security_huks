@@ -25,6 +25,10 @@
 #include "hks_three_stage_test_common.h"
 #include "hks_type.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::ExportKeyMt {
 struct TestCaseParams {
@@ -49,7 +53,25 @@ public:
 
         return ret;
     }
+
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksExportTestMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksExportTestMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 const TestCaseParams g_huksExportKeyMt100Params = {
     .params = {

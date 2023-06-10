@@ -1245,6 +1245,7 @@ HWTEST_F(HksImportAgreeTest, HksImportAgreeTest003, TestSize.Level0)
     ImportAgreeTest(HKS_ALG_DH, HKS_DH_KEY_SIZE_2048);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksImportAgreeTest.HksImportAgreeTest004
  * @tc.desc: import dh 2048
@@ -1264,5 +1265,6 @@ HWTEST_F(HksImportAgreeTest, HksImportAgreeTest005, TestSize.Level0)
 {
     ImportAgreeTest(HKS_ALG_DH, HKS_DH_KEY_SIZE_4096);
 }
+#endif
 } // namespace Unittest::ImportAgreeTest
 

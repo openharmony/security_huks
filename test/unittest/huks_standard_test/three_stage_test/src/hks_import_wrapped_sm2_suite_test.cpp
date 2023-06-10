@@ -22,6 +22,10 @@
 
 #include "hks_import_wrapped_sm2_suite_test.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::ImportWrappedKey {
     class HksImportWrappedSm2SuiteTest : public testing::Test {
@@ -37,10 +41,16 @@ namespace Unittest::ImportWrappedKey {
 
     void HksImportWrappedSm2SuiteTest::SetUpTestCase(void)
     {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     }
 
     void HksImportWrappedSm2SuiteTest::TearDownTestCase(void)
     {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
     }
 
     void HksImportWrappedSm2SuiteTest::SetUp()
