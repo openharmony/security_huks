@@ -18,6 +18,9 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_access_control_test_common.h"
 
 using namespace testing::ext;
@@ -35,10 +38,16 @@ public:
 
 void HksAccessControlPart1Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksAccessControlPart1Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksAccessControlPart1Test::SetUp()

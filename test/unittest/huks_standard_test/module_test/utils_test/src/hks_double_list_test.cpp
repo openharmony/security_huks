@@ -19,6 +19,7 @@
 
 #include "hks_double_list.h"
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_type.h"
 
@@ -37,10 +38,12 @@ public:
 
 void HksDoubleListTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksDoubleListTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksDoubleListTest::SetUp()

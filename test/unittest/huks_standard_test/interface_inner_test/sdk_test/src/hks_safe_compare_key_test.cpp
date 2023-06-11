@@ -17,6 +17,7 @@
 
 #include "hks_safe_compare_key_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_file_operator.h"
@@ -41,10 +42,12 @@ public:
 
 void HksSafeCompareKeyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSafeCompareKeyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSafeCompareKeyTest::SetUp()

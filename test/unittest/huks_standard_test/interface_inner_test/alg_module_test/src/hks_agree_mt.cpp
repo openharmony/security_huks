@@ -26,6 +26,10 @@
 #include "openssl_dh_helper.h"
 #include "openssl_ecc_helper.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -84,6 +88,7 @@ int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, co
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_00100_PARAMS = {
     .generateKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -106,6 +111,7 @@ const TestCaseParams HUKS_AGREE_MT_00100_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_AGREE_MT_00200_PARAMS = {
     .generateKeyParams = {
@@ -176,6 +182,7 @@ const TestCaseParams HUKS_AGREE_MT_00400_PARAMS = {
     .agreeResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_00500_PARAMS = {
     .generateKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -198,6 +205,7 @@ const TestCaseParams HUKS_AGREE_MT_00500_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_AGREE_MT_00600_PARAMS = {
     .generateKeyParams = {
@@ -268,6 +276,7 @@ const TestCaseParams HUKS_AGREE_MT_00800_PARAMS = {
     .agreeResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_00900_PARAMS = {
     .generateKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -290,6 +299,7 @@ const TestCaseParams HUKS_AGREE_MT_00900_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_AGREE_MT_01000_PARAMS = {
     .generateKeyParams = {
@@ -459,6 +469,7 @@ const TestCaseParams HUKS_AGREE_MT_01900_PARAMS = {
     .agreeResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AGREE_MT_02000_PARAMS = {
     .agreeKeyParams = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -486,6 +497,7 @@ const TestCaseParams HUKS_AGREE_MT_02100_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .agreeResult = HKS_SUCCESS,
 };
+#endif
 #endif
 }  // namespace
 
@@ -704,7 +716,26 @@ protected:
         HksFree(agreeKeyBob.data);
     }
 #endif
+
+public:
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksAgreeMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksAgreeMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
@@ -922,6 +953,7 @@ HWTEST_F(HksAgreeMt, HksAgreeMt01900, TestSize.Level0)
     DhRunTestCase(HUKS_AGREE_MT_01900_PARAMS, 0);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksAgreeMt.HksAgreeMt02000
  * @tc.name      : HksAgreeMt02000
@@ -943,6 +975,7 @@ HWTEST_F(HksAgreeMt, HksAgreeMt02100, TestSize.Level0)
 {
     DhRunTestCase(HUKS_AGREE_MT_02100_PARAMS, 0);
 }
+#endif
 #endif
 }  // namespace MT
 }  // namespace Huks

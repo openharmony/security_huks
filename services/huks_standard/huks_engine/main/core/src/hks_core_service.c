@@ -173,6 +173,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
 
     struct HksBlob tempKey = { size, buffer };
     struct HksKeyNode *keyNode = HksGenerateKeyNode(&tempKey);
+    (void)memset_s(buffer, size, 0, size);
     HKS_FREE_PTR(buffer);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generating keynode with agree key failed")
 
@@ -1277,6 +1278,19 @@ int32_t HksCoreModuleInit(void)
 #endif
 
     return ret;
+}
+
+int32_t HksCoreModuleDestroy(void)
+{
+    if (g_huksMutex != NULL) {
+        HksMutexClose(g_huksMutex);
+        g_huksMutex = NULL;
+    }
+    HksCoreDestroyAuthTokenKey();
+#ifndef _HARDWARE_ROOT_KEY_
+    HksRkcDestroy();
+#endif
+    return HKS_SUCCESS;
 }
 
 int32_t HksCoreRefresh(void)

@@ -52,8 +52,6 @@ ohos_unittest("huks_UT_test") {
     "src/hks_pbkdf2_derive_part1_test.cpp",
     "src/hks_pbkdf2_derive_part2_test.cpp",
     "src/hks_pbkdf2_derive_test_common.cpp",
-    "src/hks_rsa_cipher_part1_test.cpp",
-    "src/hks_rsa_cipher_part2_test.cpp",
     "src/hks_rsa_cipher_part3_test.cpp",
     "src/hks_rsa_cipher_part4_test.cpp",
     "src/hks_rsa_cipher_part5_test.cpp",
@@ -80,6 +78,8 @@ ohos_unittest("huks_UT_test") {
     sources += [
       "src/hks_ecc_sign_verify_part1_test.cpp",
       "src/hks_import_sign_verify_test.cpp",
+      "src/hks_rsa_cipher_part1_test.cpp",
+      "src/hks_rsa_cipher_part2_test.cpp",
       "src/hks_rsa_sign_verify_part1_test.cpp",
       "src/hks_rsa_sign_verify_part2_test.cpp",
       "src/hks_rsa_sign_verify_part3_test.cpp",
@@ -133,9 +133,13 @@ ohos_unittest("huks_UT_test") {
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
-    "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
   ]
+  if (huks_security_level == "software") {
+    deps += [
+      "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
+      "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
+    ]
+  }
   deps += [
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
@@ -153,5 +157,9 @@ ohos_unittest("huks_UT_test") {
     deps += [ "//third_party/json:nlohmann_json_static" ]
   }
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hiviewdfx_hilog_native:libhilog",
+  ]
+  defines += [ "L2_STANDARD" ]
 }

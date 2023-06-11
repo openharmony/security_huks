@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_log.h"
@@ -37,10 +38,12 @@ public:
 
 void HksSessionMaxTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSessionMaxTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSessionMaxTest::SetUp()

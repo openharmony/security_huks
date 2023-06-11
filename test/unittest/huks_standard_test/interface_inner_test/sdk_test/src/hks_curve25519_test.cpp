@@ -17,6 +17,7 @@
 
 #include "hks_curve25519_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_curve25519.h"
@@ -36,10 +37,12 @@ public:
 
 void HksCurve25519Test::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCurve25519Test::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCurve25519Test::SetUp()

@@ -21,6 +21,10 @@
 
 #include "hks_type.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 namespace OHOS {
 namespace Security {
 namespace Huks {

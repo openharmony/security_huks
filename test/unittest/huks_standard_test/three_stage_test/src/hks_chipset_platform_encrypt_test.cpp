@@ -21,6 +21,9 @@
 
 #include <nlohmann/json.hpp>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -529,6 +532,9 @@ public:
 
 void HksChipsetPlatformEncryptTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     HKS_LOG_E("set up cases");
     int32_t ret = HksInitialize();
     EXPECT_EQ(ret, HKS_SUCCESS);
@@ -536,6 +542,9 @@ void HksChipsetPlatformEncryptTest::SetUpTestCase(void)
 
 void HksChipsetPlatformEncryptTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksChipsetPlatformEncryptTest::SetUp()

@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::ImportAgreeTest {
 class HksImportAgreeTest : public testing::Test {
@@ -32,10 +36,16 @@ public:
 
 void HksImportAgreeTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksImportAgreeTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksImportAgreeTest::SetUp()
@@ -1197,7 +1207,9 @@ static void TestImportKey(uint32_t alg, uint32_t keySize, uint32_t importType)
 static void ImportAgreeTest(uint32_t alg, uint32_t keySize)
 {
     TestImportKey(alg, keySize, HKS_KEY_TYPE_PUBLIC_KEY);
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
     TestImportKey(alg, keySize, HKS_KEY_TYPE_PRIVATE_KEY);
+#endif
     TestImportKey(alg, keySize, HKS_KEY_TYPE_KEY_PAIR);
 }
 
@@ -1233,6 +1245,7 @@ HWTEST_F(HksImportAgreeTest, HksImportAgreeTest003, TestSize.Level0)
     ImportAgreeTest(HKS_ALG_DH, HKS_DH_KEY_SIZE_2048);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksImportAgreeTest.HksImportAgreeTest004
  * @tc.desc: import dh 2048
@@ -1252,5 +1265,6 @@ HWTEST_F(HksImportAgreeTest, HksImportAgreeTest005, TestSize.Level0)
 {
     ImportAgreeTest(HKS_ALG_DH, HKS_DH_KEY_SIZE_4096);
 }
+#endif
 } // namespace Unittest::ImportAgreeTest
 

@@ -41,6 +41,16 @@ ENABLE_CFI(int32_t HuksAccessModuleInit(void))
     return g_hksHalDevicePtr->HuksHdiModuleInit();
 }
 
+ENABLE_CFI(int32_t HuksAccessModuleDestroy(void))
+{
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
+
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiModuleDestroy, HKS_ERROR_NULL_POINTER,
+        "Module Destroy function is null pointer")
+
+    return g_hksHalDevicePtr->HuksHdiModuleDestroy();
+}
+
 ENABLE_CFI(int32_t HuksAccessRefresh(void))
 {
     HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)

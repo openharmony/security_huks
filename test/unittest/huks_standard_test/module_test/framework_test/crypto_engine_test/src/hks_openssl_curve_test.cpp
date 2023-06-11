@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 
 #include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/src/hks_openssl_ed25519tox25519.c"
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_openssl_ed25519tox25519.h"
 #include "hks_log.h"
@@ -46,10 +47,12 @@ public:
 
 void HksCurveEngineTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCurveEngineTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCurveEngineTest::SetUp()

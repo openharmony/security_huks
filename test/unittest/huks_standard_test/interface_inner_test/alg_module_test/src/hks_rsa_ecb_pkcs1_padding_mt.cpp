@@ -18,6 +18,10 @@
 
 #include "hks_rsa_common_mt.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -25,9 +29,13 @@ namespace Huks {
 namespace MT {
 namespace {
 const int SET_SIZE_4096 = 4096;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const int KEY_SIZE_512 = 512;
 const int KEY_SIZE_768 = 768;
 const int KEY_SIZE_1024 = 1024;
+#endif
+
 const int KEY_SIZE_2048 = 2048;
 const int KEY_SIZE_3072 = 3072;
 
@@ -179,6 +187,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_21700_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_21800_PARAMS = {
     .alias = "This is a test auth id for PKCS1Padding",
     .params =
@@ -201,6 +210,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_21800_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_21900_PARAMS = {
     .params =
@@ -223,6 +233,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_21900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_22000_PARAMS = {
     .alias = "This is a test auth id for PKCS1Padding",
     .params =
@@ -245,6 +256,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_22000_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_22100_PARAMS = {
     .params =
@@ -267,6 +279,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_22100_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_22200_PARAMS = {
     .alias = "This is a test auth id for PKCS1Padding",
     .params =
@@ -289,6 +302,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_22200_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_22300_PARAMS = {
     .params =
@@ -444,6 +458,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_22900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_23000_PARAMS = {
     .alias = "This is a test auth id for PKCS1Padding",
     .params =
@@ -465,6 +480,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_23000_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_23100_PARAMS = {
     .params =
@@ -487,6 +503,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_23100_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_23200_PARAMS = {
     .alias = "This is a test auth id for PKCS1Padding",
     .params =
@@ -508,6 +525,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_23200_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_23300_PARAMS = {
     .params =
@@ -530,6 +548,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_23300_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_23400_PARAMS = {
     .alias = "This is a test auth id for PKCS1Padding",
     .params =
@@ -551,6 +570,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_23400_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_23500_PARAMS = {
     .params =
@@ -682,7 +702,22 @@ const DecryptServiceCaseParams HKS_RSA_MT_24000_PARAMS = {
 };
 }  // namespace
 
-class HksRsaEcbPkcs1PaddingMt : public HksRsaCommonMt, public testing::Test {};
+class HksRsaEcbPkcs1PaddingMt : public HksRsaCommonMt, public testing::Test {
+public:
+    static void SetUpTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+    }
+
+    static void TearDownTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+    }
+};
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt21100
@@ -763,6 +798,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt21700, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_21700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt21800
  * @tc.name      : HksRsaEcbPkcs1PaddingMt21800
@@ -773,6 +809,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt21800, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_21800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt21900
@@ -784,6 +821,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt21900, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_21900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt22000
  * @tc.name      : HksRsaEcbPkcs1PaddingMt22000
@@ -794,6 +832,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt22000, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_22000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt22100
@@ -806,6 +845,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt22100, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_22100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt22200
  * @tc.name      : HksRsaEcbPkcs1PaddingMt22200
@@ -816,6 +856,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt22200, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_22200_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt22300
@@ -896,6 +937,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt22900, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_22900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt23000
  * @tc.name      : HksRsaEcbPkcs1PaddingMt23000
@@ -906,6 +948,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt23000, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_23000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt23100
@@ -918,6 +961,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt23100, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_23100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt23200
  * @tc.name      : HksRsaEcbPkcs1PaddingMt23200
@@ -928,6 +972,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt23200, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_23200_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt23300
@@ -940,6 +985,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt23300, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_23300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt23400
  * @tc.name      : HksRsaEcbPkcs1PaddingMt23400
@@ -950,6 +996,7 @@ HWTEST_F(HksRsaEcbPkcs1PaddingMt, HksRsaEcbPkcs1PaddingMt23400, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_23400_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbPkcs1PaddingMt23500

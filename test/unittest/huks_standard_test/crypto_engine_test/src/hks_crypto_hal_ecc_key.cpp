@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
@@ -34,6 +35,7 @@ struct TestCaseParams {
     HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_ECC,
@@ -46,6 +48,7 @@ const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_001_PARAMS = {
     .generateKeyResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_ECC_KEY_002_PARAMS = {
     .spec = {
@@ -108,10 +111,12 @@ protected:
 
 void HksCryptoHalEccKey::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalEccKey::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalEccKey::SetUp()

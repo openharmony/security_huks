@@ -17,6 +17,7 @@
 
 #include "hks_agreement_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
@@ -39,11 +40,13 @@ public:
 
 void HksAgreementTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAgreementTest::TearDownTestCase(void)
 {
     EXPECT_EQ(HksInitialize(), 0);
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAgreementTest::SetUp()

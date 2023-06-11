@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::CheckPurposeTest {
 class HksCheckPurPartTest : public testing::Test {
@@ -32,10 +36,16 @@ public:
 
 void HksCheckPurPartTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksCheckPurPartTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksCheckPurPartTest::SetUp()
@@ -116,6 +126,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_003_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ARGUMENT
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 #ifdef _USE_OPENSSL_
 /* mbedtls engine don't support DSA alg */
 /* 004: gen hmac for hmac; init for cipher */
@@ -141,7 +152,9 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_004_PARAMS = {
     .initResult = HKS_ERROR_INVALID_ALGORITHM
 };
 #endif
+#endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 005: gen ecc for sign; init for agree */
 const TestPurposeCaseParams HKS_PURPOE_TEST_005_PARAMS = {
     .genParams =
@@ -189,6 +202,7 @@ const TestPurposeCaseParams HKS_PURPOE_TEST_006_PARAMS = {
         },
     .initResult = HKS_ERROR_INVALID_ALGORITHM
 };
+#endif
 #endif
 
 /* 007: gen hmac for mac; init for mac */
@@ -328,6 +342,7 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest004, TestSize.Level0)
 }
 #endif
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksCheckPurposeTest.HksCheckPurposeTest005
  * @tc.desc: alg-ECC gen-pur-Sign init-pur-Agree.
@@ -340,7 +355,6 @@ HWTEST_F(HksCheckPurPartTest, HksCheckPurTest005, TestSize.Level0)
     EXPECT_EQ(CheckPurposeTest(HKS_PURPOE_TEST_005_PARAMS), HKS_SUCCESS);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksAuthPartTest.HksCheckPurposeTest006
  * @tc.desc: alg-DSA gen-pur-Sign init-pur-Agree.

@@ -23,6 +23,10 @@
 #include "hks_param.h"
 #include "openssl_ecc_helper.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -39,6 +43,7 @@ struct TestCaseParams {
 };
 const char PUB_KEY[] = "This is a public key";
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_00100_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -134,6 +139,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_00600_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_00700_PARAMS = {
     .params = {
@@ -151,6 +157,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_00700_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_00800_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -182,6 +189,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_00900_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_01000_PARAMS = {
     .params = {
@@ -247,6 +255,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_01300_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_01400_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -278,6 +287,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_01500_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_01600_PARAMS = {
     .params = {
@@ -343,6 +353,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_01900_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_02000_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -374,6 +385,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_02100_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_02200_PARAMS = {
     .params = {
@@ -439,6 +451,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_02500_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_02600_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -518,6 +531,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_03000_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_03100_PARAMS = {
     .params = {
@@ -631,6 +645,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_03700_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_03800_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -662,6 +677,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_03900_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_04000_PARAMS = {
     .params = {
@@ -727,6 +743,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_04300_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_04400_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -758,6 +775,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_04500_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_ECC_VERIFY_MT_04600_PARAMS = {
     .params = {
@@ -872,7 +890,25 @@ protected:
         HksFree(pubKey.data);
         HksFree(signature.data);
     }
+public:
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksEccVerifyMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksEccVerifyMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
