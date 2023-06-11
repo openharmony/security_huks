@@ -1288,7 +1288,8 @@ int32_t HksCoreModuleDestroy(void)
     }
     HksCoreDestroyAuthTokenKey();
 #ifndef _HARDWARE_ROOT_KEY_
-    HksRkcDestroy();
+    HksCfgDestroy();
+    HksMkDestroy();
 #endif
     return HKS_SUCCESS;
 }

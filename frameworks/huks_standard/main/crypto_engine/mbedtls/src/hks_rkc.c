@@ -565,8 +565,8 @@ int32_t HksRkcInit(void)
     } while (0);
 
     if (ret != HKS_SUCCESS) {
-        (void)HksCfgDestroy();
-        (void)HksMkDestroy();
+        HksCfgDestroy();
+        HksMkDestroy();
         return ret;
     }
 
