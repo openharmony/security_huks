@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::DhAgree {
 class HksDhAgreeTest : public testing::Test {
@@ -32,10 +36,16 @@ public:
 
 void HksDhAgreeTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksDhAgreeTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksDhAgreeTest::SetUp()
@@ -46,6 +56,7 @@ void HksDhAgreeTest::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksBlob g_keyAlias01006 = {
     strlen("HksDHAgreeKeyAliasTest006_1"),
     (uint8_t *)"HksDHAgreeKeyAliasTest006_1"
@@ -192,6 +203,7 @@ static struct HksParam g_agreeParams02Init008[] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
+#endif
 
 static struct HksBlob g_keyAlias01009 = {
     strlen("HksDHAgreeKeyAliasTest009_1"),
@@ -490,6 +502,7 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree001, TestSize.Level0)
     HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree002
  * @tc.desc: alg-DH, pur-AGREE, size-3072
@@ -830,6 +843,7 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree008, TestSize.Level0)
     HksDeleteKey(&g_keyAlias02008, genParamSet);
     HksDhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
 }
+#endif
 
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree009

@@ -16,6 +16,7 @@
 #include "dcm_attest.h"
 #include "hks_attest_utils_test.h"
 
+#include "file_ex.h"
 #include <gtest/gtest.h>
 #include <thread>
 #include <unistd.h>
@@ -39,10 +40,12 @@ public:
 
 void HksAttestUtilsTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAttestUtilsTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAttestUtilsTest::SetUp()

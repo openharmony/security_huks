@@ -25,6 +25,7 @@
 #include <gtest/gtest.h>
 #include <openssl/evp.h>
 
+#include "file_ex.h"
 #include "hks_openssl_aes.h"
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -45,10 +46,12 @@ public:
 
 void HksAesEngineTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAesEngineTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAesEngineTest::SetUp()

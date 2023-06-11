@@ -20,6 +20,10 @@
 #include <gtest/gtest.h>
 #include <vector>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::HksAccessControlPartTest {
 class HksAccessControlAgreeTest : public testing::Test {
@@ -35,10 +39,16 @@ public:
 
 void HksAccessControlAgreeTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksAccessControlAgreeTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksAccessControlAgreeTest::SetUp()

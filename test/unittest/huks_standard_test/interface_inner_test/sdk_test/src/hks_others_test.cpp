@@ -17,6 +17,7 @@
 
 #include "hks_others_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_type.h"
@@ -36,10 +37,12 @@ public:
 
 void HksOthersTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksOthersTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksOthersTest::SetUp()

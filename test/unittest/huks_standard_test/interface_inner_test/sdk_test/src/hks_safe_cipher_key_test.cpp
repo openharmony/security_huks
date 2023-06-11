@@ -17,6 +17,7 @@
 
 #include "hks_safe_cipher_key_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_file_operator.h"
@@ -41,10 +42,12 @@ public:
 
 void HksSafeCipherKeyTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSafeCipherKeyTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSafeCipherKeyTest::SetUp()

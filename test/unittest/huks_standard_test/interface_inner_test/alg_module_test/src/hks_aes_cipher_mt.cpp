@@ -23,6 +23,10 @@
 #include "hks_param.h"
 #include "openssl_aes_helper.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -103,6 +107,7 @@ const TestCaseParams HUKS_AES_CIPER_MT_00300_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AES_CIPER_MT_00400_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -147,6 +152,7 @@ const TestCaseParams HUKS_AES_CIPER_MT_00500_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HUKS_AES_CIPER_MT_00600_PARAMS = {
     .params = {
@@ -229,6 +235,7 @@ const TestCaseParams HUKS_AES_CIPER_MT_00900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AES_CIPER_MT_01000_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -273,6 +280,7 @@ const TestCaseParams HUKS_AES_CIPER_MT_01100_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HUKS_AES_CIPER_MT_01200_PARAMS = {
     .params = {
@@ -355,6 +363,7 @@ const TestCaseParams HUKS_AES_CIPER_MT_01500_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_AES_CIPER_MT_01600_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -399,6 +408,7 @@ const TestCaseParams HUKS_AES_CIPER_MT_01700_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HUKS_AES_CIPER_MT_01800_PARAMS = {
     .params = {
@@ -458,7 +468,26 @@ protected:
         HksFree(cipherText.data);
         HksFreeParamSet(&paramInSet);
     }
+
+public:
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksAesCipherMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksAesCipherMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 /**
  * @tc.number    : HksAesCipherMt.HksAesCipherMt00100

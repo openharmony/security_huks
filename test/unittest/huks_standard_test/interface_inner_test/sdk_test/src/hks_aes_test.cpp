@@ -17,6 +17,7 @@
 
 #include "hks_aes_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_aes.h"
@@ -36,10 +37,12 @@ public:
 
 void HksAesTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksAesTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAesTest::SetUp()

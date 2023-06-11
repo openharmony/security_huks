@@ -17,6 +17,10 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::DsaSignVerify {
 class HksDsaSignVerifyTest : public testing::Test {
@@ -32,10 +36,16 @@ public:
 
 void HksDsaSignVerifyTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksDsaSignVerifyTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksDsaSignVerifyTest::SetUp()

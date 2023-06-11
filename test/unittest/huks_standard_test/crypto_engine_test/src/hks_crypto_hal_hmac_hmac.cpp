@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
@@ -39,6 +40,8 @@ struct TestCaseParams {
 
 const uint32_t HMAC_KEY_SIZE = 256;
 const uint32_t SIGNATURE_SIZE = 1024;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_001_PARAMS = {
     .spec = {
         .algType = HKS_ALG_HMAC,
@@ -62,6 +65,7 @@ const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_002_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .hmacResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_HMAC_HMAC_003_PARAMS = {
     .spec = {
@@ -146,10 +150,12 @@ protected:
 
 void HksCryptoHalHmacHmac::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalHmacHmac::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalHmacHmac::SetUp()

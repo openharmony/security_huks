@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
@@ -93,6 +94,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_003_PARAMS = {
     .encryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_004_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_AES,
@@ -126,6 +128,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_005_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_006_PARAMS = {
     .usageSpec = {
@@ -187,6 +190,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_009_PARAMS = {
     .encryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_010_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_AES,
@@ -220,6 +224,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_011_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_012_PARAMS = {
     .usageSpec = {
@@ -281,6 +286,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_015_PARAMS = {
     .encryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_016_PARAMS = {
     .usageSpec = {
         .algType = HKS_ALG_AES,
@@ -314,6 +320,7 @@ const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_017_PARAMS = {
     .encryptResult = HKS_ERROR_NOT_SUPPORTED,
 #endif
 };
+#endif
 
 const TestCaseParams HKS_CRYPTO_HAL_AES_ENCRYPT_018_PARAMS = {
     .usageSpec = {
@@ -433,10 +440,12 @@ protected:
 
 void HksCryptoHalAesEncrypt::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalAesEncrypt::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalAesEncrypt::SetUp()

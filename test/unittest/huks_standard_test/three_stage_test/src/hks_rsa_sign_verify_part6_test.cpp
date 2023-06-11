@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_rsa_sign_verify_part6_test.h"
 #include "hks_rsa_sign_verify_test_common.h"
 
@@ -33,10 +36,16 @@ public:
 
 void HksRsaSignVerifyPart6Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksRsaSignVerifyPart6Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksRsaSignVerifyPart6Test::SetUp()
@@ -48,6 +57,7 @@ void HksRsaSignVerifyPart6Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest051[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -156,6 +166,7 @@ static struct HksParam g_verifyParamsTest052[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 static struct HksParam g_genParamsTest053[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -319,6 +330,8 @@ static struct HksParam g_verifyParamsTest055[] = {
         .uint32Param = HKS_DIGEST_SHA512
     }
 };
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest056[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -428,6 +441,8 @@ static struct HksParam g_verifyParamsTest057[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
+
 static struct HksParam g_genParamsTest058[] = {
     {
         .tag = HKS_TAG_ALGORITHM,

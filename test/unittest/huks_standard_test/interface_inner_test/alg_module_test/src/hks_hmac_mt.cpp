@@ -24,6 +24,10 @@
 #include "hks_param.h"
 #include "openssl_hmac_helper.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -40,6 +44,7 @@ struct TestCaseParams {
 
 const char HMAC_KEY[] = "This is a HMAC key";
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_HMAC_MT_00100_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -69,6 +74,7 @@ const TestCaseParams HUKS_HMAC_MT_00200_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .hmacResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_HMAC_MT_00300_PARAMS = {
     .params = {
@@ -115,6 +121,7 @@ const TestCaseParams HUKS_HMAC_MT_00500_PARAMS = {
     .hmacResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_HMAC_MT_00600_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
@@ -144,6 +151,7 @@ const TestCaseParams HUKS_HMAC_MT_00700_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .hmacResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_HMAC_MT_00800_PARAMS = {
     .params = {
@@ -190,6 +198,7 @@ const TestCaseParams HUKS_HMAC_MT_01000_PARAMS = {
     .hmacResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_HMAC_MT_01100_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -219,6 +228,7 @@ const TestCaseParams HUKS_HMAC_MT_01200_PARAMS = {
     .generateKeyResult = HKS_SUCCESS,
     .hmacResult = HKS_SUCCESS,
 };
+#endif
 
 const TestCaseParams HUKS_HMAC_MT_01300_PARAMS = {
     .params = {
@@ -354,7 +364,26 @@ protected:
         HksFreeParamSet(&paramInSet);
         HksFree(macForHuks.data);
     }
+
+public:
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksHmacMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksHmacMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**

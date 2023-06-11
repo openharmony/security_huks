@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_rsa_cipher_part3_test.h"
 #include "hks_rsa_cipher_test_common.h"
 
@@ -33,10 +36,16 @@ public:
 
 void HksRsaCipherPart3Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksRsaCipherPart3Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksRsaCipherPart3Test::SetUp()
@@ -48,6 +57,7 @@ void HksRsaCipherPart3Test::TearDown()
 {
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams021[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -111,6 +121,7 @@ static struct HksParam g_decryptParams021[] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
+#endif
 
 #ifdef _USE_OPENSSL_
 static struct HksParam g_genParams022[] = {
@@ -242,6 +253,7 @@ static struct HksParam g_decryptParams023[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams024[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -369,6 +381,7 @@ static struct HksParam g_decryptParams025[] = {
         .uint32Param = HKS_MODE_ECB
     }
 };
+#endif
 
 static struct HksParam g_genParams026[] = {
     {
@@ -692,6 +705,7 @@ static struct HksParam g_decryptParams030[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaCipherPart3Test.HksRsaCipherPart3Test021
  * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-1024 pad-OAEP dig-SHA512 mode-ECB.
@@ -723,6 +737,7 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test021, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 
 #ifdef _USE_OPENSSL_
 /**
@@ -790,6 +805,7 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test023, TestSize.Level1)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksRsaCipherPart3Test.HksRsaCipherPart3Test024
  * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-2048 pad-OAEP dig-SHA1 mode-ECB.
@@ -853,6 +869,7 @@ HWTEST_F(HksRsaCipherPart3Test, HksRsaCipherPart3Test025, TestSize.Level1)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 
 /**
  * @tc.name: HksRsaCipherPart3Test.HksRsaCipherPart3Test026

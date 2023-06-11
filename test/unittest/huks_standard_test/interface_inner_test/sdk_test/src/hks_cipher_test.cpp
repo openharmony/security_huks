@@ -17,6 +17,7 @@
 
 #include "hks_cipher_test.h"
 
+#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_cipher.h"
@@ -36,10 +37,12 @@ public:
 
 void HksCipherTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCipherTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCipherTest::SetUp()

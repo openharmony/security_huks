@@ -19,6 +19,7 @@
 
 #include "hks_openssl_common.h"
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -40,10 +41,12 @@ public:
 
 void HksFrameworkOpensslCommonTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFrameworkOpensslCommonTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFrameworkOpensslCommonTest::SetUp()

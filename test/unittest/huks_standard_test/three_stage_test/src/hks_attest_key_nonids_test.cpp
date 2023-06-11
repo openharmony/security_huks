@@ -17,6 +17,9 @@
 
 #include <gtest/gtest.h>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_attest_key_test_common.h"
 
 using namespace testing::ext;
@@ -38,10 +41,16 @@ public:
 
 void HksAttestKeyNonIdsTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksAttestKeyNonIdsTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksAttestKeyNonIdsTest::SetUp()

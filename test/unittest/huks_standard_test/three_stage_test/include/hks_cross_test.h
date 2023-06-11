@@ -157,6 +157,7 @@ static struct HksParam g_rsaDecryParams[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_dsaSVGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -199,6 +200,7 @@ static struct HksParam g_dsaSVVerParams[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
+#endif
 
 static struct HksParam g_eccSVGenParams[] = {
     {
@@ -349,6 +351,7 @@ static struct HksParam g_rsaSVVerParams[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_hmacGenParams[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -376,6 +379,7 @@ static struct HksParam g_hmacParams[] = {
         .uint32Param = HKS_DIGEST_SHA256
     }
 };
+#endif
 
 static struct HksBlob g_dhKeyAlias01 = {
     strlen("HksCrossTestDhAgree001_01"),

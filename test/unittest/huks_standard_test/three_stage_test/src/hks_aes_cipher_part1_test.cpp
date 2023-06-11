@@ -17,6 +17,9 @@
 #include "hks_aes_cipher_test_common.h"
 
 #include <gtest/gtest.h>
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_log.h"
 
 using namespace testing::ext;
@@ -34,10 +37,16 @@ public:
 
 void HksAesCipherPart1Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
 }
 
 void HksAesCipherPart1Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksAesCipherPart1Test::SetUp()
@@ -398,7 +407,7 @@ static struct HksParam g_decryptParams005[] = {
         }
     }
 };
-
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParams006[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -545,7 +554,8 @@ static struct HksParam g_decryptParams007[] = {
         }
     }
 };
-#endif
+#endif // _USE_OPENSSL_
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 
 /**

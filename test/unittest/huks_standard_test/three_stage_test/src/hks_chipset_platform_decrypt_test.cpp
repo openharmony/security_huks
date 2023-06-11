@@ -19,6 +19,9 @@
 #include <string>
 #include <vector>
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
 #include "hks_chipset_platform_test.h"
 #include "hks_client_service.h"
 #include "hks_mem.h"
@@ -478,11 +481,17 @@ public:
 
 void HksChipsetPlatformDecryptTest::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     HKS_LOG_E("set up cases");
 }
 
 void HksChipsetPlatformDecryptTest::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksChipsetPlatformDecryptTest::SetUp()

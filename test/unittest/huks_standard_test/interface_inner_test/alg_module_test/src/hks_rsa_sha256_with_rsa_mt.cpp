@@ -18,6 +18,10 @@
 
 #include "hks_rsa_common_mt.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -25,9 +29,13 @@ namespace Huks {
 namespace MT {
 namespace {
 const int SET_SIZE_4096 = 4096;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const int KEY_SIZE_512 = 512;
 const int KEY_SIZE_768 = 768;
 const int KEY_SIZE_1024 = 1024;
+#endif
+
 const int KEY_SIZE_2048 = 2048;
 const int KEY_SIZE_3072 = 3072;
 
@@ -51,6 +59,7 @@ const SignLocalCaseParams HKS_RSA_MT_38500_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const SignServiceCaseParams HKS_RSA_MT_38600_PARAMS = {
     .alias = "This is a test auth id for SHA256",
     .params =
@@ -71,6 +80,7 @@ const SignServiceCaseParams HKS_RSA_MT_38600_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const VerifyLocalCaseParams HKS_RSA_MT_38700_PARAMS = {
     .params =
@@ -92,6 +102,7 @@ const VerifyLocalCaseParams HKS_RSA_MT_38700_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const VerifyServiceCaseParams HKS_RSA_MT_38800_PARAMS = {
     .alias = "This is a test auth id for SHA256",
     .params =
@@ -113,6 +124,7 @@ const VerifyServiceCaseParams HKS_RSA_MT_38800_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const SignLocalCaseParams HKS_RSA_MT_38900_PARAMS = {
     .params =
@@ -134,6 +146,7 @@ const SignLocalCaseParams HKS_RSA_MT_38900_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const SignServiceCaseParams HKS_RSA_MT_39000_PARAMS = {
     .alias = "This is a test auth id for SHA256",
     .params =
@@ -154,6 +167,7 @@ const SignServiceCaseParams HKS_RSA_MT_39000_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const VerifyLocalCaseParams HKS_RSA_MT_39100_PARAMS = {
     .params =
@@ -175,6 +189,7 @@ const VerifyLocalCaseParams HKS_RSA_MT_39100_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const VerifyServiceCaseParams HKS_RSA_MT_39200_PARAMS = {
     .alias = "This is a test auth id for SHA256",
     .params =
@@ -196,6 +211,7 @@ const VerifyServiceCaseParams HKS_RSA_MT_39200_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const SignLocalCaseParams HKS_RSA_MT_39300_PARAMS = {
     .params =
@@ -217,6 +233,7 @@ const SignLocalCaseParams HKS_RSA_MT_39300_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const SignServiceCaseParams HKS_RSA_MT_39400_PARAMS = {
     .alias = "This is a test auth id for SHA256",
     .params =
@@ -237,6 +254,7 @@ const SignServiceCaseParams HKS_RSA_MT_39400_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const VerifyLocalCaseParams HKS_RSA_MT_39500_PARAMS = {
     .params =
@@ -258,6 +276,7 @@ const VerifyLocalCaseParams HKS_RSA_MT_39500_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const VerifyServiceCaseParams HKS_RSA_MT_39600_PARAMS = {
     .alias = "This is a test auth id for SHA256",
     .params =
@@ -279,6 +298,7 @@ const VerifyServiceCaseParams HKS_RSA_MT_39600_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const SignLocalCaseParams HKS_RSA_MT_39700_PARAMS = {
     .params =
@@ -530,7 +550,22 @@ const VerifyServiceCaseParams HKS_RSA_MT_40800_PARAMS = {
 };
 }  // namespace
 
-class HksRsaSha256WithRsaMt : public HksRsaCommonMt, public testing::Test {};
+class HksRsaSha256WithRsaMt : public HksRsaCommonMt, public testing::Test {
+public:
+    static void SetUpTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+    }
+
+    static void TearDownTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+    }
+};
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt38500
@@ -542,6 +577,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt38500, TestSize.Level1)
     SignLocalTestCase(HKS_RSA_MT_38500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaSha256WithRsaMt38600
  * @tc.name      : HksRsaSha256WithRsaMt38600
@@ -551,6 +587,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt38600, TestSize.Level1)
 {
     SignServiceTestCase(HKS_RSA_MT_38600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt38700
@@ -562,6 +599,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt38700, TestSize.Level1)
     VerifyLocalTestCase(HKS_RSA_MT_38700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaSha256WithRsaMt38800
  * @tc.name      : HksRsaSha256WithRsaMt38800
@@ -571,6 +609,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt38800, TestSize.Level1)
 {
     VerifyServiceTestCase(HKS_RSA_MT_38800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt38900
@@ -582,6 +621,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt38900, TestSize.Level1)
     SignLocalTestCase(HKS_RSA_MT_38900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39000
  * @tc.name      : HksRsaSha256WithRsaMt39000
@@ -591,6 +631,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39000, TestSize.Level1)
 {
     SignServiceTestCase(HKS_RSA_MT_39000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39100
@@ -602,6 +643,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39100, TestSize.Level1)
     VerifyLocalTestCase(HKS_RSA_MT_39100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39200
  * @tc.name      : HksRsaSha256WithRsaMt39200
@@ -611,6 +653,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39200, TestSize.Level1)
 {
     VerifyServiceTestCase(HKS_RSA_MT_39200_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39300
@@ -622,6 +665,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39300, TestSize.Level1)
     SignLocalTestCase(HKS_RSA_MT_39300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39400
  * @tc.name      : HksRsaSha256WithRsaMt39400
@@ -631,6 +675,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39400, TestSize.Level1)
 {
     SignServiceTestCase(HKS_RSA_MT_39400_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39500
@@ -642,6 +687,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39500, TestSize.Level1)
     VerifyLocalTestCase(HKS_RSA_MT_39500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39600
  * @tc.name      : HksRsaSha256WithRsaMt39600
@@ -651,6 +697,7 @@ HWTEST_F(HksRsaSha256WithRsaMt, HksRsaSha256WithRsaMt39600, TestSize.Level1)
 {
     VerifyServiceTestCase(HKS_RSA_MT_39600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaSha256WithRsaMt39700

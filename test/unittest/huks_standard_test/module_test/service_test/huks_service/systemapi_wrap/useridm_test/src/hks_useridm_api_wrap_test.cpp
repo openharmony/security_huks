@@ -17,6 +17,7 @@
 
 #include <gtest/gtest.h>
 
+#include "file_ex.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_type.h"
@@ -39,10 +40,12 @@ public:
 
 void HksUseridmWrapTest::SetUpTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksUseridmWrapTest::TearDownTestCase(void)
 {
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksUseridmWrapTest::SetUp()

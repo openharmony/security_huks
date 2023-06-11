@@ -19,6 +19,10 @@
 #include <gtest/gtest.h>
 #include "hks_log.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::EccSifnVerify {
 class HksEccSignVerifyPart3Test : public testing::Test {
@@ -34,11 +38,17 @@ public:
 
 void HksEccSignVerifyPart3Test::SetUpTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksEccSignVerifyPart3Test::TearDownTestCase(void)
 {
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
 }
 
 void HksEccSignVerifyPart3Test::SetUp()
@@ -141,6 +151,7 @@ static struct HksParam g_verifyParamsTest018[] = {
     }
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 static struct HksParam g_genParamsTest019[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -278,6 +289,7 @@ static struct HksParam g_verifyParamsTest021[] = {
         .uint32Param = HKS_DIGEST_SHA224
     }
 };
+#endif
 
 static struct HksParam g_genParamsTest022[] = {
     {
@@ -659,6 +671,8 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest018, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0019
  * @tc.desc: alg-ECC pur-Sign.
@@ -696,7 +710,6 @@ HWTEST_F(HksEccSignVerifyPart3Test, HksEccSignVerifyTest019, TestSize.Level0)
     HksFreeParamSet(&verifyParamSet);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksEccSignVerifyPart3Test.HksEccSignVerifyTest0020
  * @tc.desc: alg-ECC pur-Sign.

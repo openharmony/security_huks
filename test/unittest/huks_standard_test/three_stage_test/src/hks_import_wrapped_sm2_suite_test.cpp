@@ -22,6 +22,10 @@
 
 #include "hks_import_wrapped_sm2_suite_test.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::ImportWrappedKey {
     class HksImportWrappedSm2SuiteTest : public testing::Test {
@@ -37,10 +41,16 @@ namespace Unittest::ImportWrappedKey {
 
     void HksImportWrappedSm2SuiteTest::SetUpTestCase(void)
     {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
     }
 
     void HksImportWrappedSm2SuiteTest::TearDownTestCase(void)
     {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
     }
 
     void HksImportWrappedSm2SuiteTest::SetUp()
@@ -292,6 +302,7 @@ namespace Unittest::ImportWrappedKey {
         .size = strlen("test_import_Key_alias_04"),
         .data = (uint8_t *)"test_import_Key_alias_04"};
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
     /* ------------------ 5 -------------------- */
 
     static struct HksBlob g_callerKeyAlias_05 = {
@@ -317,6 +328,7 @@ namespace Unittest::ImportWrappedKey {
     static struct HksBlob g_importkeyAlias_05 = {
         .size = strlen("test_import_Key_alias_05"),
         .data = (uint8_t *)"test_import_Key_alias_05"};
+#endif
 
     /* ------------------ 6 -------------------- */
 
@@ -893,6 +905,7 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&importKeyAlias, nullptr);
     }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
     /**
      * @tc.name: HksImportWrappedSm2SuiteTest.HksImportWrappedKeyTestSm2Suite005
      * @tc.desc: import sm2 private key.
@@ -929,6 +942,7 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importderiveKey1Alias_05, nullptr);
         (void)HksDeleteKey(&g_importderiveKey2Alias_05, nullptr);
     }
+#endif
 
     /**
      * @tc.name: HksImportWrappedSm2SuiteTest.HksImportWrappedKeyTestSm2Suite005
@@ -1013,7 +1027,9 @@ namespace Unittest::ImportWrappedKey {
         (void)HksDeleteKey(&g_importkeyAlias_02, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_03, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_04, nullptr);
+        #ifdef HKS_UNTRUSTED_RUNNING_ENV
         (void)HksDeleteKey(&g_importkeyAlias_05, nullptr);
+        #endif
         (void)HksDeleteKey(&g_importkeyAlias_06, nullptr);
         (void)HksDeleteKey(&g_importkeyAlias_07, nullptr);
         int32_t ret = HksInitialize();
