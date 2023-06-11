@@ -55,8 +55,8 @@ declare_args() {
   # whether enable upgrade key file for l1 sdk to l1 service, default as false
   huks_enable_upgrade_small_to_service = false
 
-  # whether enable upgrade root key component from V1 to V2, default as false
-  huks_enable_upgrade_rkc_v1tov2 = false
+  # whether enable upgrade root key component from V1 to V2, default as true
+  huks_enable_upgrade_rkc_v1tov2 = true
 
   # whether enable upgrade key derivation algorithm
   huks_enable_upgrade_derive_key_alg = true
