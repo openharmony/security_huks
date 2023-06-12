@@ -18,6 +18,10 @@
 #include "hks_log.h"
 #include "hks_rsa_common_mt.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -25,9 +29,13 @@ namespace Huks {
 namespace MT {
 namespace {
 const int SET_SIZE_4096 = 4096;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const int KEY_SIZE_512 = 512;
 const int KEY_SIZE_768 = 768;
 const int KEY_SIZE_1024 = 1024;
+#endif
+
 const int KEY_SIZE_2048 = 2048;
 const int KEY_SIZE_3072 = 3072;
 
@@ -51,6 +59,7 @@ const SignLocalCaseParams HKS_RSA_MT_26500_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const SignServiceCaseParams HKS_RSA_MT_26600_PARAMS = {
     .alias = "This is a test auth id for NONE",
     .params =
@@ -71,6 +80,7 @@ const SignServiceCaseParams HKS_RSA_MT_26600_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const VerifyLocalCaseParams HKS_RSA_MT_26700_PARAMS = {
     .params =
@@ -92,6 +102,7 @@ const VerifyLocalCaseParams HKS_RSA_MT_26700_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const VerifyServiceCaseParams HKS_RSA_MT_26800_PARAMS = {
     .alias = "This is a test auth id for NONE",
     .params =
@@ -113,6 +124,7 @@ const VerifyServiceCaseParams HKS_RSA_MT_26800_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const SignLocalCaseParams HKS_RSA_MT_26900_PARAMS = {
     .params =
@@ -134,6 +146,7 @@ const SignLocalCaseParams HKS_RSA_MT_26900_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const SignServiceCaseParams HKS_RSA_MT_27000_PARAMS = {
     .alias = "This is a test auth id for NONE",
     .params =
@@ -154,6 +167,7 @@ const SignServiceCaseParams HKS_RSA_MT_27000_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const VerifyLocalCaseParams HKS_RSA_MT_27100_PARAMS = {
     .params =
@@ -175,6 +189,7 @@ const VerifyLocalCaseParams HKS_RSA_MT_27100_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const VerifyServiceCaseParams HKS_RSA_MT_27200_PARAMS = {
     .alias = "This is a test auth id for NONE",
     .params =
@@ -196,6 +211,7 @@ const VerifyServiceCaseParams HKS_RSA_MT_27200_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const SignLocalCaseParams HKS_RSA_MT_27300_PARAMS = {
     .params =
@@ -217,6 +233,7 @@ const SignLocalCaseParams HKS_RSA_MT_27300_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const SignServiceCaseParams HKS_RSA_MT_27400_PARAMS = {
     .alias = "This is a test auth id for NONE",
     .params =
@@ -237,6 +254,7 @@ const SignServiceCaseParams HKS_RSA_MT_27400_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const VerifyLocalCaseParams HKS_RSA_MT_27500_PARAMS = {
     .params =
@@ -258,6 +276,7 @@ const VerifyLocalCaseParams HKS_RSA_MT_27500_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const VerifyServiceCaseParams HKS_RSA_MT_27600_PARAMS = {
     .alias = "This is a test auth id for NONE",
     .params =
@@ -279,6 +298,7 @@ const VerifyServiceCaseParams HKS_RSA_MT_27600_PARAMS = {
     .signResult = HKS_SUCCESS,
     .verifyResult = HKS_SUCCESS,
 };
+#endif
 
 const SignLocalCaseParams HKS_RSA_MT_27700_PARAMS = {
     .params =
@@ -530,7 +550,22 @@ const VerifyServiceCaseParams HKS_RSA_MT_28800_PARAMS = {
 };
 }  // namespace
 
-class HksRsaNoneWithRsaMt : public HksRsaCommonMt, public testing::Test {};
+class HksRsaNoneWithRsaMt : public HksRsaCommonMt, public testing::Test {
+public:
+    static void SetUpTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+    }
+
+    static void TearDownTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+    }
+};
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt26500
@@ -543,6 +578,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26500, TestSize.Level1)
     SignLocalTestCase(HKS_RSA_MT_26500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaNoneWithRsaMt26600
  * @tc.name      : HksRsaNoneWithRsaMt26600
@@ -553,6 +589,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26600, TestSize.Level1)
     HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26600");
     SignServiceTestCase(HKS_RSA_MT_26600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt26700
@@ -565,6 +602,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26700, TestSize.Level1)
     VerifyLocalTestCase(HKS_RSA_MT_26700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaNoneWithRsaMt26800
  * @tc.name      : HksRsaNoneWithRsaMt26800
@@ -575,6 +613,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26800, TestSize.Level1)
     HKS_LOG_E(" Enter HksRsaNoneWithRsaMt26800");
     VerifyServiceTestCase(HKS_RSA_MT_26800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt26900
@@ -587,6 +626,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt26900, TestSize.Level1)
     SignLocalTestCase(HKS_RSA_MT_26900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27000
  * @tc.name      : HksRsaNoneWithRsaMt27000
@@ -597,6 +637,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27000, TestSize.Level1)
     HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27000");
     SignServiceTestCase(HKS_RSA_MT_27000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27100
@@ -609,6 +650,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27100, TestSize.Level1)
     VerifyLocalTestCase(HKS_RSA_MT_27100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27200
  * @tc.name      : HksRsaNoneWithRsaMt27200
@@ -619,6 +661,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27200, TestSize.Level1)
     HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27200");
     VerifyServiceTestCase(HKS_RSA_MT_27200_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27300
@@ -631,6 +674,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27300, TestSize.Level1)
     SignLocalTestCase(HKS_RSA_MT_27300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27400
  * @tc.name      : HksRsaNoneWithRsaMt27400
@@ -641,6 +685,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27400, TestSize.Level1)
     HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27400");
     SignServiceTestCase(HKS_RSA_MT_27400_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27500
@@ -653,6 +698,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27500, TestSize.Level1)
     VerifyLocalTestCase(HKS_RSA_MT_27500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27600
  * @tc.name      : HksRsaNoneWithRsaMt27600
@@ -663,6 +709,7 @@ HWTEST_F(HksRsaNoneWithRsaMt, HksRsaNoneWithRsaMt27600, TestSize.Level1)
     HKS_LOG_E(" Enter HksRsaNoneWithRsaMt27600");
     VerifyServiceTestCase(HKS_RSA_MT_27600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaNoneWithRsaMt27700

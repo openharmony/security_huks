@@ -25,6 +25,10 @@
 #include "hks_three_stage_test_common.h"
 #include "hks_type.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace Unittest::ExportKey {
 const int SET_SIZE_4096 = 4096;
@@ -69,7 +73,25 @@ public:
 
         return ret;
     }
+
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksExportTest::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksExportTest::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams g_huksExportKey00100Params = {

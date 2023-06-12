@@ -1,5 +1,5 @@
 #
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -45,8 +45,13 @@ unittest("huks_3.0_test") {
     "hks_safe_cipher_key_test.cpp",
     "hks_safe_compare_key_test.cpp",
   ]
-  if (hks_enable_test && huks_enable_upgrade_small_to_service) {
-    sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/upgrade_test/version_one/hks_compatibility_test.cpp" ]
+  if (hks_enable_test) {
+    if (huks_enable_upgrade_small_to_service) {
+      sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/upgrade_test/version_one/hks_compatibility_test.cpp" ]
+    }
+    if (huks_enable_upgrade_rkc_v1tov2) {
+      sources += [ "//base/security/huks/test/unittest/huks_lite_test/liteos_a_adapter/upgrade_test/version_two/hks_upgrade_rkc_test.cpp" ]
+    }
   }
 
   sources += [
@@ -89,10 +94,21 @@ unittest("huks_3.0_test") {
 
   include_dirs += [ "./include" ]
 
+  if (huks_enable_upgrade_rkc_v1tov2) {
+    include_dirs += [
+      "../../../../frameworks/huks_standard/main/os_dependency/sysinfo/include",
+      "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include",
+      "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src",
+    ]
+  }
+
   deps = [
+    "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls:libhuks_mbedtls_small_static",
     "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]
+
+  deps += [ "//third_party/mbedtls:mbedtls_shared" ]
 
   deps += [ "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util" ]
 
