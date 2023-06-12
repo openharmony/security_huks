@@ -435,6 +435,7 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_02400_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_02500_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
@@ -451,7 +452,6 @@ const TestCaseParams HUKS_ECC_VERIFY_MT_02500_PARAMS = {
     .verifyResult = HKS_SUCCESS,
 };
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const TestCaseParams HUKS_ECC_VERIFY_MT_02600_PARAMS = {
     .params = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
