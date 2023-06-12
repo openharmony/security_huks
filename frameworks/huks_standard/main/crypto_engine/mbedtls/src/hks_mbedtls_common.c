@@ -76,7 +76,7 @@ int32_t HksCtrDrbgSeed(mbedtls_ctr_drbg_context *ctrDrbg, mbedtls_entropy_contex
         HKS_LOG_E("Ctr drbg seed failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         mbedtls_ctr_drbg_free(ctrDrbg);
         mbedtls_entropy_free(entropy);
-        return ret;
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     return HKS_SUCCESS;
@@ -96,6 +96,7 @@ int32_t HksMbedtlsFillRandom(struct HksBlob *randomData)
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls random failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(randomData->data, randomData->size, 0, randomData->size);
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     } while (0);
 

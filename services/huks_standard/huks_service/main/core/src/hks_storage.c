@@ -51,8 +51,17 @@ enum KeyOperation {
 
 static bool g_setRootMainPath = false;
 static bool g_setRootBakPath = false;
+
+#ifdef HKS_ENABLE_LITE_HAP
+static bool g_setRootLiteHapPath = false;
+#endif
+
 static char g_keyStoreMainPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
 static char g_keyStoreBakPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
+
+#ifdef HKS_ENABLE_LITE_HAP
+static char g_keyStoreLiteHapPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
+#endif
 
 struct HksFileEntry {
     char *fileName;
@@ -114,6 +123,19 @@ static void ResumeInvalidCharacter(const char input, char *output)
             return;
     }
 }
+
+#ifdef HKS_ENABLE_LITE_HAP
+#define HKS_LITE_NATIVE_PROCESS_NAME "hks_client"
+static bool CheckIsLiteHap(const struct HksBlob *processName)
+{
+    if (processName->size == strlen(HKS_LITE_NATIVE_PROCESS_NAME)
+        && HksMemCmp(processName->data, HKS_LITE_NATIVE_PROCESS_NAME,
+        strlen(HKS_LITE_NATIVE_PROCESS_NAME)) == HKS_SUCCESS) {
+        return false;
+    }
+    return true;
+}
+#endif
 
 /* Encode invisible content to visible */
 static int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint32_t nameLen)
@@ -245,6 +267,17 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
             g_setRootBakPath = true;
         }
         *path = g_keyStoreBakPath;
+#ifdef HKS_ENABLE_LITE_HAP
+    } else if (type == HKS_STORAGE_LITE_HAP_PATH) {
+        if (!g_setRootLiteHapPath) {
+            uint32_t len = sizeof(g_keyStoreLiteHapPath);
+            int32_t ret = HksGetStoragePath(HKS_STORAGE_LITE_HAP_PATH, g_keyStoreLiteHapPath, &len);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get backup storage path fail")
+
+            g_setRootLiteHapPath = true;
+        }
+        *path = g_keyStoreLiteHapPath;
+#endif
     } else {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -712,7 +745,14 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
     char userProcess[HKS_PROCESS_INFO_LEN] = "";
     char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
 
-    int32_t ret = GetStoreRootPath(HKS_STORAGE_MAIN_PATH, &mainRootPath);
+    enum HksStoragePathType pathType = HKS_STORAGE_MAIN_PATH;
+#ifdef HKS_ENABLE_LITE_HAP
+    if (CheckIsLiteHap(&processInfo->processName)) {
+        pathType = HKS_STORAGE_LITE_HAP_PATH;
+    }
+#endif
+
+    int32_t ret = GetStoreRootPath(pathType, &mainRootPath);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get root path failed")
 
     ret = MakeDirIfNotExist(mainRootPath);
@@ -765,13 +805,25 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
     HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
-
-    ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
-        HKS_FREE_PTR(name);
-        return ret;
+#ifdef HKS_ENABLE_LITE_HAP
+    if (CheckIsLiteHap(&processInfo->processName)) {
+        if (memcpy_s(name, HKS_MAX_FILE_NAME_LEN, processInfo->processName.data,
+            processInfo->processName.size) != EOK) {
+            HKS_LOG_E("construct name failed, name buffer is too small.");
+            HKS_FREE_PTR(name);
+            return HKS_ERROR_BUFFER_TOO_SMALL;
+        }
+    } else {
+#endif
+        ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
+            HKS_FREE_PTR(name);
+            return ret;
+        }
+#ifdef HKS_ENABLE_LITE_HAP
     }
+#endif
 
     ret = HKS_ERROR_NOT_SUPPORTED;
     struct HksProcessInfo info;
@@ -1028,12 +1080,27 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
 
     (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-    int32_t ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
-        HKS_FREE_PTR(name);
-        return ret;
+    int32_t ret;
+#ifdef HKS_ENABLE_LITE_HAP
+    if (CheckIsLiteHap(&processInfo->processName)) {
+        if (memcpy_s(name, HKS_MAX_FILE_NAME_LEN, processInfo->processName.data,
+            processInfo->processName.size) != EOK) {
+            HKS_LOG_E("construct name failed, name buffer is too small.");
+            HKS_FREE_PTR(name);
+            return HKS_ERROR_BUFFER_TOO_SMALL;
+        }
+        ret = HKS_SUCCESS;
+    } else {
+#endif
+        ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
+            HKS_FREE_PTR(name);
+            return ret;
+        }
+#ifdef HKS_ENABLE_LITE_HAP
     }
+#endif
 
     struct HksProcessInfo info;
     SaveProcessInfo((uint8_t *)name, strlen(name), processInfo->userId, &info);
