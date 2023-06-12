@@ -37,6 +37,7 @@ if (os_level == "standard") {
       integer_overflow = true
       cfi = true
       debug = false
+      cfi_cross_dso = true
     }
 
     configs = [

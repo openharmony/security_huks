@@ -18,6 +18,7 @@ enable_hks_coverage = false
 enable_user_auth_framework = true
 enable_huks_lite_hap = false
 enable_bundle_framework = true
+has_huks_hdi_driver = true
 
 # always set as false for upload code
 hks_enable_test = false
@@ -34,6 +35,10 @@ if (!defined(global_parts_info) ||
 
 if (!defined(global_parts_info.useriam_user_auth_framework)) {
   enable_user_auth_framework = false
+}
+
+if (!defined(global_parts_info.hdf_drivers_peripheral_huks)) {
+  has_huks_hdi_driver = false
 }
 
 if (os_level == "mini" && defined(global_parts_info.arkui_ace_engine_lite)) {

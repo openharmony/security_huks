@@ -36,7 +36,7 @@
 
 #include "hks_crypto_hal.h"
 #include "hks_core_hal_api.h"
-#include "hks_useridm_api_wrap.h"
+#include "hks_core_useriam_wrap.h"
 
 #define BYTES_PER_POS 8
 #define S_TO_MS 1000
@@ -494,7 +494,7 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get auth access type failed!")
 
     uint32_t authTokenAuthType = 0;
-    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &authTokenAuthType);
+    ret = HksCoreConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &authTokenAuthType);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_SUPPORTED, "invalid user iam auth type:not support!")
 
     if ((authTokenAuthType & userAuthType->uint32Param) == 0) {
@@ -704,7 +704,7 @@ static int32_t GetSecureSignAuthInfo(const struct HuksKeyNode *keyNode, struct H
 
     struct HksUserAuthToken *authToken = (struct HksUserAuthToken *)authTokenParam->blob.data;
     uint32_t hksAuthType;
-    ret = HksConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &hksAuthType);
+    ret = HksCoreConvertUserIamTypeToHksType(HKS_AUTH_TYPE, authToken->plaintextData.authType, &hksAuthType);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "invalid user iam auth type")
 
     secureSignInfo->userAuthType = hksAuthType;
