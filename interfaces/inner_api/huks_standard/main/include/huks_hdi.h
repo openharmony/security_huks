@@ -270,7 +270,10 @@
     struct HuksParamSet paramSetCore = {0};  \
     struct HuksBlob kdfKeyCore = {0};  \
     struct HuksBlob derivedKeyCore = {0};  \
-    ret = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
+    HDI_CONVERTER_PARAM_IN_PARAMSET(paramSet, paramSetCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(kdfKey, kdfKeyCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(derivedKey, derivedKeyCore)  \
+    ret = (func)(HDI_ADAPTER_PARAM(paramSet, &paramSetCore), \
                  HDI_ADAPTER_PARAM(kdfKey, &kdfKeyCore),  \
                  HDI_ADAPTER_PARAM(derivedKey, &derivedKeyCore));  \
     HDI_CONVERTER_PARAM_OUT_BLOB(derivedKeyCore, derivedKey)
@@ -306,6 +309,8 @@
     struct HuksBlob saltCore = {0};  \
     struct HuksBlob publicKeyCore = {0};  \
     uint32_t sceneInt = (uint32_t) scene;  \
+    HDI_CONVERTER_PARAM_IN_BLOB(salt, saltCore)  \
+    HDI_CONVERTER_PARAM_IN_BLOB(publicKey, publicKeyCore)  \
     ret = (func)(HDI_ADAPTER_PARAM(salt, &saltCore),  \
               sceneInt,  \
               HDI_ADAPTER_PARAM(publicKey, &publicKeyCore));  \
