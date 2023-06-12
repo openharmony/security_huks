@@ -1405,6 +1405,7 @@ HWTEST_F(HksEccSignMt, HksEccSignMt04300, TestSize.Level0)
     RunTestCase(HUKS_ECC_SIGN_MT_04300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccSignMt.HksEccSignMt04400
  * @tc.name      : HksEccSignMt04400
@@ -1426,6 +1427,7 @@ HWTEST_F(HksEccSignMt, HksEccSignMt04500, TestSize.Level0)
 {
     RunTestCase(HUKS_ECC_SIGN_MT_04500_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksEccSignMt.HksEccSignMt04600
