@@ -877,6 +877,11 @@ protected:
         HksBlob signature = { .size = ECC_MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(ECC_MESSAGE_SIZE) };
         ASSERT_NE(signature.data, nullptr);
 
+        // Attention! the generating key purpose is HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
+        // here the purpose is reassigned with HKS_KEY_PURPOSE_SIGN
+        struct HksParam *paramPurpose = nullptr;
+        EXPECT_EQ(HksGetParam(paramInSet, HKS_TAG_PURPOSE, &paramPurpose), HKS_SUCCESS);
+        paramPurpose->uint32Param = HKS_KEY_PURPOSE_SIGN;
         EXPECT_EQ(HksSign(&authId, paramInSet, &message, &signature), testCaseParams.signResult);
         if (digest == HKS_DIGEST_NONE) {
             EXPECT_EQ(SignVerifyWithDigestNone(&pubKey, &message, &signature, false), testCaseParams.verifyResult);
