@@ -28,16 +28,15 @@ namespace Security {
 namespace Huks {
 namespace MT {
 namespace {
-const int SET_SIZE_4096 = 4096;
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
+const int SET_SIZE_4096 = 4096;
 const int KEY_SIZE_512 = 512;
 const int KEY_SIZE_768 = 768;
 const int KEY_SIZE_1024 = 1024;
-#endif
-
 const int KEY_SIZE_2048 = 2048;
 const int KEY_SIZE_3072 = 3072;
+#endif
 
 const GenerateKeyCaseParams HKS_RSA_MT_03100_PARAMS = {
     .params =
@@ -324,6 +323,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_04300_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_04400_PARAMS = {
     .alias = "This is a test auth id for OAEPPadding",
     .params =
@@ -346,6 +346,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_04400_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_04500_PARAMS = {
     .params =
@@ -368,6 +369,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_04500_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_04600_PARAMS = {
     .alias = "This is a test auth id for OAEPPadding",
     .params =
@@ -390,6 +392,8 @@ const EncryptServiceCaseParams HKS_RSA_MT_04600_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
+
 const EncryptLocalCaseParams HKS_RSA_MT_04700_PARAMS = {
     .params =
         {
@@ -411,6 +415,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_04700_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_04800_PARAMS = {
     .alias = "This is a test auth id for OAEPPadding",
     .params =
@@ -433,6 +438,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_04800_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_04900_PARAMS = {
     .params =
@@ -590,6 +596,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_05500_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_05600_PARAMS = {
     .alias = "This is a test auth id for OAEPPadding",
     .params =
@@ -611,6 +618,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_05600_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_05700_PARAMS = {
     .params =
@@ -633,6 +641,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_05700_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_05800_PARAMS = {
     .alias = "This is a test auth id for OAEPPadding",
     .params =
@@ -654,6 +663,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_05800_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_05900_PARAMS = {
     .params =
@@ -676,6 +686,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_05900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_06000_PARAMS = {
     .alias = "This is a test auth id for OAEPPadding",
     .params =
@@ -697,6 +708,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_06000_PARAMS = {
     .encryptResult = HKS_SUCCESS,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 }  // namespace
 
 class HksRsaEcbOaepPaddingMt : public HksRsaCommonMt, public testing::Test {
@@ -854,6 +866,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt04300, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_04300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt04400
  * @tc.name      : HksRsaEcbOaepPaddingMt04400
@@ -863,6 +876,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt04400, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_04400_PARAMS);
 }
+#endif
 
 #ifndef CUT_RSA_4096_TEST
 /**
@@ -875,6 +889,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt04500, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_04500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt04600
  * @tc.name      : HksRsaEcbOaepPaddingMt04600
@@ -884,6 +899,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt04600, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_04600_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt04700
@@ -895,6 +911,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt04700, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_04700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt04800
  * @tc.name      : HksRsaEcbOaepPaddingMt04800
@@ -904,6 +921,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt04800, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_04800_PARAMS);
 }
+#endif
 #endif
 
 /**
@@ -983,6 +1001,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt05500, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_05500_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt05600
  * @tc.name      : HksRsaEcbOaepPaddingMt05600
@@ -992,6 +1011,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt05600, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_05600_PARAMS);
 }
+#endif
 
 #ifndef CUT_RSA_4096_TEST
 /**
@@ -1004,6 +1024,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt05700, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_05700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt05800
  * @tc.name      : HksRsaEcbOaepPaddingMt05800
@@ -1013,6 +1034,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt05800, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_05800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt05900
@@ -1024,6 +1046,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt05900, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_05900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepPaddingMt06000
  * @tc.name      : HksRsaEcbOaepPaddingMt06000
@@ -1033,6 +1056,7 @@ HWTEST_F(HksRsaEcbOaepPaddingMt, HksRsaEcbOaepPaddingMt06000, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_06000_PARAMS);
 }
+#endif
 #endif
 }  // namespace MT
 }  // namespace Huks
