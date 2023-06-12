@@ -17,14 +17,26 @@
 #include "hks_client_service.h"
 #include "hks_get_process_info.h"
 #include "hks_log.h"
+#include "hks_param.h"
 #include "hks_template.h"
 
 #define HKS_PROCESS_INFO_LEN    128
 #define HKS_MAX_DIRENT_FILE_LEN 128
 
-static int32_t GetProcessInfo(char **processName, char **userId)
+static int32_t GetProcessInfo(const struct HksParamSet *paramSet, char **processName, char **userId)
 {
-    HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+    (void)paramSet;
+#ifdef HKS_ENABLE_LITE_HAP
+    struct HksParam *bundleNameParam = NULL;
+    if (paramSet != NULL && HksGetParam(paramSet, HKS_TAG_BUNDLE_NAME, &bundleNameParam) == HKS_SUCCESS) {
+        // the end of bundleNameParam->blob.data is \0 and it's considered in blob.size
+        *processName = (char *)bundleNameParam->blob.data;
+    } else {
+#endif
+        HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetProcessName(processName), HKS_ERROR_INTERNAL_ERROR, "get process name failed")
+#ifdef HKS_ENABLE_LITE_HAP
+    }
+#endif
     HKS_IF_NOT_SUCC_LOGE_RETURN(HksGetUserId(userId), HKS_ERROR_INTERNAL_ERROR, "get user id failed")
     return HKS_SUCCESS;
 }
@@ -49,7 +61,7 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
     (void)paramSetOut;
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -66,7 +78,7 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -83,7 +95,7 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -102,7 +114,7 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
     (void)paramSet;
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -119,7 +131,7 @@ int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParam
     (void)paramSet;
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -135,7 +147,7 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamS
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(NULL, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -152,7 +164,7 @@ int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamS
     (void)paramSet;
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -169,7 +181,7 @@ int32_t HksClientSign(const struct HksBlob *key, const struct HksParamSet *param
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -186,7 +198,7 @@ int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *par
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -203,7 +215,7 @@ int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *pa
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -220,7 +232,7 @@ int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *pa
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -237,7 +249,7 @@ int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBl
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -254,7 +266,7 @@ int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksB
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -271,7 +283,7 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -287,7 +299,7 @@ int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCo
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(NULL, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -313,7 +325,7 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -342,7 +354,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -359,7 +371,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -375,7 +387,7 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
 {
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {
@@ -393,7 +405,7 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
     (void)paramSet;
     char *processName = NULL;
     char *userId = NULL;
-    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(&processName, &userId), HKS_ERROR_INTERNAL_ERROR,
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSet, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
     struct HksProcessInfo processInfo = {

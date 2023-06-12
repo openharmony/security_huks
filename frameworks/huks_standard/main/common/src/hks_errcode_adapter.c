@@ -17,9 +17,10 @@
 
 #include <stddef.h>
 
+#include "hks_log.h"
 #include "hks_type.h"
 
-static const char *g_convertErrMsg = "HksConvertErrCode Failed.";
+static const char *g_convertErrMsg = "HUKS operation failed.";
 
 static struct HksError g_errCodeTable[] = {
     {
@@ -579,6 +580,7 @@ struct HksResult HksConvertErrCode(int32_t ret)
             return g_errCodeTable[i].hksResult;
         }
     }
+    HKS_LOG_E("convert error code form %" LOG_PUBLIC "d failed!", ret);
     return result;
 }
 
