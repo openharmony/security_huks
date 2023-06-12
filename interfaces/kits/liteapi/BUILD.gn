@@ -1,0 +1,70 @@
+#
+# Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+import("//base/security/huks/build/config.gni")
+import("//build/ohos.gni")
+
+ROOT_PATH = "../../../../../.."
+
+HUKS_PATH = "../../.."
+
+ohos_static_library("ace_kit_huks") {
+  subsystem_name = "security"
+  part_name = "huks"
+
+  cflags = []
+  defines = []
+  if (huks_config_file != "") {
+    print(huks_config_file)
+    cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+  }
+
+  sources = [
+    "$HUKS_PATH/frameworks/huks_standard/main/common/src/hks_errcode_adapter.c",
+    "src/hks_lite_api.cpp",
+    "src/hks_lite_api_abort_session.cpp",
+    "src/hks_lite_api_common.cpp",
+    "src/hks_lite_api_delete_key_item.cpp",
+    "src/hks_lite_api_generate_key_item.cpp",
+    "src/hks_lite_api_init_session.cpp",
+    "src/hks_lite_api_is_key_item_exist.cpp",
+    "src/hks_lite_api_update_finish_session.cpp",
+  ]
+  deps = []
+  include_dirs = []
+
+  configs = [ "$ROOT_PATH/foundation/arkui/ace_engine_lite/frameworks/targets:ace_lite_target_config" ]
+
+  if (huks_enable_log == true) {
+    defines += [ "_HUKS_LOG_ENABLE_" ]
+    deps +=
+        [ "$ROOT_PATH/base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
+  }
+
+  include_dirs += [
+    "include",
+    "//third_party/bounds_checking_function/include",
+    "$ROOT_PATH/foundation/arkui/ace_engine_lite/interfaces/inner_api/builtin/jsi",
+    "$ROOT_PATH/foundation/arkui/ace_engine_lite/interfaces/inner_api/builtin/base",
+    "$ROOT_PATH/foundation/arkui/ace_engine_lite/frameworks/src/core/context",
+    "$ROOT_PATH/foundation/arkui/ace_engine_lite/interfaces/inner_api/builtin/async",
+    "$HUKS_PATH/frameworks/huks_standard/main/common/include",
+  ]
+  deps += [
+    "$HUKS_PATH/interfaces/inner_api/huks_lite:huks_3.0_sdk",
+    "$ROOT_PATH/foundation/arkui/ace_engine_lite/frameworks:ace_lite",
+    "//third_party/bounds_checking_function:libsec_shared",
+  ]
+}
