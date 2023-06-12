@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,7 +18,8 @@
 
 #include "hks_type_inner.h"
 
-#define HKS_RKC_VER 1                                   /* the version of root key component */
+#define HKS_RKC_VER 2                                   /* the version of root key component */
+#define HKS_MK_VER 2                                    /* the version of main key */
 #define HKS_RKC_RMK_ITER 1                              /* the iterator number of times which derive Root Main Key */
 #define HKS_RKC_RMK_HMAC_SHA256 1                       /* the hash algorithm which derive Root Main Key */
 #define HKS_RKC_MK_CRYPT_ALG_AES256_GCM 1               /* the encrypt algorithm of main key */
@@ -30,7 +31,7 @@
 #define HKS_RKC_MK_IV_LEN 16                            /* the tag length of main key */
 #define HKS_RKC_MK_CIPHER_TEXT_LEN 48                   /* the cipher length of main key */
 #define HKS_RKC_MK_LEN 32                               /* the length of main key */
-#define HKS_RKC_KSF_NUM 2                               /* the keystore file number of root key component */
+#define HKS_KSF_NUM 2                                   /* the keystore file number of rkc or mk */
 
 /* the storage type of root key component */
 enum HksRkcStorageType {
@@ -44,6 +45,12 @@ enum HksRkcState {
     HKS_RKC_STATE_VALID = 1,
 };
 
+/* the type of keystore file */
+enum HksKsfType {
+    HKS_KSF_TYPE_RKC = 0,
+    HKS_KSF_TYPE_MK = 1,
+};
+
 /* time */
 struct HksTime {
     uint16_t hksYear;
@@ -54,23 +61,24 @@ struct HksTime {
     uint8_t hksSec;
 };
 
-/* the attribute of keystore file */
-struct HksRkcKsfAttr {
-    uint8_t num;                                        /* the number of files */
-    char *name[HKS_RKC_KSF_NUM];
+struct HksKsfAttr {
+    char *name[HKS_KSF_NUM];
 };
 
-/* the keystore file data of root key component */
-struct HksRkcKsfData {
-    uint16_t version;                                   /* version */
-    struct HksTime rkCreatedTime;                       /* the created time of rook key */
-    struct HksTime rkExpiredTime;                       /* the expired time of rook key */
+/* the fields of root key component */
+struct HksKsfDataRkc {
+    struct HksTime rkCreatedTime;                       /* the created time of root key */
+    struct HksTime rkExpiredTime;                       /* the expired time of root key */
     uint8_t rkMaterial1[HKS_RKC_MATERIAL_LEN];          /* the first material of root key */
     uint8_t rkMaterial2[HKS_RKC_MATERIAL_LEN];          /* the second material of root key */
     uint32_t rmkIter;                                   /* the iterator number of times which derive root main key */
     uint8_t rmkSalt[HKS_RKC_SALT_LEN];                  /* the salt which derive root main key */
     uint32_t rmkHashAlg;                                /* the hash algorithm which derive root main key */
     uint8_t rkRsv[HKS_RKC_KSF_DATA_RSV_LEN];            /* mk_rsv data for root key, 32 byte */
+};
+
+/* the fields of main key */
+struct HksKsfDataMk {
     struct HksTime mkCreatedTime;                       /* the created time of main key */
     struct HksTime mkExpiredTime;                       /* the expired time of main key */
     uint32_t mkEncryptAlg;                              /* the encrption algorithm of main key */
@@ -79,32 +87,47 @@ struct HksRkcKsfData {
     uint8_t mkRsv[HKS_RKC_KSF_DATA_RSV_LEN];            /* mk_rsv data for main key, 32 byte */
 };
 
-/* the configuration of root key component */
-struct HksRkcCfg {
-    uint8_t state;                                      /* system state */
-    uint16_t version;                                   /* the version of root key component */
-    uint8_t storageType;                                /* the storage type of root key component */
-    struct HksTime rkCreatedTime;                       /* the created time of rook key */
-    struct HksTime rkExpiredTime;                       /* the expired time of rook key */
-    struct HksRkcKsfAttr ksfAttr;                       /* the attribute of keystore file */
-    uint32_t rmkIter;                                   /* the iterator number of times which derive Root Main Key */
-    uint32_t rmkHashAlg;                                /* the hash algorithm which derive Root Main Key */
-    uint8_t mkMask[HKS_RKC_MK_LEN];                     /* the mask of main key */
-    uint32_t mkEncryptAlg;                              /* the encrption algorithm of main key */
-    uint8_t reserve[HKS_RKC_CFG_RSV_LEN];               /* reserve data, 32 byte */
+/* the keystore file data of root key (since version 2) */
+struct HksKsfDataRkcWithVer {
+    uint16_t rkVersion;                                 /* the version of root key */
+    struct HksKsfDataRkc ksfDataRkc;                    /* fields of root key */
 };
 
-extern struct HksRkcCfg g_hksRkcCfg;
+/* the keystore file data of main key (since version 2) */
+struct HksKsfDataMkWithVer {
+    uint16_t mkVersion;                                 /* the version of main key */
+    struct HksKsfDataMk ksfDataMk;                      /* fields of main key */
+};
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksRkcReadKsf(const char *ksfName, struct HksRkcKsfData *ksfData);
+int32_t GetProcessInfo(struct HksProcessInfo *processInfo);
 
-int32_t HksRkcWriteKsf(const char *ksfName, const struct HksRkcKsfData *ksfData);
+int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf);
 
-bool RkcKsfExist(void);
+int32_t ExtractFieldFromBuffer(const struct HksBlob *srcBlob, uint32_t *srcOffset, void *dest, uint32_t destSize);
+
+int32_t FillFieldToBuffer(const void *src, uint32_t srcSize, struct HksBlob *destBlob, uint32_t *destOffset);
+
+int32_t ExtractKsfDataRkc(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset, struct HksKsfDataRkc *ksfDataRkc);
+
+int32_t ExtractKsfDataMk(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset, struct HksKsfDataMk *ksfDataMk);
+
+int32_t RkcExtractKsfFileFlag(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset);
+
+int32_t RkcExtractKsfHash(const struct HksBlob *ksfFromFile, uint32_t *ksfBufOffset);
+
+int32_t HksReadKsfRkc(const char *ksfName, struct HksKsfDataRkcWithVer *ksfDataRkc);
+
+int32_t HksReadKsfMk(const char *ksfName, struct HksKsfDataMkWithVer *ksfDataMk);
+
+int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *ksfDataRkc);
+
+int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksfDataMk);
+
+bool KsfExist(uint8_t ksfType);
 
 #ifdef __cplusplus
 }

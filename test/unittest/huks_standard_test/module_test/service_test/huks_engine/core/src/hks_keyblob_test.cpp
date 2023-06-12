@@ -186,7 +186,7 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest007, TestSize.Level0)
 
 /**
  * @tc.name: HksKeyBlobTest.HksKeyBlobTest008
- * @tc.desc: tdd EncryptAndDecryptKeyBlob, expect HKS_ERROR_INVALID_KEY_INFO
+ * @tc.desc: tdd HksGetRawKey, expect HKS_ERROR_INVALID_KEY_INFO
  * @tc.type: FUNC
  */
 HWTEST_F(HksKeyBlobTest, HksKeyBlobTest008, TestSize.Level0)
@@ -208,4 +208,67 @@ HWTEST_F(HksKeyBlobTest, HksKeyBlobTest008, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 }
+
+#ifdef HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest009
+ * @tc.desc: tdd GetDeriveKeyAlg, expect default derive algorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest009, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest009");
+    uint32_t alg;
+    GetDeriveKeyAlg(nullptr, &alg);
+    ASSERT_EQ(alg, HKS_ALG_HKDF);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest010
+ * @tc.desc: tdd GetDeriveKeyAlg, expect old derive algorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest010, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest010");
+    struct HksParam keyVersion = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = 1 };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &keyVersion, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t alg;
+    GetDeriveKeyAlg(paramSet, &alg);
+    ASSERT_EQ(alg, HKS_ALG_PBKDF2);
+
+    HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksKeyBlobTest.HksKeyBlobTest011
+ * @tc.desc: tdd GetDeriveKeyAlg, expect new derive algorithm
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksKeyBlobTest, HksKeyBlobTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksKeyBlobTest011");
+    struct HksParam keyVersion = { .tag = HKS_TAG_KEY_VERSION, .uint32Param = 3 };
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksAddParams(paramSet, &keyVersion, 1);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint32_t alg;
+    GetDeriveKeyAlg(paramSet, &alg);
+    ASSERT_EQ(alg, HKS_ALG_HKDF);
+
+    HksFreeParamSet(&paramSet);
+}
+#endif
 }
