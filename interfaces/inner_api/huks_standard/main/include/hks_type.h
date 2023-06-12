@@ -794,6 +794,24 @@ typedef struct __attribute__((__packed__)) HksSecureSignAuthInfo {
     uint64_t credentialId;
 } __attribute__((__packed__)) HksSecureSignAuthInfo;
 
+#define DEFAULT_ENROLLED_INFO_LEN 2
+#define DEFAULT_CREDENTIAL_INFO_LEN 2
+
+enum HksUserIamType {
+    HKS_AUTH_TYPE = 0,
+};
+
+struct EnrolledInfoWrap {
+    enum HksUserAuthType authType;
+    uint64_t enrolledId;
+};
+
+struct SecInfoWrap {
+    uint64_t secureUid;
+    uint32_t enrolledInfoLen;
+    struct EnrolledInfoWrap enrolledInfo[DEFAULT_ENROLLED_INFO_LEN];
+};
+
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
 #define HKS_DEFAULT_RANDOM_LEN 16

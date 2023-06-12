@@ -24,6 +24,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
     integer_overflow = true
     cfi = true
     debug = false
+    cfi_cross_dso = true
   }
   subsystem_name = "security"
   part_name = "huks"
@@ -34,7 +35,9 @@ ohos_static_library("libhuks_core_hal_api_static") {
   sources = [
     "src/hks_chipset_platform_key_hardcoded.c",
     "src/hks_core_hal_api.c",
+    "src/hks_core_useriam_wrap.cpp",
   ]
+
   deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
   include_dirs = [
     "include",
@@ -43,5 +46,17 @@ ohos_static_library("libhuks_core_hal_api_static") {
   ]
 
   complete_static_lib = true
+
   external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  if (huks_security_level == "software" && has_huks_hdi_driver &&
+      !enable_hks_mock) {
+    defines = [ "HKS_CORE_ENABLE_HDI_DRIVER" ]
+    external_deps += [ "drivers_interface_user_auth:libuser_auth_proxy_1.1" ]
+  } else {
+    if (enable_hks_mock) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
+    } else {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
+    }
+  }
 }

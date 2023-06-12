@@ -47,7 +47,10 @@
           "os_account",
           "safwk",
           "samgr",
-          "user_auth_framework"
+          "c_utils",
+          "user_auth_framework",
+          "drivers_interface_user_auth",
+          "drivers_interface_huks"
         ],
         "third_party": [ 
           "bounds_checking_function",
