@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,8 @@
 #define ASN_1_TAG_TYPE_1_BYTE_LEN 0x81
 #define ASN_1_TAG_TYPE_2_BYTE_LEN 0x82
 #define ASN_1_MIN_HEADER_LEN 0x3
+#define APPLICATION_ID_RAW_OID_LEN 16
+#define APPLICATION_ID_HEADER_LEN 2
 
 struct HksCertInfo {
     uint8_t *data;
@@ -84,7 +86,10 @@ static uint8_t g_deviceIdOid[] = {
     0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x04, 0x05
 };
 static uint8_t g_keyFlagOid[] = {
-    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x0b
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x05
+};
+static uint8_t g_appIdOid[] = {
+    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x03
 };
 
 static const struct HksParam g_oidParams[] = {
@@ -129,6 +134,12 @@ static const struct HksParam g_oidParams[] = {
         .blob = {
             .size = sizeof(g_keyFlagOid),
             .data = g_keyFlagOid
+        }
+    }, {
+        .tag = HKS_TAG_ATTESTATION_APPLICATION_ID,
+        .blob = {
+            .size = sizeof(g_appIdOid),
+            .data = g_appIdOid
         }
     },
 };
@@ -345,7 +356,6 @@ static int32_t ExtractTlvDataAndHeadSize(const uint8_t *in, uint32_t inLen,
     uint32_t headOffset = 0;
     int32_t ret = ExtractTlvLength(in, inLen, &headOffset, outLen);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ExtractTlvLength fail!")
-
     if (size != NULL) {
         *size = headOffset;
     }
@@ -437,8 +447,15 @@ static int32_t ConstructParamSetOut(enum HksTag tag, uint8_t *data, uint32_t len
     int32_t ret;
     for (uint32_t i = 0; i < paramSetOut->paramsCnt; i++) {
         if (paramSetOut->params[i].tag == tag) {
-            ret = CopyBlobBuffer(data, len, &(paramSetOut->params[i].blob));
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CopyBlobBuffer failed")
+            if (tag == HKS_TAG_ATTESTATION_APPLICATION_ID) {
+                // APPLICATION_ID_RAW_OID_LEN + APPLICATION_ID_HEADER_LEN + sizeof(appId)
+                uint32_t appIdOffsetSize = APPLICATION_ID_RAW_OID_LEN + APPLICATION_ID_HEADER_LEN;
+                ret = CopyBlobBuffer(data + appIdOffsetSize, len - appIdOffsetSize, &(paramSetOut->params[i].blob));
+                HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CopyBlobBuffer failed")
+            } else {
+                ret = CopyBlobBuffer(data, len, &(paramSetOut->params[i].blob));
+                HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CopyBlobBuffer failed")
+            }
             return HKS_SUCCESS;
         }
     }
