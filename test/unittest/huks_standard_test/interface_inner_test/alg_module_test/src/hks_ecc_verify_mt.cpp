@@ -1182,6 +1182,7 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt02400, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_02400_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt02500
  * @tc.name      : HksEccVerifyMt02500
@@ -1193,7 +1194,6 @@ HWTEST_F(HksEccVerifyMt, HksEccVerifyMt02500, TestSize.Level0)
     RunTestCase(HUKS_ECC_VERIFY_MT_02500_PARAMS);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksEccVerifyMt.HksEccVerifyMt02600
  * @tc.name      : HksEccVerifyMt02600
