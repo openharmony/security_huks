@@ -27,6 +27,7 @@
 enum ParamType {
     IDS_PARAM,
     NON_IDS_PARAM,
+    NON_IDS_BASE64_PARAM,
 };
 
 struct HksTestCertChain {

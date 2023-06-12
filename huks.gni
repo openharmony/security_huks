@@ -17,6 +17,7 @@ enable_hks_mock = false
 enable_hks_coverage = false
 enable_user_auth_framework = true
 enable_huks_lite_hap = false
+enable_bundle_framework = true
 
 # always set as false for upload code
 hks_enable_test = false
@@ -37,4 +38,9 @@ if (!defined(global_parts_info.useriam_user_auth_framework)) {
 
 if (os_level == "mini" && defined(global_parts_info.arkui_ace_engine_lite)) {
   enable_huks_lite_hap = true
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.bundlemanager_bundle_framework)) {
+  enable_bundle_framework = false
 }

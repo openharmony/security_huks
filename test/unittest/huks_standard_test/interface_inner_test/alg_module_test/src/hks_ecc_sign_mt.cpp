@@ -24,6 +24,10 @@
 #include "openssl_ecc_helper.h"
 #include "hks_log.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -889,7 +893,26 @@ protected:
         HksFree(x509Key.data);
         HksFree(signature.data);
     }
+
+public:
+    static void SetUpTestCase(void);
+
+    static void TearDownTestCase(void);
 };
+
+void HksEccSignMt::SetUpTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+}
+
+void HksEccSignMt::TearDownTestCase(void)
+{
+#ifdef L2_STANDARD
+    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+}
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**

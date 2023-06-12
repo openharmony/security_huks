@@ -35,6 +35,8 @@
         "components": [
           "ability_base",
           "access_token",
+          "bundle_framework",
+          "c_utils",
           "common",
           "common_event_service",
           "hisysevent_native",
@@ -45,13 +47,13 @@
           "os_account",
           "safwk",
           "samgr",
-          "c_utils",
           "user_auth_framework"
         ],
         "third_party": [ 
           "bounds_checking_function",
           "openssl",
-          "mbedtls"
+          "mbedtls",
+          "cjson"
         ]
       },
       "build": {
