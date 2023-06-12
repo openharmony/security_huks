@@ -217,6 +217,12 @@ if (ohos_kernel_type == "liteos_m") {
       defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
     }
 
+    if (enable_huks_lite_hap) {
+      defines += [ "HKS_ENABLE_LITE_HAP" ]
+      cflags +=
+          [ "-DHKS_CONFIG_LITE_HAP_STORE_PATH=\"${huks_lite_hap_store_path}\"" ]
+    }
+
     if (huks_enable_log == true) {
       configs += [ ":hilog_lite_dir" ]
       deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
