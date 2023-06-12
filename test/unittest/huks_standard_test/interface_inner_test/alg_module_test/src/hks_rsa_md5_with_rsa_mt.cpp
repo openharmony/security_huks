@@ -25,9 +25,13 @@ namespace Huks {
 namespace MT {
 namespace {
 const int SET_SIZE_4096 = 4096;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const int KEY_SIZE_512 = 512;
 const int KEY_SIZE_768 = 768;
 const int KEY_SIZE_1024 = 1024;
+#endif
+
 const int KEY_SIZE_2048 = 2048;
 const int KEY_SIZE_3072 = 3072;
 

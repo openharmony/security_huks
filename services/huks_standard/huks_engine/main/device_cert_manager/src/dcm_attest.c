@@ -80,7 +80,7 @@ DECLARE_OID(hksSecInfo)
 #define ID_PRIVACY_PROPERTIES_SIZE      (ID_SYSTEM_PROPERTIES_SIZE + 1)
 
 #define ID_PRIVACY_PROPERTIY_IMEI       ID_PRIVACY_PROPERTIES, 0x01
-#define ID_PRIVACY_PROPERTIY_IMEI_SIZE      (ID_SYSTEM_PROPERTIES_SIZE + 1)
+#define ID_PRIVACY_PROPERTIY_IMEI_SIZE      (ID_PRIVACY_PROPERTIES_SIZE + 1)
 DECLARE_TAG(hksImei, ID_PRIVACY_PROPERTIY_IMEI)
 DECLARE_OID(hksImei)
 
@@ -166,12 +166,12 @@ DECLARE_OID(hksDigest)
 DECLARE_TAG(hksPadding, ID_KEY_PROPERTY_PADDING)
 DECLARE_OID(hksPadding)
 
-#define ID_KEY_PROPERTY_SIGN_TYPE       ID_KEY_PROPERTIES, 0x0a
+#define ID_KEY_PROPERTY_SIGN_TYPE       ID_KEY_PROPERTIES, 0x0b
 #define ID_KEY_PROPERTY_SIGN_TYPE_SIZE      (ID_KEY_PROPERTIES_SIZE + 1)
 DECLARE_TAG(hksSignType, ID_KEY_PROPERTY_SIGN_TYPE)
 DECLARE_OID(hksSignType)
 
-#define ID_KEY_PROPERTY_KEY_FLAG       ID_KEY_PROPERTIES, 0x0b
+#define ID_KEY_PROPERTY_KEY_FLAG       ID_KEY_PROPERTIES, 0x05
 #define ID_KEY_PROPERTY_KEY_FLAG_SIZE      (ID_KEY_PROPERTIES_SIZE + 1)
 DECLARE_TAG(hkskeyFlag, ID_KEY_PROPERTY_KEY_FLAG)
 DECLARE_OID(hkskeyFlag)
@@ -209,6 +209,14 @@ DECLARE_OID(hksGroupSigRsaPssMgf1Sha256)
 DECLARE_TAG(hksGroupSigEcdsaSha256, ID_KEY_PROPERTY_GROUP_SIG_ECDSA_SHA256)
 DECLARE_OID(hksGroupSigEcdsaSha256)
 
+#define ID_KEY_PROPERTY_GROUP_SIG_SM2       ID_KEY_PROPERTY_GROUP_SIG, 0x06
+#define ID_KEY_PROPERTY_GROUP_SIG_SM2_SIZE       (ID_KEY_PROPERTY_GROUP_SIG_SIZE + 1)
+
+#define ID_KEY_PROPERTY_GROUP_SIG_SM2_SM3       ID_KEY_PROPERTY_GROUP_SIG, 0x05
+#define ID_KEY_PROPERTY_GROUP_SIG_SM2_SM3_SIZE       (ID_KEY_PROPERTY_GROUP_SIG_SIZE + 1)
+DECLARE_TAG(hksGroupSigSm2Sm3, ID_KEY_PROPERTY_GROUP_SIG_SM2_SM3)
+DECLARE_OID(hksGroupSigSm2Sm3)
+
 #define ID_KEY_PROPERTY_GROUP_ENC   ID_KEY_PROPERTY_GROUPS, 0x02
 #define ID_KEY_PROPERTY_GROUP_ENC_SIZE      (ID_KEY_PROPERTY_GROUPS_SIZE + 1)
 
@@ -236,6 +244,9 @@ DECLARE_OID(g_rsaSha256)
 
 static uint8_t g_ecdsaSha256Tag[] = { 0x06, 0x08, 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, 0x03, 0x02 };
 DECLARE_OID(g_ecdsaSha256)
+
+static uint8_t g_sm2Tag[] = {0x2A, 0x81, 0x1C, 0xCF, 0x55, 0x01, 0x82, 0x2D};
+DECLARE_OID(g_sm2)
 
 static const uint8_t g_attestTbsRsa[] = {
     0x30, 0x82, 0x01, 0xc7, 0xa0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x01, 0x01, 0x30, 0x0b, 0x06, 0x09,
@@ -714,6 +725,9 @@ static void GetSignatureByAlg(uint32_t signAlg, struct HksAsn1Blob *sigature)
     if (signAlg == HKS_ALG_RSA) {
         sigature->size = g_rsaSha256Oid.size;
         sigature->data = g_rsaSha256Oid.data;
+    } else if (signAlg == HKS_ALG_SM2) {
+        sigature->size = g_sm2Oid.size;
+        sigature->data = g_sm2Oid.data;
     } else {
         sigature->size = g_ecdsaSha256Oid.size;
         sigature->data = g_ecdsaSha256Oid.data;
@@ -870,6 +884,9 @@ static int32_t SignTbs(struct HksBlob *sig, const struct HksBlob *tbs, const str
     if (signAlg == HKS_ALG_RSA) {
         usageSpec.padding = HKS_PADDING_PKCS1_V1_5;
         usageSpec.algType = HKS_ALG_RSA;
+    } else if (signAlg == HKS_ALG_SM2) {
+        usageSpec.algType = HKS_ALG_SM2;
+        usageSpec.digest = HKS_DIGEST_SM3;
     } else {
         usageSpec.padding = HKS_PADDING_NONE;
         usageSpec.algType = HKS_ALG_ECC;
@@ -911,6 +928,10 @@ static int32_t CreateAttestCert(struct HksBlob *attestCert, struct HksBlob *temp
         signOidBlob.size = g_ecdsaSha256Oid.size;
         signOidBlob.data = g_ecdsaSha256Oid.data;
     }
+    if (signAlg == HKS_ALG_SM2) {
+        signOidBlob.size = g_sm2Oid.size;
+        signOidBlob.data = g_sm2Oid.data;
+    }
     ret = DcmAsn1InsertValue(&tmp, &obj, &signOidBlob);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "insert sign oid failed!")
 
@@ -932,7 +953,7 @@ static int32_t InsertSignatureGroupClaim(struct HksBlob *out, const struct HksUs
     if (!(attetUsageSpec->purpose & (HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY))) {
         return HKS_ERROR_NOT_SUPPORTED;
     }
-    if (attetUsageSpec->digest != HKS_DIGEST_SHA256) {
+    if ((attetUsageSpec->digest != HKS_DIGEST_SHA256) && (attetUsageSpec->digest != HKS_DIGEST_SM3)) {
         return HKS_ERROR_NOT_SUPPORTED;
     }
 
@@ -948,6 +969,9 @@ static int32_t InsertSignatureGroupClaim(struct HksBlob *out, const struct HksUs
             HKS_LOG_I("inserting SigEcdsaSha256 group\n");
             return DcmInsertClaim(out, &hksGroupSigEcdsaSha256Oid, &booleanTrue, secLevel);
         }
+    } else if (attetUsageSpec->algType == HKS_ALG_SM2) {
+        HKS_LOG_I("inserting SigSm2Sm3 group\n");
+        return DcmInsertClaim(out, &hksGroupSigSm2Sm3Oid, &booleanTrue, secLevel);
     }
     return HKS_ERROR_NOT_SUPPORTED;
 }
@@ -1015,7 +1039,7 @@ static int32_t InsertAppIdClaim(struct HksBlob *out, const struct HksParamSet *p
 {
     struct HksParam *appId = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_APPLICATION_ID, &appId);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not contain appId param!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not contain appId param!") // appId is optional
 
     uint8_t buf[ASN_1_MAX_HEADER_LEN + MAX_OID_LEN + HKS_APP_ID_SIZE] = {0};
     uint8_t *tmp = buf;
@@ -1029,10 +1053,15 @@ static int32_t InsertAppIdClaim(struct HksBlob *out, const struct HksParamSet *p
     struct HksAsn1Blob value = { ASN_1_TAG_TYPE_OCT_STR, appId->blob.size, appId->blob.data };
     ret = DcmAsn1WriteFinal(&tmpBlob, &value);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "write final value fail\n")
+    tmp += tmpBlob.size;
 
     uint32_t seqSize = tmp - buf;
     struct HksAsn1Blob seq = { ASN_1_TAG_TYPE_SEQ, seqSize, buf };
-    return DcmInsertClaim(out, &hksApplicationIdOid, &seq, secLevel);
+    ret = DcmInsertClaim(out, &hksApplicationIdOid, &seq, secLevel);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add appId to cert fail, ret = %" LOG_PUBLIC "d", ret)
+
+    HKS_LOG_I("add appId to cert success!");
+    return HKS_SUCCESS;
 }
 
 static int32_t BuildAttestMsgClaims(struct HksBlob *out, const struct HksParamSet *paramSet)
@@ -1111,7 +1140,7 @@ static int32_t BuildAttestKeyClaims(struct HksBlob *out, const struct HksParamSe
     ret = DcmInsertClaim(out, &hksDigestOid, &digest, secLevel);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert digest fail\n")
 
-    if (attetUsageSpec->algType != HKS_ALG_RSA) {
+    if ((attetUsageSpec->algType != HKS_ALG_RSA) && (attetUsageSpec->algType != HKS_ALG_SM2)) {
         struct HksAsn1Blob padding = { ASN_1_TAG_TYPE_OCT_STR, sizeof(uint32_t), (uint8_t *)&attetUsageSpec->padding };
         ret = DcmInsertClaim(out, &hksPaddingOid, &padding, secLevel);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "insert padding fail\n")
@@ -1286,7 +1315,7 @@ static void FreeAttestSpec(struct HksAttestSpec **attestSpec)
 static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
 {
     if ((usageSpec->algType != HKS_ALG_RSA) && (usageSpec->algType != HKS_ALG_ECC) &&
-        (usageSpec->algType != HKS_ALG_X25519)) {
+        (usageSpec->algType != HKS_ALG_X25519) && (usageSpec->algType != HKS_ALG_SM2)) {
             HKS_LOG_E("invalid alg %" LOG_PUBLIC "u\n", usageSpec->algType);
             return HKS_ERROR_INVALID_ARGUMENT;
     }

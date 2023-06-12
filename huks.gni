@@ -16,6 +16,7 @@ non_rwlock_support = false
 enable_hks_mock = false
 enable_hks_coverage = false
 enable_user_auth_framework = true
+enable_bundle_framework = true
 has_huks_hdi_driver = true
 
 # always set as false for upload code
@@ -37,4 +38,9 @@ if (!defined(global_parts_info.useriam_user_auth_framework)) {
 
 if (!defined(global_parts_info.hdf_drivers_peripheral_huks)) {
   has_huks_hdi_driver = false
+}
+
+if (defined(global_parts_info) &&
+    !defined(global_parts_info.bundlemanager_bundle_framework)) {
+  enable_bundle_framework = false
 }

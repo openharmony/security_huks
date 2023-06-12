@@ -35,6 +35,8 @@
         "components": [
           "ability_base",
           "access_token",
+          "bundle_framework",
+          "c_utils",
           "common",
           "common_event_service",
           "hisysevent_native",
@@ -53,7 +55,8 @@
         "third_party": [ 
           "bounds_checking_function",
           "openssl",
-          "mbedtls"
+          "mbedtls",
+          "cjson"
         ]
       },
       "build": {
