@@ -25,5 +25,8 @@ int HksKeyBlobTest005(void);
 int HksKeyBlobTest006(void);
 int HksKeyBlobTest007(void);
 int HksKeyBlobTest008(void);
+int HksKeyBlobTest009(void);
+int HksKeyBlobTest010(void);
+int HksKeyBlobTest011(void);
 }
 #endif
