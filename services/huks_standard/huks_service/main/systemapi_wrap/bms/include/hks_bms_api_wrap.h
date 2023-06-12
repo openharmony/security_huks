@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef HKS_KEY_BLOB_TEST_H
-#define HKS_KEY_BLOB_TEST_H
+#ifndef HKS_BMS_API_WRAP_H
+#define HKS_BMS_API_WRAP_H
 
-namespace Unittest::HksKeyBlobTest {
-int HksKeyBlobTest001(void);
-int HksKeyBlobTest002(void);
-int HksKeyBlobTest003(void);
-int HksKeyBlobTest004(void);
-int HksKeyBlobTest005(void);
-int HksKeyBlobTest006(void);
-int HksKeyBlobTest007(void);
-int HksKeyBlobTest008(void);
-int HksKeyBlobTest009(void);
-int HksKeyBlobTest010(void);
-int HksKeyBlobTest011(void);
+#include "hks_type_inner.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo);
+
+#ifdef __cplusplus
 }
 #endif
+
+#endif // HKS_BMS_API_WRAP_H

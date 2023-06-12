@@ -48,9 +48,11 @@
 #include "securec.h"
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-
 #include "hks_useridm_api_wrap.h"
+#endif
 
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+#include "hks_bms_api_wrap.h"
 #endif
 
 #ifndef _CUT_AUTHENTICATE_
@@ -1307,6 +1309,43 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
     return ret;
 }
 
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, struct HksParamSet *paramSet,
+    struct HksParamSet **outParamSet)
+{
+    int32_t ret;
+    struct HksBlob hapInfo = {0, NULL};
+    struct HksParamSet *newParamSet = NULL;
+
+    do {
+        ret = AppendToNewParamSet(paramSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
+
+        ret = HksGetHapInfo(processInfo, &hapInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapInfo failed")
+
+        if (CheckBlob(&hapInfo) == HKS_SUCCESS) {
+            struct HksParam hapInfoParam;
+            hapInfoParam.tag = HKS_TAG_ATTESTATION_APPLICATION_ID;
+            hapInfoParam.blob = hapInfo;
+            ret = HksAddParams(newParamSet, &hapInfoParam, 1);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add hapInfo failed")
+        }
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
+
+        *outParamSet = newParamSet;
+        HKS_FREE_BLOB(hapInfo);
+        return ret;
+    } while (0);
+
+    HKS_FREE_BLOB(hapInfo);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+#endif
+
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
@@ -1314,13 +1353,22 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
+    struct HksParamSet *processInfoParamSet = NULL;
     int32_t ret;
     do {
         ret = HksCheckAttestKeyParams(&processInfo->processName, keyAlias, paramSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check attest key param fail")
 
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &processInfoParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        ret = AddHapInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddHapInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
+#else
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
+#endif
 
         ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
@@ -1331,6 +1379,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&processInfoParamSet);
     HksHitraceEnd(&traceId);
 
     HksReport(__func__, processInfo, paramSet, ret);

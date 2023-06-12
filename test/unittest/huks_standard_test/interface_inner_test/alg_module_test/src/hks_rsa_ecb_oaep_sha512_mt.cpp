@@ -18,6 +18,10 @@
 
 #include "hks_rsa_common_mt.h"
 
+#ifdef L2_STANDARD
+#include "file_ex.h"
+#endif
+
 using namespace testing::ext;
 namespace OHOS {
 namespace Security {
@@ -25,9 +29,13 @@ namespace Huks {
 namespace MT {
 namespace {
 const int SET_SIZE_4096 = 4096;
+
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const int KEY_SIZE_512 = 512;
 const int KEY_SIZE_768 = 768;
 const int KEY_SIZE_1024 = 1024;
+#endif
+
 const int KEY_SIZE_2048 = 2048;
 const int KEY_SIZE_3072 = 3072;
 
@@ -179,6 +187,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_18700_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_18800_PARAMS = {
     .alias = "This is a test auth id for OAEPWithSHA-512",
     .params =
@@ -201,6 +210,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_18800_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_KEY_FILE,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_18900_PARAMS = {
     .params =
@@ -223,6 +233,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_18900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_19000_PARAMS = {
     .alias = "This is a test auth id for OAEPWithSHA-512",
     .params =
@@ -245,6 +256,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_19000_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_KEY_FILE,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_19100_PARAMS = {
     .params =
@@ -267,6 +279,7 @@ const EncryptLocalCaseParams HKS_RSA_MT_19100_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const EncryptServiceCaseParams HKS_RSA_MT_19200_PARAMS = {
     .alias = "This is a test auth id for OAEPWithSHA-512",
     .params =
@@ -289,6 +302,7 @@ const EncryptServiceCaseParams HKS_RSA_MT_19200_PARAMS = {
     .encryptResult = HKS_ERROR_INVALID_KEY_FILE,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const EncryptLocalCaseParams HKS_RSA_MT_19300_PARAMS = {
     .params =
@@ -444,6 +458,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_19900_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_20000_PARAMS = {
     .alias = "This is a test auth id for OAEPWithSHA-512",
     .params =
@@ -465,6 +480,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_20000_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_20100_PARAMS = {
     .params =
@@ -487,6 +503,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_20100_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_20200_PARAMS = {
     .alias = "This is a test auth id for OAEPWithSHA-512",
     .params =
@@ -508,6 +525,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_20200_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_20300_PARAMS = {
     .params =
@@ -530,6 +548,7 @@ const DecryptLocalCaseParams HKS_RSA_MT_20300_PARAMS = {
     .decryptResult = HKS_SUCCESS,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 const DecryptServiceCaseParams HKS_RSA_MT_20400_PARAMS = {
     .alias = "This is a test auth id for OAEPWithSHA-512",
     .params =
@@ -551,6 +570,7 @@ const DecryptServiceCaseParams HKS_RSA_MT_20400_PARAMS = {
     .encryptResult = HKS_FAILURE,
     .decryptResult = HKS_SUCCESS,
 };
+#endif
 
 const DecryptLocalCaseParams HKS_RSA_MT_20500_PARAMS = {
     .params =
@@ -682,7 +702,22 @@ const DecryptServiceCaseParams HKS_RSA_MT_21000_PARAMS = {
 };
 }  // namespace
 
-class HksRsaEcbOaepSha512Mt : public HksRsaCommonMt, public testing::Test {};
+class HksRsaEcbOaepSha512Mt : public HksRsaCommonMt, public testing::Test {
+public:
+    static void SetUpTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
+#endif
+    }
+
+    static void TearDownTestCase(void)
+    {
+#ifdef L2_STANDARD
+        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
+#endif
+    }
+};
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt18100
@@ -756,6 +791,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt18700, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_18700_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt18800
  * @tc.name      : HksRsaEcbOaepSha512Mt18800
@@ -765,6 +801,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt18800, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_18800_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt18900
@@ -776,6 +813,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt18900, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_18900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt19000
  * @tc.name      : HksRsaEcbOaepSha512Mt19000
@@ -785,6 +823,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt19000, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_19000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt19100
@@ -796,6 +835,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt19100, TestSize.Level1)
     EncryptLocalTestCase(HKS_RSA_MT_19100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt19200
  * @tc.name      : HksRsaEcbOaepSha512Mt19200
@@ -805,6 +845,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt19200, TestSize.Level1)
 {
     EncryptServiceTestCase(HKS_RSA_MT_19200_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt19300
@@ -878,6 +919,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt19900, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_19900_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt20000
  * @tc.name      : HksRsaEcbOaepSha512Mt20000
@@ -887,6 +929,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt20000, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_20000_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt20100
@@ -898,6 +941,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt20100, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_20100_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt20200
  * @tc.name      : HksRsaEcbOaepSha512Mt20200
@@ -907,6 +951,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt20200, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_20200_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt20300
@@ -918,6 +963,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt20300, TestSize.Level1)
     DecryptLocalTestCase(HKS_RSA_MT_20300_PARAMS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt20400
  * @tc.name      : HksRsaEcbOaepSha512Mt20400
@@ -927,6 +973,7 @@ HWTEST_F(HksRsaEcbOaepSha512Mt, HksRsaEcbOaepSha512Mt20400, TestSize.Level1)
 {
     DecryptServiceTestCase(HKS_RSA_MT_20400_PARAMS);
 }
+#endif
 
 /**
  * @tc.number    : HksRsaEcbOaepSha512Mt20500
