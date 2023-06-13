@@ -102,4 +102,7 @@ ohos_moduletest("huks_mt_test") {
     "c_utils:utils",
     "hiviewdfx_hilog_native:libhilog",
   ]
+  if (os_level == "standard") {
+    defines += [ "L2_STANDARD" ]
+  }
 }
