@@ -235,6 +235,11 @@ if (ohos_kernel_type == "liteos_m") {
       # compile code of old version
       sources += [ "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_rkc_v1.c" ]
     }
+
+    if (huks_enable_upgrade_derive_key_alg) {
+      # enable upgrade key derivation algorithm from PBKDF2 to HKDF
+      defines += [ "HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF" ]
+    }
   }
 } else {
   ohos_shared_library("huks_3.0_sdk") {
