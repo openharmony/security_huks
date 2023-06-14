@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+import("//base/security/huks/build/config.gni")
+
 group("unittest") {
   if (os_level == "standard") {
     testonly = true
