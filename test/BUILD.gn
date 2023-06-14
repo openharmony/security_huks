@@ -13,6 +13,8 @@
 # limitations under the License.
 #
 
+import("//base/security/huks/build/config.gni")
+
 group("unittest") {
   if (os_level == "standard") {
     testonly = true
@@ -24,10 +26,12 @@ group("unittest") {
       "./unittest/huks_standard_test/module_test/mock:huks_mock_test",
       "./unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/idl/ipc:service_ipc_test",
       "./unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_wrap/useridm_test:huks_useridm_wrap_test",
-      "./unittest/huks_standard_test/module_test/upgrade_key_test:huks_upgrade_key_test",
       "./unittest/huks_standard_test/storage_multithread_test:huks_multithread_test",
       "./unittest/huks_standard_test/three_stage_test:huks_UT_test",
     ]
+    if (huks_security_level == "software") {
+      deps += [ "./unittest/huks_standard_test/module_test/upgrade_key_test:huks_upgrade_key_test" ]
+    }
   } else {
     if (ohos_kernel_type == "liteos_m") {
       #deps = [ "./unittest/huks_lite_test/liteos_m_adapter:huks_3.0_test" ]

@@ -47,7 +47,6 @@ ohos_unittest("huks_module_test") {
 
   # interface sdk_test
   sources += [
-    "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_aes_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_agreement_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_bn_exp_mod_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_cipher_test.cpp",
