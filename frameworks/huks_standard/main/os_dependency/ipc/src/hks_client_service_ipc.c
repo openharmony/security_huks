@@ -510,7 +510,7 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-static int32_t CertificateChainGetOrAttest(enum HksMessage type, const struct HksBlob *keyAlias,
+static int32_t CertificateChainGetOrAttest(enum HksIpcInterfaceCode type, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksCertChain *certChain)
 {
     struct HksBlob inBlob = { 0, NULL };
