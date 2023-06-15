@@ -14,10 +14,9 @@
  */
 
 #include "hks_samgr_client.h"
-
-#include "huks_service_ipc_interface_code.h"
 #include "hks_request.h"
 #include "hks_template.h"
+#include "huks_service_ipc_interface_code.h"
 
 #include "iproxy_client.h"
 #include "registry.h"

@@ -16,8 +16,8 @@
 #ifndef HKS_REQUEST_H
 #define HKS_REQUEST_H
 
-#include "huks_service_ipc_interface_code.h"
 #include "hks_type_inner.h"
+#include "huks_service_ipc_interface_code.h"
 
 #ifdef __cplusplus
 extern "C" {
