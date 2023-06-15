@@ -18,8 +18,8 @@
 #include <securec.h>
 
 #include "hks_client_service.h"
-#include "huks_service_ipc_interface_code.h"
 #include "hks_sa.h"
+#include "huks_service_ipc_interface_code.h"
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
