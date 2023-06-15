@@ -18,7 +18,7 @@
 #include <securec.h>
 
 #include "hks_client_service.h"
-#include "hks_message_code.h"
+#include "huks_service_ipc_interface_code.h"
 #include "hks_sa.h"
 
 namespace OHOS {

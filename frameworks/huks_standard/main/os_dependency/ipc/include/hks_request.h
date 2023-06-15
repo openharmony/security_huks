@@ -16,7 +16,7 @@
 #ifndef HKS_REQUEST_H
 #define HKS_REQUEST_H
 
-#include "hks_message_code.h"
+#include "huks_service_ipc_interface_code.h"
 #include "hks_type_inner.h"
 
 #ifdef __cplusplus
@@ -29,7 +29,7 @@ extern "C" {
  * @inBlob:      the input serialized data blob.
  * @outBlob:     the output serialized data blob, can be null.
  */
-int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
+int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
     const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
