@@ -19,7 +19,7 @@ module_output_path = "security/huks"
 ##############################fuzztest##########################################
 ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "../ipc_entry_fuzzer"
+  fuzz_config_file = "../hksserviceonremoterequest_fuzzer"
 
   include_dirs = [
     ".",
