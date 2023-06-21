@@ -19,7 +19,7 @@ module_output_path = "security/huks"
 ##############################fuzztest##########################################
 ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   module_out_path = module_output_path
-  fuzz_config_file = "../ipc_entry_fuzzer"
+  fuzz_config_file = "../hksserviceonremoterequest_fuzzer"
 
   include_dirs = [
     ".",
@@ -38,7 +38,6 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   sources = [ "hks_service_on_remote_request_fuzzer.cpp" ]
 
   deps = [
-    "../../../services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     "../../../services/huks_standard/huks_service/main:libhuks_service_standard_static",
     "//third_party/bounds_checking_function:libsec_static",
   ]
