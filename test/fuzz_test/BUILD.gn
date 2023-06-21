@@ -20,6 +20,7 @@ group("fuzztest") {
   if (os_level == "standard") {
     if (huks_test_suite_running_environment == "system") {
       deps = [
+        "//base/security/huks/test/fuzz_test/hksserviceonremoterequest_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksabort_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksattestkey_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksbnexpmod_fuzzer:fuzztest",
@@ -36,7 +37,6 @@ group("fuzztest") {
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksinit_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hkskeyexist_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksupdate_fuzzer:fuzztest",
-        "//base/security/huks/test/fuzz_test/ipc_entry_fuzzer:fuzztest",
       ]
     }
   }
