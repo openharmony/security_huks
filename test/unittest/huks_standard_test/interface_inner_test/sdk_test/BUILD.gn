@@ -73,7 +73,7 @@ ohos_unittest("hukssdk_test") {
   ]
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
