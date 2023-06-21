@@ -90,8 +90,8 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
     external_deps = [
-      "hitrace:libhitracechain",
       "hilog:libhilog",
+      "hitrace:libhitracechain",
     ]
   }
 } else {
