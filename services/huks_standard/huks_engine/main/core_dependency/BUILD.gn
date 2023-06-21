@@ -47,7 +47,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
 
   complete_static_lib = true
 
-  external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+  external_deps = [ "hilog:libhilog" ]
   if (huks_security_level == "software" && has_huks_hdi_driver &&
       !enable_hks_mock) {
     defines = [ "HKS_CORE_ENABLE_HDI_DRIVER" ]

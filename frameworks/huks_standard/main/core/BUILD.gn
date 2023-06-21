@@ -45,7 +45,7 @@ if (os_level == "standard") {
     }
     sources += [ "./src/hks_verifier.c" ]
     deps += [ "//third_party/openssl:libcrypto_shared" ]
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 } else {
   ohos_static_library("libhuks_core_small_static") {
