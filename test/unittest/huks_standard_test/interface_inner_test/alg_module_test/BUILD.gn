@@ -100,7 +100,7 @@ ohos_moduletest("huks_mt_test") {
   ]
   external_deps = [
     "c_utils:utils",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
   ]
   if (os_level == "standard") {
     defines += [ "L2_STANDARD" ]

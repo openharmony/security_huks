@@ -230,8 +230,8 @@ ohos_unittest("huks_module_test") {
 
   external_deps = [
     "c_utils:utils",
-    "hitrace_native:libhitracechain",
-    "hiviewdfx_hilog_native:libhilog",
+    "hitrace:libhitracechain",
+    "hilog:libhilog",
   ]
   if (support_jsapi) {
     sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_event_observer_test.cpp" ]
