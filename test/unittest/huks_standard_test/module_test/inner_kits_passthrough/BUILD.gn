@@ -169,9 +169,9 @@ ohos_static_library("libhukssdk_static") {
   ]
   external_deps = [
     "c_utils:utils",
-    "hitrace_native:hitrace_meter",
-    "hitrace_native:libhitracechain",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hitrace:hitrace_meter",
+    "hitrace:libhitracechain",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]

@@ -42,8 +42,8 @@ ohos_static_library("libhuks_utils_hisysevent_wrapper_static") {
     "-Werror",
   ]
   external_deps = [
-    "hisysevent_native:libhisysevent",
-    "hiviewdfx_hilog_native:libhilog",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
   ]
   complete_static_lib = true
 }
