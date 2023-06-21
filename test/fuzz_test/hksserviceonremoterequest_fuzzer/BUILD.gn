@@ -38,7 +38,6 @@ ohos_fuzztest("HksServiceOnRemoteRequestFuzzTest") {
   sources = [ "hks_service_on_remote_request_fuzzer.cpp" ]
 
   deps = [
-    "../../../services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
     "../../../services/huks_standard/huks_service/main:libhuks_service_standard_static",
     "//third_party/bounds_checking_function:libsec_static",
   ]
