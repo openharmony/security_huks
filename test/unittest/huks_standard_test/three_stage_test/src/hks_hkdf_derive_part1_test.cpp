@@ -175,7 +175,7 @@ static struct HksParam g_genParams003[] = {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
     }, {
-        .tag =  HKS_TAG_DIGEST, 
+        .tag =  HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA512
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
