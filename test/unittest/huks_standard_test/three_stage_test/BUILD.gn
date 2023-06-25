@@ -22,15 +22,6 @@ ohos_unittest("huks_UT_test") {
   module_out_path = module_output_path
 
   sources = [
-    "src/symmetric_alg_test/hks_aes_cipher_part1_test.cpp",
-    "src/symmetric_alg_test/hks_aes_cipher_part2_test.cpp",
-    "src/symmetric_alg_test/hks_aes_cipher_part3_test.cpp",
-    "src/symmetric_alg_test/hks_aes_cipher_test_common.cpp",
-    "src/hks_attest_key_nonids_test.cpp",
-    "src/hks_attest_key_test_common.cpp",
-    "src/hks_check_pur_part_test.cpp",
-    "src/hks_cross_test.cpp",
-    "src/hks_cross_test_common.cpp",
     "src/asymmetric_alg_test/hks_dh_agree_test.cpp",
     "src/asymmetric_alg_test/hks_ecc_sign_verify_part2_test.cpp",
     "src/asymmetric_alg_test/hks_ecc_sign_verify_part3_test.cpp",
@@ -41,6 +32,21 @@ ohos_unittest("huks_UT_test") {
     "src/asymmetric_alg_test/hks_ed25519_sign_verify_test.cpp",
     "src/asymmetric_alg_test/hks_export_test.cpp",
     "src/asymmetric_alg_test/hks_export_test_mt.cpp",
+    "src/asymmetric_alg_test/hks_rsa_cipher_part3_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_cipher_part4_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_cipher_part5_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_cipher_test_common.cpp",
+    "src/asymmetric_alg_test/hks_rsa_sign_verify_part5_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_sign_verify_part6_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_sign_verify_part7_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_sign_verify_part8_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_sign_verify_part9_test.cpp",
+    "src/asymmetric_alg_test/hks_rsa_sign_verify_test_common.cpp",
+    "src/hks_attest_key_nonids_test.cpp",
+    "src/hks_attest_key_test_common.cpp",
+    "src/hks_check_pur_part_test.cpp",
+    "src/hks_cross_test.cpp",
+    "src/hks_cross_test_common.cpp",
     "src/hks_hkdf_derive_part1_test.cpp",
     "src/hks_hkdf_derive_part2_test.cpp",
     "src/hks_hkdf_derive_test_common.cpp",
@@ -52,18 +58,12 @@ ohos_unittest("huks_UT_test") {
     "src/hks_pbkdf2_derive_part1_test.cpp",
     "src/hks_pbkdf2_derive_part2_test.cpp",
     "src/hks_pbkdf2_derive_test_common.cpp",
-    "src/asymmetric_alg_test/hks_rsa_cipher_part3_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_cipher_part4_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_cipher_part5_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_cipher_test_common.cpp",
-    "src/asymmetric_alg_test/hks_rsa_sign_verify_part5_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_sign_verify_part6_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_sign_verify_part7_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_sign_verify_part8_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_sign_verify_part9_test.cpp",
-    "src/asymmetric_alg_test/hks_rsa_sign_verify_test_common.cpp",
     "src/hks_three_stage_test_common.c",
     "src/hks_x25519_agree_test.cpp",
+    "src/symmetric_alg_test/hks_aes_cipher_part1_test.cpp",
+    "src/symmetric_alg_test/hks_aes_cipher_part2_test.cpp",
+    "src/symmetric_alg_test/hks_aes_cipher_part3_test.cpp",
+    "src/symmetric_alg_test/hks_aes_cipher_test_common.cpp",
   ]
 
   sources += [
@@ -77,13 +77,13 @@ ohos_unittest("huks_UT_test") {
     defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
     sources += [
       "src/asymmetric_alg_test/hks_ecc_sign_verify_part1_test.cpp",
-      "src/hks_import_sign_verify_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_cipher_part1_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_cipher_part2_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part1_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part2_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part3_test.cpp",
       "src/asymmetric_alg_test/hks_rsa_sign_verify_part4_test.cpp",
+      "src/hks_import_sign_verify_test.cpp",
     ]
   }
 
