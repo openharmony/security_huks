@@ -45,12 +45,12 @@ void HksAgreementTest::SetUpTestCase(void)
 
 void HksAgreementTest::TearDownTestCase(void)
 {
-    EXPECT_EQ(HksInitialize(), 0);
     OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksAgreementTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksAgreementTest::TearDown()
