@@ -89,6 +89,8 @@ unittest("huks_3.0_test") {
     "//base/security/huks/huawei_property/include",
     "../common/include",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include",
+    "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/asymmetric_alg_test",
+    "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/symmetric_alg_test",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
   ]
 
