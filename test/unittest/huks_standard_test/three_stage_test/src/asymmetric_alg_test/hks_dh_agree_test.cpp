@@ -50,6 +50,7 @@ void HksDhAgreeTest::TearDownTestCase(void)
 
 void HksDhAgreeTest::SetUp()
 {
+    EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksDhAgreeTest::TearDown()
