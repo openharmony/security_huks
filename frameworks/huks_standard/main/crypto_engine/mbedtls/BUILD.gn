@@ -67,7 +67,7 @@ if (os_level == "standard") {
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
-    external_deps = [ "hiviewdfx_hilog_native:libhilog" ]
+    external_deps = [ "hilog:libhilog" ]
   }
 } else {
   ohos_static_library("libhuks_mbedtls_small_static") {

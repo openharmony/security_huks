@@ -24,6 +24,7 @@
 #include <openssl/evp.h>
 #include <stddef.h>
 
+#include "hks_cfi.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_openssl_common.h"
@@ -38,10 +39,10 @@
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) ||    \
     defined(HKS_SUPPORT_SM4_ECB_PKCS7)
 
-const EVP_CIPHER *GetBlockCipherType(uint32_t keySize, uint32_t mode,
+ENABLE_CFI(const EVP_CIPHER *GetBlockCipherType(uint32_t keySize, uint32_t mode,
     const EVP_CIPHER *(*getCbcCipherType)(uint32_t keySize),
     const EVP_CIPHER *(*getCtrCipherType)(uint32_t keySize),
-    const EVP_CIPHER *(*getEcbCipherType)(uint32_t keySize))
+    const EVP_CIPHER *(*getEcbCipherType)(uint32_t keySize)))
 {
     if (mode == HKS_MODE_CBC) {
         return getCbcCipherType(keySize);
@@ -81,9 +82,9 @@ static int32_t OpensslBlockCipherCryptInitParams(const struct HksBlob *key, EVP_
     return HKS_SUCCESS;
 }
 
-int32_t OpensslBlockCipherCryptInit(
+ENABLE_CFI(int32_t OpensslBlockCipherCryptInit(
     const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool isEncrypt, void **cryptoCtx,
-    const EVP_CIPHER *(*getCipherType)(uint32_t keySize, uint32_t mode))
+    const EVP_CIPHER *(*getCipherType)(uint32_t keySize, uint32_t mode)))
 {
     int32_t ret;
     struct HksCipherParam *cipherParam = (struct HksCipherParam *)usageSpec->algParam;

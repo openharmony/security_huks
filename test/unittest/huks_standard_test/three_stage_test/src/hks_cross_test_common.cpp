@@ -299,26 +299,20 @@ int32_t HksCrossTestAgree(const struct HksBlob *keyAlias, const struct HksBlob *
     return HKS_SUCCESS;
 }
 
-#include <stdio.h>
-#define LOGI(fmt, ...) printf("[I][%s][%d]" fmt "\n", __FUNCTION__, __LINE__, ##__VA_ARGS__)
-
 int32_t HksCrossTestDerive(const struct HksBlob *keyAlias, const struct HksParamSet *genParamSet,
     struct HksParamSet *initParamSet, struct HksParamSet *finishParamSet)
 {
-LOGI("");
     struct HksBlob inData = {
         g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
-LOGI("");
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksGenerateKey failed.");
         return HKS_FAILURE;
     }
 
-LOGI("");
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
     ret = HksInit(keyAlias, initParamSet, &handleDerive, nullptr);
@@ -327,7 +321,6 @@ LOGI("");
         return HKS_FAILURE;
     }
 
-LOGI("");
     uint8_t tmpOut[CROSS_COMMON_SIZE] = {0};
     struct HksBlob outDataU = { CROSS_COMMON_SIZE, tmpOut };
     ret = HksUpdate(&handleDerive, initParamSet, &inData, &outDataU);
@@ -336,7 +329,6 @@ LOGI("");
         return HKS_FAILURE;
     }
 
-LOGI("");
     uint8_t outDataD[CROSS_COMMON_SIZE] = {0};
     struct HksBlob outData = { CROSS_COMMON_SIZE, outDataD };
     ret = HksFinish(&handleDerive, finishParamSet, &inData, &outData);
@@ -345,7 +337,6 @@ LOGI("");
         return HKS_FAILURE;
     }
 
-LOGI("");
     uint8_t tmpDerive[DERIVE_KEY_SIZE_32] = {0};
     struct HksBlob derivedKey = { DERIVE_KEY_SIZE_32, tmpDerive };
     ret = HksDeriveKey(initParamSet, keyAlias, &derivedKey);
@@ -354,14 +345,12 @@ LOGI("");
         return HKS_FAILURE;
     }
 
-LOGI("");
     ret = HksMemCmp(derivedKey.data, outData.data, outData.size);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("outData not equals derivedKey.");
         return HKS_FAILURE;
     }
 
-LOGI("");
     return HKS_SUCCESS;
 }
 }

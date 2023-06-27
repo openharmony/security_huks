@@ -119,8 +119,8 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     if (arrayBlob.data == nullptr) {
         return nullptr;
     }
-    // the start point of target data should be the rawData + offset
-    (void)memcpy_s(arrayBlob.data, length, (uint8_t *)rawData + offset, length);
+
+    (void)memcpy_s(arrayBlob.data, length, rawData, length);
     arrayBlob.size = static_cast<uint32_t>(length);
 
     return GetInt32(env, 0);
