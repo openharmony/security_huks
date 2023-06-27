@@ -37,7 +37,6 @@
           "access_token",
           "bundle_framework",
           "c_utils",
-          "common",
           "common_event_service",
           "hisysevent",
           "hitrace",
@@ -47,7 +46,6 @@
           "os_account",
           "safwk",
           "samgr",
-          "c_utils",
           "user_auth_framework",
           "drivers_interface_user_auth",
           "drivers_interface_huks"
