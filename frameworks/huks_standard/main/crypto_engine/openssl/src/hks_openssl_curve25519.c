@@ -180,56 +180,40 @@ int32_t HksOpensslX25519AgreeKey(const struct HksBlob *nativeKey, const struct H
     return ret;
 }
 
-static void FreeEd25519KeyData(uint8_t *priData, uint8_t *pubData, uint8_t *pubKmData)
-{
-    if (priData != NULL) {
-        HksFree(priData);
-    }
-
-    if (pubData != NULL) {
-        HksFree(pubData);
-    }
-
-    if (pubKmData != NULL) {
-        HksFree(pubKmData);
-    }
-}
-
 int32_t HksOpensslEd25519AgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
-    (void)spec;
-    uint32_t priSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
-    uint8_t *priData = (uint8_t *)HksMalloc(priSize);
-    struct HksBlob nKey = { priSize, priData };
-    uint32_t pubSize = CURVE25519_KEY_LEN;
-    uint8_t *pubData = (uint8_t *)HksMalloc(pubSize);
-    struct HksBlob pKey = { pubSize, pubData };
-    struct HksBlob pubKeyData = {0};
-    uint32_t pubKmSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
-    uint8_t *pubKmData = (uint8_t *)HksMalloc(pubKmSize);
-    struct HksBlob pubKm = { pubKmSize, pubKmData };
-    if (priData == NULL || pubData == NULL || pubKmData == NULL) {
-        FreeEd25519KeyData(priData, pubData, pubKmData);
-        return HKS_ERROR_MALLOC_FAIL;
-    }
+    struct HksBlob ed25519PubKey = { 0 };
+    uint32_t materialKeySize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
+    struct HksBlob x25519PriKeyMaterial = { materialKeySize, (uint8_t *)HksMalloc(materialKeySize) };
+    struct HksBlob x25519PubKeyMaterial = { materialKeySize, (uint8_t *)HksMalloc(materialKeySize) };
+
     int32_t ret;
     do {
-        ret = ConvertPrivX25519FromED25519(nativeKey, &nKey);
+        if (x25519PriKeyMaterial.data == NULL || x25519PubKeyMaterial.data == NULL) {
+            HKS_LOG_E("malloc for x22519 key pair failed");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+
+        // get x25519 private key material
+        ret = ConvertPrivX25519FromED25519(nativeKey, &x25519PriKeyMaterial);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "convert ED25519 private key to x25519 failed")
 
-        ret = HksGetKeyFromMaterial(HKS_ALG_X25519, true, pubKey, &pubKeyData);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data from key material failed")
-        ret = ConvertPubkeyX25519FromED25519(&pubKeyData, &pKey);
+        // get x25519 public key material
+        ret = HksGetKeyFromMaterial(HKS_ALG_ED25519, true, pubKey, &ed25519PubKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get public key from keymaterial failed")
+        ret = ConvertPubkeyX25519FromED25519(&ed25519PubKey, &x25519PubKeyMaterial);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "convert ED25519 public key to x25519 failed")
-        ret = HksSetKeyToMaterial(HKS_ALG_X25519, true, &pKey, &pubKm);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "set mkey data to key material failed")
-        ret = HksOpensslX25519AgreeKey(&nKey, &pubKm, NULL, sharedKey);
+
+        // x25519 key agreement
+        ret = HksOpensslX25519AgreeKey(&x25519PriKeyMaterial, &x25519PubKeyMaterial, spec, sharedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "x25519 agree key failed")
     } while (0);
-    (void)memset_s(nKey.data, nKey.size, 0, nKey.size);
-    FreeEd25519KeyData(nKey.data, pKey.data, pubKm.data);
-    HksFree(pubKeyData.data);
+
+    HKS_MEMSET_FREE_BLOB(ed25519PubKey);
+    HKS_MEMSET_FREE_BLOB(x25519PriKeyMaterial);
+    HKS_MEMSET_FREE_BLOB(x25519PubKeyMaterial);
     return ret;
 }
 

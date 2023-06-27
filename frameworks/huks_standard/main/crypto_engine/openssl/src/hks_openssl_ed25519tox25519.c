@@ -292,7 +292,6 @@ static int32_t FillPubKeyByZero(uint8_t *pubKey, uint32_t *pubKeySize)
 static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct HksBlob *keyOut,
     struct Curve25519Var *var, BIGNUM *numberOne, BN_CTX *ctx)
 {
-    uint32_t tmpSize = keyOut->size;
     uint8_t tmpKey[P_BYTES] = {0};
     struct Curve25519Structure curve25519 = {0};
     int32_t ret = Curve25519Initialize(&curve25519, keyIn->data, keyIn->size, true);
@@ -321,7 +320,7 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
         if (BN_bn2bin(var->c, tmpKey) <= 0) {
             break;
         }
-        tmpSize = (uint32_t)BN_num_bytes(var->c);
+        uint32_t tmpSize = (uint32_t)BN_num_bytes(var->c);
         HKS_IF_NOT_SUCC_BREAK(FillPubKeyByZero(tmpKey, &tmpSize))
         SwapEndianThirtyTwoByte(tmpKey, tmpSize, true);
         if (memcpy_s(keyOut->data, keyOut->size, tmpKey, tmpSize) != EOK) {
@@ -337,6 +336,18 @@ static int32_t BnOperationOfPubKeyConversion(const struct HksBlob *keyIn, struct
 
 int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
+    uint32_t tmpSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
+    if (keyOut->size < tmpSize) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    struct KeyMaterial25519 *keyMaterialOut = (struct KeyMaterial25519 *)keyOut->data;
+    keyMaterialOut->keyAlg = HKS_ALG_X25519;
+    keyMaterialOut->keySize = HKS_CURVE25519_KEY_SIZE_256;
+    keyMaterialOut->pubKeySize = CURVE25519_KEY_LEN;
+    keyMaterialOut->priKeySize = 0;
+    keyMaterialOut->reserved = 0;
+    struct HksBlob outPubKey = { CURVE25519_KEY_LEN, keyOut->data + sizeof(struct KeyMaterial25519) };
+
     BN_CTX *ctx = BN_CTX_new();
     HKS_IF_NULL_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR)
 
@@ -347,7 +358,7 @@ int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBl
         return ret;
     }
     BIGNUM *numberOne = BN_new();
-    ret = BnOperationOfPubKeyConversion(keyIn, keyOut, &var, numberOne, ctx);
+    ret = BnOperationOfPubKeyConversion(keyIn, &outPubKey, &var, numberOne, ctx);
 
     BN_CTX_free(ctx);
     BN_free(numberOne);
@@ -357,11 +368,18 @@ int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBl
 
 int32_t ConvertPrivX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob *keyOut)
 {
-    uint32_t tmpSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN; // 2: pub + pri
+    uint32_t tmpSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN;
+    uint32_t totalSize = sizeof(struct KeyMaterial25519) + CURVE25519_KEY_LEN * 2; // 2: private key and public key
+    if (keyIn->size < totalSize || keyOut->size < tmpSize) {
+        HKS_LOG_E("Invalid keyInSize=%u or keyOutSize=%u", keyIn->size, keyOut->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     struct KeyMaterial25519 *keyMaterialOut = (struct KeyMaterial25519 *)keyOut->data;
-    keyMaterialOut->keySize = tmpSize;
+    keyMaterialOut->keyAlg = HKS_ALG_X25519;
+    keyMaterialOut->keySize = HKS_CURVE25519_KEY_SIZE_256;
     keyMaterialOut->pubKeySize = 0;
     keyMaterialOut->priKeySize = CURVE25519_KEY_LEN;
+    keyMaterialOut->reserved = 0;
     uint32_t offset = sizeof(struct KeyMaterial25519);
 
     uint8_t *input = keyIn->data + tmpSize;
@@ -382,10 +400,10 @@ int32_t ConvertPrivX25519FromED25519(const struct HksBlob *keyIn, struct HksBlob
     }
 
     // 248 127 64 are the constant value of x25 to ed25 algorithm
-    keyOut->size = keyMaterialOut->keySize;
+    keyOut->size = tmpSize;
     keyOut->data[offset] &= 248; // 248: RFC 8032
-    keyOut->data[keyMaterialOut->keySize - 1] &= 127; // 127: RFC 8032
-    keyOut->data[keyMaterialOut->keySize - 1] |= 64;  // 64: RFC 8032
+    keyOut->data[tmpSize - 1] &= 127; // 127: RFC 8032
+    keyOut->data[tmpSize - 1] |= 64;  // 64: RFC 8032
     (void)memset_s(digest, digestLen, 0, digestLen);
     return HKS_SUCCESS;
 }

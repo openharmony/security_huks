@@ -652,7 +652,6 @@ static int32_t MakeSubPath(const char *mainPath, const char *tmpPath, char *outP
     if (strncat_s(outPath, outPathLen, tmpPath, strlen(tmpPath)) != EOK) {
         return HKS_ERROR_INTERNAL_ERROR;
     }
-    HKS_LOG_E("MakeSubPath outPath = %" LOG_PUBLIC "s", outPath);
     return HKS_SUCCESS;
 }
 
