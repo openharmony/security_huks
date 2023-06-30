@@ -11,7 +11,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-# any change to frameworks/huks_standard/main/common/include/huks_service_ipc_interface_code.h needs to be reviewed by 
+# any change to frameworks/huks_standard/main/common/include/huks_service_ipc_interface_code.h needs to be reviewed by
 # @leonchan5
 
 frameworks/huks_standard/main/common/include/huks_service_ipc_interface_code.h @leonchan5
