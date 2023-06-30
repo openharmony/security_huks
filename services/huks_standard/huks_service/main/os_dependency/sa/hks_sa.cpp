@@ -26,6 +26,8 @@
 #include "hks_message_handler.h"
 #include "hks_template.h"
 
+#include "hks_response.h"
+
 #ifdef SUPPORT_COMMON_EVENT
 #include <pthread.h>
 #include <unistd.h>
@@ -87,7 +89,7 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
         if (code == HKS_IPC_MESSAGE_HANDLER[i].msgId) {
             HKS_IPC_MESSAGE_HANDLER[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData),
                 reinterpret_cast<const uint8_t *>(&reply));
-            return NO_ERROR;
+            return HKS_SUCCESS;
         }
     }
 
@@ -99,10 +101,10 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
                 outData.size = outSize;
                 if (outData.size > MAX_MALLOC_LEN) {
                     HKS_LOG_E("outData size is invalid, size:%" LOG_PUBLIC "u", outData.size);
-                    return HW_SYSTEM_ERROR;
+                    return HKS_ERROR_INVALID_ARGUMENT;
                 }
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
-                HKS_IF_NULL_LOGE_RETURN(outData.data, HW_SYSTEM_ERROR, "Malloc outData failed.")
+                HKS_IF_NULL_LOGE_RETURN(outData.data, HKS_ERROR_MALLOC_FAIL, "Malloc outData failed.")
             }
             HKS_IPC_THREE_STAGE_HANDLER[i].handler(reinterpret_cast<const struct HksBlob *>(&srcData), &outData,
                 reinterpret_cast<const uint8_t *>(&reply));
@@ -110,7 +112,7 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
             break;
         }
     }
-    return NO_ERROR;
+    return HKS_SUCCESS;
 }
 
 HksService::HksService(int saId, bool runOnCreate = true)
@@ -170,36 +172,45 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d", code);
     // check that the code is valid
-    if (code < MSG_CODE_BASE || code >= MSG_CODE_MAX) {
+    if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
     }
 
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
-
     struct HksBlob srcData = { 0, nullptr };
-    srcData.size = static_cast<uint32_t>(data.ReadUint32());
-    if (IsInvalidLength(srcData.size)) {
-        HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
-        return HW_SYSTEM_ERROR;
-    }
+    int32_t ret = HKS_SUCCESS;
+    do {
+        srcData.size = static_cast<uint32_t>(data.ReadUint32());
+        if (IsInvalidLength(srcData.size)) {
+            HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+            break;
+        }
 
-    srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
-    HKS_IF_NULL_LOGE_RETURN(srcData.data, HW_SYSTEM_ERROR, "Malloc srcData failed.")
+        srcData.data = static_cast<uint8_t *>(HksMalloc(srcData.size));
+        if (srcData.data == nullptr) {
+            HKS_LOG_E("Malloc srcData failed.");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
 
-    const uint8_t *pdata = data.ReadBuffer(static_cast<size_t>(srcData.size));
-    if (pdata == nullptr) {
-        HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_IPC_MSG_FAIL;
-    }
-    (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
+        const uint8_t *pdata = data.ReadBuffer(static_cast<size_t>(srcData.size));
+        if (pdata == nullptr) {
+            ret = HKS_ERROR_IPC_MSG_FAIL;
+            break;
+        }
+        (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
 
-    if (ProcessMessage(code, outSize, srcData, reply) != NO_ERROR) {
-        HKS_LOG_E("process message!");
-        HKS_FREE_BLOB(srcData);
-        return HKS_ERROR_BAD_STATE;
-    }
+        ret = ProcessMessage(code, outSize, srcData, reply);
+    } while (0);
 
     HKS_FREE_BLOB(srcData);
+
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("handle ipc msg failed!");
+        HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
+    }
+
     return NO_ERROR;
 }
 
