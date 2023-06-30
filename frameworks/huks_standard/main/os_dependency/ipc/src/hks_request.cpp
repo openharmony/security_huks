@@ -69,7 +69,7 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     return HKS_SUCCESS;
 }
 
-int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob,
+int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
     enum HksSendType sendType = HKS_SEND_TYPE_SYNC;

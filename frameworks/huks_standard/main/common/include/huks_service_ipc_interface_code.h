@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 
-#ifndef HKS_MESSAGE_CODE_H
-#define HKS_MESSAGE_CODE_H
+#ifndef HUKS_SERVICE_IPC_INTERFACE_CODE_H
+#define HUKS_SERVICE_IPC_INTERFACE_CODE_H
 
-enum HksMessage {
+/* SAID: 3510 */
+enum HksIpcInterfaceCode {
     HKS_MSG_BASE = 0,
 
     HKS_MSG_GEN_KEY = HKS_MSG_BASE,
@@ -47,4 +48,4 @@ enum HksMessage {
     HKS_MSG_MAX,
 };
 
-#endif /* HKS_MESSAGE_CODE_H */
+#endif /* HUKS_SERVICE_IPC_INTERFACE_CODE_H */

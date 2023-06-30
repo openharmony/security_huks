@@ -16,14 +16,15 @@
 #ifndef HKS_MESSAGE_HANDLER_H
 #define HKS_MESSAGE_HANDLER_H
 
+#include "huks_service_ipc_interface_code.h"
+
 #include "hks_ipc_service.h"
-#include "hks_message_code.h"
 #include "hks_type.h"
 
 typedef void (*HksIpcHandlerFuncProc)(const struct HksBlob *msg, const uint8_t *context);
 
 struct HksIpcEntryPoint {
-    enum HksMessage msgId;
+    enum HksIpcInterfaceCode msgId;
     HksIpcHandlerFuncProc handler;
 };
 
@@ -51,7 +52,7 @@ typedef void (*HksIpcThreeStageHandlerFuncProc)(const struct HksBlob *msg, struc
     const uint8_t *context);
 
 struct HksIpcThreeStagePoint {
-    enum HksMessage msgId;
+    enum HksIpcInterfaceCode msgId;
     HksIpcThreeStageHandlerFuncProc handler;
 };
 

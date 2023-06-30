@@ -14,10 +14,9 @@
  */
 
 #include "hks_samgr_client.h"
-
-#include "hks_message_code.h"
 #include "hks_request.h"
 #include "hks_template.h"
+#include "huks_service_ipc_interface_code.h"
 
 #include "iproxy_client.h"
 #include "registry.h"
@@ -115,7 +114,7 @@ static int32_t WriteToIpcRequest(IpcIo *request, uint32_t outBlobSize, const str
     return HKS_SUCCESS;
 }
 
-static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct HksBlob *inBlob,
+static int32_t HksIpcCall(IUnknown *iUnknown, enum HksIpcInterfaceCode type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob)
 {
     /* Check input and inBlob */
@@ -166,7 +165,7 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksMessage type, const struct
     return ret;
 }
 
-static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob)
+static int32_t HksSendRequestSync(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob, struct HksBlob *outBlob)
 {
     IClientProxy *clientProxy = NULL;
     IUnknown *iUnknown = SAMGR_GetInstance()->GetFeatureApi(HKS_SAMGR_SERVICE, HKS_SAMGR_FEATRURE);
@@ -187,7 +186,7 @@ static int32_t HksSendRequestSync(enum HksMessage type, const struct HksBlob *in
     return ret;
 }
 
-int32_t HksSendRequest(enum HksMessage type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
+int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob, struct HksBlob *outBlob,
     const struct HksParamSet *paramSet)
 {
     (void)paramSet;
