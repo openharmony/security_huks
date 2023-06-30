@@ -440,4 +440,17 @@ HWTEST_F(HksAPITest, HksAPITest021, TestSize.Level0)
     int32_t ret = HksGenerateKey(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksGenerateKey failed, ret = " << ret;
 }
+
+/**
+ * @tc.name: HksAPITest.HksAPITest022
+ * @tc.desc: tdd HksExportChipsetPlatformPublicKey with nullptr input
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAPITest, HksAPITest022, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksAPITest022");
+    int32_t ret = HksExportChipsetPlatformPublicKey(
+        nullptr, HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA, nullptr);
+    EXPECT_NE(ret, HKS_SUCCESS);
+}
 }
