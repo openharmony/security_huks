@@ -527,7 +527,7 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
 
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
@@ -557,7 +557,7 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
 
         struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
         ret = GetProcessInfo(&processInfo);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };

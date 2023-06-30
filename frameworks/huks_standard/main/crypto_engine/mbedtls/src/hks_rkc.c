@@ -133,6 +133,7 @@ static int32_t RkcGetRmkRawKey(const struct HksKsfDataRkc *ksfDataRkc, struct Hk
         rawKey->data[i] = ksfDataRkc->rkMaterial1[i] ^ ksfDataRkc->rkMaterial2[i] ^ udid[i];
     }
 
+    (void)memset_s(udid, HKS_HARDWARE_UDID_LEN, 0, HKS_HARDWARE_UDID_LEN);
     return HKS_SUCCESS;
 }
 
@@ -212,7 +213,7 @@ static int32_t RkcMakeRandomMaterial(struct HksKsfDataRkc *ksfDataRkc)
     ret = HksCryptoHalFillPrivRandom(&random2);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Generate random2 failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        (void)memset_s(&random1, HKS_RKC_MATERIAL_LEN, 0, HKS_RKC_MATERIAL_LEN);
+        (void)memset_s(&random1.data, HKS_RKC_MATERIAL_LEN, 0, HKS_RKC_MATERIAL_LEN);
     }
     return ret;
 }
@@ -259,7 +260,7 @@ int32_t ExecuteMkCrypt(const struct HksKsfDataMk *ksfDataMk, const struct HksBlo
         ret = HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
     }
 
-    return HKS_SUCCESS;
+    return ret;
 }
 
 int32_t RkcMkCrypt(const struct HksKsfDataRkc *ksfDataRkc, const struct HksKsfDataMk *ksfDataMk,
@@ -461,7 +462,9 @@ int32_t FillKsfDataRkcWithVer(struct HksKsfDataRkcWithVer *ksfDataRkcWithVer)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Generate salt failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
-    (void)memset_s(ksfDataRkcWithVer, sizeof(struct HksKsfDataRkcWithVer), 0, sizeof(struct HksKsfDataRkcWithVer));
+    if (ret != HKS_SUCCESS) {
+        (void)memset_s(ksfDataRkcWithVer, sizeof(struct HksKsfDataRkcWithVer), 0, sizeof(struct HksKsfDataRkcWithVer));
+    }
     return ret;
 }
 
