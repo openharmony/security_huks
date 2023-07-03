@@ -844,7 +844,7 @@ static int32_t CleanFile(const char *path, const char *fileName)
 {
     uint32_t size = HksFileSize(path, fileName);
     if (size == 0 || size > HKS_MAX_FILE_SIZE) {
-        HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
+        HKS_LOG_E("storage lite get file size failed, ret = %" LOG_PUBLIC "u.", size);
         return HKS_ERROR_FILE_SIZE_FAIL;
     }
 
@@ -853,7 +853,7 @@ static int32_t CleanFile(const char *path, const char *fileName)
     do {
         buf = (uint8_t *)HksMalloc(size);
         if (buf == NULL) {
-            HKS_LOG_E("malloc buf failed!");
+            HKS_LOG_E("storage lite malloc buf failed!");
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
@@ -873,9 +873,7 @@ static int32_t CleanFile(const char *path, const char *fileName)
         ret = HksFileWrite(path, fileName, 0, buf, size);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, ret, "write file random failed!")
     } while (0);
-
     HksFree(buf);
-
     return HKS_SUCCESS;
 }
 #endif
