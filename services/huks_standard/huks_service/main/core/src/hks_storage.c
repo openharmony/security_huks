@@ -400,7 +400,6 @@ static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
     ret = CleanFile(path, fileName);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("clean file failed!");
-        return ret;
     }
 #endif
 #ifdef HKS_SUPPORT_THREAD
