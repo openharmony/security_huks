@@ -843,7 +843,7 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
 static int32_t CleanFile(const char *path, const char *fileName)
 {
     uint32_t size = HksFileSize(path, fileName);
-    if (size == 0 || size > MAX_KEY_SIZE) {
+    if (size == 0 || size > HKS_MAX_FILE_SIZE) {
         HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
         return HKS_ERROR_FILE_SIZE_FAIL;
     }
