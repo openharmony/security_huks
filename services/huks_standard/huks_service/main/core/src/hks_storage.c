@@ -33,6 +33,7 @@
 #include "hks_mem.h"
 #include "hks_storage_file_lock.h"
 #include "hks_template.h"
+#include "huks_access.h"
 #include "securec.h"
 
 #define HKS_ENCODE_OFFSET_LEN         6
@@ -351,16 +352,65 @@ static uint32_t HksStorageReadFile(
     return size;
 }
 
+#ifdef HKS_ENABLE_CLEAN_FILE
+static int32_t CleanFile(const char *path, const char *fileName)
+{
+    uint32_t size = HksFileSize(path, fileName);
+    if (size == 0 || size > MAX_KEY_SIZE) {
+        HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
+        return HKS_ERROR_FILE_SIZE_FAIL;
+    }
+
+    int32_t ret = HKS_SUCCESS;
+    uint8_t *buf;
+    do {
+        buf = (uint8_t *)HksMalloc(size);
+        if (buf == NULL) {
+            HKS_LOG_E("malloc buf failed!");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+
+        (void)memset_s(buf, size, 0, size);
+        ret = HksStorageWriteFile(path, fileName, 0, buf, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 0 failed!")
+
+        (void)memset_s(buf, size, 1, size);
+        ret = HksStorageWriteFile(path, fileName, 0, buf, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 1 failed!")
+
+        struct HksBlob bufBlob = { .size = size, .data = buf };
+        ret = HuksAccessGenerateRandom(NULL, &bufBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "fill buf random failed!")
+
+        ret = HksStorageWriteFile(path, fileName, 0, buf, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file random failed!")
+    } while (0);
+
+    HksFree(buf);
+
+    return HKS_SUCCESS;
+}
+#endif
+
 static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
 {
+    int32_t ret;
+#ifdef HKS_ENABLE_CLEAN_FILE
+    ret = CleanFile(path, fileName);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("clean file failed!");
+        return ret;
+    }
+#endif
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HksStorageFileLockWrite(lock);
-    int32_t ret = HksFileRemove(path, fileName);
+    ret = HksFileRemove(path, fileName);
     HksStorageFileUnlockWrite(lock);
     HksStorageFileLockRelease(lock);
 #else
-    int32_t ret = HksFileRemove(path, fileName);
+    ret = HksFileRemove(path, fileName);
 #endif
     return ret;
 }
