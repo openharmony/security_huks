@@ -785,10 +785,11 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &output);
         HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
+
+    HKS_FREE_PTR(keyOutBuffer);
     if (keyIn.data != NULL) {
         (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
     }
-    HKS_FREE_PTR(keyOutBuffer);
     HKS_FREE_PTR(keyIn.data);
     HksFreeParamSet(&newParamSet);
     HksHitraceEnd(&traceId);
