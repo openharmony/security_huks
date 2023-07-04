@@ -241,9 +241,7 @@ if (ohos_kernel_type == "liteos_m") {
       defines += [ "HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF" ]
     }
 
-    if (enable_huks_clean_file) {
-      cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
-    }
+    cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
   }
 } else {
   ohos_shared_library("huks_3.0_sdk") {
