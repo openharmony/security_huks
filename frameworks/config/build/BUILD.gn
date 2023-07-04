@@ -49,9 +49,6 @@ config("l2_standard_common_config") {
   if (enable_bundle_framework) {
     cflags += [ "-DHKS_SUPPORT_GET_BUNDLE_INFO" ]
   }
-  if (enable_huks_clean_file) {
-    cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
-  }
 }
 
 config("l1_small_common_config") {
