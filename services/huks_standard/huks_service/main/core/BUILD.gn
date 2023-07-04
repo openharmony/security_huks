@@ -63,6 +63,9 @@ if (os_level == "standard") {
     } else {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
     }
+    if (enable_huks_clean_file) {
+      cflags = [ "-DHKS_ENABLE_CLEAN_FILE" ]
+    }
 
     complete_static_lib = true
 
@@ -149,6 +152,10 @@ if (os_level == "standard") {
       } else {
         cflags += [ "-D_DEFAULT_SOURCE" ]
       }
+    }
+
+    if (enable_huks_clean_file) {
+      cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
     }
 
     deps = [

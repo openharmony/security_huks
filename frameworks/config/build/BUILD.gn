@@ -94,7 +94,4 @@ config("l1_small_common_config") {
       defines += [ "HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF" ]
     }
   }
-  if (enable_huks_clean_file) {
-    cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
-  }
 }
