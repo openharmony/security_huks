@@ -24,7 +24,7 @@
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        // 初始化HUKS服务
+        // Initialize the huks service
         HksServiceInitialize();
         const std::u16string SA_KEYSTORE_SERVICE_DESCRIPTOR = u"ohos.security.hks.service";
         sptr<OHOS::Security::Hks::HksService> ptrInstance = OHOS::Security::Hks::HksService::GetInstance();
