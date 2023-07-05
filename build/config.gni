@@ -43,7 +43,7 @@ declare_args() {
   # specify the path of MbedTls huks depends on
   huks_dependency_mbedtls_path = ""
 
-  # specify the OpenSSL huks depends on
+  # specify the path of OpenSSL huks depends on
   huks_dependency_openssl_path = ""
 
   # specify the uid white list for change key owner
