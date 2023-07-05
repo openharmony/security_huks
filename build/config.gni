@@ -25,7 +25,7 @@ declare_args() {
   # whether use lite storeage
   huks_use_lite_storage = false
 
-  # whether use hardware root key
+  # whether use hardware root key for better security
   huks_use_hardware_root_key = false
 
   # whether use hks config file
