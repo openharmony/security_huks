@@ -64,7 +64,7 @@ declare_args() {
   # default security level supported by huks is software
   huks_security_level = "software"
 
-  # default tdd running environment
+  # default tdd running environment do not change this config in your device
   huks_test_suite_running_environment = "system"
 
   # config lite hap key store path in mini or lite system
