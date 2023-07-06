@@ -67,23 +67,23 @@ static struct HksParam g_genParams[] = {
         .tag = HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_SM4
     }, {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = HKS_SM4_IV_SIZE,
+            .data = static_cast<uint8_t *>(g_hksSm4TestIv)
+        }
+    }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_SM4_KEY_SIZE_128
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS7
     }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_SM4_KEY_SIZE_128
+    }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = HKS_SM4_IV_SIZE,
-            .data = (uint8_t *)g_hksSm4TestIv
-        }
     },
 };
 
@@ -114,7 +114,8 @@ static int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam
 
 static int32_t GenerateKeyTest(const char *tmpKeyAlias)
 {
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmpKeyAlias)) };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams, sizeof(g_genParams) / sizeof(HksParam));
@@ -129,7 +130,8 @@ static int32_t GenerateKeyTest(const char *tmpKeyAlias)
 
 static int32_t DeleteKeyTest(const char *tmpKeyAlias)
 {
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmpKeyAlias)) };
     return HksDeleteKey(&keyAlias, nullptr);
 }
 
@@ -141,26 +143,27 @@ static struct HksParam g_encryptParams[] = {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
     }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_SM4_KEY_SIZE_128
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = HKS_SM4_IV_SIZE,
+            .data = static_cast<uint8_t *>(g_hksSm4TestIv)
+        }
     }, {
         .tag = HKS_TAG_PADDING,
         .uint32Param = HKS_PADDING_PKCS7
     }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_SM4_KEY_SIZE_128
+    }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = HKS_SM4_IV_SIZE,
-            .data = (uint8_t *)g_hksSm4TestIv
-        }
     },
 };
 
 static int32_t InitSessionTest(const char *tmpKeyAlias, struct HksBlob *handle)
 {
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmpKeyAlias)) };
     struct HksParamSet *encryptParamSet = nullptr;
     int32_t ret = InitParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
@@ -170,17 +173,17 @@ static int32_t InitSessionTest(const char *tmpKeyAlias, struct HksBlob *handle)
     return ret;
 }
 
-static int32_t UpdateSessionTest(const char *tmpKeyAlias, struct HksBlob *handle)
+static int32_t UpdateSessionTest(struct HksBlob *handle)
 {
     struct HksParamSet *encryptParamSet = nullptr;
     int32_t ret = InitParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     uint32_t indataSize = 8192;
-    uint8_t *indata = (uint8_t *)HksMalloc(indataSize);
+    uint8_t *indata = static_cast<uint8_t *>(HksMalloc(indataSize));
     struct HksBlob indataBlob = { indataSize, indata };
     uint32_t outdataSize = 8208;
-    uint8_t *outdata = (uint8_t *)HksMalloc(outdataSize);
+    uint8_t *outdata = static_cast<uint8_t *>(HksMalloc(outdataSize));
     struct HksBlob outdataBlob = { outdataSize, outdata };
     ret = HksUpdate(handle, encryptParamSet, &indataBlob, &outdataBlob);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksUpdate failed.")
@@ -190,17 +193,17 @@ static int32_t UpdateSessionTest(const char *tmpKeyAlias, struct HksBlob *handle
     return ret;
 }
 
-static int32_t FinishSessionTest(const char *tmpKeyAlias, struct HksBlob *handle)
+static int32_t FinishSessionTest(struct HksBlob *handle)
 {
     struct HksParamSet *encryptParamSet = nullptr;
     int32_t ret = InitParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     uint32_t indataSize = 8192;
-    uint8_t *indata = (uint8_t *)HksMalloc(indataSize);
+    uint8_t *indata = static_cast<uint8_t *>(HksMalloc(indataSize));
     struct HksBlob indataBlob = { indataSize, indata };
     uint32_t outdataSize = 8208;
-    uint8_t *outdata = (uint8_t *)HksMalloc(outdataSize);
+    uint8_t *outdata = static_cast<uint8_t *>(HksMalloc(outdataSize));
     struct HksBlob outdataBlob = { outdataSize, outdata };
     ret = HksFinish(handle, encryptParamSet, &indataBlob, &outdataBlob);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksFinish failed.")
@@ -210,7 +213,7 @@ static int32_t FinishSessionTest(const char *tmpKeyAlias, struct HksBlob *handle
     return ret;
 }
 
-static int32_t AbortSessionTest(const char *tmpKeyAlias, struct HksBlob *handle)
+static int32_t AbortSessionTest(struct HksBlob *handle)
 {
     struct HksParamSet *encryptParamSet = nullptr;
     int32_t ret = InitParamSet(&encryptParamSet, g_encryptParams, sizeof(g_encryptParams) / sizeof(HksParam));
@@ -221,10 +224,10 @@ static int32_t AbortSessionTest(const char *tmpKeyAlias, struct HksBlob *handle)
     return ret;
 }
 
-static void ThreeStageTest(uint32_t i)
+static void ThreeStageTest(uint32_t testIndex)
 {
     char alias[20];
-    (void)sprintf_s(alias, sizeof(alias), "%s%u", "test_three_stage", i);
+    (void)sprintf_s(alias, sizeof(alias), "%s%u", "test_three_stage", testIndex);
     uint8_t handleE[sizeof(uint64_t)] = { 0 };
     struct HksBlob handleBlob = { sizeof(uint64_t), handleE };
     int32_t ret = GenerateKeyTest(alias);
@@ -233,14 +236,14 @@ static void ThreeStageTest(uint32_t i)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitSessionTest failed.";
 
     std::vector<std::thread> threads;
-    srand(time(0));
+    srand(time(nullptr));
     uint32_t finishPos = (uint32_t)((rand() / RAND_MAX) * THREADS_NUM);
 
     for (uint32_t i = 0; i < THREADS_NUM; i++) {
         if (finishPos == i) {
-            threads.emplace_back(std::thread(AbortSessionTest, alias, &handleBlob));
+            threads.emplace_back(std::thread(AbortSessionTest, &handleBlob));
         } else {
-            threads.emplace_back(std::thread(UpdateSessionTest, alias, &handleBlob));
+            threads.emplace_back(std::thread(UpdateSessionTest, &handleBlob));
         }
     }
 
@@ -252,8 +255,8 @@ static void ThreeStageTest(uint32_t i)
 
     std::vector<std::thread> threads2;
     ret = InitSessionTest(alias, &handleBlob);
-    threads2.emplace_back(std::thread(FinishSessionTest, alias, &handleBlob));
-    threads2.emplace_back(std::thread(AbortSessionTest, alias, &handleBlob));
+    threads2.emplace_back(std::thread(FinishSessionTest, &handleBlob));
+    threads2.emplace_back(std::thread(AbortSessionTest, &handleBlob));
 
     for (auto &t : threads2) {
         t.join();
@@ -283,4 +286,4 @@ HWTEST_F(HksThreeStageMultiThreadTest, HksThreeStageMultiThreadTest001, TestSize
     int32_t ret = HksInitialize();
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
-};
+}
