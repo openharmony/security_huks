@@ -210,7 +210,7 @@ struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *pro
         if ((operation != NULL) && (operation->handle == handle) && IsSameProcessName(processInfo, operation) &&
             IsSameUserId(processInfo, operation)) {
             if (operation->isInUse) {
-                HKS_LOG_E("session is already in use!");
+                HKS_LOG_E("operation is in use!");
                 pthread_mutex_unlock(&g_lock);
                 return NULL;
             }
