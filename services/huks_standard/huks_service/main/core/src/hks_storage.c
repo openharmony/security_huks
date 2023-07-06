@@ -389,7 +389,7 @@ static int32_t CleanFile(const char *path, const char *fileName)
 
     HksFree(buf);
 
-    return HKS_SUCCESS;
+    return ret;
 }
 #endif
 

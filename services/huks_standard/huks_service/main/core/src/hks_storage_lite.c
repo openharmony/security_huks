@@ -860,21 +860,21 @@ static int32_t CleanFile(const char *path, const char *fileName)
 
         (void)memset_s(buf, size, 0, size);
         ret = HksFileWrite(path, fileName, 0, buf, size);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, ret, "write file 0 failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 0 failed!")
 
         (void)memset_s(buf, size, 1, size);
         ret = HksFileWrite(path, fileName, 0, buf, size);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, ret, "write file 1 failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 1 failed!")
 
         struct HksBlob bufBlob = { .size = size, .data = buf };
         ret = HuksAccessGenerateRandom(NULL, &bufBlob);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, ret, "fill buf random failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "fill buf random failed!")
 
         ret = HksFileWrite(path, fileName, 0, buf, size);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, ret, "write file random failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file random failed!")
     } while (0);
     HksFree(buf);
-    return HKS_SUCCESS;
+    return ret;
 }
 #endif
 
