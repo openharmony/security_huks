@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
 import("//build/test.gni")
 
 module_output_path = "huks_standard/huks_standard_test"
@@ -30,13 +31,25 @@ ohos_unittest("huks_multithread_test") {
     "src/hks_storage_test.cpp",
   ]
 
-  configs = [
-    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+  cflags = []
+  if (enable_hks_coverage) {
+    cflags += [ "--coverage" ]
+    ldflags = [ "--coverage" ]
+  }
+  cflags += [
+    "-Wall",
+    "-Werror",
+    "-fPIC",
   ]
 
-  if (huks_security_level == "software") {
-    defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
-  }
+  cflags +=
+      [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
+
+  defines = [
+    "_HARDWARE_ROOT_KEY_",
+    "_HUKS_LOG_ENABLE_",
+    "L2_STANDARD",
+  ]
 
   include_dirs = [
     "//base/security/huks/frameworks/huks_standard/main/common/include",

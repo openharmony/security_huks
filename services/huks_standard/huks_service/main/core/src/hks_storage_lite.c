@@ -839,19 +839,73 @@ int32_t HksStoreGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCou
     return HKS_SUCCESS;
 }
 
+#ifdef HKS_ENABLE_CLEAN_FILE
+static int32_t CleanFile(const char *path, const char *fileName)
+{
+    uint32_t size = HksFileSize(path, fileName);
+    if (size == 0 || size > HKS_MAX_FILE_SIZE) {
+        HKS_LOG_E("storage lite get file size failed, ret = %" LOG_PUBLIC "u.", size);
+        return HKS_ERROR_FILE_SIZE_FAIL;
+    }
+
+    int32_t ret = HKS_SUCCESS;
+    uint8_t *buf;
+    do {
+        buf = (uint8_t *)HksMalloc(size);
+        if (buf == NULL) {
+            HKS_LOG_E("storage lite malloc buf failed!");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+
+        (void)memset_s(buf, size, 0, size);
+        ret = HksFileWrite(path, fileName, 0, buf, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 0 failed!")
+
+        (void)memset_s(buf, size, 1, size);
+        ret = HksFileWrite(path, fileName, 0, buf, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file 1 failed!")
+
+        struct HksBlob bufBlob = { .size = size, .data = buf };
+        ret = HuksAccessGenerateRandom(NULL, &bufBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "fill buf random failed!")
+
+        ret = HksFileWrite(path, fileName, 0, buf, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file random failed!")
+    } while (0);
+    HksFree(buf);
+    return ret;
+}
+#endif
+
+static int32_t RemoveFile(const char *path, const char *fileName)
+{
+#ifdef HKS_ENABLE_CLEAN_FILE
+    if (CleanFile(path, fileName) != HKS_SUCCESS) {
+        HKS_LOG_E("clean file failed");
+    }
+#endif
+
+    if (HksFileRemove(path, fileName) != HKS_SUCCESS) {
+        HKS_LOG_E("remove file failed");
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     (void)processName;
     /* only record log, continue delete */
-    if (HksFileRemove(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME) != HKS_SUCCESS) {
+
+    if (RemoveFile(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME) != HKS_SUCCESS) {
         HKS_LOG_E("remove key store file failed");
     }
 
-    if (HksFileRemove(HKS_KEY_STORE_PATH, "info1.data") != HKS_SUCCESS) {
+    if (RemoveFile(HKS_KEY_STORE_PATH, "info1.data") != HKS_SUCCESS) {
         HKS_LOG_E("remove info1 file failed");
     }
 
-    if (HksFileRemove(HKS_KEY_STORE_PATH, "info2.data") != HKS_SUCCESS) {
+    if (RemoveFile(HKS_KEY_STORE_PATH, "info2.data") != HKS_SUCCESS) {
         HKS_LOG_E("remove info2 file failed");
     }
     return HKS_SUCCESS;
@@ -859,4 +913,3 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
 #endif /* _STORAGE_LITE_ */
 
 #endif /* _CUT_AUTHENTICATE_ */
-
