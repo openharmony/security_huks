@@ -1553,7 +1553,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     HKS_FREE_BLOB(output);
     if (operation != NULL) {
         MarkOperationUnUse(operation);
-        DeleteOperation(handle);  // zwz to do : 是否需要迁移到if里面
+        DeleteOperation(handle);
     }
     HksFreeParamSet(&newParamSet);
 
