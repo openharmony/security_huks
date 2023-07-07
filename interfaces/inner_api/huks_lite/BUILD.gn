@@ -240,6 +240,8 @@ if (ohos_kernel_type == "liteos_m") {
       # enable upgrade key derivation algorithm from PBKDF2 to HKDF
       defines += [ "HKS_CHANGE_DERIVE_KEY_ALG_TO_HKDF" ]
     }
+
+    cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
   }
 } else {
   ohos_shared_library("huks_3.0_sdk") {
