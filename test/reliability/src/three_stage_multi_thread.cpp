@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -237,7 +237,7 @@ static void ThreeStageTest(uint32_t testIndex)
 
     std::vector<std::thread> threads;
     srand(time(nullptr));
-    uint32_t finishPos = (uint32_t)((rand() / RAND_MAX) * THREADS_NUM);
+    uint32_t finishPos = static_cast<uint32_t>(rand() / RAND_MAX) * THREADS_NUM;
 
     for (uint32_t i = 0; i < THREADS_NUM; i++) {
         if (finishPos == i) {
