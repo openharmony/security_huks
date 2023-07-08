@@ -260,7 +260,7 @@ int32_t ExecuteMkCrypt(const struct HksKsfDataMk *ksfDataMk, const struct HksBlo
         ret = HKS_ERROR_CRYPTO_ENGINE_ERROR; /* need return this error code for hichian call refresh func */
     }
 
-    return ret;
+    return HKS_SUCCESS;
 }
 
 int32_t RkcMkCrypt(const struct HksKsfDataRkc *ksfDataRkc, const struct HksKsfDataMk *ksfDataMk,
