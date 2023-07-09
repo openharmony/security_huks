@@ -97,7 +97,7 @@ int32_t HksMbedtlsHmac(const struct HksBlob *key,
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
-            HILOG_ERROR(HILOG_MODULE_SCY, "Mbedtls hmac failed! mbedtls ret = 0x%{public}X", ret);
+        HILOG_ERROR(HILOG_MODULE_SCY, "Mbedtls hmac failed! mbedtls ret = 0x%{public}X", ret);
 #endif
         (void)memset_s(mac->data, mac->size, 0, mac->size);
         return ret;
