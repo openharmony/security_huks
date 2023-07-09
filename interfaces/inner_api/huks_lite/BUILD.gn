@@ -208,6 +208,7 @@ if (ohos_kernel_type == "liteos_m") {
     defines = [
       "MBEDTLS_ECP_RESTARTABLE=1",
       "LOG_ENGINE_HILOG_MODULE_SCY",
+      "HUKS_LOG_MINI_EXT_ENABLED",
     ]
     if (product_name == "wifiiot_hispark_pegasus") {
       defines += [ "USE_HISI_MBED" ]
@@ -223,10 +224,8 @@ if (ohos_kernel_type == "liteos_m") {
           [ "-DHKS_CONFIG_LITE_HAP_STORE_PATH=\"${huks_lite_hap_store_path}\"" ]
     }
 
-    if (huks_enable_log == true) {
-      configs += [ ":hilog_lite_dir" ]
-      deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
-    }
+    configs += [ ":hilog_lite_dir" ]
+    deps += [ "//base/hiviewdfx/hilog_lite/frameworks/mini:hilog_lite" ]
 
     if (huks_enable_upgrade_rkc_v1tov2) {
       # enable upgrade rkc derivation algorithm from PBKDF2 to HKDF

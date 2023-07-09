@@ -21,6 +21,10 @@
 
 #ifdef HKS_SUPPORT_HMAC_C
 
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+#include "log.h"
+#endif
+
 #include "hks_mbedtls_hmac.h"
 
 #include <mbedtls/md.h>
@@ -62,6 +66,9 @@ int32_t HksMbedtlsHmacGenerateKey(const struct HksKeySpec *spec, struct HksBlob 
         ret = mbedtls_ctr_drbg_random(&ctrDrbg, outKey, keyByteLen);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls ctr drbg random failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "Mbedtls ctr drbg random failed! mbedtls ret = 0x%{public}X", ret);
+#endif
             (void)memset_s(outKey, keyByteLen, 0, keyByteLen);
             HKS_FREE_PTR(outKey);
             break;
@@ -89,6 +96,9 @@ int32_t HksMbedtlsHmac(const struct HksBlob *key,
         key->data, key->size, msg->data, msg->size, mac->data);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls hmac failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "Mbedtls hmac failed! mbedtls ret = 0x%{public}X", ret);
+#endif
         (void)memset_s(mac->data, mac->size, 0, mac->size);
         return ret;
     }
