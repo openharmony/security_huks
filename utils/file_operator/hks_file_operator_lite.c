@@ -42,6 +42,11 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+#include "log.h"
+#endif
+
+
 #ifndef _CUT_AUTHENTICATE_
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {
@@ -109,6 +114,9 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     int32_t fd = open(fileName, O_RDONLY);
     if (fd < 0) {
         HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", errno);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "failed to open file, errno = 0x%{public}X", errno);
+#endif
         return 0;
     }
 
@@ -116,6 +124,9 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     close(fd);
     if (size < 0) {
         HKS_LOG_E("failed to read file, errno = 0x%" LOG_PUBLIC "x", errno);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "failed to read file, errno = 0x%{public}X", errno);
+#endif
         return 0;
     }
 
@@ -140,12 +151,18 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     int32_t fd = open(fileName, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd < 0) {
         HKS_LOG_E("open file failed, errno = 0x%" LOG_PUBLIC "x", errno);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "open file failed, errno = 0x%{public}X", errno);
+#endif
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
     int32_t size = write(fd, buf, len);
     if (size < 0) {
         HKS_LOG_E("write file size failed, errno = 0x%" LOG_PUBLIC "x", errno);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "write file size failed, errno = 0x%{public}X", errno);
+#endif
         close(fd);
         return HKS_ERROR_WRITE_FILE_FAIL;
     }
@@ -197,6 +214,9 @@ int32_t HksMakeDir(const char *path)
                 return HKS_ERROR_ALREADY_EXISTS;
             default:
                 HKS_LOG_E("mkdir failed, errno = 0x%" LOG_PUBLIC "x", errno);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+                HILOG_ERROR(HILOG_MODULE_SCY, "mkdir failed, errno = 0x%{public}X", errno);
+#endif
                 return HKS_ERROR_MAKE_DIR_FAIL;
         }
     }
