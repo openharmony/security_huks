@@ -115,7 +115,7 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     if (fd < 0) {
         HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
-            HILOG_ERROR(HILOG_MODULE_SCY, "failed to open file, errno = 0x%{public}X", errno);
+        HILOG_ERROR(HILOG_MODULE_SCY, "failed to open file, errno = 0x%{public}X", errno);
 #endif
         return 0;
     }
@@ -125,7 +125,7 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     if (size < 0) {
         HKS_LOG_E("failed to read file, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
-            HILOG_ERROR(HILOG_MODULE_SCY, "failed to read file, errno = 0x%{public}X", errno);
+        HILOG_ERROR(HILOG_MODULE_SCY, "failed to read file, errno = 0x%{public}X", errno);
 #endif
         return 0;
     }
@@ -152,7 +152,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     if (fd < 0) {
         HKS_LOG_E("open file failed, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
-            HILOG_ERROR(HILOG_MODULE_SCY, "open file failed, errno = 0x%{public}X", errno);
+        HILOG_ERROR(HILOG_MODULE_SCY, "open file failed, errno = 0x%{public}X", errno);
 #endif
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
@@ -161,7 +161,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     if (size < 0) {
         HKS_LOG_E("write file size failed, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
-            HILOG_ERROR(HILOG_MODULE_SCY, "write file size failed, errno = 0x%{public}X", errno);
+        HILOG_ERROR(HILOG_MODULE_SCY, "write file size failed, errno = 0x%{public}X", errno);
 #endif
         close(fd);
         return HKS_ERROR_WRITE_FILE_FAIL;
