@@ -27,6 +27,10 @@
 #include "hks_log.h"
 #include "hks_template.h"
 
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+#include "log.h"
+#endif
+
 /* the custom data of random seed */
 const unsigned char g_hksRandomSeedCustom[] = {
     /* H     K     S */
@@ -95,6 +99,9 @@ int32_t HksMbedtlsFillRandom(struct HksBlob *randomData)
         ret = mbedtls_ctr_drbg_random(&ctrDrbg, randomData->data, randomData->size);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls random failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+#ifdef HUKS_LOG_MINI_EXT_ENABLED
+            HILOG_ERROR(HILOG_MODULE_SCY, "Mbedtls random failed! mbedtls ret = 0x%{public}X", ret);
+#endif
             (void)memset_s(randomData->data, randomData->size, 0, randomData->size);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
