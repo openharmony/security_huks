@@ -16,7 +16,7 @@
 /**
  * @file hks_api.h
  *
- * @brief Declares key operation interface.
+ * @brief Declares huks operation inner interface.
  *
  * @since 8
  */
