@@ -27,6 +27,7 @@
 #include "hks_template.h"
 #include "securec.h"
 
+#define USER_ID_ROOT                  "0"
 #ifndef HAS_OS_ACCOUNT_PART
 constexpr static int UID_TRANSFORM_DIVISOR = 200000;
 static void GetOsAccountIdFromUid(int uid, int &osAccountId)
@@ -38,12 +39,19 @@ static void GetOsAccountIdFromUid(int uid, int &osAccountId)
 static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processInfo)
 {
     uint32_t userSize = sizeof(userId);
+    if (userId == 0) {
+        userSize = strlen(USER_ID_ROOT);
+    }
     uint8_t *userData = static_cast<uint8_t *>(HksMalloc(userSize));
     if (userData == nullptr) {
         HKS_LOG_E("user id malloc failed.");
         return;
     }
-    (void)memcpy_s(userData, userSize, &userId, userSize);
+    if (userId == 0) {
+        (void)memcpy_s(userData, userSize, USER_ID_ROOT, userSize);
+    } else {
+        (void)memcpy_s(userData, userSize, &userId, userSize);
+    }
     processInfo->userId.size = userSize;
     processInfo->userId.data = userData;
 
