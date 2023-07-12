@@ -1441,12 +1441,12 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 #ifdef L2_STANDARD
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 #endif
-
+    struct HksOperation *operation;
     int32_t ret;
     do {
-        struct HksOperation *operation = QueryOperation(processInfo, handle);
+        operation = QueryOperationAndMarkInUse(processInfo, handle);
         if (operation == NULL) {
-            HKS_LOG_E("operationHandle is not exist");
+            HKS_LOG_E("operationHandle is not exist or being busy");
             ret = HKS_ERROR_NOT_EXIST;
             break;
         }
@@ -1462,11 +1462,13 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         ret = HuksAccessUpdate(handle, paramSet, inData, outData);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HuksAccessUpdate fail, ret = %" LOG_PUBLIC "d", ret);
+            MarkOperationUnUse(operation);
             DeleteOperation(handle);
+            operation = NULL;
             break;
         }
     } while (0);
-
+    MarkOperationUnUse(operation);
 #ifdef L2_STANDARD
     HksHitraceEnd(&traceId);
     HksReport(__func__, processInfo, paramSet, ret);
@@ -1478,28 +1480,24 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
 }
 
 static int32_t AppendAndQueryInFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
+    const struct HksParamSet *paramSet, struct HksParamSet **newParamSet, struct HksOperation **outOperation)
 {
-    int32_t ret;
-    do {
-        ret = AppendProcessInfoAndkeyAlias(paramSet, processInfo, NULL, newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
+    int32_t ret = AppendProcessInfoAndkeyAlias(paramSet, processInfo, NULL, newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append process info failed, ret = %" LOG_PUBLIC "d", ret)
 
-        struct HksOperation *operation = QueryOperation(processInfo, handle);
-        if (operation == NULL) {
-            HKS_LOG_E("operationHandle is not exist");
-            ret = HKS_ERROR_NOT_EXIST;
-            break;
-        }
+    struct HksOperation *operation = QueryOperationAndMarkInUse(processInfo, handle);
+    if (operation == NULL) {
+        HKS_LOG_E("operationHandle is not exist or being busy");
+        return HKS_ERROR_NOT_EXIST;
+    }
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-        if (operation->accessTokenId != processInfo->accessTokenId) {
-            HKS_LOG_E("compare access token id failed, unauthorized calling");
-            ret = HKS_ERROR_BAD_STATE;
-            break;
-        }
+    if (operation->accessTokenId != processInfo->accessTokenId) {
+        HKS_LOG_E("compare access token id failed, unauthorized calling");
+        return HKS_ERROR_BAD_STATE;
+    }
 #endif
-    } while (0);
-    return ret;
+    *outOperation = operation;
+    return HKS_SUCCESS;
 }
 
 static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksBlob *outData, bool isStorage)
@@ -1534,12 +1532,13 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         outSize = MAX_KEY_SIZE;
     }
     struct HksBlob output = { outSize, NULL };
+    struct HksOperation *operation = NULL;
     do {
         if (outSize != 0) {
             ret = InitOutputDataForFinish(&output, outData, isNeedStorage);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init output data failed")
         }
-        ret = AppendAndQueryInFinish(handle, processInfo, paramSet, &newParamSet);
+        ret = AppendAndQueryInFinish(handle, processInfo, paramSet, &newParamSet, &operation);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessFinish(handle, newParamSet, inData, &output);
@@ -1552,7 +1551,10 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         (void)memset_s(output.data, output.size, 0, output.size);
     }
     HKS_FREE_BLOB(output);
-    DeleteOperation(handle);
+    if (operation != NULL) {
+        MarkOperationUnUse(operation);
+        DeleteOperation(handle);
+    }
     HksFreeParamSet(&newParamSet);
 
 #ifdef L2_STANDARD
@@ -1574,10 +1576,12 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
     traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
 #endif
 
+    struct HksOperation *operation;
     int32_t ret;
     do {
-        if (QueryOperation(processInfo, handle) == NULL) {
-            HKS_LOG_E("operationHandle is not exist");
+        operation = QueryOperationAndMarkInUse(processInfo, handle);
+        if (operation == NULL) {
+            HKS_LOG_E("operationHandle is not exist or being busy");
             ret = HKS_SUCCESS; /* return success if the handle is not found */
             break;
         }
@@ -1585,8 +1589,11 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         ret = HuksAccessAbort(handle, paramSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
 
+        MarkOperationUnUse(operation);
         DeleteOperation(handle);
+        operation = NULL;
     } while (0);
+    MarkOperationUnUse(operation);
 
 #ifdef L2_STANDARD
     HksHitraceEnd(&traceId);

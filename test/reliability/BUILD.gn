@@ -23,6 +23,7 @@ ohos_reliabilitytest("huks_stability_test") {
   sources = [
     "src/api_pressure_test.cpp",
     "src/pressure_test.cpp",
+    "src/three_stage_multi_thread.cpp",
   ]
 
   configs = [
