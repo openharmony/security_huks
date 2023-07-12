@@ -74,6 +74,10 @@ static bool DeleteFirstAbortableOperation(void)
 
     HKS_DLIST_ITER(operation, &g_operationList) {
         if (operation != NULL && operation->abortable) {
+            if (operation->isInUse) {
+                HKS_LOG_I("operation is in use, do not delete");
+                continue;
+            }
             DeleteKeyNode(operation->handle);
             FreeOperation(&operation);
             --g_operationCount;
@@ -167,6 +171,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
     }
 
     operation->abortable = abortable;
+    operation->isInUse = false;
 
     ret = AddOperation(operation);
     if (ret != HKS_SUCCESS) {
@@ -192,7 +197,8 @@ static bool IsSameUserId(const struct HksProcessInfo *processInfo, const struct 
         (memcmp(operation->processInfo.userId.data, processInfo->userId.data, userIdLen) == 0));
 }
 
-struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle)
+struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *operationHandle)
 {
     uint64_t handle;
     int32_t ret = ConstructOperationHandle(operationHandle, &handle);
@@ -203,6 +209,12 @@ struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, co
     HKS_DLIST_ITER(operation, &g_operationList) {
         if ((operation != NULL) && (operation->handle == handle) && IsSameProcessName(processInfo, operation) &&
             IsSameUserId(processInfo, operation)) {
+            if (operation->isInUse) {
+                HKS_LOG_E("operation is in use!");
+                pthread_mutex_unlock(&g_lock);
+                return NULL;
+            }
+            operation->isInUse = true;
             pthread_mutex_unlock(&g_lock);
             return operation;
         }
@@ -210,6 +222,14 @@ struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, co
     pthread_mutex_unlock(&g_lock);
 
     return NULL;
+}
+
+void MarkOperationUnUse(struct HksOperation *operation)
+{
+    if (operation == NULL) {
+        return;
+    }
+    operation->isInUse = false;
 }
 
 void DeleteOperation(const struct HksBlob *operationHandle)
@@ -225,6 +245,10 @@ void DeleteOperation(const struct HksBlob *operationHandle)
     pthread_mutex_lock(&g_lock);
     HKS_DLIST_ITER(operation, &g_operationList) {
         if (operation != NULL && operation->handle == handle) {
+            if (operation->isInUse) {
+                HKS_LOG_I("operation is in use, do not delete");
+                break;
+            }
             FreeOperation(&operation);
             --g_operationCount;
             HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
@@ -237,6 +261,10 @@ void DeleteOperation(const struct HksBlob *operationHandle)
 
 static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOperation *operation)
 {
+    if (operation->isInUse) {
+        HKS_LOG_E("operation is in use, do not delete");
+        return;
+    }
     bool isNeedDelete = false;
     if (processInfo->processName.size == 0) { /* delete by user id */
         isNeedDelete = IsSameUserId(processInfo, operation);

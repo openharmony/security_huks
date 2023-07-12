@@ -28,6 +28,7 @@ struct HksOperation {
     uint64_t handle;
     bool abortable;
     uint64_t accessTokenId;
+    bool isInUse;
 };
 
 #ifdef __cplusplus
@@ -37,7 +38,10 @@ extern "C" {
 int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle,
     bool abortable);
 
-struct HksOperation *QueryOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle);
+struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *operationHandle);
+
+void MarkOperationUnUse(struct HksOperation *operation);
 
 void DeleteOperation(const struct HksBlob *operationHandle);
 
