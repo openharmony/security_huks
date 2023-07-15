@@ -322,8 +322,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest005, TestSize.Level0
     struct HksBlob outBlob = { sizeof(out), out };
     ret = HksDeriveKey(deriveParamSet, &keyAlias, &outBlob);
     (void)HksFreeParamSet(&deriveParamSet);
-    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
-
     (void)HksDeleteKey(&keyAlias, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

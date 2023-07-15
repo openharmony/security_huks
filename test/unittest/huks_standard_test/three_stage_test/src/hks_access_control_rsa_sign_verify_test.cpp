@@ -736,8 +736,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest012, TestSize.
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksVerify(&keyAlias, verifyParamSet2, &plainDataBlob, &signatureBlob);
     (void)HksFreeParamSet(&verifyParamSet2);
-    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
-
     (void)HksDeleteKey(&keyAlias, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }
