@@ -38,6 +38,8 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
 
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet);
 
+int32_t HksCheckKeybBlobIsSupportUserAuth(const struct HksParamSet *blobParamSet, bool *isSupport);
+
 #ifdef __cplusplus
 }
 #endif

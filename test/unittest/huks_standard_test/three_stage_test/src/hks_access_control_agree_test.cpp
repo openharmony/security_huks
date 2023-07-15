@@ -408,4 +408,110 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest006, TestSize.Level0)
     ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal003, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
+
+/**
+ * @tc.name: HksAccessControlAgreeTest.HksAccessAgreePartTest007
+ * @tc.desc: alg-ECDH gen-pur-Agree one stage api
+ * @tc.type: FUNC
+ * @tc.auth_type: PIN
+ * @tc.result:HKS_ERROR_NOT_SUPPORTED
+ * @tc.require: issueI5NY0M
+ */
+HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest007, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAccessAgreePartTest007");
+    uint8_t alias[] = "testCheckAuthAgree";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
+        HKS_ACCESS_TEST_001_PARAMS.genParams.size());
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    (void)HksFreeParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    struct HksParam agreeParams[] =
+    {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECDH },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
+    };
+    struct HksParamSet *agreeParamSet = nullptr;
+    ret = InitParamSet(&agreeParamSet, agreeParams, sizeof(agreeParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint8_t agreeKeyAlias[] = "agree_abormal_key";
+    struct HksBlob agreekeyAliasBlob = { sizeof(agreeKeyAlias), agreeKeyAlias };
+    uint8_t eccPubData256[] = {
+        0x30, 0x59, 0x30, 0x13, 0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, 0x06, 0x08, 0x2a,
+        0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, 0x03, 0x42, 0x00, 0x04, 0xa5, 0xb8, 0xa3, 0x78, 0x1d,
+        0x6d, 0x76, 0xe0, 0xb3, 0xf5, 0x6f, 0x43, 0x9d, 0xcf, 0x60, 0xf6, 0x0b, 0x3f, 0x64, 0x45, 0xa8,
+        0x3f, 0x1a, 0x96, 0xf1, 0xa1, 0xa4, 0x5d, 0x3e, 0x2c, 0x3f, 0x13, 0xd7, 0x81, 0xf7, 0x2a, 0xb5,
+        0x8d, 0x19, 0x3d, 0x9b, 0x96, 0xc7, 0x6a, 0x10, 0xf0, 0xaa, 0xbc, 0x91, 0x6f, 0x4d, 0xa7, 0x09,
+        0xb3, 0x57, 0x88, 0x19, 0x6f, 0x00, 0x4b, 0xad, 0xee, 0x34, 0x35,
+    };
+    struct HksBlob publicKey = { sizeof(eccPubData256), eccPubData256 };
+    uint8_t outData[256] = {0};
+    struct HksBlob outDataBlob = { sizeof(outData), outData };
+    ret = HksAgreeKey(agreeParamSet, &agreekeyAliasBlob, &publicKey, &outDataBlob);
+    (void)HksFreeParamSet(&agreeParamSet);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+    (void)HksDeleteKey(&keyAlias, nullptr);
+}
+
+/**
+ * @tc.name: HksAccessControlAgreeTest.HksAccessAgreePartTest008
+ * @tc.desc: one stage api:HksGenerateKet do not support operate user-auth-key
+ * @tc.type: FUNC
+ * @tc.auth_type: PIN
+ * @tc.result:HKS_ERROR_NOT_SUPPORTED
+ * @tc.require: issueI5NY0M
+ */
+HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest008, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAccessAgreePartTest008");
+    uint8_t alias[] = "testCheckAuthAgree2";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    struct HksParam genX25519Params[] = {
+        {.tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_X25519},
+        {.tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE},
+        {.tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_CURVE25519_KEY_SIZE_256}
+    };
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, genX25519Params, sizeof(genX25519Params) / sizeof(struct HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    (void)HksFreeParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    uint8_t x25519PubData256[] = {
+        0x9c, 0xf6, 0x7a, 0x8d, 0xce, 0xc2, 0x7f, 0xa7, 0xd9, 0xfd, 0xf1, 0xad, 0xac, 0xf0, 0xb3, 0x8c,
+        0xe8, 0x16, 0xa2, 0x65, 0xcc, 0x18, 0x55, 0x60, 0xcd, 0x2f, 0xf5, 0xe5, 0x72, 0xc9, 0x3c, 0x54,
+    };
+
+    struct HksParam agreeParams[] =
+    {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CCM },
+        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
+        { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_AGREE },
+        { .tag = HKS_TAG_AGREE_ALG, .uint32Param = HKS_ALG_X25519 },
+        { .tag = HKS_TAG_AGREE_PUBLIC_KEY_IS_KEY_ALIAS, .boolParam = false },
+        { .tag = HKS_TAG_AGREE_PRIVATE_KEY_ALIAS, .blob = keyAlias },
+        { .tag = HKS_TAG_AGREE_PUBLIC_KEY, .blob = { .size = sizeof(x25519PubData256), .data = x25519PubData256} },
+    };
+    struct HksParamSet *agreeParamSet = nullptr;
+    ret = InitParamSet(&agreeParamSet, agreeParams, sizeof(agreeParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    uint8_t agreeKeyAlias[] = "agree_abormal_key";
+    struct HksBlob agreekeyAliasBlob = { sizeof(agreeKeyAlias), agreeKeyAlias };
+    ret = HksGenerateKey(&agreekeyAliasBlob, agreeParamSet, nullptr);
+    (void)HksFreeParamSet(&agreeParamSet);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+    (void)HksDeleteKey(&keyAlias, nullptr);
+}
 }

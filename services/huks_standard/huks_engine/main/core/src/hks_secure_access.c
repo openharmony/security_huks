@@ -962,6 +962,19 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
 
     return DoAppendPrefixDataToFinishData(keyNode, &innerParams, inOutData, inOutDataOriginSize);
 }
+
+int32_t HksCheckKeybBlobIsSupportUserAuth(const struct HksParamSet *blobParamSet, bool *isSupport)
+{
+    struct HksParam *blobUserAuthType = NULL;
+    int32_t ret = HksGetParam(blobParamSet, HKS_TAG_USER_AUTH_TYPE, &blobUserAuthType);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        *isSupport = false;
+        return HKS_SUCCESS;
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get blob user auth type failed!")
+    *isSupport = true;
+    return HKS_SUCCESS;
+}
 #else
 int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct HksParamSet *initParamSet,
     struct HksBlob *token)
@@ -1009,6 +1022,13 @@ int32_t HksCoreAppendAuthInfoAfterFinish(struct HuksKeyNode *keyNode, uint32_t p
     (void)inParamSet;
     (void)inOutDataBufferSize;
     (void)inOutData;
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckKeybBlobIsSupportUserAuth(const struct HksParamSet *blobParamSet, bool *isSupport)
+{
+    (void)blobParamSet;
+    *isSupport = false;
     return HKS_SUCCESS;
 }
 #endif

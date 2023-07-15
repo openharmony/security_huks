@@ -177,7 +177,21 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
     HKS_FREE_PTR(buffer);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generating keynode with agree key failed")
 
-    int32_t ret = HksGetRawKey(keyNode->paramSet, keyOut);
+    bool isSupportUserAuth = false;
+    int32_t ret = HksCheckKeybBlobIsSupportUserAuth(keyNode->paramSet, &isSupportUserAuth);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCheckKeybBlobIsSupportUserAuth failed");
+        HksFreeKeyNode(&keyNode);
+        return ret;
+    }
+
+    if (isSupportUserAuth) {
+        HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation failed");
+        HksFreeKeyNode(&keyNode);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    ret = HksGetRawKey(keyNode->paramSet, keyOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "get raw key during key agreement failed!")
 
     HksFreeKeyNode(&keyNode);
@@ -1096,6 +1110,16 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
     do {
         ret = HksProcessIdentityVerify(privateKeyNode->paramSet, paramSet);
         HKS_IF_NOT_SUCC_BREAK(ret)
+
+        bool isSupportUserAuth = false;
+        ret = HksCheckKeybBlobIsSupportUserAuth(privateKeyNode->paramSet, &isSupportUserAuth);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckKeybBlobIsSupportUserAuth failed");
+
+        if (isSupportUserAuth) {
+            ret = HKS_ERROR_NOT_SUPPORTED;
+            HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation failed");
+            break;
+        }
 
         struct HksBlob key = { 0, NULL };
         ret = HksGetRawKey(privateKeyNode->paramSet, &key);
