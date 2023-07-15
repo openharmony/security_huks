@@ -212,4 +212,47 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest004, TestSize.Level0)
     ASSERT_EQ(CheckAccessHmacTest(testAccessCaseParams, testIDMParams), HKS_SUCCESS);
 #endif
 }
+
+/**
+ * @tc.name: HksAccessControlMacTest.HksAccessMacPartTest005
+ * @tc.desc: one stage api:HksMac do not support operate user-auth-key
+ * @tc.type: FUNC
+ * @tc.auth_type: PIN
+ * @tc.result:HKS_ERROR_NOT_SUPPORTED
+ * @tc.require: issueI5NY0M
+ */
+HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest005, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAccessMacPartTest005");
+    uint8_t alias[] = "testCheckAuthMac";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
+        HKS_ACCESS_TEST_001_PARAMS.genParams.size());
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    (void)HksFreeParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    // test mac
+    struct HksParam macParams[] =
+    {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HMAC },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_MAC },
+        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_256 },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256  },
+    };
+    struct HksParamSet *macParamSet = nullptr;
+    ret = InitParamSet(&macParamSet, macParams, sizeof(macParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    
+    uint8_t out[256] = {0};
+    struct HksBlob outBlob = { sizeof(out), out };
+    ret = HksMac(&keyAlias, macParamSet, &outBlob, &outBlob);
+    (void)HksFreeParamSet(&macParamSet);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+
+    (void)HksDeleteKey(&keyAlias, nullptr);
+}
 }
