@@ -59,11 +59,15 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
 
     MessageParcel *reply = const_cast<MessageParcel *>(reinterpret_cast<const MessageParcel *>(context));
     reply->WriteInt32(result);
+    /**
+     * no need to check the result of write fun because the reply has to be returned to the caller and the caller
+     * already prepared thorough check for safety
+    */
     if (response == nullptr) {
-        reply->WriteUint32(0);
+        (void)reply->WriteUint32(0);
     } else {
-        reply->WriteUint32(response->size);
-        reply->WriteBuffer(response->data, static_cast<size_t>(response->size));
+        (void)reply->WriteUint32(response->size);
+        (void)reply->WriteBuffer(response->data, static_cast<size_t>(response->size));
     }
 }
 

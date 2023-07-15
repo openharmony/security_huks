@@ -72,4 +72,12 @@ if ((OBJECT) == HKS_NULL_POINTER) { \
 if ((OBJECT) == HKS_NULL_POINTER) { \
     break; \
 }
+
+#define HKS_IF_NOT_TRUE_LOGE_RETURN(BOOL_FUNC, ERROR_CODE) \
+do { \
+    if (!(BOOL_FUNC)) { \
+        HKS_LOG_E("%{public}s failed!", #BOOL_FUNC); \
+        return ERROR_CODE; \
+    } \
+} while (0)
 #endif /* HKS_TEMPLATE_H */
