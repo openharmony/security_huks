@@ -58,12 +58,13 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
     }
 
     MessageParcel *reply = const_cast<MessageParcel *>(reinterpret_cast<const MessageParcel *>(context));
-    reply->WriteInt32(result);
+    HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteInt32(result));
+
     if (response == nullptr) {
-        reply->WriteUint32(0);
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(0));
     } else {
-        reply->WriteUint32(response->size);
-        reply->WriteBuffer(response->data, static_cast<size_t>(response->size));
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(response->size));
+        HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteBuffer(response->data, static_cast<size_t>(response->size)));
     }
 }
 

@@ -87,17 +87,15 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     } else {
         option = MessageOption::TF_ASYNC;
     }
-
-    data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteInterfaceToken(SA_KEYSTORE_SERVICE_DESCRIPTOR), HKS_ERROR_BAD_STATE);
 
     if (outBlob == nullptr) {
-        data.WriteUint32(0);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteUint32(0), HKS_ERROR_BAD_STATE);
     } else {
-        data.WriteUint32(outBlob->size);
+        HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteUint32(outBlob->size), HKS_ERROR_BAD_STATE);
     }
-
-    data.WriteUint32(inBlob->size);
-    data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size));
+    HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteUint32(inBlob->size), HKS_ERROR_BAD_STATE);
+    HKS_IF_NOT_TRUE_LOGE_RETURN(data.WriteBuffer(inBlob->data, static_cast<size_t>(inBlob->size)), HKS_ERROR_BAD_STATE);
 
     sptr<IRemoteObject> hksProxy = GetHksProxy();
     HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
