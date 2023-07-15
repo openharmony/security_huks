@@ -251,8 +251,7 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest005, TestSize.Level0)
     struct HksBlob outBlob = { sizeof(out), out };
     ret = HksMac(&keyAlias, macParamSet, &outBlob, &outBlob);
     (void)HksFreeParamSet(&macParamSet);
-    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
-
     (void)HksDeleteKey(&keyAlias, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

@@ -567,11 +567,10 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest014, TestSize.Level0
         0x6d, 0x76, 0xe0, 0xb3, 0xf5, 0x6f, 0x43, 0x9d, 0xcf, 0x60, 0xf6, 0x0b, 0x3f, 0x64, 0x45, 0xa8,
         0x3f, 0x1a, 0x96, 0xf1, 0xa1, 0xa4, 0x5d, 0x3e, 0x2c, 0x3f, 0x13, 0xd7, 0x81, 0xf7, 0x2a, 0xb5,
         0x8d, 0x19, 0x3d, 0x9b, 0x96, 0xc7, 0x6a, 0x10, 0xf0, 0xaa, 0xbc, 0x91, 0x6f, 0x4d, 0xa7, 0x09,
-        0xb3, 0x57, 0x88, 0x19, 0x6f, 0x00, 0x4b, 0xad, 0xee, 0x34, 0x35,
     };
-    struct HksBlob plainDataBlob = { sizeof(plainData), plainData };
+    struct HksBlob plainDataBlob = { .size = sizeof(plainData), .data = plainData };
     uint8_t outData[256] = {0};
-    struct HksBlob outDataBlob = { sizeof(outData), outData };
+    struct HksBlob outDataBlob = { .size = sizeof(outData), .data = outData };
     ret = HksEncrypt(&keyAlias, cipherParamSet, &plainDataBlob, &outDataBlob);
     (void)HksFreeParamSet(&cipherParamSet);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
@@ -589,10 +588,9 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest014, TestSize.Level0
     struct HksParamSet *cipherParamSet2 = nullptr;
     ret = InitParamSet(&cipherParamSet2, cipherParams2, sizeof(cipherParams2) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksDecrypt(&keyAlias, cipherParamSet2, &outDataBlob, &outDataBlob);
+    ret = HksDecrypt(&keyAlias, cipherParamSet2, &plainDataBlob, &outDataBlob);
     (void)HksFreeParamSet(&cipherParamSet2);
-    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
-
     (void)HksDeleteKey(&keyAlias, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }
