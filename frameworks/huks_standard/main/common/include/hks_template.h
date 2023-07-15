@@ -80,4 +80,12 @@ do { \
         return ERROR_CODE; \
     } \
 } while (0)
+
+#define HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(BOOL_FUNC) \
+do { \
+    if (!(BOOL_FUNC)) { \
+        HKS_LOG_E("%{public}s failed!", #BOOL_FUNC); \
+        return; \
+    } \
+} while (0)
 #endif /* HKS_TEMPLATE_H */
