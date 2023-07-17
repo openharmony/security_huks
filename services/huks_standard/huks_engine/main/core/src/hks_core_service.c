@@ -186,7 +186,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
     }
 
     if (isSupportUserAuth) {
-        HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation failed");
+        HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation");
         HksFreeKeyNode(&keyNode);
         return HKS_ERROR_NOT_SUPPORTED;
     }
@@ -1117,7 +1117,7 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
 
         if (isSupportUserAuth) {
             ret = HKS_ERROR_NOT_SUPPORTED;
-            HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation failed");
+            HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation");
             break;
         }
 
