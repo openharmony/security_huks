@@ -137,9 +137,7 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
   ]
   if (huks_security_level == "software") {
-    deps += [
-      "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard",
-    ]
+    deps += [ "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard" ]
   }
   deps += [
     "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",

@@ -162,7 +162,7 @@ int32_t HksAuth(uint32_t authId, const struct HksKeyNode *keyNode, const struct 
     }
 
     if (isSupportUserAuth) {
-        HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation failed");
+        HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation");
         return HKS_ERROR_NOT_SUPPORTED;
     }
 
