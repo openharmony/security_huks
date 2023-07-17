@@ -390,7 +390,7 @@ static int32_t UpgradeMkIfNeeded(uint32_t mkVersion, const struct HksBlob *mk)
     }
     // reserved function for future upgrade, e.g. version 2->3
     (void)mk;
-    return HKS_ERROR_NOT_SUPPORTED;
+    return HKS_SUCCESS;
 }
 
 static int32_t RkcLoadKsf(void)
