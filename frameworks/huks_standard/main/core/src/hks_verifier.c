@@ -85,9 +85,6 @@ static uint8_t g_versionInfoOid[] = {
 static uint8_t g_deviceIdOid[] = {
     0x06, 0x0e, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x02, 0x04, 0x05
 };
-static uint8_t g_keyFlagOid[] = {
-    0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x05
-};
 static uint8_t g_appIdOid[] = {
     0x06, 0x0d, 0x2b, 0x06, 0x01, 0x04, 0x01, 0x8f, 0x5b, 0x02, 0x82, 0x78, 0x02, 0x01, 0x03
 };
@@ -128,12 +125,6 @@ static const struct HksParam g_oidParams[] = {
         .blob = {
             .size = sizeof(g_deviceIdOid),
             .data = g_deviceIdOid
-        }
-    }, {
-        .tag = HKS_TAG_KEY_FLAG,
-        .blob = {
-            .size = sizeof(g_keyFlagOid),
-            .data = g_keyFlagOid
         }
     }, {
         .tag = HKS_TAG_ATTESTATION_APPLICATION_ID,
@@ -446,7 +437,7 @@ static int32_t ConstructParamSetOut(enum HksTag tag, uint8_t *data, uint32_t len
 {
     int32_t ret;
     for (uint32_t i = 0; i < paramSetOut->paramsCnt; i++) {
-        if (paramSetOut->params[i].tag == tag) {
+        if ((paramSetOut->params[i].tag == tag) && (GetTagType(tag) == HKS_TAG_TYPE_BYTES)) {
             if (tag == HKS_TAG_ATTESTATION_APPLICATION_ID) {
                 // APPLICATION_ID_RAW_OID_LEN + APPLICATION_ID_HEADER_LEN + sizeof(appId)
                 uint32_t appIdOffsetSize = APPLICATION_ID_RAW_OID_LEN + APPLICATION_ID_HEADER_LEN;
