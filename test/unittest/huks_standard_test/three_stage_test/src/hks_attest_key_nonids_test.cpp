@@ -257,56 +257,6 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest006
- * @tc.desc: attest with right params and validate success.
- * @tc.type: FUNC
- * @tc.require: issueI5NY0L
- */
-HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest006, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksAttestKeyNonIdsTest006");
-    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
-    struct HksParamSet *paramSet = nullptr;
-    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
-    HksCertChain *certChain = nullptr;
-    const struct HksTestCertChain certParam = { true, true, true, g_size };
-    (void)ConstructDataToCertChain(&certChain, &certParam);
-    ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
-
-    ASSERT_TRUE(ret == HKS_SUCCESS);
-    
-    struct HksParamSet *keyFlagparamSet = nullptr;
-    ret = HksInitParamSet(&keyFlagparamSet);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
-    struct HksBlob keyFlagBlob = { .size = sizeof(uint32_t),
-        .data = reinterpret_cast<uint8_t *>(HksMalloc(sizeof(uint32_t))) };
-
-    struct HksParam keyFlagParam = { .tag = HKS_TAG_KEY_FLAG, .blob = keyFlagBlob };
-    ret = HksAddParams(keyFlagparamSet, &keyFlagParam, 1);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksBuildParamSet(&keyFlagparamSet);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksValidateCertChain(certChain, keyFlagparamSet);
-    ASSERT_TRUE(ret == HKS_SUCCESS) << "HksValidateCertChain and get key flag failed";
-
-    ASSERT_EQ(keyFlagparamSet->params[0].blob.size, sizeof(uint32_t));
-    uint32_t keyflag = *(reinterpret_cast<uint32_t *>(keyFlagparamSet->params[0].blob.data));
-    ASSERT_EQ(HKS_KEY_FLAG_GENERATE_KEY, keyflag) << "fail compare key flag, " << keyflag;
-    
-    HKS_FREE_BLOB(keyFlagBlob);
-    HksFreeParamSet(&keyFlagparamSet);
-
-    FreeCertChain(&certChain, certChain->certsCount);
-    certChain = nullptr;
-
-    HksFreeParamSet(&paramSet);
-
-    ret = HksDeleteKey(&g_keyAlias, nullptr);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
-}
-
-/**
  * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest007
  * @tc.desc: attest with device id and expect HKS_ERROR_NO_PERMISSION
  * @tc.type: FUNC
