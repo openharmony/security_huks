@@ -537,6 +537,7 @@ static int32_t OpensslAesAeadCryptInit(
     }
     outCtx->algType = usageSpec->algType;
     outCtx->mode = usageSpec->mode;
+    outCtx->padding = 0;
     outCtx->append = (void *)ctx;
 
     *cryptoCtx = (void *)outCtx;
