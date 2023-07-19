@@ -21,6 +21,7 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_secure_access.h"
 
 struct HksAuthPolicy {
     uint32_t authId;
@@ -153,6 +154,18 @@ static int32_t AuthPolicy(const struct HksAuthPolicy *policy, const struct HksPa
 
 int32_t HksAuth(uint32_t authId, const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
+    bool isSupportUserAuth = false;
+    int32_t ret = HksCheckKeybBlobIsSupportUserAuth(keyNode->paramSet, &isSupportUserAuth);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCheckKeybBlobIsSupportUserAuth failed");
+        return ret;
+    }
+
+    if (isSupportUserAuth) {
+        HKS_LOG_E("key should do user auth, but one stage api do not support user auth operation");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_authPolicyList); i++) {
         if (authId == g_authPolicyList[i].authId) {
             return AuthPolicy(&g_authPolicyList[i], keyNode->paramSet, paramSet);

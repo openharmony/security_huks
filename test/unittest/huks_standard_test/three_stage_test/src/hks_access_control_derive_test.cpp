@@ -283,4 +283,46 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest004, TestSize.Level0
     ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish002, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
+
+/**
+ * @tc.name: HksAccessControlDeriveTest.HksAccessDerivePartTest005
+ * @tc.desc: one stage api:HksDerive do not support operate user-auth-key
+ * @tc.type: FUNC
+ * @tc.auth_type: PIN
+ * @tc.result:HKS_ERROR_NOT_SUPPORTED
+ * @tc.require: issueI5NY0M
+ */
+HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest005, TestSize.Level0)
+{
+    HKS_LOG_I("Enter HksAccessDerivePartTest005");
+    uint8_t alias[] = "testCheckAuthDerive";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
+        HKS_ACCESS_TEST_001_PARAMS.genParams.size());
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    (void)HksFreeParamSet(&genParamSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+
+    // test sign
+    struct HksParam deriveParams[] =
+    {
+        { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_HKDF },
+        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_DERIVE },
+        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
+        { .tag = HKS_TAG_DERIVE_KEY_SIZE, .uint32Param = DERIVE_KEY_SIZE_32 },
+    };
+    struct HksParamSet *deriveParamSet = nullptr;
+    ret = InitParamSet(&deriveParamSet, deriveParams, sizeof(deriveParams) / sizeof(HksParam));
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    
+    uint8_t out[256] = {0};
+    struct HksBlob outBlob = { sizeof(out), out };
+    ret = HksDeriveKey(deriveParamSet, &keyAlias, &outBlob);
+    (void)HksFreeParamSet(&deriveParamSet);
+    (void)HksDeleteKey(&keyAlias, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+}
 }
