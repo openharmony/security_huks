@@ -331,15 +331,15 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
 
         HksLocalCryptoAbilityInit();
         ret = HksCryptoHalSign(&keyMaterial, &usageSpec, &message, signature);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "local engine verify failed, ret:%" LOG_PUBLIC "x!", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "local engine Sign failed, ret:%" LOG_PUBLIC "x!", ret)
     } while (0);
 
-    if (needFree) {
-        HKS_FREE_PTR(message.data);
-    }
     if (keyMaterial.data != NULL) {
         (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
         HKS_FREE_PTR(keyMaterial.data);
+    }
+     if (needFree) {
+        HKS_FREE_PTR(message.data);
     }
     return ret;
 }

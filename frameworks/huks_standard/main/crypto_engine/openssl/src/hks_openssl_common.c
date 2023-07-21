@@ -50,15 +50,20 @@ int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
     return ret;
 }
 
-int32_t HksOpensslFillRandom(struct HksBlob *randomData)
+int32_t HksOpensslFillRandomInner(struct HksBlob *randomData, bool isPriv)
 {
-    int ret = RAND_bytes(randomData->data, randomData->size);
+    int ret = isPriv  
+        ? RAND_priv_bytes(randomData->data, randomData->size)
+        : RAND_bytes(randomData->data, randomData->size);
+         
     if (ret <= 0) {
-        HKS_LOG_E("generate random failed, ret = 0x%" LOG_PUBLIC "x", ret);
+        isPriv 
+            ? HKS_LOG_E("generate private random failed, ret = 0x%" LOG_PUBLIC "x", ret)
+            : HKS_LOG_E("generate random failed, ret = 0x%" LOG_PUBLIC "x", ret);
+                 
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-
-    if (randomData->size == 1) {
+     if (randomData->size == 1) {
         return HKS_SUCCESS;
     }
 
@@ -70,36 +75,24 @@ int32_t HksOpensslFillRandom(struct HksBlob *randomData)
         }
     }
     if (j == randomData->size) {
-        HKS_LOG_E("fill random failed, size %" LOG_PUBLIC "x", randomData->size);
+        isPriv 
+            ? HKS_LOG_E("fill private random failed, size %" LOG_PUBLIC "x", randomData->size)
+            : HKS_LOG_E("fill random failed, size %" LOG_PUBLIC "x", randomData->size);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    HKS_LOG_D("generate random success");
+    isPriv 
+        ? HKS_LOG_D("generate private random success")
+        : HKS_LOG_D("generate random success");
+             
     return HKS_SUCCESS;
+}
+
+int32_t HksOpensslFillRandom(struct HksBlob *randomData)
+{
+   return HksOpensslFillRandomInner(randomData, false);
 }
 
 int32_t HksOpensslFillPrivRandom(struct HksBlob *randomData)
 {
-    int ret = RAND_priv_bytes(randomData->data, randomData->size);
-    if (ret <= 0) {
-        HKS_LOG_E("generate private random failed, ret = 0x%" LOG_PUBLIC "x", ret);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-
-    if (randomData->size == 1) {
-        return HKS_SUCCESS;
-    }
-
-    uint32_t j = 0;
-
-    for (uint32_t i = 0; i < randomData->size; i++) {
-        if (randomData->data[i] == 0) {
-            j++;
-        }
-    }
-    if (j == randomData->size) {
-        HKS_LOG_E("fill private random failed, size %" LOG_PUBLIC "x", randomData->size);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    HKS_LOG_D("generate private random success");
-    return HKS_SUCCESS;
+    return HksOpensslFillRandomInner(randomData, true);
 }
