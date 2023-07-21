@@ -1083,8 +1083,7 @@ static int32_t CheckEccSignature(uint32_t cmdId, uint32_t keySize, const struct 
             break;
         case HKS_CMD_ID_VERIFY:
             if (signature->size > (eccSignRSize + eccSignSSize + HKS_ECC_SIGN_MAX_TL_SIZE)) {
-                HKS_LOG_E("eccverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u",
-                    keySize, signature->size);
+                HKS_LOG_E("eccverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u", keySize, signature->size);
                 return HKS_ERROR_INVALID_SIGNATURE_SIZE;
             }
             break;
@@ -1151,8 +1150,7 @@ static int32_t CheckRsaSignature(uint32_t cmdId, uint32_t keySize, const struct 
             break;
         case HKS_CMD_ID_VERIFY:
             if (signature->size > keySize / HKS_BITS_PER_BYTE) {
-                HKS_LOG_E("rsaverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u",
-                    keySize, signature->size);
+                HKS_LOG_E("rsaverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u", keySize, signature->size);
                 return HKS_ERROR_INVALID_SIGNATURE_SIZE;
             }
             break;
@@ -1502,18 +1500,18 @@ int32_t HksCheckGenKeyPurpose(uint32_t alg, uint32_t inputPurpose, uint32_t keyF
 static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
 {
     if (key->size < sizeof(struct HksParamSet)) {
-        HKS_LOG_E("check key size: invalid keyfile size: %" LOG_PUBLIC "u", key->size);
+        HKS_LOG_E("check dsa key size: invalid keyfile size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_KEY_FILE;
     }
 
     struct HksParamSet *keyParamSet = (struct HksParamSet *)key->data;
     int32_t ret = HksCheckParamSetValidity(keyParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE, "check key size: paramset invalid failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE, "check dsa key size: paramset invalid failed")
 
     struct HksParam *keySizeParam = NULL;
     ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
-        "check key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
+        "check dsa key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
     *keySize = keySizeParam->uint32Param;
     return ret;
 }

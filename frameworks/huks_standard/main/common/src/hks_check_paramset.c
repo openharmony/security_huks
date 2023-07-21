@@ -57,11 +57,11 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_HMAC_C
     HKS_ALG_HMAC,
 #endif
-#ifdef HKS_SUPPORT_X25519_C
-    HKS_ALG_X25519,
-#endif
 #ifdef HKS_SUPPORT_ED25519_C
     HKS_ALG_ED25519,
+#endif
+#ifdef HKS_SUPPORT_X25519_C
+    HKS_ALG_X25519,
 #endif
 #ifdef HKS_SUPPORT_DSA_C
     HKS_ALG_DSA,
@@ -72,11 +72,11 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_ECDH_C
     HKS_ALG_ECDH,
 #endif
-#ifdef HKS_SUPPORT_SM2_C
-    HKS_ALG_SM2,
-#endif
 #ifdef HKS_SUPPORT_SM3_C
     HKS_ALG_SM3,
+#endif
+#ifdef HKS_SUPPORT_SM2_C
+    HKS_ALG_SM2,
 #endif
 #ifdef HKS_SUPPORT_SM4_C
     HKS_ALG_SM4,
@@ -154,11 +154,11 @@ static uint32_t g_signAlg[] = {
 #endif
 
 static uint32_t g_agreeAlg[] = {
-#ifdef HKS_SUPPORT_ECDH_C
-    HKS_ALG_ECDH,
-#endif
 #ifdef HKS_SUPPORT_X25519_C
     HKS_ALG_X25519,
+#endif
+#ifdef HKS_SUPPORT_ECDH_C
+    HKS_ALG_ECDH,
 #endif
 #ifdef HKS_SUPPORT_DH_C
     HKS_ALG_DH,
@@ -575,29 +575,29 @@ static int32_t CheckCurve25519KeyLen(uint32_t alg, uint32_t keyType, const struc
     const struct HksBlob *key)
 {
     if (key->size < sizeof(struct HksKeyMaterial25519)) {
-        HKS_LOG_E("invalid import key size: %" LOG_PUBLIC "u", key->size);
+        HKS_LOG_E("invalid import Curve25519 key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     struct HksKeyMaterial25519 *keyMaterial = (struct HksKeyMaterial25519 *)(key->data);
     if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
-        HKS_LOG_E("invalid import key material");
+        HKS_LOG_E("invalid import Curve25519 key material");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     if ((keyMaterial->pubKeySize > HKS_CURVE25519_KEY_SIZE_256) ||
         (keyMaterial->priKeySize > HKS_CURVE25519_KEY_SIZE_256)) {
-        HKS_LOG_E("invalid import key material pubKey/priKey size, bigger than 256");
+        HKS_LOG_E("invalid import Curve25519 key material pubKey/priKey size, bigger than 256");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     if (keyMaterial->priKeySize == 0) {
-        HKS_LOG_E("invalid import key material priKey size: 0");
+        HKS_LOG_E("invalid import Curve25519 key material priKey size: 0");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && (keyMaterial->pubKeySize == 0)) {
-        HKS_LOG_E("invalid import key material pubKey size: 0");
+        HKS_LOG_E("invalid import Curve25519 key material pubKey size: 0");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -614,28 +614,28 @@ static int32_t CheckDHKeyLen(uint32_t alg, uint32_t keyType, const struct Params
     const struct HksBlob *key)
 {
     if (key->size < sizeof(struct HksKeyMaterialDh)) {
-        HKS_LOG_E("invalid import key size: %" LOG_PUBLIC "u", key->size);
+        HKS_LOG_E("invalid import DH key size: %" LOG_PUBLIC "u", key->size);
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     struct HksKeyMaterialDh *keyMaterial = (struct HksKeyMaterialDh *)(key->data);
     if ((keyMaterial->keyAlg != alg) || (keyMaterial->keySize != params->keyLen.value)) {
-        HKS_LOG_E("invalid import key material");
+        HKS_LOG_E("invalid import DH key material");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     if ((keyMaterial->pubKeySize > HKS_DH_KEY_SIZE_4096) || (keyMaterial->priKeySize > HKS_DH_KEY_SIZE_4096)) {
-        HKS_LOG_E("invalid import key material pubKey/priKey size, bigger than 4096");
+        HKS_LOG_E("invalid import DH key material pubKey/priKey size, bigger than 4096");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     if (keyMaterial->priKeySize == 0) {
-        HKS_LOG_E("invalid import key material priKey size: 0");
+        HKS_LOG_E("invalid import DH key material priKey size: 0");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
     if ((keyType == HKS_KEY_TYPE_KEY_PAIR) && (keyMaterial->pubKeySize == 0)) {
-        HKS_LOG_E("invalid import key material pubKey size: 0");
+        HKS_LOG_E("invalid import DH key material pubKey size: 0");
         return HKS_ERROR_INVALID_KEY_INFO;
     }
 
@@ -832,7 +832,7 @@ int32_t HksLocalCheckSignVerifyParams(uint32_t cmdId, uint32_t keySize, const st
     (void)srcData;
     uint32_t alg;
     int32_t ret = CheckAndGetAlgorithm(paramSet, g_signAlg, HKS_ARRAY_SIZE(g_signAlg), &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check and get alg failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local check and get alg failed")
 
     struct ParamsValues params;
     (void)memset_s(&params, sizeof(params), 0, sizeof(params));
@@ -841,7 +841,7 @@ int32_t HksLocalCheckSignVerifyParams(uint32_t cmdId, uint32_t keySize, const st
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify get input params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = CheckSignVerifyParamsByAlg(cmdId, alg, &params);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify check params failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign or verify local check params failed, ret = %" LOG_PUBLIC "d", ret)
 
     ret = HksCheckSignature(cmdId, alg, keySize, signature);
     HKS_IF_NOT_SUCC_LOGE(ret, "check signature failed, ret = %" LOG_PUBLIC "d", ret)
