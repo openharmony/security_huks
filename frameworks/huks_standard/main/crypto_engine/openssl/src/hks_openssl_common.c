@@ -55,7 +55,6 @@ static int32_t HksOpensslFillRandomInner(struct HksBlob *randomData, bool isPriv
     int ret = isPriv
         ? RAND_priv_bytes(randomData->data, randomData->size)
         : RAND_bytes(randomData->data, randomData->size);
-         
     if (ret <= 0) {
         HKS_LOG_E("generate random failed, ret = 0x%" LOG_PUBLIC "x, isPriv = %" LOG_PUBLIC "d", ret, isPriv);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
