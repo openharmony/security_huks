@@ -1151,7 +1151,7 @@ static int32_t CheckRsaSignature(uint32_t cmdId, uint32_t keySize, const struct 
             break;
         case HKS_CMD_ID_VERIFY:
             if (signature->size > keySize / HKS_BITS_PER_BYTE) {
-                HKS_LOG_E("rsaverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u", 
+                HKS_LOG_E("rsaverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u",
                     keySize, signature->size);
                 return HKS_ERROR_INVALID_SIGNATURE_SIZE;
             }
