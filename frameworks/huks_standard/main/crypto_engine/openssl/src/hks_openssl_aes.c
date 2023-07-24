@@ -173,7 +173,7 @@ static int32_t OpensslBlockCipherHandleFinalThree(
             evpRet = isEncrypt
                 ? EVP_EncryptUpdate(ctx, output->data, &outLen, input->data, input->size)
                 : EVP_DecryptUpdate(ctx, output->data, &outLen, input->data, input->size);
-           if (evpRet != HKS_OPENSSL_SUCCESS) {
+            if (evpRet != HKS_OPENSSL_SUCCESS) {
                 HksLogOpensslError();
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
@@ -203,7 +203,7 @@ static int32_t OpensslBlockCipherHandleFinalThree(
 int32_t OpensslBlockCipherEncryptFinalThree(
     void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
 {
-   return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, cipherText, true);
+    return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, cipherText, true);
 }
 
 // blob data and size have been checked in hks_core_service_three_stage.c
@@ -229,7 +229,7 @@ int32_t OpensslBlockCipherDecryptUpdate(
 int32_t OpensslBlockCipherDecryptFinalThree(
     void **cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
 {
-  return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, plainText, false);
+    return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, plainText, false);
 }
 
 #endif
