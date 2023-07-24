@@ -52,12 +52,12 @@ int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 
 static int32_t HksOpensslFillRandomInner(struct HksBlob *randomData, bool isPriv)
 {
-    int ret = isPriv  
+    int ret = isPriv
         ? RAND_priv_bytes(randomData->data, randomData->size)
         : RAND_bytes(randomData->data, randomData->size);
          
     if (ret <= 0) {
-        HKS_LOG_E("generate random failed, ret = 0x%" LOG_PUBLIC "x, isPriv = %" LOG_PUBLIC "d", ret, isPriv);     
+        HKS_LOG_E("generate random failed, ret = 0x%" LOG_PUBLIC "x, isPriv = %" LOG_PUBLIC "d", ret, isPriv);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (randomData->size == 1) {
@@ -72,10 +72,10 @@ static int32_t HksOpensslFillRandomInner(struct HksBlob *randomData, bool isPriv
         }
     }
     if (j == randomData->size) {
-        HKS_LOG_E("fill random failed, size %" LOG_PUBLIC "x, isPriv = %" LOG_PUBLIC "d", randomData->size, isPriv);  
+        HKS_LOG_E("fill random failed, size %" LOG_PUBLIC "x, isPriv = %" LOG_PUBLIC "d", randomData->size, isPriv);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-    HKS_LOG_D("generate random success, isPriv =%" LOG_PUBLIC "d", isPriv);  
+    HKS_LOG_D("generate random success, isPriv =%" LOG_PUBLIC "d", isPriv);
              
     return HKS_SUCCESS;
 }

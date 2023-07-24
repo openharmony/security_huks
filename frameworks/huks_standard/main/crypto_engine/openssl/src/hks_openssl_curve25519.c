@@ -277,7 +277,7 @@ int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsage
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
-    if (mdctx == NULL) {  
+    if (mdctx == NULL) {
         HksLogOpensslError();
         EVP_PKEY_free(edKeyPub);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;

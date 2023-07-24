@@ -425,7 +425,7 @@ static int32_t FormatRsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialRsa *)publicKey)->dSize = 0;
 
-    int32_t ret= FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     HksFree(publicKey);
     return ret;
 }
@@ -455,7 +455,7 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     (void)memcpy_s(publicKey + inOffset, publicKeySize - inOffset, keyIn->data + outOffset, publicKeySize - inOffset);
     ((struct KeyMaterialDsa *)publicKey)->xSize = 0;
 
-    int32_t ret= FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     HksFree(publicKey);
     return ret;
 }
@@ -480,8 +480,7 @@ static int32_t FormatEccKey(const struct HksBlob *keyIn, struct HksParamSet *par
 
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialEcc *)publicKey)->zSize = 0;
-
-    int32_t ret= FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     HksFree(publicKey);
     return ret;
 }
@@ -507,7 +506,7 @@ static int32_t FormatDhKey(const struct HksBlob *keyIn, struct HksParamSet *para
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialDh *)publicKey)->priKeySize = 0;
 
-    int32_t ret= FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     HksFree(publicKey);
     return ret;
 }

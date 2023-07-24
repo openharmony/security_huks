@@ -170,8 +170,8 @@ static int32_t OpensslBlockCipherHandleFinalThree(
         int32_t outLen = 0;
         int evpRet;
         if (input->size != 0) {
-            evpRet = isEncrypt 
-                ? EVP_EncryptUpdate(ctx, output->data, &outLen, input->data, input->size) 
+            evpRet = isEncrypt
+                ? EVP_EncryptUpdate(ctx, output->data, &outLen, input->data, input->size)
                 : EVP_DecryptUpdate(ctx, output->data, &outLen, input->data, input->size);
            if (evpRet != HKS_OPENSSL_SUCCESS) {
                 HksLogOpensslError();
@@ -180,8 +180,8 @@ static int32_t OpensslBlockCipherHandleFinalThree(
             }
         }
         output->size = (uint32_t)outLen;
-        evpRet = isEncrypt 
-            ? EVP_EncryptFinal_ex(ctx, (output->data + outLen), &outLen) 
+        evpRet = isEncrypt
+            ? EVP_EncryptFinal_ex(ctx, (output->data + outLen), &outLen)
             : EVP_DecryptFinal_ex(ctx, (output->data + outLen), &outLen);
               
         if (evpRet != HKS_OPENSSL_SUCCESS) {
