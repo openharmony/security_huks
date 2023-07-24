@@ -1083,7 +1083,8 @@ static int32_t CheckEccSignature(uint32_t cmdId, uint32_t keySize, const struct 
             break;
         case HKS_CMD_ID_VERIFY:
             if (signature->size > (eccSignRSize + eccSignSSize + HKS_ECC_SIGN_MAX_TL_SIZE)) {
-                HKS_LOG_E("eccverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u", keySize, signature->size);
+                HKS_LOG_E("eccverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u",
+                    keySize, signature->size);
                 return HKS_ERROR_INVALID_SIGNATURE_SIZE;
             }
             break;
