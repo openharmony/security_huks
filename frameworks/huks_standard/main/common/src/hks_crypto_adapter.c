@@ -392,7 +392,7 @@ int32_t GetCurve25519FromKeyMaterial(const bool isPubKey, const struct HksBlob *
     return HKS_SUCCESS;
 }
 
-#ifdef HKS_SUPPORT_AES_C || (defined(HKS_SUPPORT_HMAC_C) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY))
+#if defined(HKS_SUPPORT_AES_C) || (defined(HKS_SUPPORT_HMAC_C) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY))
 static int32_t FormatAesOrHmacKey(const struct HksBlob *keyIn, struct HksParamSet *paramSetOut)
 {
     struct HksParam params[] = {
@@ -485,7 +485,6 @@ static int32_t FormatEccKey(const struct HksBlob *keyIn, struct HksParamSet *par
     HksFree(publicKey);
     return ret;
 }
-}
 #endif
 
 #if defined(HKS_SUPPORT_DH_C) && defined(HKS_SUPPORT_DH_GENERATE_KEY)
@@ -511,7 +510,6 @@ static int32_t FormatDhKey(const struct HksBlob *keyIn, struct HksParamSet *para
     int32_t ret= FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     HksFree(publicKey);
     return ret;
-}
 }
 #endif
 
