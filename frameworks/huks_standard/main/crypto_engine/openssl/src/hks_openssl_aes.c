@@ -183,7 +183,6 @@ static int32_t OpensslBlockCipherHandleFinalThree(
         evpRet = isEncrypt
             ? EVP_EncryptFinal_ex(ctx, (output->data + outLen), &outLen)
             : EVP_DecryptFinal_ex(ctx, (output->data + outLen), &outLen);
-              
         if (evpRet != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
