@@ -1151,7 +1151,8 @@ static int32_t CheckRsaSignature(uint32_t cmdId, uint32_t keySize, const struct 
             break;
         case HKS_CMD_ID_VERIFY:
             if (signature->size > keySize / HKS_BITS_PER_BYTE) {
-                HKS_LOG_E("rsaverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u", keySize, signature->size);
+                HKS_LOG_E("rsaverfiy: invalid signature size, keySize %" LOG_PUBLIC "u, signatureSize %" LOG_PUBLIC "u", 
+                    keySize, signature->size);
                 return HKS_ERROR_INVALID_SIGNATURE_SIZE;
             }
             break;
@@ -1174,7 +1175,8 @@ static int32_t CheckRsaNoPadCipherData(uint32_t keySize, const struct HksBlob *i
     }
 
     if (outData->size < keySize) {
-        HKS_LOG_E("outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u", outData->size, keySize);
+        HKS_LOG_E("outData buffer too small size: %" LOG_PUBLIC "u, keySize: %" LOG_PUBLIC "u",
+            outData->size, keySize);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
