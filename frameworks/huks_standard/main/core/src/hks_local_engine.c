@@ -338,7 +338,7 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
         (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
         HKS_FREE_PTR(keyMaterial.data);
     }
-     if (needFree) {
+    if (needFree) {
         HKS_FREE_PTR(message.data);
     }
     return ret;

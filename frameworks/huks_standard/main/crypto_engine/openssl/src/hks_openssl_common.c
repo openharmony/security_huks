@@ -82,7 +82,7 @@ static int32_t HksOpensslFillRandomInner(struct HksBlob *randomData, bool isPriv
 
 int32_t HksOpensslFillRandom(struct HksBlob *randomData)
 {
-   return HksOpensslFillRandomInner(randomData, false);
+    return HksOpensslFillRandomInner(randomData, false);
 }
 
 int32_t HksOpensslFillPrivRandom(struct HksBlob *randomData)
