@@ -41,7 +41,6 @@ static int32_t GetProcessInfo(const struct HksParamSet *paramSet, char **process
     return HKS_SUCCESS;
 }
 
-///-------------------------------------------------------------------------------wxt
     struct HksProcessInfo getProcessInfoStruct(const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
