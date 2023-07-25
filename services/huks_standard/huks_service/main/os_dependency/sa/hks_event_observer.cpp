@@ -54,6 +54,7 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
     }
     processInfo->userId.size = userSize;
     processInfo->userId.data = userData;
+    processInfo->userIdInt = userId;
 
     uint32_t uidSize = sizeof(uid);
     uint8_t *uidData = static_cast<uint8_t *>(HksMalloc(uidSize));
