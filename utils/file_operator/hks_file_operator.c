@@ -335,7 +335,7 @@ int32_t HksRemoveDir(const char *dirPath)
     return HKS_SUCCESS;
 }
 
-static int32_t HksDeletDirPartTwo(const char *path)
+static int32_t HksDeleteDirPartInner(const char *path, int32_t part)
 {
     int32_t ret;
     char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
@@ -359,46 +359,29 @@ static int32_t HksDeletDirPartTwo(const char *path)
             closedir(dir);
             return HKS_ERROR_INTERNAL_ERROR;
         }
-
-        if ((strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
-            (void)remove(deletePath);
-        }
-        dire = readdir(dir);
-    }
-    closedir(dir);
-    ret = remove(path);
-    return ret;
-}
-
-static int32_t HksDeletDirPartOne(const char *path)
-{
-    int32_t ret;
-    char deletePath[HKS_MAX_FILE_NAME_LEN] = {0};
-    DIR *dir = opendir(path);
-    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
-    struct dirent *dire = readdir(dir);
-    while (dire != NULL) {
-        if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
-            closedir(dir);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-
-        if (deletePath[strlen(deletePath) - 1] != '/') {
-            if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
-                closedir(dir);
-                return HKS_ERROR_INTERNAL_ERROR;
+        switch (part)
+        {
+        case 0:
+            if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
+                HksDeleteDirPartInner(deletePath, 1);
+            } else if (dire->d_type != DT_DIR) {
+                (void)remove(deletePath);
             }
-        }
-
-        if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
-            closedir(dir);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-
-        if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
-            HksDeletDirPartTwo(deletePath);
-        } else if (dire->d_type != DT_DIR) {
-            (void)remove(deletePath);
+            break;
+        case 1:
+            if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
+                HksDeleteDirPartInner(deletePath, 2);
+            } else if (dire->d_type != DT_DIR) {
+                (void)remove(deletePath);
+            }
+            break;
+        case 2:
+            if ((strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
+                (void)remove(deletePath);
+            }
+            break;
+        default:
+            break;
         }
         dire = readdir(dir);
     }
@@ -409,40 +392,7 @@ static int32_t HksDeletDirPartOne(const char *path)
 
 int32_t HksDeleteDir(const char *path)
 {
-    int32_t ret;
-    char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
-
-    DIR *dir = opendir(path);
-    HKS_IF_NULL_LOGE_RETURN(dir, HKS_ERROR_OPEN_FILE_FAIL, "open dir failed")
-    struct dirent *dire = readdir(dir);
-    while (dire != NULL) {
-        if (strncpy_s(deletePath, sizeof(deletePath), path, strlen(path)) != EOK) {
-            closedir(dir);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-
-        if (deletePath[strlen(deletePath) - 1] != '/') {
-            if (strncat_s(deletePath, sizeof(deletePath), "/", strlen("/")) != EOK) {
-                closedir(dir);
-                return HKS_ERROR_INTERNAL_ERROR;
-            }
-        }
-
-        if (strncat_s(deletePath, sizeof(deletePath), dire->d_name, strlen(dire->d_name)) != EOK) {
-            closedir(dir);
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-
-        if (dire->d_type == DT_DIR && (strcmp("..", dire->d_name) != 0) && (strcmp(".", dire->d_name) != 0)) {
-            HksDeletDirPartOne(deletePath);
-        } else if (dire->d_type != DT_DIR) {
-            (void)remove(deletePath);
-        }
-        dire = readdir(dir);
-    }
-    closedir(dir);
-    ret = remove(path);
-    return ret;
+    return HksDeleteDirPartInner(path, 0);
 }
 
 uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
