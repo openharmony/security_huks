@@ -262,7 +262,8 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
     return HksFreshParamSet(paramSetOut, false);
 }
 
-#if defined(HKS_SUPPORT_AES_C) || (defined(HKS_SUPPORT_HMAC_C) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY))
+//wxt
+#if (defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)) 
 static int32_t FormatKeyInner(uint32_t publicKeySize, uint8_t *publicKey, const struct HksBlob *keyIn,
     struct HksParamSet *paramSetOut)
 {
@@ -276,7 +277,6 @@ static int32_t FormatKeyInner(uint32_t publicKeySize, uint8_t *publicKey, const 
             .blob = { keyIn->size, keyIn->data },
         },
     };
-
     int32_t ret = BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
     (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     return ret;
