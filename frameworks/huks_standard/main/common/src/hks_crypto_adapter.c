@@ -262,6 +262,7 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
     return HksFreshParamSet(paramSetOut, false);
 }
 
+#if defined(HKS_SUPPORT_AES_C) || (defined(HKS_SUPPORT_HMAC_C) && defined(HKS_SUPPORT_HMAC_GENERATE_KEY))
 static int32_t FormatKeyInner(uint32_t publicKeySize, uint8_t *publicKey, const struct HksBlob *keyIn,
     struct HksParamSet *paramSetOut)
 {
@@ -280,6 +281,7 @@ static int32_t FormatKeyInner(uint32_t publicKeySize, uint8_t *publicKey, const 
     (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     return ret;
 }
+#endif
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t SetCurve25519KeyMaterial(bool isPubKey, const struct HksBlob *keyIn, struct HksBlob *keyOut)

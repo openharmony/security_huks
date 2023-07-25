@@ -223,7 +223,8 @@ int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksUsageSp
     (void)usageSpec;
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
     uint32_t offset = sizeof(struct KeyMaterial25519) + km->pubKeySize;
-    EVP_PKEY *edKeyPri = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, key->data + offset, km->priKeySize);
+    EVP_PKEY *edKeyPri = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL,
+        key->data + offset, km->priKeySize);
    
     if (edKeyPri == NULL) {
         HksLogOpensslError();
@@ -268,9 +269,8 @@ int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsage
 {
     (void)usageSpec;
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
-
-    EVP_PKEY *edKeyPub = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, key->data + sizeof(struct KeyMaterial25519),
-        km->pubKeySize);
+    EVP_PKEY *edKeyPub = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL,
+        key->data + sizeof(struct KeyMaterial25519), km->pubKeySize);
    
     if (edKeyPub == NULL) {
         HksLogOpensslError();
