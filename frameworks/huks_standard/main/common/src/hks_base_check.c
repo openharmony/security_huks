@@ -954,10 +954,8 @@ static int32_t InitInputParamsByAlg(uint32_t alg, enum CheckKeyType checkType, s
         case HKS_ALG_RSA:
             return InitInputParams(checkType, inputParams, g_rsaParamSet, HKS_ARRAY_SIZE(g_rsaParamSet));
 #endif
-#ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             return InitInputParams(checkType, inputParams, g_aesParamSet, HKS_ARRAY_SIZE(g_aesParamSet));
-#endif
 #ifdef HKS_SUPPORT_ECC_C
         case HKS_ALG_ECC:
             return InitInputParams(checkType, inputParams, g_eccParamSet, HKS_ARRAY_SIZE(g_eccParamSet));
@@ -1020,10 +1018,8 @@ static int32_t GetExpectParams(uint32_t alg, enum CheckKeyType checkType, struct
         case HKS_ALG_RSA:
             return InitExpectParams(checkType, expectValues, g_expectRsaParams, HKS_ARRAY_SIZE(g_expectRsaParams));
 #endif
-#ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             return InitExpectParams(checkType, expectValues, g_expectAesParams, HKS_ARRAY_SIZE(g_expectAesParams));
-#endif
 #ifdef HKS_SUPPORT_ECC_C
         case HKS_ALG_ECC:
             return InitExpectParams(checkType, expectValues, g_expectEccParams, HKS_ARRAY_SIZE(g_expectEccParams));

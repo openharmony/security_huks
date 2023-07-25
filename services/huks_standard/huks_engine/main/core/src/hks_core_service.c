@@ -942,7 +942,6 @@ static int32_t AppendRsaPublicExponent(const struct HksBlob *key, struct HksBlob
     uint8_t *out = (uint8_t *)HksMalloc(size);
     HKS_IF_NULL_LOGE_RETURN(out, HKS_ERROR_MALLOC_FAIL, "malloc failed")
 
-    int32_t ret = HKS_SUCCESS;
     uint32_t offset = 0;
     do {
         (void)memcpy_s(out + offset, size - offset, key->data, sizeof(struct HksKeyMaterialRsa));
@@ -960,10 +959,6 @@ static int32_t AppendRsaPublicExponent(const struct HksBlob *key, struct HksBlob
             key->data + offset, keyMaterial->dSize);
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
-        (void)memset_s(out, size, 0, size);
-        HKS_FREE_PTR(out);
-    }
     outKey->data = out;
     outKey->size = size;
     return HKS_SUCCESS;
