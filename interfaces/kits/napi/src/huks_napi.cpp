@@ -106,7 +106,10 @@ static void AddHuksTagPart1(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_USER_AUTH_TYPE", HKS_TAG_USER_AUTH_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_AUTH_TIMEOUT", HKS_TAG_AUTH_TIMEOUT);
     AddInt32Property(env, tag, "HUKS_TAG_AUTH_TOKEN", HKS_TAG_AUTH_TOKEN);
+}
 
+static void AddHuksTagPart2(napi_env env, napi_value tag)
+{
     /* Attestation related TAG: 501 - 600 */
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_CHALLENGE", HKS_TAG_ATTESTATION_CHALLENGE);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_APPLICATION_ID", HKS_TAG_ATTESTATION_APPLICATION_ID);
@@ -123,10 +126,7 @@ static void AddHuksTagPart1(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_UDID", HKS_TAG_ATTESTATION_ID_UDID);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO", HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO);
     AddInt32Property(env, tag, "HUKS_TAG_ATTESTATION_ID_VERSION_INFO", HKS_TAG_ATTESTATION_ID_VERSION_INFO);
-}
 
-static void AddHuksTagPart2(napi_env env, napi_value tag)
-{
     /*
      * Other reserved TAG: 601 - 1000
      *
@@ -155,7 +155,10 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_PAYLOAD_LEN", HKS_TAG_PAYLOAD_LEN);
     AddInt32Property(env, tag, "HUKS_TAG_AE_TAG", HKS_TAG_AE_TAG);
     AddInt32Property(env, tag, "HUKS_TAG_IS_KEY_HANDLE", HKS_TAG_IS_KEY_HANDLE);
+}
 
+static void AddHuksTagPart3(napi_env env, napi_value tag)
+{
     /* Os version related TAG */
     AddInt32Property(env, tag, "HUKS_TAG_OS_VERSION", HKS_TAG_OS_VERSION);
     AddInt32Property(env, tag, "HUKS_TAG_OS_PATCHLEVEL", HKS_TAG_OS_PATCHLEVEL);
@@ -188,7 +191,8 @@ static napi_value CreateHuksTag(napi_env env)
 
     AddHuksTagPart1(env, tag);
     AddHuksTagPart2(env, tag);
-
+    AddHuksTagPart3(env, tag);
+    
     return tag;
 }
 
@@ -632,9 +636,36 @@ using namespace HuksNapi;
 using namespace HuksNapiItem;
 
 extern "C" {
+napi_property_descriptor NAPI_FUNC_DESC[] = {
+    DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
+    DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
+    DECLARE_NAPI_FUNCTION("getSdkVersion", HuksNapiGetSdkVersion),
+    DECLARE_NAPI_FUNCTION("importKey", HuksNapiImportKey),
+    DECLARE_NAPI_FUNCTION("exportKey", HuksNapiExportKey),
+    DECLARE_NAPI_FUNCTION("getKeyProperties", HuksNapiGetKeyProperties),
+    DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),
+    DECLARE_NAPI_FUNCTION("init", HuksNapiInit),
+    DECLARE_NAPI_FUNCTION("update", HuksNapiUpdate),
+    DECLARE_NAPI_FUNCTION("finish", HuksNapiFinish),
+    DECLARE_NAPI_FUNCTION("abort", HuksNapiAbort),
+
+    DECLARE_NAPI_FUNCTION("generateKeyItem", HuksNapiItemGenerateKey),
+    DECLARE_NAPI_FUNCTION("deleteKeyItem", HuksNapiDeleteKeyItem),
+    DECLARE_NAPI_FUNCTION("importKeyItem", HuksNapiImportKeyItem),
+    DECLARE_NAPI_FUNCTION("importWrappedKeyItem", HuksNapiImportWrappedKeyItem),
+    DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
+    DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
+    DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
+    DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
+    DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
+    DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
+    DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
+    DECLARE_NAPI_FUNCTION("abortSession", HuksNapiAbortSession),
+};
+
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)
 {
-    napi_property_descriptor desc[] = {
+    napi_property_descriptor propDesc[] = {
         DECLARE_NAPI_PROPERTY("HuksExceptionErrCode", CreateHuksErrCode(env)),
         DECLARE_NAPI_PROPERTY("HuksErrorCode", CreateHuksErrorCode(env)),
         DECLARE_NAPI_PROPERTY("HuksKeyPurpose", CreateHuksKeyPurpose(env)),
@@ -657,33 +688,17 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksChallengePosition", CreateHuksChallengePosition(env)),
         DECLARE_NAPI_PROPERTY("HuksSecureSignType", CreateHuksSecureSignType(env)),
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
-
-        DECLARE_NAPI_FUNCTION("generateKey", HuksNapiGenerateKey),
-        DECLARE_NAPI_FUNCTION("deleteKey", HuksNapiDeleteKey),
-        DECLARE_NAPI_FUNCTION("getSdkVersion", HuksNapiGetSdkVersion),
-        DECLARE_NAPI_FUNCTION("importKey", HuksNapiImportKey),
-        DECLARE_NAPI_FUNCTION("exportKey", HuksNapiExportKey),
-        DECLARE_NAPI_FUNCTION("getKeyProperties", HuksNapiGetKeyProperties),
-        DECLARE_NAPI_FUNCTION("isKeyExist", HuksNapiIsKeyExist),
-        DECLARE_NAPI_FUNCTION("init", HuksNapiInit),
-        DECLARE_NAPI_FUNCTION("update", HuksNapiUpdate),
-        DECLARE_NAPI_FUNCTION("finish", HuksNapiFinish),
-        DECLARE_NAPI_FUNCTION("abort", HuksNapiAbort),
-
-        DECLARE_NAPI_FUNCTION("generateKeyItem", HuksNapiItemGenerateKey),
-        DECLARE_NAPI_FUNCTION("deleteKeyItem", HuksNapiDeleteKeyItem),
-        DECLARE_NAPI_FUNCTION("importKeyItem", HuksNapiImportKeyItem),
-        DECLARE_NAPI_FUNCTION("importWrappedKeyItem", HuksNapiImportWrappedKeyItem),
-        DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
-        DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
-        DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
-        DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
-        DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
-        DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
-        DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
-        DECLARE_NAPI_FUNCTION("abortSession", HuksNapiAbortSession),
-
     };
+    napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
+
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(NAPI_FUNC_DESC); ++i) {
+        desc[i] = NAPI_FUNC_DESC[i];
+    }
+
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(propDesc); ++i) {
+        desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + i] = propDesc[i];
+    }
+
     NAPI_CALL(env, napi_define_properties(env, exports, sizeof(desc) / sizeof(desc[0]), desc));
     return exports;
 }

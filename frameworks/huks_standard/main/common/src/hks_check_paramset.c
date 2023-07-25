@@ -764,8 +764,9 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
 int32_t HksCoreCheckImportWrappedKeyParams(const struct HksBlob *key, const struct HksBlob *wrappedKeyData,
     const struct HksParamSet *paramSet, struct HksBlob *keyOut, uint32_t *outUnwrapSuite)
 {
-    (void)key;
     (void)keyOut;
+
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(key), HKS_ERROR_INVALID_ARGUMENT, "wrapping key is invalid")
 
     /* first check wrapping-related params and wrapped key data */
     uint32_t unwrapSuite = 0;
