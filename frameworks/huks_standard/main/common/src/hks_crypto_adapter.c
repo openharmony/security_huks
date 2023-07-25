@@ -262,7 +262,6 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
     return HksFreshParamSet(paramSetOut, false);
 }
 
-//wxt
 #if (defined(HKS_SUPPORT_ECC_C) && defined(HKS_SUPPORT_ECC_GENERATE_KEY)) 
 static int32_t FormatKeyInner(uint32_t publicKeySize, uint8_t *publicKey, const struct HksBlob *keyIn,
     struct HksParamSet *paramSetOut)
