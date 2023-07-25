@@ -173,12 +173,7 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
         // processName is 0 if no processName
         int processName = 0;
         if (processInfo != NULL) {
-            if (memcpy_s(&userId, sizeof(userId), processInfo->userId.data,
-                processInfo->userId.size) != EOK) {
-                HKS_LOG_E("copy user id failed!");
-                ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-                break;
-            }
+            userId = processInfo->userIdInt;
             if (memcpy_s(&processName, sizeof(processName), processInfo->processName.data,
                 processInfo->processName.size) != EOK) {
                 HKS_LOG_E("process name is no int, default as 0");

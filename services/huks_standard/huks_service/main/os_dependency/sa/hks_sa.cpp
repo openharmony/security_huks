@@ -55,6 +55,7 @@ static void SubscribEvent()
     for (uint32_t i = 0; i < MAX_DELAY_TIMES; ++i) {
         if (SystemEventObserver::SubscribeSystemEvent()) {
             HKS_LOG_I("subscribe system event success, i = %" LOG_PUBLIC "u", i);
+            pthread_detach(pthread_self());
             return;
         } else {
             HKS_LOG_E("subscribe system event failed %" LOG_PUBLIC "u times", i);
@@ -62,6 +63,7 @@ static void SubscribEvent()
         }
     }
     HKS_LOG_E("subscribe system event failed");
+    pthread_detach(pthread_self());
     return;
 }
 
