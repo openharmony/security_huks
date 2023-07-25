@@ -632,8 +632,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
     const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksParamSet *sendParamSet = NULL;
-
-    struct HksParam params[] = {
+    struct HksParam updParams[] = {
         { .tag = HKS_TAG_PARAM0_BUFFER,
           .blob = { paramSet->paramSetSize,
                     (uint8_t *)paramSet } },
@@ -643,7 +642,7 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
           .blob = *inData },
     };
 
-    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    int32_t ret = HksParamsToParamSet(updParams, HKS_ARRAY_SIZE(updParams), &sendParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
 
     struct HksBlob parcelBlob = {
@@ -665,7 +664,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
     const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksParamSet *sendParamSet = NULL;
-    struct HksParam params[] = {
+    struct HksParam finParams[] = {
         { .tag = HKS_TAG_PARAM0_BUFFER,
           .blob = { paramSet->paramSetSize,
                     (uint8_t *)paramSet } },
@@ -677,7 +676,7 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
           .blob = *outData },
     };
 
-    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
+    int32_t ret = HksParamsToParamSet(finParams, HKS_ARRAY_SIZE(finParams), &sendParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
 
     struct HksBlob parcelBlob = {
