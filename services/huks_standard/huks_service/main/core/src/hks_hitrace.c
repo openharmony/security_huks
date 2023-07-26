@@ -37,7 +37,7 @@ struct HksHitraceId HksHitraceBegin(const char *name, int flag)
 #endif
 }
 
-void HksHitraceEnd(struct HksHitraceId *hitraceId)
+void HksHitraceEnd(const struct HksHitraceId *hitraceId)
 {
 #ifdef L2_STANDARD
     HiTraceChainEnd(&hitraceId->traceId);
