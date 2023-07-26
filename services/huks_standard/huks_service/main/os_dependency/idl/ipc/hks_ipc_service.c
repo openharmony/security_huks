@@ -690,7 +690,7 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
 void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context, bool isUpd)
 {
-   int32_t ret;
+    int32_t ret;
     struct HksParamSet *inParamSet = NULL;
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob paramsBlob      = { 0, NULL };
