@@ -688,14 +688,15 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
     HKS_FREE_BLOB(processInfo.userId);
 }
 
-void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context, bool isUpd)
+void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *outData,
+    const uint8_t *context, bool isUpd)
 {
     int32_t ret;
     struct HksParamSet *inParamSet = NULL;
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob paramsBlob      = { 0, NULL };
-    struct HksBlob handle          = { 0, NULL };
     struct HksBlob inData          = { 0, NULL };
+    struct HksBlob handle          = { 0, NULL };
     struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
 
     do {
@@ -724,11 +725,11 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if(isUpd){
+        if (isUpd){
             ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret)
         }
-        else{
+        else {
             ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceFinish fail, ret = %" LOG_PUBLIC "d", ret)
         }

@@ -82,7 +82,7 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
 int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *key)
 {
-    struct HksProcessInfo processInfo =getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
     return HksServiceImportKey(&processInfo, keyAlias, paramSet, key);
 }
 
