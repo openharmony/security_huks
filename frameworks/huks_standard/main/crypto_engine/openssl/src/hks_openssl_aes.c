@@ -154,13 +154,12 @@ int32_t OpensslBlockCipherEncryptUpdate(
     return HKS_SUCCESS;
 }
 
-// blob data and size have been checked in hks_core_service_three_stage.c
-int32_t OpensslBlockCipherEncryptFinalThree(
-    void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+
+static int32_t OpensslBlockCipherHandleFinalThree(
+    void **cryptoCtx, const struct HksBlob *input, struct HksBlob *output, bool isEncrypt)
 {
     struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
-
     if (ctx == NULL) {
         HKS_FREE_PTR(*cryptoCtx);
         return HKS_ERROR_NULL_POINTER;
@@ -169,22 +168,27 @@ int32_t OpensslBlockCipherEncryptFinalThree(
     int32_t ret = HKS_SUCCESS;
     do {
         int32_t outLen = 0;
-        if (message->size != 0) {
-            if (EVP_EncryptUpdate(ctx, cipherText->data, &outLen, message->data,
-                message->size) != HKS_OPENSSL_SUCCESS) {
+        int evpRet;
+        if (input->size != 0) {
+            evpRet = isEncrypt
+                ? EVP_EncryptUpdate(ctx, output->data, &outLen, input->data, input->size)
+                : EVP_DecryptUpdate(ctx, output->data, &outLen, input->data, input->size);
+            if (evpRet != HKS_OPENSSL_SUCCESS) {
                 HksLogOpensslError();
                 ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
                 break;
             }
         }
-        cipherText->size = (uint32_t)outLen;
-
-        if (EVP_EncryptFinal_ex(ctx, (cipherText->data + outLen), &outLen) != HKS_OPENSSL_SUCCESS) {
+        output->size = (uint32_t)outLen;
+        evpRet = isEncrypt
+            ? EVP_EncryptFinal_ex(ctx, (output->data + outLen), &outLen)
+            : EVP_DecryptFinal_ex(ctx, (output->data + outLen), &outLen);
+        if (evpRet != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
             break;
         }
-        cipherText->size += (uint32_t)outLen;
+        output->size += (uint32_t)outLen;
     } while (0);
 
     EVP_CIPHER_CTX_free(ctx);
@@ -192,6 +196,13 @@ int32_t OpensslBlockCipherEncryptFinalThree(
     HKS_FREE_PTR(*cryptoCtx);
 
     return ret;
+}
+
+// blob data and size have been checked in hks_core_service_three_stage.c
+int32_t OpensslBlockCipherEncryptFinalThree(
+    void **cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText)
+{
+    return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, cipherText, true);
 }
 
 // blob data and size have been checked in hks_core_service_three_stage.c
@@ -217,38 +228,9 @@ int32_t OpensslBlockCipherDecryptUpdate(
 int32_t OpensslBlockCipherDecryptFinalThree(
     void **cryptoCtx, const struct HksBlob *message, struct HksBlob *plainText)
 {
-    struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
-    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
-    if (ctx == NULL) {
-        HKS_FREE_PTR(*cryptoCtx);
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    int32_t ret = HKS_SUCCESS;
-    do {
-        int32_t outLen = 0;
-        if (message->size != 0) {
-            if (EVP_DecryptUpdate(ctx, plainText->data, &outLen, message->data, message->size) != HKS_OPENSSL_SUCCESS) {
-                HksLogOpensslError();
-                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-                break;
-            }
-        }
-        plainText->size = (uint32_t)outLen;
-
-        if (EVP_DecryptFinal_ex(ctx, plainText->data + outLen, &outLen) != HKS_OPENSSL_SUCCESS) {
-            HksLogOpensslError();
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
-        plainText->size += (uint32_t)outLen;
-    } while (0);
-
-    EVP_CIPHER_CTX_free(ctx);
-    blockCipherCtx->append = NULL;
-    HKS_FREE_PTR(*cryptoCtx);
-    return ret;
+    return OpensslBlockCipherHandleFinalThree(cryptoCtx, message, plainText, false);
 }
+
 #endif
 #endif /* defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C) */
 

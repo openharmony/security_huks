@@ -209,43 +209,6 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
     return HksFreshParamSet(freshParamSet, true);
 }
 
-HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCopy)
-{
-    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "invalid NULL paramSet")
-
-    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid fresh paramSet")
-
-    uint32_t size = paramSet->paramSetSize;
-    uint32_t offset = sizeof(struct HksParamSet) + sizeof(struct HksParam) * paramSet->paramsCnt;
-
-    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
-        if (offset > size) {
-            HKS_LOG_E("invalid param set offset!");
-            return HKS_ERROR_INVALID_ARGUMENT;
-        }
-        if (GetTagType((enum HksTag)(paramSet->params[i].tag)) == HKS_TAG_TYPE_BYTES) {
-            if (IsAdditionOverflow(offset, paramSet->params[i].blob.size)) {
-                HKS_LOG_E("blob size overflow!");
-                return HKS_ERROR_INVALID_ARGUMENT;
-            }
-
-            if (isCopy && (memcpy_s((uint8_t *)paramSet + offset, size - offset,
-                paramSet->params[i].blob.data, paramSet->params[i].blob.size) != EOK)) {
-                HKS_LOG_E("copy param blob failed!");
-                return HKS_ERROR_INSUFFICIENT_MEMORY;
-            }
-            paramSet->params[i].blob.data = (uint8_t *)paramSet + offset;
-            offset += paramSet->params[i].blob.size;
-        }
-    }
-
-    if (paramSet->paramSetSize != offset) {
-        HKS_LOG_E("invalid param set size!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    return HKS_SUCCESS;
-}
 
 HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
 {
@@ -330,8 +293,8 @@ static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
                 HKS_LOG_E("blob size overflow!");
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
-            if (isCopy && memcpy_s((uint8_t *)paramSet + offset, size - offset,
-                paramSet->params[i].blob.data, paramSet->params[i].blob.size) != EOK) {
+            if (isCopy && (memcpy_s((uint8_t *)paramSet + offset, size - offset,
+                paramSet->params[i].blob.data, paramSet->params[i].blob.size) != EOK)) {
                 HKS_LOG_E("copy param blob failed!");
                 return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
@@ -345,6 +308,17 @@ static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
+}
+
+
+HKS_API_EXPORT int32_t HksFreshParamSet(struct HksParamSet *paramSet, bool isCopy)
+{
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "invalid NULL paramSet")
+
+    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "invalid fresh paramSet")
+
+    return FreshParamSet(paramSet, isCopy);
 }
 
 HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t tag, struct HksParam **param)
