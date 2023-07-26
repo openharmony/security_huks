@@ -404,7 +404,7 @@ napi_value HuksNapiUpdate(napi_env env, napi_callback_info info)
 {
     UpdateAsyncContext context = CreateUpdateAsyncContext();
     if (context == nullptr) {
-        HKS_LOG_E("could not create context");
+        HKS_LOG_E("could not create update async context");
         return nullptr;
     }
 
