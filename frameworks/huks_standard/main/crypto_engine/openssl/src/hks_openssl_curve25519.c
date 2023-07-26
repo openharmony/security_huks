@@ -223,22 +223,23 @@ int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksUsageSp
     (void)usageSpec;
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
     uint32_t offset = sizeof(struct KeyMaterial25519) + km->pubKeySize;
-    EVP_PKEY *edKey = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL, key->data + offset, km->priKeySize);
-    if (edKey == NULL) {
+    EVP_PKEY *edKeyPri = EVP_PKEY_new_raw_private_key(EVP_PKEY_ED25519, NULL,
+        key->data + offset, km->priKeySize);
+   
+    if (edKeyPri == NULL) {
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if (mdctx == NULL) {
         HksLogOpensslError();
-        EVP_PKEY_free(edKey);
+        EVP_PKEY_free(edKeyPri);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
-        if (EVP_DigestSignInit(mdctx, NULL, NULL, NULL, edKey) != HKS_OPENSSL_SUCCESS) {
+        if (EVP_DigestSignInit(mdctx, NULL, NULL, NULL, edKeyPri) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             break;
         }
@@ -258,7 +259,7 @@ int32_t HksOpensslEd25519Sign(const struct HksBlob *key, const struct HksUsageSp
         ret = HKS_SUCCESS;
     } while (0);
 
-    EVP_PKEY_free(edKey);
+    EVP_PKEY_free(edKeyPri);
     EVP_MD_CTX_free(mdctx);
     return ret;
 }
@@ -268,23 +269,23 @@ int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsage
 {
     (void)usageSpec;
     struct KeyMaterial25519 *km = (struct KeyMaterial25519 *)key->data;
-    EVP_PKEY *edKey = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL, key->data + sizeof(struct KeyMaterial25519),
-        km->pubKeySize);
-    if (edKey == NULL) {
+    EVP_PKEY *edKeyPub = EVP_PKEY_new_raw_public_key(EVP_PKEY_ED25519, NULL,
+        key->data + sizeof(struct KeyMaterial25519), km->pubKeySize);
+   
+    if (edKeyPub == NULL) {
         HksLogOpensslError();
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
-
     EVP_MD_CTX *mdctx = EVP_MD_CTX_new();
     if (mdctx == NULL) {
         HksLogOpensslError();
-        EVP_PKEY_free(edKey);
+        EVP_PKEY_free(edKeyPub);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
     int32_t ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
     do {
-        if (EVP_DigestVerifyInit(mdctx, NULL, NULL, NULL, edKey) != HKS_OPENSSL_SUCCESS) {
+        if (EVP_DigestVerifyInit(mdctx, NULL, NULL, NULL, edKeyPub) != HKS_OPENSSL_SUCCESS) {
             HksLogOpensslError();
             break;
         }
@@ -298,7 +299,7 @@ int32_t HksOpensslEd25519Verify(const struct HksBlob *key, const struct HksUsage
         ret = HKS_SUCCESS;
     } while (0);
 
-    EVP_PKEY_free(edKey);
+    EVP_PKEY_free(edKeyPub);
     EVP_MD_CTX_free(mdctx);
     return ret;
 }
