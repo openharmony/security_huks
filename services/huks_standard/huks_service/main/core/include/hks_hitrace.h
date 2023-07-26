@@ -44,7 +44,7 @@ struct HksHitraceId {
 
 struct HksHitraceId HksHitraceBegin(const char *name, int flag);
 
-void HksHitraceEnd(struct HksHitraceId *hitraceId);
+void HksHitraceEnd(const struct HksHitraceId *hitraceId);
 
 #ifdef __cplusplus
 }
