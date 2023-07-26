@@ -785,13 +785,14 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     return ret;
 }
 
-static void IfL2Report(const char *funcName, const struct HksHitraceId *traceId, const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, int32_t ret)
+static void IfL2Report(const char *funcName, const struct HksHitraceId *traceId,
+    const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet, int32_t ret)
 {
 #ifdef L2_STANDARD
     HksHitraceEnd(traceId);
     HksReport(funcName, processInfo, paramSet, ret);
 #else
+    (void)funcName;
     (void)traceId;
     (void)processInfo;
     (void)paramSet;
