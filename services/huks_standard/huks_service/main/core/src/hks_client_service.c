@@ -793,6 +793,9 @@ static void ifL2Report(struct HksHitraceId traceId, const struct HksProcessInfo 
     HksReport(__func__, processInfo, paramSet, ret);
 #else
     (void)traceId;
+    (void)processInfo;
+    (void)paramSet;
+    (void)ret;
 #endif
 }
 
