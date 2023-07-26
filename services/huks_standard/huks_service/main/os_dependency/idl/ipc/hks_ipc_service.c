@@ -725,7 +725,7 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (isUpd){
+        if (isUpd ){
             ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret)
         }

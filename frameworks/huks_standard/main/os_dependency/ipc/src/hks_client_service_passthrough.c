@@ -41,20 +41,19 @@ static int32_t GetProcessInfo(const struct HksParamSet *paramSet, char **process
     return HKS_SUCCESS;
 }
 
-static struct HksProcessInfo getProcessInfoStruct(const struct HksParamSet *paramSetIn)
+static int32_t getProcessInfoStruct(static struct HksProcessInfo *processInfo, const struct HksParamSet *paramSetIn)
 {
     char *processName = NULL;
     char *userId = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(paramSetIn, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
         "get process info failed")
 
-    struct HksProcessInfo processInfo = {
+    *processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
         0
     };
-    return processInfo;
 }
 
 #ifndef _CUT_AUTHENTICATE_
@@ -75,101 +74,116 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
     struct HksParamSet *paramSetOut)
 {
     (void)paramSetOut;
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSetIn);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceGenerateKey(&processInfo, keyAlias, paramSetIn, NULL);
 }
 
 int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksBlob *key)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceImportKey(&processInfo, keyAlias, paramSet, key);
 }
 
 int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceImportWrappedKey(&processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
 }
 
 int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksBlob *key)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceExportPublicKey(&processInfo, keyAlias, key);
 }
 
 int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceDeleteKey(&processInfo, keyAlias);
 }
 
 int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSetOut)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(NULL);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceGetKeyParamSet(&processInfo, keyAlias, paramSetOut);
 }
 
 int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceKeyExist(&processInfo, keyAlias);
 }
 
 int32_t HksClientSign(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, struct HksBlob *signature)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceSign(&processInfo, key, paramSet, srcData, signature);
 }
 
 int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *signature)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceVerify(&processInfo, key, paramSet, srcData, signature);
 }
 
 int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *plainText, struct HksBlob *cipherText)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceEncrypt(&processInfo, key, paramSet, plainText, cipherText);
 }
 
 int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *cipherText, struct HksBlob *plainText)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceDecrypt(&processInfo, key, paramSet, cipherText, plainText);
 }
 
 int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceAgreeKey(&processInfo, paramSet, privateKey, peerPublicKey, agreedKey);
 }
 
 int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *mainKey,
     struct HksBlob *derivedKey)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceDeriveKey(&processInfo, paramSet, mainKey, derivedKey);
 }
 
 int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramSet, const struct HksBlob *srcData,
     struct HksBlob *mac)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceMac(&processInfo, key, paramSet, srcData, mac);
 }
 
 int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceGetKeyInfoList(&processInfo, keyInfoList, listCount);
 }
 
@@ -204,27 +218,31 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
 int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceUpdate(handle, &processInfo, paramSet, inData, outData);
 }
 
 int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceFinish(handle, &processInfo, paramSet, inData, outData);
 }
 
 int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceAbort(handle, &processInfo, paramSet);
 }
 #endif
 
 int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet *paramSet)
 {
-    struct HksProcessInfo processInfo = getProcessInfoStruct(paramSet);
+    struct HksProcessInfo processInfo = NULL;
+    getProcessInfoStruct(&processInfo, paramSetIn);
     return HksServiceGenerateRandom(&processInfo, random);
 }
 
