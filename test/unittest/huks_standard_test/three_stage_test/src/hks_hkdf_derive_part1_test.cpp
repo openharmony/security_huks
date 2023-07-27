@@ -101,72 +101,16 @@ static struct HksParam g_hkdfFinishParams001[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
-    }, {
-        .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_32
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }
-};
-static struct HksParam g_genParams002[] = {
-    {
-        .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
     }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }
-};
-static struct HksParam g_hkdfParams002[] = {
-    {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }, {
-        .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_48
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
-static struct HksParam g_hkdfFinishParams002[] = {
-    {
-        .tag =  HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest002"),
-            (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest002"
-        }
-    }, {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
-    }, {
-        .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_48
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }
-};
+
 static struct HksParam g_genParams003[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -209,16 +153,13 @@ static struct HksParam g_hkdfFinishParams003[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_ALG_AES
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_64
+        .uint32Param = HKS_AES_KEY_SIZE_512
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA512
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
 #endif
@@ -265,74 +206,17 @@ static struct HksParam g_hkdfFinishParams004[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_ALG_AES
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_32
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
-static struct HksParam g_genParams005[] = {
-    {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }, {
-        .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_192
-    }
-};
-static struct HksParam g_hkdfParams005[] = {
-    {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }, {
-        .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_48
-    }
-};
-static struct HksParam g_hkdfFinishParams005[] = {
-    {
-        .tag =  HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest005"),
-            (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest005"
-        }
-    }, {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
-    }, {
-        .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_48
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }
-};
 static struct HksParam g_genParams006[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -375,16 +259,13 @@ static struct HksParam g_hkdfFinishParams006[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_ALG_AES
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_64
+        .uint32Param = HKS_AES_KEY_SIZE_512
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA512
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
 #endif
@@ -431,72 +312,16 @@ static struct HksParam g_hkdfFinishParams007[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
-    }, {
-        .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_32
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }
-};
-static struct HksParam g_genParams008[] = {
-    {
-        .tag =  HKS_TAG_ALGORITHM,
         .uint32Param = HKS_ALG_AES
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
         .uint32Param = HKS_AES_KEY_SIZE_256
-    }
-};
-static struct HksParam g_hkdfParams008[] = {
-    {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }, {
-        .tag =  HKS_TAG_DERIVE_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_48
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
-static struct HksParam g_hkdfFinishParams008[] = {
-    {
-        .tag =  HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag =  HKS_TAG_KEY_ALIAS,
-        .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest008"),
-            (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest008"
-        }
-    }, {
-        .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
-    }, {
-        .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_48
-    }, {
-        .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA384
-    }
-};
+
 static struct HksParam g_genParams009[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -539,16 +364,13 @@ static struct HksParam g_hkdfFinishParams009[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_ALG_AES
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_64
+        .uint32Param = HKS_AES_KEY_SIZE_512
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA512
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
 
@@ -591,44 +413,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
-/**
- * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive002
- * @tc.desc: alg-HKDF pur-Derive dig-SHA384 KEY_SIZE-128
- * @tc.type: FUNC
- */
-HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive002, TestSize.Level0)
-{
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest002"), (uint8_t *)"HksHKDFDeriveKeyAliasTest002" };
-    int32_t ret = HKS_FAILURE;
 
-    /* 1. Generate Key */
-    struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    /* 2. HKDF Three Stage */
-    struct HksParamSet *hkdfParamSet = nullptr;
-    struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams002, sizeof(g_hkdfParams002) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams002, sizeof(g_hkdfFinishParams002) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    // Init-Update-final
-    HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
-    /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest002"),
-        .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest002"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&hkdfParamSet);
-    HksFreeParamSet(&hkdfFinishParamSet);
-}
 /**
  * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive003
  * @tc.desc: alg-HKDF pur-Derive dig-SHA384 KEY_SIZE-192
@@ -710,44 +495,6 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
- * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive005
- * @tc.desc: alg-HKDF pur-Derive dig-SHA256.
- * @tc.type: FUNC
- */
-HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive005, TestSize.Level0)
-{
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest005"), (uint8_t *)"HksHKDFDeriveKeyAliasTest005" };
-    int32_t ret = HKS_FAILURE;
-
-    /* 1. Generate Key */
-    struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    /* 2. HKDF Three Stage */
-    struct HksParamSet *hkdfParamSet = nullptr;
-    struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams005, sizeof(g_hkdfParams005) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams005, sizeof(g_hkdfFinishParams005) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    // Init-Update-final
-    HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
-    /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest005"),
-        .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest005"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&hkdfParamSet);
-    HksFreeParamSet(&hkdfFinishParamSet);
-}
-/**
  * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive006
  * @tc.desc: alg-HKDF pur-Derive dig-SHA384.
  * @tc.type: FUNC
@@ -825,44 +572,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
     HksFreeParamSet(&hkdfParamSet);
     HksFreeParamSet(&hkdfFinishParamSet);
 }
-/**
- * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive008
- * @tc.desc: alg-HKDF pur-Derive dig-SHA512.
- * @tc.type: FUNC
- */
-HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive008, TestSize.Level0)
-{
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest008"), (uint8_t *)"HksHKDFDeriveKeyAliasTest008" };
-    int32_t ret = HKS_FAILURE;
 
-    /* 1. Generate Key */
-    struct HksParamSet *genParamSet = nullptr;
-    ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    /* 2. HKDF Three Stage */
-    struct HksParamSet *hkdfParamSet = nullptr;
-    struct HksParamSet *hkdfFinishParamSet = nullptr;
-    ret = InitParamSet(&hkdfParamSet, g_hkdfParams008, sizeof(g_hkdfParams008) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-    // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams008, sizeof(g_hkdfFinishParams008) / sizeof(HksParam));
-    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
-
-    // Init-Update-final
-    HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
-    /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest008"),
-        .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest008"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
-
-    HksFreeParamSet(&genParamSet);
-    HksFreeParamSet(&hkdfParamSet);
-    HksFreeParamSet(&hkdfFinishParamSet);
-}
 /**
  * @tc.name: HksHkdfDerivePart1Test.HksHKDFDerive009
  * @tc.desc: alg-HKDF pur-Derive dig-SHA512.

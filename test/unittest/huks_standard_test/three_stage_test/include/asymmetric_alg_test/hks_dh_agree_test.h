@@ -62,7 +62,7 @@ static struct HksParam g_agreeParams01Init001[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_DH_KEY_SIZE_2048
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_agreeParams01Finish001[] = {
@@ -104,7 +104,7 @@ static struct HksParam g_agreeParams02Init001[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_DH_KEY_SIZE_2048
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_agreeParams02Finish001[] = {
@@ -174,7 +174,7 @@ static struct HksParam g_agreeParams01Init002[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_DH_KEY_SIZE_3072
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_agreeParams01Finish002[] = {
@@ -216,7 +216,7 @@ static struct HksParam g_agreeParams02Init002[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_DH_KEY_SIZE_3072
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_agreeParams02Finish002[] = {
@@ -286,7 +286,7 @@ static struct HksParam g_agreeParams01Init003[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_DH_KEY_SIZE_4096
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_agreeParams01Finish003[] = {
@@ -328,7 +328,7 @@ static struct HksParam g_agreeParams02Init003[] = {
         .uint32Param = HKS_KEY_PURPOSE_AGREE
     }, {
         .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_DH_KEY_SIZE_4096
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 static struct HksParam g_agreeParams02Finish003[] = {

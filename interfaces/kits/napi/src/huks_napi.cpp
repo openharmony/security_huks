@@ -192,7 +192,7 @@ static napi_value CreateHuksTag(napi_env env)
     AddHuksTagPart1(env, tag);
     AddHuksTagPart2(env, tag);
     AddHuksTagPart3(env, tag);
-    
+
     return tag;
 }
 
