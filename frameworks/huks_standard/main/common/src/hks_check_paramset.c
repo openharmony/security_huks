@@ -252,6 +252,33 @@ static uint32_t g_cipherAlgLocal[] = {
 #endif
 };
 
+static uint32_t g_asymmetricAlgorithm[] = {
+#ifdef HKS_SUPPORT_RSA_C
+    HKS_ALG_RSA,
+#endif
+#ifdef HKS_SUPPORT_ECC_C
+    HKS_ALG_ECC,
+#endif
+#ifdef HKS_SUPPORT_X25519_C
+    HKS_ALG_X25519,
+#endif
+#ifdef HKS_SUPPORT_ED25519_C
+    HKS_ALG_ED25519,
+#endif
+#ifdef HKS_SUPPORT_DSA_C
+    HKS_ALG_DSA,
+#endif
+#ifdef HKS_SUPPORT_DH_C
+    HKS_ALG_DH,
+#endif
+#ifdef HKS_SUPPORT_ECDH_C
+    HKS_ALG_ECDH,
+#endif
+#ifdef HKS_SUPPORT_SM2_C
+    HKS_ALG_SM2,
+#endif
+};
+
 static int32_t CheckAndGetAlgorithm(
     const struct HksParamSet *paramSet, const uint32_t *expectAlg, uint32_t expectCnt, uint32_t *alg)
 {
@@ -1054,4 +1081,37 @@ int32_t HksCoreCheckMacParams(const struct HksBlob *key, const struct HksParamSe
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check Mac purpose failed")
 
     return CheckMacOutput(key, paramSet, mac, isLocalCheck);
+}
+
+static bool CheckIsAsymmetricAlgorithm(uint32_t alg)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_asymmetricAlgorithm); ++i) {
+        if (alg == g_asymmetricAlgorithm[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const struct HksParamSet *paramSet)
+{
+    // check the key paramset is consistent with key real attributes, including key size and valid key algorithm
+    struct HksParam *keySize = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key size from agree paramset failed!")
+    if (HKS_KEY_BYTES(keySize->uint32Param) != key->size) {
+        HKS_LOG_E("Size param is not consistent with real key size! param %" LOG_PUBLIC "u vs real %" LOG_PUBLIC "u",
+            HKS_KEY_BYTES(keySize->uint32Param), key->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    struct HksParam *algorithm = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algorithm);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key algorithm from agree paramset failed!")
+    if (CheckIsAsymmetricAlgorithm(algorithm->uint32Param)) {
+        HKS_LOG_E("Agreed key algorithm param cannot be asymmetric algorithm! Algorithm is %" LOG_PUBLIC "u",
+            algorithm->uint32Param);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
 }

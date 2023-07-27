@@ -546,16 +546,13 @@ static struct HksParam g_hkdfFinishParams024[] = {
         }
     }, {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_ALG_AES
     }, {
         .tag =  HKS_TAG_KEY_SIZE,
-        .uint32Param = DERIVE_KEY_SIZE_32
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag =  HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag =  HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }
 };
 #endif
