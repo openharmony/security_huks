@@ -449,6 +449,96 @@ void HksDhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct Hks
     HksFree(blob4->data);
 }
 
+const static uint32_t IV_SIZE = 16;
+const static uint8_t IV[IV_SIZE] = { 0 };
+
+static struct HksParam g_agreedKeyEncrypt001[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
+        }
+    }
+};
+
+static struct HksParam g_agreedKeyDecrypt001[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC
+    }, {
+        .tag = HKS_TAG_IV,
+        .blob = {
+            .size = IV_SIZE,
+            .data = (uint8_t *)IV
+        }
+    }
+};
+
+static int32_t TestAgreedKeyEncrypt(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2)
+{
+    const char *plainTest = "test_plain_test_";
+    struct HksBlob plaindata = { .size = strlen(plainTest), .data = (uint8_t *)plainTest };
+    const uint32_t cipherMaxSize = 1024;
+    uint8_t cipherBuffer[cipherMaxSize] = { 0 };
+    struct HksBlob cipherData = { .size = cipherMaxSize, .data = (uint8_t *)cipherBuffer };
+    struct HksParamSet *encryptParamSet = nullptr;
+    int32_t ret = InitParamSet(&encryptParamSet, g_agreedKeyEncrypt001, HKS_ARRAY_SIZE(g_agreedKeyEncrypt001));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet g_agreedKeyEncrypt001 failed.";
+
+    ret = HksEncrypt(keyAlias1, encryptParamSet, &plaindata, &cipherData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_agreedKeyDecrypt001, HKS_ARRAY_SIZE(g_agreedKeyDecrypt001));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet g_agreedKeyDecrypt001 failed.";
+
+    uint8_t decrypedBuffer[cipherMaxSize] = { 0 };
+    struct HksBlob decrypedData = { .size = cipherMaxSize, .data = (uint8_t *)decrypedBuffer };
+
+    ret = HksDecrypt(keyAlias2, decryptParamSet, &cipherData, &decrypedData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksDecrypt failed.";
+    if (decrypedData.size != plaindata.size ||
+        HksMemCmp(decrypedData.data, plaindata.data, plaindata.size) != HKS_SUCCESS) {
+        printf("compare decrypedData.data and plaindata.data failed!\n");
+        return HKS_FAILURE;
+    }
+    return ret;
+}
+
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree001
  * @tc.desc: alg-DH, pur-AGREE
@@ -494,6 +584,9 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish01 failed.";
     ret = HksDhAgreeFinish(&g_keyAlias02001, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish02 failed.";
+
+    ret = TestAgreedKeyEncrypt(&g_keyAliasFinal1001, &g_keyAliasFinal2001);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestAgreedKeyEncrypt failed.";
 
     HksDeleteKey(&g_keyAlias01001, genParamSet);
     HksDeleteKey(&g_keyAlias02001, genParamSet);

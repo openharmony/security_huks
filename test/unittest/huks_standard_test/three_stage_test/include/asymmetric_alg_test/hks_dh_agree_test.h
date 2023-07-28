@@ -80,7 +80,7 @@ static struct HksParam g_agreeParams01Finish001[] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA256
@@ -122,7 +122,7 @@ static struct HksParam g_agreeParams02Finish001[] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA256
