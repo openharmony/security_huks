@@ -17,6 +17,7 @@
 #include "file_ex.h"
 #endif
 #include "hks_x25519_agree_test.h"
+#include "hks_agree_test_common.h"
 
 #include <gtest/gtest.h>
 
@@ -111,7 +112,7 @@ static struct HksParam g_agreeParams01Finish001[] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA256
@@ -151,7 +152,7 @@ static struct HksParam g_agreeParams02Finish001[] = {
         .uint32Param = HKS_AES_KEY_SIZE_256
     }, {
         .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
     }, {
         .tag = HKS_TAG_DIGEST,
         .uint32Param = HKS_DIGEST_SHA256
@@ -467,6 +468,9 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksX25519AgreeFinish01 failed.";
     ret = HksX25519AgreeFinish(&g_keyAlias02001, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksX25519AgreeFinish02 failed.";
+
+    ret = TestAgreedKeyUse(&g_keyAliasFinal1001, &g_keyAliasFinal2001);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestAgreedKeyUse failed.";
 
     HksDeleteKey(&g_keyAlias01001, genParamSet);
     HksDeleteKey(&g_keyAlias02001, genParamSet);

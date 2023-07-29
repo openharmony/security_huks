@@ -42,6 +42,7 @@ ohos_unittest("huks_UT_test") {
     "src/asymmetric_alg_test/hks_rsa_sign_verify_part8_test.cpp",
     "src/asymmetric_alg_test/hks_rsa_sign_verify_part9_test.cpp",
     "src/asymmetric_alg_test/hks_rsa_sign_verify_test_common.cpp",
+    "src/hks_agree_test_common.cpp",
     "src/hks_attest_key_nonids_test.cpp",
     "src/hks_attest_key_test_common.cpp",
     "src/hks_check_pur_part_test.cpp",
