@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -121,6 +121,27 @@ int32_t TestAgreedKeyUse(const struct HksBlob *keyAlias1, const struct HksBlob *
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitParamSet g_agreedKeyDecrypt001 failed.");
 
         ret = TestAgreedKeyEncryptDecrypt(keyAlias1, encryptParamSet, keyAlias2, decryptParamSet);
+        HKS_IF_NOT_SUCC_LOGE(ret, "InitParamSet g_agreedKeyDecrypt001 failed.");
+    } while (0);
+
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+    return ret;
+}
+
+int32_t TestDerivedKeyUse(const struct HksBlob *keyAlias)
+{
+    struct HksParamSet *encryptParamSet = nullptr;
+    struct HksParamSet *decryptParamSet = nullptr;
+    int32_t ret;
+    do {
+        ret = InitParamSet(&encryptParamSet, g_agreedKeyEncrypt001, HKS_ARRAY_SIZE(g_agreedKeyEncrypt001));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitParamSet g_agreedKeyEncrypt001 failed.");
+
+        ret = InitParamSet(&decryptParamSet, g_agreedKeyDecrypt001, HKS_ARRAY_SIZE(g_agreedKeyDecrypt001));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitParamSet g_agreedKeyDecrypt001 failed.");
+
+        ret = TestAgreedKeyEncryptDecrypt(keyAlias, encryptParamSet, keyAlias, decryptParamSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "InitParamSet g_agreedKeyDecrypt001 failed.");
     } while (0);
 
