@@ -14,6 +14,8 @@
  */
 
 #include "hks_pbkdf2_derive_part1_test.h"
+
+#include "hks_agree_test_common.h"
 #include "hks_pbkdf2_derive_test_common.h"
 
 #include <gtest/gtest.h>
@@ -464,6 +466,9 @@ HWTEST_F(HksPbkdf2DerivePart1Test, HksPbkdf2Derive001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksPBKDF2DeriveKeyAliasTest001_2"),
         .data = (uint8_t *)"HksPBKDF2DeriveKeyAliasTest001_2"};
+
+    ret = TestDerivedKeyUse(&deleteKeyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestDerivedKeyUse failed.";    
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 

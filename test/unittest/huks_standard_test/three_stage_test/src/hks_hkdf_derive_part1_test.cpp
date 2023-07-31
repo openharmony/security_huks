@@ -14,6 +14,8 @@
  */
 
 #include "hks_hkdf_derive_part1_test.h"
+
+#include "hks_agree_test_common.h"
 #include "hks_hkdf_derive_test_common.h"
 
 #include <gtest/gtest.h>
@@ -565,6 +567,10 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest007"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest007"};
+
+    ret = TestDerivedKeyUse(&deleteKeyAlias);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestDerivedKeyUse failed.";    
+
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 

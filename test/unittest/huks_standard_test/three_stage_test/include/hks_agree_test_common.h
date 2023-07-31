@@ -26,5 +26,6 @@
 #include "hks_type.h"
 
 int32_t TestAgreedKeyUse(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2);
+int32_t TestDerivedKeyUse(const struct HksBlob *keyAlias);
 
 #endif
