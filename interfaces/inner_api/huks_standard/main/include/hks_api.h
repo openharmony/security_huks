@@ -323,7 +323,7 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
     const struct HksBlob *inData, struct HksBlob *outData);
 
 /**
- * @brief Finish operation
+ * @brief Abort operation
  * @param handle operation handle
  * @param paramSet required parameter set
  * @return error code, see hks_type.h

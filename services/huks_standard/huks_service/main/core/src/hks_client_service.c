@@ -785,7 +785,7 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
     return ret;
 }
 
-static void IfL2Report(const char *funcName, const struct HksHitraceId *traceId,
+static void HksReportEvent(const char *funcName, const struct HksHitraceId *traceId,
     const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet, int32_t ret)
 {
 #ifdef L2_STANDARD
@@ -824,7 +824,7 @@ int32_t HksServiceSign(const struct HksProcessInfo *processInfo, const struct Hk
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -852,7 +852,7 @@ int32_t HksServiceVerify(const struct HksProcessInfo *processInfo, const struct 
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -905,7 +905,7 @@ int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1107,7 +1107,7 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
 
     HKS_FREE_BLOB(wrappingKeyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1162,7 +1162,7 @@ int32_t HksServiceAgreeKey(const struct HksProcessInfo *processInfo, const struc
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1190,7 +1190,7 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1218,7 +1218,7 @@ int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct Hks
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1388,7 +1388,7 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1428,7 +1428,7 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
         }
     } while (0);
     MarkOperationUnUse(operation);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1509,7 +1509,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         DeleteOperation(handle);
     }
     HksFreeParamSet(&newParamSet);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
@@ -1540,7 +1540,7 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
         operation = NULL;
     } while (0);
     MarkOperationUnUse(operation);
-    IfL2Report(__func__, &traceId, processInfo, paramSet, ret);
+    HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
     return ret;
 }
 
