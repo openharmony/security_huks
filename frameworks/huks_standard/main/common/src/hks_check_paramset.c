@@ -252,30 +252,21 @@ static uint32_t g_cipherAlgLocal[] = {
 #endif
 };
 
-static uint32_t g_asymmetricAlgorithm[] = {
-#ifdef HKS_SUPPORT_RSA_C
-    HKS_ALG_RSA,
+static uint32_t g_symmetricAlgorithm[] = {
+#ifdef HKS_SUPPORT_AES_C
+    HKS_ALG_AES,
 #endif
-#ifdef HKS_SUPPORT_ECC_C
-    HKS_ALG_ECC,
-#endif
-#ifdef HKS_SUPPORT_X25519_C
-    HKS_ALG_X25519,
-#endif
-#ifdef HKS_SUPPORT_ED25519_C
-    HKS_ALG_ED25519,
-#endif
-#ifdef HKS_SUPPORT_DSA_C
-    HKS_ALG_DSA,
+#ifdef HKS_SUPPORT_HMAC_C
+    HKS_ALG_HMAC,
 #endif
 #ifdef HKS_SUPPORT_DH_C
     HKS_ALG_DH,
 #endif
-#ifdef HKS_SUPPORT_ECDH_C
-    HKS_ALG_ECDH,
+#ifdef HKS_SUPPORT_SM3_C
+    HKS_ALG_SM3,
 #endif
-#ifdef HKS_SUPPORT_SM2_C
-    HKS_ALG_SM2,
+#ifdef HKS_SUPPORT_SM4_C
+    HKS_ALG_SM4,
 #endif
 };
 
@@ -1083,10 +1074,10 @@ int32_t HksCoreCheckMacParams(const struct HksBlob *key, const struct HksParamSe
     return CheckMacOutput(key, paramSet, mac, isLocalCheck);
 }
 
-static bool CheckIsAsymmetricAlgorithm(uint32_t alg)
+static bool CheckIsSymmetricAlgorithm(uint32_t alg)
 {
-    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_asymmetricAlgorithm); ++i) {
-        if (alg == g_asymmetricAlgorithm[i]) {
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_symmetricAlgorithm); ++i) {
+        if (alg == g_symmetricAlgorithm[i]) {
             return true;
         }
     }
@@ -1107,8 +1098,8 @@ int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const str
     struct HksParam *algorithm = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algorithm);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key algorithm from agree paramset failed!")
-    if (CheckIsAsymmetricAlgorithm(algorithm->uint32Param)) {
-        HKS_LOG_E("Agreed key algorithm param cannot be asymmetric algorithm! Algorithm is %" LOG_PUBLIC "u",
+    if (!CheckIsSymmetricAlgorithm(algorithm->uint32Param)) {
+        HKS_LOG_E("Agreed or derived key algorithm param can only be symmetric! Algorithm is %" LOG_PUBLIC "u",
             algorithm->uint32Param);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
