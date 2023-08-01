@@ -257,7 +257,6 @@ static int32_t BuildParamSetOut(const struct HksParam *params, uint32_t paramCnt
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    paramSetOut->paramSetSize = tmpParamSetOut->paramSetSize;
     HksFreeParamSet(&tmpParamSetOut);
     return HksFreshParamSet(paramSetOut, false);
 }
@@ -276,9 +275,7 @@ static int32_t FormatKeyInner(uint32_t publicKeySize, uint8_t *publicKey, const 
             .blob = { keyIn->size, keyIn->data },
         },
     };
-    int32_t ret = BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
-    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
-    return ret;
+    return BuildParamSetOut(params, HKS_ARRAY_SIZE(params), paramSetOut);
 }
 #endif
 
@@ -427,6 +424,7 @@ static int32_t FormatRsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     ((struct KeyMaterialRsa *)publicKey)->dSize = 0;
 
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
@@ -457,6 +455,7 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
     ((struct KeyMaterialDsa *)publicKey)->xSize = 0;
 
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
@@ -482,6 +481,7 @@ static int32_t FormatEccKey(const struct HksBlob *keyIn, struct HksParamSet *par
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialEcc *)publicKey)->zSize = 0;
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
@@ -506,8 +506,8 @@ static int32_t FormatDhKey(const struct HksBlob *keyIn, struct HksParamSet *para
 
     (void)memcpy_s(publicKey, publicKeySize, keyIn->data, publicKeySize);
     ((struct KeyMaterialDh *)publicKey)->priKeySize = 0;
-
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
+    (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
     HksFree(publicKey);
     return ret;
 }
