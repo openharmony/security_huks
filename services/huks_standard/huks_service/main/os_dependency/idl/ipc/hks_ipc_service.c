@@ -689,7 +689,7 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 }
 
 void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *outData,
-    const uint8_t *context, bool isUpd)
+    const uint8_t *context, bool isUpdate)
 {
     int32_t ret;
     struct HksParamSet *inParamSet = NULL;
@@ -725,7 +725,7 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        if (isUpd) {
+        if (isUpdate) {
             ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret)
         }
