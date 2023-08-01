@@ -569,7 +569,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest007"};
 
     ret = TestDerivedKeyUse(&deleteKeyAlias);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "TestDerivedKeyUse failed.";    
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestDerivedKeyUse failed.";
 
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
