@@ -69,6 +69,7 @@ unittest("huks_3.0_test") {
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/asymmetric_alg_test/hks_rsa_sign_verify_part7_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/asymmetric_alg_test/hks_rsa_sign_verify_part8_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/asymmetric_alg_test/hks_rsa_sign_verify_test_common.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_agree_test_common.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_hkdf_derive_part1_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_hkdf_derive_part2_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_hkdf_derive_test_common.cpp",
