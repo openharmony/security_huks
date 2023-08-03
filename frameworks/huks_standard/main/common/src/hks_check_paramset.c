@@ -1091,8 +1091,8 @@ int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const str
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySize);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key size from agree paramset failed!")
     if (HKS_KEY_BYTES(keySize->uint32Param) != key->size) {
-        HKS_LOG_E("Size param is not consistent with real key size! param %" LOG_PUBLIC "u vs real %" LOG_PUBLIC "u",
-            HKS_KEY_BYTES(keySize->uint32Param), key->size);
+        HKS_LOG_E("key size param from paramSet is not consistent with real key size, param size %" LOG_PUBLIC
+            "u not equals to real key size %" LOG_PUBLIC "u", HKS_KEY_BYTES(keySize->uint32Param), key->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     struct HksParam *algorithm = NULL;
