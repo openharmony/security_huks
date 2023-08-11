@@ -18,6 +18,7 @@
 
 #include <string>
 #include "hks_three_stage_test_common.h"
+#include "hks_macro_def.h"
 
 namespace Unittest::CrossTest {
 static const std::string g_inData_32  = "Hks_Cross_Test_Rsa_000000_string";
@@ -92,36 +93,22 @@ static struct HksParam g_ecdhGenParams[] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
+
 static struct HksParam g_ecdhInitParams01[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECDH
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_256
-    }
+    HKS_PARAM_ARR
 };
+
 static struct HksParam g_ecdhFinishParams01[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_TEMP
     }
 };
+
 static struct HksParam g_ecdhInitParams02[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECDH
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_256
-    }
+    HKS_PARAM_ARR
 };
+
 static struct HksParam g_ecdhFinishParams02[] = {
     {
         .tag = HKS_TAG_KEY_STORAGE_FLAG,
