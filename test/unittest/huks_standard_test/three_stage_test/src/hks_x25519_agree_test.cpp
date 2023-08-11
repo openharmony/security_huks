@@ -19,6 +19,7 @@
 #include "hks_x25519_agree_test.h"
 
 #include <gtest/gtest.h>
+#include "hks_macro_def.h"
 
 using namespace testing::ext;
 namespace Unittest::X25519Agree {
@@ -103,19 +104,7 @@ static struct HksParam g_agreeParams01Finish001[] = {
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
+    },HKS_PARAM_ARR_02{
         .tag = HKS_TAG_KEY_ALIAS, .blob = g_keyAliasFinal1001
     }, {
         .tag = HKS_TAG_PADDING,
@@ -143,19 +132,7 @@ static struct HksParam g_agreeParams02Finish001[] = {
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
+    }, HKS_PARAM_ARR_02{
         .tag = HKS_TAG_KEY_ALIAS, .blob = g_keyAliasFinal2001
     }, {
         .tag = HKS_TAG_PADDING,
