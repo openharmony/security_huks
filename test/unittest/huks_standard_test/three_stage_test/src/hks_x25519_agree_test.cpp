@@ -104,7 +104,7 @@ static struct HksParam g_agreeParams01Finish001[] = {
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true
-    }, HKS_DERIVE_FINISH_AES_256_COMMON_01,
+    }, HKS_DERIVE_FINISH_AES_256_COMMON_01
     {
         .tag = HKS_TAG_KEY_ALIAS, .blob = g_keyAliasFinal1001
     }, {
@@ -133,7 +133,7 @@ static struct HksParam g_agreeParams02Finish001[] = {
         .uint32Param = HKS_STORAGE_PERSISTENT
     }, {
         .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true
-    }, HKS_DERIVE_FINISH_AES_256_COMMON_01,
+    }, HKS_DERIVE_FINISH_AES_256_COMMON_01
     {
         .tag = HKS_TAG_KEY_ALIAS, .blob = g_keyAliasFinal2001
     }, {
