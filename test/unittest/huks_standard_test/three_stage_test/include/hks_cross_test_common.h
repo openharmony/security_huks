@@ -95,7 +95,7 @@ static struct HksParam g_ecdhGenParams[] = {
 };
 
 static struct HksParam g_ecdhInitParams01[] = {
-    HKS_PARAM_ARR
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 
 static struct HksParam g_ecdhFinishParams01[] = {
@@ -106,7 +106,7 @@ static struct HksParam g_ecdhFinishParams01[] = {
 };
 
 static struct HksParam g_ecdhInitParams02[] = {
-    HKS_PARAM_ARR
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 
 static struct HksParam g_ecdhFinishParams02[] = {
