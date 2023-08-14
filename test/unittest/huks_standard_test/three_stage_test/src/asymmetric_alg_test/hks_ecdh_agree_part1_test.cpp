@@ -109,7 +109,7 @@ static struct HksParam g_agreeParams01Init001[] = {
     }
 };
 static struct HksParam g_agreeParams01Finish001[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1001
@@ -134,7 +134,7 @@ static struct HksParam g_agreeParams02Init001[] = {
     }
 };
 static struct HksParam g_agreeParams02Finish001[] = {
-    HKS_PARAM_ARR_01
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2001
@@ -186,10 +186,10 @@ static struct HksParam g_genParams002[] = {
     }
 };
 static struct HksParam g_agreeParams01Init002[] = {
-    HKS_PARAM_ARR
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams01Finish002[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1002
@@ -202,10 +202,10 @@ static struct HksParam g_agreeParams01Finish002[] = {
     }
 };
 static struct HksParam g_agreeParams02Init002[] = {
-    HKS_PARAM_ARR
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams02Finish002[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2002
@@ -268,7 +268,7 @@ static struct HksParam g_agreeParams01Init003[] = {
     }
 };
 static struct HksParam g_agreeParams01Finish003[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1003
@@ -293,7 +293,7 @@ static struct HksParam g_agreeParams02Init003[] = {
     }
 };
 static struct HksParam g_agreeParams02Finish003[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2003
@@ -356,7 +356,7 @@ static struct HksParam g_agreeParams01Init004[] = {
     }
 };
 static struct HksParam g_agreeParams01Finish004[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1004
@@ -381,7 +381,7 @@ static struct HksParam g_agreeParams02Init004[] = {
     }
 };
 static struct HksParam g_agreeParams02Finish004[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2004

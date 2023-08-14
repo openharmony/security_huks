@@ -87,7 +87,7 @@ static struct HksParam g_genParams006[] = {
     }
 };
 static struct HksParam g_agreeParams01Init006[] = {
-    HKS_PARAM_ARR
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams01Finish006[] = {
     {
@@ -96,7 +96,7 @@ static struct HksParam g_agreeParams01Finish006[] = {
     }
 };
 static struct HksParam g_agreeParams02Init006[] = {
-    HKS_PARAM_ARR
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams02Finish006[] = {
     {

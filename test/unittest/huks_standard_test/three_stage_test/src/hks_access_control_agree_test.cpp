@@ -95,7 +95,7 @@ static struct HksBlob g_keyAliasFinal001 = {
 };
 
 static struct HksParam g_agreeAccessFinish001[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal001
@@ -135,7 +135,7 @@ static struct HksBlob g_keyAliasFinal002 = {
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_final"
 };
 static struct HksParam g_agreeAccessFinish002[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal002
@@ -175,7 +175,7 @@ static struct HksBlob g_keyAliasFinal003 = {
     (uint8_t *)"HksDHAgreeKeyAliasTest003_final"
 };
 static struct HksParam g_agreeAccessFinish003[] = {
-    HKS_PARAM_ARR_01 
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal003
