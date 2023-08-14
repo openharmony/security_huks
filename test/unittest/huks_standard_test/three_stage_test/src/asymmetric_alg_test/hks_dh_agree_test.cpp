@@ -235,7 +235,7 @@ static struct HksParam g_agreeParams01Finish009[] = {
     {
         .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_ONLY_USED_IN_HUKS
-    }, 
+    },
     HKS_DERIVE_FINISH_AES_256_COMMON_02
     {
         .tag = HKS_TAG_KEY_ALIAS,
@@ -253,7 +253,7 @@ static struct HksParam g_agreeParams02Finish009[] = {
     {
         .tag = HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
         .uint32Param = HKS_STORAGE_ONLY_USED_IN_HUKS
-    }, 
+    },
     HKS_DERIVE_FINISH_AES_256_COMMON_02
     {
         .tag = HKS_TAG_KEY_ALIAS,
