@@ -929,9 +929,9 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
     ret = HksGetInputParmasByAlg(alg, HKS_CHECK_TYPE_USE_KEY, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher get input params failed, ret = %" LOG_PUBLIC "d", ret)
 
-    if ((alg == HKS_ALG_RSA) || (alg == HKS_ALG_SM4)) {
+    if ((alg == HKS_ALG_RSA) || (alg == HKS_ALG_SM4) || (alg == HKS_ALG_SM4)) {
         ret = HksGetKeySize(alg, key, &params.keyLen.value);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "rsa cipher get key size failed")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "rsa/SM4/SM2 cipher get key size failed")
     }
 
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
