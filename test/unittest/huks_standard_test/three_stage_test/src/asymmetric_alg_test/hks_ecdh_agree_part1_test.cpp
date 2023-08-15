@@ -15,6 +15,7 @@
 
 #include "hks_ecdh_agree_part1_test.h"
 #include "hks_ecdh_agree_test_common.h"
+#include "hks_macro_def.h"
 
 #include <gtest/gtest.h>
 
@@ -108,25 +109,8 @@ static struct HksParam g_agreeParams01Init001[] = {
     }
 };
 static struct HksParam g_agreeParams01Finish001[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1001
     }, {
@@ -150,25 +134,8 @@ static struct HksParam g_agreeParams02Init001[] = {
     }
 };
 static struct HksParam g_agreeParams02Finish001[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2001
     }, {
@@ -219,37 +186,11 @@ static struct HksParam g_genParams002[] = {
     }
 };
 static struct HksParam g_agreeParams01Init002[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECDH
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_256
-    }
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams01Finish002[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1002
     }, {
@@ -261,37 +202,11 @@ static struct HksParam g_agreeParams01Finish002[] = {
     }
 };
 static struct HksParam g_agreeParams02Init002[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECDH
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_256
-    }
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams02Finish002[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2002
     }, {
@@ -353,25 +268,8 @@ static struct HksParam g_agreeParams01Init003[] = {
     }
 };
 static struct HksParam g_agreeParams01Finish003[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1003
     }, {
@@ -395,25 +293,8 @@ static struct HksParam g_agreeParams02Init003[] = {
     }
 };
 static struct HksParam g_agreeParams02Finish003[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2003
     }, {
@@ -475,25 +356,8 @@ static struct HksParam g_agreeParams01Init004[] = {
     }
 };
 static struct HksParam g_agreeParams01Finish004[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal1004
     }, {
@@ -517,25 +381,8 @@ static struct HksParam g_agreeParams02Init004[] = {
     }
 };
 static struct HksParam g_agreeParams02Finish004[] = {
+    HKS_DERIVE_FINISH_AES_256_COMMON
     {
-        .tag = HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_PERSISTENT
-    }, {
-        .tag = HKS_TAG_IS_KEY_ALIAS,
-        .boolParam = true
-    }, {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_AES
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_DERIVE
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
         .tag = HKS_TAG_KEY_ALIAS,
         .blob = g_keyAliasFinal2004
     }, {
