@@ -15,7 +15,7 @@
 
 #include "hks_ecdh_agree_part2_test.h"
 #include "hks_ecdh_agree_test_common.h"
-
+#include "hks_macro_def.h"
 #include <gtest/gtest.h>
 
 #ifdef L2_STANDARD
@@ -87,16 +87,7 @@ static struct HksParam g_genParams006[] = {
     }
 };
 static struct HksParam g_agreeParams01Init006[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECDH
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_256
-    }
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams01Finish006[] = {
     {
@@ -105,16 +96,7 @@ static struct HksParam g_agreeParams01Finish006[] = {
     }
 };
 static struct HksParam g_agreeParams02Init006[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECDH
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_256
-    }
+    HKS_AGREE_FINISH_ECDH_256_COMMON
 };
 static struct HksParam g_agreeParams02Finish006[] = {
     {

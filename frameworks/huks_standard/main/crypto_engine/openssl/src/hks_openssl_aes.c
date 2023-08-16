@@ -154,7 +154,6 @@ int32_t OpensslBlockCipherEncryptUpdate(
     return HKS_SUCCESS;
 }
 
-
 static int32_t OpensslBlockCipherHandleFinalThree(
     void **cryptoCtx, const struct HksBlob *input, struct HksBlob *output, bool isEncrypt)
 {
