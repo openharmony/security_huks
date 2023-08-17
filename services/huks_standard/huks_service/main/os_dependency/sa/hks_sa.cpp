@@ -28,6 +28,10 @@
 
 #include "hks_response.h"
 
+#ifdef CONFIG_USE_JEMALLOC_DFX_INTF
+#include "malloc.h"
+#endif
+
 #ifdef SUPPORT_COMMON_EVENT
 #include <pthread.h>
 #include <unistd.h>
@@ -161,9 +165,21 @@ bool HksService::Init()
     return true;
 }
 
+static void HksInitMemPolicy(void)
+{
+#ifdef CONFIG_USE_JEMALLOC_DFX_INTF
+    // disable mem cache and delay free because the size of mem data in HUKS is associated with caller tasks and
+    // changeable, which is not suitable for this case
+    int32_t ret1 = mallopt(M_SET_THREAD_CACHE, M_THREAD_CACHE_DISABLE);
+    int32_t ret2 = mallopt(M_DELAYED_FREE, M_DELAYED_FREE_DISABLE);
+    HKS_LOG_I("disable cache and delay free, result[%" LOG_PUBLIC "d, %" LOG_PUBLIC "d]", ret1, ret2);
+#endif
+}
+
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
+    HksInitMemPolicy();
     // this is the temporary version which comments the descriptor check
     std::u16string descriptor = HksService::GetDescriptor();
     std::u16string remoteDescriptor = data.ReadInterfaceToken();
