@@ -1585,7 +1585,7 @@ static int32_t CheckOptionalParams(bool needCheck, bool isAbsent, uint32_t input
     if (needCheck) {
         if (!isAbsent) {
             if (HksCheckValue(inputValue, expectValue, expectCnt) != HKS_SUCCESS) {
-                HKS_LOG_E("CheckOptionalParams invalid argument, %" LOG_PUBLIC "d", inputValue);
+                HKS_LOG_E("CheckOptionalParams invalid argument, %d", inputValue);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         }
@@ -1899,7 +1899,7 @@ int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
         case HKS_ALG_SM4:
             return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_SM4);
 #endif
-#if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_ENCRYPT_DECRYPT)
+#ifdef HKS_SUPPORT_SM2_C
         case HKS_ALG_SM2:
             return HKS_SUCCESS;
 #endif

@@ -123,9 +123,6 @@ int32_t HksGetDigestLen(uint32_t digest, uint32_t *digestLen)
         case HKS_DIGEST_SM3:
             *digestLen = HKS_DIGEST_SM3_LEN;
             break;
-        case HKS_DIGEST_NONE:
-            *digestLen = 0;
-            break;
         default:
             return HKS_ERROR_INVALID_DIGEST;
     }
