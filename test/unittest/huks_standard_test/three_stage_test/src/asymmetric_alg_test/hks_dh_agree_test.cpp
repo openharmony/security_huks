@@ -426,6 +426,7 @@ void HksDhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct Hks
     HksFree(blob4->data);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree001
  * @tc.desc: alg-DH, pur-AGREE
@@ -483,7 +484,6 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree001, TestSize.Level0)
     HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree002
  * @tc.desc: alg-DH, pur-AGREE, size-3072
@@ -824,7 +824,6 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree008, TestSize.Level0)
     HksDeleteKey(&g_keyAlias02008, genParamSet);
     HksDhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
 }
-#endif
 
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree009
@@ -881,6 +880,7 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree009, TestSize.Level0)
     HksDhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
+#endif
 
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree010
