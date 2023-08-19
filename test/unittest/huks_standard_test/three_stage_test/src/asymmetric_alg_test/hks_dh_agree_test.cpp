@@ -207,7 +207,6 @@ static struct HksParam g_agreeParams02Init008[] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-#endif
 
 static struct HksBlob g_keyAlias01009 = {
     strlen("HksDHAgreeKeyAliasTest009_1"),
@@ -268,6 +267,7 @@ static struct HksParam g_agreeParams02Finish009[] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
+#endif
 
 static struct HksBlob g_keyAlias01010 = {
     strlen("HksDHAgreeKeyAliasTest010_1"),
