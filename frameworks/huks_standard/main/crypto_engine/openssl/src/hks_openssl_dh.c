@@ -202,7 +202,8 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         if (memcpy_s(sharedKey->data, sharedKey->size, computeKey, HKS_KEY_BYTES(spec->keyLen)) != EOK) {
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
         } else {
-            sharedKey->size = (uint32_t)DH_size(dh);
+            HKS_LOG_I("get agreed key size %" LOG_PUBLIC "u", HKS_KEY_BYTES(spec->keyLen));
+            sharedKey->size = HKS_KEY_BYTES(spec->keyLen);
             ret = HKS_SUCCESS;
         }
     }

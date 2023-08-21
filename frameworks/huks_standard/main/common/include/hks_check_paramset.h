@@ -55,6 +55,8 @@ int32_t HksCoreCheckDeriveKeyParams(const struct HksParamSet *paramSet, const st
 int32_t HksCoreCheckMacParams(const struct HksBlob *key, const struct HksParamSet *paramSet,
     const struct HksBlob *srcData, const struct HksBlob *mac, bool isLocalCheck);
 
+int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const struct HksParamSet *paramSet);
+
 #ifdef __cplusplus
 }
 #endif

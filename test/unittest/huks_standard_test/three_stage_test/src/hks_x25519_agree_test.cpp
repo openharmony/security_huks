@@ -17,6 +17,7 @@
 #include "file_ex.h"
 #endif
 #include "hks_x25519_agree_test.h"
+#include "hks_agree_test_common.h"
 
 #include <gtest/gtest.h>
 #include "hks_macro_def.h"
@@ -448,6 +449,9 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksX25519AgreeFinish01 failed.";
     ret = HksX25519AgreeFinish(&g_keyAlias02001, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksX25519AgreeFinish02 failed.";
+
+    ret = TestAgreedKeyUse(&g_keyAliasFinal1001, &g_keyAliasFinal2001);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestAgreedKeyUse failed.";
 
     HksDeleteKey(&g_keyAlias01001, genParamSet);
     HksDeleteKey(&g_keyAlias02001, genParamSet);

@@ -252,6 +252,21 @@ static uint32_t g_cipherAlgLocal[] = {
 #endif
 };
 
+static uint32_t g_symmetricAlgorithm[] = {
+#ifdef HKS_SUPPORT_AES_C
+    HKS_ALG_AES,
+#endif
+#ifdef HKS_SUPPORT_HMAC_C
+    HKS_ALG_HMAC,
+#endif
+#ifdef HKS_SUPPORT_SM3_C
+    HKS_ALG_SM3,
+#endif
+#ifdef HKS_SUPPORT_SM4_C
+    HKS_ALG_SM4,
+#endif
+};
+
 static int32_t CheckAndGetAlgorithm(
     const struct HksParamSet *paramSet, const uint32_t *expectAlg, uint32_t expectCnt, uint32_t *alg)
 {
@@ -1054,4 +1069,37 @@ int32_t HksCoreCheckMacParams(const struct HksBlob *key, const struct HksParamSe
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check Mac purpose failed")
 
     return CheckMacOutput(key, paramSet, mac, isLocalCheck);
+}
+
+static bool CheckIsSymmetricAlgorithm(uint32_t alg)
+{
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_symmetricAlgorithm); ++i) {
+        if (alg == g_symmetricAlgorithm[i]) {
+            return true;
+        }
+    }
+    return false;
+}
+
+int32_t HksCoreCheckAgreeDeriveFinishParams(const struct HksBlob *key, const struct HksParamSet *paramSet)
+{
+    // check the key paramset is consistent with key real attributes, including key size and valid key algorithm
+    struct HksParam *keySize = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_SIZE, &keySize);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key size from agree paramset failed!")
+    if (HKS_KEY_BYTES(keySize->uint32Param) != key->size) {
+        HKS_LOG_E("key size param from paramSet is not consistent with real key size, param size %" LOG_PUBLIC
+            "u not equals to real key size %" LOG_PUBLIC "u", HKS_KEY_BYTES(keySize->uint32Param), key->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    struct HksParam *algorithm = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algorithm);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key algorithm from agree paramset failed!")
+    if (!CheckIsSymmetricAlgorithm(algorithm->uint32Param)) {
+        HKS_LOG_E("Agreed or derived key algorithm param can only be symmetric! Algorithm is %" LOG_PUBLIC "u",
+            algorithm->uint32Param);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
 }

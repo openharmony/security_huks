@@ -27,6 +27,7 @@
 
 #include "hks_auth.h"
 #include "hks_base_check.h"
+#include "hks_check_paramset.h"
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
@@ -1103,8 +1104,8 @@ static int32_t DoBuildKeyBlobOrGetOutDataAction(const struct HksParamSet *paramS
     return HKS_SUCCESS;
 }
 
-static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, const struct HksBlob *restoreData,
-    struct HksBlob *outData, uint8_t keyFlag, const struct HuksKeyNode *keyNode)
+static int32_t BuildAgreeDeriveKeyBlobOrGetOutData(const struct HksParamSet *paramSet,
+    const struct HksBlob *restoreData, struct HksBlob *outData, uint8_t keyFlag, const struct HuksKeyNode *keyNode)
 {
     bool isNeedStorageOrExported = false;
     struct HksParam *keyStorageFlagParam = NULL;
@@ -1121,6 +1122,13 @@ static int32_t BuildKeyBlobOrGetOutData(const struct HksParamSet *paramSet, cons
 
     bool isNeedStorage = false;
     HksCheckKeyNeedStored(paramSet, &isNeedStorage);
+
+    if (isNeedStorage) {
+        // the paramset is only used when the key needs be stored
+        ret = HksCoreCheckAgreeDeriveFinishParams(restoreData, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check agree finish key paramset failed!")
+    }
+
     if (isNeedStorageOrExported) {
         // Whether the derived/agreed key needs to be stored was not specified when generating the key
         HKS_LOG_D("default mode of storage");
@@ -1152,7 +1160,7 @@ int32_t HksCoreDeriveThreeStageFinish(const struct HuksKeyNode *keyNode, const s
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
-    ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_DERIVE_KEY, keyNode);
+    ret = BuildAgreeDeriveKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_DERIVE_KEY, keyNode);
 
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);
@@ -1256,7 +1264,7 @@ int32_t HksCoreAgreeThreeStageFinish(const struct HuksKeyNode *keyNode, const st
 
     struct HksBlob *restoreData = (struct HksBlob *)ctx;
 
-    ret = BuildKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_AGREE_KEY, keyNode);
+    ret = BuildAgreeDeriveKeyBlobOrGetOutData(paramSet, restoreData, outData, HKS_KEY_FLAG_AGREE_KEY, keyNode);
 
     FreeCachedData(&restoreData);
     ClearCryptoCtx(keyNode);
