@@ -259,9 +259,6 @@ static uint32_t g_symmetricAlgorithm[] = {
 #ifdef HKS_SUPPORT_HMAC_C
     HKS_ALG_HMAC,
 #endif
-#ifdef HKS_SUPPORT_DH_C
-    HKS_ALG_DH,
-#endif
 #ifdef HKS_SUPPORT_SM3_C
     HKS_ALG_SM3,
 #endif
