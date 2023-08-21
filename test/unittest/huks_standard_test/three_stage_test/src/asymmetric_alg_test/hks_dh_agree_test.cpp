@@ -15,6 +15,8 @@
 
 #include "hks_dh_agree_test.h"
 
+#include "hks_agree_test_common.h"
+
 #include <gtest/gtest.h>
 #include "hks_macro_def.h"
 
@@ -205,7 +207,6 @@ static struct HksParam g_agreeParams02Init008[] = {
         .uint32Param = HKS_DH_KEY_SIZE_4096
     }
 };
-#endif
 
 static struct HksBlob g_keyAlias01009 = {
     strlen("HksDHAgreeKeyAliasTest009_1"),
@@ -266,6 +267,7 @@ static struct HksParam g_agreeParams02Finish009[] = {
         .uint32Param = HKS_MODE_CBC
     }
 };
+#endif
 
 static struct HksBlob g_keyAlias01010 = {
     strlen("HksDHAgreeKeyAliasTest010_1"),
@@ -424,6 +426,7 @@ void HksDhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2, struct Hks
     HksFree(blob4->data);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree001
  * @tc.desc: alg-DH, pur-AGREE
@@ -470,6 +473,9 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree001, TestSize.Level0)
     ret = HksDhAgreeFinish(&g_keyAlias02001, &publicKey01, initParamSet02, finishParamSet02, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDhAgreeFinish02 failed.";
 
+    ret = TestAgreedKeyUse(&g_keyAliasFinal1001, &g_keyAliasFinal2001);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestAgreedKeyUse failed.";
+
     HksDeleteKey(&g_keyAlias01001, genParamSet);
     HksDeleteKey(&g_keyAlias02001, genParamSet);
     HksDeleteKey(&g_keyAliasFinal1001, NULL);
@@ -478,7 +484,6 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree001, TestSize.Level0)
     HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
 
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree002
  * @tc.desc: alg-DH, pur-AGREE, size-3072
@@ -819,7 +824,6 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree008, TestSize.Level0)
     HksDeleteKey(&g_keyAlias02008, genParamSet);
     HksDhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
 }
-#endif
 
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree009
@@ -876,6 +880,7 @@ HWTEST_F(HksDhAgreeTest, HksDhAgree009, TestSize.Level0)
     HksDhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksDhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
+#endif
 
 /**
  * @tc.name: HksDhAgreeTest.HksDhAgree010
