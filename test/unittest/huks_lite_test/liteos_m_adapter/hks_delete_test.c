@@ -15,6 +15,8 @@
 
 #ifndef _CUT_AUTHENTICATE_
 
+#include <gtest/gtest.h>
+
 #include "hctest.h"
 #include "hi_watchdog.h"
 #include "hks_delete_test.h"
@@ -73,18 +75,18 @@ LITE_TEST_CASE(HksDeleteTest, HksDeleteTest001, Level1)
     int32_t ret;
     struct HksBlob *keyAlias = NULL;
     if (g_testKeyExistParams[0].isGenKey) {
-        HKS_TEST_ASSERT(TestGenDefaultKeyAndGetAlias(&keyAlias) == 0);
+        EXPECT_TRUE(TestGenDefaultKeyAndGetAlias(&keyAlias) == 0);
     } else {
         ret = TestConstuctBlob(&keyAlias,
                                g_testKeyExistParams[0].keyAliasParams.blobExist,
                                g_testKeyExistParams[0].keyAliasParams.blobSize,
                                g_testKeyExistParams[0].keyAliasParams.blobDataExist,
                                g_testKeyExistParams[0].keyAliasParams.blobDataSize);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
     }
 
     ret = HksDeleteKeyRun(keyAlias, 1);
-    HKS_TEST_ASSERT(ret == g_testKeyExistParams[0].expectResult);
+    EXPECT_TRUE(ret == g_testKeyExistParams[0].expectResult);
 
     TestFreeBlob(&keyAlias);
     TEST_ASSERT_TRUE(ret == 0);

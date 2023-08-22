@@ -15,14 +15,7 @@
 
 #include "hctest.h"
 #include "hi_watchdog.h"
-#include "hks_bn_exp_mod_test.h"
-
-#include "hks_api.h"
-#include "hks_param.h"
-#include "hks_test_api_performance.h"
-#include "hks_test_common.h"
-#include "hks_test_log.h"
-#include "hks_type.h"
+#include "hks_bn_exp_mod_test_c.h"
 
 /*
  * @tc.register: register a test suit named "CalcMultiTest"
@@ -53,44 +46,6 @@ static BOOL HksBnExpModTestTearDown()
     LiteTestPrint("tearDown\n");
     hi_watchdog_enable();
     return TRUE;
-}
-
-
-#define DEFAULT_X_SIZE 256
-#define DEFAULT_A_SIZE 256
-#define DEFAULT_E_SIZE 256
-#define DEFAULT_N_SIZE 256
-#define HKS_TEST_2 2
-#define HKS_TEST_8 8
-
-static const struct HksTestBnExpModParams g_testBnExpModParams[] = {
-    /* normal case */
-    { 0, HKS_SUCCESS, false,
-        { true, DEFAULT_X_SIZE, true, DEFAULT_X_SIZE },
-        { true, DEFAULT_A_SIZE, true, DEFAULT_A_SIZE },
-        { true, DEFAULT_E_SIZE, true, DEFAULT_E_SIZE },
-        { true, DEFAULT_N_SIZE, true, DEFAULT_N_SIZE }
-    },
-};
-
-static int32_t TestValue()
-{
-    HKS_TEST_LOG_I("test value");
-    uint8_t bufX[HKS_TEST_8] = { 0, 0, 0, 0, 0, 0, 0, 0x40 };
-    uint8_t bufA[HKS_TEST_8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
-    uint8_t bufE[HKS_TEST_2] = { 0, 2 };
-    uint8_t bufN[HKS_TEST_8] = { 0, 1, 2, 3, 4, 5, 6, 7 };
-    uint8_t tmpBufX[HKS_TEST_8] = {0};
-    struct HksBlob tmpX = { HKS_TEST_8, tmpBufX };
-    struct HksBlob tmpA = { HKS_TEST_8, bufA };
-    struct HksBlob tmpE = { HKS_TEST_2, bufE };
-    struct HksBlob tmpN = { HKS_TEST_8, bufN };
-    int32_t ret = HksBnExpModRun(&tmpX, &tmpA, &tmpE, &tmpN, 1);
-    for (int i = 0; i < HKS_TEST_8; ++i) {
-        HKS_TEST_LOG_I("%x, %x", tmpBufX[i], bufX[i]);
-        HKS_TEST_ASSERT(tmpBufX[i] == bufX[i]);
-    }
-    return ret;
 }
 
 /**

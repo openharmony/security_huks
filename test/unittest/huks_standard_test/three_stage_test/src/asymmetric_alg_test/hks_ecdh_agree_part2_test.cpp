@@ -15,7 +15,6 @@
 
 #include "hks_ecdh_agree_part2_test.h"
 #include "hks_ecdh_agree_test_common.h"
-#include "hks_macro_def.h"
 #include <gtest/gtest.h>
 
 #ifdef L2_STANDARD

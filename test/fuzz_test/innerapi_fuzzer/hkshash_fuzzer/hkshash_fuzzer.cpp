@@ -14,25 +14,25 @@
  */
 #include "hkshash_fuzzer.h"
 
-#include <securec.h>
-
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
+#include <securec.h>
+
 const int DOUBLE_BLOB_SIZE = 20;
+const int BLOB_SIZE = 10;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
+        if (myData == nullptr) {
             return false;
         }
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
+        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
             return false;
         }
 

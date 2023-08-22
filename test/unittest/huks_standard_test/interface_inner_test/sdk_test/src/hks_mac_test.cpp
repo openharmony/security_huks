@@ -17,12 +17,12 @@
 
 #include "hks_mac_test.h"
 
-#include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
+#include "file_ex.h"
 
 using namespace testing::ext;
 namespace {
@@ -32,9 +32,9 @@ public:
 
     static void TearDownTestCase(void);
 
-    void SetUp();
-
     void TearDown();
+
+    void SetUp();
 };
 
 void HksMacTest::SetUpTestCase(void)
@@ -70,13 +70,15 @@ static const struct HksTestMacParams g_testMacParams[] = {
     },
 
     /* success: tee-sha256 */
-    { 1, HKS_SUCCESS, HKS_TEST_MAC_TYPE_TEE, { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
+    { 1, HKS_SUCCESS, HKS_TEST_MAC_TYPE_TEE,
+        { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
         {true, true, HKS_ALG_AES, true, HKS_AES_KEY_SIZE_256, true, HKS_KEY_PURPOSE_MAC,
             true, HKS_DIGEST_SHA256, false, 0, false, 0 },
         { 0 },
         { true,  true, HKS_KEY_PURPOSE_MAC, true, HKS_DIGEST_SHA256 },
         { true, HKS_DEFAULT_MAC_SRCDATA_SIZE, true, HKS_DEFAULT_MAC_SRCDATA_SIZE },
-        { true, HKS_DEFAULT_MAC_SHA256_SIZE, true, HKS_DEFAULT_MAC_SHA256_SIZE }
+        { true, HKS_DEFAULT_MAC_SHA256_SIZE,
+            true, HKS_DEFAULT_MAC_SHA256_SIZE }
     },
 };
 
@@ -86,30 +88,29 @@ static int32_t ConstructDataToBlob(struct HksBlob **srcData, struct HksBlob **ma
     int32_t ret = TestConstuctBlob(srcData,
         srcDataParams->blobExist,
         srcDataParams->blobSize,
-        srcDataParams->blobDataExist,
-        srcDataParams->blobDataSize);
-    HKS_TEST_ASSERT(ret == 0);
+        srcDataParams->blobDataExist, srcDataParams->blobDataSize);
+    EXPECT_TRUE(ret == 0);
 
     ret = TestConstuctBlob(macData,
         macDataParams->blobExist,
         macDataParams->blobSize,
-        macDataParams->blobDataExist,
-        macDataParams->blobDataSize);
-    HKS_TEST_ASSERT(ret == 0);
+        macDataParams->blobDataExist, macDataParams->blobDataSize);
+    EXPECT_TRUE(ret == 0);
     return ret;
 }
 
 static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, struct HksBlob *macData,
     const struct HksTestMacParamSet *macParamSetParams, enum HksTestMacType macType)
 {
-    struct HksParamSet *macParamSet = NULL;
     int32_t ret;
+    struct HksParamSet *macParamSet = NULL;
     if (macType == HKS_TEST_MAC_TYPE_REE) {
         struct TestMacParamSetStructure paramStructTrue = {
             &macParamSet,
             macParamSetParams->paramSetExist,
             macParamSetParams->setPurpose, macParamSetParams->purpose,
-            macParamSetParams->setDigest, macParamSetParams->digest, true, false
+            macParamSetParams->setDigest,
+            macParamSetParams->digest, true, false
         };
         ret = TestConstructMacParamSet(&paramStructTrue);
     } else {
@@ -117,11 +118,12 @@ static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, str
             &macParamSet,
             macParamSetParams->paramSetExist,
             macParamSetParams->setPurpose, macParamSetParams->purpose,
-            macParamSetParams->setDigest, macParamSetParams->digest, false, false
+            macParamSetParams->setDigest,
+            macParamSetParams->digest, false, false
         };
         ret = TestConstructMacParamSet(&paramStructFalse);
     }
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = HksMacRun(key, macParamSet, srcData, macData, 1);
     HksFreeParamSet(&macParamSet);
@@ -131,8 +133,8 @@ static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, str
 static int32_t BaseTestMac(uint32_t index)
 {
     /* 1. generate key */
-    struct HksBlob *key = NULL;
     int32_t ret;
+    struct HksBlob *key = NULL;
 
     if (g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_REE) {
         ret = TestConstuctBlob(&key,
@@ -142,8 +144,8 @@ static int32_t BaseTestMac(uint32_t index)
             g_testMacParams[index].keyParams.blobDataSize);
     } else {
         if (g_testMacParams[index].keyAliasParams.blobExist) {
-            ret = GenerateKey(&key, &(g_testMacParams[index].keyAliasParams),
-                &g_testMacParams[index].genKeyParamSetParams, NULL);
+            ret = GenerateKey(&key,
+            &(g_testMacParams[index].keyAliasParams), &g_testMacParams[index].genKeyParamSetParams, NULL);
         } else {
             ret = TestConstuctBlob(&key,
                 g_testMacParams[index].keyParams.blobExist,
@@ -152,26 +154,25 @@ static int32_t BaseTestMac(uint32_t index)
                 g_testMacParams[index].keyParams.blobDataSize);
         }
     }
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     /* 2. mac */
-    struct HksBlob *srcData = NULL;
     struct HksBlob *macData = NULL;
+    struct HksBlob *srcData = NULL;
     ret = ConstructDataToBlob(&srcData, &macData,
         &g_testMacParams[index].srcDataParams, &g_testMacParams[index].macParams);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = Mac(key, srcData, macData, &g_testMacParams[index].macParamSetParams, g_testMacParams[index].macType);
     if (ret != g_testMacParams[index].expectResult) {
         HKS_TEST_LOG_I("failed, ret[%u] = %d", g_testMacParams[index].testId, ret);
     }
-    HKS_TEST_ASSERT(ret == g_testMacParams[index].expectResult);
+    EXPECT_TRUE(ret == g_testMacParams[index].expectResult);
 
     /* 3. deletekey */
-    if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) &&
-        (g_testMacParams[index].keyAliasParams.blobExist)) {
+    if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) && (g_testMacParams[index].keyAliasParams.blobExist)) {
         ret = HksDeleteKey(key, NULL);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
     }
     TestFreeBlob(&key);
     TestFreeBlob(&srcData);

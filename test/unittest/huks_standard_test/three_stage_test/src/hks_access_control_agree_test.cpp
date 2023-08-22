@@ -19,7 +19,6 @@
 
 #include <gtest/gtest.h>
 #include <vector>
-#include "hks_macro_def.h"
 
 #ifdef L2_STANDARD
 #include "file_ex.h"

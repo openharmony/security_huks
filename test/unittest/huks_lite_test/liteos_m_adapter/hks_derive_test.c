@@ -12,20 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <gtest/gtest.h>
 #include <hctest.h>
 #include "hi_watchdog.h"
 
-#include "hks_derive_test.h"
-
-#include "hks_api.h"
-#include "hks_param.h"
-#include "hks_test_api_performance.h"
-#include "hks_test_common.h"
-#include "hks_test_log.h"
-
-#define DEFAULT_DERIVE_SIZE 32
-#define DEFAULT_INFO_SIZE 55
-#define DEFAULT_SALT_SIZE 16
+#include "hks_derive_test_c.h"
 
 /*
  * @tc.register: register a test suit named "CalcMultiTest"
@@ -58,88 +49,31 @@ static BOOL HksDeriveTestTearDown()
     return TRUE;
 }
 
-
-static const struct HksTestDeriveParams g_testDeriveParams[] = {
-    /* hkdf-sha256-salt-info */
-    { 0, HKS_SUCCESS, { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
-        {
-            true, /* genKey params */
-            true, HKS_ALG_AES,
-            true, HKS_AES_KEY_SIZE_256,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            false, 0,
-            false, 0 },
-        { 0 },
-        {
-            true, /* derive params */
-            true, HKS_ALG_HKDF,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            true, DEFAULT_SALT_SIZE,
-            true, DEFAULT_INFO_SIZE,
-            false, true },
-        {
-            true, DEFAULT_DERIVE_SIZE, true, DEFAULT_DERIVE_SIZE },
-        {
-            false, 0, false, 0 }
-    },
-
-    /* local: hkdf-sha256-salt-info */
-    { 1, HKS_SUCCESS, { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
-        {
-            true, /* genKey params */
-            true, HKS_ALG_AES,
-            true, HKS_AES_KEY_SIZE_256,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            false, 0,
-            true, HKS_STORAGE_TEMP },
-        { 0 },
-        {
-            true, /* derive params */
-            true, HKS_ALG_HKDF,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            true, DEFAULT_SALT_SIZE,
-            true, DEFAULT_INFO_SIZE,
-            true, false },
-        {
-            true, DEFAULT_DERIVE_SIZE, true, DEFAULT_DERIVE_SIZE },
-        {
-            true, DEFAULT_LOCAL_KEY_SIZE, true, DEFAULT_LOCAL_KEY_SIZE }
-    },
-};
-
 static int32_t DeriveKey(const struct HksTestDeriveParamSet *deriveParamSetParams, const struct HksBlob *masterKey,
     struct HksBlob *derivedKey, struct HksBlob **saltData, struct HksBlob **infoData)
 {
     struct HksParamSet *deriveParamSet = NULL;
-    uint32_t saltSize = deriveParamSetParams->saltSize;
     uint32_t infoSize = deriveParamSetParams->infoSize;
+    uint32_t saltSize = deriveParamSetParams->saltSize;
     if (saltSize != 0) {
-        HKS_TEST_ASSERT(TestConstuctBlob(saltData, true, saltSize, true, saltSize) == 0);
+        EXPECT_TRUE(TestConstuctBlob(saltData, true, saltSize, true, saltSize) == 0);
     }
     if (infoSize != 0) {
-        HKS_TEST_ASSERT(TestConstuctBlob(infoData, true, infoSize, true, infoSize) == 0);
+        EXPECT_TRUE(TestConstuctBlob(infoData, true, infoSize, true, infoSize) == 0);
     }
     struct TestDeriveParamSetStructure paramStruct = {
-        &deriveParamSet,
-        deriveParamSetParams->paramSetExist,
+        &deriveParamSet, deriveParamSetParams->paramSetExist,
         deriveParamSetParams->setAlg, deriveParamSetParams->alg,
         deriveParamSetParams->setPurpose, deriveParamSetParams->purpose,
         deriveParamSetParams->setDigest, deriveParamSetParams->digest,
         deriveParamSetParams->setIteration, deriveParamSetParams->iteration,
         deriveParamSetParams->setSalt, *saltData,
         deriveParamSetParams->setInfo, *infoData,
-        deriveParamSetParams->setIsKeyAlias, deriveParamSetParams->isKeyAlias
+        deriveParamSetParams->setIsKeyAlias,
+        deriveParamSetParams->isKeyAlias
     };
     int32_t ret = TestConstructDeriveParamSet(&paramStruct);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = HksDeriveKeyRun(deriveParamSet, masterKey, derivedKey, 1);
     HksFreeParamSet(&deriveParamSet);
@@ -153,10 +87,12 @@ static int32_t BaseTestDerive(uint32_t index)
     int32_t ret;
     if (g_testDeriveParams[index].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testDeriveParams[index].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        ret = GenerateLocalRandomKey(&keyAlias, &g_testDeriveParams[index].localKeyParams);
+        ret = GenerateLocalRandomKey(&keyAlias,
+            &g_testDeriveParams[index].localKeyParams);
     } else {
         if (g_testDeriveParams[index].keyAliasParams.blobExist) {
-            ret = GenerateKey(&keyAlias, &g_testDeriveParams[index].keyAliasParams,
+            ret = GenerateKey(&keyAlias,
+                &g_testDeriveParams[index].keyAliasParams,
                 &g_testDeriveParams[index].genKeyParamSetParams, NULL);
         } else {
             ret = TestConstuctBlob(&keyAlias,

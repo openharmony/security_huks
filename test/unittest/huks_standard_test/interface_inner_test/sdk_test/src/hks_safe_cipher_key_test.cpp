@@ -96,27 +96,27 @@ HWTEST_F(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, TestSize.Level0)
     uint32_t pubKeyLen = 32;
     struct HksBlob pubKeyInfo = { pubKeyLen, pubKey };
     ret = HksExportPublicKey(&ed25519Alias, NULL, &pubKeyInfo);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
     ret = HksDeleteKey(&ed25519Alias, NULL);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     struct HksBlob newAliasOne = { strlen("test_ed25519_1"), (uint8_t *)"test_ed25519_1" };
     ret = TestImportEd25519(newAliasOne, &pubKeyInfo);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     struct HksBlob newAliasTwo = { strlen("test_ed25519_2"), (uint8_t *)"test_ed25519_2" };
     ret = TestImportEd25519(newAliasTwo, &pubKeyInfo);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = CompareTwoKey(&newAliasOne, &newAliasTwo);
-    HKS_TEST_ASSERT(ret != 0);
+    EXPECT_TRUE(ret != 0);
     ASSERT_TRUE(ret != 0);
 
     ret = HksDeleteKey(&newAliasOne, NULL);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
     ASSERT_TRUE(ret == 0);
     ret = HksDeleteKey(&newAliasTwo, NULL);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
     ASSERT_TRUE(ret == 0);
 }
 }

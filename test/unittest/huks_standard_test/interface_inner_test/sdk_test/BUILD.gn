@@ -46,6 +46,13 @@ ohos_unittest("hukssdk_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_native_api_compatibility_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_bn_exp_mod_test_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_common_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_aes_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_cipher_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_curve25519_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_file_operator_func.c",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
   ]
   if (huks_security_level == "software") {
     defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
@@ -56,6 +63,8 @@ ohos_unittest("hukssdk_test") {
     "//base/security/access_token/interfaces/innerkits/token_setproc/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/include",
     "//base/security/huks/utils/file_operator",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
 
   cflags = [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]

@@ -20,7 +20,6 @@
 #include "hks_agree_test_common.h"
 
 #include <gtest/gtest.h>
-#include "hks_macro_def.h"
 
 using namespace testing::ext;
 namespace Unittest::X25519Agree {

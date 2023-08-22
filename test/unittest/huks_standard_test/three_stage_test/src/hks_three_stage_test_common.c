@@ -25,14 +25,12 @@ int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam *param
 
     ret = HksAddParams(*paramSet, params, paramcount);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed");
         HksFreeParamSet(paramSet);
         return ret;
     }
 
     ret = HksBuildParamSet(paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksBuildParamSet failed!");
         HksFreeParamSet(paramSet);
         return ret;
     }

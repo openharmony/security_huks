@@ -16,10 +16,10 @@
 #ifndef HKS_TEST_LOG_H
 #define HKS_TEST_LOG_H
 
-#define HKS_TEST_ASSERT(test) \
-    if (!(test)) { \
-        printf("[ASSERT][%s](%d):fail\n", __func__, __LINE__); \
-    }
+// #define EXPECT_TRUE(test) \
+//     if (!(test)) { \
+//         printf("[ASSERT][%s](%d):fail\n", __func__, __LINE__); \
+//     }
 
 #define HKS_TEST_LOG_E(fmt...) \
 do { \

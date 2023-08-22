@@ -70,22 +70,22 @@ HWTEST_F(HksExistTest, HksExistTest001, TestSize.Level0)
     int32_t ret;
     struct HksBlob *keyAlias = NULL;
     if (g_testKeyExistParams[0].isGenKey) {
-        HKS_TEST_ASSERT(TestGenDefaultKeyAndGetAlias(&keyAlias) == 0);
+        EXPECT_TRUE(TestGenDefaultKeyAndGetAlias(&keyAlias) == 0);
         ret = HksKeyExistRun(keyAlias, 1);
-        HKS_TEST_ASSERT(ret == g_testKeyExistParams[0].expectResult);
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == HKS_SUCCESS);
+        EXPECT_TRUE(ret == g_testKeyExistParams[0].expectResult);
+        EXPECT_TRUE(HksDeleteKey(keyAlias, NULL) == HKS_SUCCESS);
     } else {
         ret = TestConstuctBlob(&keyAlias,
                                g_testKeyExistParams[0].keyAliasParams.blobExist,
                                g_testKeyExistParams[0].keyAliasParams.blobSize,
                                g_testKeyExistParams[0].keyAliasParams.blobDataExist,
                                g_testKeyExistParams[0].keyAliasParams.blobDataSize);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
         ret = HksKeyExistRun(keyAlias, 1);
         if (ret != g_testKeyExistParams[0].expectResult) {
             HKS_TEST_LOG_I("HksKeyExistRun 2 failed, ret[%u] = %d", g_testKeyExistParams[0].testId, ret);
         }
-        HKS_TEST_ASSERT(ret == g_testKeyExistParams[0].expectResult);
+        EXPECT_TRUE(ret == g_testKeyExistParams[0].expectResult);
     }
     TestFreeBlob(&keyAlias);
     ASSERT_TRUE(ret == 0);

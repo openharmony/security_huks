@@ -73,13 +73,13 @@ HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest001, TestSize.Level0)
         g_testGenRandomParams[0].randomParams.blobSize,
         g_testGenRandomParams[0].randomParams.blobDataExist,
         g_testGenRandomParams[0].randomParams.blobDataSize);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = HksGenerateRandomRun(random, 1);
     if (ret != g_testGenRandomParams[0].expectResult) {
         HKS_TEST_LOG_I("HksGenerateRandomRun failed, ret[%u] = %d", g_testGenRandomParams[0].testId, ret);
     }
-    HKS_TEST_ASSERT(ret == g_testGenRandomParams[0].expectResult);
+    EXPECT_TRUE(ret == g_testGenRandomParams[0].expectResult);
 
     TestFreeBlob(&random);
     ASSERT_TRUE(ret == 0);
