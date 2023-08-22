@@ -14,7 +14,7 @@
  */
 
 #ifndef _CUT_AUTHENTICATE_
-
+#include <gtest/gtest.h>
 #include "hks_generate_key_test.h"
 
 #include <hctest.h>
@@ -121,7 +121,7 @@ LITE_TEST_CASE(HksGenerateKeyTest, HksGenerateKeyTest001, Level1)
     if ((ret == HKS_SUCCESS) &&
         !(g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag) &&
         (g_testGenKeyParams[index].paramSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
+        EXPECT_TRUE(HksDeleteKey(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     HksFreeParamSet(&paramSet);

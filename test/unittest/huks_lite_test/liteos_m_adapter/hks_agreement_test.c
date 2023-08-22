@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include <gtest/gtest.h>
 
 #include "hctest.h"
 #include "hi_watchdog.h"
@@ -89,7 +90,7 @@ static int32_t AgreeKey(const struct HksTestAgreeParamSet *agreeParamSetParams, 
         agreeParamSetParams->setIsKeyAlias, agreeParamSetParams->isKeyAlias
     };
     int32_t ret = TestConstructAgreeParamSet(&paramStruct);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = HksAgreeKeyRun(agreeParamSet, privateKey, peerPublicKey, agreedKey, 1);
     HksFreeParamSet(&agreeParamSet);
@@ -112,9 +113,9 @@ LITE_TEST_CASE(HksAgreementTest, HksAgreementTest001, Level1)
     if (g_testAgreeParams[0].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testAgreeParams[0].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
         ret = GenerateLocalX25519Key(&privateKey, NULL, &g_testAgreeParams[0].localPrivateKeyParams, NULL);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
         ret = GenerateLocalX25519Key(NULL, &peerPublicKey, NULL, &g_testAgreeParams[0].localPublicKeyParams);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
     }
     /* 2. agreeKey */
     struct HksBlob *agreeKey = NULL;
@@ -123,10 +124,10 @@ LITE_TEST_CASE(HksAgreementTest, HksAgreementTest001, Level1)
         g_testAgreeParams[0].agreedKeyParams.blobSize,
         g_testAgreeParams[0].agreedKeyParams.blobDataExist,
         g_testAgreeParams[0].agreedKeyParams.blobDataSize);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = AgreeKey(&g_testAgreeParams[0].agreeParamSetParams, privateKey, peerPublicKey, agreeKey);
-    HKS_TEST_ASSERT(ret == g_testAgreeParams[0].expectResult);
+    EXPECT_TRUE(ret == g_testAgreeParams[0].expectResult);
 
     /* 3. delete key */
     if (!(g_testAgreeParams[0].genKeyParamSetParams.setKeyStorageFlag &&
@@ -134,9 +135,9 @@ LITE_TEST_CASE(HksAgreementTest, HksAgreementTest001, Level1)
         ((g_testAgreeParams[0].keyAlias1Params.blobExist) &&
         (g_testAgreeParams[0].keyAlias2Params.blobExist))) {
         ret = HksDeleteKey(privateKey, NULL);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
         ret = HksDeleteKey(peerPubKeyAlias, NULL);
-        HKS_TEST_ASSERT(ret == 0);
+        EXPECT_TRUE(ret == 0);
     }
     TestFreeBlob(&privateKey);
     TestFreeBlob(&peerPubKeyAlias);

@@ -13,15 +13,11 @@
  * limitations under the License.
  */
 
-#include "hks_test_file_operator.h"
+#include "hks_test_file_operator_c.h"
 
 #ifndef __LITEOS_M__
-#include <dirent.h>
-#include <errno.h>
+
 #include <fcntl.h>
-#include <limits.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 /* use product definitions temporarily */
 #define DEFAULT_FILE_PERMISSION 0666
@@ -30,40 +26,6 @@
 #include <utils_file.h>
 
 #endif /* _STORAGE_LITE_ */
-
-
-#include "hks_param.h"
-#include "hks_test_log.h"
-#include "hks_test_mem.h"
-#include "hks_type.h"
-#include "securec.h"
-
-#define HKS_MAX_FILE_NAME_LEN 512
-
-static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
-{
-    if (path != NULL) {
-        if (strncpy_s(fullFileName, fullFileNameLen, path, strlen(path)) != EOK) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-
-        if (path[strlen(path) - 1] != '/') {
-            if (strncat_s(fullFileName, fullFileNameLen, "/", strlen("/")) != EOK) {
-                return HKS_ERROR_INTERNAL_ERROR;
-            }
-        }
-
-        if (strncat_s(fullFileName, fullFileNameLen, fileName, strlen(fileName)) != EOK) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-    } else {
-        if (strncpy_s(fullFileName, fullFileNameLen, fileName, strlen(fileName)) != EOK) {
-            return HKS_ERROR_INTERNAL_ERROR;
-        }
-    }
-
-    return HKS_SUCCESS;
-}
 
 static int32_t GetFullFileName(const char *path, const char *fileName, char **fullFileName)
 {
@@ -86,100 +48,6 @@ static int32_t GetFullFileName(const char *path, const char *fileName, char **fu
 }
 
 #ifndef __LITEOS_M__
-static int32_t IsFileExist(const char *fileName)
-{
-    if (access(fileName, F_OK) != 0) {
-        return HKS_ERROR_NOT_EXIST;
-    }
-
-    return HKS_SUCCESS;
-}
-
-static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
-{
-    (void)offset;
-    if (IsFileExist(fileName) != HKS_SUCCESS) {
-        return 0;
-    }
-
-    char filePath[PATH_MAX + 1] = {0};
-    (void)realpath(fileName, filePath);
-    if (strstr(filePath, "../") != NULL) {
-        HKS_TEST_LOG_E("invalid filePath, path %s", filePath);
-        return 0;
-    }
-
-    FILE *fp = fopen(filePath, "rb");
-    if (fp == NULL) {
-        HKS_TEST_LOG_E("failed to open file");
-        return 0;
-    }
-
-    uint32_t size = fread(buf, 1, len, fp);
-    if (fclose(fp) < 0) {
-        HKS_TEST_LOG_E("failed to close file");
-        return 0;
-    }
-
-    return size;
-}
-
-static uint32_t FileSize(const char *fileName)
-{
-    if (IsFileExist(fileName) != HKS_SUCCESS) {
-        return 0;
-    }
-
-    struct stat fileStat;
-    (void)memset_s(&fileStat, sizeof(fileStat), 0, sizeof(fileStat));
-    if (stat(fileName, &fileStat) != 0) {
-        HKS_TEST_LOG_E("file stat fail.");
-        return 0;
-    }
-
-    return fileStat.st_size;
-}
-
-static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
-{
-    (void)offset;
-    char filePath[PATH_MAX + 1] = {0};
-    if (memcpy_s(filePath, sizeof(filePath) - 1, fileName, strlen(fileName)) != EOK) {
-        return HKS_ERROR_BAD_STATE;
-    }
-    (void)realpath(fileName, filePath);
-    if (strstr(filePath, "../") != NULL) {
-        HKS_TEST_LOG_E("invalid filePath, path %s", filePath);
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
-
-    /* caller function ensures that the folder exists */
-    FILE *fp = fopen(filePath, "wb+");
-    if (fp == NULL) {
-        HKS_TEST_LOG_E("open file fail");
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
-
-    if (chmod(filePath, S_IRUSR | S_IWUSR) < 0) {
-        HKS_TEST_LOG_E("chmod file fail.");
-        fclose(fp);
-        return HKS_ERROR_OPEN_FILE_FAIL;
-    }
-
-    uint32_t size = fwrite(buf, 1, len, fp);
-    if (size != len) {
-        HKS_TEST_LOG_E("write file size fail.");
-        fclose(fp);
-        return HKS_ERROR_WRITE_FILE_FAIL;
-    }
-
-    if (fclose(fp) < 0) {
-        HKS_TEST_LOG_E("failed to close file");
-        return HKS_ERROR_CLOSE_FILE_FAIL;
-    }
-
-    return HKS_SUCCESS;
-}
 
 int32_t HksTestIsFileExist(const char *path, const char *fileName)
 {

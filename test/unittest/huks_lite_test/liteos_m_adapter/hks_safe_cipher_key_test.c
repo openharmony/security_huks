@@ -15,7 +15,7 @@
 
 #ifndef _CUT_AUTHENTICATE_
 #ifndef _CUT_ED25519_
-
+#include <gtest/gtest.h>
 #include "hks_safe_cipher_key_test.h"
 
 #include <hctest.h>
@@ -77,7 +77,8 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
         uint8_t *tmpBuf = storageBuf.data + offset;
         struct HksStoreKeyInfo *keyInfo = (struct HksStoreKeyInfo *)tmpBuf;
         if (keyInfo->aliasSize == keyAlias->size) {
-            if (HksMemCmp(keyAlias->data, tmpBuf + sizeof(*keyInfo), keyAlias->size) == 0) {
+            if (HksMemCmp(keyAlias->data,
+                tmpBuf + sizeof(*keyInfo), keyAlias->size) == 0) {
                 *keyOffset = offset;
                 return HKS_SUCCESS;
             }
@@ -154,7 +155,7 @@ LITE_TEST_CASE(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, Level1)
     TEST_ASSERT_TRUE(ret != 0);
 
     ret = HksDeleteKey(&newAliasOne, NULL);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
     TEST_ASSERT_TRUE(ret == 0);
     ret = HksDeleteKey(&newAliasTwo, NULL);
     TEST_ASSERT_TRUE(ret == 0);

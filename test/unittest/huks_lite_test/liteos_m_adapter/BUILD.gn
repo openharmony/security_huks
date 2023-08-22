@@ -35,11 +35,14 @@ hctest_suite("huks_3.0_test") {
     "hks_others_test.c",
     "hks_safe_cipher_key_test.c",
     "hks_safe_compare_key_test.c",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_bn_exp_mod_test_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
   ]
   include_dirs = [
     "//base/security/huks/interfaces/inner_api/huks_lite",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "../common/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
 
   deps = [

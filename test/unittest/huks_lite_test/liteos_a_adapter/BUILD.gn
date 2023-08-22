@@ -44,6 +44,7 @@ unittest("huks_3.0_test") {
     "hks_others_test.cpp",
     "hks_safe_cipher_key_test.cpp",
     "hks_safe_compare_key_test.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
   ]
   if (hks_enable_test) {
     if (huks_enable_upgrade_small_to_service) {
@@ -93,6 +94,8 @@ unittest("huks_3.0_test") {
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/asymmetric_alg_test",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/symmetric_alg_test",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
 
   include_dirs += [ "./include" ]

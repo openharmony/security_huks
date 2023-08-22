@@ -18,7 +18,6 @@
 #include "hks_agree_test_common.h"
 
 #include <gtest/gtest.h>
-#include "hks_macro_def.h"
 
 #ifdef L2_STANDARD
 #include "file_ex.h"

@@ -96,13 +96,13 @@ static int32_t SafeTestGenerateKey(struct HksBlob *keyAlias)
         g_testGenKeyParams[index].paramSetParams.keyStorageFlag
     };
     int32_t ret = TestConstructGenerateKeyParamSet(&paramStruct);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     struct HksParamSet *paramSetOut = NULL;
     ret = TestConstructGenerateKeyParamSetOut(&paramSetOut,
         g_testGenKeyParams[index].paramSetParamsOut.paramSetExist,
         g_testGenKeyParams[index].paramSetParamsOut.paramSetSize);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = HksGenerateKeyRun(keyAlias, paramSet, paramSetOut, performTimes);
     if (ret != g_testGenKeyParams[index].expectResult) {

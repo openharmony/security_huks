@@ -925,7 +925,7 @@ static int32_t AesCtrCrypt(const struct HksBlob *key, const struct HksUsageSpec 
 {
     const struct HksCipherParam *cipherParam = (struct HksCipherParam *)(usageSpec->algParam);
     mbedtls_cipher_context_t ctx;
-    (void)memset_s(&ctx, sizeof(mbedtls_cipher_context_t), 0, sizeof(mbedtls_cipher_context_t));    
+    (void)memset_s(&ctx, sizeof(mbedtls_cipher_context_t), 0, sizeof(mbedtls_cipher_context_t));
     mbedtls_cipher_init(&ctx);
 
     int32_t ret;

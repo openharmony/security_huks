@@ -88,7 +88,7 @@ HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level0)
         g_testGenKeyParams[index].keyAliasParams.blobSize,
         g_testGenKeyParams[index].keyAliasParams.blobDataExist,
         g_testGenKeyParams[index].keyAliasParams.blobDataSize);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     struct HksParamSet *paramSet = NULL;
     struct GenerateKeyParamSetStructure paramStruct = { &paramSet,
@@ -102,24 +102,24 @@ HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level0)
         g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag,
         g_testGenKeyParams[index].paramSetParams.keyStorageFlag };
     ret = TestConstructGenerateKeyParamSet(&paramStruct);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     struct HksParamSet *paramSetOut = NULL;
     ret = TestConstructGenerateKeyParamSetOut(&paramSetOut,
         g_testGenKeyParams[index].paramSetParamsOut.paramSetExist,
         g_testGenKeyParams[index].paramSetParamsOut.paramSetSize);
-    HKS_TEST_ASSERT(ret == 0);
+    EXPECT_TRUE(ret == 0);
 
     ret = HksGenerateKeyRun(keyAlias, paramSet, paramSetOut, performTimes);
     if (ret != g_testGenKeyParams[index].expectResult) {
         HKS_TEST_LOG_I("failed, ret[%u] = %d", g_testGenKeyParams[index].testId, ret);
     }
-    HKS_TEST_ASSERT(ret == g_testGenKeyParams[index].expectResult);
+    EXPECT_TRUE(ret == g_testGenKeyParams[index].expectResult);
 
     if ((ret == HKS_SUCCESS) &&
         !(g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag) &&
         (g_testGenKeyParams[index].paramSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
+        EXPECT_TRUE(HksDeleteKey(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     HksFreeParamSet(&paramSet);
