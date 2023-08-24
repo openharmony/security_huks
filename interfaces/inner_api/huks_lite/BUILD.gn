@@ -293,7 +293,7 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     external_deps = [
-      "hilog_featured_lite:hilog_shared",
+      "hilog_lite:hilog_shared",
       "init_lite:libbegetutil",
     ]
 
@@ -338,7 +338,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/frameworks/huks_standard/main:huks_small_frameworks",
       "//base/security/huks/services/huks_standard/huks_service/main:libhuks_service_small_static",
     ]
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   }
 
   if (ohos_build_type == "debug") {

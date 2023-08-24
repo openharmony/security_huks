@@ -118,6 +118,6 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/hks_samgr_service_feature.c",
     ]
 
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   }
 }
