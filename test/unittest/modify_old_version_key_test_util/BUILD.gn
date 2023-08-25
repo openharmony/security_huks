@@ -96,7 +96,7 @@ ohos_static_library("huks_modify_old_version_key_util") {
       "../../../utils/list:libhuks_utils_list_static",
       "../../../utils/mutex:libhuks_utils_mutex_static",
     ]
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
 
     if (huks_use_hardware_root_key == true) {
       cflags += [ "-D_HARDWARE_ROOT_KEY_" ]

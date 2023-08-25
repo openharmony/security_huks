@@ -61,6 +61,6 @@ ohos_static_library("huks_3.0_test_common") {
       "-Werror",
     ]
     configs += [ ":hilog_dir" ]
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   }
 }

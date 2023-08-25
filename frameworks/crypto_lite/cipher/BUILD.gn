@@ -42,7 +42,7 @@ ohos_shared_library("cipher_shared") {
   ]
 
   if (os_level == "small") {
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   } else if (os_level == "standard") {
     external_deps = [ "hilog:libhilog" ]
     include_dirs +=

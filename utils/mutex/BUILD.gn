@@ -67,7 +67,7 @@ if (os_level == "standard") {
     sources = [ "hks_mutex.c" ]
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_small_static" ]
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
     complete_static_lib = true
   }
 }
