@@ -132,6 +132,6 @@ if (os_level == "standard") {
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
     ]
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   }
 }

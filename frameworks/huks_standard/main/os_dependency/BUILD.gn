@@ -73,7 +73,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
     ]
     external_deps = [
-      "hilog_featured_lite:hilog_shared",
+      "hilog_lite:hilog_shared",
       "init_lite:libbegetutil",
     ]
   }

@@ -115,7 +115,7 @@ unittest("huks_3.0_test") {
 
   deps += [ "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util" ]
 
-  external_deps = [ "hilog_featured_lite:hilog_shared" ]
+  external_deps = [ "hilog_lite:hilog_shared" ]
 
   cflags = [
     "-Wall",

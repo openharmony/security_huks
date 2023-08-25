@@ -54,6 +54,6 @@ if (os_level == "standard") {
 
     cflags = []
 
-    external_deps = [ "hilog_featured_lite:hilog_shared" ]
+    external_deps = [ "hilog_lite:hilog_shared" ]
   }
 }
