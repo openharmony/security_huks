@@ -232,8 +232,14 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return NO_ERROR;
 }
 
+#define OLD_PATH "/data/service/el2/public/huks_service/maindata"
+#define NEW_PATH "/data/service/el1/public/huks_service/maindata"
+
 void HksService::OnStart()
 {
+    system("mv " OLD_PATH "/* " NEW_PATH "/");
+    system("mv " OLD_PATH "/.* " NEW_PATH "/");
+    system("chown -R 3510:3510 " NEW_PATH);
     HKS_LOG_I("HksService OnStart");
 
     if (runningState_ == STATE_RUNNING) {
