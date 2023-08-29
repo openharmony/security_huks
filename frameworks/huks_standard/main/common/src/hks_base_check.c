@@ -694,11 +694,13 @@ static const uint32_t g_userAuthChallengeType[] = {
 
 static const uint32_t g_validBiometricAuthAccessType[] = {
     HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL,
-    HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
+    HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD,
+    HKS_AUTH_ACCESS_ALWAYS_VALID
 };
 
 static const uint32_t g_validPinAuthAccessType[] = {
-    HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
+    HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD,
+    HKS_AUTH_ACCESS_ALWAYS_VALID
 };
 
 static const struct AuthAccessTypeChecker g_expectAuthAccessParams[] = {

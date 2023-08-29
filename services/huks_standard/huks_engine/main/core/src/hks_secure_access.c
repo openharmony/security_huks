@@ -420,6 +420,23 @@ static int32_t VerifyChallengeOrTimeStamp(const struct HuksKeyNode *keyNode, con
     return ret;
 }
 
+static int32_t VerifyAccountidIfNeed(const struct HksParamSet *keyBlobParamSet,
+    const struct HksUserAuthToken *authToken)
+{
+    struct HksParam *accountIdParam = NULL;
+    int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_ACTIVE_ACCOUNTID, &accountIdParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get accountIdParam failed!")
+
+    HKS_LOG_I("VerifyAccountidIfNeed doing...  activeOsAccountId = %" LOG_PUBLIC "d; auth = %" LOG_PUBLIC "d",
+        accountIdParam->int32Param, authToken->ciphertextData.userId);
+
+    if (accountIdParam->int32Param != authToken->ciphertextData.userId) {
+        HKS_LOG_E("check userId failed!");
+        return HKS_ERROR_KEY_AUTH_PERMANENTLY_INVALIDATED;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t VerifySecureUidIfNeed(const struct HksParamSet *keyBlobParamSet,
     const struct HksUserAuthToken *authToken, uint32_t authAccessType)
 {
@@ -502,13 +519,17 @@ static int32_t VerifyAuthTokenInfo(const struct HuksKeyNode *keyNode, const stru
         return HKS_ERROR_KEY_AUTH_VERIFY_FAILED;
     }
 
-    ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")
+    if (authAccessType->uint32Param == HKS_AUTH_ACCESS_ALWAYS_VALID) {
+        ret = VerifyAccountidIfNeed(keyBlobParamSet, authToken);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify Verify Accountid failed!")
+    } else {
+        ret = VerifySecureUidIfNeed(keyBlobParamSet, authToken, authAccessType->uint32Param);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify sec uid failed!")
 
-    ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param,
-        authAccessType->uint32Param, authTokenAuthType);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify enrolled id info failed!")
-
+        ret = VerifyEnrolledIdInfoIfNeed(keyBlobParamSet, authToken, userAuthType->uint32Param,
+            authAccessType->uint32Param, authTokenAuthType);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "verify enrolled id info failed!")
+    }
     return ret;
 }
 
