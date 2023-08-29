@@ -59,6 +59,7 @@ config("soft_huks_config") {
       "--diag_suppress",
       "Pe370,Pe226",
     ]
+    defines = [ "HKS_USE_OHOS_MEM" ]
   } else {
     cflags = [
       "-fvisibility=hidden",
