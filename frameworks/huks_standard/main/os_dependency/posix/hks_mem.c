@@ -15,13 +15,24 @@
 
 #include "hks_mem.h"
 
+#if defined(HKS_USE_OHOS_MEM)
+#include "ohos_mem_pool.h"
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 void *HksMalloc(size_t size)
 {
+    if (size == 0) {
+        return NULL;
+    }
+#if defined(HKS_USE_OHOS_MEM)
+    return OhosMalloc(MEM_TYPE_HICHAIN, size);
+#else
     return malloc(size);
+#endif
 }
 
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
@@ -29,3 +40,14 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
     return memcmp(ptr1, ptr2, size);
 }
 
+void HksFreeImpl(void *addr)
+{
+    if (addr == NULL) {
+        return;
+    }
+#if defined(HKS_USE_OHOS_MEM)
+    OhosFree(addr);
+#else
+    free(addr);
+#endif
+}
