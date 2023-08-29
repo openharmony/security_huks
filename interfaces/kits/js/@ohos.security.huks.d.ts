@@ -1376,8 +1376,7 @@ declare namespace huks {
    */
   export enum HuksAuthAccessType {
     HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD = 1 << 0,
-    HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1,
-    HUKS_AUTH_ACCESS_ALWAYS_VALID = 1 << 2
+    HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1
   }
 
   /**

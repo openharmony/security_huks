@@ -390,27 +390,18 @@ static int32_t BuildUserAuthParamSet(const struct HksParamSet *paramSet, struct 
     struct HksParamSet *newParamSet = NULL;
     int32_t ret;
     do {
-         if (paramSet != NULL) {
+        if (paramSet != NULL) {
             ret = AppendToNewParamSet(paramSet, &newParamSet);
         } else {
             ret = HksInitParamSet(&newParamSet);
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
-
-        struct HksParam *accountIdParam = NULL;
-        ret = HksGetParam(newParamSet, HKS_TAG_ACTIVE_ACCOUNTID, &accountIdParam);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Set or get accountIdParam failed! ret = %" LOG_PUBLIC "d", ret);
-        } else {
-            HKS_LOG_I("Set and get accountIdParam success! activeOsAccountId = %" LOG_PUBLIC "d",
-                accountIdParam->int32Param);
-        }
         
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
-        *outParamSet = newParamSet;
+            *outParamSet = newParamSet;
     } while (0);
-     if (ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&newParamSet);
         *outParamSet = NULL;
     }
@@ -517,12 +508,13 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
         struct HksParamSet *userAuthParamSet = NULL;
 
         if (authAccessType == HKS_AUTH_ACCESS_ALWAYS_VALID) {
-            HKS_LOG_I("authAccessType is always vaild, CheckIfUserIamSupportCurType is PASS.");
+            HKS_LOG_I("authAccessType is always vaild, CheckIfUserIamSupportCurType pass.");
             ret = BuildUserAuthParamSet(paramSet, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Build UserAuthParamSet failed!")
         } else {
             ret = CheckIfUserIamSupportCurType(processInfo->userIdInt, userAuthType);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "UserIAM do not support current user auth or not enrolled cur auth info")
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "UserIAM do not support current user auth or not enrolled cur auth info")
 
             ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append secure access info failed!")
@@ -1633,3 +1625,32 @@ int32_t HksServiceExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     return HuksAccessExportChipsetPlatformPublicKey(salt, scene, publicKey);
 }
 #endif
+
+int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet, int frontUserId)
+{
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret;
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
+
+        struct HksParam frontUserIdParam;
+        frontUserIdParam.tag = HKS_TAG_FRONT_USER_ID;
+        frontUserIdParam.int32Param = frontUserId;
+        ret = HksAddParams(newParamSet, &frontUserIdParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add frontUserIdParam fail!");
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
+        *outParamSet = newParamSet;
+    } while (0);
+        if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&newParamSet);
+        *outParamSet = NULL;
+    }
+    return ret;
+}
