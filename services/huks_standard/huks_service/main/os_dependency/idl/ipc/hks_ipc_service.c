@@ -79,8 +79,32 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
+        uint32_t userAuthType = 0;
+        uint32_t authAccessType = 0;
+        ret = HksCheckAndGetUserAuthInfo(inParamSet, &userAuthType, &authAccessType);
+
+        if (ret == HKS_SUCCESS && authAccessType == HKS_AUTH_ACCESS_ALWAYS_VALID) {
+            do {
+                    int32_t activeAccountId;
+                    int32_t ret = HksGetActiveOsAccountId(&activeAccountId);
+                    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetActiveOsAccountId fail! ret=%" LOG_PUBLIC "d", ret);
+
+                    struct HksParam accountIdParam;
+                    accountIdParam.tag = HKS_TAG_ACTIVE_ACCOUNTID;
+                    accountIdParam.int32Param = activeAccountId;
+                    ret = HksAddParams(inParamSet, &accountIdParam, 1);
+                    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add accountIdParam fail!");
+
+                    ret = HksBuildParamSet(&inParamSet);
+                    HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet fail!");
+                    HKS_LOG_I("Set accountIdParam success! activeOsAccountId = %" LOG_PUBLIC "d", activeAccountId);
+
+            } while (0);
+        } 
+    
         ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceGenerateKey fail, ret = %" LOG_PUBLIC "d", ret)
+        
     } while (0);
 
     if (isNoneResponse) {
