@@ -125,7 +125,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     return HKS_SUCCESS;
 }
 
-int32_t HksGetActiveOsAccountId(int32_t *outId)
+int32_t HksGetFrontUserId(int32_t *outId)
 {
 #ifdef HAS_OS_ACCOUNT_PART
     std::vector<int> ids;
@@ -134,11 +134,11 @@ int32_t HksGetActiveOsAccountId(int32_t *outId)
         HKS_LOG_E("QueryActiveOsAccountIds Failed!! ret = %" LOG_PUBLIC "d", ret);
         return HKS_FAILURE;
     }
-    HKS_LOG_I("QueryActiveOsAccountIds success: AccountId= %" LOG_PUBLIC "d", ids[0]);
+    HKS_LOG_I("QueryActiveOsAccountIds success: FrontUserId= %" LOG_PUBLIC "d", ids[0]);
     *outId = ids[0];
 #else // HAS_OS_ACCOUNT_PART
     *outId = -1;
-    HKS_LOG_I("QueryActiveOsAccountIds, no os account part, set AccountId= -1");
+    HKS_LOG_I("QueryActiveOsAccountIds, no os account part, set FrontUserId= -1");
 #endif // HAS_OS_ACCOUNT_PART
 
     return HKS_SUCCESS;

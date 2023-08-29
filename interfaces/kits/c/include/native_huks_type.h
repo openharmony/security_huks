@@ -447,9 +447,7 @@ enum OH_Huks_AuthAccessType {
     /** The key is invalid after the password is cleared. */
     OH_HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD = 1 << 0,
     /** The key is invalid after a new biometric feature is enrolled. */
-    OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1,
-    /** The key is always valid. */
-    OH_HUKS_AUTH_ACCESS_ALWAYS_VALID = 1 << 2,
+    OH_HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL = 1 << 1
 };
 
 /**
