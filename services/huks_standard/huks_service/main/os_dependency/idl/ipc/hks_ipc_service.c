@@ -34,6 +34,7 @@
 #include "hks_mem.h"
 #include "hks_response.h"
 #include "hks_template.h"
+#include "hks_client_check.h"
 
 #define MAX_KEY_SIZE         2048
 
@@ -79,7 +80,20 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
+        uint32_t userAuthType, authAccessType;
+        ret = HksCheckAndGetUserAuthInfo(inParamSet, &userAuthType, &authAccessType);
+        if (ret == HKS_SUCCESS && authAccessType == HKS_AUTH_ACCESS_ALWAYS_VALID) {
+            int32_t activeFrontUserId;
+            ret = HksGetFrontUserId(&activeFrontUserId);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetFrontUserId fail! ret=%" LOG_PUBLIC "d", ret);
+            
+            struct HksParamSet *newParamSet = NULL;
+            ret = BuildFrontUserIdParamSet(inParamSet, &newParamSet, activeFrontUserId);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildFrontUserIdParamSet fail! ret=%" LOG_PUBLIC "d", ret);
+            ret = HksServiceGenerateKey(&processInfo, &keyAlias, newParamSet, &keyOut);
+        } else {
+            ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
+        }
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceGenerateKey fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 

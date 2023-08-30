@@ -63,6 +63,7 @@ static uint32_t g_validTags[] = {
 
     HKS_TAG_ALL_USERS,
     HKS_TAG_USER_ID,
+    HKS_TAG_FRONT_USER_ID,
     HKS_TAG_NO_AUTH_REQUIRED,
     HKS_TAG_USER_AUTH_TYPE,
     HKS_TAG_AUTH_TIMEOUT,

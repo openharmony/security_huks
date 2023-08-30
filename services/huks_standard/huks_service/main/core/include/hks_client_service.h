@@ -98,6 +98,9 @@ void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
 int32_t HksServiceExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
 
+int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
+    struct HksParamSet **outParamSet, int frontUserId);
+
 #ifdef __cplusplus
 }
 #endif
