@@ -92,3 +92,10 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     return HKS_SUCCESS;
 }
+
+int32_t HksGetFrontUserId(int32_t *outId)
+{
+    *outId = -1;
+    HKS_LOG_I("QueryActiveOsFrontUserIds, no os account part, set FrontUserId= -1");
+    return HKS_SUCCESS;
+}
