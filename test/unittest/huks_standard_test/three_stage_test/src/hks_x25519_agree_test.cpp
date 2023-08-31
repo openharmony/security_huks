@@ -18,6 +18,7 @@
 #endif
 #include "hks_x25519_agree_test.h"
 #include "hks_agree_test_common.h"
+#include "hks_struct_macro_def.h"
 
 #include <gtest/gtest.h>
 

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
 
 #include "hks_bn_exp_mod_test_c.h"
 
@@ -31,7 +30,7 @@ int32_t TestValue()
     int32_t ret = HksBnExpModRun(&tmpX, &tmpA, &tmpE, &tmpN, 1);
     for (int i = 0; i < HKS_TEST_8; ++i) {
         HKS_TEST_LOG_I("%x, %x", tmpBufX[i], bufX[i]);
-        EXPECT_TRUE(tmpBufX[i] == bufX[i]);
+        HKS_TEST_ASSERT(tmpBufX[i] == bufX[i]);
     }
     return ret;
 }

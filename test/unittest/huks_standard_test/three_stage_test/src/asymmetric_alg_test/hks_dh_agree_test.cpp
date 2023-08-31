@@ -12,6 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#include "hks_struct_macro_def.h"
 
 #include "hks_dh_agree_test.h"
 

@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
 
 #include "hks_test_aes_c.h"
 
@@ -119,9 +118,9 @@ int32_t ConstructParamSetEncryptDecryptAes(uint32_t mode, uint32_t padding, bool
     struct HksParamSet **paramSet)
 {
     int32_t ret =  ConstructParamSetEncryptDecryptAesPre(mode, padding, isEncrypt, paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     ret =  ConstructParamSetEncryptDecryptAesPost(mode, paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     return ret;
 }
 
@@ -130,7 +129,7 @@ void GenerateBaseKey(const struct HksBlob *alias)
 {
     HKS_TEST_LOG_I("Test_Aes_gen_by_derive BASEKEY!\n");
     struct HksParamSet *paramSet = NULL;
-    EXPECT_TRUE(HksInitParamSet(&paramSet) == 0);
+    HKS_TEST_ASSERT(HksInitParamSet(&paramSet) == 0);
 
     struct HksBlob authId = { strlen(TEST_KEY_AUTH_ID), (uint8_t *)TEST_KEY_AUTH_ID };
 
@@ -151,9 +150,9 @@ void GenerateBaseKey(const struct HksBlob *alias)
             .uint32Param = HKS_KEY_GENERATE_TYPE_AGREE }, /* no use */
     };
 
-    EXPECT_TRUE(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
-    EXPECT_TRUE(HksBuildParamSet(&paramSet) == 0);
-    EXPECT_TRUE(HksGenerateKey(alias, paramSet, NULL) == 0);
+    HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
+    HKS_TEST_ASSERT(HksBuildParamSet(&paramSet) == 0);
+    HKS_TEST_ASSERT(HksGenerateKey(alias, paramSet, NULL) == 0);
 
     HksFreeParamSet(&paramSet);
 }
@@ -192,7 +191,7 @@ void PlainPubKey(const struct HksBlob *baseKey, const struct HksBlob *peerPubKey
             .uint32Param = HKS_ALG_ED25519 },
     };
 
-    EXPECT_TRUE(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
+    HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
 }
 
 void SetKeyAliasTrue(const struct HksBlob *baseKey, const struct HksBlob *peerPubKey,
@@ -221,7 +220,7 @@ void SetKeyAliasTrue(const struct HksBlob *baseKey, const struct HksBlob *peerPu
             .uint32Param = HKS_ALG_ED25519 },
     };
 
-    EXPECT_TRUE(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
+    HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
 }
 
 void SetKeyAliasWrong(const struct HksBlob *baseKey, const struct HksBlob *peerPubKey,
@@ -248,7 +247,7 @@ void SetKeyAliasWrong(const struct HksBlob *baseKey, const struct HksBlob *peerP
             .uint32Param = HKS_ALG_ED25519 },
     };
 
-    EXPECT_TRUE(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
+    HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
 }
 
 void GenerateAesAgreeKey(const struct HksBlob *alias, const struct HksBlob *baseKey,
@@ -256,7 +255,7 @@ void GenerateAesAgreeKey(const struct HksBlob *alias, const struct HksBlob *base
 {
     HKS_TEST_LOG_I("Test_Aes_gen_by_agree key!\n");
     struct HksParamSet *paramSet = NULL;
-    EXPECT_TRUE(HksInitParamSet(&paramSet) == 0);
+    HKS_TEST_ASSERT(HksInitParamSet(&paramSet) == 0);
 
     if (isPlainPubKey) {
         PlainPubKey(baseKey, peerPubKey, paramSet);
@@ -267,22 +266,22 @@ void GenerateAesAgreeKey(const struct HksBlob *alias, const struct HksBlob *base
             SetKeyAliasWrong(baseKey, peerPubKey, paramSet);
         }
     }
-    EXPECT_TRUE(HksBuildParamSet(&paramSet) == 0);
-    EXPECT_TRUE(HksGenerateKey(alias, paramSet, NULL) == 0);
+    HKS_TEST_ASSERT(HksBuildParamSet(&paramSet) == 0);
+    HKS_TEST_ASSERT(HksGenerateKey(alias, paramSet, NULL) == 0);
 
     HksFreeParamSet(&paramSet);
 }
 
 void ExportPubKey(const struct HksBlob *alias, struct HksBlob *pubKey)
 {
-    EXPECT_TRUE(HksExportPublicKey(alias, NULL, pubKey) == 0);
+    HKS_TEST_ASSERT(HksExportPublicKey(alias, NULL, pubKey) == 0);
 }
 
 void ImportPubKey(const struct HksBlob *alias, const struct HksBlob *pubKey)
 {
     HKS_TEST_LOG_I("Test_Import pubKey!\n");
     struct HksParamSet *paramSet = NULL;
-    EXPECT_TRUE(HksInitParamSet(&paramSet) == 0);
+    HKS_TEST_ASSERT(HksInitParamSet(&paramSet) == 0);
 
     struct HksBlob authId = { strlen(TEST_KEY_AUTH_ID), (uint8_t *)TEST_KEY_AUTH_ID };
 
@@ -303,9 +302,9 @@ void ImportPubKey(const struct HksBlob *alias, const struct HksBlob *pubKey)
             .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT }, /* no use */
     };
 
-    EXPECT_TRUE(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
-    EXPECT_TRUE(HksBuildParamSet(&paramSet) == 0);
-    EXPECT_TRUE(HksImportKey(alias, paramSet, pubKey) == 0);
+    HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
+    HKS_TEST_ASSERT(HksBuildParamSet(&paramSet) == 0);
+    HKS_TEST_ASSERT(HksImportKey(alias, paramSet, pubKey) == 0);
 
     HksFreeParamSet(&paramSet);
 }
@@ -349,23 +348,23 @@ int32_t TestAes256ByAgree()
     /* encrypt by aes key 1 */
     struct HksParamSet *paramSet = NULL;
     int32_t ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, true, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob plainText1 = { strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    EXPECT_TRUE(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSet);
 
     /* decrypt by aes key 2 */
     ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, false, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
     ret = HksDecrypt(&aesKeyAlias2, paramSet, &cipherText, &plainText);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("ConstructParamSetEncryptDecryptAes plainText: %s", plainText.data);
     HksFreeParamSet(&paramSet);
 
@@ -415,23 +414,23 @@ int32_t TestAes256ByAgree1()
     /* encrypt by aes key 1 */
     struct HksParamSet *paramSet = NULL;
     int32_t ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, true, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob plainText1 = { strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    EXPECT_TRUE(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSet);
 
     /* decrypt by aes key 2 */
     ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, false, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
     ret = HksDecrypt(&aesKeyAlias2, paramSet, &cipherText, &plainText);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("ConstructParamSetEncryptDecryptAes plainText: %s", plainText.data);
     HksFreeParamSet(&paramSet);
 
@@ -473,23 +472,23 @@ int32_t TestAes256ByAgree2()
     /* encrypt by aes key 1 */
     struct HksParamSet *paramSet = NULL;
     int32_t ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, true, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob plainText1 = { strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    EXPECT_TRUE(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSet);
 
     /* decrypt by aes key 2 */
     ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, false, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
     ret = HksDecrypt(&aesKeyAlias2, paramSet, &cipherText, &plainText);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("ConstructParamSetEncryptDecryptAes plainText: %s", plainText.data);
     HksFreeParamSet(&paramSet);
 

@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
+
 #include "hks_modify_key_test_c.h"
 
 int32_t ConstructDataToBlob(struct HksBlob **inData, struct HksBlob **outData,
@@ -22,13 +22,13 @@ int32_t ConstructDataToBlob(struct HksBlob **inData, struct HksBlob **outData,
         inTextParams->blobExist,
         inTextParams->blobSize, inTextParams->blobDataExist,
         inTextParams->blobDataSize);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = TestConstuctBlob(outData,
         outTextParams->blobExist,
         outTextParams->blobSize,
         outTextParams->blobDataExist, outTextParams->blobDataSize);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     return ret;
 }
 
@@ -42,15 +42,15 @@ int32_t Encrypt(struct CipherEncryptStructure *encryptStruct)
     uint32_t aadSize = encryptStruct->cipherParms->aadSize;
     if (ivSize != 0) {
         ret = TestConstuctBlob(encryptStruct->ivData, true, ivSize, true, ivSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
     }
     if (nonceSize != 0) {
         ret = TestConstuctBlob(encryptStruct->nonceData, true, nonceSize, true, nonceSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
     }
     if (aadSize != 0) {
         ret = TestConstuctBlob(encryptStruct->aadData, true, aadSize, true, aadSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
     }
     struct AesCipherParamSetStructure enParamStruct = {
         &encryptParamSet,
@@ -65,7 +65,7 @@ int32_t Encrypt(struct CipherEncryptStructure *encryptStruct)
         encryptStruct->cipherParms->setIsKeyAlias, encryptStruct->cipherParms->isKeyAlias
     };
     ret = TestConstructAesCipherParamSet(&enParamStruct);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = HksEncryptRun(encryptStruct->keyAlias, encryptParamSet, encryptStruct->plainData, encryptStruct->cipherData,
         encryptStruct->performTimes);
@@ -80,7 +80,7 @@ int32_t DecryptCipher(struct CipherDecryptStructure *decryptStruct)
         decryptStruct->cipherParms->decryptedTextParams.blobSize,
         decryptStruct->cipherParms->decryptedTextParams.blobDataExist,
         decryptStruct->cipherParms->decryptedTextParams.blobDataSize);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     struct HksParamSet *decryptParamSet = NULL;
     struct AesCipherParamSetStructure deParamStruct = {
@@ -101,7 +101,7 @@ int32_t DecryptCipher(struct CipherDecryptStructure *decryptStruct)
         decryptStruct->cipherParms->decryptParamSetParams.isKeyAlias
     };
     ret = TestConstructAesCipherParamSet(&deParamStruct);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = HksDecryptRun(decryptStruct->keyAlias, decryptParamSet, decryptStruct->cipherData,
         *(decryptStruct->decryptedData), decryptStruct->performTimes);
@@ -126,17 +126,17 @@ int32_t GenerateKeyTwo(struct HksBlob *keyAlias, const struct HksTestBlobParams 
         genKeyParamSetParams->setKeyStorageFlag, genKeyParamSetParams->keyStorageFlag
     };
     int32_t ret = TestConstructGenerateKeyParamSet(&paramStruct);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     struct HksParamSet *paramSetOut = NULL;
     if (genKeyParamSetParamsOut != NULL) {
         ret = TestConstructGenerateKeyParamSetOut(&paramSet,
             genKeyParamSetParamsOut->paramSetExist, genKeyParamSetParamsOut->paramSetSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
     }
 
     ret = HksGenerateKey(keyAlias, paramSet, paramSetOut);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     HksFreeParamSet(&paramSet);
     return ret;

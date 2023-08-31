@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef _HKS_TEST_CIPHER_C_H_
-#define _HKS_TEST_CIPHER_C_H_
+#ifndef HKS_TEST_CIPHER_C_H
+#define HKS_TEST_CIPHER_C_H
 
 #include "hks_test_cipher.h"
 #include "hks_api.h"

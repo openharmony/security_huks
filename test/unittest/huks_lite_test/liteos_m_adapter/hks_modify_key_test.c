@@ -15,8 +15,6 @@
 
 #ifndef _CUT_AUTHENTICATE_
 
-#include <gtest/gtest.h>
-
 #include "hks_modify_key_test_c.h"
 
 #include <hctest.h>
@@ -81,7 +79,7 @@ int32_t BaseTestCipherProcess(const struct HksBlob *keyAlias, uint32_t index)
     struct HksBlob *decryptedData = NULL;
     int32_t ret = ConstructDataToBlob(&plainData, &cipherData,
         &g_testCipherParams[index].plainTextParams, &g_testCipherParams[index].cipherTextParams);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     /* 2. encrypt */
     do {
         struct CipherDecryptStructure testDecryptStruct = {
@@ -181,7 +179,7 @@ LITE_TEST_CASE(HksModifyKeyTest, HksModifyKeyTest001, Level1)
     };
     ret = DecryptCipher(&testDecryptStruct);
 
-    EXPECT_TRUE(ret != g_testCipherParams[index].expectResult);
+    HKS_TEST_ASSERT(ret != g_testCipherParams[index].expectResult);
     TestFreeBlob(&plainData);
     TestFreeBlob(&cipherData);
     TestFreeBlob(&decryptedData);

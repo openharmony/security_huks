@@ -83,7 +83,7 @@ int32_t BaseTestCipherProcess(struct HksBlob *keyAlias, uint32_t index)
     struct HksBlob *cipherData = NULL;
     int32_t ret = ConstructDataToBlob(&plainData, &cipherData,
         &g_testCipherParams[index].plainTextParams, &g_testCipherParams[index].cipherTextParams);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob *ivData = NULL;
     struct HksBlob *nonceData = NULL;
     struct HksBlob *aadData = NULL;
@@ -166,7 +166,7 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
     };
     ret = DecryptCipher(&testDecryptStruct);
 
-    EXPECT_TRUE(ret != g_testCipherParams[index].expectResult);
+    HKS_TEST_ASSERT(ret != g_testCipherParams[index].expectResult);
     TestFreeBlob(&plainData);
     TestFreeBlob(&cipherData);
     TestFreeBlob(&decryptedData);

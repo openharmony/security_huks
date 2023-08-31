@@ -15,7 +15,7 @@
 
 #ifndef _CUT_AUTHENTICATE_
 #ifndef _CUT_ED25519_
-#include <gtest/gtest.h>
+
 #include "hks_safe_cipher_key_test.h"
 
 #include <hctest.h>
@@ -155,7 +155,7 @@ LITE_TEST_CASE(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, Level1)
     TEST_ASSERT_TRUE(ret != 0);
 
     ret = HksDeleteKey(&newAliasOne, NULL);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     TEST_ASSERT_TRUE(ret == 0);
     ret = HksDeleteKey(&newAliasTwo, NULL);
     TEST_ASSERT_TRUE(ret == 0);

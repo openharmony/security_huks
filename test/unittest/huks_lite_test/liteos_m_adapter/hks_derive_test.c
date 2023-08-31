@@ -12,7 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
+
 #include <hctest.h>
 #include "hi_watchdog.h"
 
@@ -56,10 +56,10 @@ static int32_t DeriveKey(const struct HksTestDeriveParamSet *deriveParamSetParam
     uint32_t infoSize = deriveParamSetParams->infoSize;
     uint32_t saltSize = deriveParamSetParams->saltSize;
     if (saltSize != 0) {
-        EXPECT_TRUE(TestConstuctBlob(saltData, true, saltSize, true, saltSize) == 0);
+        HKS_TEST_ASSERT(TestConstuctBlob(saltData, true, saltSize, true, saltSize) == 0);
     }
     if (infoSize != 0) {
-        EXPECT_TRUE(TestConstuctBlob(infoData, true, infoSize, true, infoSize) == 0);
+        HKS_TEST_ASSERT(TestConstuctBlob(infoData, true, infoSize, true, infoSize) == 0);
     }
     struct TestDeriveParamSetStructure paramStruct = {
         &deriveParamSet, deriveParamSetParams->paramSetExist,
@@ -73,7 +73,7 @@ static int32_t DeriveKey(const struct HksTestDeriveParamSet *deriveParamSetParam
         deriveParamSetParams->isKeyAlias
     };
     int32_t ret = TestConstructDeriveParamSet(&paramStruct);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = HksDeriveKeyRun(deriveParamSet, masterKey, derivedKey, 1);
     HksFreeParamSet(&deriveParamSet);

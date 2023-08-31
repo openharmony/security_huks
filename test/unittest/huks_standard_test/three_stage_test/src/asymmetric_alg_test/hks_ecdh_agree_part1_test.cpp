@@ -15,6 +15,7 @@
 
 #include "hks_ecdh_agree_part1_test.h"
 #include "hks_ecdh_agree_test_common.h"
+#include "hks_struct_macro_def.h"
 
 #include "hks_agree_test_common.h"
 
