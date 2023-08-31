@@ -170,7 +170,8 @@ static int32_t BaseTestMac(uint32_t index)
     EXPECT_TRUE(ret == g_testMacParams[index].expectResult);
 
     /* 3. deletekey */
-    if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) && (g_testMacParams[index].keyAliasParams.blobExist)) {
+    if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) && 
+            (g_testMacParams[index].keyAliasParams.blobExist)) {
         ret = HksDeleteKey(key, NULL);
         EXPECT_TRUE(ret == 0);
     }

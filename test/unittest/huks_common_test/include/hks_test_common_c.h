@@ -26,7 +26,8 @@
 #define HKS_TEST_COMMON_8 8
 #define HKS_TEST_COMMON_128 128
 
-int32_t TestConstuctBlob(struct HksBlob **blob, bool blobExist, uint32_t blobSize, bool blobDataExist, uint32_t realBlobDataSize);
+int32_t TestConstuctBlob(struct HksBlob **blob, bool blobExist, uint32_t blobSize,
+    bool blobDataExist, uint32_t realBlobDataSize);
 
 int32_t TestGenerateKeyParamSetPre(struct GenerateKeyParamSetStructure *paramStruct, struct HksParamSet *paramSet);
 
@@ -34,7 +35,8 @@ int32_t TestGenerateKeyParamSetPost(struct GenerateKeyParamSetStructure *paramSt
 
 int32_t TestConstructGenerateKeyParamSet(struct GenerateKeyParamSetStructure *paramStruct);
 
-int32_t TestConstructGenerateKeyParamSetOut(struct HksParamSet **outParamSet, bool paramSetExist, uint32_t paramSetSize);
+int32_t TestConstructGenerateKeyParamSetOut(struct HksParamSet **outParamSet,
+    bool paramSetExist, uint32_t paramSetSize);
 
 int32_t TestConstructRsaCipherParamSet(struct TestRsaCipherParamSet *paramStruct);
 
@@ -54,7 +56,8 @@ int32_t TestDeriveParamSetPost(struct TestDeriveParamSetStructure *paramStruct, 
 
 int32_t TestConstructDeriveParamSet(struct TestDeriveParamSetStructure *paramStruct);
 
-int32_t TestConstructHashParamSet(struct HksParamSet **outParamSet, bool paramSetExist, bool setDigest, uint32_t digest);
+int32_t TestConstructHashParamSet(struct HksParamSet **outParamSet,
+    bool paramSetExist, bool setDigest, uint32_t digest);
 
 int32_t GenerateKey(struct HksBlob **keyAlias, const struct HksTestBlobParams *keyAliasParams,
     const struct HksTestGenKeyParamsParamSet *genKeyParamSetParams,
@@ -62,7 +65,8 @@ int32_t GenerateKey(struct HksBlob **keyAlias, const struct HksTestBlobParams *k
 
 int32_t GenerateLocalRandomKey(struct HksBlob **keyAlias, const struct HksTestBlobParams *localKeyParams);
 
-int32_t TestConstructBlobOut(struct HksBlob **blob, bool blobExist, uint32_t blobSize, bool blobDataExist, uint32_t realBlobDataSize);
+int32_t TestConstructBlobOut(struct HksBlob **blob, bool blobExist, uint32_t blobSize,
+    bool blobDataExist, uint32_t realBlobDataSize);
 
 int32_t GenerateLocalX25519Key(struct HksBlob **privateKey, struct HksBlob **publicKey,
     const struct HksTestBlobParams *localPrivateKeyParams, const struct HksTestBlobParams *localPublicKeyParams);

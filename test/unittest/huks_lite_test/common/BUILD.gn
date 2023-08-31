@@ -34,6 +34,11 @@ config("huks_test_common") {
 
 ohos_static_library("huks_3.0_test_common") {
   sources = [
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_aes_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_cipher_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_common_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_curve25519_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_file_operator_func.c",
     "hks_test_aes.c",
     "hks_test_api_performance.c",
     "hks_test_cipher.c",
@@ -42,11 +47,6 @@ ohos_static_library("huks_3.0_test_common") {
     "hks_test_file_operator.c",
     "hks_test_log.c",
     "hks_test_mem.c",
-    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_common_func.cpp",
-    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_aes_func.cpp",
-    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_cipher_func.cpp",
-    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_curve25519_func.cpp",
-    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_file_operator_func.c",
   ]
 
   deps = []

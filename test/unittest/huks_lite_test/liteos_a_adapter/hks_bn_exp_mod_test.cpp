@@ -86,7 +86,7 @@ static int32_t TestValue()
     int32_t ret = HksBnExpModRun(&tmpX, &tmpA, &tmpE, &tmpN, 1);
     for (int i = 0; i < HKS_TEST_8; ++i) {
         HKS_TEST_LOG_I("%x, %x", tmpBufX[i], bufX[i]);
-        EXPECT_TRUE(tmpBufX[i] == bufX[i]);
+        HKS_TEST_ASSERT(tmpBufX[i] == bufX[i]);
     }
     return ret;
 }
@@ -110,29 +110,29 @@ HWTEST_F(HksBnExpModTest, HksBnExpModTest001, TestSize.Level0)
         ret = TestConstuctBlob(&x, g_testBnExpModParams[0].xParams.blobExist,
             g_testBnExpModParams[0].xParams.blobSize, g_testBnExpModParams[0].xParams.blobDataExist,
             g_testBnExpModParams[0].xParams.blobDataSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
 
         ret = TestConstructBlobOut(&a, g_testBnExpModParams[0].aParams.blobExist,
             g_testBnExpModParams[0].aParams.blobSize,  g_testBnExpModParams[0].aParams.blobDataExist,
             g_testBnExpModParams[0].aParams.blobDataSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
 
         ret = TestConstuctBlob(&e, g_testBnExpModParams[0].eParams.blobExist,
             g_testBnExpModParams[0].eParams.blobSize, g_testBnExpModParams[0].eParams.blobDataExist,
             g_testBnExpModParams[0].eParams.blobDataSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
 
         ret = TestConstuctBlob(&n, g_testBnExpModParams[0].nParams.blobExist,
             g_testBnExpModParams[0].nParams.blobSize, g_testBnExpModParams[0].nParams.blobDataExist,
             g_testBnExpModParams[0].nParams.blobDataSize);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
         if ((n != NULL) && (n->data != NULL) && (n->size != 0)) {
             n->data[n->size - 1] = n->data[n->size - 1] | 0x00000001; /* make sure n is odd */
         }
 
         ret = HksBnExpModRun(x, a, e, n, 1);
 
-        EXPECT_TRUE(ret == g_testBnExpModParams[0].expectResult);
+        HKS_TEST_ASSERT(ret == g_testBnExpModParams[0].expectResult);
 
         TestFreeBlob(&x);
         TestFreeBlob(&a);

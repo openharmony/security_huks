@@ -65,6 +65,6 @@ do { \
 #define HKS_TEST_LOG_D(...)
 #endif
 
-#define EXPECT_TRUE HksAssertLog
+#define HKS_TEST_ASSERT HksAssertLog
 
 #endif /* HKS_TEST_LOG_H */

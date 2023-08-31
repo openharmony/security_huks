@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <gtest/gtest.h>
 
 #include "hks_test_aes_c.h"
 
@@ -41,7 +40,7 @@ int32_t TestAes256ByLocal()
     };
 
     int32_t ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, true, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = HksAddParams(paramSet, (const struct HksParam *)&algParam, 1);
     if (ret != 0) {
@@ -53,14 +52,14 @@ int32_t TestAes256ByLocal()
     struct HksBlob plainText1 = { strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    EXPECT_TRUE(HksEncrypt(&keyBlob, paramSet, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncrypt(&keyBlob, paramSet, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSet);
 
     /* decrypt by aes key 2 */
     ret = ConstructParamSetEncryptDecryptAes(HKS_MODE_GCM, HKS_PADDING_NONE, false, &paramSet);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     algParam.tag = HKS_TAG_IS_KEY_ALIAS;
     algParam.uint32Param = 0;
     ret = HksAddParams(paramSet, (const struct HksParam *)&algParam, 1);
@@ -74,9 +73,9 @@ int32_t TestAes256ByLocal()
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
     ret = HksDecrypt(&keyBlob, paramSet, &cipherText, &plainText);
-    EXPECT_TRUE(ret == 0);
-    EXPECT_TRUE(plainText1.size == plainText.size);
-    EXPECT_TRUE(memcmp(plainText.data, plainText1.data, plainText.size) == 0);
+    HKS_TEST_ASSERT(ret == 0);
+    HKS_TEST_ASSERT(plainText1.size == plainText.size);
+    HKS_TEST_ASSERT(memcmp(plainText.data, plainText1.data, plainText.size) == 0);
     HksFreeParamSet(&paramSet);
 
     HKS_TEST_LOG_I("end");

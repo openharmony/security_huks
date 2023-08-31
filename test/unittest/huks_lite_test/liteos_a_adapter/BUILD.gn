@@ -28,6 +28,7 @@ unittest("huks_3.0_test") {
   defines = [ "_HUKS_LOG_ENABLE_" ]
 
   sources = [
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
     "hks_aes_test.cpp",
     "hks_agreement_test.cpp",
     "hks_bn_exp_mod_test.cpp",
@@ -44,7 +45,6 @@ unittest("huks_3.0_test") {
     "hks_others_test.cpp",
     "hks_safe_cipher_key_test.cpp",
     "hks_safe_compare_key_test.cpp",
-    "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
   ]
   if (hks_enable_test) {
     if (huks_enable_upgrade_small_to_service) {

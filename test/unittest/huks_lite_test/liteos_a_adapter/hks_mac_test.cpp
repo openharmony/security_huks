@@ -86,14 +86,14 @@ static int32_t ConstructDataToBlob(struct HksBlob **srcData, struct HksBlob **ma
         srcDataParams->blobSize,
         srcDataParams->blobDataExist,
         srcDataParams->blobDataSize);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = TestConstuctBlob(macData,
         macDataParams->blobExist,
         macDataParams->blobSize,
         macDataParams->blobDataExist,
         macDataParams->blobDataSize);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     return ret;
 }
 
@@ -119,7 +119,7 @@ static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, str
         };
         ret = TestConstructMacParamSet(&paramStructFalse);
     }
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = HksMacRun(key, macParamSet, srcData, macData, 1);
     HksFreeParamSet(&macParamSet);
@@ -150,26 +150,26 @@ static int32_t BaseTestMac(uint32_t index)
                 g_testMacParams[index].keyParams.blobDataSize);
         }
     }
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     /* 2. mac */
     struct HksBlob *srcData = NULL;
     struct HksBlob *macData = NULL;
     ret = ConstructDataToBlob(&srcData, &macData,
         &g_testMacParams[index].srcDataParams, &g_testMacParams[index].macParams);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = Mac(key, srcData, macData, &g_testMacParams[index].macParamSetParams, g_testMacParams[index].macType);
     if (ret != g_testMacParams[index].expectResult) {
         HKS_TEST_LOG_I("failed, ret[%u] = %d", g_testMacParams[index].testId, ret);
     }
-    EXPECT_TRUE(ret == g_testMacParams[index].expectResult);
+    HKS_TEST_ASSERT(ret == g_testMacParams[index].expectResult);
 
     /* 3. deletekey */
     if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) &&
         (g_testMacParams[index].keyAliasParams.blobExist)) {
         ret = HksDeleteKey(key, NULL);
-        EXPECT_TRUE(ret == 0);
+        HKS_TEST_ASSERT(ret == 0);
     }
     TestFreeBlob(&key);
     TestFreeBlob(&srcData);
