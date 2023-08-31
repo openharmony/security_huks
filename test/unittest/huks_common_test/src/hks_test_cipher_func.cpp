@@ -82,7 +82,7 @@ int32_t EncryptTest(struct CipherEncryptStructure *encryptStructTest)
     }
 
     ret = HksEncryptRun(encryptStructTest->keyAlias, encryptParamSet, encryptStructTest->plainData,
-            encryptStructTest->cipherData, encryptStructTest->performTimes);
+        encryptStructTest->cipherData, encryptStructTest->performTimes);
     HksFreeParamSet(&encryptParamSet);
     return ret;
 }

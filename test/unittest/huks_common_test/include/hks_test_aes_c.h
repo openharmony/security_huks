@@ -35,6 +35,9 @@ static uint8_t g_nonce[TEST_AES_12] = "hahahahahah";
 static uint8_t g_aad[TEST_AES_16] = "bababababababab";
 static uint8_t g_iv[TEST_AES_16] = "aabaabaabaabaab";
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 int32_t ConstructParamSetEncryptDecryptAesPre(uint32_t mode, uint32_t padding, bool isEncrypt,
     struct HksParamSet **paramSet);
 
@@ -66,5 +69,7 @@ int32_t TestAes256ByAgree();
 int32_t TestAes256ByAgree1();
 
 int32_t TestAes256ByAgree2();
-
+#ifdef __cplusplus
+}
+#endif
 #endif
