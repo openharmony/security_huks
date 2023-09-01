@@ -427,7 +427,7 @@ static int32_t VerifyFrontUserIdIfNeed(const struct HksParamSet *keyBlobParamSet
     int32_t ret = HksGetParam(keyBlobParamSet, HKS_TAG_FRONT_USER_ID, &frontUserIdParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get frontUserIdParam failed!")
 
-    HKS_LOG_I("VerifyFrontUserIdIfNeed doing...  frontUserIdParam = %" LOG_PUBLIC "d; auth = %" LOG_PUBLIC "d",
+    HKS_LOG_I("Verify FrontUserId:  frontUserId = %" LOG_PUBLIC "d; UserId in authToken = %" LOG_PUBLIC "d",
         frontUserIdParam->int32Param, authToken->ciphertextData.userId);
 
     if (frontUserIdParam->int32Param != authToken->ciphertextData.userId) {
