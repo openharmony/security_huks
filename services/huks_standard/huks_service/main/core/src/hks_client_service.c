@@ -396,7 +396,6 @@ static int32_t BuildUserAuthParamSet(const struct HksParamSet *paramSet, struct 
             ret = HksInitParamSet(&newParamSet);
         }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init param set failed")
-        
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
             *outParamSet = newParamSet;
@@ -519,7 +518,6 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
             ret = AppendUserAuthInfo(paramSet, processInfo->userIdInt, authAccessType, &userAuthParamSet);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append secure access info failed!")
         }
-       
         struct HksParamSet *newInfoParamSet = NULL;
         ret = AppendProcessInfoAndkeyAlias(userAuthParamSet, processInfo, keyAlias, &newInfoParamSet);
         if (ret != HKS_SUCCESS) {

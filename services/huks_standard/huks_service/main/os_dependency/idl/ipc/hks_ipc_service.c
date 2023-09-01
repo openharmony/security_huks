@@ -86,7 +86,6 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
             int32_t activeFrontUserId;
             ret = HksGetFrontUserId(&activeFrontUserId);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetFrontUserId fail! ret=%" LOG_PUBLIC "d", ret);
-            
             struct HksParamSet *newParamSet = NULL;
             ret = BuildFrontUserIdParamSet(inParamSet, &newParamSet, activeFrontUserId);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildFrontUserIdParamSet fail! ret=%" LOG_PUBLIC "d", ret);
