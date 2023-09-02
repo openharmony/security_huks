@@ -14,7 +14,7 @@
  */
 
 /**
- * @file hks_param.h
+ * @file hks_type.h
  *
  * @brief Declares huks struct and enum.
  *
