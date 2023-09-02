@@ -14,7 +14,7 @@
  */
 
 /**
- * @file hks_param.h
+ * @file hks_hdi.h
  *
  * @brief Declares hdi interface
  *
