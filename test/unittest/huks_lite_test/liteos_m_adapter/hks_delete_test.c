@@ -14,7 +14,6 @@
  */
 
 #ifndef _CUT_AUTHENTICATE_
-
 #include "hctest.h"
 #include "hi_watchdog.h"
 #include "hks_delete_test.h"

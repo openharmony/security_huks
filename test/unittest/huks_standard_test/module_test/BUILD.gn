@@ -42,12 +42,18 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/os_dependency_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
 
   sources = []
 
   # interface sdk_test
   sources += [
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_bn_exp_mod_test_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_aes_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_cipher_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_common_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_curve25519_func.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_agreement_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_bn_exp_mod_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_cipher_test.cpp",

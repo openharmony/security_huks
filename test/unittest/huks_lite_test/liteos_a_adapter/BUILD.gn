@@ -28,6 +28,7 @@ unittest("huks_3.0_test") {
   defines = [ "_HUKS_LOG_ENABLE_" ]
 
   sources = [
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
     "hks_aes_test.cpp",
     "hks_agreement_test.cpp",
     "hks_bn_exp_mod_test.cpp",
@@ -93,6 +94,8 @@ unittest("huks_3.0_test") {
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/asymmetric_alg_test",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/symmetric_alg_test",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
 
   include_dirs += [ "./include" ]

@@ -281,19 +281,21 @@ static int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struc
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
+    uint8_t handleS1[sizeof(uint64_t)] = {0};
+    uint8_t handleS2[sizeof(uint64_t)] = {0};
+    struct HksParam signParams;
+
     if (param.isUseIndataAfterHash) {
         inData.size = strlen(reinterpret_cast<const char *>(g_inDataArrayAfterHash[param.hashAlgIndex]));
         inData.data = const_cast<uint8_t *>(g_inDataArrayAfterHash[param.hashAlgIndex]);
     }
 
-    uint8_t handleS1[sizeof(uint64_t)] = {0};
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob1 = { TOKEN_CHALLENGE_LEN, challenge1 };
     int32_t ret = HksInit(keyAlias1, paramSet1, &handle1, &challengeBlob1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
-    uint8_t handleS2[sizeof(uint64_t)] = {0};
     struct HksBlob handle2 = { sizeof(uint64_t), handleS2 };
     uint8_t challenge2[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob2 = { TOKEN_CHALLENGE_LEN, challenge2 };
@@ -303,7 +305,7 @@ static int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struc
     // Update loop
     struct HksParamSet *newParamSet1 = nullptr;
     struct HksParamSet *newParamSet2 = nullptr;
-    struct HksParam signParams;
+    
     ret = AddAuthToeknParamCustomCase(challengeBlob1, challengeBlob2, &signParams, param.testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddAuthToeknParam failed.";
 
@@ -311,14 +313,15 @@ static int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struc
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle1, newParamSet1, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
- 
+    
+    uint8_t tmpIn1[] = "tempIn";
+    
     ret = AddSignParamCustomCase(&signParams, paramSet2, &newParamSet2, param.testIDMParams);
     EXPECT_EQ(ret, HKS_SUCCESS) << "AddPosParam failed.";
     ret = HksTestUpdate(&handle2, newParamSet2, &inData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
 
     // Finish
-    uint8_t tmpIn1[] = "tempIn";
     struct HksBlob finishInData1 = { 0, tmpIn1 };
     ret = HksFinish(&handle1, paramSet1, &finishInData1, &outData1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";

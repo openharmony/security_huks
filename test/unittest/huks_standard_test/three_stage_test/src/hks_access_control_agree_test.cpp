@@ -16,10 +16,10 @@
 #include "hks_access_control_agree_test.h"
 #include "hks_access_control_test_common.h"
 #include "hks_api.h"
+#include "hks_struct_macro_def.h"
 
 #include <gtest/gtest.h>
 #include <vector>
-#include "hks_macro_def.h"
 
 #ifdef L2_STANDARD
 #include "file_ex.h"

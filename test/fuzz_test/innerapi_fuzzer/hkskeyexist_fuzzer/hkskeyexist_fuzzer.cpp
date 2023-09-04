@@ -16,10 +16,10 @@
 
 #include <securec.h>
 
-#include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
+#include "hks_api.h"
 
 const int BLOB_SIZE = 10;
 

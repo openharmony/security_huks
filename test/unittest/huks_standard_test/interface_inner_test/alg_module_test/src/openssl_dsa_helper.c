@@ -139,10 +139,10 @@ static const EVP_MD *GetOpensslDigestType(enum HksKeyDigest digestType)
             return EVP_md5();
         case HKS_DIGEST_SHA1:
             return EVP_sha1();
-        case HKS_DIGEST_SHA224:
-            return EVP_sha224();
         case HKS_DIGEST_SHA256:
             return EVP_sha256();
+        case HKS_DIGEST_SHA224:
+            return EVP_sha224();
         case HKS_DIGEST_SHA384:
             return EVP_sha384();
         case HKS_DIGEST_SHA512:
