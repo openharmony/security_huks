@@ -16,12 +16,12 @@
 #include <gtest/gtest.h>
 #include <iostream>
 
+#include "hks_mem.h"
 #include "file_ex.h"
 #include "hks_ability.h"
 #include "hks_config.h"
 #include "hks_crypto_hal.h"
 #include "hks_crypto_hal_common.h"
-#include "hks_mem.h"
 
 #ifdef HKS_SUPPORT_DH_C
 
@@ -34,8 +34,8 @@ namespace {
 struct TestCaseParams {
     HksKeySpec spec = {0};
 
-    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
     HksErrorCode agreeResult = HksErrorCode::HKS_SUCCESS;
+    HksErrorCode generateKeyResult = HksErrorCode::HKS_SUCCESS;
 };
 
 const uint32_t ALISE_KEY_SIZE = 4096;

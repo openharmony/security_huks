@@ -549,11 +549,13 @@ HWTEST_F(PressureTest, PressureTest01300, TestSize.Level1)
     struct HksParam tmpParams[] = {
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
-        { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+        { .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_128 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
         { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
-        { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
+        { .tag = HKS_TAG_IS_KEY_ALIAS,
+        .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
         { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
     };
@@ -598,23 +600,24 @@ HWTEST_F(PressureTest, PressureTest01400, TestSize.Level1)
 {
     double programTimes = 0;
     struct HksBlob authId = { strlen(GENERATE_KEY), (uint8_t *)GENERATE_KEY };
-
+    uint8_t iv[IV_SIZE] = {0};
     struct HksParamSet *paramInSet = nullptr;
     HksInitParamSet(&paramInSet);
 
     struct HksParam tmpParams[] = {
-        { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
+        { .tag = HKS_TAG_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_PERSISTENT },
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
-        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
+        { .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_PKCS7 },
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
         { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
     };
 
-    uint8_t iv[IV_SIZE] = {0};
     struct HksParam tagIv = { .tag = HKS_TAG_IV, .blob = { .size = IV_SIZE, .data = iv } };
     HksAddParams(paramInSet, &tagIv, 1);
 
@@ -917,10 +920,12 @@ HWTEST_F(PressureTest, PressureTest02000, TestSize.Level1)
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_ECC },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_224 },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+        { .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
-        { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+        { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+        .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
     };
 
     HksAddParams(paramInSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));

@@ -21,8 +21,8 @@
 
 #include "hks_api.h"
 #include "hks_mem.h"
-#include "hks_param.h"
 #include "openssl_aes_helper.h"
+#include "hks_param.h"
 
 using namespace testing::ext;
 namespace OHOS {

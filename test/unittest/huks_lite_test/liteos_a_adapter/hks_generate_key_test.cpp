@@ -67,7 +67,8 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
         false, 0,
         false, 0,
         true, HKS_STORAGE_TEMP },
-        { true, DEFAULT_X25519_PARAM_SET_OUT },
+        { true,
+        DEFAULT_X25519_PARAM_SET_OUT },
     },
 };
 
@@ -78,9 +79,9 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
  */
 HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level0)
 {
-    uint32_t times = 1;
     uint32_t index = 0;
     uint32_t performTimes = 1;
+    uint32_t times = 1;
     struct HksBlob *keyAlias = NULL;
     int32_t ret = TestConstuctBlob(&keyAlias,
         g_testGenKeyParams[index].keyAliasParams.blobExist,
@@ -97,7 +98,8 @@ HWTEST_F(HksGenerateKeyTest, HksGenerateKeyTest001, TestSize.Level0)
         g_testGenKeyParams[index].paramSetParams.setPurpose, g_testGenKeyParams[index].paramSetParams.purpose,
         g_testGenKeyParams[index].paramSetParams.setDigest, g_testGenKeyParams[index].paramSetParams.digest,
         g_testGenKeyParams[index].paramSetParams.setPadding, g_testGenKeyParams[index].paramSetParams.padding,
-        g_testGenKeyParams[index].paramSetParams.setBlockMode, g_testGenKeyParams[index].paramSetParams.mode,
+        g_testGenKeyParams[index].paramSetParams.setBlockMode,
+        g_testGenKeyParams[index].paramSetParams.mode,
         g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag,
         g_testGenKeyParams[index].paramSetParams.keyStorageFlag };
     ret = TestConstructGenerateKeyParamSet(&paramStruct);

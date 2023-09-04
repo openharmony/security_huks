@@ -326,8 +326,8 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Export Public Key */
-    uint8_t tmpPublicKey[HKS_RSA_KEY_SIZE_4096] = {0};
-    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKey };
+    uint8_t tmpPublicKeyTest01[HKS_RSA_KEY_SIZE_4096] = {0};
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKeyTest01 };
     ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
 
     /* 3. Encrypt Three Stage */
@@ -399,8 +399,8 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Export Public Key */
-    uint8_t tmpPublicKey[HKS_RSA_KEY_SIZE_4096] = {0};
-    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKey };
+    uint8_t tmpPublicKeyTest02[HKS_RSA_KEY_SIZE_4096] = {0};
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKeyTest02 };
     ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
 
     /* 3. Encrypt Three Stage */

@@ -476,21 +476,21 @@ namespace Unittest::ImportWrappedKey {
         outBlob.size = totalLength;
         (void)MallocAndCheckBlobData(&outBlob, outBlob.size);
 
-        uint32_t offset = 0;
+        uint32_t offsetTest = 0;
 
         /* copy data */
         for (uint32_t i = 0; i < size; ++i) {
-            if (memcpy_s(outBlob.data + offset, totalLength - offset, reinterpret_cast<uint8_t *>(&blobArray[i]->size),
+            if (memcpy_s(outBlob.data + offsetTest, totalLength - offsetTest, reinterpret_cast<uint8_t *>(&blobArray[i]->size),
                 sizeof(blobArray[i]->size)) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
-            offset += sizeof(blobArray[i]->size);
+            offsetTest += sizeof(blobArray[i]->size);
 
-            if (memcpy_s(outBlob.data + offset, totalLength - offset, blobArray[i]->data,
+            if (memcpy_s(outBlob.data + offsetTest, totalLength - offsetTest, blobArray[i]->data,
                 blobArray[i]->size) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
-            offset += blobArray[i]->size;
+            offsetTest += blobArray[i]->size;
         }
 
         outData->size = outBlob.size;
@@ -710,11 +710,11 @@ namespace Unittest::ImportWrappedKey {
         return HKS_SUCCESS;
     }
 
-    static int32_t ConstructEccKey(struct TestImportKeyData *key,
+    static int32_t ConstructEccKey(struct TestImportKeyData *keyTest,
         uint32_t keySize, uint32_t importType, struct HksBlob *outKey)
     {
         if (importType == HKS_KEY_TYPE_PUBLIC_KEY) {
-            return CopyKey(key->x509PublicKey.data, key->x509PublicKey.size, outKey);
+            return CopyKey(keyTest->x509PublicKey.data, keyTest->x509PublicKey.size, outKey);
         }
 
         bool isPriKey = (importType == HKS_KEY_TYPE_PRIVATE_KEY) ? true : false;
@@ -722,9 +722,9 @@ namespace Unittest::ImportWrappedKey {
         struct HksKeyMaterialEcc material;
         material.keyAlg = HKS_ALG_SM2;
         material.keySize = keySize;
-        material.xSize = isPriKey ? 0 : key->publicOrXData.size;
-        material.ySize = isPriKey ? 0 : key->privateOrYData.size;
-        material.zSize = key->zData.size;
+        material.xSize = isPriKey ? 0 : keyTest->publicOrXData.size;
+        material.ySize = isPriKey ? 0 : keyTest->privateOrYData.size;
+        material.zSize = keyTest->zData.size;
 
         uint32_t size = sizeof(material) + material.xSize + material.ySize + material.zSize;
         uint8_t *data = (uint8_t *)HksMalloc(size);
@@ -741,14 +741,14 @@ namespace Unittest::ImportWrappedKey {
         uint32_t offset = sizeof(material);
         if (!isPriKey) {
             // copy xData
-            if (memcpy_s(data + offset, size - offset, key->publicOrXData.data, key->publicOrXData.size) != EOK) {
+            if (memcpy_s(data + offset, size - offset, keyTest->publicOrXData.data, keyTest->publicOrXData.size) != EOK) {
                 HksFree(data);
                 return HKS_ERROR_BAD_STATE;
             }
 
             offset += material.xSize;
             // copy yData
-            if (memcpy_s(data + offset, size - offset, key->privateOrYData.data, key->privateOrYData.size) != EOK) {
+            if (memcpy_s(data + offset, size - offset, keyTest->privateOrYData.data, keyTest->privateOrYData.size) != EOK) {
                 HksFree(data);
                 return HKS_ERROR_BAD_STATE;
             }
@@ -756,7 +756,7 @@ namespace Unittest::ImportWrappedKey {
         }
 
         // copy zData
-        if (memcpy_s(data + offset, size - offset, key->zData.data, key->zData.size) != EOK) {
+        if (memcpy_s(data + offset, size - offset, keyTest->zData.data, keyTest->zData.size) != EOK) {
             HksFree(data);
             return HKS_ERROR_BAD_STATE;
         }

@@ -23,6 +23,24 @@
 #include "hks_template.h"
 #include "hks_type.h"
 
+#define HKS_SHA256_CBC \
+{ \
+    .tag = HKS_TAG_DIGEST, \
+    .uint32Param = HKS_DIGEST_SHA256 \
+}, { \
+    .tag = HKS_TAG_PADDING, \
+    .uint32Param = HKS_PADDING_NONE \
+}, { \
+    .tag = HKS_TAG_BLOCK_MODE, \
+    .uint32Param = HKS_MODE_CBC \
+}, { \
+    .tag = HKS_TAG_IV, \
+    .blob = { \
+        .size = AGREE_TEST_IV_SIZE, \
+        .data = (uint8_t *)AGREE_TEST_IV \
+    } \
+}
+
 const static uint32_t AGREE_TEST_IV_SIZE = 16;
 const static uint8_t AGREE_TEST_IV[AGREE_TEST_IV_SIZE] = { 0 };
 
@@ -36,22 +54,8 @@ static struct HksParam g_agreedKeyEncrypt001[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = AGREE_TEST_IV_SIZE,
-            .data = (uint8_t *)AGREE_TEST_IV
-        }
-    }
+    },
+    HKS_SHA256_CBC
 };
 
 static struct HksParam g_agreedKeyDecrypt001[] = {
@@ -64,22 +68,8 @@ static struct HksParam g_agreedKeyDecrypt001[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_SHA256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = AGREE_TEST_IV_SIZE,
-            .data = (uint8_t *)AGREE_TEST_IV
-        }
-    }
+    },
+    HKS_SHA256_CBC
 };
 
 static int32_t TestAgreedKeyEncryptDecrypt(const struct HksBlob *keyAlias1, const struct HksParamSet *encryptParamSet,

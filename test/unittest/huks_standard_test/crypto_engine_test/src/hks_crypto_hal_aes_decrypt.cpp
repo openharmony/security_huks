@@ -336,17 +336,16 @@ protected:
         }
 
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
+        HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
         uint32_t outLen = inLen;
         if (testCaseParams.usageSpec.padding == HKS_PADDING_PKCS7) {
             outLen = (inLen + HKS_PADDING_SUPPLENMENT) / HKS_PADDING_SUPPLENMENT * HKS_PADDING_SUPPLENMENT;
         }
-
-        HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
+        
         ASSERT_EQ(message.data == nullptr, false) << "message malloc failed.";
         for (uint32_t ii = 0; ii < inLen; ii++) {
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[HKS_COUNT_OF_HALF * ii]);
         }
-
         HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
         ASSERT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
         if (testCaseParams.runStage == HksStageType::HKS_STAGE_THREE) {

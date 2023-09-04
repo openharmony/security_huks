@@ -17,12 +17,12 @@
 
 #include "hks_generate_random_test.h"
 
+#include "hks_type.h"
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
-#include "hks_type.h"
 
 using namespace testing::ext;
 namespace {
@@ -32,9 +32,9 @@ public:
 
     static void TearDownTestCase(void);
 
-    void SetUp();
-
     void TearDown();
+
+    void SetUp();
 };
 
 void HksGenerateRandomTest::SetUpTestCase(void)
@@ -65,8 +65,8 @@ const struct HksTestGenRandomParams g_testGenRandomParams[] = {
  */
 HWTEST_F(HksGenerateRandomTest, HksGenerateRandomTest001, TestSize.Level0)
 {
-    int32_t ret;
     struct HksBlob *random = NULL;
+    int32_t ret;
 
     ret = TestConstructBlobOut(&random,
         g_testGenRandomParams[0].randomParams.blobExist,

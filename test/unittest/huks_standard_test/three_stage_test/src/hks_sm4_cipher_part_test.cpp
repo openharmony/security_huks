@@ -22,6 +22,42 @@
 
 #include "hks_sm4_cipher_test_common.h"
 
+#define HKS_IV \
+{ \
+    .tag = HKS_TAG_IV, \
+    .blob = { \
+        .size = HKS_SM4_IV_SIZE, \
+        .data = (uint8_t *)g_hksSm4TestIv \
+    } \
+},
+
+#define HKS_SM4_128 \
+{ \
+    .tag = HKS_TAG_ALGORITHM, \
+    .uint32Param = HKS_ALG_SM4 \
+}, { \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_SM4_KEY_SIZE_128 \
+},
+
+#define HKS_CTR_128 \
+{ \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_SM4_KEY_SIZE_128 \
+}, { \
+    .tag = HKS_TAG_PADDING, \
+    .uint32Param = HKS_PADDING_NONE \
+}, { \
+    .tag = HKS_TAG_BLOCK_MODE, \
+    .uint32Param = HKS_MODE_CTR \
+}, { \
+    .tag = HKS_TAG_IV, \
+    .blob = { \
+        .size = HKS_SM4_IV_SIZE, \
+        .data = (uint8_t *)g_hksSm4TestIv \
+    } \
+}
+
 using namespace testing::ext;
 namespace Unittest::Sm4Cipher {
 class HksSm4CipherPartTest : public testing::Test {
@@ -228,22 +264,8 @@ static struct HksParam g_encryptParams003[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_SM4_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CTR
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = HKS_SM4_IV_SIZE,
-            .data = (uint8_t *)g_hksSm4TestIv
-        }
-    }
+    },
+    HKS_CTR_128
 };
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
@@ -380,22 +402,8 @@ static struct HksParam g_decryptParams003[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_SM4_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CTR
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = HKS_SM4_IV_SIZE,
-            .data = (uint8_t *)g_hksSm4TestIv
-        }
-    }
+    },
+    HKS_CTR_128
 };
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
@@ -494,26 +502,16 @@ static const struct FailureCaseParam g_genFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_CBC
-            }, {
-                .tag = HKS_TAG_IV,
-                .blob = {
-                    .size = HKS_SM4_IV_SIZE,
-                    .data = (uint8_t *)g_hksSm4TestIv
-                }
             },
+            HKS_IV
         },
     },
 
     {   1,
         HKS_ERROR_INVALID_PADDING,
         {
+            HKS_SM4_128
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM4
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM4_KEY_SIZE_128
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
             }, {
@@ -522,26 +520,16 @@ static const struct FailureCaseParam g_genFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_CBC
-            }, {
-                .tag = HKS_TAG_IV,
-                .blob = {
-                    .size = HKS_SM4_IV_SIZE,
-                    .data = (uint8_t *)g_hksSm4TestIv
-                }
             },
+            HKS_IV
         },
     },
 
     {   2,
         HKS_ERROR_INVALID_MODE,
         {
+            HKS_SM4_128
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM4
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM4_KEY_SIZE_128
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
             }, {
@@ -579,26 +567,16 @@ static const struct FailureCaseParam g_encryptFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_CBC
-            }, {
-                .tag = HKS_TAG_IV,
-                .blob = {
-                    .size = HKS_SM4_IV_SIZE,
-                    .data = (uint8_t *)g_hksSm4TestIv
-                }
             },
+            HKS_IV
         },
     },
 
     {   1,
         HKS_ERROR_INVALID_PADDING,
         {
+            HKS_SM4_128
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM4
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM4_KEY_SIZE_128
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
             }, {
@@ -607,26 +585,16 @@ static const struct FailureCaseParam g_encryptFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_CBC
-            }, {
-                .tag = HKS_TAG_IV,
-                .blob = {
-                    .size = HKS_SM4_IV_SIZE,
-                    .data = (uint8_t *)g_hksSm4TestIv
-                }
             },
+            HKS_IV
         },
     },
 
     {   2,
         HKS_ERROR_INVALID_MODE,
         {
+            HKS_SM4_128
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM4
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM4_KEY_SIZE_128
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
             }, {
@@ -664,26 +632,16 @@ static const struct FailureCaseParam g_decryptFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_CBC
-            }, {
-                .tag = HKS_TAG_IV,
-                .blob = {
-                    .size = HKS_SM4_IV_SIZE,
-                    .data = (uint8_t *)g_hksSm4TestIv
-                }
             },
+            HKS_IV
         },
     },
 
     {   1,
         HKS_ERROR_INVALID_PADDING,
         {
+            HKS_SM4_128
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM4
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM4_KEY_SIZE_128
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_DECRYPT
             }, {
@@ -692,26 +650,16 @@ static const struct FailureCaseParam g_decryptFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_CBC
-            }, {
-                .tag = HKS_TAG_IV,
-                .blob = {
-                    .size = HKS_SM4_IV_SIZE,
-                    .data = (uint8_t *)g_hksSm4TestIv
-                }
             },
+            HKS_IV
         },
     },
 
     {   2,
         HKS_ERROR_INVALID_MODE,
         {
+            HKS_SM4_128
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM4
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM4_KEY_SIZE_128
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_DECRYPT
             }, {

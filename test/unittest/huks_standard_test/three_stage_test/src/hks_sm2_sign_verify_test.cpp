@@ -22,6 +22,15 @@
 #include <cstdint>
 #include <gtest/gtest.h>
 
+#define HKS_SM2_256 \
+{ \
+    .tag = HKS_TAG_ALGORITHM, \
+    .uint32Param = HKS_ALG_SM2 \
+}, { \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_SM2_KEY_SIZE_256 \
+},
+
 using namespace testing::ext;
 namespace Unittest::Sm2SignVerify {
 class HksSm2SignVerifyTest : public testing::Test {
@@ -104,13 +113,8 @@ static const struct GenerateKeyCaseParam NEGATIVE_CASE_GEN_PARAMS[] = {
         2,
         HKS_ERROR_INVALID_DIGEST,
         {
+            HKS_SM2_256
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
             }, {
@@ -124,13 +128,8 @@ static const struct GenerateKeyCaseParam NEGATIVE_CASE_GEN_PARAMS[] = {
         3,
         HKS_ERROR_INVALID_PURPOSE,
         {
+            HKS_SM2_256
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_WRAP
             }, {
@@ -203,13 +202,8 @@ static const struct GenerateKeyCaseParam NEGATIVE_CASE_SIGN_PARAMS[] = {
         2,
         HKS_ERROR_INVALID_ARGUMENT,
         {
+            HKS_SM2_256
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_SIGN
             }, {
@@ -305,13 +299,8 @@ static const struct GenerateKeyCaseParam NEGATIVE_CASE_VERIFY_PARAMS[] = {
         2,
         HKS_ERROR_INVALID_DIGEST,
         {
+            HKS_SM2_256
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_VERIFY
             }, {
@@ -325,13 +314,8 @@ static const struct GenerateKeyCaseParam NEGATIVE_CASE_VERIFY_PARAMS[] = {
         3,
         HKS_ERROR_INVALID_PURPOSE,
         {
+            HKS_SM2_256
             {
-                .tag = HKS_TAG_ALGORITHM,
-                .uint32Param = HKS_ALG_SM2
-            }, {
-                .tag = HKS_TAG_KEY_SIZE,
-                .uint32Param = HKS_SM2_KEY_SIZE_256
-            }, {
                 .tag = HKS_TAG_PURPOSE,
                 .uint32Param = HKS_KEY_PURPOSE_DECRYPT
             }, {
@@ -346,13 +330,8 @@ static const struct GenerateKeyCaseParam NON_DIGEST_CASE_VERIFY_PARAM = {
     4,
     HKS_SUCCESS,
     {
+        HKS_SM2_256
         {
-            .tag = HKS_TAG_ALGORITHM,
-            .uint32Param = HKS_ALG_SM2
-        }, {
-            .tag = HKS_TAG_KEY_SIZE,
-            .uint32Param = HKS_SM2_KEY_SIZE_256
-        }, {
             .tag = HKS_TAG_PURPOSE,
             .uint32Param = HKS_KEY_PURPOSE_VERIFY
         }, {
@@ -379,13 +358,13 @@ static int32_t HksTestSignVerify(const struct HksBlob *keyAlias, const struct Hk
             break;
         }
 
-        struct HksParam *tmpParam = NULL;
-        ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
+        struct HksParam *tmpParamTest = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParamTest);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
-        ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
+        ret = TestUpdateFinish(&handle, paramSet, tmpParamTest->uint32Param, inData, outData);
         if (ret != HKS_SUCCESS) {
             break;
         }

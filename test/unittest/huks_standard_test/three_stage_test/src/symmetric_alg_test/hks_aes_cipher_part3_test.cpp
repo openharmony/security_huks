@@ -15,6 +15,7 @@
 
 #include "hks_aes_cipher_part3_test.h"
 #include "hks_aes_cipher_test_common.h"
+#include "hks_aes_cipher_part_test_c.h"
 
 #include <gtest/gtest.h>
 
@@ -229,37 +230,8 @@ static struct HksParam g_encryptParams018[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = AAD_SIZE,
-            .data = (uint8_t *)AAD
-        }
-    }, {
-        .tag = HKS_TAG_NONCE,
-        .blob = {
-            .size = NONCE_SIZE,
-            .data = (uint8_t *)NONCE
-        }
-    }, {
-        .tag = HKS_TAG_AE_TAG,
-        .blob = {
-            .size = AEAD_SIZE,
-            .data = (uint8_t *)AEAD
-        }
-    }
+    },
+    HKS_AES_256
 };
 static struct HksParam g_decryptParams018[] = {
     {
@@ -268,37 +240,8 @@ static struct HksParam g_decryptParams018[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = AAD_SIZE,
-            .data = (uint8_t *)AAD
-        }
-    }, {
-        .tag = HKS_TAG_NONCE,
-        .blob = {
-            .size = NONCE_SIZE,
-            .data = (uint8_t *)NONCE
-        }
-    }, {
-        .tag = HKS_TAG_AE_TAG,
-        .blob = {
-            .size = AEAD_SIZE,
-            .data = (uint8_t *)AEAD
-        }
-    }
+    },
+    HKS_AES_256
 };
 
 #ifdef L2_STANDARD
@@ -312,28 +255,8 @@ static struct HksParam g_decrypt1Params018[] = {
     }, {
         .tag = HKS_TAG_KEY_SIZE,
         .uint32Param = HKS_AES_KEY_SIZE_256
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_ASSOCIATED_DATA,
-        .blob = {
-            .size = AAD_SIZE,
-            .data = (uint8_t *)AAD
-        }
-    }, {
-        .tag = HKS_TAG_NONCE,
-        .blob = {
-            .size = NONCE_SIZE,
-            .data = (uint8_t *)NONCE
-        }
-    }
+    },
+    NO_DIGEST_NOR_PADDING
 };
 
 static struct HksParam g_genParams019[] = {

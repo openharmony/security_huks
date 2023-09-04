@@ -32,6 +32,7 @@ unittest("huks_3.0_module_test") {
   include_dirs = [
     "../../../../../../../interfaces/inner_api/huks_lite",
     "../../../../../../../frameworks/huks_standard/main/common/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
 
   include_dirs += [ "./include" ]
