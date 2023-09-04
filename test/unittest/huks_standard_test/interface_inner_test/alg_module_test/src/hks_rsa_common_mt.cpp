@@ -352,28 +352,28 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
 
 void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams)
 {
-    struct HksParamSet *paramInSet = NULL;
-    HksInitParamSet(&paramInSet);
-    ASSERT_NE(paramInSet, nullptr);
+    struct HksParamSet *paramInSetTest = NULL;
+    HksInitParamSet(&paramInSetTest);
+    ASSERT_NE(paramInSetTest, nullptr);
 
     struct HksParamSet *paramSetOut = static_cast<struct HksParamSet *>(HksMalloc(SET_SIZE_4096));
     ASSERT_NE(paramSetOut, nullptr);
     (void)memset_s(paramSetOut, SET_SIZE_4096, 0, SET_SIZE_4096);
     paramSetOut->paramSetSize = SET_SIZE_4096;
 
-    EXPECT_EQ(HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size()), HKS_SUCCESS);
+    EXPECT_EQ(HksAddParams(paramInSetTest, testCaseParams.params.data(), testCaseParams.params.size()), HKS_SUCCESS);
 
-    EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
+    EXPECT_EQ(HksBuildParamSet(&paramInSetTest), HKS_SUCCESS);
 
-    EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOut), HKS_SUCCESS);
+    EXPECT_EQ(HksGenerateKey(NULL, paramInSetTest, paramSetOut), HKS_SUCCESS);
 
-    HksParam *priKeyExport = NULL;
-    EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
+    HksParam *priKeyExportTest = NULL;
+    EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExportTest), HKS_SUCCESS);
 
-    HksBlob privateKey = { .size = priKeyExport->blob.size,
-        .data = static_cast<uint8_t *>(HksMalloc(priKeyExport->blob.size)) };
+    HksBlob privateKey = { .size = priKeyExportTest->blob.size,
+        .data = static_cast<uint8_t *>(HksMalloc(priKeyExportTest->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
-    (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
+    (void)memcpy_s(privateKey.data, priKeyExportTest->blob.size, priKeyExportTest->blob.data, priKeyExportTest->blob.size);
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
@@ -385,7 +385,7 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
     HksBlob signData = { .size = SET_SIZE_4096, .data = static_cast<uint8_t *>(HksMalloc(SET_SIZE_4096)) };
     ASSERT_NE(signData.data, nullptr);
 
-    EXPECT_EQ(HksSign(&privateKey, paramInSet, &plainText, &signData), testCaseParams.signResult);
+    EXPECT_EQ(HksSign(&privateKey, paramInSetTest, &plainText, &signData), testCaseParams.signResult);
     if (testCaseParams.signResult == HKS_SUCCESS) {
         HksParam *pubKeyExport = NULL;
         EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
@@ -411,7 +411,7 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
     HksFree(paramSetOut);
     HksFree(privateKey.data);
     HksFree(signData.data);
-    HksFreeParamSet(&paramInSet);
+    HksFreeParamSet(&paramInSetTest);
 }
 
 void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCaseParams)

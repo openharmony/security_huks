@@ -73,7 +73,6 @@ const struct HksTestBnExpModParams g_testBnExpModParams[] = {
 
 static int32_t TestValue()
 {
-    HKS_TEST_LOG_I("test value");
     uint8_t bufX[HKS_TEST_8] = { 0, 0, 0, 0, 0, 0, 0, 0x40 };
     uint8_t bufA[HKS_TEST_8] = { 1, 2, 3, 4, 5, 6, 7, 8 };
     uint8_t bufE[HKS_TEST_2] = { 0, 2 };
@@ -83,12 +82,12 @@ static int32_t TestValue()
     struct HksBlob tmpA = { HKS_TEST_8, bufA };
     struct HksBlob tmpE = { HKS_TEST_2, bufE };
     struct HksBlob tmpN = { HKS_TEST_8, bufN };
-    int32_t ret = HksBnExpModRun(&tmpX, &tmpA, &tmpE, &tmpN, 1);
+    int32_t retTest = HksBnExpModRun(&tmpX, &tmpA, &tmpE, &tmpN, 1);
     for (int i = 0; i < HKS_TEST_8; ++i) {
         HKS_TEST_LOG_I("%x, %x", tmpBufX[i], bufX[i]);
         HKS_TEST_ASSERT(tmpBufX[i] == bufX[i]);
     }
-    return ret;
+    return retTest;
 }
 
 /**

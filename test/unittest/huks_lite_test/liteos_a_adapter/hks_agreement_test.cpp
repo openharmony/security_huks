@@ -66,7 +66,8 @@ const struct HksTestAgreeParams g_testAgreeParams[] = {
             HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, true, HKS_DIGEST_SHA256,
             false, 0, false, 0, true, HKS_STORAGE_TEMP },
         { 0 },
-        { true, true, HKS_ALG_X25519, true, HKS_CURVE25519_KEY_SIZE_256, true, false },
+        { true, true, HKS_ALG_X25519, true,
+            HKS_CURVE25519_KEY_SIZE_256, true, false },
         { true, TMP_SIZE, true, TMP_SIZE },
         { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE },
         { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE },
@@ -77,9 +78,9 @@ const struct HksTestAgreeParams g_testAgreeParams[] = {
 static int32_t AgreeKey(const struct HksTestAgreeParamSet *agreeParamSetParams, struct HksBlob *privateKey,
     struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
-    struct HksParamSet *agreeParamSet = NULL;
+    struct HksParamSet *agreeParamSetTest = NULL;
     struct TestAgreeParamSetStructure paramStruct = {
-        &agreeParamSet,
+        &agreeParamSetTest,
         agreeParamSetParams->paramSetExist,
         agreeParamSetParams->setAlg, agreeParamSetParams->alg,
         agreeParamSetParams->setKeySize, agreeParamSetParams->keySize,
@@ -88,8 +89,8 @@ static int32_t AgreeKey(const struct HksTestAgreeParamSet *agreeParamSetParams, 
     int32_t ret = TestConstructAgreeParamSet(&paramStruct);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksAgreeKeyRun(agreeParamSet, privateKey, peerPublicKey, agreedKey, 1);
-    HksFreeParamSet(&agreeParamSet);
+    ret = HksAgreeKeyRun(agreeParamSetTest, privateKey, peerPublicKey, agreedKey, 1);
+    HksFreeParamSet(&agreeParamSetTest);
     return ret;
 }
 

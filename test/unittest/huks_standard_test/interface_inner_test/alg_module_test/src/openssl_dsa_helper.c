@@ -155,20 +155,20 @@ static const EVP_MD *GetOpensslDigestType(enum HksKeyDigest digestType)
 int32_t OpensslSignDsa(
     const struct HksBlob *plainText, struct HksBlob *signData, struct HksBlob *key, enum HksKeyDigest digestType)
 {
-    DSA *dsa = InitDsa(key, true);
-    if (dsa == NULL) {
+    DSA *dsaTest = InitDsa(key, true);
+    if (dsaTest == NULL) {
         return DSA_FAILED;
     }
 
     EVP_PKEY *pkey = EVP_PKEY_new();
     if (pkey == NULL) {
-        DSA_free(dsa);
+        DSA_free(dsaTest);
         return DSA_FAILED;
     }
 
-    if (EVP_PKEY_assign_DSA(pkey, dsa) != 1) {
+    if (EVP_PKEY_assign_DSA(pkey, dsaTest) != 1) {
         EVP_PKEY_free(pkey);
-        DSA_free(dsa);
+        DSA_free(dsaTest);
         return DSA_FAILED;
     }
 

@@ -439,14 +439,14 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
         return HKS_FAILURE;
     }
 
-    struct HksParam *tmpParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
+    struct HksParam *tmpParamTest = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParamTest);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get tag purpose failed.");
         return HKS_FAILURE;
     }
 
-    ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
+    ret = TestUpdateFinish(&handle, paramSet, tmpParamTest->uint32Param, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;

@@ -173,9 +173,9 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
     uint32_t i = 0;
     for (i = 0; i < decryptParamSet->paramsCnt; i++) {
         if (decryptParamSet->params[i].tag == HKS_TAG_AE_TAG) {
-            uint8_t *tempPtr = cipherText.data;
+            uint8_t *tempPtrTest = cipherText.data;
             (void)memcpy_s(decryptParamSet->params[i].blob.data, AEAD_SIZE,
-                tempPtr + cipherText.size, AEAD_SIZE);
+                tempPtrTest + cipherText.size, AEAD_SIZE);
             break;
         }
     }
@@ -183,14 +183,14 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
     /* 3. Decrypt Three Stage */
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
-    struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    struct HksBlob handleDecryptTest = { sizeof(uint64_t), handleD };
+    ret = HksInit(keyAlias, decryptParamSet, &handleDecryptTest, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update & Finish
     uint8_t plain[AES_COMMON_SIZE] = {0};
     struct HksBlob plainText = { AES_COMMON_SIZE, plain };
-    ret = TestUpdateLoopFinish(&handleDecrypt, decryptParamSet, &cipherText, &plainText);
+    ret = TestUpdateLoopFinish(&handleDecryptTest, decryptParamSet, &cipherText, &plainText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
     EXPECT_EQ(HksMemCmp(inData.data, plainText.data, inData.size), HKS_SUCCESS) << "plainText not equals inData";
     EXPECT_EQ(HksMemCmp(plainText1.data, plainText.data, plainText1.size), HKS_SUCCESS) << "plainText != plainText1";
@@ -288,13 +288,13 @@ int32_t HksAesCipherTestCaseGcm1(const struct HksBlob *keyAlias, struct HksParam
 
     /* 2. Encrypt Three Stage */
     // Init
+    uint8_t cipher[AES_COMMON_SIZE] = {0};
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
     ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update & Finish
-    uint8_t cipher[AES_COMMON_SIZE] = {0};
     struct HksBlob cipherText = { AES_COMMON_SIZE, cipher };
     ret = TestUpdateLoopFinish(&handleEncrypt, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";

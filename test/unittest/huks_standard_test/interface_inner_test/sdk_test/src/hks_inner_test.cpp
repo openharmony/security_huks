@@ -134,35 +134,35 @@ HWTEST_F(HksInnerTest, HksInnerTest006, Function | SmallTest | Level0)
         {0},
         {0},
     };
-    HksBlob keyAlias = {0};
+    HksBlob keyAliasTest = {0};
     HksBlob key = {0};
-    HksParamSet *paramSet = nullptr;
+    HksParamSet *paramSetTest = nullptr;
     HksBlob keyOut = {0};
 
-    ret = HksInitParamSet(&paramSet);
+    ret = HksInitParamSet(&paramSetTest);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     HksParam algrithom;
     algrithom.tag = HKS_TAG_ALGORITHM;
     algrithom.uint32Param = HKS_ALG_DSA;
-    HksAddParams(paramSet, &algrithom, 1);
+    HksAddParams(paramSetTest, &algrithom, 1);
 
     HksParam keySize;
     keySize.tag = HKS_TAG_KEY_SIZE;
     keySize.uint32Param = 256;
-    HksAddParams(paramSet, &keySize, 1);
+    HksAddParams(paramSetTest, &keySize, 1);
 
     HksParam purpose;
     purpose.tag = HKS_TAG_PURPOSE;
     purpose.uint32Param = HKS_KEY_PURPOSE_SIGN;
-    HksAddParams(paramSet, &purpose, 1);
+    HksAddParams(paramSetTest, &purpose, 1);
 
     HksParam digest;
     digest.tag = HKS_TAG_DIGEST;
     digest.uint32Param = HKS_DIGEST_SHA256;
-    HksAddParams(paramSet, &digest, 1);
+    HksAddParams(paramSetTest, &digest, 1);
 
-    ret = HksCoreCheckImportKeyParams(&keyAlias, &key, paramSet, &keyOut);
+    ret = HksCoreCheckImportKeyParams(&keyAliasTest, &key, paramSetTest, &keyOut);
 }
 
 /**

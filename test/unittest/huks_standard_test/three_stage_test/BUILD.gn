@@ -126,6 +126,7 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/test/unittest/src/common/include",
     "//base/security/huks/utils/crypto_adapter",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+    "//base/security/huks/test/unittest/huks_common_test/include",
   ]
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",

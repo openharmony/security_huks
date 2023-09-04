@@ -68,7 +68,8 @@ const struct HksTestMacParams g_testMacParams[] = {
     },
 
     /* success: tee-sha256 */
-    { 1, HKS_SUCCESS, HKS_TEST_MAC_TYPE_TEE, { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
+    { 1, HKS_SUCCESS, HKS_TEST_MAC_TYPE_TEE,
+        { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
         {true, true, HKS_ALG_AES, true, HKS_AES_KEY_SIZE_256, true, HKS_KEY_PURPOSE_MAC,
             true, HKS_DIGEST_SHA256, false, 0, false, 0 },
         { 0 },
@@ -100,11 +101,11 @@ static int32_t ConstructDataToBlob(struct HksBlob **srcData, struct HksBlob **ma
 static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, struct HksBlob *macData,
     const struct HksTestMacParamSet *macParamSetParams, enum HksTestMacType macType)
 {
-    struct HksParamSet *macParamSet = NULL;
+    struct HksParamSet *macParamSetTest = NULL;
     int32_t ret;
     if (macType == HKS_TEST_MAC_TYPE_REE) {
         struct TestMacParamSetStructure paramStructTrue = {
-            &macParamSet,
+            &macParamSetTest,
             macParamSetParams->paramSetExist,
             macParamSetParams->setPurpose, macParamSetParams->purpose,
             macParamSetParams->setDigest, macParamSetParams->digest, true, false
@@ -112,7 +113,7 @@ static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, str
         ret = TestConstructMacParamSet(&paramStructTrue);
     } else {
         struct TestMacParamSetStructure paramStructFalse = {
-            &macParamSet,
+            &macParamSetTest,
             macParamSetParams->paramSetExist,
             macParamSetParams->setPurpose, macParamSetParams->purpose,
             macParamSetParams->setDigest, macParamSetParams->digest, false, false
@@ -129,21 +130,21 @@ static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, str
 static int32_t BaseTestMac(uint32_t index)
 {
     /* 1. generate key */
-    struct HksBlob *key = NULL;
+    struct HksBlob *keyTest = NULL;
     int32_t ret;
 
     if (g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_REE) {
-        ret = TestConstuctBlob(&key,
+        ret = TestConstuctBlob(&keyTest,
             g_testMacParams[index].keyParams.blobExist,
             g_testMacParams[index].keyParams.blobSize,
             g_testMacParams[index].keyParams.blobDataExist,
             g_testMacParams[index].keyParams.blobDataSize);
     } else {
         if (g_testMacParams[index].keyAliasParams.blobExist) {
-            ret = GenerateKey(&key, &(g_testMacParams[index].keyAliasParams),
+            ret = GenerateKey(&keyTest, &(g_testMacParams[index].keyAliasParams),
                 &g_testMacParams[index].genKeyParamSetParams, NULL);
         } else {
-            ret = TestConstuctBlob(&key,
+            ret = TestConstuctBlob(&keyTest,
                 g_testMacParams[index].keyParams.blobExist,
                 g_testMacParams[index].keyParams.blobSize,
                 g_testMacParams[index].keyParams.blobDataExist,

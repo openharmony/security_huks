@@ -92,6 +92,8 @@ static int32_t GetKeyOffsetByKeyAlias(const struct HksBlob *keyAlias, uint32_t *
 
 static int32_t CompareTwoKey(const struct HksBlob *keyAliasOne, const struct HksBlob *keyAliasTwo)
 {
+    int32_t offset1;
+    int32_t offset2;
     uint32_t sizeOne = HksTestFileSize(g_storePath, "hks_keystore");
     uint8_t *bufOne = (uint8_t *)HksTestMalloc(sizeOne);
     if (bufOne == NULL) {
@@ -104,13 +106,11 @@ static int32_t CompareTwoKey(const struct HksBlob *keyAliasOne, const struct Hks
     g_storageImageBuffer.data = bufOne;
     g_storageImageBuffer.size = sizeOne;
 
-    int32_t offset1;
     int ret = GetKeyOffsetByKeyAlias(keyAliasOne, &offset1);
     TEST_ASSERT_TRUE(ret == 0);
 
     struct HksStoreKeyInfo *keyInfo1 = (struct HksStoreKeyInfo *)(g_storageImageBuffer.data + offset1);
 
-    int32_t offset2;
     ret = GetKeyOffsetByKeyAlias(keyAliasTwo, &offset2);
     TEST_ASSERT_TRUE(ret == 0);
 

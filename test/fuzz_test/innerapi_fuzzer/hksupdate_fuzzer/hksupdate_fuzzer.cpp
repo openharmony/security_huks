@@ -33,23 +33,23 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
+        uint8_t *myDataTest = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
+        if (myDataTest == nullptr) {
             return false;
         }
 
-        (void)memcpy_s(myData, size, data, size);
+        (void)memcpy_s(myDataTest, size, data, size);
 
-        struct HksBlob handle = { BLOB_SIZE, myData };
-        struct HksBlob inData = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksBlob outData = { BLOB_SIZE, static_cast<uint8_t *>(myData + DOUBLE_BLOB_SIZE) };
+        struct HksBlob handle = { BLOB_SIZE, myDataTest };
+        struct HksBlob inData = { BLOB_SIZE, static_cast<uint8_t *>(myDataTest + BLOB_SIZE) };
+        struct HksBlob outData = { BLOB_SIZE, static_cast<uint8_t *>(myDataTest + DOUBLE_BLOB_SIZE) };
 
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + TRIPLE_BLOB_SIZE);
+        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myDataTest + TRIPLE_BLOB_SIZE);
         paramSet->paramSetSize = size - TRIPLE_BLOB_SIZE;
 
         (void)HksUpdate(&handle, paramSet, &inData, &outData);
 
-        HksFree(myData);
+        HksFree(myDataTest);
         return true;
     }
 }

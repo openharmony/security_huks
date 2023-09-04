@@ -99,12 +99,12 @@ public:
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams) const
     {
-        HksBlob key = { .size = 0, .data = nullptr };
-        ASSERT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &key), testCaseParams.generateKeyResult);
+        HksBlob keyTest02 = { .size = 0, .data = nullptr };
+        ASSERT_EQ(HksCryptoHalGenerateKey(&testCaseParams.spec, &keyTest02), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
-            ASSERT_NE((uint32_t)0, key.size);
-            ASSERT_NE(nullptr, key.data);
-            HksFree(key.data);
+            ASSERT_NE((uint32_t)0, keyTest02.size);
+            ASSERT_NE(nullptr, keyTest02.data);
+            HksFree(keyTest02.data);
         }
     }
 };

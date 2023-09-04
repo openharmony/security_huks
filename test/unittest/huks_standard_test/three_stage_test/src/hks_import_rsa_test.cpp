@@ -390,21 +390,21 @@ static int32_t ConstructKey(const struct HksBlob *nDataBlob, const struct HksBlo
     material.eSize = isPriKey ? 0 : sizeof(g_eData);
     material.dSize = dDataBlob->size;
 
-    uint32_t size = sizeof(material) + material.nSize + material.eSize + material.dSize;
-    uint8_t *data = (uint8_t *)HksMalloc(size);
+    uint32_t sizeTest = sizeof(material) + material.nSize + material.eSize + material.dSize;
+    uint8_t *data = (uint8_t *)HksMalloc(sizeTest);
     if (data == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
 
     // copy struct material
-    if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
+    if (memcpy_s(data, sizeTest, &material, sizeof(material)) != EOK) {
         HksFree(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     uint32_t offset = sizeof(material);
     // copy nData
-    if (memcpy_s(data + offset, size - offset, nDataBlob->data, nDataBlob->size) != EOK) {
+    if (memcpy_s(data + offset, sizeTest - offset, nDataBlob->data, nDataBlob->size) != EOK) {
         HksFree(data);
         return HKS_ERROR_BAD_STATE;
     }
@@ -412,7 +412,7 @@ static int32_t ConstructKey(const struct HksBlob *nDataBlob, const struct HksBlo
     offset += material.nSize;
     // copy eData
     if (!isPriKey) {
-        if (memcpy_s(data + offset, size - offset, &g_eData, sizeof(g_eData)) != EOK) {
+        if (memcpy_s(data + offset, sizeTest - offset, &g_eData, sizeof(g_eData)) != EOK) {
             HksFree(data);
             return HKS_ERROR_BAD_STATE;
         }
@@ -420,13 +420,13 @@ static int32_t ConstructKey(const struct HksBlob *nDataBlob, const struct HksBlo
     }
 
     // copy dData
-    if (memcpy_s(data + offset, size - offset, dDataBlob->data, dDataBlob->size) != EOK) {
+    if (memcpy_s(data + offset, sizeTest - offset, dDataBlob->data, dDataBlob->size) != EOK) {
         HksFree(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     outKey->data = data;
-    outKey->size = size;
+    outKey->size = sizeTest;
     return HKS_SUCCESS;
 }
 
@@ -598,22 +598,22 @@ static int32_t ConstructOpPurpose(uint32_t inputPurpose, uint32_t &outOp1Purpose
 }
 
 static int32_t ConstructParamSets(const struct HksParam *initParams, uint32_t initParamCount,
-    struct HksParamSet **initParamSet, struct HksParamSet **updateParamSet, struct HksParamSet **finishParamSet)
+    struct HksParamSet **initParamSetTest, struct HksParamSet **updateParamSet, struct HksParamSet **finishParamSet)
 {
-    int32_t ret = InitParamSet(initParamSet, initParams, initParamCount);
+    int32_t ret = InitParamSet(initParamSetTest, initParams, initParamCount);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
     ret = InitParamSet(updateParamSet, g_updateParams, sizeof(g_updateParams) / sizeof(struct HksParam));
     if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(initParamSet);
+        HksFreeParamSet(initParamSetTest);
         return ret;
     }
 
     ret = InitParamSet(finishParamSet, g_finishParams, sizeof(g_finishParams) / sizeof(struct HksParam));
     if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(initParamSet);
+        HksFreeParamSet(initParamSetTest);
         HksFreeParamSet(updateParamSet);
     }
     return ret;
@@ -622,10 +622,10 @@ static int32_t ConstructParamSets(const struct HksParam *initParams, uint32_t in
 static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam *initParams, uint32_t initParamCount,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    struct HksParamSet *initParamSet = nullptr;
+    struct HksParamSet *initParamSetTest = nullptr;
     struct HksParamSet *updateParamSet = nullptr;
     struct HksParamSet *finishParamSet = nullptr;
-    int32_t ret = ConstructParamSets(initParams, initParamCount, &initParamSet, &updateParamSet, &finishParamSet);
+    int32_t ret = ConstructParamSets(initParams, initParamCount, &initParamSetTest, &updateParamSet, &finishParamSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -633,20 +633,20 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
     do {
         uint64_t handleValue = 0;
         struct HksBlob handle = { sizeof(uint64_t), (uint8_t *)&handleValue };
-        ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
+        ret = HksInit(keyAlias, initParamSetTest, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
         uint8_t tempBuf[LENGTH_TO_BE_OPERATED] = {0};
         struct HksBlob tmpBlob = { LENGTH_TO_BE_OPERATED, tempBuf };
+        struct HksBlob tmpBlob2 = { 0, nullptr };
+
         ret = HksUpdate(&handle, updateParamSet, inData, &tmpBlob);
         if (ret != HKS_SUCCESS) {
             break;
         }
-
-        struct HksBlob tmpBlob2 = { 0, nullptr };
-
+        
         // The caller guarantees that the access will not cross the border
         if (initParams[TAG_PURPOSE_ID].uint32Param == HKS_KEY_PURPOSE_VERIFY) {
             ret = HksFinish(&handle, finishParamSet, outData, &tmpBlob2);
@@ -655,7 +655,7 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
         }
     } while (0);
 
-    HksFreeParamSet(&initParamSet);
+    HksFreeParamSet(&initParamSetTest);
     HksFreeParamSet(&updateParamSet);
     HksFreeParamSet(&finishParamSet);
     return ret;
@@ -773,12 +773,12 @@ static void RsaImportPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uin
     EXPECT_EQ(ret, HKS_SUCCESS) << "import key public failed";
 
     uint32_t purposeOp1;
-    uint32_t purposeOp2;
-    ret = ConstructOpPurpose(purpose, purposeOp1, purposeOp2);
+    uint32_t purposeTestOp2;
+    ret = ConstructOpPurpose(purpose, purposeOp1, purposeTestOp2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "construct operation purpose failed";
 
     ModifyinitOp1Params(purposeOp1, keySize, padding, digest);
-    ModifyinitOp2Params(purposeOp2, keySize, padding, digest);
+    ModifyinitOp2Params(purposeTestOp2, keySize, padding, digest);
 
     ret = DoOperation(&priKeyAlias, &pairKeyAlias);
     EXPECT_EQ(ret, HKS_SUCCESS) << "operation failed";
@@ -786,8 +786,8 @@ static void RsaImportPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uin
     EXPECT_EQ(ret, HKS_SUCCESS) << "operation 2 failed";
 
     // export public key
-    uint8_t pubKey[HKS_RSA_KEY_SIZE_1024] = {0};
-    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKey };
+    uint8_t pubKeyTest[HKS_RSA_KEY_SIZE_1024] = {0};
+    struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKeyTest };
     ret = HksExportPublicKey(&pubKeyAlias, nullptr, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
