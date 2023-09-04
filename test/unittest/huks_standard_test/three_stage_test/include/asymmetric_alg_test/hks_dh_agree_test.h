@@ -18,8 +18,7 @@
 
 #include <string>
 #include "hks_three_stage_test_common.h"
-
-#include "hks_macro_def.h"
+#include "hks_struct_macro_def.h"
 
 namespace Unittest::DhAgree {
 static const std::string g_inData = "Hks_DH_Agree_Test_00000000000000000000000000000000000000000000000000000000000000"

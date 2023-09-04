@@ -18,7 +18,7 @@
 
 #include <string>
 #include "hks_three_stage_test_common.h"
-#include "hks_macro_def.h"
+#include "hks_struct_macro_def.h"
 
 namespace Unittest::CrossTest {
 static const std::string g_inData_32  = "Hks_Cross_Test_Rsa_000000_string";

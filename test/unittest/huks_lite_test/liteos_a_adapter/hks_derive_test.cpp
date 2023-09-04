@@ -15,13 +15,7 @@
 
 #include <gtest/gtest.h>
 
-#include "hks_derive_test.h"
-
-#include "hks_api.h"
-#include "hks_param.h"
-#include "hks_test_api_performance.h"
-#include "hks_test_common.h"
-#include "hks_test_log.h"
+#include "hks_derive_test_c.h"
 
 using namespace testing::ext;
 namespace {
@@ -52,66 +46,6 @@ void HksDeriveTest::SetUp()
 void HksDeriveTest::TearDown()
 {
 }
-
-const int DEFAULT_DERIVE_SIZE = 32;
-const int DEFAULT_INFO_SIZE = 55;
-const int DEFAULT_SALT_SIZE = 16;
-
-const struct HksTestDeriveParams g_testDeriveParams[] = {
-    /* hkdf-sha256-salt-info */
-    { 0, HKS_SUCCESS, { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
-        {
-            true, /* genKey params */
-            true, HKS_ALG_AES,
-            true, HKS_AES_KEY_SIZE_256,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            false, 0,
-            false, 0 },
-        { 0 },
-        {
-            true, /* derive params */
-            true, HKS_ALG_HKDF,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            true, DEFAULT_SALT_SIZE,
-            true, DEFAULT_INFO_SIZE,
-            false, true },
-        {
-            true, DEFAULT_DERIVE_SIZE, true, DEFAULT_DERIVE_SIZE },
-        {
-            false, 0, false, 0 }
-    },
-
-    /* local: hkdf-sha256-salt-info */
-    { 1, HKS_SUCCESS, { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
-        {
-            true, /* genKey params */
-            true, HKS_ALG_AES,
-            true, HKS_AES_KEY_SIZE_256,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            false, 0,
-            true, HKS_STORAGE_TEMP },
-        { 0 },
-        {
-            true, /* derive params */
-            true, HKS_ALG_HKDF,
-            true, HKS_KEY_PURPOSE_DERIVE,
-            true, HKS_DIGEST_SHA256,
-            false, 0,
-            true, DEFAULT_SALT_SIZE,
-            true, DEFAULT_INFO_SIZE,
-            true, false },
-        {
-            true, DEFAULT_DERIVE_SIZE, true, DEFAULT_DERIVE_SIZE },
-        {
-            true, DEFAULT_LOCAL_KEY_SIZE, true, DEFAULT_LOCAL_KEY_SIZE }
-    },
-};
 
 static int32_t DeriveKey(const struct HksTestDeriveParamSet *deriveParamSetParams, const struct HksBlob *masterKey,
     struct HksBlob *derivedKey, struct HksBlob **saltData, struct HksBlob **infoData)

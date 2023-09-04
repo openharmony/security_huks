@@ -83,15 +83,15 @@ static const struct HksTestGenKeyParams g_testGenKeyParams[] = {
 static int32_t SafeTestGenerateKey(struct HksBlob *keyAlias)
 {
     uint32_t index = 0;
-    uint32_t performTimes = 1;
-
+    
+    struct HksParamSet *paramSetOut = NULL;
     struct HksParamSet *paramSet = NULL;
     struct GenerateKeyParamSetStructure paramStruct = {
         &paramSet,
-        g_testGenKeyParams[index].paramSetParams.paramSetExist,
-        g_testGenKeyParams[index].paramSetParams.setAlg, g_testGenKeyParams[index].paramSetParams.alg,
-        g_testGenKeyParams[index].paramSetParams.setKeySize, g_testGenKeyParams[index].paramSetParams.keySize,
-        g_testGenKeyParams[index].paramSetParams.setPurpose, g_testGenKeyParams[index].paramSetParams.purpose,
+        g_testGenKeyParams[index].paramSetParams.paramSetExist, g_testGenKeyParams[index].paramSetParams.setAlg,
+        g_testGenKeyParams[index].paramSetParams.alg, g_testGenKeyParams[index].paramSetParams.setKeySize,
+        g_testGenKeyParams[index].paramSetParams.keySize, g_testGenKeyParams[index].paramSetParams.setPurpose,
+        g_testGenKeyParams[index].paramSetParams.purpose,
         g_testGenKeyParams[index].paramSetParams.setDigest, g_testGenKeyParams[index].paramSetParams.digest,
         g_testGenKeyParams[index].paramSetParams.setPadding, g_testGenKeyParams[index].paramSetParams.padding,
         g_testGenKeyParams[index].paramSetParams.setBlockMode, g_testGenKeyParams[index].paramSetParams.mode,
@@ -101,7 +101,7 @@ static int32_t SafeTestGenerateKey(struct HksBlob *keyAlias)
     int32_t ret = TestConstructGenerateKeyParamSet(&paramStruct);
     HKS_TEST_ASSERT(ret == 0);
 
-    struct HksParamSet *paramSetOut = NULL;
+    uint32_t performTimes = 1;
     ret = TestConstructGenerateKeyParamSetOut(&paramSetOut,
         g_testGenKeyParams[index].paramSetParamsOut.paramSetExist,
         g_testGenKeyParams[index].paramSetParamsOut.paramSetSize);

@@ -18,19 +18,20 @@
 
 #include "hks_api.h"
 #include "hks_mem.h"
-#include "hks_param.h"
 #include "hks_type.h"
+#include "hks_param.h"
 
 const int BLOB_SIZE = 10;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
+        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
+        
         if (data == nullptr || size <= (sizeof(struct HksParamSet) + BLOB_SIZE)) {
             return false;
         }
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;
         }

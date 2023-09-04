@@ -34,9 +34,9 @@ public:
 
     static void TearDownTestCase(void);
 
-    void SetUp();
-
     void TearDown();
+
+    void SetUp();
 };
 
 void HksHashTest::SetUpTestCase(void)
@@ -75,8 +75,8 @@ const struct HksTestHashParams g_testHashParams[] = {
  */
 HWTEST_F(HksHashTest, HksHashTest001, TestSize.Level0)
 {
-    struct HksParamSet *paramSet = NULL;
     struct HksBlob *srcData = NULL;
+    struct HksParamSet *paramSet = NULL;
     struct HksBlob *hash = NULL;
 
     int32_t ret = TestConstructHashParamSet(&paramSet,
@@ -87,15 +87,13 @@ HWTEST_F(HksHashTest, HksHashTest001, TestSize.Level0)
     ret = TestConstuctBlob(&srcData,
         g_testHashParams[0].srcDataParams.blobExist,
         g_testHashParams[0].srcDataParams.blobSize,
-        g_testHashParams[0].srcDataParams.blobDataExist,
-        g_testHashParams[0].srcDataParams.blobDataSize);
+        g_testHashParams[0].srcDataParams.blobDataExist, g_testHashParams[0].srcDataParams.blobDataSize);
     HKS_TEST_ASSERT(ret == 0);
 
     ret = TestConstructBlobOut(&hash,
         g_testHashParams[0].hashParams.blobExist,
         g_testHashParams[0].hashParams.blobSize,
-        g_testHashParams[0].hashParams.blobDataExist,
-        g_testHashParams[0].hashParams.blobDataSize);
+        g_testHashParams[0].hashParams.blobDataExist, g_testHashParams[0].hashParams.blobDataSize);
     HKS_TEST_ASSERT(ret == 0);
 
     ret = HksHashRun(paramSet, srcData, hash, 1);
@@ -107,7 +105,6 @@ HWTEST_F(HksHashTest, HksHashTest001, TestSize.Level0)
     HksFreeParamSet(&paramSet);
     TestFreeBlob(&srcData);
     TestFreeBlob(&hash);
-    HKS_TEST_LOG_I("[%u]TestHash, Testcase_Hash_[%03u] pass!", 1, g_testHashParams[0].testId);
     ASSERT_TRUE(ret == 0);
 }
 #endif /* _CUT_AUTHENTICATE_ */

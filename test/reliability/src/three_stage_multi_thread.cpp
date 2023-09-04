@@ -97,15 +97,15 @@ static int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam
 
     ret = HksAddParams(*paramSet, params, paramcount);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed");
         HksFreeParamSet(paramSet);
+        HKS_LOG_E("HksAddParams failed");
         return ret;
     }
 
     ret = HksBuildParamSet(paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksBuildParamSet failed!");
         HksFreeParamSet(paramSet);
+        HKS_LOG_E("HksBuildParamSet failed!");
         return ret;
     }
 
@@ -180,9 +180,9 @@ static int32_t UpdateSessionTest(struct HksBlob *handle)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
     uint32_t indataSize = 8192;
+    uint32_t outdataSize = 8208;
     uint8_t *indata = static_cast<uint8_t *>(HksMalloc(indataSize));
     struct HksBlob indataBlob = { indataSize, indata };
-    uint32_t outdataSize = 8208;
     uint8_t *outdata = static_cast<uint8_t *>(HksMalloc(outdataSize));
     struct HksBlob outdataBlob = { outdataSize, outdata };
     ret = HksUpdate(handle, encryptParamSet, &indataBlob, &outdataBlob);

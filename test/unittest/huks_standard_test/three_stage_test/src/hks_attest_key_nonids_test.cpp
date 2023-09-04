@@ -86,8 +86,9 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksParamSet *paramSet = nullptr;
-    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    struct HksParamSet *paramOutSet = nullptr;
     HksCertChain *certChain = nullptr;
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
@@ -95,7 +96,6 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
         HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
     }
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    HKS_LOG_I("Attest key success!");
 
     struct HksParam g_getParam = {
         .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
@@ -103,21 +103,20 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     };
     ASSERT_TRUE(g_getParam.blob.data != nullptr);
 
-    struct HksParamSet *paramOutSet = nullptr;
+    struct HksParam *keySizeParam = nullptr;
+    uint32_t rootUid = 0;
     HksInitParamSet(&paramOutSet);
     HksAddParams(paramOutSet, &g_getParam, 1);
     HksBuildParamSet(&paramOutSet);
     HksFree(g_getParam.blob.data);
     ret = HksGetKeyParamSet(&g_keyAlias, nullptr, paramOutSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    struct HksParam *keySizeParam = nullptr;
     ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
     struct HksParam *processParam = nullptr;
     ret = HksGetParam(paramOutSet, HKS_TAG_PROCESS_NAME, &processParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    uint32_t rootUid = 0;
     ASSERT_EQ(sizeof(rootUid), processParam->blob.size);
     ASSERT_EQ(HksMemCmp(processParam->blob.data, &rootUid, processParam->blob.size), HKS_SUCCESS);
 
@@ -125,7 +124,6 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
 
     ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    HKS_LOG_I("Validate key success!");
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = nullptr;
 

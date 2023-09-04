@@ -135,7 +135,7 @@ int32_t HksCheckGetKeyInfoListParams(const struct HksBlob *processName, const st
     }
 
     return HKS_SUCCESS;
-} 
+}
 #endif /* _CUT_AUTHENTICATE_ */
 
 int32_t HksCheckGenerateRandomParams(const struct HksBlob *processName, const struct HksBlob *random)
