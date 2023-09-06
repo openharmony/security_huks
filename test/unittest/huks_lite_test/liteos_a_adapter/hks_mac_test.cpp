@@ -122,8 +122,8 @@ static int32_t Mac(const struct HksBlob *key, const struct HksBlob *srcData, str
     }
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksMacRun(key, macParamSet, srcData, macData, 1);
-    HksFreeParamSet(&macParamSet);
+    ret = HksMacRun(key, macParamSetTest, srcData, macData, 1);
+    HksFreeParamSet(&macParamSetTest);
     return ret;
 }
 
@@ -160,7 +160,7 @@ static int32_t BaseTestMac(uint32_t index)
         &g_testMacParams[index].srcDataParams, &g_testMacParams[index].macParams);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = Mac(key, srcData, macData, &g_testMacParams[index].macParamSetParams, g_testMacParams[index].macType);
+    ret = Mac(keyTest, srcData, macData, &g_testMacParams[index].macParamSetParams, g_testMacParams[index].macType);
     if (ret != g_testMacParams[index].expectResult) {
         HKS_TEST_LOG_I("failed, ret[%u] = %d", g_testMacParams[index].testId, ret);
     }
@@ -169,10 +169,10 @@ static int32_t BaseTestMac(uint32_t index)
     /* 3. deletekey */
     if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) &&
         (g_testMacParams[index].keyAliasParams.blobExist)) {
-        ret = HksDeleteKey(key, NULL);
+        ret = HksDeleteKey(keyTest, NULL);
         HKS_TEST_ASSERT(ret == 0);
     }
-    TestFreeBlob(&key);
+    TestFreeBlob(&keyTest);
     TestFreeBlob(&srcData);
     TestFreeBlob(&macData);
     return ret;
