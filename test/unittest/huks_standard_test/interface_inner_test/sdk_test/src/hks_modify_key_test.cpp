@@ -97,15 +97,15 @@ int32_t BaseTestCipher(struct HksBlob *keyAlias, uint32_t index)
             keyAlias, &g_testCipherParams[index].encryptParamSetParams,
             plainData, cipherData, &ivData, &nonceData, &aadData, 1
         };
-        struct CipherDecryptStructure testDecryptStruct = {
-            keyAlias, &g_testCipherParams[index], cipherData,
-            &decryptedData, ivData, nonceData, aadData, 1
-        };
         ret = Encrypt(&testEncryptStruct);
         if (ret != g_testCipherParams[index].expectResult) {
             break;
         }
         /* 3. decrypt */
+        struct CipherDecryptStructure testDecryptStruct = {
+            keyAlias, &g_testCipherParams[index], cipherData,
+            &decryptedData, ivData, nonceData, aadData, 1
+        };
         ret = DecryptCipher(&testDecryptStruct);
         if (ret != g_testCipherParams[index].expectResult) {
             break;
