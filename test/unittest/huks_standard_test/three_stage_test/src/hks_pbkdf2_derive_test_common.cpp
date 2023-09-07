@@ -57,7 +57,7 @@ int32_t HksPbkdf2DeriveTestNormalCase(const struct HksBlob keyAlias,
 int32_t HksPbkdf2DeriveTestCmpCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {
-    struct HksBlob inData = {
+    struct HksBlob inDataTest = {
         g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
@@ -70,19 +70,19 @@ int32_t HksPbkdf2DeriveTestCmpCase(const struct HksBlob keyAlias,
 
     /* 2. Derive Three Stage */
     // Init
-    uint8_t handleD[sizeof(uint64_t)] = {0};
-    struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
+    uint8_t handleDTest[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDerive = { sizeof(uint64_t), handleDTest };
     ret = HksInit(&keyAlias, deriveParamSet, &handleDerive, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
     uint8_t tmpOut[COMMON_SIZE] = {0};
     struct HksBlob outData = { COMMON_SIZE, tmpOut };
-    ret = HksUpdate(&handleDerive, deriveParamSet, &inData, &outData);
+    ret = HksUpdate(&handleDerive, deriveParamSet, &inDataTest, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
     uint8_t outDataD[COMMON_SIZE] = {0};
-    struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
-    ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
+    struct HksBlob outDataDeriveTest = { COMMON_SIZE, outDataD };
+    ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inDataTest, &outDataDeriveTest);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     uint8_t tmpDerive[COMMON_SIZE] = {0};
@@ -90,7 +90,7 @@ int32_t HksPbkdf2DeriveTestCmpCase(const struct HksBlob keyAlias,
     ret = HksDeriveKey(deriveParamSet, &keyAlias, &derivedKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeriveKey failed.";
 
-    ret = HksMemCmp(derivedKey.data, outDataDerive.data, outDataDerive.size);
+    ret = HksMemCmp(derivedKey.data, outDataDeriveTest.data, outDataDeriveTest.size);
     EXPECT_EQ(ret, HKS_SUCCESS) << "outDataDerive not equals derivedKey.";
 
     return ret;

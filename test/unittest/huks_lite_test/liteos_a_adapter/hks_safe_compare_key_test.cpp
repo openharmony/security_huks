@@ -69,7 +69,8 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
             true, HKS_CURVE25519_KEY_SIZE_256,
             true, HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
             false, 0,
-            false, 0,
+            false,
+            0,
             false, 0,
             false, 0
         },

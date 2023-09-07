@@ -50,12 +50,14 @@ const TestCaseParams HKS_DSA_MT_00100_PARAMS = {
             { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_PURPOSE,
+              .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
-            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+            { .tag = HKS_TAG_BLOCK_MODE,
+              .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA1,
 #if defined(_USE_MBEDTLS_)
@@ -77,7 +79,8 @@ const TestCaseParams HKS_DSA_MT_00200_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
-            { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+            { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+              .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA1,
@@ -122,7 +125,8 @@ const TestCaseParams HKS_DSA_MT_00400_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA1 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
+            { .tag = HKS_TAG_IS_KEY_ALIAS,
+              .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
@@ -168,7 +172,8 @@ const TestCaseParams HKS_DSA_MT_00600_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
+            { .tag = HKS_TAG_IS_KEY_ALIAS,
+              .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
@@ -192,7 +197,8 @@ const TestCaseParams HKS_DSA_MT_00700_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
-            { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+            { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+              .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA224,
@@ -234,12 +240,14 @@ const TestCaseParams HKS_DSA_MT_00900_PARAMS = {
             { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_PURPOSE,
+              .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA224 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
-            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+            { .tag = HKS_TAG_BLOCK_MODE,
+              .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA224,
 #if defined(_USE_MBEDTLS_)
@@ -283,7 +291,8 @@ const TestCaseParams HKS_DSA_MT_01100_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
+            { .tag = HKS_TAG_IS_KEY_ALIAS,
+              .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
@@ -307,7 +316,8 @@ const TestCaseParams HKS_DSA_MT_01200_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA256 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
-            { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+            { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+              .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA256,
@@ -392,12 +402,14 @@ const TestCaseParams HKS_DSA_MT_01600_PARAMS = {
             { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_PURPOSE,
+              .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA384 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
-            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+            { .tag = HKS_TAG_BLOCK_MODE,
+              .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA384,
 #if defined(_USE_MBEDTLS_)
@@ -418,7 +430,8 @@ const TestCaseParams HKS_DSA_MT_01700_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA384 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
+            { .tag = HKS_TAG_IS_KEY_ALIAS,
+              .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
@@ -465,7 +478,8 @@ const TestCaseParams HKS_DSA_MT_01900_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA384 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
-            { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+            { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+              .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA384,
@@ -510,7 +524,8 @@ const TestCaseParams HKS_DSA_MT_02100_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
-            { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
+            { .tag = HKS_TAG_IS_KEY_ALIAS,
+              .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
@@ -534,7 +549,8 @@ const TestCaseParams HKS_DSA_MT_02200_PARAMS = {
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
-            { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+            { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+              .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA512,
@@ -576,12 +592,14 @@ const TestCaseParams HKS_DSA_MT_02400_PARAMS = {
             { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_TEMP },
             { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_1024 },
-            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
+            { .tag = HKS_TAG_PURPOSE,
+              .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
             { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA512 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS1_V1_5 },
             { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = false },
             { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
-            { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
+            { .tag = HKS_TAG_BLOCK_MODE,
+              .uint32Param = HKS_MODE_ECB },
         },
     .keyDigest = HKS_DIGEST_SHA512,
 #if defined(_USE_MBEDTLS_)
@@ -621,9 +639,9 @@ class HksDsaMt : public testing::Test {
 protected:
     void GenerateKeyTestCase(const TestCaseParams &testCaseParams)
     {
-        struct HksParamSet *paramInSet = nullptr;
-        HksInitParamSet(&paramInSet);
-        ASSERT_NE(paramInSet, nullptr);
+        struct HksParamSet *paramInSet01 = nullptr;
+        HksInitParamSet(&paramInSet01);
+        ASSERT_NE(paramInSet01, nullptr);
 
         struct HksParamSet *paramSetOut = nullptr;
         HksInitParamSet(&paramSetOut);
@@ -636,11 +654,11 @@ protected:
 
         HksBuildParamSet(&paramSetOut);
 
-        EXPECT_EQ(HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size()), HKS_SUCCESS);
+        EXPECT_EQ(HksAddParams(paramInSet01, testCaseParams.params.data(), testCaseParams.params.size()), HKS_SUCCESS);
 
-        EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
+        EXPECT_EQ(HksBuildParamSet(&paramInSet01), HKS_SUCCESS);
 
-        EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOut), testCaseParams.generateKeyResult);
+        EXPECT_EQ(HksGenerateKey(NULL, paramInSet01, paramSetOut), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
             HksParam *pubKeyExport = nullptr;
             EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
@@ -651,14 +669,15 @@ protected:
             ASSERT_NE(publicKey.data, nullptr);
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-            HksParam *priKeyExport = nullptr;
-            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
+            HksParam *priKeyExport01 = nullptr;
+            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport01), HKS_SUCCESS);
             HksBlob privateKey = {
-                .size = priKeyExport->blob.size,
-                .data = (uint8_t *)HksMalloc(priKeyExport->blob.size)
+                .size = priKeyExport01->blob.size,
+                .data = (uint8_t *)HksMalloc(priKeyExport01->blob.size)
             };
             ASSERT_NE(privateKey.data, nullptr);
-            (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
+            (void)memcpy_s(privateKey.data, priKeyExport01->blob.size,
+                priKeyExport01->blob.data, priKeyExport01->blob.size);
 
             const char *hexData = "00112233445566778899aabbccddeeff";
 
@@ -679,7 +698,7 @@ protected:
         }
         HksFree(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
-        HksFreeParamSet(&paramInSet);
+        HksFreeParamSet(&paramInSet01);
     }
 
     void SignLocalTestCase(const TestCaseParams &testCaseParams)
@@ -810,25 +829,25 @@ protected:
         HksInitParamSet(&paramInSet);
         ASSERT_NE(paramInSet, nullptr);
 
-        struct HksParamSet *paramSetOut = nullptr;
-        HksInitParamSet(&paramSetOut);
+        struct HksParamSet *paramSetOutTest = nullptr;
+        HksInitParamSet(&paramSetOutTest);
         struct HksParam localKey = {
             .tag = HKS_TAG_SYMMETRIC_KEY_DATA,
             .blob = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) }
         };
         ASSERT_NE(localKey.blob.data, nullptr);
-        HksAddParams(paramSetOut, &localKey, 1);
+        HksAddParams(paramSetOutTest, &localKey, 1);
 
-        HksBuildParamSet(&paramSetOut);
+        HksBuildParamSet(&paramSetOutTest);
 
         EXPECT_EQ(HksAddParams(paramInSet, testCaseParams.params.data(), testCaseParams.params.size()), HKS_SUCCESS);
 
         EXPECT_EQ(HksBuildParamSet(&paramInSet), HKS_SUCCESS);
 
-        EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOut), testCaseParams.generateKeyResult);
+        EXPECT_EQ(HksGenerateKey(NULL, paramInSet, paramSetOutTest), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
             HksParam *pubKeyExport = nullptr;
-            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
+            EXPECT_EQ(HksGetParam(paramSetOutTest, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
 
             HksBlob publicKey = {
                 .size = pubKeyExport->blob.size,
@@ -838,7 +857,7 @@ protected:
             (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
             HksParam *priKeyExport = nullptr;
-            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
+            EXPECT_EQ(HksGetParam(paramSetOutTest, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport), HKS_SUCCESS);
 
             HksBlob privateKey = {
                 .size = priKeyExport->blob.size,
@@ -847,9 +866,9 @@ protected:
             ASSERT_NE(privateKey.data, nullptr);
             (void)memcpy_s(privateKey.data, priKeyExport->blob.size, priKeyExport->blob.data, priKeyExport->blob.size);
 
-            const char *hexData = "00112233445566778899aabbccddeeff"; // as plainText data input
+            const char *hexDataTest = "00112233445566778899aabbccddeeff"; // as plainText data input
 
-            HksBlob plainText = { .size = (uint32_t)strlen(hexData), .data = (uint8_t *)hexData };
+            HksBlob plainText = { .size = (uint32_t)strlen(hexDataTest), .data = (uint8_t *)hexDataTest };
 
             HksBlob signData = { .size = SET_SIZE_4096, .data = (uint8_t *)HksMalloc(SET_SIZE_4096) };
             ASSERT_NE(signData.data, nullptr);
@@ -864,7 +883,7 @@ protected:
             HksFree(signData.data);
         }
         HksFree(localKey.blob.data);
-        HksFreeParamSet(&paramSetOut);
+        HksFreeParamSet(&paramSetOutTest);
         HksFreeParamSet(&paramInSet);
     }
 

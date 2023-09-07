@@ -91,13 +91,13 @@ HWTEST_F(HksStorageTest, HksStorageTest_00100, Function | SmallTest | Level1)
         .size = TEST_USER_ID.size() + 1,
         .data = (uint8_t *)&TEST_USER_ID[0]
     };
-    HksBlob keyAlias = {
-        .size = TEST_KEY_ALIAS.size() + 1,
-        .data = (uint8_t *)&TEST_KEY_ALIAS[0],
-    };
     HksBlob keyBlob = {
         .size = TEST_BLOB_SIZE,
         .data = (uint8_t *)TEST_BLOB,
+    };
+    HksBlob keyAlias = {
+        .size = TEST_KEY_ALIAS.size() + 1,
+        .data = (uint8_t *)&TEST_KEY_ALIAS[0],
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,

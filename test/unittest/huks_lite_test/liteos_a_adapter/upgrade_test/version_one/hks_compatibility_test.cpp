@@ -24,7 +24,7 @@
 #include "hks_mem.h"
 #include "hks_test_modify_old_key.h"
 #include "hks_type_inner.h"
-
+#include "hks_compatibility_test_c.h"
 #include "cstring"
 #include "unistd.h"
 #include "securec.h"
@@ -73,16 +73,8 @@ static const struct HksParam GEN_AES_PARAMS[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }
+    },
+    HKS_AES_128
 };
 
 static const struct HksParam ENCYPT_AES_PARAMS[] = {
@@ -92,25 +84,9 @@ static const struct HksParam ENCYPT_AES_PARAMS[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = IV_SIZE,
-            .data = (uint8_t *)IV
-        }
-    }
+    },
+    HKS_AES_128,
+    HKS_NONE_DIGEST_IV
 };
 
 static const struct HksParam DECRYPT_AES_PARAMS[] = {
@@ -120,25 +96,9 @@ static const struct HksParam DECRYPT_AES_PARAMS[] = {
     }, {
         .tag = HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_AES_KEY_SIZE_128
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_IV,
-        .blob = {
-            .size = IV_SIZE,
-            .data = (uint8_t *)IV
-        }
-    }
+    },
+    HKS_AES_128,
+    HKS_NONE_DIGEST_IV
 };
 
 #define USER_ID "0"

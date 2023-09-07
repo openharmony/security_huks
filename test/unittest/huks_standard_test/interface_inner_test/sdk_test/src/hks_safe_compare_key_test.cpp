@@ -72,7 +72,8 @@ static const struct HksTestGenKeyParams g_testGenKeyParams[] = {
             true, HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY,
             false, 0,
             false, 0,
-            false, 0,
+            false,
+            0,
             false, 0
         },
         { false, 0 },
@@ -151,13 +152,13 @@ HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level0)
 {
     struct HksBlob keyAliasOne = { strlen(g_testOne), (uint8_t *)g_testOne };
     int32_t ret = SafeTestGenerateKey(&keyAliasOne);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
     struct HksBlob keyAliasTwo = { strlen(g_testTwo), (uint8_t *)g_testTwo };
     ret = SafeTestGenerateKey(&keyAliasTwo);
-    EXPECT_TRUE(ret == 0);
+    HKS_TEST_ASSERT(ret == 0);
 
     ret = CompareKeyData(&keyAliasOne, &keyAliasTwo);
-    EXPECT_TRUE(ret != 0);
+    HKS_TEST_ASSERT(ret != 0);
     ASSERT_TRUE(ret != 0);
     (void)HksDeleteKey(&keyAliasOne, nullptr);
     (void)HksDeleteKey(&keyAliasTwo, nullptr);

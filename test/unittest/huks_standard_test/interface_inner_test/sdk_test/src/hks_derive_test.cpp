@@ -85,17 +85,17 @@ void HksDeriveTest::TearDown()
 static int32_t BaseTestDerive(uint32_t index)
 {
     /* 1. generate key */
-    struct HksBlob *keyAlias = NULL;
+    struct HksBlob *keyAliasTest = NULL;
     int32_t ret;
     if (g_testDeriveParams[index].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testDeriveParams[index].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        ret = GenerateLocalRandomKey(&keyAlias, &g_testDeriveParams[index].localKeyParams);
+        ret = GenerateLocalRandomKey(&keyAliasTest, &g_testDeriveParams[index].localKeyParams);
     } else {
         if (g_testDeriveParams[index].keyAliasParams.blobExist) {
-            ret = GenerateKey(&keyAlias, &g_testDeriveParams[index].keyAliasParams,
+            ret = GenerateKey(&keyAliasTest, &g_testDeriveParams[index].keyAliasParams,
                 &g_testDeriveParams[index].genKeyParamSetParams, NULL);
         } else {
-            ret = TestConstuctBlob(&keyAlias,
+            ret = TestConstuctBlob(&keyAliasTest,
                 g_testDeriveParams[index].masterKeyParams.blobExist,
                 g_testDeriveParams[index].masterKeyParams.blobSize,
                 g_testDeriveParams[index].masterKeyParams.blobDataExist,
@@ -115,7 +115,7 @@ static int32_t BaseTestDerive(uint32_t index)
 
     struct HksBlob *saltData = NULL;
     struct HksBlob *infoData = NULL;
-    ret = DeriveKey(&g_testDeriveParams[index].deriveParamSetParams, keyAlias, derivedKey, &saltData, &infoData);
+    ret = DeriveKey(&g_testDeriveParams[index].deriveParamSetParams, keyAliasTest, derivedKey, &saltData, &infoData);
     if (ret != g_testDeriveParams[index].expectResult) {
         HKS_TEST_LOG_I("failed, ret[%u] = %d", g_testDeriveParams[index].testId, ret);
     }
@@ -125,9 +125,9 @@ static int32_t BaseTestDerive(uint32_t index)
     if (!(g_testDeriveParams[index].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testDeriveParams[index].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) &&
         (g_testDeriveParams[index].keyAliasParams.blobExist)) {
-        EXPECT_TRUE(HksDeleteKey(keyAlias, NULL) == 0);
+        EXPECT_TRUE(HksDeleteKey(keyAliasTest, NULL) == 0);
     }
-    TestFreeBlob(&keyAlias);
+    TestFreeBlob(&keyAliasTest);
     TestFreeBlob(&derivedKey);
     TestFreeBlob(&saltData);
     TestFreeBlob(&infoData);

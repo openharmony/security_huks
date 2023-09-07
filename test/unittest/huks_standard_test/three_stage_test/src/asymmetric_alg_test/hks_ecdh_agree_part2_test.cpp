@@ -22,6 +22,27 @@
 #include "file_ex.h"
 #endif
 
+#define HKS_ECC_521 \
+{ \
+    .tag = HKS_TAG_ALGORITHM, \
+    .uint32Param = HKS_ALG_ECC \
+}, { \
+    .tag = HKS_TAG_PURPOSE, \
+    .uint32Param = HKS_KEY_PURPOSE_AGREE \
+}, { \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_ECC_KEY_SIZE_521 \
+}, { \
+    .tag = HKS_TAG_DIGEST, \
+    .uint32Param = HKS_DIGEST_NONE \
+}, { \
+    .tag = HKS_TAG_PADDING, \
+    .uint32Param = HKS_PADDING_NONE \
+}, { \
+    .tag = HKS_TAG_BLOCK_MODE, \
+    .uint32Param = HKS_MODE_CBC \
+}
+
 using namespace testing::ext;
 namespace Unittest::EcdhAgree {
 class HksEcdhAgreePart2Test : public testing::Test {
@@ -180,25 +201,7 @@ static struct HksBlob g_keyAlias02008 = {
     (uint8_t *)"HksECDHAgreeKeyAliasTest008_2"
 };
 static struct HksParam g_genParams008[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECC
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_521
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }
+    HKS_ECC_521
 };
 static struct HksParam g_agreeParams01Init008[] = {
     {
@@ -246,25 +249,7 @@ static struct HksBlob g_keyAlias02009 = {
     (uint8_t *)"HksECDHAgreeKeyAliasTest009_2"
 };
 static struct HksParam g_genParams009[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECC
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_521
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }
+    HKS_ECC_521
 };
 static struct HksParam g_agreeParams01Init009[] = {
     {
@@ -300,25 +285,7 @@ static struct HksBlob g_keyAlias02010 = {
     (uint8_t *)"HksECDHAgreeKeyAliasTest0010_2"
 };
 static struct HksParam g_genParams010[] = {
-    {
-        .tag = HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_ECC
-    }, {
-        .tag = HKS_TAG_PURPOSE,
-        .uint32Param = HKS_KEY_PURPOSE_AGREE
-    }, {
-        .tag = HKS_TAG_KEY_SIZE,
-        .uint32Param = HKS_ECC_KEY_SIZE_521
-    }, {
-        .tag = HKS_TAG_DIGEST,
-        .uint32Param = HKS_DIGEST_NONE
-    }, {
-        .tag = HKS_TAG_PADDING,
-        .uint32Param = HKS_PADDING_NONE
-    }, {
-        .tag = HKS_TAG_BLOCK_MODE,
-        .uint32Param = HKS_MODE_CBC
-    }
+    HKS_ECC_521
 };
 static struct HksParam g_agreeParams01Init010[] = {
     {

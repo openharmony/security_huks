@@ -1260,11 +1260,13 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01300, TestSize.Level1)
         { .tag = HKS_TAG_KEY_STORAGE_FLAG, .uint32Param = HKS_STORAGE_PERSISTENT },
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
-        { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+        { .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
         { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
-        { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
+        { .tag = HKS_TAG_KEY_GENERATE_TYPE,
+        .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
         { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
     };
     uint8_t iv[IV_SIZE] = {0};
@@ -1302,11 +1304,13 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01400, TestSize.Level1)
         { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
-        { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_NONE },
+        { .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_NONE },
         { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_PKCS7 },
         { .tag = HKS_TAG_IS_KEY_ALIAS, .boolParam = true },
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
-        { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+        { .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CBC },
     };
     uint8_t iv[IV_SIZE] = {0};
     struct HksParam tagIv = { .tag = HKS_TAG_IV, .blob = { .size = IV_SIZE, .data = iv } };

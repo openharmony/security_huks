@@ -282,41 +282,41 @@ namespace Unittest::ImportWrappedKey {
         material.dSize = dDataBlob->size;
 
         uint32_t size = sizeof(material) + material.nSize + material.eSize + material.dSize;
-        uint8_t *data = (uint8_t *) HksMalloc(size);
-        if (data == nullptr) {
+        uint8_t *dataTest = (uint8_t *) HksMalloc(size);
+        if (dataTest == nullptr) {
             return HKS_ERROR_MALLOC_FAIL;
         }
 
         // copy struct material
-        if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-            HksFree(data);
+        if (memcpy_s(dataTest, size, &material, sizeof(material)) != EOK) {
+            HksFree(dataTest);
             return HKS_ERROR_BAD_STATE;
         }
 
         uint32_t offset = sizeof(material);
         // copy nData
-        if (memcpy_s(data + offset, size - offset, nDataBlob->data, nDataBlob->size) != EOK) {
-            HksFree(data);
+        if (memcpy_s(dataTest + offset, size - offset, nDataBlob->data, nDataBlob->size) != EOK) {
+            HksFree(dataTest);
             return HKS_ERROR_BAD_STATE;
         }
 
         offset += material.nSize;
         // copy eData
         if (!isPriKey) {
-            if (memcpy_s(data + offset, size - offset, &g_eData, sizeof(g_eData)) != EOK) {
-                HksFree(data);
+            if (memcpy_s(dataTest + offset, size - offset, &g_eData, sizeof(g_eData)) != EOK) {
+                HksFree(dataTest);
                 return HKS_ERROR_BAD_STATE;
             }
             offset += material.eSize;
         }
 
         // copy dData
-        if (memcpy_s(data + offset, size - offset, dDataBlob->data, dDataBlob->size) != EOK) {
-            HksFree(data);
+        if (memcpy_s(dataTest + offset, size - offset, dDataBlob->data, dDataBlob->size) != EOK) {
+            HksFree(dataTest);
             return HKS_ERROR_BAD_STATE;
         }
 
-        outKey->data = data;
+        outKey->data = dataTest;
         outKey->size = size;
         return HKS_SUCCESS;
     }

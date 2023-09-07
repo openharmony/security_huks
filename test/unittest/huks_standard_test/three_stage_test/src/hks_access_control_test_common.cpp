@@ -267,12 +267,11 @@ int32_t AuthTokenSign(const IDMParams &testIDMParams,  HksUserAuthToken *authTok
 static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
-    struct HksParamSet *newParamSet = nullptr;
-    HKS_LOG_E("AppendToNewParamSet start ");
+    struct HksParamSet *newParamSetTest = nullptr;
+    
     do {
         ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("check paramSet failed");
             break;
         }
 
@@ -282,24 +281,24 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
             break;
         }
 
-        ret = HksInitParamSet(&newParamSet);
+        ret = HksInitParamSet(&newParamSetTest);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append init operation param set failed");
             break;
         }
 
-        ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
+        ret = HksAddParams(newParamSetTest, paramSet->params, paramSet->paramsCnt);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("append params failed");
             break;
         }
         HKS_LOG_E("AppendToNewParamSet end ");
 
-        *outParamSet = newParamSet;
+        *outParamSet = newParamSetTest;
         return ret;
     } while (0);
 
-    HksFreeParamSet(&newParamSet);
+    HksFreeParamSet(&newParamSetTest);
     return ret;
 }
 

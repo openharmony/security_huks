@@ -526,6 +526,7 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
 
     /* 2. Generate Key */
     struct HksParamSet *genParamSet = nullptr;
+    struct HksParamSet *hmacParamSet = nullptr;
 #ifdef L2_STANDARD
     ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
 #else
@@ -536,7 +537,6 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. HMAC Three Stage(Abort) */
-    struct HksParamSet *hmacParamSet = nullptr;
 #ifdef L2_STANDARD
     ret = InitParamSet(&hmacParamSet, g_hmacParams005, sizeof(g_hmacParams005) / sizeof(HksParam));
 #else

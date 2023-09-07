@@ -53,16 +53,6 @@ void HksCurve25519Test::TearDown()
 }
 
 /**
- * @tc.name: HksCurve25519Test.HksCurve25519Test001
- * @tc.desc: The static function will return true;
- * @tc.type: FUNC
- */
-HWTEST_F(HksCurve25519Test, HksCurve25519Test001, TestSize.Level0)
-{
-    ASSERT_TRUE(TestCurve25519All() == 0);
-}
-
-/**
  * @tc.name: HksCurve25519Test.HksCurve25519Test002
  * @tc.desc: The static function will return true;
  * @tc.type: FUNC
@@ -70,6 +60,16 @@ HWTEST_F(HksCurve25519Test, HksCurve25519Test001, TestSize.Level0)
 HWTEST_F(HksCurve25519Test, HksCurve25519Test002, TestSize.Level0)
 {
     ASSERT_TRUE(TestEd25519SignTeeVerifyLocal() == 0);
+}
+
+/**
+ * @tc.name: HksCurve25519Test.HksCurve25519Test001
+ * @tc.desc: The static function will return true;
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksCurve25519Test, HksCurve25519Test001, TestSize.Level0)
+{
+    ASSERT_TRUE(TestCurve25519All() == 0);
 }
 
 /**
