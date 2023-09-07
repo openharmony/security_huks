@@ -491,7 +491,8 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0013, TestSize.Level0)
     ret = HksGenerateRandom(NULL, &(saltParam->blob));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
-    ret = InitParamSet(&pbkdf2FinishParamSetTest01, g_pbkdf2StorageParams, sizeof(g_pbkdf2StorageParams) / sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2FinishParamSetTest01, g_pbkdf2StorageParams,
+        sizeof(g_pbkdf2StorageParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -622,7 +623,8 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0016, TestSize.Level0)
     ret = HksGenerateRandom(NULL, &(saltParam->blob));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
-    ret = InitParamSet(&pbkdf2FinishParamSetTest02, g_pbkdf2StorageParams, sizeof(g_pbkdf2StorageParams) / sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2FinishParamSetTest02, g_pbkdf2StorageParams,
+        sizeof(g_pbkdf2StorageParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final
@@ -709,7 +711,8 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0018, TestSize.Level0)
     ret = HksGenerateRandom(NULL, &(saltParam->blob));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateRandom failed.";
     // Finish paramset
-    ret = InitParamSet(&pbkdf2FinishParamSetTest03, g_pbkdf2StorageParams, sizeof(g_pbkdf2StorageParams) / sizeof(HksParam));
+    ret = InitParamSet(&pbkdf2FinishParamSetTest03, g_pbkdf2StorageParams,
+        sizeof(g_pbkdf2StorageParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // init-update-final

@@ -68,7 +68,7 @@ const struct HksTestGenKeyParams g_testGenKeyParams[] = {
         false, 0,
         true, HKS_STORAGE_TEMP },
         { true,
-        DEFAULT_X25519_PARAM_SET_OUT },
+          DEFAULT_X25519_PARAM_SET_OUT },
     },
 };
 

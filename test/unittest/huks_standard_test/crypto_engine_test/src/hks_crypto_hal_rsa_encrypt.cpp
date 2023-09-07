@@ -275,7 +275,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_011_PARAMS = {
     .keyData = HKS_CRYPTO_HAL_RSA_0011_PARAMS_KEY_DATA
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
     .keySize = HKS_RSA_KEY_SIZE_3072,
-    
+
     .encryptResult = HKS_SUCCESS,
 };
 
@@ -291,7 +291,7 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_ENCRYPT_012_PARAMS = {
     .keyData = HKS_CRYPTO_HAL_RSA_0012_PARAMS_KEY_DATA
     .hexData = "00112233445566778899aabbccddeeff00112233445566778899aabbccddeeff",
     .keySize = HKS_RSA_KEY_SIZE_4096,
-    
+
     .encryptResult = HKS_SUCCESS,
 };
 }  // namespace

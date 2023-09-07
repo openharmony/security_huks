@@ -480,8 +480,8 @@ namespace Unittest::ImportWrappedKey {
 
         /* copy data */
         for (uint32_t i = 0; i < size; ++i) {
-            if (memcpy_s(outBlob.data + offsetTest, totalLength - offsetTest, reinterpret_cast<uint8_t *>(&blobArray[i]->size),
-                sizeof(blobArray[i]->size)) != EOK) {
+            if (memcpy_s(outBlob.data + offsetTest, totalLength - offsetTest,
+                reinterpret_cast<uint8_t *>(&blobArray[i]->size), sizeof(blobArray[i]->size)) != EOK) {
                 return HKS_ERROR_BUFFER_TOO_SMALL;
             }
             offsetTest += sizeof(blobArray[i]->size);
@@ -741,14 +741,16 @@ namespace Unittest::ImportWrappedKey {
         uint32_t offset = sizeof(material);
         if (!isPriKey) {
             // copy xData
-            if (memcpy_s(data + offset, size - offset, keyTest->publicOrXData.data, keyTest->publicOrXData.size) != EOK) {
+            if (memcpy_s(data + offset, size - offset, keyTest->publicOrXData.data,
+                keyTest->publicOrXData.size) != EOK) {
                 HksFree(data);
                 return HKS_ERROR_BAD_STATE;
             }
 
             offset += material.xSize;
             // copy yData
-            if (memcpy_s(data + offset, size - offset, keyTest->privateOrYData.data, keyTest->privateOrYData.size) != EOK) {
+            if (memcpy_s(data + offset, size - offset, keyTest->privateOrYData.data,
+                keyTest->privateOrYData.size) != EOK) {
                 HksFree(data);
                 return HKS_ERROR_BAD_STATE;
             }

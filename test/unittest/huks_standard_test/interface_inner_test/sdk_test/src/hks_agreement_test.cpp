@@ -73,7 +73,7 @@ static const struct HksTestAgreeParams g_testAgreeParams[] = {
         { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE },
         { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE },
         { true, X25519_KEY_SIZE,
-        true, X25519_KEY_SIZE }
+          true, X25519_KEY_SIZE }
     },
 };
 

@@ -42,7 +42,7 @@ uint32_t padding; \
 bool setBlockMode; \
 uint32_t mode; \
 bool setKeyStorageFlag; \
-uint32_t keyStorageFlag;
+uint32_t keyStorageFlag
 
 struct HksTestBlobParams {
     bool blobExist;              /* blob null or not */
@@ -51,7 +51,7 @@ struct HksTestBlobParams {
     uint32_t blobDataSize;       /* blob->data malloc size */
 };
 struct HksTestGenKeyParamsParamSet {
-    HKS_TEST_GEN_KEY
+    HKS_TEST_GEN_KEY;
 };
 struct HksTestGenKeyParamsParamSetOut {
     bool paramSetExist;          /* paramSet null or not */
@@ -264,7 +264,7 @@ struct TestAgreeParamSetStructure {
 };
 struct GenerateKeyParamSetStructure {
     struct HksParamSet **outParamSet;
-    HKS_TEST_GEN_KEY
+    HKS_TEST_GEN_KEY;
 };
 struct AesCipherParamSetStructure {
     struct HksParamSet **outParamSet;

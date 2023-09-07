@@ -373,7 +373,8 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
     HksBlob privateKey = { .size = priKeyExportTest->blob.size,
         .data = static_cast<uint8_t *>(HksMalloc(priKeyExportTest->blob.size)) };
     ASSERT_NE(privateKey.data, nullptr);
-    (void)memcpy_s(privateKey.data, priKeyExportTest->blob.size, priKeyExportTest->blob.data, priKeyExportTest->blob.size);
+    (void)memcpy_s(privateKey.data, priKeyExportTest->blob.size,
+        priKeyExportTest->blob.data, priKeyExportTest->blob.size);
 
     const char *hexData = "00112233445566778899aabbccddeeff";
 
