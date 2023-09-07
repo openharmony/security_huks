@@ -28,7 +28,7 @@ int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, 
                 return HKS_ERROR_INTERNAL_ERROR;
             }
         }
-    
+
         if (strncat_s(fullFileName, fullFileNameLen, fileName, strlen(fileName)) != EOK) {
             return HKS_ERROR_INTERNAL_ERROR;
         }
