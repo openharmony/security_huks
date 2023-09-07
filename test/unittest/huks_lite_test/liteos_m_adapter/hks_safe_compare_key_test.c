@@ -83,7 +83,7 @@ static const struct HksTestGenKeyParams g_testGenKeyParams[] = {
 static int32_t SafeTestGenerateKey(struct HksBlob *keyAlias)
 {
     uint32_t index = 0;
-    
+
     struct HksParamSet *paramSetOut = NULL;
     struct HksParamSet *paramSet = NULL;
     struct GenerateKeyParamSetStructure paramStruct = {

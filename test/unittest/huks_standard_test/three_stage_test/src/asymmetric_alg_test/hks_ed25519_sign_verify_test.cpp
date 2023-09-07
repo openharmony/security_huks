@@ -67,22 +67,22 @@ void HksTestFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet *para
 int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet, const struct HksBlob *inData,
     struct HksBlob *outData, bool isSign)
 {
+    struct HksParam *tmpParam = NULL;
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
-    struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle, nullptr);
+    struct HksBlob handleTest = { sizeof(uint64_t), tmpHandle };
+    int32_t ret = HksInit(keyAlias, paramSet, &handleTest, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
 
-    struct HksParam *tmpParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &tmpParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get tag purpose failed.");
         return HKS_FAILURE;
     }
 
-    ret = TestUpdateFinish(&handle, paramSet, tmpParam->uint32Param, inData, outData);
+    ret = TestUpdateFinish(&handleTest, paramSet, tmpParam->uint32Param, inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;

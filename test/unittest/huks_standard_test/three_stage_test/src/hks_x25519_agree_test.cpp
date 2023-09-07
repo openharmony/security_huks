@@ -472,7 +472,7 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree002, TestSize.Level0)
     struct HksParamSet *initParamSet01 = nullptr;
     struct HksParamSet *finishParamSet01 = nullptr;
     struct HksParamSet *initParamSet02 = nullptr;
-    struct HksParamSet *finishParamSet02 = nullptr;
+    struct HksParamSet *finishParamSetTest02 = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     ret = InitParamSet(&initParamSet01, g_agreeParams01Init002, sizeof(g_agreeParams01Init002) / sizeof(HksParam));
@@ -482,7 +482,7 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)01 failed.";
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init002, sizeof(g_agreeParams02Init002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
-    ret = InitParamSet(&finishParamSet02, g_agreeParams02Finish002,
+    ret = InitParamSet(&finishParamSetTest02, g_agreeParams02Finish002,
         sizeof(g_agreeParams02Finish002) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
@@ -510,7 +510,7 @@ HWTEST_F(HksX25519AgreeTest, HksX25519Agree002, TestSize.Level0)
 
     HksDeleteKey(&g_keyAlias01002, genParamSet);
     HksDeleteKey(&g_keyAlias02002, genParamSet);
-    HksX25519AgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
+    HksX25519AgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSetTest02);
     HksX25519AgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
 

@@ -16,46 +16,7 @@
 #ifndef HKS_TEST_API_PERFORMANCE_H
 #define HKS_TEST_API_PERFORMANCE_H
 
-#include "hks_type.h"
-
 #include "securec.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-int32_t HksGenerateKeyRun(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
-    struct HksParamSet *paramSetOut, uint32_t performTimes);
-
-int32_t HksEncryptRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *plainText, struct HksBlob *cipherText, uint32_t performTimes);
-
-int32_t HksDecryptRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *cipherText, struct HksBlob *plainText, uint32_t performTimes);
-
-int32_t HksMacRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *mac, uint32_t performTimes);
-
-int32_t HksDeriveKeyRun(const struct HksParamSet *paramSet, const struct HksBlob *masterKey,
-    struct HksBlob *derivedKey, uint32_t performTimes);
-
-int32_t HksDeleteKeyRun(const struct HksBlob *keyAlias, uint32_t performTimes);
-
-int32_t HksKeyExistRun(const struct HksBlob *keyAlias, uint32_t performTimes);
-
-int32_t HksGenerateRandomRun(struct HksBlob *random, uint32_t performTimes);
-
-int32_t HksAgreeKeyRun(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
-    const struct HksBlob *peerPublicKey, struct HksBlob *agreedKey, uint32_t performTimes);
-
-int32_t HksHashRun(const struct HksParamSet *paramSet,
-    const struct HksBlob *srcData, struct HksBlob *hash, uint32_t performTimes);
-
-int32_t HksBnExpModRun(struct HksBlob *x, const struct HksBlob *a,
-    const struct HksBlob *e, const struct HksBlob *n, uint32_t performTimes);
-
-#ifdef __cplusplus
-}
-#endif
+#include "hks_test_api_performance_h.h"
 
 #endif /* HKS_TEST_API_PERFORMANCE_H */

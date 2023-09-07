@@ -27,7 +27,7 @@ namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
     {
         uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        
+
         if (data == nullptr || size <= (sizeof(struct HksParamSet) + BLOB_SIZE)) {
             return false;
         }

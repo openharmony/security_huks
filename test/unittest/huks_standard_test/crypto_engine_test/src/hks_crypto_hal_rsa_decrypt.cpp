@@ -291,7 +291,6 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_DECRYPT_012_PARAMS = {
         .algParam = nullptr,
     },
     .keyData = HKS_CRYPTO_HAL_RSA_0012_PARAMS_KEY_DATA
-    
     .hexData =
         "2769734972944c17d96fadc2c2ac2295a0b0fbbeec6bbc866ec2f4b49af477de0be17ce35d5568780ec74400dfccc7dfcd53a5ce84c758"
         "02bb3e20e66dfd2e9f35df0e94efab95e5e946bd203865abebd8280f0ec2a072e307a40ef7828d0c5c9149a1c292bbf25f1e5682e78a1c"
@@ -317,15 +316,15 @@ public:
 protected:
     void RunTestCase(const TestCaseParams &testCaseParams) const
     {
-        uint32_t keyLen = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
-        HksBlob key = { .size = keyLen, .data = (uint8_t *)HksMalloc(keyLen) };
+        uint32_t keyLenTest = testCaseParams.keyData.length() / HKS_COUNT_OF_HALF;
+        HksBlob key = { .size = keyLenTest, .data = (uint8_t *)HksMalloc(keyLenTest) };
         ASSERT_EQ(key.data == nullptr, false) << "key malloc failed.";
-        for (uint32_t ii = 0; ii < keyLen; ii++) {
+        for (uint32_t ii = 0; ii < keyLenTest; ii++) {
             key.data[ii] = ReadHex((const uint8_t *)&testCaseParams.keyData[HKS_COUNT_OF_HALF * ii]);
         }
 
         uint32_t inLen = testCaseParams.hexData.length() / HKS_COUNT_OF_HALF;
-        uint32_t outLen = inLen;
+        uint32_t outLenTest = inLen;
 
         HksBlob message = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
         ASSERT_EQ(message.data == nullptr, false) << "message malloc failed.";
@@ -333,7 +332,7 @@ protected:
             message.data[ii] = ReadHex((const uint8_t *)&testCaseParams.hexData[HKS_COUNT_OF_HALF * ii]);
         }
 
-        HksBlob cipherText = { .size = outLen, .data = (uint8_t *)HksMalloc(outLen + HKS_PADDING_SUPPLENMENT) };
+        HksBlob cipherText = { .size = outLenTest, .data = (uint8_t *)HksMalloc(outLenTest + HKS_PADDING_SUPPLENMENT) };
         ASSERT_EQ(cipherText.data == nullptr, false) << "cipherText malloc failed.";
 
         EXPECT_EQ(

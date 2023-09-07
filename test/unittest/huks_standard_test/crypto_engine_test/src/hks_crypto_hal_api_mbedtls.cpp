@@ -130,26 +130,26 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_004, Function | SmallTes
     HksBlob key = { .size = 0, .data = nullptr };
     HksUsageSpec spec = { .algType = 0xffff };
     HksBlob message = { .size = 0, .data = nullptr };
-    HksBlob cipherText = { .size = 0, .data = nullptr };
+    HksBlob cipherTextTest = { .size = 0, .data = nullptr };
     HksBlob tagAead = { .size = 0, .data = nullptr };
     uint8_t buff[1] = {0};
 
-    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherText, &tagAead);
+    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherTextTest, &tagAead);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     key = { .size = 1, .data = buff };
-    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherText, &tagAead);
+    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherTextTest, &tagAead);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     message = { .size = 1, .data = buff };
-    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherText, &tagAead);
+    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherTextTest, &tagAead);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
     cipherText = { .size = 1, .data = buff };
-    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherText, &tagAead);
+    ret = HksCryptoHalEncrypt(&key, nullptr, &message, &cipherTextTest, &tagAead);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
-    ret = HksCryptoHalEncrypt(&key, &spec, &message, &cipherText, &tagAead);
+    ret = HksCryptoHalEncrypt(&key, &spec, &message, &cipherTextTest, &tagAead);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 }
 
@@ -166,20 +166,20 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_005, Function | SmallTes
     HksUsageSpec spec = { .algType = 0xffff };
     HksBlob message = { .size = 0, .data = nullptr };
     HksBlob cipherText = { .size = 0, .data = nullptr };
-    uint8_t buff[1] = {0};
+    uint8_t buffTest[1] = {0};
 
     ret = HksCryptoHalDecrypt(&key, nullptr, &message, &cipherText);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
-    key = { .size = 1, .data = buff };
+    key = { .size = 1, .data = buffTest };
     ret = HksCryptoHalDecrypt(&key, nullptr, &message, &cipherText);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
-    message = { .size = 1, .data = buff };
+    message = { .size = 1, .data = buffTest };
     ret = HksCryptoHalDecrypt(&key, nullptr, &message, &cipherText);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 
-    cipherText = { .size = 1, .data = buff };
+    cipherText = { .size = 1, .data = buffTest };
     ret = HksCryptoHalDecrypt(&key, nullptr, &message, &cipherText);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
 

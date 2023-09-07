@@ -73,10 +73,10 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestGenerateKey failed.";
 
     struct HksParamSet *encryptParamSet = nullptr;
-    struct HksParamSet *decryptParamSet = nullptr;
+    struct HksParamSet *decryptParamSetTest = nullptr;
     ret = InitParamSet(&encryptParamSet, g_aesEncryParams, sizeof(g_aesEncryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(en) failed.";
-    ret = InitParamSet(&decryptParamSet, g_aesDecryParams, sizeof(g_aesDecryParams) / sizeof(HksParam));
+    ret = InitParamSet(&decryptParamSetTest, g_aesDecryParams, sizeof(g_aesDecryParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(de) failed.";
 
     struct HksBlob inData = { g_inData.length(),
@@ -90,14 +90,14 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
     EXPECT_NE(HksMemCmp(inData.data, cipherText.data, cipherText.size), HKS_SUCCESS) << "inData equals cipherText.";
 
-    ret = HksCrossTestAesDecrypt(&keyAlias, decryptParamSet, &cipherText, &plainText);
+    ret = HksCrossTestAesDecrypt(&keyAlias, decryptParamSetTest, &cipherText, &plainText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAesDecrypt failed.";
     EXPECT_EQ(HksMemCmp(inData.data, plainText.data, plainText.size), HKS_SUCCESS) << "inData not equals plainText.";
 
     HksDeleteKey(&keyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
-    HksFreeParamSet(&decryptParamSet);
+    HksFreeParamSet(&decryptParamSetTest);
 }
 
 /**

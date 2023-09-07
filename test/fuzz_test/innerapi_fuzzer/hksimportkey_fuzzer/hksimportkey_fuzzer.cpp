@@ -21,8 +21,8 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
 const int DOUBLE_BLOB_SIZE = 20;
+const int BLOB_SIZE = 10;
 
 namespace OHOS {
     bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
@@ -31,22 +31,22 @@ namespace OHOS {
             return false;
         }
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t)*size));
-        if (myData == nullptr) {
+        uint8_t *myDataTest = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t)*size));
+        if (myDataTest == nullptr) {
             return false;
         }
 
-        (void)memcpy_s(myData, size, data, size);
+        (void)memcpy_s(myDataTest, size, data, size);
 
-        struct HksBlob keyAlias = { BLOB_SIZE, myData };
-        struct HksBlob pubKey = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + DOUBLE_BLOB_SIZE);
+        struct HksBlob keyAlias = { BLOB_SIZE, myDataTest };
+        struct HksBlob pubKey = { BLOB_SIZE, static_cast<uint8_t *>(myDataTest + BLOB_SIZE) };
+        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myDataTest + DOUBLE_BLOB_SIZE);
 
         paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
 
         (void)HksImportKey(&keyAlias, paramSet, &pubKey);
 
-        HksFree(myData);
+        HksFree(myDataTest);
         return true;
     }
 }

@@ -65,22 +65,24 @@ static const struct HksTestAgreeParams g_testAgreeParams[] = {
         { true, DEFAULT_KEY_ALIAS_SIZE, true, DEFAULT_KEY_ALIAS_SIZE },
         { true, true, HKS_ALG_X25519, true, HKS_CURVE25519_KEY_SIZE_256, true,
             HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY, true, HKS_DIGEST_SHA256,
-            false, 0, false, 0, true, HKS_STORAGE_TEMP },
+            false, 0, false, 0,
+            true, HKS_STORAGE_TEMP },
         { 0 },
         { true, true, HKS_ALG_X25519, true, HKS_CURVE25519_KEY_SIZE_256, true, false },
         { true, TMP_SIZE, true, TMP_SIZE },
         { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE },
         { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE },
-        { true, X25519_KEY_SIZE, true, X25519_KEY_SIZE }
+        { true, X25519_KEY_SIZE,
+          true, X25519_KEY_SIZE }
     },
 };
 
 static int32_t AgreeKey(const struct HksTestAgreeParamSet *agreeParamSetParams, struct HksBlob *privateKey,
     struct HksBlob *peerPublicKey, struct HksBlob *agreedKey)
 {
-    struct HksParamSet *agreeParamSet = NULL;
+    struct HksParamSet *agreeParamSetTest = NULL;
     struct TestAgreeParamSetStructure paramStruct = {
-        &agreeParamSet,
+        &agreeParamSetTest,
         agreeParamSetParams->paramSetExist,
         agreeParamSetParams->setAlg, agreeParamSetParams->alg,
         agreeParamSetParams->setKeySize, agreeParamSetParams->keySize,
@@ -89,8 +91,8 @@ static int32_t AgreeKey(const struct HksTestAgreeParamSet *agreeParamSetParams, 
     int32_t ret = TestConstructAgreeParamSet(&paramStruct);
     EXPECT_TRUE(ret == 0);
 
-    ret = HksAgreeKeyRun(agreeParamSet, privateKey, peerPublicKey, agreedKey, 1);
-    HksFreeParamSet(&agreeParamSet);
+    ret = HksAgreeKeyRun(agreeParamSetTest, privateKey, peerPublicKey, agreedKey, 1);
+    HksFreeParamSet(&agreeParamSetTest);
     return ret;
 }
 
@@ -103,15 +105,15 @@ HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level0)
 {
      /* 1. generate key */
     struct HksBlob *privateKey = NULL;
-    struct HksBlob *peerPubKeyAlias = NULL;
-    struct HksBlob *peerPublicKey = NULL;
+    struct HksBlob *peerPubKeyAliasTest = NULL;
+    struct HksBlob *peerPublicKeyTest = NULL;
     int32_t ret;
 
     if (g_testAgreeParams[0].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testAgreeParams[0].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
         ret = GenerateLocalX25519Key(&privateKey, NULL, &g_testAgreeParams[0].localPrivateKeyParams, NULL);
         EXPECT_TRUE(ret == 0);
-        ret = GenerateLocalX25519Key(NULL, &peerPublicKey, NULL, &g_testAgreeParams[0].localPublicKeyParams);
+        ret = GenerateLocalX25519Key(NULL, &peerPublicKeyTest, NULL, &g_testAgreeParams[0].localPublicKeyParams);
         EXPECT_TRUE(ret == 0);
     }
     /* 2. agreeKey */
@@ -123,7 +125,7 @@ HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level0)
         g_testAgreeParams[0].agreedKeyParams.blobDataSize);
     EXPECT_TRUE(ret == 0);
 
-    ret = AgreeKey(&g_testAgreeParams[0].agreeParamSetParams, privateKey, peerPublicKey, agreeKey);
+    ret = AgreeKey(&g_testAgreeParams[0].agreeParamSetParams, privateKey, peerPublicKeyTest, agreeKey);
     EXPECT_TRUE(ret == g_testAgreeParams[0].expectResult);
 
     /* 3. delete key */
@@ -133,12 +135,12 @@ HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level0)
         (g_testAgreeParams[0].keyAlias2Params.blobExist))) {
         ret = HksDeleteKey(privateKey, NULL);
         EXPECT_TRUE(ret == 0);
-        ret = HksDeleteKey(peerPubKeyAlias, NULL);
+        ret = HksDeleteKey(peerPubKeyAliasTest, NULL);
         EXPECT_TRUE(ret == 0);
     }
     TestFreeBlob(&privateKey);
-    TestFreeBlob(&peerPubKeyAlias);
-    TestFreeBlob(&peerPublicKey);
+    TestFreeBlob(&peerPubKeyAliasTest);
+    TestFreeBlob(&peerPublicKeyTest);
     TestFreeBlob(&agreeKey);
     ASSERT_TRUE(ret == 0);
 }

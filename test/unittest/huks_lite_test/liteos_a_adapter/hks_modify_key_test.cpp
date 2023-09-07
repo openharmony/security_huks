@@ -79,9 +79,9 @@ static int32_t ModifyKey(struct HksBlob *keyAlias)
 
 int32_t BaseTestCipherProcess(struct HksBlob *keyAlias, uint32_t index)
 {
-    struct HksBlob *plainData = NULL;
+    struct HksBlob *plainDataTest = NULL;
     struct HksBlob *cipherData = NULL;
-    int32_t ret = ConstructDataToBlob(&plainData, &cipherData,
+    int32_t ret = ConstructDataToBlob(&plainDataTest, &cipherData,
         &g_testCipherParams[index].plainTextParams, &g_testCipherParams[index].cipherTextParams);
     HKS_TEST_ASSERT(ret == 0);
     struct HksBlob *ivData = NULL;
@@ -92,7 +92,7 @@ int32_t BaseTestCipherProcess(struct HksBlob *keyAlias, uint32_t index)
     do {
         struct CipherEncryptStructure testEncryptStruct = {
             keyAlias, &g_testCipherParams[index].encryptParamSetParams,
-            plainData, cipherData, &ivData, &nonceData, &aadData, 1
+            plainDataTest, cipherData, &ivData, &nonceData, &aadData, 1
         };
         ret = Encrypt(&testEncryptStruct);
         if (ret != g_testCipherParams[index].expectResult) {
@@ -109,13 +109,13 @@ int32_t BaseTestCipherProcess(struct HksBlob *keyAlias, uint32_t index)
         }
 
         if (ret == g_testCipherParams[index].expectResult) {
-            if (plainData->size != decryptedData->size) {
+            if (plainDataTest->size != decryptedData->size) {
                 break;
             }
-            ret = memcmp(plainData->data, decryptedData->data, plainData->size);
+            ret = memcmp(plainDataTest->data, decryptedData->data, plainDataTest->size);
         }
     } while (0);
-    TestFreeBlob(&plainData);
+    TestFreeBlob(&plainDataTest);
     TestFreeBlob(&cipherData);
     TestFreeBlob(&decryptedData);
     TestFreeBlob(&ivData);
@@ -131,8 +131,8 @@ int32_t BaseTestCipherProcess(struct HksBlob *keyAlias, uint32_t index)
  */
 HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
 {
-    uint32_t index = 0;
     struct HksBlob keyAlias = { strlen(g_testName), (uint8_t *)g_testName };
+    uint32_t index = 0;
     int32_t ret = GenerateKeyTwo(&keyAlias, &g_testCipherParams[index].keyAliasParams,
             &g_testCipherParams[index].genKeyParamSetParams, &g_testCipherParams[index].genKeyParamSetParamsOut);
     EXPECT_EQ(ret, 0);

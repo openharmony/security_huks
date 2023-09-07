@@ -211,10 +211,10 @@ int32_t TestAesCipherParamSetPre(struct AesCipherParamSetStructure *paramStruct,
     }
     int32_t ret = 1;
     if (paramStruct->setAlg) {
-        struct HksParam algParam = {0};
-        algParam.tag = HKS_TAG_ALGORITHM;
-        algParam.uint32Param = paramStruct->alg;
-        ret = HksAddParams(paramSet, (const struct HksParam *) &algParam, 1);
+        struct HksParam algParamTest = {0};
+        algParamTest.tag = HKS_TAG_ALGORITHM;
+        algParamTest.uint32Param = paramStruct->alg;
+        ret = HksAddParams(paramSet, (const struct HksParam *) &algParamTest, 1);
         HKS_TEST_ASSERT(ret == 0);
     }
 

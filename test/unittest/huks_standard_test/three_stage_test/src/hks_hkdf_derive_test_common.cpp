@@ -35,8 +35,8 @@ int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias, const struct 
 
     /* 2. Derive Three Stage */
     // Init
-    uint8_t handleD[sizeof(uint64_t)] = {0};
-    struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
+    uint8_t handleDTest[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDerive = { sizeof(uint64_t), handleDTest };
     ret = HksInit(&keyAlias, deriveParamSet, &handleDerive, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
@@ -56,7 +56,7 @@ int32_t HksHkdfDeriveTestNormalCase(const struct HksBlob keyAlias, const struct 
 int32_t HksHkdfDeriveTestCmpCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {
-    struct HksBlob inData = {
+    struct HksBlob inDataTest = {
         g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
@@ -70,22 +70,22 @@ int32_t HksHkdfDeriveTestCmpCase(const struct HksBlob keyAlias,
     /* 2. Derive Three Stage */
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
-    struct HksBlob handleDerive = { sizeof(uint64_t), handleD };
-    ret = HksInit(&keyAlias, deriveParamSet, &handleDerive, nullptr);
+    struct HksBlob handleDeriveTest = { sizeof(uint64_t), handleD };
+    ret = HksInit(&keyAlias, deriveParamSet, &handleDeriveTest, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update
     uint8_t tmpOut[COMMON_SIZE] = {0};
     struct HksBlob outData = { COMMON_SIZE, tmpOut };
-    ret = HksUpdate(&handleDerive, deriveParamSet, &inData, &outData);
+    ret = HksUpdate(&handleDeriveTest, deriveParamSet, &inDataTest, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     // Finish
     uint8_t outDataD[COMMON_SIZE] = {0};
     struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
-    ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
+    ret = HksFinish(&handleDeriveTest, deriveFinalParamsSet, &inDataTest, &outDataDerive);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
-    uint8_t tmpDerive[COMMON_SIZE] = {0};
-    struct HksBlob derivedKey = { COMMON_SIZE, tmpDerive };
+    uint8_t tmpDeriveTest[COMMON_SIZE] = {0};
+    struct HksBlob derivedKey = { COMMON_SIZE, tmpDeriveTest };
     ret = HksDeriveKey(deriveParamSet, &keyAlias, &derivedKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeriveKey failed.";
 
