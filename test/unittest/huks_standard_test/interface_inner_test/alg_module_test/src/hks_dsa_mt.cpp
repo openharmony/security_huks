@@ -639,9 +639,9 @@ class HksDsaMt : public testing::Test {
 protected:
     void GenerateKeyTestCase(const TestCaseParams &testCaseParams)
     {
-        struct HksParamSet *paramInSetTest = nullptr;
-        HksInitParamSet(&paramInSetTest);
-        ASSERT_NE(paramInSetTest, nullptr);
+        struct HksParamSet *paramInSet01 = nullptr;
+        HksInitParamSet(&paramInSet01);
+        ASSERT_NE(paramInSet01, nullptr);
 
         struct HksParamSet *paramSetOut = nullptr;
         HksInitParamSet(&paramSetOut);
@@ -654,32 +654,30 @@ protected:
 
         HksBuildParamSet(&paramSetOut);
 
-        EXPECT_EQ(HksAddParams(paramInSetTest, testCaseParams.params.data(), testCaseParams.params.size()),
-            HKS_SUCCESS);
+        EXPECT_EQ(HksAddParams(paramInSet01, testCaseParams.params.data(), testCaseParams.params.size()), HKS_SUCCESS);
 
-        EXPECT_EQ(HksBuildParamSet(&paramInSetTest), HKS_SUCCESS);
+        EXPECT_EQ(HksBuildParamSet(&paramInSet01), HKS_SUCCESS);
 
-        EXPECT_EQ(HksGenerateKey(NULL, paramInSetTest, paramSetOut), testCaseParams.generateKeyResult);
+        EXPECT_EQ(HksGenerateKey(NULL, paramInSet01, paramSetOut), testCaseParams.generateKeyResult);
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
-            HksParam *pubKeyExportTest = nullptr;
-            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExportTest), HKS_SUCCESS);
+            HksParam *pubKeyExport = nullptr;
+            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA, &pubKeyExport), HKS_SUCCESS);
             HksBlob publicKey = {
-                .size = pubKeyExportTest->blob.size,
-                .data = (uint8_t *)HksMalloc(pubKeyExportTest->blob.size)
+                .size = pubKeyExport->blob.size,
+                .data = (uint8_t *)HksMalloc(pubKeyExport->blob.size)
             };
             ASSERT_NE(publicKey.data, nullptr);
-            (void)memcpy_s(publicKey.data, pubKeyExportTest->blob.size,
-                pubKeyExportTest->blob.data, pubKeyExportTest->blob.size);
+            (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
 
-            HksParam *priKeyExportTest = nullptr;
-            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExportTest), HKS_SUCCESS);
+            HksParam *priKeyExport01 = nullptr;
+            EXPECT_EQ(HksGetParam(paramSetOut, HKS_TAG_ASYMMETRIC_PRIVATE_KEY_DATA, &priKeyExport01), HKS_SUCCESS);
             HksBlob privateKey = {
-                .size = priKeyExportTest->blob.size,
-                .data = (uint8_t *)HksMalloc(priKeyExportTest->blob.size)
+                .size = priKeyExport01->blob.size,
+                .data = (uint8_t *)HksMalloc(priKeyExport01->blob.size)
             };
             ASSERT_NE(privateKey.data, nullptr);
-            (void)memcpy_s(privateKey.data, priKeyExportTest->blob.size,
-                priKeyExportTest->blob.data, priKeyExportTest->blob.size);
+            (void)memcpy_s(privateKey.data, priKeyExport01->blob.size,
+                priKeyExport01->blob.data, priKeyExport01->blob.size);
 
             const char *hexData = "00112233445566778899aabbccddeeff";
 
@@ -700,7 +698,7 @@ protected:
         }
         HksFree(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
-        HksFreeParamSet(&paramInSetTest);
+        HksFreeParamSet(&paramInSet01);
     }
 
     void SignLocalTestCase(const TestCaseParams &testCaseParams)

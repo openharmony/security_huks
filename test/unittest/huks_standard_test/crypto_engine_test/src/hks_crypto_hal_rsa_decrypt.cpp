@@ -291,7 +291,6 @@ const TestCaseParams HKS_CRYPTO_HAL_RSA_DECRYPT_012_PARAMS = {
         .algParam = nullptr,
     },
     .keyData = HKS_CRYPTO_HAL_RSA_0012_PARAMS_KEY_DATA
-
     .hexData =
         "2769734972944c17d96fadc2c2ac2295a0b0fbbeec6bbc866ec2f4b49af477de0be17ce35d5568780ec74400dfccc7dfcd53a5ce84c758"
         "02bb3e20e66dfd2e9f35df0e94efab95e5e946bd203865abebd8280f0ec2a072e307a40ef7828d0c5c9149a1c292bbf25f1e5682e78a1c"
