@@ -203,11 +203,8 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
     switch (alg) {
         case HKS_ALG_RSA:
             return CheckRsaCipherData(isEncrypt, cipherSpec.keyLen, &usageSpec, outData);
-<<<<<<< HEAD
         case HKS_ALG_SM2:
             return CheckSm2CipherData(isEncrypt, &usageSpec, inData, outData);
-=======
->>>>>>> 9cc754a834932b7a42cad3d5f6d172693556f22b
         case HKS_ALG_AES:
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:
