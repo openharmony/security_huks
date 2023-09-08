@@ -173,13 +173,13 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
 {
     struct HksUsageSpec usageSpec = {0};
     HksFillUsageSpec(paramSet, &usageSpec);
-    struct HksKeySpec cihperSpec = {0};
-    HksFillKeySpec(paramSet, &cihperSpec);
+    struct HksKeySpec cipherSpec = {0};
+    HksFillKeySpec(paramSet, &cipherSpec);
     uint32_t alg = usageSpec.algType;
 
     switch (alg) {
         case HKS_ALG_RSA:
-            return CheckRsaCipherData(isEncrypt, cihperSpec.keyLen, &usageSpec, outData);
+            return CheckRsaCipherData(isEncrypt, cipherSpec.keyLen, &usageSpec, outData);
         case HKS_ALG_AES:
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:

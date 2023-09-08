@@ -937,7 +937,7 @@ int32_t HksCoreCheckCipherParams(uint32_t cmdId, const struct HksBlob *key, cons
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = HksCheckCihperData(cmdId, alg, &params, inData, outData);
+    ret = HksCheckCipherData(cmdId, alg, &params, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
@@ -976,7 +976,7 @@ int32_t HksLocalCheckCipherParams(uint32_t cmdId, uint32_t keySize, const struct
     ret = CheckCipherParamsByAlg(cmdId, alg, paramSet, &params);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "local cipher check params failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = HksCheckCihperData(cmdId, alg, &params, inData, outData);
+    ret = HksCheckCipherData(cmdId, alg, &params, inData, outData);
     HKS_IF_NOT_SUCC_LOGE(ret, "local cipher check input or output data failed, ret = %" LOG_PUBLIC "d", ret)
 
     return ret;
