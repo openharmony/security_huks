@@ -75,7 +75,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest002
- * @tc.desc: tdd HksCheckCihperData, expecting HKS_ERROR_INVALID_MODE
+ * @tc.desc: tdd HksCheckCipherData, expecting HKS_ERROR_INVALID_MODE
  * @tc.type: FUNC
  */
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest002, TestSize.Level0)
@@ -84,20 +84,20 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest002, TestSize.Level0)
     struct ParamsValues values;
     struct Params param = { true, HKS_MODE_OFB };
     values.mode = param;
-    int32_t ret = HksCheckCihperData(0, HKS_ALG_SM4, &values, nullptr, nullptr);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_MODE) << "HksCheckCihperData failed, ret = " << ret;
+    int32_t ret = HksCheckCipherData(0, HKS_ALG_SM4, &values, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_MODE) << "HksCheckCipherData failed, ret = " << ret;
 }
 
 /**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest003
- * @tc.desc: tdd HksCheckCihperData, expecting HKS_ERROR_INVALID_ALGORITHM
+ * @tc.desc: tdd HksCheckCipherData, expecting HKS_ERROR_INVALID_ALGORITHM
  * @tc.type: FUNC
  */
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest003");
-    int32_t ret = HksCheckCihperData(0, HKS_ALG_PBKDF2, nullptr, nullptr, nullptr);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_ALGORITHM) << "HksCheckCihperData failed, ret = " << ret;
+    int32_t ret = HksCheckCipherData(0, HKS_ALG_PBKDF2, nullptr, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ALGORITHM) << "HksCheckCipherData failed, ret = " << ret;
 }
 
 /**

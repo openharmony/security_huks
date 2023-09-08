@@ -1883,7 +1883,7 @@ int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct P
     return ret;
 }
 
-int32_t HksCheckCihperData(uint32_t cmdId, uint32_t alg, const struct ParamsValues *inputParams,
+int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValues *inputParams,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
     switch (alg) {
