@@ -115,8 +115,8 @@ enum HksKeyType {
  * @brief hks key purpose
  */
 enum HksKeyPurpose {
-    HKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC, AES, and SM4 keys. */
-    HKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC, AES, and SM4 keys. */
+    HKS_KEY_PURPOSE_ENCRYPT = 1,                   /* Usable with RSA, EC, AES, SM2, and SM4 keys. */
+    HKS_KEY_PURPOSE_DECRYPT = 2,                   /* Usable with RSA, EC, AES, SM2, and SM4 keys. */
     HKS_KEY_PURPOSE_SIGN = 4,                      /* Usable with RSA, EC keys. */
     HKS_KEY_PURPOSE_VERIFY = 8,                    /* Usable with RSA, EC keys. */
     HKS_KEY_PURPOSE_DERIVE = 16,                   /* Usable with EC keys. */

@@ -344,7 +344,7 @@ static const struct ExpectParamsValuesChecker g_expectEccParams[] = {
 static const struct ParamsValuesChecker g_sm2ParamSet[] = {
     { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
         { false, 0, false} } },
-    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+    { HKS_CHECK_TYPE_USE_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
         { false, 0, false} } }
 };
 static const struct ExpectParamsValuesChecker g_expectSm2Params[] = {
@@ -357,7 +357,7 @@ static const struct ExpectParamsValuesChecker g_expectSm2Params[] = {
         }
     },
     { HKS_CHECK_TYPE_USE_KEY, {
-        { false, NULL, 0 },
+        { true, g_sm2KeySize, HKS_ARRAY_SIZE(g_sm2KeySize) },
         { false, NULL, 0 },
         { false, NULL, 0 },
         { true, g_sm2Digest, HKS_ARRAY_SIZE(g_sm2Digest) },
@@ -1899,8 +1899,10 @@ int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
         case HKS_ALG_SM4:
             return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_SM4);
 #endif
+#ifdef HKS_SUPPORT_SM2_C
         case HKS_ALG_SM2:
             return HKS_SUCCESS;
+#endif
         default:
             return HKS_ERROR_INVALID_ALGORITHM;
     }
