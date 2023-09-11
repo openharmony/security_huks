@@ -429,9 +429,7 @@ static void FreeBuffAndDeleteKey(struct HksParamSet **paramSet1, struct HksParam
 static int32_t HksSm2CipherTestRun(const struct HksBlob *keyAlias, const GenEncryptDecryptParam &param,
     const struct HksBlob *inData, struct HksBlob *cipherText)
 {
-    struct HksParamSet *genParamSet = nullptr;
-    struct HksParamSet *encryptParamSet = nullptr;
-    struct HksParamSet *decryptParamSet = nullptr;
+    struct HksParamSet *genParamSet, *encryptParamSet, *decryptParamSet;
     int32_t ret = InitParamSet(&genParamSet, param.gen.params.data(), param.gen.params.size());
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
 
@@ -505,7 +503,6 @@ HWTEST_F(HksSm2CipherTest, HksSm2CipherTest001, TestSize.Level0)
     struct HksBlob cipherText2 = { 1, cipher };
     ret = HksSm2CipherTestRun(&keyAlias, param, &inData, &cipherText2);
     EXPECT_NE(ret, HKS_SUCCESS) << "sm2CipherTest001.2 failed.";
-
 }
 
 /**
@@ -520,12 +517,13 @@ HWTEST_F(HksSm2CipherTest, HksSm2CipherTest002, TestSize.Level0)
     struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
     struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
     uint8_t cipher[SM2_COMMON_SIZE] = {0};
-    struct HksBlob cipherText = { SM2_COMMON_SIZE, cipher };
+    struct HksBlob cipherText;
 
     int ret;
     for (const struct TestCaseParam &negativeGenParam : NEGATIVE_CASE_GEN_PARAMS) {
         GenEncryptDecryptParam param { negativeGenParam, POSITIVE_CASE_ENCRYPT_PARAM,
             POSITIVE_CASE_DECRYPT_PARAM };
+        cipherText = { SM2_COMMON_SIZE, cipher };
         ret = HksSm2CipherTestRun(&keyAlias, param, &inData, &cipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "sm2CipherTest002 gen abnormal test failed.";
     }
@@ -533,6 +531,7 @@ HWTEST_F(HksSm2CipherTest, HksSm2CipherTest002, TestSize.Level0)
     for (const struct TestCaseParam &negativeEncryptParam : NEGATIVE_CASE_ENCRYPT_PARAMS) {
         GenEncryptDecryptParam param { POSITIVE_CASE_GEN_PARAM, negativeEncryptParam,
             POSITIVE_CASE_DECRYPT_PARAM };
+        cipherText = { SM2_COMMON_SIZE, cipher };
         ret = HksSm2CipherTestRun(&keyAlias, param, &inData, &cipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "sm2CipherTest002 encrypt abnormal test failed.";
     }
@@ -540,6 +539,7 @@ HWTEST_F(HksSm2CipherTest, HksSm2CipherTest002, TestSize.Level0)
     for (const struct TestCaseParam &negativeDecryptParam : NEGATIVE_CASE_DECRYPT_PARAMS) {
         GenEncryptDecryptParam param { POSITIVE_CASE_GEN_PARAM, POSITIVE_CASE_ENCRYPT_PARAM,
             negativeDecryptParam };
+        cipherText = { SM2_COMMON_SIZE, cipher };
         ret = HksSm2CipherTestRun(&keyAlias, param, &inData, &cipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "sm2CipherTest002 decrypt abnormal test failed.";
     }
@@ -656,7 +656,6 @@ static int32_t HksSm2CipherTestRunByNdk(const struct OH_Huks_Blob *keyAlias, con
         ret = OH_Huks_ImportKeyItem(&newKeyAlias, (OH_Huks_ParamSet *) encryptParamSet, &publicKey).errorCode;
         if (ret != HKS_SUCCESS) {
             ret = ((param.encrypt.result != HKS_SUCCESS) ? HKS_SUCCESS : ret);
-            HKS_LOG_E("########################>?????????????????: %" LOG_PUBLIC "d   --%" LOG_PUBLIC "d", param.gen.result, param.encrypt.result);
             EXPECT_EQ(ret, HKS_SUCCESS) << "OH_Huks_ImportKeyItem failed.";
             break;
         }
