@@ -53,7 +53,6 @@
 #endif
 #define HKS_RSA_OAEP_DIGEST_NUM          2
 #define HKS_SM2_C1_LEN_NUM               2
-#define HKS_BYTE_SIZE                    8
 #define HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE  16
 #define HKS_TEMP_SIZE                    32
 #define MAX_BUF_SIZE                     (5 * 1024 * 1024)
@@ -102,20 +101,20 @@ static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsa
 static int32_t CheckSm2CipherData(bool isEncrypt, const struct HksUsageSpec *usageSpec, const struct HksBlob *inData,
     const struct HksBlob *outData)
 {
-    if (isEncrypt) {
-        uint32_t digest = usageSpec->digest;
-        uint32_t digestLen;
-        int32_t ret = HksGetDigestLen(digest, &digestLen);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
+    if (!isEncrypt) {
+        return HKS_SUCCESS;
+    }
+    uint32_t digest = usageSpec->digest;
+    uint32_t digestLen;
+    int32_t ret = HksGetDigestLen(digest, &digestLen);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetDigestLen failed, ret = %" LOG_PUBLIC "x", ret)
+    uint32_t lenC1 = HKS_SM2_C1_LEN_NUM * HKS_KEY_BYTES(HKS_SM2_KEY_SIZE_256) + 1;
+    uint32_t needLen = (lenC1 + digestLen + inData->size);
 
-        uint32_t lenC1 = (HKS_SM2_C1_LEN_NUM * HKS_SM2_KEY_SIZE_256 + 1) / HKS_BYTE_SIZE;
-        uint32_t needLen = (lenC1 + digestLen + inData->size);
-
-        if (outData->size < needLen) {
-            HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, needLen: %" LOG_PUBLIC "d",
-                outData->size, needLen);
-            return HKS_ERROR_BUFFER_TOO_SMALL;
-        }
+    if (outData->size < needLen) {
+        HKS_LOG_E("encrypt, outData buffer too small size: %" LOG_PUBLIC "u, needLen: %"
+            LOG_PUBLIC "d", outData->size, needLen);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     return HKS_SUCCESS;
 }
@@ -136,7 +135,6 @@ static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     }
-
     return HKS_SUCCESS;
 }
 
@@ -515,7 +513,7 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
         ret = HksCryptoHalVerify(&rawKey, &usageSpec, inData, outData);
     }
     HKS_IF_NOT_SUCC_LOGE(ret, "SignVerify Finish failed, purpose = 0x%" LOG_PUBLIC "x, ret = %" LOG_PUBLIC "d",
-            usageSpec.purpose, ret)
+        usageSpec.purpose, ret)
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE_PTR(rawKey.data);
@@ -762,7 +760,7 @@ static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct H
         ret = HksCryptoHalDecrypt(&rawKey, &usageSpec, inData, outData);
     }
     HKS_IF_NOT_SUCC_LOGE(ret, "rsa cipher Finish failed, purpose = 0x%" LOG_PUBLIC "x, ret = %" LOG_PUBLIC "d",
-            usageSpec.purpose, ret)
+        usageSpec.purpose, ret)
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE_PTR(rawKey.data);
