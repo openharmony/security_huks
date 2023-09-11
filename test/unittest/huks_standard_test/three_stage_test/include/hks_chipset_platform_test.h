@@ -48,6 +48,8 @@ struct HksCipsetPlatformEncryptInput {
     // uuid and customInfo will be concatenating together during encrypting and decrypting.
     std::vector<uint8_t> customInfo;
     std::vector<uint8_t> plainText;
+    bool inputPlatformPubKeyManually;
+    std::vector<uint8_t> platformPubKey;
 };
 
 inline std::vector<HksParam> CipherMaterialsToDecryptInputParams(struct HksChipsetPlatformTestCase &t)
