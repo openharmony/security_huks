@@ -42,12 +42,10 @@ public:
 
 void HksSafeCipherKeyTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSafeCipherKeyTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSafeCipherKeyTest::SetUp()

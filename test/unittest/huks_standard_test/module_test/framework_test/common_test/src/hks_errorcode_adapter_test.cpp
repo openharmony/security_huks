@@ -38,12 +38,10 @@ public:
 
 void HksErrorCodeAdapterTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksErrorCodeAdapterTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksErrorCodeAdapterTest::SetUp()

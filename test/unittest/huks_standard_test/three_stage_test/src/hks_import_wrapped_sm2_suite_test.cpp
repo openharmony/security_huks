@@ -41,16 +41,10 @@ namespace Unittest::ImportWrappedKey {
 
     void HksImportWrappedSm2SuiteTest::SetUpTestCase(void)
     {
-#ifdef L2_STANDARD
-        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
     }
 
     void HksImportWrappedSm2SuiteTest::TearDownTestCase(void)
     {
-#ifdef L2_STANDARD
-        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
     }
 
     void HksImportWrappedSm2SuiteTest::SetUp()

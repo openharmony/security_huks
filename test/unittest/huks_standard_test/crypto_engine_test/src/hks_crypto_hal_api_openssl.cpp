@@ -41,12 +41,10 @@ public:
 
 void HksCryptoHalApiOpenssl::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalApiOpenssl::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalApiOpenssl::SetUp()

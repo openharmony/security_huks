@@ -150,12 +150,10 @@ protected:
 
 void HksCryptoHalHmacHmac::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalHmacHmac::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalHmacHmac::SetUp()

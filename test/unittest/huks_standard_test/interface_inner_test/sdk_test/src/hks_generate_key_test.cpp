@@ -39,12 +39,10 @@ public:
 
 void HksGenerateKeyTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksGenerateKeyTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksGenerateKeyTest::SetUp()
