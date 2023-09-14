@@ -40,12 +40,10 @@ public:
 
 void HksCryptoHalApiMbedtls::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalApiMbedtls::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalApiMbedtls::SetUp()

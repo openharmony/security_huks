@@ -36,16 +36,10 @@ public:
 
 void HksRsaSignVerifyPart1Test::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
 }
 
 void HksRsaSignVerifyPart1Test::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksRsaSignVerifyPart1Test::SetUp()

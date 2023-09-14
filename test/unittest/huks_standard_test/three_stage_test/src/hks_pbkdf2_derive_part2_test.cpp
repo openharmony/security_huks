@@ -117,16 +117,10 @@ public:
 
 void HksPbkdf2DerivePart2Test::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
 }
 
 void HksPbkdf2DerivePart2Test::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksPbkdf2DerivePart2Test::SetUp()

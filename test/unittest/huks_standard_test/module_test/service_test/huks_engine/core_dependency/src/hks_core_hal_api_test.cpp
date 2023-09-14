@@ -37,12 +37,10 @@ public:
 
 void HksCoreHalApiTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCoreHalApiTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCoreHalApiTest::SetUp()

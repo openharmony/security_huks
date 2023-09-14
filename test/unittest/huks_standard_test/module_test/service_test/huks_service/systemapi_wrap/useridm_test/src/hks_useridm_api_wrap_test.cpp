@@ -40,12 +40,10 @@ public:
 
 void HksUseridmWrapTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksUseridmWrapTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksUseridmWrapTest::SetUp()

@@ -532,9 +532,6 @@ public:
 
 void HksChipsetPlatformEncryptTest::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
     HKS_LOG_E("set up cases");
     int32_t ret = HksInitialize();
     EXPECT_EQ(ret, HKS_SUCCESS);
@@ -542,9 +539,6 @@ void HksChipsetPlatformEncryptTest::SetUpTestCase(void)
 
 void HksChipsetPlatformEncryptTest::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksChipsetPlatformEncryptTest::SetUp()

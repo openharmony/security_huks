@@ -440,12 +440,10 @@ protected:
 
 void HksCryptoHalAesEncrypt::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalAesEncrypt::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalAesEncrypt::SetUp()

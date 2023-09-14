@@ -40,16 +40,10 @@ public:
 
 void HksEcdhAgreePart1Test::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
 }
 
 void HksEcdhAgreePart1Test::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksEcdhAgreePart1Test::SetUp()

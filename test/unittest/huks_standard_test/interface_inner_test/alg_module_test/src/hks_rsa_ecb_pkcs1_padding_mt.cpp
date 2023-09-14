@@ -710,16 +710,10 @@ class HksRsaEcbPkcs1PaddingMt : public HksRsaCommonMt, public testing::Test {
 public:
     static void SetUpTestCase(void)
     {
-#ifdef L2_STANDARD
-        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
     }
 
     static void TearDownTestCase(void)
     {
-#ifdef L2_STANDARD
-        OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
     }
 };
 

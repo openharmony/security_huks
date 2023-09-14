@@ -481,17 +481,11 @@ public:
 
 void HksChipsetPlatformDecryptTest::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
     HKS_LOG_E("set up cases");
 }
 
 void HksChipsetPlatformDecryptTest::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksChipsetPlatformDecryptTest::SetUp()

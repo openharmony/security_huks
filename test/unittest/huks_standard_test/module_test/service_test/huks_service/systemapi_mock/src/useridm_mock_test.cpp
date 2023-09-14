@@ -37,12 +37,10 @@ public:
 
 void HksServiceUseridmMockTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksServiceUseridmMockTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksServiceUseridmMockTest::SetUp()

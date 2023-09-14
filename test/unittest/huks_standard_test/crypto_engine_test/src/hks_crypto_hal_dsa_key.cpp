@@ -39,12 +39,10 @@ public:
 const uint32_t DSA_SIZE_512 = 512;
 void HksCryptoHalDsaKey::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalDsaKey::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalDsaKey::SetUp()

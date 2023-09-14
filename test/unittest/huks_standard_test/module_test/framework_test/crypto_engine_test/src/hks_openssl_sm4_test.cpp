@@ -51,12 +51,10 @@ public:
 
 void HksFrameworkOpensslSm4Test::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFrameworkOpensslSm4Test::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFrameworkOpensslSm4Test::SetUp()

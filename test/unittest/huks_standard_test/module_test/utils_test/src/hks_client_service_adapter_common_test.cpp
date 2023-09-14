@@ -41,12 +41,10 @@ public:
 
 void HksClientServiceAdapterCommonTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksClientServiceAdapterCommonTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksClientServiceAdapterCommonTest::SetUp()
