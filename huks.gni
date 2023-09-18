@@ -19,6 +19,7 @@ enable_user_auth_framework = true
 enable_huks_lite_hap = false
 enable_bundle_framework = true
 has_huks_hdi_driver = true
+fuzz_module_out_path = "huks/huks"
 
 # always set as false for upload code
 hks_enable_test = false
