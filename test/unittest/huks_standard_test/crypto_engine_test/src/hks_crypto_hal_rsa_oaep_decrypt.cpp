@@ -808,12 +808,10 @@ protected:
 
 void HksCryptoHalRsaOaepDecrypt::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalRsaOaepDecrypt::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalRsaOaepDecrypt::SetUp()

@@ -40,12 +40,10 @@ public:
 
 void HksGenerateRandomTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksGenerateRandomTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksGenerateRandomTest::SetUp()

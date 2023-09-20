@@ -40,12 +40,10 @@ public:
 
 void HksUpgradeKeyAccesserTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksUpgradeKeyAccesserTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksUpgradeKeyAccesserTest::SetUp()

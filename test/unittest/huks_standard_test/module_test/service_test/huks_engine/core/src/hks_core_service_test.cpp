@@ -45,13 +45,11 @@ public:
 
 void HksCoreServiceTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
     static_cast<void>(HksClientInitialize());
 }
 
 void HksCoreServiceTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCoreServiceTest::SetUp()

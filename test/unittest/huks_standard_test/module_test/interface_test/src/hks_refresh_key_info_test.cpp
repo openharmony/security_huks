@@ -39,12 +39,10 @@ public:
 
 void HksRefreshKeyInfoTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksRefreshKeyInfoTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksRefreshKeyInfoTest::SetUp()

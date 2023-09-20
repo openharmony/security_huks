@@ -41,12 +41,10 @@ public:
 
 void HksThreeStageMultiThreadTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksThreeStageMultiThreadTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksThreeStageMultiThreadTest::SetUp()

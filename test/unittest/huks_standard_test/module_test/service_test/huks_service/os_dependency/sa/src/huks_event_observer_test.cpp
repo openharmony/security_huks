@@ -48,13 +48,11 @@ public:
 
 void HksEventObserverTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
     HksInitialize();
 }
 
 void HksEventObserverTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksEventObserverTest::SetUp()

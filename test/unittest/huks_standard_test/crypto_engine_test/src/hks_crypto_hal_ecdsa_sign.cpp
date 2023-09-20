@@ -562,12 +562,10 @@ protected:
 
 void HksCryptoHalEcdsaSign::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalEcdsaSign::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalEcdsaSign::SetUp()

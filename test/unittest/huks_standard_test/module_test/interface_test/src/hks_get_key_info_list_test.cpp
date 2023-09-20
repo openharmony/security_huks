@@ -43,12 +43,10 @@ public:
 
 void HksGetKeyInfoListTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksGetKeyInfoListTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksGetKeyInfoListTest::SetUp()

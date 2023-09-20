@@ -41,12 +41,10 @@ public:
 
 void HksFrameworkIpcCheckTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFrameworkIpcCheckTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFrameworkIpcCheckTest::SetUp()

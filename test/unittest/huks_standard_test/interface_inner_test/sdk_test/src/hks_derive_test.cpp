@@ -66,12 +66,10 @@ static int32_t DeriveKey(const struct HksTestDeriveParamSet *deriveParamSetParam
 
 void HksDeriveTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksDeriveTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksDeriveTest::SetUp()

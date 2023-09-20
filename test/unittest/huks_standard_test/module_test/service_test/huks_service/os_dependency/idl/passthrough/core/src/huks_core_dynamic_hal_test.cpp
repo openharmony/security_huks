@@ -40,12 +40,10 @@ public:
 
 void HksIpcCoreDynamicHalTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksIpcCoreDynamicHalTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksIpcCoreDynamicHalTest::SetUp()
