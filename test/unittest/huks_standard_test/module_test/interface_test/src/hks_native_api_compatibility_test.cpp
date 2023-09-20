@@ -41,12 +41,10 @@ public:
 
 void HksNativeApiCompatibilityTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksNativeApiCompatibilityTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksNativeApiCompatibilityTest::SetUp()

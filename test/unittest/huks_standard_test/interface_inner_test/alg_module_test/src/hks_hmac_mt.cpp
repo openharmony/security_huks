@@ -373,16 +373,10 @@ public:
 
 void HksHmacMt::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
 }
 
 void HksHmacMt::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV

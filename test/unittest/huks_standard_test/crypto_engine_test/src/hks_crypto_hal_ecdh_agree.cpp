@@ -149,12 +149,10 @@ protected:
 
 void HksCryptoHalEcdhAgree::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalEcdhAgree::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalEcdhAgree::SetUp()

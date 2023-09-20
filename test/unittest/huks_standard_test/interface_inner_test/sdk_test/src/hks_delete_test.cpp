@@ -40,12 +40,10 @@ public:
 
 void HksDeleteTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksDeleteTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksDeleteTest::SetUp()

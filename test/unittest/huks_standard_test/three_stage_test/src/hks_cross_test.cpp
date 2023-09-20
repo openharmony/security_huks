@@ -36,17 +36,11 @@ public:
 
 void HksCrossTest::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
     EXPECT_EQ(HksInitialize(), 0);
 }
 
 void HksCrossTest::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksCrossTest::SetUp()

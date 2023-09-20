@@ -38,12 +38,10 @@ public:
 
 void HksSessionMaxTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksSessionMaxTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksSessionMaxTest::SetUp()

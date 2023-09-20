@@ -36,16 +36,10 @@ public:
 
 void HksImportRsaTest::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
 }
 
 void HksImportRsaTest::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksImportRsaTest::SetUp()

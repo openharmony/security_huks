@@ -42,12 +42,10 @@ public:
 
 void HksCheckParamsetTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCheckParamsetTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCheckParamsetTest::SetUp()

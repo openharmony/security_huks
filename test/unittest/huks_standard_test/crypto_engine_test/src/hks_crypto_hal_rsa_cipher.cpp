@@ -910,12 +910,10 @@ protected:
 
 void HksCryptoHalRsaCipher::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalRsaCipher::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalRsaCipher::SetUp()

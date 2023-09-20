@@ -60,12 +60,10 @@ protected:
 
 void HksCryptoHalSm3Kdf::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksCryptoHalSm3Kdf::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksCryptoHalSm3Kdf::SetUp()

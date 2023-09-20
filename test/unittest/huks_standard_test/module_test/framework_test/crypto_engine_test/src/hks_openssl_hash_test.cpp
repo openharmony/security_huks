@@ -41,12 +41,10 @@ public:
 
 void HksFrameworkOpensslHashTest::SetUpTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
 }
 
 void HksFrameworkOpensslHashTest::TearDownTestCase(void)
 {
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
 }
 
 void HksFrameworkOpensslHashTest::SetUp()
