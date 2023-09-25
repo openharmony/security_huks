@@ -124,9 +124,9 @@ static struct TestAccessCaseParams HKS_ACCESS_TEST_003_PARAMS = {
             { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
             { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
             { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initParams =
@@ -138,9 +138,11 @@ static struct TestAccessCaseParams HKS_ACCESS_TEST_003_PARAMS = {
             { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
             { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_GCM },
             { .tag = HKS_TAG_IV, .blob = { .size = IV_SIZE, .data = (uint8_t *)IV }},
-            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_FINGERPRINT },
-            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL },
-            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_CUSTOM },
+            { .tag = HKS_TAG_ASSOCIATED_DATA, .blob = { .size = AAD_SIZE, .data = (uint8_t *)AAD_FOR_AES_GCM }},
+            { .tag = HKS_TAG_AE_TAG, .blob = { .size = AEAD_SIZE, .data = (uint8_t *)AEAD_FOR_AES_GCM }},
+            { .tag = HKS_TAG_USER_AUTH_TYPE, .uint32Param = HKS_USER_AUTH_TYPE_PIN },
+            { .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE, .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD },
+            { .tag = HKS_TAG_CHALLENGE_TYPE, .uint32Param = HKS_CHALLENGE_TYPE_NONE },
             { .tag = HKS_TAG_CHALLENGE_POS, .uint32Param = 0 },
         },
     .initResult = HKS_SUCCESS
@@ -397,7 +399,7 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest008, TestSize.Level0
     testAccessCaseParams.genParams.push_back(
         { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT }
     );
-    ASSERT_EQ(CheckAccessCipherTest(testAccessCaseParams, testIDMParams), HKS_ERROR_NOT_SUPPORTED);
+    ASSERT_EQ(CheckAccessCipherTest(testAccessCaseParams, testIDMParams), HKS_SUCCESS);
 }
 
 /**
@@ -493,7 +495,7 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest012, TestSize.Level0
     testAccessCaseParams.genParams.push_back(
         { .tag = HKS_TAG_KEY_AUTH_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT }
     );
-    ASSERT_EQ(CheckAccessCipherTest(testAccessCaseParams, testIDMParams), HKS_ERROR_NOT_SUPPORTED);
+    ASSERT_EQ(CheckAccessCipherTest(testAccessCaseParams, testIDMParams), HKS_SUCCESS);
 }
 
 /**
