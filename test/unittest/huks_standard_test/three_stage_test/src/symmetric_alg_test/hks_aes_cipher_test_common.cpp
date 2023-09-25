@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 
+#include "hks_access_control_test_common.h"
 #include "hks_aes_cipher_test_common.h"
 
 #include <gtest/gtest.h>
 
 using namespace testing::ext;
+using namespace Unittest::HksAccessControlPartTest;
 namespace Unittest::AesCipher {
 #ifdef L2_STANDARD
 int32_t HksAesCipherTestEncrypt(const struct HksBlob *keyAlias,
@@ -46,6 +48,44 @@ int32_t HksAesCipherTestEncrypt(const struct HksBlob *keyAlias,
         return ret;
     }
     EXPECT_EQ(HksMemCmp(outData.data, cipherText->data, outData.size), HKS_SUCCESS) << "cipherText not equals outData";
+
+    return HKS_SUCCESS;
+}
+
+static int32_t HksAesCipherTestEncryptWithoutNonce(const struct HksBlob *keyAlias,
+    struct HksParamSet *encryptParamSet, const struct HksBlob *inData, struct HksBlob *cipherText,
+    bool needAccessControl)
+{
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    uint8_t challenge[32] = {0};
+    struct HksBlob challengeBlob = { 32, challenge };
+    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+    int32_t ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, &challengeBlob);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    if (needAccessControl) {
+        const IDMParams testIDMParams = {
+            .secureUid = 1,
+            .enrolledId = 1,
+            .time = 0,
+            .authType = 1
+        };
+        ret = HksBuildAuthtoken(&encryptParamSet, &challengeBlob, testIDMParams);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_I("HksBuildAuthtoken failed, ret : %" LOG_PUBLIC "d", ret);
+            return ret;
+        }
+    }
+
+    ret = TestUpdateLoopFinish(&handleEncrypt, encryptParamSet, inData, cipherText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    EXPECT_NE(HksMemCmp(inData->data, cipherText->data, inData->size), HKS_SUCCESS) << "cipherText equals inData";
 
     return HKS_SUCCESS;
 }
@@ -199,6 +239,70 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
     EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     return ret;
 }
+
+int32_t HksAesCipherTestCaseGcm3(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool needAccessControl)
+{
+    struct HksBlob inData = {
+        g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
+    };
+
+    /* 1. Generate Key */
+    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    /* 2. Encrypt Three Stage */
+    uint8_t cipher[AES_COMMON_SIZE] = {0};
+    struct HksBlob cipherText = { AES_COMMON_SIZE, cipher };
+    ret = HksAesCipherTestEncryptWithoutNonce(keyAlias, encryptParamSet, &inData, &cipherText, needAccessControl);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestEncrypt failed.";
+    
+    cipherText.size -= NONCE_SIZE;
+    cipherText.size -= AEAD_SIZE;
+
+    uint32_t i = 0;
+    for (i = 0; i < decryptParamSet->paramsCnt; i++) {
+        if (decryptParamSet->params[i].tag == HKS_TAG_AE_TAG) {
+            uint8_t *tempPtrTest = cipherText.data;
+            (void)memcpy_s(decryptParamSet->params[i].blob.data, AEAD_SIZE,
+                tempPtrTest + cipherText.size, AEAD_SIZE);
+            break;
+        }
+    }
+
+    for (i = 0; i < decryptParamSet->paramsCnt; i++) {
+        if (decryptParamSet->params[i].tag == HKS_TAG_NONCE) {
+            uint8_t *tempPtrTest = cipherText.data;
+            (void)memcpy_s(decryptParamSet->params[i].blob.data, NONCE_SIZE,
+                tempPtrTest + cipherText.size + AEAD_SIZE, NONCE_SIZE);
+            break;
+        }
+    }
+
+    /* 3. Decrypt Three Stage */
+    // Init
+    uint8_t handleD[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDecryptTest = { sizeof(uint64_t), handleD };
+    ret = HksInit(keyAlias, decryptParamSet, &handleDecryptTest, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+
+    // Update & Finish
+    uint8_t plain[AES_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { AES_COMMON_SIZE, plain };
+    ret = TestUpdateLoopFinish(&handleDecryptTest, decryptParamSet, &cipherText, &plainText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
+    EXPECT_EQ(HksMemCmp(inData.data, plainText.data, inData.size), HKS_SUCCESS) << "plainText not equals inData";
+
+    /* 3. Delete Key */
+    ret = HksDeleteKey(keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+    return ret;
+}
+
 #else
     int32_t HksAesCipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
         struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)

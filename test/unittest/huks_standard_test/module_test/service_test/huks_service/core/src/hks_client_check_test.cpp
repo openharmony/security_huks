@@ -379,7 +379,7 @@ HWTEST_F(HksClientCheckTest, HksClientCheckTest014, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksCheckUserAuthKeyPurposeValidity(paramSet);
     HksFreeParamSet(&paramSet);
-    ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 }
 
 /**
