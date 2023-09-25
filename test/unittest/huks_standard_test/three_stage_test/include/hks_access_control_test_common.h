@@ -49,6 +49,10 @@ static const std::string g_inData_32  = "RSA_32_ttttttttttttttttttttttttt";
 
 static const uint32_t IV_SIZE = 16;
 
+static const uint32_t AAD_SIZE = 16;
+
+static const uint32_t AEAD_SIZE = 16;
+
 const uint32_t KEY_PARAMSET_SIZE = 1024;
 
 const uint32_t HMAC_COMMON_SIZE = 256;
@@ -68,6 +72,10 @@ const uint32_t DERIVE_COMMON_SIZE = 2048;
 const uint32_t DSA_COMMON_SIZE = 1024;
 
 static uint8_t IV[IV_SIZE] = {0};
+
+static uint8_t AAD_FOR_AES_GCM[AAD_SIZE] = {0};
+
+static uint8_t AEAD_FOR_AES_GCM[AEAD_SIZE] = {0};
 
 static uint8_t g_saltdata[16] = {0};
 
@@ -117,7 +125,7 @@ int32_t AuthTokenSign(const IDMParams &testIDMParams,  HksUserAuthToken *authTok
 
 int32_t AuthTokenMac(const struct HksBlob *keyAlias, const struct HksBlob *inData, HksUserAuthToken *authTokenHal);
 
-int32_t HksBuildAuthtoken(const struct HksParamSet *initParamSet, uint8_t *authChallenge,
+int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *authChallenge,
     const IDMParams &testIDMParams);
 
 int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
