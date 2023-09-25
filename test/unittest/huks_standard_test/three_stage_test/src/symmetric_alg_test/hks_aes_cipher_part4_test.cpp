@@ -60,6 +60,7 @@ void HksAesCipherPart4Test::TearDown()
 {
 }
 
+#ifdef USE_HKS_MOCK
 static struct HksParam g_genParams026[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -485,6 +486,7 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test031, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 #endif
 #endif
 #endif
