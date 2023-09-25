@@ -14,6 +14,7 @@
  */
 
 #include "hks_access_control_test_common.h"
+#include "hks_core_hal_api.h"
 
 #include <gtest/gtest.h>
 
