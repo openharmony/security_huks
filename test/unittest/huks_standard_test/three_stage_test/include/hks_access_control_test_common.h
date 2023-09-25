@@ -17,7 +17,6 @@
 #define HKS_ACCESS_CONTROL_TEST_COMMON_H
 
 #include "hks_three_stage_test_common.h"
-#include "hks_core_hal_api.h"
 
 #include <vector>
 #include <string>
