@@ -395,10 +395,8 @@ static struct HksParam g_decryptParams028[] = {
 };
 
 #ifdef L2_STANDARD
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-#ifdef _USE_OPENSSL_
 /**
- * @tc.name: HksAesCipherPart3Test.HksAesCipherPart1Test029
+ * @tc.name: HksAesCipherPart4Test.HksAesCipherPart1Test029
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE size-128.
  * @tc.type: FUNC
  */
@@ -428,7 +426,7 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test029, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksAesCipherPart3Test.HksAesCipherPart1Test030
+ * @tc.name: HksAesCipherPart4Test.HksAesCipherPart1Test030
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE size-128.
  * @tc.type: FUNC
  */
@@ -458,7 +456,7 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test030, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksAesCipherPart3Test.HksAesCipherPart1Test031
+ * @tc.name: HksAesCipherPart4Test.HksAesCipherPart1Test031
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE size-128.
  * @tc.type: FUNC
  */
@@ -486,8 +484,6 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test031, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
-#endif
-#endif
 #endif
 #endif
 } // namespace Unittest::AesCipher

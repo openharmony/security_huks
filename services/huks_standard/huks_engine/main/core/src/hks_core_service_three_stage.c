@@ -56,7 +56,7 @@
 #define HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE  16
 #define HKS_TEMP_SIZE                    32
 #define MAX_BUF_SIZE                     (5 * 1024 * 1024)
-#define HKS_AES_GCM_NONCE_LEN_MIN        12
+#define HKS_AES_GCM_NONCE_LEN        12
 
 static int32_t CheckRsaCipherData(bool isEncrypt, uint32_t keyLen, struct HksUsageSpec *usageSpec,
     const struct HksBlob *outData)
@@ -573,14 +573,11 @@ static bool CheckWhetherUpdateAesGcmNonce(struct HksParamSet **runtimeParamSet,
         return false;
     }
 
-    int32_t ret1;
-    int32_t ret2;
     struct HksParam *authPurposeParam = NULL;
-    ret1 = HksGetParam(*keyBlobParamSet, HKS_TAG_KEY_AUTH_PURPOSE, &authPurposeParam);
+    int32_t ret1 = HksGetParam(*keyBlobParamSet, HKS_TAG_KEY_AUTH_PURPOSE, &authPurposeParam);
     struct HksParam *nonceParam = NULL;
-    ret2 = HksGetParam(*runtimeParamSet, HKS_TAG_NONCE, &nonceParam);
-    if (!((ret1 == HKS_SUCCESS && authPurposeParam->uint32Param == HKS_KEY_PURPOSE_ENCRYPT) ||
-        (ret2 != HKS_SUCCESS))) {
+    int32_t ret2 = HksGetParam(*runtimeParamSet, HKS_TAG_NONCE, &nonceParam);
+    if (!(ret1 == HKS_SUCCESS  || ret2 != HKS_SUCCESS)) {
         return false;
     }
 
@@ -590,29 +587,35 @@ static bool CheckWhetherUpdateAesGcmNonce(struct HksParamSet **runtimeParamSet,
 static int32_t AddNonceToParamSet(struct HksParamSet **runtimeParamSet, struct HksParam *params, int32_t paramsCnt)
 {
     struct HksParamSet *paramSet = NULL;
-    int32_t ret = HksInitParamSet(&paramSet);
+    int32_t ret = HksFreshParamSet((struct HksParamSet *)(*runtimeParamSet), false);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fresh paramset failed")
+    ret = HksInitParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
-        HksFree(params[0].blob.data);
         HKS_LOG_E("init keyNode param set fail");
         return ret;
     }
-    ret = HksAddParams(paramSet, (*runtimeParamSet)->params, (*runtimeParamSet)->paramsCnt);
-    if (ret != HKS_SUCCESS) {
-        HksFree(params[0].blob.data);
-        HksFreeParamSet(&paramSet);
-        HKS_LOG_E("add in params fail");
-        return ret;
+    for (uint32_t i = 0; i < (*runtimeParamSet)->paramsCnt; ++i) {
+        bool isDeleteTag = false;
+        if ((*runtimeParamSet)->params[i].tag == HKS_TAG_NONCE) {
+            isDeleteTag = true;
+        }
+        if (!isDeleteTag) {
+            ret = HksAddParams(paramSet, &(*runtimeParamSet)->params[i], 1);
+            if (ret != HKS_SUCCESS) {
+                HksFreeParamSet(&paramSet);
+                HKS_LOG_E("delete nonce params fail");
+                return ret;
+            }
+        }
     }
     ret = HksAddParams(paramSet, params, paramsCnt);
     if (ret != HKS_SUCCESS) {
-        HksFree(params[0].blob.data);
         HksFreeParamSet(&paramSet);
         HKS_LOG_E("add nonce params fail");
         return ret;
     }
     ret = HksBuildParamSet(&paramSet);
     if (ret != HKS_SUCCESS) {
-        HksFree(params[0].blob.data);
         HksFreeParamSet(&paramSet);
         HKS_LOG_E("build paramSet fail");
         return ret;
@@ -632,15 +635,14 @@ static int32_t UpdateAesGcmNonce(struct HksParamSet **runtimeParamSet, struct Hk
     struct HksParam params[] = {
         {
             .tag = HKS_TAG_NONCE,
-            .blob.data = NULL,
-            .blob.size = HKS_AES_GCM_NONCE_LEN_MIN
+            .blob.data = HksMalloc(HKS_AES_GCM_NONCE_LEN),
+            .blob.size = HKS_AES_GCM_NONCE_LEN
         },
         {
             .tag = HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE,
             .uint32Param = 0
         },
     };
-    params[0].blob.data = HksMalloc(HKS_AES_GCM_NONCE_LEN_MIN);
     HKS_IF_NULL_LOGE_RETURN(params[0].blob.data, HKS_ERROR_MALLOC_FAIL, "malloc nonce param set failed!")
     int32_t ret = HksCryptoHalFillRandom(&params[0].blob);
     if (ret != HKS_SUCCESS) {
@@ -648,18 +650,14 @@ static int32_t UpdateAesGcmNonce(struct HksParamSet **runtimeParamSet, struct Hk
         HKS_LOG_E("get random failed");
         return ret;
     }
-    uint32_t nonceTag[] = { HKS_TAG_NONCE };
-    struct HksParamSet *outParamSet = NULL;
-    ret = HksDeleteTagsFromParamSet(nonceTag,
-        sizeof(nonceTag) / sizeof(nonceTag[0]), *runtimeParamSet, &outParamSet);
+    
+    ret = AddNonceToParamSet(runtimeParamSet, params, sizeof(params) / sizeof(params[0]));
     if (ret != HKS_SUCCESS) {
         HksFree(params[0].blob.data);
-        HKS_LOG_E("delete tag from paramSet failed");
+        HKS_LOG_E("add nonce failed");
         return ret;
-    } 
-    HksFreeParamSet(runtimeParamSet);
-    *runtimeParamSet = outParamSet;
-    return AddNonceToParamSet(runtimeParamSet, params, sizeof(params) / sizeof(params[0]));
+    }
+    return HKS_SUCCESS;
 }
 
 static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
@@ -733,6 +731,29 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
     return ret;
 }
 
+static int32_t AppendNonceWhenNeeded(const struct HuksKeyNode *keyNode,
+    const struct HksBlob *inData, struct HksBlob *outData, struct HksBlob tag)
+{
+    struct HksParam *needAppnedNonce = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppnedNonce);
+    if (ret == HKS_SUCCESS) {
+        struct HksParam *nonceParam = NULL;
+        ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_NONCE, &nonceParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "append cipher get nonce param failed!")
+        if (nonceParam->blob.size != HKS_AES_GCM_NONCE_LEN) {
+            HKS_LOG_E("nonce size invalid!");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        if (memcpy_s(outData->data + inData->size + tag.size, HKS_AES_GCM_NONCE_LEN,
+            nonceParam->blob.data, nonceParam->blob.size) != EOK) {
+            HKS_LOG_E("memcpy cached data failed");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
+        outData->size += nonceParam->blob.size;
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
 {
@@ -750,6 +771,16 @@ static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
 
+    struct HksParam *needAppnedNonce = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppnedNonce);
+
+    if (ret == HKS_SUCCESS) {
+        if (outData->size < (inData->size + HKS_AE_TAG_LEN + HKS_AES_GCM_NONCE_LEN)) {
+            HKS_LOG_E("too small out buf!");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+    }
+
     ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, &tag, alg);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("aes encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
@@ -757,19 +788,12 @@ static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
         return ret;
     }
 
-    struct HksParam *needAppnedNonce = NULL;
-    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppnedNonce);
-    if (ret == HKS_SUCCESS) {
-        struct HksParam *nonceParam = NULL;
-        ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_NONCE, &nonceParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_ALG_FAIL, "append cipher get nonce param failed!")
-        if (memcpy_s(outData->data + inData->size + tag.size, HKS_AES_GCM_NONCE_LEN_MIN,
-            nonceParam->blob.data, nonceParam->blob.size) != EOK) {
-            HKS_LOG_E("memcpy cached data failed");
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
-        outData->size += nonceParam->blob.size;
+    ret = AppendNonceWhenNeeded(keyNode, inData, outData, tag);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("appned nonce failed!");
+        return ret;
     }
+
     outData->size += tag.size;
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
     return HKS_SUCCESS;
