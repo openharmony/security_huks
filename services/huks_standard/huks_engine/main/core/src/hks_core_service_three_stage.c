@@ -584,7 +584,8 @@ static bool CheckWhetherUpdateAesGcmNonce(struct HksParamSet **runtimeParamSet,
     return true;
 }
 
-static int32_t AddNonceToParamSet(struct HksParamSet **runtimeParamSet, struct HksParam *params, int32_t paramsCnt)
+static int32_t AddNonceToParamSet(struct HksParamSet **runtimeParamSet, struct HksParam *params,
+    uint32_t paramsCnt)
 {
     struct HksParamSet *paramSet = NULL;
     int32_t ret = HksFreshParamSet((struct HksParamSet *)(*runtimeParamSet), false);
@@ -773,7 +774,6 @@ static int32_t CoreAesEncryptFinish(const struct HuksKeyNode *keyNode,
 
     struct HksParam *needAppnedNonce = NULL;
     ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppnedNonce);
-
     if (ret == HKS_SUCCESS) {
         if (outData->size < (inData->size + HKS_AE_TAG_LEN + HKS_AES_GCM_NONCE_LEN)) {
             HKS_LOG_E("too small out buf!");
