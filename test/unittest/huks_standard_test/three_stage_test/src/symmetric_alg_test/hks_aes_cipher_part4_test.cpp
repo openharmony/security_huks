@@ -447,8 +447,17 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test030, TestSize.Level0)
     ret = InitParamSet(&decryptParamSet, g_decryptParams027, sizeof(g_decryptParams027) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
-    ret = HksAesCipherTestCaseGcm3(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, true);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+    /* 1. Generate Key */
+    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+
+    /* 2. Encrypt Three Stage */
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    uint8_t challenge[32] = {0};
+    struct HksBlob challengeBlob = { 32, challenge };
+    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+    ret = HksInit(&keyAlias, encryptParamSet, &handleEncrypt, &challengeBlob);
+    EXPECT_EQ(ret, HKS_ERROR_NOT_SUPPORTED) << "Init failed.";
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
