@@ -54,6 +54,10 @@ enum HksOperationType {
     HKS_OPERATION_ENCRYPT_FREE_CTX = 0x1c,   /* encrypt free ctx */
     HKS_OPERATION_DECRYPT_FREE_CTX = 0x1d,   /* decrypt free ctx */
     HKS_OPERATION_FILL_PRI_RANDOM = 0x1e,    /* fill private random */
+    HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_KEY_AND_ECDH = 0x1f,  /* hardcoded key implementation did not use the enum */
+                                                                /* see hks_chipset_platform_key_hardcoded.c */
+    HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_PUB_KEY = 0x20,       /* hardcoded key implementation did not use the enum */
+                                                                /* see hks_chipset_platform_key_hardcoded.c */
 };
 
 struct HksAbility {
