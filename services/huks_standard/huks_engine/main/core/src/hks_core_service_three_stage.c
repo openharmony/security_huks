@@ -581,14 +581,8 @@ static int32_t CheckWhetherUpdateAesGcmNonce(struct HksParamSet **runtimeParamSe
         HKS_LOG_E("do not support pass access control and nonce params together");
         return HKS_ERROR_NOT_SUPPORTED;
     }
-    if (ret1 == HKS_SUCCESS && ret2 != HKS_SUCCESS) {
-        return HKS_SUCCESS;
-    }
     if (ret1 != HKS_SUCCESS && ret2 == HKS_SUCCESS) {
         return HKS_NO_NEED_REGENERATE_NONCE;
-    }
-    if (ret1 != HKS_SUCCESS && ret2 != HKS_SUCCESS) {
-        return HKS_SUCCESS;
     }
     return HKS_SUCCESS;
 }
@@ -640,7 +634,7 @@ static int32_t UpdateAesGcmNonce(struct HksParamSet **runtimeParamSet, struct Hk
     if (ret == HKS_NO_NEED_REGENERATE_NONCE) {
         return HKS_SUCCESS;
     }
-    if (ret != HKS_NO_NEED_REGENERATE_NONCE && ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS) {
         return ret;
     }
 
@@ -664,8 +658,8 @@ static int32_t UpdateAesGcmNonce(struct HksParamSet **runtimeParamSet, struct Hk
     }
     
     ret = AddNonceToParamSet(runtimeParamSet, params, HKS_ARRAY_SIZE(params));
+    HksFree(params[0].blob.data);
     if (ret != HKS_SUCCESS) {
-        HksFree(params[0].blob.data);
         HKS_LOG_E("add nonce failed");
         return ret;
     }
@@ -746,8 +740,8 @@ static int32_t CoreCipherUpdate(const struct HuksKeyNode *keyNode, const struct 
 static int32_t AppendNonceWhenNeeded(const struct HuksKeyNode *keyNode,
     const struct HksBlob *inData, struct HksBlob *outData, struct HksBlob tag)
 {
-    struct HksParam *needAppnedNonce = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppnedNonce);
+    struct HksParam *needAppendNonce = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, &needAppendNonce);
     if (ret != HKS_SUCCESS) {
         return HKS_SUCCESS;
     }
