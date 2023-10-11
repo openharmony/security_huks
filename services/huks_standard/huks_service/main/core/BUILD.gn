@@ -72,6 +72,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      ubsan = true
     }
     sources += [
       "src/hks_hitrace.c",

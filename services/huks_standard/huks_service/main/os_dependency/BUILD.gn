@@ -44,6 +44,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      ubsan = true
     }
     sources += [
       "posix/hks_rwlock.c",

@@ -26,6 +26,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      ubsan = true
     }
     subsystem_name = "security"
     part_name = "huks"

@@ -54,6 +54,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      ubsan = true
     }
 
     external_deps = [ "ipc:ipc_single" ]

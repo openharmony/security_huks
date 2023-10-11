@@ -33,6 +33,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      ubsan = true
     }
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
