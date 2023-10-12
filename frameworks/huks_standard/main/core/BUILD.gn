@@ -42,6 +42,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      boundary_sanitize = true
     }
     sources += [ "./src/hks_verifier.c" ]
     deps += [ "//third_party/openssl:libcrypto_shared" ]
