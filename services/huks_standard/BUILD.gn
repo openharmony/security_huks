@@ -28,6 +28,7 @@ ohos_shared_library("huks_service") {
     debug = false
     cfi_cross_dso = true
     boundary_sanitize = true
+    ubsan = true
   }
   subsystem_name = "security"
   part_name = "huks"

@@ -73,6 +73,7 @@ if (os_level == "standard") {
       debug = false
       cfi_cross_dso = true
       boundary_sanitize = true
+      ubsan = true
     }
     sources += [
       "src/hks_hitrace.c",
