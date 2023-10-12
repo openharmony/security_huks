@@ -25,6 +25,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      boundary_sanitize = true
       ubsan = true
     }
     subsystem_name = "security"

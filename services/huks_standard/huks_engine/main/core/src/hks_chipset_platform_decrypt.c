@@ -28,7 +28,7 @@
 
 #ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
 
-static const uint32_t ORDERED_VALID_TAGS[] = {
+static const uint32_t ORDERED_VALID_TAGS[PLATFORM_KEY_INPUT_PARAMS_COUNT] = {
     HKS_TAG_SALT,
     HKS_TAG_PEER_PUBLIC_KEY,
     HKS_TAG_INFO,
@@ -105,12 +105,12 @@ static int32_t DoGenEcdhSharedKey(const struct HksParamSet *paramSet, enum HksCh
         ret = HksGetParam(paramSet, HKS_TAG_SALT, &saltParam);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get salt fail");
 
-        struct HksParam *tmpPkParam = NULL;
-        ret = HksGetParam(paramSet, HKS_TAG_PEER_PUBLIC_KEY, &tmpPkParam);
+        struct HksParam *peerPkParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_PEER_PUBLIC_KEY, &peerPkParam);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get tmp pk fail");
 
         if (saltParam->blob.size != PLATFORM_KEY_SALT_SIZE ||
-            tmpPkParam->blob.size != PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE) {
+            peerPkParam->blob.size != PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE) {
             ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
@@ -118,10 +118,9 @@ static int32_t DoGenEcdhSharedKey(const struct HksParamSet *paramSet, enum HksCh
         if (scene == HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA) {
             saltPadding.data[PLATFORM_KEY_SALT_SIZE - 1] = PLATFORM_KEY_SALT_PADDING_BYTE_TA_TO_TA;
         }
-        ret = HksChipsetPlatformDeriveKeyAndEcdh(&tmpPkParam->blob, &saltPadding, sharedKey);
+        ret = HksChipsetPlatformDeriveKeyAndEcdh(&peerPkParam->blob, &saltPadding, sharedKey);
     } while (false);
-    (void)(memset_s(saltPadding.data, PLATFORM_KEY_SALT_SIZE, 0, PLATFORM_KEY_SALT_SIZE));
-    HKS_FREE_BLOB(saltPadding);
+    HKS_MEMSET_FREE_BLOB(saltPadding);
     return ret;
 }
 
@@ -129,6 +128,7 @@ static int32_t DoHmacSha256(const struct HksBlob *hmacMsg,
     const struct HksBlob *sharedKey, struct HksBlob *wrappedKey)
 {
     if (hmacMsg->size != PLATFORM_KEY_HMAC_MESSAGE_SIZE) {
+        HKS_LOG_E("invalid hmacMsg->size %" LOG_PUBLIC "d", hmacMsg->size);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HksCryptoHalHmac(sharedKey, HKS_DIGEST_SHA256, hmacMsg, wrappedKey);
@@ -229,8 +229,7 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
     struct HksBlob wrappedKey = { .size = PLATFORM_KEY_WRAPPED_KEY_SIZE,
         .data = (uint8_t *)HksMalloc(PLATFORM_KEY_WRAPPED_KEY_SIZE) };
     if (wrappedKey.data == NULL) {
-        (void)(memset_s(sharedKey.data, PLATFORM_KEY_SHARED_KEY_SIZE, 0, PLATFORM_KEY_SHARED_KEY_SIZE));
-        HKS_FREE_BLOB(sharedKey);
+        HKS_MEMSET_FREE_BLOB(sharedKey);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -238,7 +237,7 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
         // do ecdh to get sharedKey
         HKS_LOG_I("start ecdh");
         ret = DoGenEcdhSharedKey(paramSet, scene, &sharedKey);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ecdh get sharedKey failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ecdh get sharedKey failed %" LOG_PUBLIC "d", ret)
 
         // do hmac to get wrappedKey
         struct HksParam *customInfoParam = NULL;
@@ -247,27 +246,30 @@ int32_t HuksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
 
         HKS_LOG_I("start hmac");
         ret = DoHmacSha256(&customInfoParam->blob, &sharedKey, &wrappedKey);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hmac get wrappedKey failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hmac get wrappedKey failed %" LOG_PUBLIC "d", ret)
 
         // do aes decrypt
         HKS_LOG_I("start decrypt");
         ret = DoAesDecrypt(paramSet, &wrappedKey, plainText);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "aes decrypt failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "aes decrypt failed %" LOG_PUBLIC "d", ret)
     } while (false);
 
-    (void)memset_s(sharedKey.data, PLATFORM_KEY_SHARED_KEY_SIZE, 0, PLATFORM_KEY_SHARED_KEY_SIZE);
-    (void)memset_s(wrappedKey.data, PLATFORM_KEY_WRAPPED_KEY_SIZE, 0, PLATFORM_KEY_WRAPPED_KEY_SIZE);
-    HKS_FREE_BLOB(sharedKey);
-    HKS_FREE_BLOB(wrappedKey);
+    HKS_MEMSET_FREE_BLOB(sharedKey);
+    HKS_MEMSET_FREE_BLOB(wrappedKey);
     return ret;
 }
 
 int32_t HuksCoreExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
 {
-    if (CheckBlob(salt) != HKS_SUCCESS || CheckBlob(publicKey) != HKS_SUCCESS ||
-        salt->size != PLATFORM_KEY_SALT_SIZE || publicKey->size != PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE ||
+    if (CheckBlob(salt) != HKS_SUCCESS || CheckBlob(publicKey) != HKS_SUCCESS) {
+        HKS_LOG_E("invalid input salt or pk empty blob");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (salt->size != PLATFORM_KEY_SALT_SIZE || publicKey->size != PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE ||
         scene != HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA) {
+        HKS_LOG_E("invalid input salt sz %" LOG_PUBLIC "d pk sz %" LOG_PUBLIC "d scene %" LOG_PUBLIC "d",
+            salt->size, publicKey->size, scene);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     struct HksBlob saltPadding = { .size = PLATFORM_KEY_SALT_SIZE,
@@ -276,8 +278,7 @@ int32_t HuksCoreExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     (void)memcpy_s(saltPadding.data, PLATFORM_KEY_SALT_SIZE, salt->data, PLATFORM_KEY_SALT_SIZE);
     saltPadding.data[PLATFORM_KEY_SALT_SIZE - 1] = PLATFORM_KEY_SALT_PADDING_BYTE_TA_TO_TA;
     int32_t ret = HksChipsetPlatformDerivePubKey(&saltPadding, publicKey);
-    (void)(memset_s(saltPadding.data, PLATFORM_KEY_SALT_SIZE, 0, PLATFORM_KEY_SALT_SIZE));
-    HKS_FREE_BLOB(saltPadding);
+    HKS_MEMSET_FREE_BLOB(saltPadding);
     return ret;
 }
 
