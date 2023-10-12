@@ -63,6 +63,7 @@ if (os_level == "standard") {
       cfi = true
       debug = false
       cfi_cross_dso = true
+      boundary_sanitize = true
     }
     sources += [
       "../device_cert_manager/src/dcm_asn1.c",
