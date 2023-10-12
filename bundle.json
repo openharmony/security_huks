@@ -1,7 +1,7 @@
 {
     "name": "@ohos/huks",
     "description": "The provider of key and certificate manangement capbility, which belongs to security subsystem",
-    "version": "4.0",
+    "version": "4.0.2",
     "license": "Apache License 2.0",
     "publishAs": "code-segment",
     "segment": {
@@ -12,7 +12,9 @@
       "install": "DEST_PATH=${DEP_BUNDLE_BASE}/base/security/huks && mkdir -p $DEST_PATH && cp -r ./* $DEST_PATH"
     },
     "author": {},
-    "repository": "",
+    "homePage": "https://gitee.com/openharmony",
+    "repository": "https://gitee.com/openharmony/security_huks",
+    "supplier": "Organization: OpenHarmony",
     "component": {
       "name": "huks",
       "subsystem": "security",
@@ -41,6 +43,7 @@
           "hisysevent",
           "hitrace",
           "hilog",
+          "hilog_lite",
           "ipc",
           "napi",
           "os_account",
