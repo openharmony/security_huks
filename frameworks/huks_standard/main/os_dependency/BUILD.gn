@@ -45,6 +45,7 @@ if (os_level == "standard") {
       debug = false
       cfi_cross_dso = true
       boundary_sanitize = true
+      ubsan = true
     }
     sources += [ "./ipc/src/hks_client_service_ipc.c" ]
     configs = [

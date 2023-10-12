@@ -25,6 +25,7 @@ ohos_static_library("libhuks_service_systemapi_wrap_static") {
     debug = false
     cfi_cross_dso = true
     boundary_sanitize = true
+    ubsan = true
   }
   subsystem_name = "security"
   part_name = "huks"
