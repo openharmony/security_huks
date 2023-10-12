@@ -24,7 +24,7 @@
 extern "C" {
 #endif
 
-int32_t HksChipsetPlatformDeriveKeyAndEcdh(const struct HksBlob *tmpPk, const struct HksBlob *salt,
+int32_t HksChipsetPlatformDeriveKeyAndEcdh(const struct HksBlob *peerPk, const struct HksBlob *salt,
     struct HksBlob *sharedKey);
 
 int32_t HksChipsetPlatformDerivePubKey(const struct HksBlob *salt, struct HksBlob *pubKey);

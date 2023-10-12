@@ -102,7 +102,7 @@ static int32_t MallocFullPlatformPrivateKey(struct HksBlob *privateKey)
     return HKS_ERROR_INTERNAL_ERROR;
 }
 
-int32_t HksChipsetPlatformDeriveKeyAndEcdh(const struct HksBlob *tmpPk, const struct HksBlob *salt,
+int32_t HksChipsetPlatformDeriveKeyAndEcdh(const struct HksBlob *peerPk, const struct HksBlob *salt,
     struct HksBlob *sharedKey)
 {
     // salt is ignored in the hardcoded key implementation,
@@ -118,7 +118,7 @@ int32_t HksChipsetPlatformDeriveKeyAndEcdh(const struct HksBlob *tmpPk, const st
     int32_t ret = MallocFullPlatformPrivateKey(&platformPrivateKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "malloc full platform private key failed")
     do {
-        ret = MallocAndFillFullHksPublicKey(tmpPk, &peerHksPubKey);
+        ret = MallocAndFillFullHksPublicKey(peerPk, &peerHksPubKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "malloc or fill full hks pub key failed");
 
         HKS_LOG_I("DoGenEcdhSharedKey hal start");

@@ -16,6 +16,7 @@
 #include <cstdint>
 #include <fstream>
 #include <gtest/gtest.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -24,17 +25,27 @@
 #ifdef L2_STANDARD
 #include "file_ex.h"
 #endif
+#include "hks_api.h"
+#include "hks_chipset_platform_test.h"
+#include "hks_client_service_adapter.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_type.h"
-#include "hks_api.h"
 #include "hks_template.h"
 #include "hks_test_log.h"
 #include "hks_three_stage_test_common.h"
-#include "hks_chipset_platform_decrypt.h"
-#include "hks_client_service_adapter.h"
-#include "hks_chipset_platform_test.h"
+#include "hks_type.h"
+
+// HKS_OPENSSL_SUCCESS
+#include "base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include/hks_openssl_engine.h"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/include/hks_chipset_platform_decrypt.h"
+#include "base/security/huks/test/unittest/huks_standard_test/three_stage_test/include/hks_chipset_platform_test.h"
+
+#include <openssl/ec.h>
+#include <openssl/evp.h>
+#include <openssl/obj_mac.h>
+#include <openssl/types.h>
+#include <openssl/x509.h>
 
 using namespace testing::ext;
 namespace {
@@ -219,31 +230,47 @@ void PrintResult(const HksChipsetPlatformTestCase &res)
 uint8_t g_tmpKeyPairAliasStr[] = "tmpKeyPair";
 struct HksBlob g_tmpKeyPairAlias = { sizeof(g_tmpKeyPairAliasStr), g_tmpKeyPairAliasStr };
 
-// Notice: you need to pass an empty HksBlob for x509PubKey, and you MUST free x509PubKey after using
-int32_t ExportX509ChipsetPlatformPubKey(const struct HksBlob &salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob &x509PubKey)
+void ConvertRawEcPubKeyToX509Key(const std::vector<uint8_t> &rawPk, std::vector<uint8_t> &x509PubKey)
 {
-    std::vector<uint8_t> rawPk(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
-    HksBlob publicKeyBlob = { .size = PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE, .data = rawPk.data() };
+    EXPECT_EQ(rawPk.size(), PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
+    auto ecKey = std::unique_ptr<EC_KEY, void(*)(EC_KEY *&)>(
+        EC_KEY_new_by_curve_name(NID_X9_62_prime256v1), [](EC_KEY *&ecKey) {
+        SELF_FREE_PTR(ecKey, EC_KEY_free)
+    });
+    EXPECT_NE(ecKey, nullptr);
+    auto bigNumFree = [](BIGNUM *&bigNum) {
+        SELF_FREE_PTR(bigNum, BN_free)
+    };
+    auto ecX = std::unique_ptr<BIGNUM, void(*)(BIGNUM *&)>(
+        BN_bin2bn(rawPk.data(), PLATFORM_KEY_PLATFORM_PRI_KEY_SIZE, nullptr), bigNumFree);
+    EXPECT_NE(ecX, nullptr);
+    auto ecY =  std::unique_ptr<BIGNUM, void(*)(BIGNUM *&)>(BN_bin2bn(rawPk.data() +
+        PLATFORM_KEY_PLATFORM_PRI_KEY_SIZE, PLATFORM_KEY_PLATFORM_PRI_KEY_SIZE, nullptr), bigNumFree);
+    EXPECT_NE(ecY, nullptr);
+    EXPECT_EQ(EC_KEY_set_public_key_affine_coordinates(ecKey.get(), ecX.get(), ecY.get()), HKS_OPENSSL_SUCCESS);
+    EC_KEY_set_conv_form(ecKey.get(), POINT_CONVERSION_UNCOMPRESSED);
+    auto pkey = std::unique_ptr<EVP_PKEY, void(*)(EVP_PKEY *&)>(EVP_PKEY_new(), [](EVP_PKEY *&pkey) {
+        SELF_FREE_PTR(pkey, EVP_PKEY_free)
+    });
+    EXPECT_NE(pkey, nullptr);
+    EXPECT_EQ(EVP_PKEY_set1_EC_KEY(pkey.get(), ecKey.get()), HKS_OPENSSL_SUCCESS);
+    int32_t length = i2d_PUBKEY(pkey.get(), nullptr);
+    EXPECT_GT(length, 0);
+    EXPECT_LT(length, HKS_MAX_KEY_LEN);
+    x509PubKey.resize(length);
+    std::fill(x509PubKey.begin(), x509PubKey.end(), 0);
+    uint8_t *tmp = x509PubKey.data();
+    EXPECT_EQ(i2d_PUBKEY(pkey.get(), &tmp), length);
+}
+
+int32_t ExportX509ChipsetPlatformPubKey(const struct HksBlob &salt,
+    enum HksChipsetPlatformDecryptScene scene, std::vector<uint8_t> &rawPubKey)
+{
+    rawPubKey.resize(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
+    std::fill(rawPubKey.begin(), rawPubKey.end(), 0);
+    HksBlob publicKeyBlob = { .size = PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE, .data = rawPubKey.data() };
     int32_t ret = HksExportChipsetPlatformPublicKey(&salt, scene, &publicKeyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS);
-
-    struct HksPubKeyInfo publicKeyInfo = {
-        .keyAlg = HKS_ALG_ECC,
-        .keySize = HKS_ECC_KEY_SIZE_256,
-        .nOrXSize = HKS_ECC_KEY_SIZE_256 / HKS_BITS_PER_BYTE,
-        .eOrYSize = HKS_ECC_KEY_SIZE_256 / HKS_BITS_PER_BYTE,
-        .placeHolder = 0,
-    };
-    std::vector<uint8_t> huksPk(sizeof(publicKeyInfo) + publicKeyBlob.size);
-    struct HksBlob HksFullPubKey = { .size = static_cast<uint32_t>(huksPk.size()), .data = huksPk.data() };
-    EXPECT_EQ(memcpy_s(HksFullPubKey.data, HksFullPubKey.size, &publicKeyInfo, sizeof(publicKeyInfo)), EOK);
-    EXPECT_EQ(memcpy_s(HksFullPubKey.data + sizeof(publicKeyInfo), HksFullPubKey.size - sizeof(publicKeyInfo),
-        publicKeyBlob.data, publicKeyBlob.size), EOK);
-    ret = TranslateToX509PublicKey(&HksFullPubKey, &x509PubKey);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    HKS_LOG_I("import platform public key success");
-
     return ret;
 }
 
@@ -278,7 +305,8 @@ int32_t GenerateTmpKeyPairAndExportPublicKey(std::vector<uint8_t> &resTmpPk)
     struct HksBlob tmpPk = { .size = TMP_PK_BUFFER_SIZE, .data = resTmpPk.data() };
     ret = HksExportPublicKey(&g_tmpKeyPairAlias, nullptr, &tmpPk);
     EXPECT_EQ(ret, HKS_SUCCESS) << "export tmp ecc pub key failed";
-    // the exported key is in X.509 format, and the last part is the raw key
+    // the exported key is in X.509 format, and the last part is the raw key.
+    // we have verified that the length of public key will always be PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE bytes.
     resTmpPk = std::vector<uint8_t> {
         resTmpPk.begin() + tmpPk.size - PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE,
         resTmpPk.begin() + tmpPk.size
@@ -298,7 +326,7 @@ int32_t AgreeSharedKey(struct HksBlob &x509PubKey, struct HksBlob &sharedKey)
             .uint32Param = HKS_KEY_PURPOSE_AGREE
         }, {
             .tag = HKS_TAG_KEY_SIZE,
-            .uint32Param = HKS_ECC_KEY_SIZE_224
+            .uint32Param = HKS_ECC_KEY_SIZE_256
         }
     };
     int32_t ret = InitParamSet(&agreeParamSet.s, agreeParams, HKS_ARRAY_SIZE(agreeParams));
@@ -412,9 +440,17 @@ HksChipsetPlatformTestCase Encrypt(HksCipsetPlatformEncryptInput &input)
     HksBlob saltBlob = { .size = static_cast<uint32_t>(input.salt.size()), .data = input.salt.data() };
     HksBlob plainText = { .size = static_cast<uint32_t>(input.plainText.size()), .data = input.plainText.data() };
 
-    struct HksBlob x509PubKey {};
-    int32_t ret = ExportX509ChipsetPlatformPubKey(saltBlob, input.scene, x509PubKey);
-    EXPECT_EQ(ret, HKS_SUCCESS);
+    std::vector<uint8_t> rawPubKey{};
+    if (input.inputPlatformPubKeyManually) {
+        rawPubKey = input.platformPubKey;
+    } else {
+        int32_t ret = ExportX509ChipsetPlatformPubKey(saltBlob, input.scene, rawPubKey);
+        EXPECT_EQ(ret, HKS_SUCCESS);
+    }
+    EXPECT_EQ(rawPubKey.size(), PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
+    std::vector<uint8_t> x509PubKeyData{};
+    ConvertRawEcPubKeyToX509Key(rawPubKey, x509PubKeyData);
+    HksBlob x509PubKey = { .size = x509PubKeyData.size(), .data = x509PubKeyData.data() };
 
     std::vector<uint8_t> sharedKeyBuffer(PLATFORM_KEY_SHARED_KEY_SIZE);
     struct HksBlob sharedKey = { .size = PLATFORM_KEY_SHARED_KEY_SIZE, .data = sharedKeyBuffer.data() };
@@ -437,7 +473,7 @@ HksChipsetPlatformTestCase Encrypt(HksCipsetPlatformEncryptInput &input)
     res.aad.resize(PLATFORM_KEY_AAD_SIZE);
     struct HksBlob aad = { .size = PLATFORM_KEY_AAD_SIZE, .data = res.aad.data() };
 
-    ret = GenerateTmpKeyPairAndExportPublicKey(res.tmpPk);
+    int32_t ret = GenerateTmpKeyPairAndExportPublicKey(res.tmpPk);
     EXPECT_EQ(ret, HKS_SUCCESS) << "generate tmp ecc key pair failed";
 
     ret = AgreeSharedKey(x509PubKey, sharedKey);
@@ -453,7 +489,6 @@ HksChipsetPlatformTestCase Encrypt(HksCipsetPlatformEncryptInput &input)
     res.cipher = std::vector<uint8_t> { res.cipher.begin(), res.cipher.end() - PLATFORM_KEY_TAG_SIZE };
 
     (void)HksDeleteKey(&g_tmpKeyPairAlias, nullptr);
-    HKS_FREE_BLOB(x509PubKey);
     return res;
 }
 
@@ -491,6 +526,10 @@ int32_t ReadInputFile(const char *path, HksCipsetPlatformEncryptInput &input)
     input.uuid = VectorStrToVectorUint8(data["uuid"]);
     input.customInfo = VectorStrToVectorUint8(data["customInfo"]);
     input.plainText = VectorStrToVectorUint8(data["plainText"]);
+    input.inputPlatformPubKeyManually = data["inputPlatformPubKeyManually"];
+    if (input.inputPlatformPubKeyManually) {
+        input.platformPubKey = VectorStrToVectorUint8(data["platformPubKey"]);
+    }
     HKS_TEST_LOG_I("read scene = %s", scene.c_str());
     HKS_TEST_LOG_I("read salt size = %zu, data = ", input.salt.size());
     PrintOne(input.salt);
@@ -590,6 +629,7 @@ HWTEST_F(HksChipsetPlatformEncryptTest, EncryptTool, TestSize.Level0)
     HKS_TEST_LOG_I("end EncryptTool");
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /**
  * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest001
  * @tc.desc: tdd Normal process of chipset platform encrypt, expect ret == HKS_SUCCESS
@@ -669,4 +709,5 @@ HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest005, TestSi
     int32_t ret = HksExportChipsetPlatformPublicKey(&salt, HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA, &pk);
     EXPECT_NE(ret, HKS_SUCCESS);
 }
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 }

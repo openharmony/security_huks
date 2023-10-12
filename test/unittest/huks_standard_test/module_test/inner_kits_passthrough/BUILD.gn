@@ -124,6 +124,7 @@ config("hilog_dir") {
 ohos_static_library("libhukssdk_static") {
   sanitize = {
     integer_overflow = true
+    boundary_sanitize = true
     ubsan = true
   }
   subsystem_name = "security"
