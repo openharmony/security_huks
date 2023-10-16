@@ -53,7 +53,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
   if (huks_security_level == "software" && has_huks_hdi_driver &&
       !enable_hks_mock) {
     defines = [ "HKS_CORE_ENABLE_HDI_DRIVER" ]
-    external_deps += [ "drivers_interface_user_auth:libuser_auth_proxy_1.1" ]
+    external_deps += [ "drivers_interface_user_auth:libuser_auth_proxy_1.2" ]
   } else {
     if (enable_hks_mock) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock:libhuks_service_systemapi_mock_static" ]
