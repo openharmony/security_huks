@@ -31,7 +31,7 @@
 
 #define S_TO_MS 1000
 #ifdef _SUPPORT_HKS_TEE_
-#define MAX_KEYNODE_COUNT 20
+#define MAX_KEYNODE_COUNT 32
 #else
 #define MAX_KEYNODE_COUNT 100
 #endif
@@ -136,6 +136,25 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 
     HksMutexUnlock(HksCoreGetHuksMutex());
     return ret;
+}
+
+struct HuksKeyNode *HksCreateUpdateKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
+{
+    struct HuksKeyNode *updateKeyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
+    HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc hks keyNode failed")
+
+    int32_t ret;
+    struct HksParamSet *runtimeParamSet = NULL;
+
+    ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
+    if (ret != HKS_SUCCESS) {
+        return NULL;
+    }
+
+    updateKeyNode->keyBlobParamSet = keyNode->keyBlobParamSet;
+    updateKeyNode->runtimeParamSet = runtimeParamSet;
+    updateKeyNode->authRuntimeParamSet = keyNode->authRuntimeParamSet;
+    return updateKeyNode;
 }
 
 #ifdef _STORAGE_LITE_
@@ -377,5 +396,14 @@ void HksDeleteKeyNode(uint64_t handle)
         }
     }
     HksMutexUnlock(HksCoreGetHuksMutex());
+}
+
+void HksFreeUpdateKeyNode(struct HuksKeyNode *keyNode)
+{
+    if (keyNode == NULL) {
+        return;
+    }
+    FreeRuntimeParamSet(&keyNode->runtimeParamSet);
+    HKS_FREE_PTR(keyNode);
 }
 #endif /* _CUT_AUTHENTICATE_ */

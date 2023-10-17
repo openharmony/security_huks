@@ -18,9 +18,9 @@
 #include <gtest/gtest.h>
 
 #include "file_ex.h"
-#include "hks_core_hal_api.h"
 #include "hks_log.h"
 #include "hks_type_inner.h"
+#include "hks_util.h"
 
 using namespace testing::ext;
 namespace Unittest::HksCoreHalApiTest {
@@ -53,15 +53,15 @@ void HksCoreHalApiTest::TearDown()
 
 /**
  * @tc.name: HksCoreHalApiTest.HksCoreHalApiTest001
- * @tc.desc: tdd HksCoreHalElapsedRealTime, expect HKS_SUCCESS
+ * @tc.desc: tdd HksElapsedRealTime, expect HKS_SUCCESS
  * @tc.type: FUNC
  */
 HWTEST_F(HksCoreHalApiTest, HksCoreHalApiTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreHalApiTest001");
     uint64_t curTime = 0;
-    int32_t ret = HksCoreHalElapsedRealTime(&curTime);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksCoreHalElapsedRealTime failed";
-    EXPECT_EQ(curTime > 0, true) << "HksCoreHalElapsedRealTime failed, curTime = " << curTime;
+    int32_t ret = HksElapsedRealTime(&curTime);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksElapsedRealTime failed";
+    EXPECT_EQ(curTime > 0, true) << "HksElapsedRealTime failed, curTime = " << curTime;
 }
 }
