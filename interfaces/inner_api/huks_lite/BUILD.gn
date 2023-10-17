@@ -161,6 +161,7 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../frameworks/huks_standard/main/core/src/hks_local_engine.c",
       "../../../frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_passthrough.c",
       "../../../frameworks/huks_standard/main/os_dependency/posix/hks_mem.c",
+      "../../../frameworks/huks_standard/main/os_dependency/posix/hks_util.c",
       "../../../frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_process_info_passthrough.c",
       "../../../frameworks/huks_standard/main/os_dependency/sysinfo/src/hks_get_udid.c",
       "../../../interfaces/inner_api/huks_standard/main/src/hks_api.c",

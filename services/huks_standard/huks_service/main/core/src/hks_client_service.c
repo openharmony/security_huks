@@ -36,6 +36,7 @@
 #include "hks_storage.h"
 #include "hks_template.h"
 #include "huks_access.h"
+#include "hks_util.h"
 
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"
@@ -1412,13 +1413,24 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
         ret = HuksAccessInit(&keyFromFile, newParamSet, handle, token);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessInit failed, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = CreateOperation(processInfo, handle, true);
+        ret = CreateOperation(processInfo, paramSet, handle, true);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "create operation failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
     HksFreeParamSet(&newParamSet);
     HksReportEvent(__func__, &traceId, processInfo, paramSet, ret);
+    return ret;
+}
+
+static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation) {
+    uint64_t curTime = 0;
+    int32_t ret = HksElapsedRealTime(&curTime);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed");
+    if (operation->batchOperationTimestamp < curTime) {
+        HKS_LOG_E("Batch operation timeout");
+        return HKS_ERROR_INVALID_TIME_OUT;
+    }
     return ret;
 }
 
@@ -1447,6 +1459,17 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
             break;
         }
 #endif
+
+        if (operation->isBatchOperation) {
+            ret = HksServiceCheckBatchUpdateTime(operation);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("HksServiceCheckBatchUpdateTime fail, ret = %" LOG_PUBLIC "d", ret);
+                MarkOperationUnUse(operation);
+                DeleteOperation(handle);
+                operation = NULL;
+                break;
+            }
+        }
 
         ret = HuksAccessUpdate(handle, paramSet, inData, outData);
         if (ret != HKS_SUCCESS) {

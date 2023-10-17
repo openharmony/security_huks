@@ -23,7 +23,7 @@
 
 using namespace testing::ext;
 namespace {
-static const uint32_t MAX_SESSION_NUM_MORE_1 = 16;
+static const uint32_t MAX_SESSION_NUM_MORE_1 = 33;
 static const uint32_t HMAC_OUTPUT_SIZE = 32;
 class HksSessionMaxTest : public testing::Test {
 public:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -355,9 +355,19 @@ static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check and get alg failed")
 
     struct HksParam *purposeParam = NULL;
+    struct HksParam *batchPurposeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &purposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PURPOSE_FAIL,
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PURPOSE)
+    ret = HksGetParam(paramSet, HKS_TAG_BATCH_PURPOSE, &batchPurposeParam);
+    if (ret == HKS_SUCCESS) {
+        if ((purposeParam->uint32Param | batchPurposeParam->uint32Param) != purposeParam->uint32Param) {
+            return HKS_ERROR_INVALID_PURPOSE;
+        }
+    }
+    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     if (((purposeParam->uint32Param & HKS_KEY_PURPOSE_DERIVE) != 0) ||
         ((purposeParam->uint32Param & HKS_KEY_PURPOSE_MAC) != 0)) {

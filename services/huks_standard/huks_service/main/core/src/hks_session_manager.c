@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "hks_session_manager.h"
+#include "hks_client_service_util.h"
 
 #include <pthread.h>
 #include <sched.h>
@@ -26,8 +27,9 @@
 #include "hks_template.h"
 #include "huks_access.h"
 #include "securec.h"
+#include "hks_util.h"
 
-#define MAX_OPERATIONS_COUNT 15
+#define MAX_OPERATIONS_COUNT 32
 
 static struct DoubleList g_operationList = { &g_operationList, &g_operationList };
 static uint32_t g_operationCount = 0;
@@ -148,8 +150,39 @@ static int32_t ConstructOperationHandle(const struct HksBlob *operationHandle, u
     return HKS_SUCCESS;
 }
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle,
-    bool abortable)
+static int32_t HksAddBatchTimeToOperation(const struct HksParamSet *paramSet, struct HksOperation *operation)
+{
+    if (paramSet == NULL || operation == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HKS_SUCCESS;
+    bool findOperation = false;
+    bool findTimeout = false;
+    operation->isBatchOperation = false;
+    operation->batchOperationTimestamp = 0;
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag == HKS_TAG_IS_BATCH_OPERATION) {
+            operation->isBatchOperation = paramSet->params[i].boolParam;
+            findOperation = true;
+            continue;
+        }
+        if (paramSet->params[i].tag == HKS_TAG_BATCH_OPERATION_TIMEOUT) {
+            uint64_t curTime = 0;
+            ret = HksElapsedRealTime(&curTime);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
+            operation->batchOperationTimestamp = curTime + (uint64_t)paramSet->params[i].uint32Param;
+            findTimeout = true;
+            continue;
+        }
+    }
+    if (findOperation ^ findTimeout) {
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *operationHandle, bool abortable)
 {
     struct HksOperation *operation = (struct HksOperation *)HksMalloc(sizeof(struct HksOperation));
     HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_MALLOC_FAIL, "malloc hks operation failed")
@@ -172,6 +205,18 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
 
     operation->abortable = abortable;
     operation->isInUse = false;
+    operation->isBatchOperation = false;
+
+    if (paramSet != NULL) {
+        ret = HksAddBatchTimeToOperation(paramSet, operation);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("constrtct operation handle failed");
+            HKS_FREE_BLOB(operation->processInfo.processName);
+            HKS_FREE_BLOB(operation->processInfo.userId);
+            HKS_FREE_PTR(operation);
+            return ret;
+        }
+    }
 
     ret = AddOperation(operation);
     if (ret != HKS_SUCCESS) {

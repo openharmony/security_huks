@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,21 +12,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef HKS_CORE_HAL_API_H
-#define HKS_CORE_HAL_API_H
 
+#ifndef HKS_UTIL_H
+#define HKS_UTIL_H
 
 #include <stdint.h>
 #include <stdlib.h>
+
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksCoreHalElapsedRealTime(uint64_t *timestampMs);
+int32_t HksElapsedRealTime(uint64_t *timestampMs);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif
+#endif // HKS_UTIL_H
