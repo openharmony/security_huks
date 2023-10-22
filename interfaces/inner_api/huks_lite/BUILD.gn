@@ -208,7 +208,6 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     defines = [
-      "MBEDTLS_ECP_RESTARTABLE=1",
       "LOG_ENGINE_HILOG_MODULE_SCY",
       "HUKS_LOG_MINI_EXT_ENABLED",
     ]
@@ -299,10 +298,7 @@ if (ohos_kernel_type == "liteos_m") {
       "init_lite:libbegetutil",
     ]
 
-    defines = [
-      "MBEDTLS_ECP_RESTARTABLE=1",
-      "LOG_ENGINE_HILOG_MODULE_SCY",
-    ]
+    defines = [ "LOG_ENGINE_HILOG_MODULE_SCY" ]
   }
 
   ohos_executable("huks_server") {
