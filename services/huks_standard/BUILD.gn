@@ -22,6 +22,7 @@ ohos_prebuilt_etc("huks_service.rc") {
 }
 
 ohos_shared_library("huks_service") {
+  branch_protector_ret = "pac_ret"
   sanitize = {
     integer_overflow = true
     cfi = true

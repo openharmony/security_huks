@@ -35,6 +35,8 @@ if (os_level == "standard") {
 
     complete_static_lib = true
 
+    branch_protector_ret = "pac_ret"
+
     sanitize = {
       integer_overflow = true
       cfi = true
