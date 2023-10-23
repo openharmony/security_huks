@@ -39,6 +39,8 @@ if (os_level == "standard") {
 
     external_deps = []
 
+    branch_protector_ret = "pac_ret"
+
     sanitize = {
       integer_overflow = true
       cfi = true
