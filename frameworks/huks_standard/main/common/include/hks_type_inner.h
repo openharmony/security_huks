@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -71,6 +71,7 @@ enum HksStageType {
 #define HKS_ASSIGN_INNER_PARAM_ALG_VALUE \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_TYPE_UINT | 30021) \
     HKS_ASSIGN_ENUM_VALUE(HKS_TAG_BUNDLE_NAME, HKS_TAG_TYPE_BYTES | 30022) \
+    HKS_ASSIGN_ENUM_VALUE(HKS_TAG_AES_GCM_NEED_REGENERATE_NONCE, HKS_TAG_TYPE_BOOL | 30023) \
 
 enum HksInnerTag {
     HKS_ASSIGN_INNER_TMP_ENUM

@@ -68,6 +68,7 @@ ohos_unittest("huks_UT_test") {
     "src/symmetric_alg_test/hks_aes_cipher_part1_test.cpp",
     "src/symmetric_alg_test/hks_aes_cipher_part2_test.cpp",
     "src/symmetric_alg_test/hks_aes_cipher_part3_test.cpp",
+    "src/symmetric_alg_test/hks_aes_cipher_part4_test.cpp",
     "src/symmetric_alg_test/hks_aes_cipher_test_common.cpp",
   ]
 
@@ -107,6 +108,7 @@ ohos_unittest("huks_UT_test") {
     defines += [ "_USE_MBEDTLS_" ]
   }
   if (enable_hks_mock) {
+    defines += [ "USE_HKS_MOCK" ]
     sources += [
       "src/hks_access_control_agree_test.cpp",
       "src/hks_access_control_cipher_test.cpp",
