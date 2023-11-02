@@ -353,7 +353,7 @@ int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParam
     cipherText.size -= NONCE_SIZE;
     cipherText.size -= AEAD_SIZE;
 
-    HksAesGcmAppendAeadAndNonce(decryptParamSet, cipherText);
+    HksAesGcmAppendAeadAndNonce(decryptParamSet, &cipherText);
 
     /* 3. Decrypt Three Stage */
     // Init
