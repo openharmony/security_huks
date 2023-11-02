@@ -32,7 +32,7 @@
 
 #define S_TO_MS 1000
 #ifdef _SUPPORT_HKS_TEE_
-#define MAX_KEYNODE_COUNT 32
+#define MAX_KEYNODE_COUNT 64
 #else
 #define MAX_KEYNODE_COUNT 100
 #endif
