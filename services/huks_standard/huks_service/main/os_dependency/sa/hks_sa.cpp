@@ -39,6 +39,10 @@
 #include "hks_event_observer.h"
 #endif
 
+#include <filesystem>
+#include <string>
+#include <system_error>
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -232,14 +236,36 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return NO_ERROR;
 }
 
-#define OLD_PATH "/data/service/el2/public/huks_service/maindata"
-#define NEW_PATH "/data/service/el1/public/huks_service/maindata"
+void MoveDirectoryTree()
+{
+    constexpr char oldDir[] = "/data/service/el2/public/huks_service/maindata/";
+    constexpr char newDir[] = "/data/service/el1/public/huks_service/maindata/";
+    std::error_code errCode{};
+    std::filesystem::create_directory(newDir, errCode);
+    if (errCode.value() != 0) {
+        HKS_LOG_E("create_directory %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", newDir, errCode.message().c_str());
+    } else {
+        HKS_LOG_I("create_directory %" LOG_PUBLIC "s ok!", newDir);
+    }
+    std::filesystem::copy(oldDir, newDir,
+        std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
+    if (errCode.value() != 0) {
+        HKS_LOG_E("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
+            oldDir, newDir, errCode.message().c_str());
+        return;
+    }
+    HKS_LOG_I("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s ok!", oldDir, newDir);
+    std::filesystem::remove_all(oldDir, errCode);
+    if (errCode.value() != 0) {
+        HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", oldDir, errCode.message().c_str());
+        return;
+    }
+    HKS_LOG_I("remove_all %" LOG_PUBLIC "s ok!", oldDir);
+}
 
 void HksService::OnStart()
 {
-    system("mv " OLD_PATH "/* " NEW_PATH "/");
-    system("mv " OLD_PATH "/.* " NEW_PATH "/");
-    system("chown -R 3510:3510 " NEW_PATH);
+    MoveDirectoryTree();
     HKS_LOG_I("HksService OnStart");
 
     if (runningState_ == STATE_RUNNING) {
