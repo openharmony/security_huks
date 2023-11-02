@@ -362,11 +362,9 @@ static int32_t CoreCheckGenKeyParams(const struct HksParamSet *paramSet, struct 
     ret = HksGetParam(paramSet, HKS_TAG_BATCH_PURPOSE, &batchPurposeParam);
     if (ret == HKS_SUCCESS) {
         if ((purposeParam->uint32Param | batchPurposeParam->uint32Param) != purposeParam->uint32Param) {
+            HKS_LOG_E("batchPurposeParam should fall within the scope of purposeParam.");
             return HKS_ERROR_INVALID_PURPOSE;
         }
-    }
-    if (ret == HKS_ERROR_INVALID_ARGUMENT) {
-        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     if (((purposeParam->uint32Param & HKS_KEY_PURPOSE_DERIVE) != 0) ||

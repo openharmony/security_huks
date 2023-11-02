@@ -57,7 +57,7 @@ struct HuksKeyNode {
 extern "C" {
 #endif
 
-struct HuksKeyNode *HksCreateUpdateKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
+struct HuksKeyNode *HksCreateBatchKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
 
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet);
 

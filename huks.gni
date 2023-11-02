@@ -13,7 +13,7 @@
 
 use_crypto_lib = "openssl"
 non_rwlock_support = false
-enable_hks_mock = true
+enable_hks_mock = false
 enable_hks_coverage = false
 enable_user_auth_framework = true
 enable_huks_lite_hap = false

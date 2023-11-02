@@ -58,6 +58,8 @@
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
 
+#define S_TO_MS 1000
+
 static const uint8_t g_defaultRsaPubExponent[] = { 0x01, 0x00, 0x01 }; /* default 65537 */
 
 static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
@@ -1434,9 +1436,9 @@ static int32_t HksBatchCheck(struct HuksKeyNode *keyNode)
         struct HksParam *purposeParam = NULL;
         struct HksParam *batchPurposeParam = NULL;
         ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get purpose param failed!")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get purpose param failed!")
         ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_BATCH_PURPOSE, &batchPurposeParam);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get batch purpose param failed!")
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get batch purpose param failed!")
         if ((purposeParam->uint32Param | batchPurposeParam->uint32Param) != batchPurposeParam->uint32Param) {
             return HKS_ERROR_INVALID_PURPOSE;
         }
@@ -1545,11 +1547,13 @@ static int32_t HksAddBatchTimeToKeyNode(const struct HksParamSet *paramSet, stru
     if (keyNode == NULL || paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
+    uint64_t curTime = 0;
+    int32_t ret = HksElapsedRealTime(&curTime);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
     keyNode->isBatchOperation = false;
-    keyNode->batchOperationTimestamp = 0;
+    keyNode->batchOperationTimestamp = curTime + DEFAULT_BATCH_TIME_OUT * S_TO_MS;
     bool findOperation = false;
     bool findTimeout = false;
-    int32_t ret = HKS_SUCCESS;
     for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
         if (paramSet->params[i].tag == HKS_TAG_IS_BATCH_OPERATION) {
             keyNode->isBatchOperation = paramSet->params[i].boolParam;
@@ -1557,16 +1561,25 @@ static int32_t HksAddBatchTimeToKeyNode(const struct HksParamSet *paramSet, stru
             continue;
         }
         if (paramSet->params[i].tag == HKS_TAG_BATCH_OPERATION_TIMEOUT) {
-            uint64_t curTime = 0;
-            ret = HksElapsedRealTime(&curTime);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
-            keyNode->batchOperationTimestamp = curTime + (uint64_t)paramSet->params[i].uint32Param;
+            if ((uint64_t)paramSet->params[i].uint32Param > MAX_BATCH_TIME_OUT) {
+                HKS_LOG_E("Batch time is too big.");
+                return HKS_ERROR_NOT_SUPPORTED;
+            }
+            keyNode->batchOperationTimestamp = curTime + (uint64_t)paramSet->params[i].uint32Param * S_TO_MS;
             findTimeout = true;
             continue;
         }
+        if (findOperation && findTimeout) {
+            break;
+        }
     }
-    if (findOperation ^ findTimeout) {
+    if (!findOperation && findTimeout) {
+        keyNode->batchOperationTimestamp = 0;
+        HKS_LOG_E("can not find HKS_TAG_IS_BATCH_OPERATION.");
         return HKS_ERROR_NOT_SUPPORTED;
+    }
+    if (!findOperation) {
+        keyNode->batchOperationTimestamp = 0;
     }
     return ret;
 }
@@ -1604,9 +1617,12 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
 
         ret = HksBatchCheck(keyNode);
         if (ret == HKS_SUCCESS) {
+            HKS_LOG_I("HksBatchCheck success");
             return HKS_SUCCESS;
         }
-        if (ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE) {
+        if (ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE
+            || ret == HKS_ERROR_NULL_POINTER) {
+            HKS_LOG_E("HksBatchCheck failed");
             break;
         }
 
@@ -1659,7 +1675,7 @@ static int32_t HksBatchUpdate(struct HuksKeyNode *keyNode, const struct HksParam
     }
     int32_t ret = HksCheckBatchUpdateTime(keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckBatchUpdateTime failed!")
-    struct HuksKeyNode *batchKeyNode = HksCreateUpdateKeyNode(keyNode, paramSet);
+    struct HuksKeyNode *batchKeyNode = HksCreateBatchKeyNode(keyNode, paramSet);
     HKS_IF_NULL_LOGE_RETURN(batchKeyNode, HKS_ERROR_BAD_STATE, "the batchKeyNode is null")
     do {
         uint32_t pur = 0;
@@ -1704,12 +1720,15 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
 
     ret = HksBatchCheck(keyNode);
     if (ret == HKS_SUCCESS) {
+        HKS_LOG_I("HksBatchCheck success");
         ret = HksBatchUpdate(keyNode, paramSet, inData, outData);
         if (ret != HKS_SUCCESS) {
             HksDeleteKeyNode(sessionId);
         }
         return ret;
-    } else if(ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE) {
+    } else if(ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE
+        || ret == HKS_ERROR_NULL_POINTER) {
+        HKS_LOG_E("HksBatchCheck failed");
         HksDeleteKeyNode(sessionId);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -1737,16 +1756,16 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
 
+    ret = HksBatchCheck(keyNode);
+    if (ret != HKS_ERROR_PARAM_NOT_EXIST) {
+        HksDeleteKeyNode(sessionId);
+        return ret;
+    }
+
     ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
         HKS_LOG_E("HksCoreFinish secure access verify failed");
-        return ret;
-    }
-
-    ret = HksBatchCheck(keyNode);
-    if (ret != HKS_ERROR_PARAM_NOT_EXIST) {
-        HksDeleteKeyNode(sessionId);
         return ret;
     }
 
