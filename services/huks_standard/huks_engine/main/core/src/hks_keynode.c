@@ -28,6 +28,7 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "securec.h"
+#include "hks_util.h"
 
 #define S_TO_MS 1000
 #ifdef _SUPPORT_HKS_TEE_
@@ -118,11 +119,33 @@ static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
     HksFreeParamSet(paramSet);
 }
 
+static int32_t DeleteTimeOutKeyNode()
+{
+    if (g_keyNodeCount < MAX_KEYNODE_COUNT) {
+        return HKS_SUCCESS;
+    }
+    struct HuksKeyNode *tmpKeyNode = NULL;
+    HKS_DLIST_ITER(tmpKeyNode, &g_keyNodeList) {
+        if (tmpKeyNode != NULL && tmpKeyNode->isBatchOperation) {
+            uint64_t curTime = 0;
+            int32_t ret = HksElapsedRealTime(&curTime);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
+            if (tmpKeyNode->batchOperationTimestamp < curTime) {
+                HKS_LOG_E("Batch operation timeout");
+                HksDeleteKeyNode(tmpKeyNode->handle);
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 {
     int32_t ret = HKS_SUCCESS;
     HksMutexLock(HksCoreGetHuksMutex());
     do {
+        ret = DeleteTimeOutKeyNode();
+        HKS_IF_NOT_SUCC_BREAK(ret);
         if (g_keyNodeCount >= MAX_KEYNODE_COUNT) {
             HKS_LOG_E("maximum number of keyNode reached");
             ret = HKS_ERROR_SESSION_REACHED_LIMIT;
@@ -138,7 +161,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
     return ret;
 }
 
-struct HuksKeyNode *HksCreateUpdateKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
+struct HuksKeyNode *HksCreateBatchKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *updateKeyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
     HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc hks keyNode failed")

@@ -19,6 +19,8 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+#define DEFAULT_BATCH_TIME_OUT 60
+#define MAX_BATCH_TIME_OUT 600
 
 #ifdef __cplusplus
 extern "C" {
