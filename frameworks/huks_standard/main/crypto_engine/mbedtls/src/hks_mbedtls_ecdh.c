@@ -82,7 +82,8 @@ int32_t HksMbedtlsEcdh(const struct HksBlob *nativeKey,
         ret = EccKeyMaterialToCtx(nativeKey, pubKey, &ctx);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)), &(ctx.MBEDTLS_PRIVATE(Qp)), &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
+        ret = mbedtls_ecdh_compute_shared(&(ctx.MBEDTLS_PRIVATE(grp)), &(ctx.MBEDTLS_PRIVATE(z)),
+            &(ctx.MBEDTLS_PRIVATE(Qp)), &(ctx.MBEDTLS_PRIVATE(d)), mbedtls_ctr_drbg_random, &ctrDrbg);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls ecdh shared key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;

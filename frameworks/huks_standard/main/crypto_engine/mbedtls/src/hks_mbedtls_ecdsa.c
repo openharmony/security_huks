@@ -74,7 +74,6 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
         uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
         ret = HksToMbedtlsDigestAlg(digest, &mbedtlsAlg);
         HKS_IF_NOT_SUCC_BREAK(ret)
-        // size_t keyLen = signature->size;
         size_t keyLen = (size_t)(signature->size);
         ret = mbedtls_ecdsa_write_signature(&ctx, (mbedtls_md_type_t)mbedtlsAlg, message->data, (size_t)message->size,
             signature->data, keyLen, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
