@@ -119,7 +119,7 @@ static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
     HksFreeParamSet(paramSet);
 }
 
-static int32_t DeleteTimeOutKeyNode()
+static int32_t DeleteTimeOutKeyNode(void)
 {
     if (g_keyNodeCount < MAX_KEYNODE_COUNT) {
         return HKS_SUCCESS;
