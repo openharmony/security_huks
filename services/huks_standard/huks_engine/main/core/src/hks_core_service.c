@@ -1653,7 +1653,8 @@ static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_
     return HKS_SUCCESS;
 }
 
-static int32_t HksCheckBatchUpdateTime(struct HuksKeyNode *keyNode) {
+static int32_t HksCheckBatchUpdateTime(struct HuksKeyNode *keyNode)
+{
     if (keyNode == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -1726,7 +1727,7 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
             HksDeleteKeyNode(sessionId);
         }
         return ret;
-    } else if(ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE
+    } else if (ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE
         || ret == HKS_ERROR_NULL_POINTER) {
         HKS_LOG_E("HksBatchCheck failed");
         HksDeleteKeyNode(sessionId);

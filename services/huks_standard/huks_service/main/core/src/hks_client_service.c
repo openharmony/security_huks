@@ -1423,7 +1423,8 @@ int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct Hk
     return ret;
 }
 
-static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation) {
+static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation)
+{
     uint64_t curTime = 0;
     int32_t ret = HksElapsedRealTime(&curTime);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed");
