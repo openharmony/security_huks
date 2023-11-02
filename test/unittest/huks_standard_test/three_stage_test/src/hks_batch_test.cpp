@@ -943,24 +943,28 @@ HWTEST_F(HksBatchTest, HksBatchTest002, TestSize.Level0)
 }
 
 static int32_t InitParamSetForHksBatchTest003(struct HksParamSet **genParamSet, struct HksParamSet **encryptParamSet,
-    struct HksParamSet **decryptNormaLParamSet, struct HksParamSet **decryptBatchParamSet)
+    struct HksParamSet **decNormaLParamSet, struct HksParamSet **decryptBatchParamSet)
 {
-    int32_t ret = InitParamSet(genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
+    int32_t ret = InitParamSet(genParamSet, g_genParams003,
+        sizeof(g_genParams003) / sizeof(HksParam));
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
-    ret = InitParamSet(encryptParamSet, g_encryptParams003, sizeof(g_encryptParams003) / sizeof(HksParam));
+    ret = InitParamSet(encryptParamSet, g_encryptParams003,
+        sizeof(g_encryptParams003) / sizeof(HksParam));
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
-    ret = InitParamSet(decryptNormaLParamSet, g_decryptNormalParams003, sizeof(g_decryptNormalParams003) / sizeof(HksParam));
+    ret = InitParamSet(decNormaLParamSet, g_decryptNormalParams003,
+        sizeof(g_decryptNormalParams003) / sizeof(HksParam));
     if (ret != HKS_SUCCESS) {
         return ret;
     }
 
-    ret = InitParamSet(decryptBatchParamSet, g_decryptBatchParams003, sizeof(g_decryptBatchParams003) / sizeof(HksParam));
+    ret = InitParamSet(decryptBatchParamSet, g_decryptBatchParams003,
+        sizeof(g_decryptBatchParams003) / sizeof(HksParam));
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -980,9 +984,9 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
 
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *encryptParamSet = nullptr;
-    struct HksParamSet *decryptNormaLParamSet = nullptr;
+    struct HksParamSet *decNormaLParamSet = nullptr;
     struct HksParamSet *decryptBatchParamSet = nullptr;
-    int32_t ret = InitParamSetForHksBatchTest003(&genParamSet, &encryptParamSet, &decryptNormaLParamSet, &decryptBatchParamSet);
+    int32_t ret = InitParamSetForHksBatchTest003(&genParamSet, &encryptParamSet, &decNormaLParamSet, &decryptBatchParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 1. Generate Key */
@@ -990,16 +994,12 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     static const std::string tmp_inData1 = "Hks_string1";
-    struct HksBlob inData1 = {
-        tmp_inData1.length(),
-        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmp_inData1.c_str()))
-    };
+    struct HksBlob inData1 = { tmp_inData1.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmp_inData1.c_str())) };
 
     static const std::string tmp_inData2 = "Hks_string2";
-    struct HksBlob inData2 = {
-        tmp_inData2.length(),
-        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmp_inData2.c_str()))
-    };
+    struct HksBlob inData2 = { tmp_inData2.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(tmp_inData2.c_str())) };
 
     uint8_t cipher1[AesCipher::AES_COMMON_SIZE] = {0};
     struct HksBlob cipherText1 = { AesCipher::AES_COMMON_SIZE, cipher1 };
@@ -1019,10 +1019,10 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
     uint8_t plainNormal2[AesCipher::AES_COMMON_SIZE] = {0};
     struct HksBlob plainTextNormal2 = { AesCipher::AES_COMMON_SIZE, plainNormal2 };
 
-    ret = AesCipher::HksAesDecryptThreeStage(&keyAlias, decryptNormaLParamSet, &inData1, &cipherText1, &plainTextNormal1);
+    ret = AesCipher::HksAesDecryptThreeStage(&keyAlias, decNormaLParamSet, &inData1, &cipherText1, &plainTextNormal1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
 
-    ret = AesCipher::HksAesDecryptThreeStage(&keyAlias, decryptNormaLParamSet, &inData2, &cipherText2, &plainTextNormal2);
+    ret = AesCipher::HksAesDecryptThreeStage(&keyAlias, decNormaLParamSet, &inData2, &cipherText2, &plainTextNormal2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
 
     uint8_t plainBathc1[AesCipher::AES_COMMON_SIZE] = {0};
@@ -1040,7 +1040,7 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
-    HksFreeParamSet(&decryptNormaLParamSet);
+    HksFreeParamSet(&decNormaLParamSet);
     HksFreeParamSet(&decryptBatchParamSet);
 }
 

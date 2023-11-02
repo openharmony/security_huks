@@ -63,8 +63,8 @@ if (os_level == "standard") {
     public_configs = [ ":huks_config" ]
 
     sources = [
-        "./posix/hks_mem.c",
-        "./posix/hks_util.c",
+      "./posix/hks_mem.c",
+      "./posix/hks_util.c",
     ]
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]

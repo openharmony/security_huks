@@ -303,6 +303,28 @@ int32_t HksAesCipherTestCaseGcm3(const struct HksBlob *keyAlias, struct HksParam
     return ret;
 }
 
+static void HksAesGcmAppendAeadAndNonce(struct HksParamSet *paramSet, struct HksBlob *cipherText)
+{
+    uint32_t i = 0;
+    for (i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag == HKS_TAG_AE_TAG) {
+            uint8_t *tempPtrTest = cipherText->data;
+            (void)memcpy_s(paramSet->params[i].blob.data, AEAD_SIZE,
+                tempPtrTest + cipherText->size, AEAD_SIZE);
+            break;
+        }
+    }
+    for (i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag == HKS_TAG_NONCE) {
+            uint8_t *tempPtrTest = cipherText->data;
+            (void)memcpy_s(paramSet->params[i].blob.data, NONCE_SIZE,
+                tempPtrTest + cipherText->size + AEAD_SIZE, NONCE_SIZE);
+            break;
+        }
+    }
+    return;
+}
+
 int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool isTimeOut)
 {
@@ -331,24 +353,7 @@ int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParam
     cipherText.size -= NONCE_SIZE;
     cipherText.size -= AEAD_SIZE;
 
-    uint32_t i = 0;
-    for (i = 0; i < decryptParamSet->paramsCnt; i++) {
-        if (decryptParamSet->params[i].tag == HKS_TAG_AE_TAG) {
-            uint8_t *tempPtrTest = cipherText.data;
-            (void)memcpy_s(decryptParamSet->params[i].blob.data, AEAD_SIZE,
-                tempPtrTest + cipherText.size, AEAD_SIZE);
-            break;
-        }
-    }
-
-    for (i = 0; i < decryptParamSet->paramsCnt; i++) {
-        if (decryptParamSet->params[i].tag == HKS_TAG_NONCE) {
-            uint8_t *tempPtrTest = cipherText.data;
-            (void)memcpy_s(decryptParamSet->params[i].blob.data, NONCE_SIZE,
-                tempPtrTest + cipherText.size + AEAD_SIZE, NONCE_SIZE);
-            break;
-        }
-    }
+    HksAesGcmAppendAeadAndNonce(decryptParamSet, cipherText);
 
     /* 3. Decrypt Three Stage */
     // Init
@@ -389,7 +394,7 @@ int32_t HksAesEncryptThreeStage(const struct HksBlob *keyAlias, struct HksParamS
 
 int32_t HksAesDecryptThreeStage(const struct HksBlob *keyAlias, struct HksParamSet *decryptParamSet,
     const struct HksBlob *inData, struct HksBlob *cipherText, struct HksBlob *plainText)
-{  
+{
     cipherText->size -= NONCE_SIZE;
     cipherText->size -= AEAD_SIZE;
 
@@ -444,28 +449,6 @@ int32_t HksAesDecryptThreeStage(const struct HksBlob *keyAlias, struct HksParamS
     }
     EXPECT_EQ(HksMemCmp(inData->data, plainText->data, inData->size), HKS_SUCCESS) << "plainText not equals inData";
     return ret;
-}
-
-static void HksAesGcmAppendAeadAndNonce(struct HksParamSet *paramSet, struct HksBlob *cipherText)
-{
-    uint32_t i = 0;
-    for (i = 0; i < paramSet->paramsCnt; i++) {
-        if (paramSet->params[i].tag == HKS_TAG_AE_TAG) {
-            uint8_t *tempPtrTest = cipherText->data;
-            (void)memcpy_s(paramSet->params[i].blob.data, AEAD_SIZE,
-                tempPtrTest + cipherText->size, AEAD_SIZE);
-            break;
-        }
-    }
-    for (i = 0; i < paramSet->paramsCnt; i++) {
-        if (paramSet->params[i].tag == HKS_TAG_NONCE) {
-            uint8_t *tempPtrTest = cipherText->data;
-            (void)memcpy_s(paramSet->params[i].blob.data, NONCE_SIZE,
-                tempPtrTest + cipherText->size + AEAD_SIZE, NONCE_SIZE);
-            break;
-        }
-    }
-    return;
 }
 
 int32_t HksAesDecryptForBatch(const struct HksBlob *keyAlias, struct HksParamSet *decryptParamSet,
