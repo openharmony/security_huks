@@ -1457,8 +1457,7 @@ static int32_t HksCoreInitProcess(struct HuksKeyNode *keyNode, const struct HksP
     int32_t ret = HKS_ERROR_BAD_STATE;
     for (i = 0; i < size; i++) {
         if (g_hksCoreInitHandler[i].pur == pur) {
-            HKS_LOG_E("Core HksCoreInit [pur] = %" LOG_PUBLIC "d, pur = %" LOG_PUBLIC "d",
-                g_hksCoreInitHandler[i].pur, pur);
+            HKS_LOG_E("Core HksCoreInit pur = %" LOG_PUBLIC "d", pur);
             ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
             break;
         }
@@ -1481,6 +1480,7 @@ static int32_t HksCoreUpdateProcess(struct HuksKeyNode *keyNode, const struct Hk
     uint32_t pur = 0;
     uint32_t alg = 0;
     int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetPurposeAndAlgorithm failed")
     uint32_t size = HKS_ARRAY_SIZE(g_hksCoreUpdateHandler);
     for (i = 0; i < size; i++) {
         if (g_hksCoreUpdateHandler[i].pur == pur) {
@@ -1516,6 +1516,7 @@ static int32_t HksCoreFinishProcess(struct HuksKeyNode *keyNode, const struct Hk
     uint32_t pur = 0;
     uint32_t alg = 0;
     int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetPurposeAndAlgorithm failed")
     for (i = 0; i < size; i++) {
         if (g_hksCoreFinishHandler[i].pur == pur) {
             uint32_t outDataBufferSize = (outData == NULL) ? 0 : outData->size;
@@ -1620,13 +1621,9 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
             HKS_LOG_I("HksBatchCheck success");
             return HKS_SUCCESS;
         }
-        if (ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE
-            || ret == HKS_ERROR_NULL_POINTER) {
-            HKS_LOG_E("HksBatchCheck failed");
-            break;
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            ret = HksCoreInitProcess(keyNode, paramSet, pur, alg);
         }
-
-        ret = HksCoreInitProcess(keyNode, paramSet, pur, alg);
     } while (0);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
@@ -1674,7 +1671,15 @@ static int32_t HksBatchUpdate(struct HuksKeyNode *keyNode, const struct HksParam
     if (keyNode == NULL || paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksCheckBatchUpdateTime(keyNode);
+    struct HksParam *authResult = NULL;
+    int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_AUTH_RESULT, &authResult);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get authResult failed!")
+    authResult->uint32Param = HKS_AUTH_RESULT_INIT;
+    struct HksParam *isNeedSecureSignInfo = NULL;
+    ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IF_NEED_APPEND_AUTH_INFO, &isNeedSecureSignInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get is secure sign failed!")
+    isNeedSecureSignInfo->boolParam = false;
+    ret = HksCheckBatchUpdateTime(keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckBatchUpdateTime failed!")
     struct HuksKeyNode *batchKeyNode = HksCreateBatchKeyNode(keyNode, paramSet);
     HKS_IF_NULL_LOGE_RETURN(batchKeyNode, HKS_ERROR_BAD_STATE, "the batchKeyNode is null")
@@ -1686,7 +1691,7 @@ static int32_t HksBatchUpdate(struct HuksKeyNode *keyNode, const struct HksParam
         ret = HksCoreInitProcess(batchKeyNode, paramSet, pur, alg);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreInitProcess failed")
         ret = HksCoreFinishProcess(batchKeyNode, paramSet, inData, outData);
-        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCoreFinishProcess failed")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreFinishProcess failed")
     } while (0);
 
     HksFreeUpdateKeyNode(batchKeyNode);
@@ -1727,14 +1732,12 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
             HksDeleteKeyNode(sessionId);
         }
         return ret;
-    } else if (ret == HKS_ERROR_INVALID_ARGUMENT || ret == HKS_ERROR_INVALID_PURPOSE
-        || ret == HKS_ERROR_NULL_POINTER) {
-        HKS_LOG_E("HksBatchCheck failed");
-        HksDeleteKeyNode(sessionId);
-        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    ret = HksCoreUpdateProcess(keyNode, paramSet, inData, outData);
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        ret = HksCoreUpdateProcess(keyNode, paramSet, inData, outData);
+    }
+
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
     }

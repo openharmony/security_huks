@@ -171,6 +171,8 @@ struct HuksKeyNode *HksCreateBatchKeyNode(struct HuksKeyNode *keyNode, const str
 
     ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
     if (ret != HKS_SUCCESS) {
+        HksFree(updateKeyNode);
+        HKS_LOG_E("get runtime paramSet failed");
         return NULL;
     }
 
