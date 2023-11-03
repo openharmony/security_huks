@@ -164,7 +164,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 struct HuksKeyNode *HksCreateBatchKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *updateKeyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
-    HKS_IF_NULL_LOGE_RETURN(keyNode, NULL, "malloc hks keyNode failed")
+    HKS_IF_NULL_LOGE_RETURN(updateKeyNode, NULL, "malloc hks keyNode failed")
 
     int32_t ret;
     struct HksParamSet *runtimeParamSet = NULL;
