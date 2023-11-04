@@ -76,7 +76,7 @@ if (os_level == "standard") {
     ]
     external_deps = [
       "hilog_lite:hilog_shared",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
 }
