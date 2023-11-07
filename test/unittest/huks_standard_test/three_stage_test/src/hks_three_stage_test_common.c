@@ -111,6 +111,62 @@ int32_t HksTestUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     return HKS_SUCCESS;
 }
 
+int32_t TestBatchUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    struct HksBlob inDataSeg = *inData;
+    uint8_t *lastPtr = inData->data + inData->size - 1;
+    struct HksBlob outDataSeg = { MAX_OUTDATA_SIZE, NULL };
+    uint8_t *cur = outData->data;
+    uint32_t curSize = outData->size;
+    outData->size = 0;
+
+    inDataSeg.size = MAX_UPDATE_SIZE;
+
+    bool isFinished = false;
+
+    isFinished = true;
+    inDataSeg.size = lastPtr - inDataSeg.data + 1;
+
+    if (MallocAndCheckBlobData(&outDataSeg, outDataSeg.size) != HKS_SUCCESS) {
+        return HKS_FAILURE;
+    }
+    
+    int32_t ret = HksUpdate(handle, paramSet, &inDataSeg, &outDataSeg);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksUpdate Failed.");
+        HksFree(outDataSeg.data);
+        return ret;
+    }
+    (void)memcpy_s(cur, outDataSeg.size, outDataSeg.data, outDataSeg.size);
+    cur += outDataSeg.size;
+    outData->size += outDataSeg.size;
+    HksFree(outDataSeg.data);
+    if ((isFinished == false) && (inDataSeg.data + MAX_UPDATE_SIZE > lastPtr)) {
+        return HKS_FAILURE;
+    }
+    inDataSeg.data += MAX_UPDATE_SIZE;
+
+    struct HksBlob outDataFinish = { inDataSeg.size * TIMES, NULL };
+    if (MallocAndCheckBlobData(&outDataFinish, outDataFinish.size) != HKS_SUCCESS) {
+        return HKS_FAILURE;
+    }
+
+    if (HksFinish(handle, paramSet, &inDataSeg, &outDataFinish) != HKS_SUCCESS) {
+        HksFree(outDataFinish.data);
+        return HKS_FAILURE;
+    }
+    
+    if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
+        HksFree(outDataFinish.data);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    outData->size += outDataFinish.size;
+    HksFree(outDataFinish.data);
+
+    return HKS_SUCCESS;
+}
+
 int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {

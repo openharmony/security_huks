@@ -103,6 +103,9 @@ static uint32_t g_validTags[] = {
     HKS_TAG_CHALLENGE_TYPE,
     HKS_TAG_CHALLENGE_POS,
     HKS_TAG_KEY_AUTH_PURPOSE,
+    HKS_TAG_BATCH_PURPOSE,
+    HKS_TAG_IS_BATCH_OPERATION,
+    HKS_TAG_BATCH_OPERATION_TIMEOUT,
 
     HKS_TAG_KEY_INIT_CHALLENGE,
     HKS_TAG_IS_USER_AUTH_ACCESS,
@@ -209,7 +212,6 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
 
     return HksFreshParamSet(freshParamSet, true);
 }
-
 
 HKS_API_EXPORT int32_t HksCheckParamSet(const struct HksParamSet *paramSet, uint32_t size)
 {

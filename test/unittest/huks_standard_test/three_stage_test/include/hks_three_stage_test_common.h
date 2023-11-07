@@ -211,6 +211,8 @@ int32_t InitParamSet(struct HksParamSet **paramSet, const struct HksParam *param
 int32_t HksTestUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData);
 int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData);
+int32_t TestBatchUpdateLoopFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData);
 int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet,
     uint32_t purpose, const struct HksBlob *inData, struct HksBlob *outData);
 int32_t MallocAndCheckBlobData(struct HksBlob *blob, const uint32_t blobSize);

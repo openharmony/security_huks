@@ -14,7 +14,7 @@
  */
 
 #include "hks_access_control_test_common.h"
-#include "hks_core_hal_api.h"
+#include "hks_util.h"
 
 #include <gtest/gtest.h>
 
@@ -136,7 +136,7 @@ static int32_t AssignAuthToken(struct HksBlob *cipherTextOutData, struct HksBlob
     const IDMParams &testIDMParams, HksUserAuthToken *authTokenHal)
 {
     uint64_t curTime = 0;
-    int32_t ret = HksCoreHalElapsedRealTime(&curTime);
+    int32_t ret = HksElapsedRealTime(&curTime);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get elapsed real time failed!");
         return ret;

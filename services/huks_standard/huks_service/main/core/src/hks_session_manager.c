@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "hks_session_manager.h"
+#include "hks_client_service_util.h"
 
 #include <pthread.h>
 #include <sched.h>
@@ -26,8 +27,10 @@
 #include "hks_template.h"
 #include "huks_access.h"
 #include "securec.h"
+#include "hks_util.h"
 
-#define MAX_OPERATIONS_COUNT 15
+#define MAX_OPERATIONS_COUNT 32
+#define S_TO_MS 1000
 
 static struct DoubleList g_operationList = { &g_operationList, &g_operationList };
 static uint32_t g_operationCount = 0;
@@ -88,9 +91,39 @@ static bool DeleteFirstAbortableOperation(void)
     return false;
 }
 
+static bool DeleteTimeOutOperation(void)
+{
+    struct HksOperation *operation = NULL;
+
+    HKS_DLIST_ITER(operation, &g_operationList) {
+        if (operation != NULL && operation->isBatchOperation) {
+            uint64_t curTime = 0;
+            int32_t ret = HksElapsedRealTime(&curTime);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "HksElapsedRealTime failed");
+            if (operation->batchOperationTimestamp < curTime) {
+                HKS_LOG_E("Batch operation timeout");
+                DeleteKeyNode(operation->handle);
+                FreeOperation(&operation);
+                --g_operationCount;
+            }
+        }
+    }
+    return true;
+}
+
 static int32_t AddOperation(struct HksOperation *operation)
 {
     pthread_mutex_lock(&g_lock);
+
+    if (g_operationCount >= MAX_OPERATIONS_COUNT) {
+        HKS_LOG_I("maximum number of sessions reached: delete oldest session.");
+        if (!DeleteTimeOutOperation()) {
+            pthread_mutex_unlock(&g_lock);
+            HKS_LOG_E("delete timeout session failed");
+            return HKS_ERROR_BAD_STATE;
+        }
+    }
+
     if (g_operationCount >= MAX_OPERATIONS_COUNT) {
         HKS_LOG_I("maximum number of sessions reached: delete oldest session.");
         if (!DeleteFirstAbortableOperation()) {
@@ -148,8 +181,45 @@ static int32_t ConstructOperationHandle(const struct HksBlob *operationHandle, u
     return HKS_SUCCESS;
 }
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle,
-    bool abortable)
+static int32_t HksAddBatchTimeToOperation(const struct HksParamSet *paramSet, struct HksOperation *operation)
+{
+    if (paramSet == NULL || operation == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint64_t curTime = 0;
+    int32_t ret = HksElapsedRealTime(&curTime);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
+    bool findOperation = false;
+    bool findTimeout = false;
+    operation->isBatchOperation = false;
+    operation->batchOperationTimestamp = curTime + DEFAULT_BATCH_TIME_OUT * S_TO_MS;
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag == HKS_TAG_IS_BATCH_OPERATION) {
+            operation->isBatchOperation = paramSet->params[i].boolParam;
+            findOperation = true;
+            continue;
+        }
+        if (paramSet->params[i].tag == HKS_TAG_BATCH_OPERATION_TIMEOUT) {
+            if ((uint64_t)paramSet->params[i].uint32Param > MAX_BATCH_TIME_OUT) {
+                HKS_LOG_E("Batch time is too big.");
+                return HKS_ERROR_NOT_SUPPORTED;
+            }
+            operation->batchOperationTimestamp = curTime + (uint64_t)paramSet->params[i].uint32Param * S_TO_MS;
+            findTimeout = true;
+            continue;
+        }
+        if (findOperation && findTimeout) {
+            break;
+        }
+    }
+    if (!findOperation) {
+        operation->batchOperationTimestamp = 0;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *operationHandle, bool abortable)
 {
     struct HksOperation *operation = (struct HksOperation *)HksMalloc(sizeof(struct HksOperation));
     HKS_IF_NULL_LOGE_RETURN(operation, HKS_ERROR_MALLOC_FAIL, "malloc hks operation failed")
@@ -172,6 +242,17 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
 
     operation->abortable = abortable;
     operation->isInUse = false;
+
+    if (paramSet != NULL) {
+        ret = HksAddBatchTimeToOperation(paramSet, operation);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("constrtct operation handle failed");
+            HKS_FREE_BLOB(operation->processInfo.processName);
+            HKS_FREE_BLOB(operation->processInfo.userId);
+            HKS_FREE_PTR(operation);
+            return ret;
+        }
+    }
 
     ret = AddOperation(operation);
     if (ret != HKS_SUCCESS) {

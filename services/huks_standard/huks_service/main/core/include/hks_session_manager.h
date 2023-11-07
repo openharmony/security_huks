@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,14 +29,16 @@ struct HksOperation {
     bool abortable;
     uint64_t accessTokenId;
     bool isInUse;
+    uint64_t batchOperationTimestamp;
+    bool isBatchOperation;
 };
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksBlob *operationHandle,
-    bool abortable);
+int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *operationHandle, bool abortable);
 
 struct HksOperation *QueryOperationAndMarkInUse(const struct HksProcessInfo *processInfo,
     const struct HksBlob *operationHandle);
