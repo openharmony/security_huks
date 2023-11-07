@@ -47,7 +47,16 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, struct HksParamSet *decrypt1ParamSet);
 int32_t HksAesCipherTestCaseGcm3(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool needAccessControl);
+int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool needAccessControl);
 int32_t HksAesCipherTestParamAbsentCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
+int32_t HksAesEncryptThreeStage(const struct HksBlob *keyAlias, struct HksParamSet *encryptParamSet,
+    const struct HksBlob *inData, struct HksBlob *cipherText);
+int32_t HksAesDecryptThreeStage(const struct HksBlob *keyAlias, struct HksParamSet *decryptParamSet,
+    const struct HksBlob *inData, struct HksBlob *cipherText, struct HksBlob *plainText);
+int32_t HksAesDecryptForBatch(const struct HksBlob *keyAlias, struct HksParamSet *decryptParamSet,
+    const struct HksBlob *inData1, struct HksBlob *cipherText1, struct HksBlob *plainText1,
+    const struct HksBlob *inData2, struct HksBlob *cipherText2, struct HksBlob *plainText2);
 } // namespace Unittest::AesCipher
 #endif // HKS_AES_CIPHER_TEST_COMMON_H

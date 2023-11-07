@@ -28,10 +28,11 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "securec.h"
+#include "hks_util.h"
 
 #define S_TO_MS 1000
 #ifdef _SUPPORT_HKS_TEE_
-#define MAX_KEYNODE_COUNT 20
+#define MAX_KEYNODE_COUNT 64
 #else
 #define MAX_KEYNODE_COUNT 100
 #endif
@@ -118,11 +119,33 @@ static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
     HksFreeParamSet(paramSet);
 }
 
+static int32_t DeleteTimeOutKeyNode(void)
+{
+    if (g_keyNodeCount < MAX_KEYNODE_COUNT) {
+        return HKS_SUCCESS;
+    }
+    struct HuksKeyNode *tmpKeyNode = NULL;
+    HKS_DLIST_ITER(tmpKeyNode, &g_keyNodeList) {
+        if (tmpKeyNode != NULL && tmpKeyNode->isBatchOperation) {
+            uint64_t curTime = 0;
+            int32_t ret = HksElapsedRealTime(&curTime);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
+            if (tmpKeyNode->batchOperationTimestamp < curTime) {
+                HKS_LOG_E("Batch operation timeout");
+                HksDeleteKeyNode(tmpKeyNode->handle);
+            }
+        }
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 {
     int32_t ret = HKS_SUCCESS;
     HksMutexLock(HksCoreGetHuksMutex());
     do {
+        ret = DeleteTimeOutKeyNode();
+        HKS_IF_NOT_SUCC_BREAK(ret);
         if (g_keyNodeCount >= MAX_KEYNODE_COUNT) {
             HKS_LOG_E("maximum number of keyNode reached");
             ret = HKS_ERROR_SESSION_REACHED_LIMIT;
@@ -136,6 +159,29 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
 
     HksMutexUnlock(HksCoreGetHuksMutex());
     return ret;
+}
+
+
+//create batch update keynode
+struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
+{
+    struct HuksKeyNode *updateKeyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
+    HKS_IF_NULL_LOGE_RETURN(updateKeyNode, NULL, "malloc hks keyNode failed")
+
+    int32_t ret;
+    struct HksParamSet *runtimeParamSet = NULL;
+
+    ret = BuildRuntimeParamSet(paramSet, &runtimeParamSet);
+    if (ret != HKS_SUCCESS) {
+        HksFree(updateKeyNode);
+        HKS_LOG_E("get runtime paramSet failed");
+        return NULL;
+    }
+
+    updateKeyNode->keyBlobParamSet = keyNode->keyBlobParamSet;
+    updateKeyNode->runtimeParamSet = runtimeParamSet;
+    updateKeyNode->authRuntimeParamSet = keyNode->authRuntimeParamSet;
+    return updateKeyNode;
 }
 
 #ifdef _STORAGE_LITE_
@@ -377,5 +423,15 @@ void HksDeleteKeyNode(uint64_t handle)
         }
     }
     HksMutexUnlock(HksCoreGetHuksMutex());
+}
+
+// free batch update keynode
+void HksFreeUpdateKeyNode(struct HuksKeyNode *keyNode)
+{
+    if (keyNode == NULL) {
+        return;
+    }
+    FreeRuntimeParamSet(&keyNode->runtimeParamSet);
+    HKS_FREE_PTR(keyNode);
 }
 #endif /* _CUT_AUTHENTICATE_ */
