@@ -161,7 +161,9 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
     return ret;
 }
 
-struct HuksKeyNode *HksCreateBatchKeyNode(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
+
+//create batch update keynode
+struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
     struct HuksKeyNode *updateKeyNode = (struct HuksKeyNode *)HksMalloc(sizeof(struct HuksKeyNode));
     HKS_IF_NULL_LOGE_RETURN(updateKeyNode, NULL, "malloc hks keyNode failed")
@@ -423,6 +425,7 @@ void HksDeleteKeyNode(uint64_t handle)
     HksMutexUnlock(HksCoreGetHuksMutex());
 }
 
+// free batch update keynode
 void HksFreeUpdateKeyNode(struct HuksKeyNode *keyNode)
 {
     if (keyNode == NULL) {
