@@ -296,7 +296,7 @@ if (ohos_kernel_type == "liteos_m") {
 
     external_deps = [
       "hilog_lite:hilog_shared",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
 
     defines = [ "LOG_ENGINE_HILOG_MODULE_SCY" ]
