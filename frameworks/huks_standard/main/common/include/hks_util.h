@@ -19,6 +19,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 
+// The unit of time is seconds
 #define DEFAULT_BATCH_TIME_OUT 60
 #define MAX_BATCH_TIME_OUT 600
 

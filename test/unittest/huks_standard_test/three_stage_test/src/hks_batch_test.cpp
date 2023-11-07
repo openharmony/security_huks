@@ -15,7 +15,6 @@
 
 #include "hks_batch_test.h"
 #include "hks_aes_cipher_test_common.h"
-#include "hks_aes_cipher_part_test_c.h"
 #include "hks_access_control_test_common.h"
 
 #include <gtest/gtest.h>

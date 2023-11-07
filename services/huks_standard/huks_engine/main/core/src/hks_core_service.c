@@ -1440,13 +1440,14 @@ static int32_t HksBatchCheck(struct HuksKeyNode *keyNode)
         ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_BATCH_PURPOSE, &batchPurposeParam);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get batch purpose param failed!")
         if ((purposeParam->uint32Param | batchPurposeParam->uint32Param) != batchPurposeParam->uint32Param) {
+            HKS_LOG_E("purposeParam should falll within the scope of batchPurposeParam");
             return HKS_ERROR_INVALID_PURPOSE;
         }
     }
     return ret;
 }
 
-static int32_t HksCoreInitProcess(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+static int32_t HksCoreInitProcess(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     uint32_t pur, uint32_t alg)
 {
     if (keyNode == NULL || paramSet == NULL) {
@@ -1574,6 +1575,7 @@ static int32_t HksAddBatchTimeToKeyNode(const struct HksParamSet *paramSet, stru
             break;
         }
     }
+    // HKS_TAG_IS_BATCH_OPERATION must be passed
     if (!findOperation && findTimeout) {
         keyNode->batchOperationTimestamp = 0;
         HKS_LOG_E("can not find HKS_TAG_IS_BATCH_OPERATION.");
@@ -1671,6 +1673,8 @@ static int32_t HksBatchUpdate(struct HuksKeyNode *keyNode, const struct HksParam
     if (keyNode == NULL || paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
+
+    // enable verify authtoken when is multi batch operation
     struct HksParam *authResult = NULL;
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_AUTH_RESULT, &authResult);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get authResult failed!")
