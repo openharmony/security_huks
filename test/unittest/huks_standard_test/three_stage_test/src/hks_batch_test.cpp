@@ -986,7 +986,8 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
     struct HksParamSet *encryptParamSet = nullptr;
     struct HksParamSet *decNormaLParamSet = nullptr;
     struct HksParamSet *decryptBatchParamSet = nullptr;
-    int32_t ret = InitParamSetForHksBatchTest003(&genParamSet, &encryptParamSet, &decNormaLParamSet, &decryptBatchParamSet);
+    int32_t ret = InitParamSetForHksBatchTest003(&genParamSet, &encryptParamSet, &decNormaLParamSet,
+        &decryptBatchParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 1. Generate Key */
