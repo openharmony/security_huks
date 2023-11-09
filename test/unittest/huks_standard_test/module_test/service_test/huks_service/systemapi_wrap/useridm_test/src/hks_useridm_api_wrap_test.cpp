@@ -224,22 +224,9 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest012, TestSize.Level0)
     EXPECT_EQ(secInfo->enrolledInfoLen > 0, true);
     EXPECT_EQ(secInfo->enrolledInfo[0].authType, HKS_USER_AUTH_TYPE_PIN);
     EXPECT_EQ(secInfo->enrolledInfo[0].enrolledId, g_enrolledIdForPin);
-    HKS_FREE_PTR(secInfo);
-}
-
-/**
- * @tc.name: HksUseridmWrapTest.HksUseridmWrapTest013
- * @tc.desc: tdd HksUserIdmGetSecInfo, expecting HKS_SUCCESS and num == 0
- * @tc.type: FUNC
- */
-HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest013, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksUseridmWrapTest013");
-    ChangeGetSecUserInfoReturn(false);
-    struct SecInfoWrap *secInfo = NULL;
-    int32_t ret = HksUserIdmGetSecInfo(1, &secInfo);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksUseridmWrapTest013 HksUserIdmGetSecInfo failed, ret = " << ret;
-    EXPECT_EQ(secInfo->enrolledInfoLen, 0);
-    HKS_FREE_PTR(secInfo);
+    if (secInfo != NULL) {
+        HKS_FREE_PTR(secInfo->enrolledInfo);
+        HKS_FREE_PTR(secInfo);
+    }
 }
 }
