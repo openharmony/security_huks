@@ -102,7 +102,7 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
         (*outSecInfo)->enrolledInfo = static_cast<struct EnrolledInfoWrap *>(
             HksMalloc(sizeof(struct EnrolledInfoWrap) * info.enrolledInfo.size()));
         if ((*outSecInfo)->enrolledInfo == NULL) {
-            HKS_LOG_E("Malloc enrolledInfo failed! Trying to malloc %" LOG_PUBLIC "u", sizeof(struct EnrolledInfoWrap) * info.enrolledInfo.size());
+            HKS_LOG_E("Malloc enrolledInfo failed!");
             HKS_FREE_PTR(*outSecInfo);
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
