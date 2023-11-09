@@ -91,7 +91,7 @@ int32_t UserIdmClient::GetSecUserInfo(int32_t userId, const std::shared_ptr<GetS
     if (userId == 0) {
         return FAIL;
     }
-    
+
     ConstructSecUserInfo();
     std::thread thObj(RunOnSecUserInfo, std::ref(callback));
     pthread_setname_np(thObj.native_handle(), "HUKS_THOBJ1_THREAD");
