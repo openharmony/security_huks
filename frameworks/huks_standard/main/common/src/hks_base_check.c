@@ -739,7 +739,8 @@ static const uint32_t g_supportAesPurpose[] = {
 };
 
 static const uint32_t g_supportAesCipherMode[] = {
-    HKS_MODE_CBC
+    HKS_MODE_CBC,
+    HKS_MODE_GCM
 };
 
 static const struct KeyInfoParams g_validAesKeyInfo[] = {

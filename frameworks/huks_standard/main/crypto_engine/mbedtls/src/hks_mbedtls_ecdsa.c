@@ -61,24 +61,24 @@ int32_t HksMbedtlsEcdsaSign(const struct HksBlob *key, const struct HksUsageSpec
     mbedtls_ecdsa_init(&ctx);
 
     do {
-        ret = mbedtls_ecp_group_load(&(ctx.grp), curveNist);
+        ret = mbedtls_ecp_group_load(&(ctx.MBEDTLS_PRIVATE(grp)), curveNist);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls ecp group load fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
-        ret = HksEccKeyMaterialToPri(key, &(ctx.d));
+        ret = HksEccKeyMaterialToPri(key, &(ctx.MBEDTLS_PRIVATE(d)));
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        uint32_t mbedtlsAlg;
+        mbedtls_md_type_t mbedtlsAlg;
         uint32_t digest = (usageSpec->digest == HKS_DIGEST_NONE) ? HKS_DIGEST_SHA256 : usageSpec->digest;
         ret = HksToMbedtlsDigestAlg(digest, &mbedtlsAlg);
         HKS_IF_NOT_SUCC_BREAK(ret)
-        size_t keyLen = signature->size;
+        size_t keyLen = (size_t)(signature->size);
         ret = mbedtls_ecdsa_write_signature(&ctx, (mbedtls_md_type_t)mbedtlsAlg, message->data, (size_t)message->size,
-            signature->data, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
+            signature->data, keyLen, &keyLen, mbedtls_ctr_drbg_random, &ctrDrbg);
         signature->size = (uint32_t)keyLen;
-        if (ret != HKS_MBEDTLS_SUCCESS) {
+        if (ret != HKS_MBEDTLS_SUCCESS || keyLen != (size_t)(signature->size)) {
             HKS_LOG_E("Ecc mbedtls sign fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(signature->data, signature->size, 0, signature->size);
             ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
@@ -108,13 +108,13 @@ int32_t HksMbedtlsEcdsaVerify(const struct HksBlob *key, const struct HksUsageSp
     mbedtls_ecdsa_init(&ctx);
 
     do {
-        ret = mbedtls_ecp_group_load(&(ctx.grp), curveNist);
+        ret = mbedtls_ecp_group_load(&(ctx.MBEDTLS_PRIVATE(grp)), curveNist);
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("Mbedtls ecp group load fail! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             break;
         }
 
-        ret = HksEccKeyMaterialToPub(key, &(ctx.Q));
+        ret = HksEccKeyMaterialToPub(key, &(ctx.MBEDTLS_PRIVATE(Q)));
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = mbedtls_ecdsa_read_signature(&ctx,

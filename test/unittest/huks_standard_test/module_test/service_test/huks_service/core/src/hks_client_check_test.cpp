@@ -370,7 +370,7 @@ HWTEST_F(HksClientCheckTest, HksClientCheckTest014, TestSize.Level0)
             .uint32Param = HKS_ALG_AES
         }, {
             .tag = HKS_TAG_BLOCK_MODE,
-            .uint32Param = HKS_MODE_GCM
+            .uint32Param = HKS_MODE_CTR
         }
     };
 
