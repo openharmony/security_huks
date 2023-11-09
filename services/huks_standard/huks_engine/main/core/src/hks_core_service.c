@@ -43,6 +43,7 @@
 #include "hks_sm_import_wrap_key.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+#include "hks_util.h"
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
 #include "hks_upgrade_key.h"
@@ -56,6 +57,8 @@
 
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
+
+#define S_TO_MS 1000
 
 static const uint8_t g_defaultRsaPubExponent[] = { 0x01, 0x00, 0x01 }; /* default 65537 */
 
@@ -1423,110 +1426,62 @@ static int32_t CoreInitPreCheck(const struct  HksBlob *key, const struct HksPara
     return HksCheckParamSetTag(paramSet);
 }
 
-int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
-    struct HksBlob *token)
+static int32_t HksBatchCheck(struct HuksKeyNode *keyNode)
 {
-    HKS_LOG_D("HksCoreInit in Core start");
-    uint32_t pur = 0;
-    uint32_t alg = 0;
-
-    int32_t ret = CoreInitPreCheck(key, paramSet, handle, token);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    struct HuksKeyNode *keyNode = HksCreateKeyNode(key, paramSet);
-    if (keyNode == NULL || handle == NULL) {
-        HKS_LOG_E("the pointer param entered is invalid");
-        return HKS_ERROR_BAD_STATE;
+    if (keyNode == NULL) {
+        return HKS_ERROR_NULL_POINTER;
     }
-    do {
-        ret = HksProcessIdentityVerify(keyNode->keyBlobParamSet, paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        handle->size = sizeof(uint64_t);
-        (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
-
-        ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        ret = HksCoreSecureAccessInitParams(keyNode, paramSet, token);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init secure access params failed")
-
-        uint32_t i;
-        uint32_t size = HKS_ARRAY_SIZE(g_hksCoreInitHandler);
-        for (i = 0; i < size; i++) {
-            if (g_hksCoreInitHandler[i].pur == pur) {
-                HKS_LOG_E("Core HksCoreInit [pur] = %" LOG_PUBLIC "d, pur = %" LOG_PUBLIC "d",
-                    g_hksCoreInitHandler[i].pur, pur);
-                ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
-                break;
-            }
+    int32_t ret = HKS_ERROR_PARAM_NOT_EXIST;
+    if (keyNode->isBatchOperation) {
+        struct HksParam *purposeParam = NULL;
+        struct HksParam *batchPurposeParam = NULL;
+        ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PURPOSE, &purposeParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get purpose param failed!")
+        ret = HksGetParam(keyNode->keyBlobParamSet, HKS_TAG_BATCH_PURPOSE, &batchPurposeParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "get batch purpose param failed!")
+        if ((purposeParam->uint32Param | batchPurposeParam->uint32Param) != batchPurposeParam->uint32Param) {
+            HKS_LOG_E("purposeParam should falll within the scope of batchPurposeParam");
+            return HKS_ERROR_INVALID_PURPOSE;
         }
-
-        if (ret != HKS_SUCCESS || i == size) {
-            HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
-            ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
-            break;
-        }
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(keyNode->handle);
     }
-
-    HKS_LOG_D("HksCoreInit in Core end");
     return ret;
 }
 
-static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_t *sessionId,
-    struct HuksKeyNode **keyNode, uint32_t *pur, uint32_t *alg)
+static int32_t HksCoreInitProcess(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+    uint32_t pur, uint32_t alg)
 {
-    if (handle == NULL || sessionId == NULL || keyNode == NULL) {
-        HKS_LOG_E("invalid input for GetSessionAndKeyNode");
+    if (keyNode == NULL || paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-    if (memcpy_s(sessionId, sizeof(*sessionId), handle->data, handle->size) != EOK) {
-        HKS_LOG_E("memcpy handle value fail");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    uint32_t i;
+    uint32_t size = HKS_ARRAY_SIZE(g_hksCoreInitHandler);
+    int32_t ret = HKS_ERROR_BAD_STATE;
+    for (i = 0; i < size; i++) {
+        if (g_hksCoreInitHandler[i].pur == pur) {
+            HKS_LOG_E("Core HksCoreInit pur = %" LOG_PUBLIC "d", pur);
+            ret = g_hksCoreInitHandler[i].handler(keyNode, paramSet, alg);
+            break;
+        }
     }
-    *keyNode = HksQueryKeyNode(*sessionId);
-    HKS_IF_NULL_LOGE_RETURN(*keyNode, HKS_ERROR_BAD_STATE, "HksCoreUpdate query keynode failed")
 
-    int32_t ret = GetPurposeAndAlgorithm((*keyNode)->runtimeParamSet, pur, alg);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(*sessionId);
-        return ret;
+    if (ret != HKS_SUCCESS || i == size) {
+        HKS_LOG_E("CoreInit failed, pur : %u, ret : %d", pur, ret);
+        ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
-    return HKS_SUCCESS;
+    return ret;
 }
 
-int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+static int32_t HksCoreUpdateProcess(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     const struct HksBlob *inData, struct HksBlob *outData)
 {
-    HKS_LOG_D("HksCoreUpdate in Core start");
-    uint32_t pur = 0;
-    uint32_t alg = 0;
-
-    if (handle == NULL || paramSet == NULL || inData == NULL) {
-        HKS_LOG_E("the pointer param entered is invalid");
+    if (keyNode == NULL || paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-
-    int32_t ret = HksCheckParamSetTag(paramSet);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    uint64_t sessionId;
-    struct HuksKeyNode *keyNode = NULL;
-
-    ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode, &pur, &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
-
-    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreUpdate secure access verify failed");
-        return ret;
-    }
-
     uint32_t i;
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+    int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetPurposeAndAlgorithm failed")
     uint32_t size = HKS_ARRAY_SIZE(g_hksCoreUpdateHandler);
     for (i = 0; i < size; i++) {
         if (g_hksCoreUpdateHandler[i].pur == pur) {
@@ -1548,37 +1503,21 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         HKS_LOG_E("CoreUpdate failed, pur : %" LOG_PUBLIC "u, ret : %" LOG_PUBLIC "d", pur, ret);
         ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
-
     return ret;
 }
 
-int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
-    struct HksBlob *outData)
+static int32_t HksCoreFinishProcess(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
 {
-    HKS_LOG_D("HksCoreFinish in Core start");
-    uint32_t pur = 0;
-    uint32_t alg = 0;
-
-    if (handle == NULL || inData == NULL || paramSet == NULL || HksCheckParamSetTag(paramSet) != HKS_SUCCESS) {
-        HKS_LOG_E("the pointer param entered is invalid");
+    if (keyNode == NULL || paramSet == NULL) {
         return HKS_ERROR_NULL_POINTER;
     }
-
-    uint64_t sessionId;
-    struct HuksKeyNode *keyNode = NULL;
-
-    int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode, &pur, &alg);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
-
-    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
-    if (ret != HKS_SUCCESS) {
-        HksDeleteKeyNode(sessionId);
-        HKS_LOG_E("HksCoreFinish secure access verify failed");
-        return ret;
-    }
-
     uint32_t i;
     uint32_t size = HKS_ARRAY_SIZE(g_hksCoreFinishHandler);
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+    int32_t ret = GetPurposeAndAlgorithm(keyNode->runtimeParamSet, &pur, &alg);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetPurposeAndAlgorithm failed")
     for (i = 0; i < size; i++) {
         if (g_hksCoreFinishHandler[i].pur == pur) {
             uint32_t outDataBufferSize = (outData == NULL) ? 0 : outData->size;
@@ -1602,6 +1541,243 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
         HKS_LOG_E("don't found purpose, pur : %" LOG_PUBLIC "d", pur);
         ret = HKS_ERROR_INVALID_ARGUMENT;
     }
+    return ret;
+}
+
+static int32_t HksAddBatchTimeToKeyNode(const struct HksParamSet *paramSet, struct HuksKeyNode *keyNode)
+{
+    if (keyNode == NULL || paramSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint64_t curTime = 0;
+    int32_t ret = HksElapsedRealTime(&curTime);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
+    keyNode->isBatchOperation = false;
+    keyNode->batchOperationTimestamp = curTime + DEFAULT_BATCH_TIME_OUT * S_TO_MS;
+    bool findOperation = false;
+    bool findTimeout = false;
+    for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
+        if (paramSet->params[i].tag == HKS_TAG_IS_BATCH_OPERATION) {
+            keyNode->isBatchOperation = paramSet->params[i].boolParam;
+            findOperation = true;
+            continue;
+        }
+        if (paramSet->params[i].tag == HKS_TAG_BATCH_OPERATION_TIMEOUT) {
+            if ((uint64_t)paramSet->params[i].uint32Param > MAX_BATCH_TIME_OUT) {
+                HKS_LOG_E("Batch time is too big.");
+                return HKS_ERROR_NOT_SUPPORTED;
+            }
+            keyNode->batchOperationTimestamp = curTime + (uint64_t)paramSet->params[i].uint32Param * S_TO_MS;
+            findTimeout = true;
+            continue;
+        }
+        if (findOperation && findTimeout) {
+            break;
+        }
+    }
+    // HKS_TAG_IS_BATCH_OPERATION must be passed
+    if (!findOperation && findTimeout) {
+        keyNode->batchOperationTimestamp = 0;
+        HKS_LOG_E("can not find HKS_TAG_IS_BATCH_OPERATION.");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    if (!findOperation) {
+        keyNode->batchOperationTimestamp = 0;
+    }
+    return ret;
+}
+
+int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token)
+{
+    HKS_LOG_D("HksCoreInit in Core start");
+    uint32_t pur = 0;
+    uint32_t alg = 0;
+
+    int32_t ret = CoreInitPreCheck(key, paramSet, handle, token);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    struct HuksKeyNode *keyNode = HksCreateKeyNode(key, paramSet);
+    if (keyNode == NULL || handle == NULL) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_BAD_STATE;
+    }
+    do {
+        ret = HksAddBatchTimeToKeyNode(paramSet, keyNode);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        ret = HksProcessIdentityVerify(keyNode->keyBlobParamSet, paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        handle->size = sizeof(uint64_t);
+        (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
+
+        ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        ret = HksCoreSecureAccessInitParams(keyNode, paramSet, token);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init secure access params failed")
+
+        ret = HksBatchCheck(keyNode);
+        if (ret == HKS_SUCCESS) {
+            HKS_LOG_I("HksBatchCheck success");
+            return HKS_SUCCESS;
+        }
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+            ret = HksCoreInitProcess(keyNode, paramSet, pur, alg);
+        }
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
+    }
+
+    HKS_LOG_D("HksCoreInit in Core end");
+    return ret;
+}
+
+static int32_t GetParamsForUpdateAndFinish(const struct HksBlob *handle, uint64_t *sessionId,
+    struct HuksKeyNode **keyNode)
+{
+    if (handle == NULL || sessionId == NULL || keyNode == NULL) {
+        HKS_LOG_E("invalid input for GetSessionAndKeyNode");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (memcpy_s(sessionId, sizeof(*sessionId), handle->data, handle->size) != EOK) {
+        HKS_LOG_E("memcpy handle value fail");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    *keyNode = HksQueryKeyNode(*sessionId);
+    HKS_IF_NULL_LOGE_RETURN(*keyNode, HKS_ERROR_BAD_STATE, "HksCoreUpdate query keynode failed")
+
+    return HKS_SUCCESS;
+}
+
+static int32_t HksCheckBatchUpdateTime(struct HuksKeyNode *keyNode)
+{
+    if (keyNode == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    uint64_t curTime = 0;
+    int32_t ret = HksElapsedRealTime(&curTime);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed");
+    if (keyNode->batchOperationTimestamp < curTime) {
+        HKS_LOG_E("Batch operation timeout");
+        return HKS_ERROR_INVALID_TIME_OUT;
+    }
+    return ret;
+}
+
+static int32_t HksBatchUpdate(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    if (keyNode == NULL || paramSet == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    // enable verify authtoken when is multi batch operation
+    struct HksParam *authResult = NULL;
+    int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_KEY_AUTH_RESULT, &authResult);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get authResult failed!")
+    authResult->uint32Param = HKS_AUTH_RESULT_INIT;
+    struct HksParam *isNeedSecureSignInfo = NULL;
+    ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_IF_NEED_APPEND_AUTH_INFO, &isNeedSecureSignInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get is secure sign failed!")
+    isNeedSecureSignInfo->boolParam = false;
+    ret = HksCheckBatchUpdateTime(keyNode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckBatchUpdateTime failed!")
+    struct HuksKeyNode *batchKeyNode = HksCreateBatchKeyNode(keyNode, paramSet);
+    HKS_IF_NULL_LOGE_RETURN(batchKeyNode, HKS_ERROR_BAD_STATE, "the batchKeyNode is null")
+    do {
+        uint32_t pur = 0;
+        uint32_t alg = 0;
+        ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetPurposeAndAlgorithm failed")
+        ret = HksCoreInitProcess(batchKeyNode, paramSet, pur, alg);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreInitProcess failed")
+        ret = HksCoreFinishProcess(batchKeyNode, paramSet, inData, outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCoreFinishProcess failed")
+    } while (0);
+
+    HksFreeUpdateKeyNode(batchKeyNode);
+    return ret;
+}
+
+int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    HKS_LOG_D("HksCoreUpdate in Core start");
+
+    if (handle == NULL || paramSet == NULL || inData == NULL) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksCheckParamSetTag(paramSet);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    uint64_t sessionId;
+    struct HuksKeyNode *keyNode = NULL;
+
+    ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
+
+    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("HksCoreUpdate secure access verify failed");
+        return ret;
+    }
+
+    ret = HksBatchCheck(keyNode);
+    if (ret == HKS_SUCCESS) {
+        HKS_LOG_I("HksBatchCheck success");
+        ret = HksBatchUpdate(keyNode, paramSet, inData, outData);
+        if (ret != HKS_SUCCESS) {
+            HksDeleteKeyNode(sessionId);
+        }
+        return ret;
+    }
+
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        ret = HksCoreUpdateProcess(keyNode, paramSet, inData, outData);
+    }
+
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(keyNode->handle);
+    }
+    return ret;
+}
+
+int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *paramSet, const struct HksBlob *inData,
+    struct HksBlob *outData)
+{
+    HKS_LOG_D("HksCoreFinish in Core start");
+
+    if (handle == NULL || inData == NULL || paramSet == NULL || HksCheckParamSetTag(paramSet) != HKS_SUCCESS) {
+        HKS_LOG_E("the pointer param entered is invalid");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    uint64_t sessionId;
+    struct HuksKeyNode *keyNode = NULL;
+
+    int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
+
+    ret = HksBatchCheck(keyNode);
+    if (ret != HKS_ERROR_PARAM_NOT_EXIST) {
+        HksDeleteKeyNode(sessionId);
+        return ret;
+    }
+
+    ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("HksCoreFinish secure access verify failed");
+        return ret;
+    }
+
+    ret = HksCoreFinishProcess(keyNode, paramSet, inData, outData);
     HksDeleteKeyNode(sessionId);
     HKS_LOG_D("HksCoreFinish in Core end");
     return ret;

@@ -282,7 +282,7 @@ napi_ref GetCallback(napi_env env, napi_value object)
     return ref;
 }
 
-static napi_value GenerateAarrayBuffer(napi_env env, uint8_t *data, uint32_t size)
+static napi_value GenerateArrayBuffer(napi_env env, uint8_t *data, uint32_t size)
 {
     uint8_t *buffer = static_cast<uint8_t *>(HksMalloc(size));
     if (buffer == nullptr) {
@@ -329,7 +329,7 @@ static napi_value GenerateHksParam(napi_env env, const HksParam &param)
             NAPI_CALL(env, napi_get_boolean(env, param.boolParam, &value));
             break;
         case HKS_TAG_TYPE_BYTES:
-            value = GenerateAarrayBuffer(env, param.blob.data, param.blob.size);
+            value = GenerateArrayBuffer(env, param.blob.data, param.blob.size);
             break;
         default:
             value = GetNull(env);
@@ -366,7 +366,7 @@ static napi_value GenerateResult(napi_env env, int32_t error, uint8_t *data, uin
 
     napi_value outData = nullptr;
     if (data != nullptr && size != 0) {
-        napi_value outBuffer = GenerateAarrayBuffer(env, data, size);
+        napi_value outBuffer = GenerateArrayBuffer(env, data, size);
         if (outBuffer != nullptr) {
             NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, size, outBuffer, 0, &outData));
         }
@@ -491,7 +491,7 @@ napi_value GenerateHksHandle(napi_env env, int32_t error, const struct HksBlob *
 
     napi_value tokenjs = nullptr;
     if ((token->size != 0) && (token->data != nullptr)) {
-        napi_value outBuffer = GenerateAarrayBuffer(env, token->data, token->size);
+        napi_value outBuffer = GenerateArrayBuffer(env, token->data, token->size);
         if (outBuffer != nullptr) {
             NAPI_CALL(env, napi_create_typedarray(env, napi_uint8_array, token->size, outBuffer, 0, &tokenjs));
         } else {

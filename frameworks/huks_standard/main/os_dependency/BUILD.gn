@@ -34,6 +34,7 @@ if (os_level == "standard") {
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
       "./posix/hks_mem.c",
+      "./posix/hks_util.c",
     ]
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
@@ -63,7 +64,10 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_os_dependency_small_static") {
     public_configs = [ ":huks_config" ]
 
-    sources = [ "./posix/hks_mem.c" ]
+    sources = [
+      "./posix/hks_mem.c",
+      "./posix/hks_util.c",
+    ]
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
 
@@ -78,7 +82,7 @@ if (os_level == "standard") {
     ]
     external_deps = [
       "hilog_lite:hilog_shared",
-      "init_lite:libbegetutil",
+      "init:libbegetutil",
     ]
   }
 }

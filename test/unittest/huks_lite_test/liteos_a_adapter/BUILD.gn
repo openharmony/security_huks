@@ -83,6 +83,7 @@ unittest("huks_3.0_test") {
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/symmetric_alg_test/hks_aes_cipher_part1_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/symmetric_alg_test/hks_aes_cipher_part2_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/symmetric_alg_test/hks_aes_cipher_part3_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/symmetric_alg_test/hks_aes_cipher_part4_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/symmetric_alg_test/hks_aes_cipher_test_common.cpp",
   ]
 

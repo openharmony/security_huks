@@ -29,13 +29,13 @@
 #include "hks_param.h"
 #include "hks_type_inner.h"
 #include "hks_template.h"
+#include "hks_util.h"
 
 #include "securec.h"
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 
 #include "hks_crypto_hal.h"
-#include "hks_core_hal_api.h"
 #include "hks_core_useriam_wrap.h"
 
 #define BYTES_PER_POS 8
@@ -175,7 +175,7 @@ static int32_t AddChallengeParams(struct HksParamSet *paramSet, struct HksBlob *
 static int32_t AddKeyAccessTimeParams(struct HksParamSet *paramSet)
 {
     uint64_t curTime = 0;
-    int32_t ret = HksCoreHalElapsedRealTime(&curTime);
+    int32_t ret = HksElapsedRealTime(&curTime);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get elapsed real time failed!")
 
     struct HksParam accessTimeParam;

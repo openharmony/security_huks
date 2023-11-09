@@ -358,7 +358,7 @@ napi_ref GetCallback(napi_env env, napi_value object)
     return ref;
 }
 
-static napi_value GenerateAarrayBuffer(napi_env env, uint8_t *data, uint32_t size)
+static napi_value GenerateArrayBuffer(napi_env env, uint8_t *data, uint32_t size)
 {
     uint8_t *buffer = static_cast<uint8_t *>(HksMalloc(size));
     if (buffer == nullptr) {
@@ -404,7 +404,7 @@ static napi_value GenerateHksParam(napi_env env, const HksParam &param)
             NAPI_CALL(env, napi_get_boolean(env, param.boolParam, &value));
             break;
         case HKS_TAG_TYPE_BYTES:
-            value = GenerateAarrayBuffer(env, param.blob.data, param.blob.size);
+            value = GenerateArrayBuffer(env, param.blob.data, param.blob.size);
             break;
         default:
             value = GetNull(env);
@@ -679,7 +679,7 @@ static napi_value AddHandleOrChallenge(napi_env env, napi_value &object,
     // add challenge
     if ((challenge != nullptr) && (challenge->size != 0) && (challenge->data != nullptr)) {
         napi_value challengejs = nullptr;
-        napi_value outBuffer = GenerateAarrayBuffer(env, challenge->data, challenge->size);
+        napi_value outBuffer = GenerateArrayBuffer(env, challenge->data, challenge->size);
         if (outBuffer == nullptr) {
             HKS_LOG_E("add token failed");
             return nullptr;
@@ -701,7 +701,7 @@ static napi_value AddOutDataParamSetOrCertChain(napi_env env, napi_value &object
     // add outData
     if ((outData != nullptr) && (outData->data != nullptr) && (outData->size != 0)) {
         napi_value outDataJs = nullptr;
-        napi_value outBuffer = GenerateAarrayBuffer(env, outData->data, outData->size);
+        napi_value outBuffer = GenerateArrayBuffer(env, outData->data, outData->size);
         if (outBuffer == nullptr) {
             HKS_LOG_E("add outData failed");
             return nullptr;

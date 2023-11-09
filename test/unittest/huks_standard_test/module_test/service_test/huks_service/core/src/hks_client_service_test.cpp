@@ -126,7 +126,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
-    CreateOperation(&processInfo, &operationHandle, true);
+    CreateOperation(&processInfo, NULL, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo);
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
@@ -151,7 +151,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
-    CreateOperation(&processInfo, &operationHandle, true);
+    CreateOperation(&processInfo, NULL, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo);
     ret = HksServiceKeyExist(&processInfo, &keyAlias);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
