@@ -77,7 +77,7 @@ if (os_level == "standard") {
 
     include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
 
-    defines = [ "MBEDTLS_ECP_RESTARTABLE=1" ]
+    defines = []
 
     sources = [
       "src/hks_crypto_ed25519.c",
