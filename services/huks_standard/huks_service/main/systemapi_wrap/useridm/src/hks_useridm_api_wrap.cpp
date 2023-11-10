@@ -89,7 +89,7 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
     int32_t ret = HKS_SUCCESS;
     do {
         if (info.enrolledInfo.size() > g_maxEnrolledLen || info.enrolledInfo.size() == 0) {
-            HKS_LOG_E("invalid num of enrolledInfo %" LOG_PUBLIC "u", info.enrolledInfo.size());
+            HKS_LOG_E("invalid num of enrolledInfo %" LOG_PUBLIC "u", (uint32_t)info.enrolledInfo.size());
             ret = HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
             break;
         }
