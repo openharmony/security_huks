@@ -444,7 +444,10 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
         *outParamSet = newParamSet;
     } while (0);
     HKS_FREE_PTR(enrolledInfo.data);
-    HKS_FREE_PTR(secInfo);
+    if (secInfo != NULL) {
+        HKS_FREE_PTR(secInfo->enrolledInfo);
+        HKS_FREE_PTR(secInfo);
+    }
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&newParamSet);
         *outParamSet = NULL;
@@ -456,7 +459,7 @@ static int32_t CheckIfEnrollAuthInfo(int32_t userId, enum HksUserAuthType authTy
 {
     uint32_t numOfAuthInfo = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(userId, authType, &numOfAuthInfo);
-    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST) {
+    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0) {
         HKS_LOG_E("have not enroll the auth info.");
         return HKS_ERROR_CREDENTIAL_NOT_EXIST;
     }

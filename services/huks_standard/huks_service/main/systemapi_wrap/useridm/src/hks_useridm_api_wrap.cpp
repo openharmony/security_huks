@@ -88,21 +88,25 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
 {
     int32_t ret = HKS_SUCCESS;
     do {
-        if (info.enrolledInfo.size() > g_maxEnrolledLen) {
-            HKS_LOG_E("invalid num of enrolledInfo");
+        if (info.enrolledInfo.size() > g_maxEnrolledLen || info.enrolledInfo.size() == 0) {
+            HKS_LOG_E("invalid num of enrolledInfo %" LOG_PUBLIC "u", (uint32_t)info.enrolledInfo.size());
             ret = HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
             break;
         }
-        uint32_t secInfoSize = sizeof(struct SecInfoWrap) + ((info.enrolledInfo.size() >
-            DEFAULT_ENROLLED_INFO_LEN) ? sizeof(struct EnrolledInfoWrap) * (info.enrolledInfo.size() -
-            DEFAULT_ENROLLED_INFO_LEN) : 0);
-        *outSecInfo = static_cast<struct SecInfoWrap *>(HksMalloc(secInfoSize));
+        *outSecInfo = static_cast<struct SecInfoWrap *>(HksMalloc(sizeof(struct SecInfoWrap)));
         if (*outSecInfo == NULL) {
-            HKS_LOG_E("Malloc enrolledInfo failed!");
+            HKS_LOG_E("Malloc outSecInfo failed!");
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-
+        (*outSecInfo)->enrolledInfo = static_cast<struct EnrolledInfoWrap *>(
+            HksMalloc(sizeof(struct EnrolledInfoWrap) * info.enrolledInfo.size()));
+        if ((*outSecInfo)->enrolledInfo == NULL) {
+            HKS_LOG_E("Malloc enrolledInfo failed!");
+            HKS_FREE_PTR(*outSecInfo);
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
         (**outSecInfo).secureUid = info.secureUid;
         (**outSecInfo).enrolledInfoLen = info.enrolledInfo.size();
         for (uint32_t i = 0; i < (**outSecInfo).enrolledInfoLen; ++i) {
@@ -111,13 +115,15 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ConvertToHksAuthType failed :%" LOG_PUBLIC "d!", ret)
 
             (**outSecInfo).enrolledInfo[i].authType = authType;
-                
+
             (**outSecInfo).enrolledInfo[i].enrolledId = info.enrolledInfo[i].enrolledId;
         }
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HksFree(*outSecInfo);
-        *outSecInfo = NULL;
+        if (*outSecInfo != NULL) {
+            HKS_FREE_PTR((*outSecInfo)->enrolledInfo);
+            HKS_FREE_PTR(*outSecInfo);
+        }
     }
     isCallbacked = true;
     HksConditionNotify(condition);
@@ -142,9 +148,9 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
     } else {
         HKS_LOG_E("GetSecInfoCallback failed: %" LOG_PUBLIC "d!", ret);
     }
-    
+
     HksConditionDestroy(condition);
-    
+
     if (ret != USER_IAM::ResultCode::SUCCESS || *outSecInfo == NULL) {
         HKS_LOG_E("get sec info failed!");
         return HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
@@ -207,7 +213,7 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
         HKS_LOG_E("GetAuthInfo failed: %" LOG_PUBLIC "d!", ret);
         ret = HKS_ERROR_GET_USERIAM_AUTHINFO_FAILED;
     }
-    
+
     HksConditionDestroy(condition);
     return ret;
 }

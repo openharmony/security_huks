@@ -24,7 +24,7 @@
 
 static constexpr const uint32_t g_paramSidMax = 2;
 
-static struct SecInfoWrap SecInfoParams[g_paramSidMax] = {
+static const struct SecInfoWrap SecInfoParams[g_paramSidMax] = {
     {
         .secureUid = 1,
         .enrolledInfoLen = 3
@@ -77,10 +77,17 @@ static int32_t g_ParamsId = 0;
 
 int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
 {
+    (void)userId;
     if (outSecInfo == nullptr)
         return HKS_ERROR_INVALID_ARGUMENT;
-    *outSecInfo = static_cast<struct SecInfoWrap *>(HksMalloc(sizeof(struct SecInfoWrap) +
-        sizeof(struct EnrolledInfoWrap)));
+    *outSecInfo = static_cast<struct SecInfoWrap *>(HksMalloc(sizeof(struct SecInfoWrap)));
+    HKS_IF_NULL_RETURN(*outSecInfo, HKS_ERROR_MALLOC_FAIL)
+    (*outSecInfo)->enrolledInfo = static_cast<struct EnrolledInfoWrap *>(
+        HksMalloc(sizeof(struct EnrolledInfoWrap) * SecInfoParams[g_ParamsId].enrolledInfoLen));
+    if ((*outSecInfo)->enrolledInfo == NULL) {
+        HKS_FREE_PTR(*outSecInfo);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     (*outSecInfo)->secureUid = SecInfoParams[g_ParamsId].secureUid;
     (*outSecInfo)->enrolledInfoLen = SecInfoParams[g_ParamsId].enrolledInfoLen;
     for (uint32_t i = 0; i < SecInfoParams[g_ParamsId].enrolledInfoLen; i++) {
