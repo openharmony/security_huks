@@ -69,6 +69,8 @@ int32_t HksCertificateChainUnpackFromService(const struct HksBlob *srcData, bool
 
 int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksParamSet **outParamSet);
 
+int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *outBlob);
+
 #ifdef __cplusplus
 }
 #endif

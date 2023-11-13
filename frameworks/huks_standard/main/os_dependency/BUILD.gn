@@ -48,7 +48,13 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
+    if (huks_security_level == "software") {
+      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    }
     sources += [ "./ipc/src/hks_client_service_ipc.c" ]
+    if (huks_security_level == "trusted_environment") {
+      sources += [ "./ipc/src/hks_client_service_dcm.cpp" ]
+    }
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]

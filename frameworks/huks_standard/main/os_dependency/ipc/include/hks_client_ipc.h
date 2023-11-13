@@ -72,6 +72,9 @@ int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCo
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain);
 
+int32_t HksClientAnonAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksCertChain *certChain);
+
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *handle,
     struct HksBlob *token);
 

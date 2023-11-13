@@ -94,6 +94,13 @@ struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     return ConvertApiResult(result);
 }
 
+struct OH_Huks_Result OH_Huks_AnonAttestKeyItem(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain)
+{
+    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain);
+    return ConvertApiResult(result);
+}
+
 struct OH_Huks_Result OH_Huks_InitSession(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_Blob *handle, struct OH_Huks_Blob *token)
 {

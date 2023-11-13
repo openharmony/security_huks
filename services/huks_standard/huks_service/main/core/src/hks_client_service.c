@@ -20,6 +20,7 @@
 #endif
 
 #include "hks_client_service.h"
+#include "hks_client_service_dcm.h"
 
 #include <stdbool.h>
 #include <stddef.h>
@@ -1372,9 +1373,6 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 
         ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
-
-        ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_CERTCHAIN, certChain);
-        HKS_IF_NOT_SUCC_LOGE(ret, "store attest cert chain failed")
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);

@@ -34,6 +34,7 @@
     HksHash;
     HksGetKeyInfoList;
     HksAttestKey;
+    HksAnonAttestKey;
     HksGetCertificateChain;
     HksWrapKey;
     HksUnwrapKey;
