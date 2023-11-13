@@ -121,6 +121,43 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = nullptr;
 
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    g_getParam = {
+        .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
+        .blob = { .size = g_keyParamsetSize, .data = (uint8_t *)HksMalloc(g_keyParamsetSize) }
+    };
+    ASSERT_TRUE(g_getParam.blob.data != nullptr);
+
+    keySizeParam = nullptr;
+    rootUid = 0;
+    HksInitParamSet(&paramOutSet);
+    HksAddParams(paramOutSet, &g_getParam, 1);
+    HksBuildParamSet(&paramOutSet);
+    HksFree(g_getParam.blob.data);
+    ret = HksGetKeyParamSet(&g_keyAlias, nullptr, paramOutSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
+    processParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_PROCESS_NAME, &processParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_EQ(sizeof(rootUid), processParam->blob.size);
+    ASSERT_EQ(HksMemCmp(processParam->blob.data, &rootUid, processParam->blob.size), HKS_SUCCESS);
+
+    HksFreeParamSet(&paramOutSet);
+
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    FreeCertChain(&certChain, certChain->certsCount);
+    certChain = nullptr;
+
     HksFreeParamSet(&paramSet);
 
     ret = HksDeleteKey(&g_keyAlias, nullptr);
@@ -146,9 +183,15 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest002, TestSize.Level0)
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
 
-    HksFreeParamSet(&paramSet);
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = NULL;
+
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
+    ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
+    FreeCertChain(&certChain, certChain->certsCount);
+    certChain = NULL;
+    HksFreeParamSet(&paramSet);
 
     ret = HksDeleteKey(&g_keyAlias, NULL);
     ASSERT_TRUE(ret == HKS_SUCCESS);
@@ -175,6 +218,11 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest003, TestSize.Level0)
 
     FreeCertChain(&certChain, certChain->certsCount);
 
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
+    ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
+
+    FreeCertChain(&certChain, certChain->certsCount);
     HksFreeParamSet(&paramSet);
 
     ret = HksDeleteKey(&g_keyAlias, NULL);
@@ -198,6 +246,13 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest004, TestSize.Level0)
     const struct HksTestCertChain certParam = { false, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
+    ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
+    if (certChain != NULL) {
+        FreeCertChain(&certChain, certChain->certsCount);
+    }
+
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
     if (certChain != NULL) {
         FreeCertChain(&certChain, certChain->certsCount);
@@ -242,6 +297,16 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = NULL;
 
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
+
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_BASE64_PARAM);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+
+    FreeCertChain(&certChain, certChain->certsCount);
+    certChain = NULL;
+
     HksFreeParamSet(&paramSet);
 
     ret = HksDeleteKey(&g_keyAlias, NULL);
@@ -274,6 +339,14 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest007, TestSize.Level0)
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
+
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
+
+    FreeCertChain(&certChain, certChain->certsCount);
+    certChain = NULL;
+
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
 
     ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
 
@@ -330,6 +403,46 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest008, TestSize.Level0)
     ret = HksGetParam(paramOutSet, HKS_TAG_PROCESS_NAME, &processParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     uint32_t rootUid = 0;
+    ASSERT_EQ(sizeof(rootUid), processParam->blob.size);
+    ASSERT_EQ(HksMemCmp(processParam->blob.data, &rootUid, processParam->blob.size), HKS_SUCCESS);
+
+    HksFreeParamSet(&paramOutSet);
+
+    ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HKS_LOG_I("Validate key success!");
+    FreeCertChain(&certChain, certChain->certsCount);
+    certChain = nullptr;
+
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = HksAnonAttestKey(&g_keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    HKS_LOG_I("Attest key success!");
+
+    g_getParam = {
+        .tag = HKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA,
+        .blob = { .size = g_keyParamsetSize, .data = (uint8_t *)HksMalloc(g_keyParamsetSize) }
+    };
+    ASSERT_TRUE(g_getParam.blob.data != nullptr);
+
+    paramOutSet = nullptr;
+    HksInitParamSet(&paramOutSet);
+    HksAddParams(paramOutSet, &g_getParam, 1);
+    HksBuildParamSet(&paramOutSet);
+    HksFree(g_getParam.blob.data);
+    ret = HksGetKeyParamSet(&g_keyAlias, nullptr, paramOutSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    keySizeParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_TRUE(keySizeParam->uint32Param == HKS_RSA_KEY_SIZE_2048);
+    processParam = nullptr;
+    ret = HksGetParam(paramOutSet, HKS_TAG_PROCESS_NAME, &processParam);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    rootUid = 0;
     ASSERT_EQ(sizeof(rootUid), processParam->blob.size);
     ASSERT_EQ(HksMemCmp(processParam->blob.data, &rootUid, processParam->blob.size), HKS_SUCCESS);
 

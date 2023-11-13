@@ -52,6 +52,7 @@ ohos_shared_library("huks") {
     "src/v8/huks_napi_update_finish.cpp",
     "src/v9/huks_napi_abort_session.cpp",
     "src/v9/huks_napi_attest_key_item.cpp",
+    "src/v9/huks_napi_anon_attest_key_item.cpp",
     "src/v9/huks_napi_common_item.cpp",
     "src/v9/huks_napi_delete_key_item.cpp",
     "src/v9/huks_napi_export_key_item.cpp",

@@ -232,6 +232,16 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksCertChain *certChain);
 
 /**
+ * @brief Anonymous Attest key
+ * @param keyAlias key alias
+ * @param paramSet required parameter set
+ * @param certChain cert chain
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksCertChain *certChain);
+
+/**
  * @brief Get certificate chain
  * @param keyAlias key alias
  * @param paramSet required parameter set
