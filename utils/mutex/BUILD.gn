@@ -21,6 +21,8 @@ config("huks_config") {
 
 if (os_level == "standard") {
   ohos_static_library("libhuks_utils_mutex_static") {
+    branch_protector_ret = "pac_ret"
+
     sanitize = {
       integer_overflow = true
       cfi = true

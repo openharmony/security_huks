@@ -20,6 +20,8 @@ config("huks_config") {
 
 if (os_level == "standard") {
   ohos_shared_library("libhukssdk") {
+    branch_protector_ret = "pac_ret"
+
     sanitize = {
       integer_overflow = true
       cfi = true

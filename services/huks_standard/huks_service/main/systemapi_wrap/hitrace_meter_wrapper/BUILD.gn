@@ -27,6 +27,8 @@ ohos_static_library("libhuks_utils_hitrace_meter_wrapper_static") {
     boundary_sanitize = true
     ubsan = true
   }
+  branch_protector_ret = "pac_ret"
+
   subsystem_name = "security"
   part_name = "huks"
   public_configs = [ ":huks_config" ]

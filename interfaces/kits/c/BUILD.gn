@@ -43,6 +43,17 @@ ohos_shared_library("huks_ndk") {
     "_HUKS_LOG_ENABLE_",
   ]
 
+  branch_protector_ret = "pac_ret"
+
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+  }
+
   include_dirs = [
     "//base/security/huks/interfaces/kits/c/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
