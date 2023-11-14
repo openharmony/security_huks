@@ -37,6 +37,8 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
+    branch_protector_ret = "pac_ret"
+
     sanitize = {
       integer_overflow = true
       cfi = true
