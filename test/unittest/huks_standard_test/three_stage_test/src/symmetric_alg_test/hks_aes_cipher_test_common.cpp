@@ -17,6 +17,9 @@
 #include "hks_aes_cipher_test_common.h"
 
 #include <gtest/gtest.h>
+#include <iostream>
+#include <thread>
+#include <chrono>
 
 using namespace testing::ext;
 using namespace Unittest::HksAccessControlPartTest;
@@ -362,6 +365,10 @@ int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParam
     ret = HksInit(keyAlias, decryptParamSet, &handleDecryptTest, nullptr);
     if (ret != HKS_SUCCESS) {
         return ret;
+    }
+
+    if (isTimeOut) {
+        std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 
     // Update & Finish
