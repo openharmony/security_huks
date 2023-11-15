@@ -613,14 +613,15 @@ static volatile bool g_isInitAuthTokenKey = false;
  * at every start after enable HKS_SUPPORT_GET_AT_KEY
  */
 #ifndef HKS_SUPPORT_GET_AT_KEY
-#define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
+#define HKS_DEFAULT_USER_AT_MAC_KEY "huks_default_user_auth_token_mac"
+#define HKS_DEFAULT_USER_AT_CIPHER_KEY "huks_default_user_auth_cipherkey"
 #define HKS_DEFAULT_USER_AT_KEY_LEN 32
 static int32_t GenerateAuthTokenKey(void)
 {
     (void)memcpy_s(g_cachedAuthTokenKey.macKey, HKS_KEY_BLOB_AT_KEY_BYTES,
-        HKS_DEFAULT_USER_AT_KEY, HKS_DEFAULT_USER_AT_KEY_LEN);
+        HKS_DEFAULT_USER_AT_MAC_KEY, HKS_DEFAULT_USER_AT_KEY_LEN);
     (void)memcpy_s(g_cachedAuthTokenKey.cipherKey, HKS_KEY_BLOB_AT_KEY_BYTES,
-        HKS_DEFAULT_USER_AT_KEY, HKS_DEFAULT_USER_AT_KEY_LEN);
+        HKS_DEFAULT_USER_AT_CIPHER_KEY, HKS_DEFAULT_USER_AT_KEY_LEN);
     HKS_LOG_I("generate At key success!");
     return HKS_SUCCESS;
 }
