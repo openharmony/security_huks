@@ -58,6 +58,10 @@ if (os_level == "standard") {
       "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
     ]
 
+    if (huks_security_level == "software" && enable_user_auth_framework) {
+      defines += [ "HKS_ENABLE_IS_PASSWORD_SET" ]
+      deps += [ "../../../huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
+    }
     branch_protector_ret = "pac_ret"
 
     sanitize = {
