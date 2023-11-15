@@ -562,7 +562,14 @@ static struct HksError g_errCodeTable[] = {
             .errorMsg = "Failed to obtain the authentication information via UserIAM.",
             .data = NULL
         }
-    }
+    }, {
+        .innerErrCode = HKS_ERROR_DEVICE_PASSWORD_UNSET,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET,
+            .errorMsg = "Device password is required but not set.",
+            .data = NULL
+        }
+    },
 };
 
 /**

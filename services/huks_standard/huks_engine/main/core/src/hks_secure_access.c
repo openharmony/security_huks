@@ -31,6 +31,10 @@
 #include "hks_template.h"
 #include "hks_util.h"
 
+#ifdef HKS_ENABLE_IS_PASSWORD_SET
+#include "hks_useridm_api_wrap.h"
+#endif
+
 #include "securec.h"
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
@@ -1114,6 +1118,34 @@ static int32_t HksCheckCompareProcessName(const struct HksParamSet *blobParamSet
 }
 #endif /** _STORAGE_LITE_ */
 
+int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet)
+{
+#ifdef HKS_ENABLE_IS_PASSWORD_SET
+    struct HksParam *isSetPassword = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_IS_DEVICE_PASSWORD_SET, &isSetPassword) != HKS_SUCCESS ||
+        !isSetPassword->boolParam) {
+        return HKS_SUCCESS;
+    }
+    struct HksParam *userId = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_USER_ID, &userId) != HKS_SUCCESS) {
+        HKS_LOG_E("get user id from paramset failed!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    uint32_t numOfAuthInfo = 0;
+    int32_t ret = HksUserIdmGetAuthInfoNum(userId->uint32Param, HKS_USER_AUTH_TYPE_PIN, &numOfAuthInfo);
+    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST) {
+        HKS_LOG_E("have not enroll the pin.");
+        return HKS_ERROR_DEVICE_PASSWORD_UNSET;
+    }
+    if (numOfAuthInfo == 0) {
+        return HKS_ERROR_DEVICE_PASSWORD_UNSET;
+    }
+#else
+    (void)paramSet;
+#endif
+    return HKS_SUCCESS;
+}
+
 int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const struct HksParamSet *runtimeParamSet)
 {
     int32_t ret = HKS_SUCCESS;
@@ -1127,6 +1159,9 @@ int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const s
 
     ret = HksCheckCompareProcessName(blobParamSet, runtimeParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "process name compare failed")
+
+    ret = CheckIfNeedIsDevicePasswordSet(blobParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "need password but not set yet!")
 #else
     (void)blobParamSet;
     (void)runtimeParamSet;
