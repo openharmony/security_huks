@@ -400,7 +400,7 @@ enum  OH_Huks_ErrCode {
     OH_HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST = 12000013,
     /** The memory is not sufficient. */
     OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY = 12000014,
-    /** Faile to call service. */
+    /** Failed to call service. */
     OH_HUKS_ERR_CODE_CALL_SERVICE_FAILED = 12000015,
     /** Device password is required but not set. */
     OH_HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET = 12000016
