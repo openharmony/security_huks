@@ -1133,11 +1133,8 @@ int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet)
     }
     uint32_t numOfAuthInfo = 0;
     int32_t ret = HksUserIdmGetAuthInfoNum(userId->uint32Param, HKS_USER_AUTH_TYPE_PIN, &numOfAuthInfo);
-    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST) {
-        HKS_LOG_E("have not enroll the pin.");
-        return HKS_ERROR_DEVICE_PASSWORD_UNSET;
-    }
-    if (numOfAuthInfo == 0) {
+    if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0) {
+        HKS_LOG_E("have not enrolled the pin.");
         return HKS_ERROR_DEVICE_PASSWORD_UNSET;
     }
 #else

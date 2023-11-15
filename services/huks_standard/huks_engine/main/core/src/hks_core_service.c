@@ -1725,7 +1725,11 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
 
     ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check device password status failed")
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("check device password status failed");
+        return ret;
+    }
 
     ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
     if (ret != HKS_SUCCESS) {
@@ -1771,7 +1775,11 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
 
     ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check device password status failed")
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("check device password status failed");
+        return ret;
+    }
 
     ret = HksBatchCheck(keyNode);
     if (ret != HKS_ERROR_PARAM_NOT_EXIST) {
