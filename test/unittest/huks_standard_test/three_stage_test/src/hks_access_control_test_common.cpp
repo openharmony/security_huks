@@ -115,16 +115,18 @@ static struct HksParam g_authtokenAesParams[] = {
     }
 };
 
-int32_t AuthTokenImportKey(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount)
+int32_t AuthTokenImportKey(const struct HksBlob *keyAlias, const struct HksParam *params, uint32_t paramCount,
+    bool isMac)
 {
     struct HksParamSet *importParamSet = nullptr;
     int32_t ret = InitParamSet(&importParamSet, params, paramCount);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
+    const char *atKey = isMac ? HKS_DEFAULT_USER_AT_MAC_KEY : HKS_DEFAULT_USER_AT_CIPHER_KEY;
     struct HksBlob key = {
         SHA256_KEY_LEN,
-        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(HKS_DEFAULT_USER_AT_KEY))
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(atKey))
     };
 
     ret = HksImportKey(keyAlias, importParamSet, &key);
@@ -162,7 +164,8 @@ int32_t AuthTokenEncrypt(const IDMParams &testIDMParams, struct HksBlob *authCha
     int32_t ret = HKS_FAILURE;
     uint8_t alias[] = "AuthToken_Encrypt_Decrypt_KeyAlias";
     const struct HksBlob keyAlias = { sizeof(alias), alias };
-    AuthTokenImportKey(&keyAlias, g_authtokenImportAesParams, sizeof(g_authtokenImportAesParams) / sizeof(HksParam));
+    AuthTokenImportKey(&keyAlias, g_authtokenImportAesParams, sizeof(g_authtokenImportAesParams) / sizeof(HksParam),
+        false);
     HksCiphertextData *cipherTextData = nullptr;
     struct HksParamSet *cipherParamSet = nullptr;
     do {
@@ -222,7 +225,8 @@ int32_t AuthTokenSign(const IDMParams &testIDMParams,  HksUserAuthToken *authTok
     int32_t ret = HKS_FAILURE;
     uint8_t alias[] = "AuthToken_Sign_Verify_KeyAlias";
     const struct HksBlob keyAlias = { sizeof(alias), alias };
-    AuthTokenImportKey(&keyAlias, g_authtokenImportHmacParams, sizeof(g_authtokenImportHmacParams) / sizeof(HksParam));
+    AuthTokenImportKey(&keyAlias, g_authtokenImportHmacParams, sizeof(g_authtokenImportHmacParams) / sizeof(HksParam),
+        true);
     struct HksParamSet *hmacParamSet = nullptr;
     do {
         uint8_t authTokenData[AUTH_TOKEN_DATA_LEN] = {0};
@@ -269,7 +273,7 @@ static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct Hk
 {
     int32_t ret;
     struct HksParamSet *newParamSetTest = nullptr;
-    
+
     do {
         ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
         if (ret != HKS_SUCCESS) {
@@ -489,7 +493,7 @@ int32_t CheckAccessCipherTest(const TestAccessCaseParams &testCaseParams,
         return ret;
     }
     ret = AddAuthtokenUpdateFinish(&handle, initParamSet, 0);
-    
+
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&initParamSet);
     (void)HksDeleteKey(&keyAlias, nullptr);
@@ -521,7 +525,7 @@ int32_t CheckAccessHmacTest(const TestAccessCaseParams &testCaseParams,
     }
     uint8_t challenge[32] = {0};
     struct HksBlob challengeBlob = { 32, challenge };
-    
+
     uint8_t handle[32] = {0};
     struct HksBlob handleHMAC = { 32, handle };
     ret = HksInit(&keyAlias, initParamSet, &handleHMAC, &challengeBlob);

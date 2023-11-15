@@ -28,7 +28,8 @@
 #define AUTH_TOKEN_DATA_LEN (AUTH_TOKEN_LEN - SHA256_SIGN_LEN)
 #define TOKEN_CHALLENGE_LEN 32
 #define TOKEN_CHALLENGE_LEN_PER_POS 8
-#define HKS_DEFAULT_USER_AT_KEY "huks_default_user_auth_token_key"
+#define HKS_DEFAULT_USER_AT_MAC_KEY "huks_default_user_auth_token_mac"
+#define HKS_DEFAULT_USER_AT_CIPHER_KEY "huks_default_user_auth_cipherkey"
 #define HKS_AE_AAD_LEN 12
 #define HKS_AES_COMMON_SIZE 1024U
 
