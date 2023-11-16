@@ -317,6 +317,7 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
     (void)keyAlias;
     (void)paramSet;
     (void)certChain;
+    (void)needAnonCertChain;
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
