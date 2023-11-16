@@ -70,10 +70,7 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
 int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount);
 
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain);
-
-int32_t HksClientAnonAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain);
+    struct HksCertChain *certChain, bool needAnonCertChain);
 
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *handle,
     struct HksBlob *token);

@@ -17,8 +17,7 @@ import("//build/test.gni")
 ##############################fuzztest##########################################
 ohos_fuzztest("HksAnonAttestKeyFuzzTest") {
   module_out_path = fuzz_module_out_path
-  fuzz_config_file =
-      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksanonattestkey_fuzzer"
+  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksanonattestkey_fuzzer"
 
   include_dirs = [
     ".",

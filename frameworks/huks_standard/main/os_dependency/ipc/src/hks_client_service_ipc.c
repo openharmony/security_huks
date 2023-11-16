@@ -562,8 +562,8 @@ static void InitCertChain(struct HksCertChain *certChain)
 }
 #endif
 
-static int32_t CertificateChainGetOrAttest(enum HksIpcInterfaceCode type, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksCertChain *certChain, bool needAnonCertChain)
+int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    struct HksCertChain *certChain, bool needAnonCertChain)
 {
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
@@ -581,7 +581,7 @@ static int32_t CertificateChainGetOrAttest(enum HksIpcInterfaceCode type, const 
         ret = HksCertificateChainPack(&inBlob, keyAlias, paramSet, &outBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainPack fail")
 
-        ret = HksSendRequest(type, &inBlob, &outBlob, paramSet);
+        ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
         // vendor need to implenment the device cert manager.
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
@@ -611,18 +611,6 @@ static int32_t CertificateChainGetOrAttest(enum HksIpcInterfaceCode type, const 
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
     return ret;
-}
-
-int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain)
-{
-    return CertificateChainGetOrAttest(HKS_MSG_ATTEST_KEY, keyAlias, paramSet, certChain, false);
-}
-
-int32_t HksClientAnonAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain)
-{
-    return CertificateChainGetOrAttest(HKS_MSG_ATTEST_KEY, keyAlias, paramSet, certChain, true);
 }
 
 static int32_t CopyData(const uint8_t *data, const uint32_t size, struct HksBlob *out)
