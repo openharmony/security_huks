@@ -512,6 +512,11 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
 }
 
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
+#define CERT_ROOT_INDEX 0
+#define CERT_CA_INDEX 1
+#define CERT_DEVICE_INDEX 2
+#define CERT_KEY_INDEX 3
+
 static void FreeHksCertChain(struct HksCertChain *certChain)
 {
     if (certChain == NULL) {
@@ -534,27 +539,27 @@ static void InitCertChain(struct HksCertChain *certChain)
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = (struct HksBlob *)(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
     if (certChain->certs != NULL) {
-        certChain->certs[0].size = HKS_CERT_APP_SIZE;
-        certChain->certs[0].data = (uint8_t *)(HksMalloc(certChain->certs[0].size));
-        if (certChain->certs[0].data == NULL) {
+        certChain->certs[CERT_ROOT_INDEX].size = HKS_CERT_APP_SIZE;
+        certChain->certs[CERT_ROOT_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_ROOT_INDEX].size));
+        if (certChain->certs[CERT_ROOT_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
             return;
         }
-        certChain->certs[1].size = HKS_CERT_DEVICE_SIZE;
-        certChain->certs[1].data = (uint8_t *)(HksMalloc(certChain->certs[1].size));
-        if (certChain->certs[1].data == NULL) {
+        certChain->certs[CERT_CA_INDEX].size = HKS_CERT_DEVICE_SIZE;
+        certChain->certs[CERT_CA_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_CA_INDEX].size));
+        if (certChain->certs[CERT_CA_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
             return;
         }
-        certChain->certs[2].size = HKS_CERT_CA_SIZE;
-        certChain->certs[2].data = (uint8_t *)(HksMalloc(certChain->certs[2].size));
-        if (certChain->certs[2].data == NULL) {
+        certChain->certs[CERT_DEVICE_INDEX].size = HKS_CERT_CA_SIZE;
+        certChain->certs[CERT_DEVICE_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_DEVICE_INDEX].size));
+        if (certChain->certs[CERT_DEVICE_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
             return;
         }
-        certChain->certs[3].size = HKS_CERT_ROOT_SIZE;
-        certChain->certs[3].data = (uint8_t *)(HksMalloc(certChain->certs[3].size));
-        if (certChain->certs[3].data == NULL) {
+        certChain->certs[CERT_KEY_INDEX].size = HKS_CERT_ROOT_SIZE;
+        certChain->certs[CERT_KEY_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_KEY_INDEX].size));
+        if (certChain->certs[CERT_KEY_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
             return;
         }
@@ -596,9 +601,11 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
             }
             for (uint32_t i = 0; i < certChainNew->certsCount; ++i) {
                 struct HksBlob tmpBlob = { certChainNew->certs[i].size, certChain->certs[i].data };
-                HKS_LOG_I("certChainNew size is %" LOG_PUBLIC "d, certChain size is %" LOG_PUBLIC "d", certChainNew->certs[i].size, certChain->certs[i].size);
+                HKS_LOG_I("certChainNew size is %" LOG_PUBLIC "d, certChain size is %" LOG_PUBLIC "d",
+                    certChainNew->certs[i].size, certChain->certs[i].size);
                 ret = EncodeCertChain(&tmpBlob, &certChain->certs[i]);
-                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EncodeCertChain fail after calling dcm service, ret = %" LOG_PUBLIC "d", ret);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EncodeCertChain fail after calling dcm service,
+                    ret = %" LOG_PUBLIC "d", ret);
             }
             FreeHksCertChain(certChainNew);
         }
