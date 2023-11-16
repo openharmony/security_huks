@@ -506,18 +506,38 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
 }
 
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
-static int32_t AddAttestMode(struct HksParamSet *newParamSet, struct HksParam *attestMode) {
-    int32_t ret = HksAddParams(newParamSet, attestMode, 1);
+static int32_t ConstructNewAttestParamSet(struct HksParamSet **newParamSet, const struct HksParamSet *paramSet,
+    enum HksAttestationMode mode)
+{
+    int32_t ret = HksInitParamSet(newParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("add param attestMode fail");
+        HKS_LOG_E("init paramSet fail");
         return ret;
-    }
-    ret = HksBuildParamSet(&newParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("build paramSet fail");
-        return ret;
-    }
-    return HKS_SUCCESS;
+    };
+    do {
+        ret = HksAddParams(*newParamSet, paramSet->params, paramSet->paramsCnt);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("copy params fail");
+            break;
+        };
+        struct HksParam attestMode = {
+            .tag = HKS_TAG_ATTESTATION_MODE,
+            .uint32Param = mode,
+        };
+        ret = HksAddParams(*newParamSet, &attestMode, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add param attestMode fail");
+            break;
+        }
+        ret = HksBuildParamSet(newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("build paramSet fail");
+            break;
+        }
+        return HKS_SUCCESS;
+    } while (false);
+    HksFreeParamSet(newParamSet);
+    return ret;
 }
 #endif
 
@@ -530,29 +550,14 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
         return HKS_ERROR_NULL_POINTER;
     }
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = HksInitParamSet(&newParamSet);
+    int32_t ret = ConstructNewAttestParamSet(&newParamSet, paramSet, HKS_ATTESTATION_MODE_DEFAULT);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init paramSet fail");
+        HKS_LOG_E("construct new paramSet for attest key fail");
         return ret;
     };
-    do {
-        ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("copy params fail");
-            break;
-        };
-        struct HksParam attestMode = {
-            .tag = HKS_TAG_ATTESTATION_MODE,
-            .uint32Param = HKS_ATTESTATION_MODE_DEFAULT,
-        };
-        ret = AddAttestMode(newParamSet, &attestMode);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add attest mode fail");
-            break;
-        };
-        ret = HksClientAttestKey(keyAlias, newParamSet, certChain, false);
-        HKS_LOG_I("leave attest key, result = %" LOG_PUBLIC "d", ret);
-    } while (false);
+
+    ret = HksClientAttestKey(keyAlias, newParamSet, certChain, false);
+    HKS_LOG_I("leave attest key, result = %" LOG_PUBLIC "d", ret);
     HksFreeParamSet(&newParamSet);
     return ret;
 #else
@@ -572,29 +577,14 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
         return HKS_ERROR_NULL_POINTER;
     }
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = HksInitParamSet(&newParamSet);
+    int32_t ret = ConstructNewAttestParamSet(&newParamSet, paramSet, HKS_ATTESTATION_MODE_ANONYMOUS);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("init paramSet fail");
+        HKS_LOG_E("construct new paramSet for anonn attest key fail");
         return ret;
     };
-    do {
-        ret = HksAddParams(newParamSet, paramSet->params, paramSet->paramsCnt);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("copy params fail");
-            break;
-        };
-        struct HksParam attestMode = {
-            .tag = HKS_TAG_ATTESTATION_MODE,
-            .uint32Param = HKS_ATTESTATION_MODE_ANONYMOUS,
-        };
-        ret = AddAttestMode(newParamSet, &attestMode);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add attest mode fail");
-            break;
-        };
-        ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
-        HKS_LOG_I("leave anonn attest key, result = %" LOG_PUBLIC "d", ret);
-    } while (false);
+
+    ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
+    HKS_LOG_I("leave anonn attest key, result = %" LOG_PUBLIC "d", ret);
     HksFreeParamSet(&newParamSet);
     return ret;
 #else
