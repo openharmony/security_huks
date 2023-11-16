@@ -48,7 +48,7 @@ int32_t HksAesCipherTestCaseGcm2(const struct HksBlob *keyAlias, struct HksParam
 int32_t HksAesCipherTestCaseGcm3(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool needAccessControl);
 int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
-    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool needAccessControl);
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet, bool isTimeOut);
 int32_t HksAesCipherTestParamAbsentCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
 int32_t HksAesEncryptThreeStage(const struct HksBlob *keyAlias, struct HksParamSet *encryptParamSet,
