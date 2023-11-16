@@ -458,7 +458,7 @@ void FreeHksCertChain(HksCertChain *&certChain)
             }
         }
     }
-
+    HksFree(certChain->certs);
     HksFree(certChain);
     certChain = nullptr;
 }

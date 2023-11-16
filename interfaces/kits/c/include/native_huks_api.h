@@ -190,7 +190,7 @@ struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
  *    returns an error code otherwise.
  * @since 11
  * @version 1.0
- * @note require networking and time-consuming
+ * @note this is a networking duration interface caller need to get the certChain in asynchronous thread
  */
 struct OH_Huks_Result OH_Huks_AnonAttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain);

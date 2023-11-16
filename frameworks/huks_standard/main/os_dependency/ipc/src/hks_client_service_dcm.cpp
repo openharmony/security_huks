@@ -52,7 +52,7 @@ class DcmAttest {
     std::condition_variable attestFinished{};
     bool callbackCalled = false;
     bool timeout = false;
-    bool isCallingFailed = false;
+    bool isCallingFailed = true;
 
     std::condition_variable sleepAlarm{};
     HksCertChain *certChain{};
@@ -71,56 +71,51 @@ class DcmAttest {
 
 void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
 {
-    if (errCode != DCM_SUCCESS) {
-        HKS_LOG_I("DcmCallBack result is fail, erroCode = %" LOG_PUBLIC "u", errCode);
-        isCallingFailed = true;
-        return;
-    }
     callbackCalled = true;
-    if (certChain->certs == nullptr) {
-        HKS_LOG_E("malloc certChain buffer failed.");
-        isCallingFailed = true;
-        return;
-    }
-    for (uint32_t i = 0; i < certChain->certsCount; ++i) {
-        if (certChain->certs[i].data == nullptr) {
-            HKS_LOG_E("malloc certChain buffer failed.");
-            isCallingFailed = true;
-            return;
+    do {
+        if (errCode != DCM_SUCCESS) {
+            HKS_LOG_I("DcmCallBack result is fail, erroCode = %" LOG_PUBLIC "u", errCode);
+            break;
         }
-    }
-    if (dcmCertChain == nullptr) {
-        HKS_LOG_E("dcmCertChain is NULL");
-        isCallingFailed = true;
-        return;
-    }
-    if (certChain->certsCount < dcmCertChain->certCount) {
-        HKS_LOG_E("certs count not enough.");
-        isCallingFailed = true;
-        return;
-    }
-
-    for (uint32_t i = 0; i < dcmCertChain->certCount; ++i) {
-        if (dcmCertChain->cert[i].data == nullptr) {
-            HKS_LOG_E("malloc dcmCertChain buffer failed.");
-            isCallingFailed = true;
-            return;
+        if (certChain->certs == nullptr) {
+            HKS_LOG_E("certChain buffer from caller is null.");
+            break;
         }
-        if (certChain->certs[i].size < dcmCertChain->cert[i].size) {
-            HKS_LOG_E("certChain cert size is smaller than dcmCertChain certChain size: %" LOG_PUBLIC
-                "u, dcmCertSize: %" LOG_PUBLIC "u", certChain->certs[i].size, dcmCertChain->cert[i].size);
-            isCallingFailed = true;
-            return;
+        for (uint32_t i = 0; i < certChain->certsCount; ++i) {
+            if (certChain->certs[i].data == nullptr) {
+                HKS_LOG_E("single cert chain from huks is null.");
+                break;
+            }
         }
-    }
-    HKS_LOG_I("Begin to extract anon certChain.");
-    for (uint32_t i = 0; i < dcmCertChain->certCount; ++i) {
-        if(memcpy_s(certChain->certs[i].data, certChain->certs[i].size, dcmCertChain->cert[i].data,
-            dcmCertChain->cert[i].size) != EOK) {
-            return;
+        if (dcmCertChain == nullptr) {
+            HKS_LOG_E("dcmCertChain is NULL");
+            break;
         }
-        certChain->certs[i].size = dcmCertChain->cert[i].size;
-    }
+        if (certChain->certsCount < dcmCertChain->certCount) {
+            HKS_LOG_E("cert count from huks is not enough to load dcm certChain.");
+            break;
+        }
+        HKS_LOG_I("Begin to extract anon certChain.");
+        for (uint32_t i = 0; i < dcmCertChain->certCount; ++i) {
+            if (dcmCertChain->cert[i].data == nullptr) {
+                HKS_LOG_E("single dcmCertChain buffer is null.");
+                break;
+            }
+            if (certChain->certs[i].size < dcmCertChain->cert[i].size) {
+                HKS_LOG_E("huks certChain cert size is smaller than dcmCertChain certChain size: %" LOG_PUBLIC
+                    "u, dcmCertSize: %" LOG_PUBLIC "u", certChain->certs[i].size, dcmCertChain->cert[i].size);
+                break;
+            }
+            if(memcpy_s(certChain->certs[i].data, certChain->certs[i].size, dcmCertChain->cert[i].data,
+                dcmCertChain->cert[i].size) != EOK) {
+                HKS_LOG_E("extract number %" LOG_PUBLIC "u, has failed.", i);
+                break;
+            }
+            certChain->certs[i].size = dcmCertChain->cert[i].size;
+        }
+        isCallingFailed = false;
+        HKS_LOG_I("Extract anon certChain final Success!");
+    } while (0);
     attestFinished.notify_all();
 }
 
@@ -133,7 +128,7 @@ void DcmAttest::WaitTimeout()
         std::cv_status waitResult =
             sleepAlarm.wait_for(lock, std::chrono::seconds(10));
         if (waitResult == std::cv_status::timeout) {
-            HKS_LOG_E("timeout!");
+            HKS_LOG_E("watting for dcm is timeout!");
         } else {
             HKS_LOG_I("finished successfully! waked up!");
         }
@@ -187,7 +182,7 @@ int32_t DcmAttest::AttestWithAnon(HksBlob *cert)
         callback(errCode, errInfo, infoSize, dcmCertChain);
     });
     if (ret != DCM_SUCCESS) {
-        HKS_LOG_E("ret = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("calling dcm anon attestKey not success,ret = %" LOG_PUBLIC "d", ret);
         sleepAlarm.notify_all();
         timerThread.join();
         return ret;
@@ -204,7 +199,7 @@ int32_t DcmAttest::AttestWithAnon(HksBlob *cert)
         ret = HKS_ERROR_COMMUNICATION_TIMEOUT;
     }
     if (isCallingFailed) {
-        ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+        ret = HKS_ERROR_BUFFER_TOO_SMALL;
     }
     HKS_LOG_I("begin notify sleep thread");
     sleepAlarm.notify_all();

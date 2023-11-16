@@ -107,7 +107,7 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
     return GetInt32(env, 0);
 }
 
-static void InitCertChain(struct HksCertChain *certChain)
+static int32_t InitCertChain(struct HksCertChain *certChain)
 {
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
@@ -116,27 +116,28 @@ static void InitCertChain(struct HksCertChain *certChain)
         certChain->certs[INDEX_0].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_0].size));
         if (certChain->certs[INDEX_0].data == nullptr) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         certChain->certs[INDEX_1].size = HKS_CERT_DEVICE_SIZE;
         certChain->certs[INDEX_1].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_1].size));
         if (certChain->certs[INDEX_1].data == nullptr) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         certChain->certs[INDEX_2].size = HKS_CERT_CA_SIZE;
         certChain->certs[INDEX_2].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_2].size));
         if (certChain->certs[INDEX_2].data == nullptr) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         certChain->certs[INDEX_3].size = HKS_CERT_ROOT_SIZE;
         certChain->certs[INDEX_3].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_3].size));
         if (certChain->certs[INDEX_3].data == nullptr) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
+    return HKS_SUCCESS;
 }
 
 static napi_value AnonAttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context)
@@ -158,7 +159,11 @@ static napi_value AnonAttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext con
 
             napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (napiContext->certChain != nullptr) {
-                InitCertChain(napiContext->certChain);
+                int32_t ret = InitCertChain(napiContext->certChain);
+                if (ret != HKS_SUCCESS) {
+                    HKS_LOG_E("Init Cert Chain failed in napi");
+                    return;
+                }
             }
             napiContext->result = HksAnonAttestKey(napiContext->keyAlias, napiContext->paramSet, napiContext->certChain);
         },
