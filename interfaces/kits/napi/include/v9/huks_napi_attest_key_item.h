@@ -24,5 +24,4 @@ namespace HuksNapiItem {
 napi_value HuksNapiAttestKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 
-
 #endif  // HUKS_NAPI_ATTEST_KEY_ITEM_H

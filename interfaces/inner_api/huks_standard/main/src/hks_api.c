@@ -584,7 +584,7 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
     };
 
     ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
-    HKS_LOG_I("leave anonn attest key, result = %" LOG_PUBLIC "d", ret);
+    HKS_LOG_I("leave anon attest key, result = %" LOG_PUBLIC "d", ret);
     HksFreeParamSet(&newParamSet);
     return ret;
 #else

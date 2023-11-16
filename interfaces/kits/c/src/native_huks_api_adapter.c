@@ -20,7 +20,7 @@
 #include "native_huks_param.h"
 
 int32_t HuksAttestAdapter(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
-    struct OH_Huks_CertChain *certChain)
+    struct OH_Huks_CertChain *certChain, bool needAnonCertChain)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -54,8 +54,13 @@ int32_t HuksAttestAdapter(const struct OH_Huks_Blob *keyAlias, const struct OH_H
         if (ret != HKS_SUCCESS) {
             break;
         }
-        ret = HksAttestKey((const struct HksBlob *)keyAlias, (struct HksParamSet *)newParamSet,
-            (struct HksCertChain *)certChain);
+        if (needAnonCertChain) {
+            ret = HksAnonAttestKey((const struct HksBlob *)keyAlias, (struct HksParamSet *)newParamSet,
+                (struct HksCertChain *)certChain);
+        } else {
+            ret = HksAttestKey((const struct HksBlob *)keyAlias, (struct HksParamSet *)newParamSet,
+                (struct HksCertChain *)certChain);
+        }
     } while (0);
     HksFreeParamSet(&newParamSet);
     return ret;

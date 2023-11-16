@@ -23,7 +23,7 @@ extern "C" {
 #endif
 
 int32_t HuksAttestAdapter(const struct OH_Huks_Blob *keyAlias, const struct OH_Huks_ParamSet *paramSet,
-    struct OH_Huks_CertChain *certChain);
+    struct OH_Huks_CertChain *certChain, bool needAnonCertChain);
 
 #ifdef __cplusplus
 }

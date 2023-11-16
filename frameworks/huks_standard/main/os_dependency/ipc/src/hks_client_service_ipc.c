@@ -530,11 +530,11 @@ static void FreeHksCertChain(struct HksCertChain *certChain)
             }
         }
     }
+    HksFree(certChain->certs);
     HksFree(certChain);
-    certChain = NULL;
 }
 
-static void InitCertChain(struct HksCertChain *certChain)
+static int32_t InitCertChain(struct HksCertChain *certChain)
 {
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = (struct HksBlob *)(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
@@ -543,27 +543,28 @@ static void InitCertChain(struct HksCertChain *certChain)
         certChain->certs[CERT_ROOT_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_ROOT_INDEX].size));
         if (certChain->certs[CERT_ROOT_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         certChain->certs[CERT_CA_INDEX].size = HKS_CERT_DEVICE_SIZE;
         certChain->certs[CERT_CA_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_CA_INDEX].size));
         if (certChain->certs[CERT_CA_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         certChain->certs[CERT_DEVICE_INDEX].size = HKS_CERT_CA_SIZE;
         certChain->certs[CERT_DEVICE_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_DEVICE_INDEX].size));
         if (certChain->certs[CERT_DEVICE_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
         certChain->certs[CERT_KEY_INDEX].size = HKS_CERT_ROOT_SIZE;
         certChain->certs[CERT_KEY_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_KEY_INDEX].size));
         if (certChain->certs[CERT_KEY_INDEX].data == NULL) {
             FreeHksCertChain(certChain);
-            return;
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }
+    return HKS_SUCCESS;
 }
 #endif
 
@@ -588,13 +589,16 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 
         ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
+        struct HksCertChain *certChainNew = NULL;
         // vendor need to implenment the device cert manager.
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
         if (needAnonCertChain) {
-            struct HksCertChain *certChainNew = (struct HksCertChain *)(HksMalloc(sizeof(struct HksCertChain)));
-            InitCertChain(certChainNew);
+            certChainNew = (struct HksCertChain *)(HksMalloc(sizeof(struct HksCertChain)));
+            HKS_IF_NULL_LOGE_BREAK(certChain, "malloc certChainNew is null!")
+            ret = InitCertChain(certChainNew);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitCertChainNew failed.")
             ret = DcmGenerateCertChain(&outBlob, certChainNew);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail %" LOG_PUBLIC "d", ret);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail result: %" LOG_PUBLIC "d", ret);
             if (!isBase64) {
                 HKS_LOG_I("No need to base64, return certChain to caller.");
                 break;
@@ -607,7 +611,6 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
                 HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EncodeCertChain fail after calling dcm service,
                     ret = %" LOG_PUBLIC "d", ret);
             }
-            FreeHksCertChain(certChainNew);
         }
 #endif
         if (!needAnonCertChain) {
@@ -615,6 +618,7 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
         }
     } while (0);
 
+    FreeHksCertChain(certChainNew);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
     return ret;
