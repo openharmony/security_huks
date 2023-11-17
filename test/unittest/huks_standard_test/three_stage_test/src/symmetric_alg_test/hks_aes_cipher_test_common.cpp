@@ -69,6 +69,7 @@ static int32_t HksAesCipherTestEncryptWithoutNonce(const struct HksBlob *keyAlia
         return ret;
     }
 
+#ifdef USE_HKS_MOCK
     if (needAccessControl) {
         const IDMParams testIDMParams = {
             .secureUid = 1,
@@ -82,6 +83,7 @@ static int32_t HksAesCipherTestEncryptWithoutNonce(const struct HksBlob *keyAlia
             return ret;
         }
     }
+#endif
 
     ret = TestUpdateLoopFinish(&handleEncrypt, encryptParamSet, inData, cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
@@ -347,7 +349,7 @@ int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParam
     /* 2. Encrypt Three Stage */
     uint8_t cipher[AES_COMMON_SIZE] = {0};
     struct HksBlob cipherText = { AES_COMMON_SIZE, cipher };
-    ret = HksAesCipherTestEncryptWithoutNonce(keyAlias, encryptParamSet, &inData, &cipherText, true);
+    ret = HksAesCipherTestEncryptWithoutNonce(keyAlias, encryptParamSet, &inData, &cipherText, false);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestEncrypt failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -394,7 +396,7 @@ int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParam
 int32_t HksAesEncryptThreeStage(const struct HksBlob *keyAlias, struct HksParamSet *encryptParamSet,
     const struct HksBlob *inData, struct HksBlob *cipherText)
 {
-    int32_t ret = HksAesCipherTestEncryptWithoutNonce(keyAlias, encryptParamSet, inData, cipherText, true);
+    int32_t ret = HksAesCipherTestEncryptWithoutNonce(keyAlias, encryptParamSet, inData, cipherText, false);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestEncrypt failed.";
     return ret;
 }
@@ -436,18 +438,6 @@ int32_t HksAesDecryptThreeStage(const struct HksBlob *keyAlias, struct HksParamS
         return ret;
     }
 
-    const IDMParams testIDMParams = {
-        .secureUid = 1,
-        .enrolledId = 1,
-        .time = 0,
-        .authType = 1
-    };
-    ret = HksBuildAuthtoken(&decryptParamSet, &challengeBlob, testIDMParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksBuildAuthtoken failed, ret : %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
-
     // Update & Finish
     ret = TestUpdateLoopFinish(&handleDecryptTest, decryptParamSet, cipherText, plainText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
@@ -472,18 +462,6 @@ int32_t HksAesDecryptForBatch(const struct HksBlob *keyAlias, struct HksParamSet
     int32_t ret = HksInit(keyAlias, decryptParamSet, &handleDecryptTest, &challengeBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
-        return ret;
-    }
-
-    const IDMParams testIDMParams = {
-        .secureUid = 1,
-        .enrolledId = 1,
-        .time = 0,
-        .authType = 1
-    };
-    ret = HksBuildAuthtoken(&decryptParamSet, &challengeBlob, testIDMParams);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("HksBuildAuthtoken failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
 

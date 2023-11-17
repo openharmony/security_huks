@@ -59,7 +59,6 @@ void HksBatchTest::TearDown()
 {
 }
 
-#ifdef USE_HKS_MOCK
 static struct HksParam g_genParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -79,15 +78,6 @@ static struct HksParam g_genParams001[] = {
     }, {
         .tag = HKS_TAG_KEY_AUTH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_BATCH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
@@ -112,15 +102,6 @@ static struct HksParam g_encryptParams001[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
@@ -210,15 +191,6 @@ static struct HksParam g_genParams002[] = {
         .tag = HKS_TAG_KEY_AUTH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
     }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
-    }, {
         .tag = HKS_TAG_BATCH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
     }
@@ -242,15 +214,6 @@ static struct HksParam g_encryptParams002[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
@@ -340,15 +303,6 @@ static struct HksParam g_genParams003[] = {
         .tag = HKS_TAG_KEY_AUTH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
     }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
-    }, {
         .tag = HKS_TAG_BATCH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
     }
@@ -373,15 +327,6 @@ static struct HksParam g_encryptParams003[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
@@ -512,15 +457,6 @@ static struct HksParam g_genParams004[] = {
         .tag = HKS_TAG_KEY_AUTH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
     }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
-    }, {
         .tag = HKS_TAG_BATCH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT | HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY
     }
@@ -544,15 +480,6 @@ static struct HksParam g_encryptParams004[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
@@ -642,15 +569,6 @@ static struct HksParam g_genParams005[] = {
         .tag = HKS_TAG_KEY_AUTH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
     }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
-    }, {
         .tag = HKS_TAG_BATCH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
     }
@@ -674,15 +592,6 @@ static struct HksParam g_encryptParams005[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
@@ -772,15 +681,6 @@ static struct HksParam g_genParams006[] = {
         .tag = HKS_TAG_KEY_AUTH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
     }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
-    }, {
         .tag = HKS_TAG_BATCH_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DECRYPT
     }
@@ -804,15 +704,6 @@ static struct HksParam g_encryptParams006[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_GCM
-    }, {
-        .tag = HKS_TAG_USER_AUTH_TYPE,
-        .uint32Param = HKS_USER_AUTH_TYPE_PIN
-    }, {
-        .tag = HKS_TAG_KEY_AUTH_ACCESS_TYPE,
-        .uint32Param = HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD
-    }, {
-        .tag = HKS_TAG_CHALLENGE_TYPE,
-        .uint32Param = HKS_CHALLENGE_TYPE_NONE
     }, {
         .tag = HKS_TAG_IV,
         .blob = {
@@ -1133,7 +1024,6 @@ HWTEST_F(HksBatchTest, HksBatchTest006, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
-#endif
 #endif
 
 } // namespace Unittest::BatchTest
