@@ -33,6 +33,7 @@ ohos_shared_library("huks_service") {
   }
   subsystem_name = "security"
   part_name = "huks"
+  version_script = "libhuksservice.map"
 
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",

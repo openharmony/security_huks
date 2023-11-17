@@ -39,6 +39,8 @@ ohos_shared_library("huks") {
     "include/v9",
   ]
 
+  version_script = "libhuksnapi.map"
+
   sources = [
     "src/huks_napi.cpp",
     "src/v8/huks_napi_abort.cpp",
