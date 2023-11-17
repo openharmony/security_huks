@@ -60,7 +60,6 @@ void HksAesCipherPart4Test::TearDown()
 {
 }
 
-#ifdef USE_HKS_MOCK
 static struct HksParam g_genParams026[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -152,6 +151,7 @@ static struct HksParam g_decryptParams026[] = {
     }
 };
 
+#ifdef USE_HKS_MOCK
 static struct HksParam g_genParams027[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -393,6 +393,7 @@ static struct HksParam g_decryptParams028[] = {
         }
     }
 };
+#endif
 
 #ifdef L2_STANDARD
 /**
@@ -425,6 +426,7 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test029, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifdef USE_HKS_MOCK
 /**
  * @tc.name: HksAesCipherPart4Test.HksAesCipherPart1Test030
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE size-128.
