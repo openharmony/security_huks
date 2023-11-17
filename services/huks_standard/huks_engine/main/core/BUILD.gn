@@ -50,7 +50,10 @@ if (os_level == "standard") {
     ]
 
     deps = [
-      "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
       "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
       "//base/security/huks/utils/crypto_adapter:libhuks_utils_client_service_adapter_static",
       "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
