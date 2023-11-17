@@ -49,6 +49,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_agree_test_common.cpp",
     "src/hks_attest_key_nonids_test.cpp",
     "src/hks_attest_key_test_common.cpp",
+    "src/hks_batch_test.cpp",
     "src/hks_check_pur_part_test.cpp",
     "src/hks_cross_test.cpp",
     "src/hks_cross_test_common.cpp",
@@ -70,7 +71,6 @@ ohos_unittest("huks_UT_test") {
     "src/symmetric_alg_test/hks_aes_cipher_part3_test.cpp",
     "src/symmetric_alg_test/hks_aes_cipher_part4_test.cpp",
     "src/symmetric_alg_test/hks_aes_cipher_test_common.cpp",
-    "src/hks_batch_test.cpp",
   ]
 
   sources += [
