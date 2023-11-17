@@ -46,7 +46,7 @@ struct DcmCertChainT {
 };
 using DcmCertChain = DcmCertChainT;
 
-using DcmCallback = void (*)(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *certChain);
+using DcmCallback = void (*)(int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *certChain);
 
 class DcmAttest {
     std::condition_variable attestFinished{};
@@ -61,7 +61,7 @@ class DcmAttest {
     void *certMgrSdkHandle {};
     AttestFunction dcmAnonymousAttestKey {};
 
-    void DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain);
+    void DcmCallback(int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain);
     void WaitTimeout();
   public:
     explicit DcmAttest(HksCertChain *certChain);
@@ -69,23 +69,17 @@ class DcmAttest {
     int32_t AttestWithAnon(HksBlob *cert);
 };
 
-void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
+void DcmAttest::DcmCallback(int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
 {
     callbackCalled = true;
     do {
         if (errCode != DCM_SUCCESS) {
-            HKS_LOG_I("DcmCallBack result is fail, erroCode = %" LOG_PUBLIC "u", errCode);
+            HKS_LOG_I("DcmCallBack result is fail, erroCode = %" LOG_PUBLIC "d", errCode);
             break;
         }
-        if (certChain->certs == nullptr) {
+        if (certChain == nullptr || certChain->certs == nullptr) {
             HKS_LOG_E("certChain buffer from caller is null.");
             break;
-        }
-        for (uint32_t i = 0; i < certChain->certsCount; ++i) {
-            if (certChain->certs[i].data == nullptr) {
-                HKS_LOG_E("single cert chain from huks is null.");
-                break;
-            }
         }
         if (dcmCertChain == nullptr) {
             HKS_LOG_E("dcmCertChain is NULL");
@@ -97,6 +91,10 @@ void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSiz
         }
         HKS_LOG_I("Begin to extract anon certChain.");
         for (uint32_t i = 0; i < dcmCertChain->certCount; ++i) {
+            if (certChain->certs[i].data == nullptr) {
+                HKS_LOG_E("single cert chain from huks is null.");
+                break;
+            }
             if (dcmCertChain->cert[i].data == nullptr) {
                 HKS_LOG_E("single dcmCertChain buffer is null.");
                 break;
@@ -106,7 +104,7 @@ void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSiz
                     "u, dcmCertSize: %" LOG_PUBLIC "u", certChain->certs[i].size, dcmCertChain->cert[i].size);
                 break;
             }
-            if(memcpy_s(certChain->certs[i].data, certChain->certs[i].size, dcmCertChain->cert[i].data,
+            if (memcpy_s(certChain->certs[i].data, certChain->certs[i].size, dcmCertChain->cert[i].data,
                 dcmCertChain->cert[i].size) != EOK) {
                 HKS_LOG_E("extract number %" LOG_PUBLIC "u, has failed.", i);
                 break;
@@ -173,11 +171,11 @@ int32_t DcmAttest::AttestWithAnon(HksBlob *cert)
     std::thread timerThread([&]() { WaitTimeout(); });
     DcmBlob dcmCert = {.size = cert->size, .data = cert->data};
     HKS_LOG_I("begin to pack callback for dcmAnonymousAttestKey");
-    static auto callback = [&](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
+    static auto callback = [&](int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
         DcmCallback(errCode, errInfo, infoSize, dcmCertChain);
     };
     HKS_LOG_I("begin to call dcmAnonymousAttestKey!");
-    int32_t ret = dcmAnonymousAttestKey(&dcmCert, [](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize,
+    int32_t ret = dcmAnonymousAttestKey(&dcmCert, [](int32_t errCode, uint8_t *errInfo, uint32_t infoSize,
         DcmCertChain *dcmCertChain) {
         callback(errCode, errInfo, infoSize, dcmCertChain);
     });

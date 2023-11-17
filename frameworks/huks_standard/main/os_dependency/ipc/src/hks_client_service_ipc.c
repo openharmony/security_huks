@@ -511,10 +511,6 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-#define CERT_ROOT_INDEX 0
-#define CERT_CA_INDEX 1
-#define CERT_DEVICE_INDEX 2
-#define CERT_KEY_INDEX 3
 
 static void FreeHksCertChain(struct HksCertChain *certChain)
 {
@@ -531,38 +527,46 @@ static void FreeHksCertChain(struct HksCertChain *certChain)
     }
     HksFree(certChain->certs);
     HksFree(certChain);
+    certChain = NULL;
 }
 
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
+#define CERT_KEY_INDEX 0
+#define CERT_DEVICE_INDEX 1
+#define CERT_CA_INDEX 2
+#define CERT_ROOT_INDEX 3
+
 static int32_t InitCertChain(struct HksCertChain *certChain)
 {
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = (struct HksBlob *)(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
-    if (certChain->certs != NULL) {
-        certChain->certs[CERT_ROOT_INDEX].size = HKS_CERT_APP_SIZE;
-        certChain->certs[CERT_ROOT_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_ROOT_INDEX].size));
-        if (certChain->certs[CERT_ROOT_INDEX].data == NULL) {
-            FreeHksCertChain(certChain);
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
-        certChain->certs[CERT_CA_INDEX].size = HKS_CERT_DEVICE_SIZE;
-        certChain->certs[CERT_CA_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_CA_INDEX].size));
-        if (certChain->certs[CERT_CA_INDEX].data == NULL) {
-            FreeHksCertChain(certChain);
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
-        certChain->certs[CERT_DEVICE_INDEX].size = HKS_CERT_CA_SIZE;
-        certChain->certs[CERT_DEVICE_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_DEVICE_INDEX].size));
-        if (certChain->certs[CERT_DEVICE_INDEX].data == NULL) {
-            FreeHksCertChain(certChain);
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
-        certChain->certs[CERT_KEY_INDEX].size = HKS_CERT_ROOT_SIZE;
-        certChain->certs[CERT_KEY_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_KEY_INDEX].size));
-        if (certChain->certs[CERT_KEY_INDEX].data == NULL) {
-            FreeHksCertChain(certChain);
-            return HKS_ERROR_INSUFFICIENT_MEMORY;
-        }
+    if (certChain->certs == NULL) {
+        HKS_LOG_E("malloc certChain failed.");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    certChain->certs[CERT_KEY_INDEX].size = HKS_CERT_APP_SIZE;
+    certChain->certs[CERT_KEY_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_KEY_INDEX].size));
+    if (certChain->certs[CERT_KEY_INDEX].data == NULL) {
+        FreeHksCertChain(certChain);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    certChain->certs[CERT_DEVICE_INDEX].size = HKS_CERT_DEVICE_SIZE;
+    certChain->certs[CERT_DEVICE_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_DEVICE_INDEX].size));
+    if (certChain->certs[CERT_DEVICE_INDEX].data == NULL) {
+        FreeHksCertChain(certChain);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    certChain->certs[CERT_CA_INDEX].size = HKS_CERT_CA_SIZE;
+    certChain->certs[CERT_CA_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_CA_INDEX].size));
+    if (certChain->certs[CERT_CA_INDEX].data == NULL) {
+        FreeHksCertChain(certChain);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    certChain->certs[CERT_ROOT_INDEX].size = HKS_CERT_ROOT_SIZE;
+    certChain->certs[CERT_ROOT_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_ROOT_INDEX].size));
+    if (certChain->certs[CERT_ROOT_INDEX].data == NULL) {
+        FreeHksCertChain(certChain);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return HKS_SUCCESS;
 }
@@ -589,11 +593,11 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 
         ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
-        // vendor need to implenment the device cert manager.
+        // vendor need to implement the device cert manager.
         certChainNew = (struct HksCertChain *)(HksMalloc(sizeof(struct HksCertChain)));;
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
         if (needAnonCertChain) {
-            HKS_IF_NULL_LOGE_BREAK(certChain, "malloc certChainNew is null!")
+            HKS_IF_NULL_LOGE_BREAK(certChainNew, "malloc certChainNew is null!")
             ret = InitCertChain(certChainNew);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitCertChainNew failed.")
             ret = DcmGenerateCertChain(&outBlob, certChainNew);
