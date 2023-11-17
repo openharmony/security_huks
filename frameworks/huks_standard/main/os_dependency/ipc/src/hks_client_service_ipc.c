@@ -511,7 +511,6 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-#ifndef HKS_UNTRUSTED_RUNNING_ENV
 #define CERT_ROOT_INDEX 0
 #define CERT_CA_INDEX 1
 #define CERT_DEVICE_INDEX 2
@@ -534,6 +533,7 @@ static void FreeHksCertChain(struct HksCertChain *certChain)
     HksFree(certChain);
 }
 
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
 static int32_t InitCertChain(struct HksCertChain *certChain)
 {
     certChain->certsCount = HKS_CERT_COUNT;
@@ -576,7 +576,7 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 
     int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CertificateChainInitBlob fail")
-
+    struct HksCertChain *certChainNew = NULL;
     do {
         struct HksParam *isBase64Param = NULL;
         bool isBase64 = false;
@@ -589,11 +589,10 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 
         ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
-        struct HksCertChain *certChainNew = NULL;
         // vendor need to implenment the device cert manager.
+        certChainNew = (struct HksCertChain *)(HksMalloc(sizeof(struct HksCertChain)));;
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
         if (needAnonCertChain) {
-            certChainNew = (struct HksCertChain *)(HksMalloc(sizeof(struct HksCertChain)));
             HKS_IF_NULL_LOGE_BREAK(certChain, "malloc certChainNew is null!")
             ret = InitCertChain(certChainNew);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitCertChainNew failed.")
@@ -617,7 +616,6 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
             ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
         }
     } while (0);
-
     FreeHksCertChain(certChainNew);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
