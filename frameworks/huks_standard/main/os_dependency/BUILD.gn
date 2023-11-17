@@ -52,6 +52,7 @@ if (os_level == "standard") {
       defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
     }
     sources += [ "./ipc/src/hks_client_service_ipc.c" ]
+    sources += [ "./ipc/src/hks_client_service_dcm.cpp" ]
     if (huks_security_level == "trusted_environment") {
       sources += [ "./ipc/src/hks_client_service_dcm.cpp" ]
     }
