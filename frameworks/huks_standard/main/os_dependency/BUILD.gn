@@ -28,9 +28,7 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
     include_dirs = [ "../common/include" ]
-    sources = [
-      "./posix/hks_mem.c",
-    ]
+    sources = [ "./posix/hks_mem.c" ]
 
     complete_static_lib = true
 
@@ -55,9 +53,7 @@ if (os_level == "standard") {
     part_name = "huks"
     public_configs = [ ":huks_config" ]
     include_dirs = [ "../common/include" ]
-    sources = [
-      "./posix/hks_util.c",
-    ]
+    sources = [ "./posix/hks_util.c" ]
 
     complete_static_lib = true
 

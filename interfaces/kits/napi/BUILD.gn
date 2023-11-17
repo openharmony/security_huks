@@ -69,9 +69,9 @@ ohos_shared_library("huks") {
   ]
 
   deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
   ]
 
   external_deps = [
