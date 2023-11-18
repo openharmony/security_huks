@@ -23,6 +23,56 @@ config("huks_config") {
 }
 
 if (os_level == "standard") {
+  ohos_static_library("libhuks_mem_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+    include_dirs = [ "../common/include" ]
+    sources = [ "./posix/hks_mem.c" ]
+
+    complete_static_lib = true
+
+    branch_protector_ret = "pac_ret"
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+  }
+
+  ohos_static_library("libhuks_util_standard_static") {
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+    include_dirs = [ "../common/include" ]
+    sources = [ "./posix/hks_util.c" ]
+
+    complete_static_lib = true
+
+    branch_protector_ret = "pac_ret"
+
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+
+    configs = [
+      "//base/security/huks/frameworks/config/build:l2_standard_common_config",
+    ]
+  }
+
   ohos_static_library("libhuks_os_dependency_standard_static") {
     subsystem_name = "security"
     part_name = "huks"
@@ -33,8 +83,6 @@ if (os_level == "standard") {
       "./ipc/src/hks_ipc_serialization.c",
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
-      "./posix/hks_mem.c",
-      "./posix/hks_util.c",
     ]
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 

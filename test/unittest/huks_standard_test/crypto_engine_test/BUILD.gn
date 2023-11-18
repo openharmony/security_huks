@@ -82,7 +82,9 @@ ohos_unittest("crypto_engine_unit_test") {
   ]
 
   deps = [
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
     "//third_party/googletest:gtest_main",
   ]
   external_deps = [

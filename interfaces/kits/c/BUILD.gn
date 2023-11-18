@@ -45,6 +45,8 @@ ohos_shared_library("huks_ndk") {
 
   branch_protector_ret = "pac_ret"
 
+  version_script = "libhuksndk.map"
+
   sanitize = {
     integer_overflow = true
     cfi = true
