@@ -28,6 +28,7 @@ if (os_level == "standard") {
     include_dirs = [
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
     ]
 
     sources = [

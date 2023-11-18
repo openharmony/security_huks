@@ -68,7 +68,9 @@ int32_t HksClientGenerateKey(const struct HksBlob *keyAlias, const struct HksPar
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceGenerateKey(&processInfo, keyAlias, paramSetIn, NULL);
 }
@@ -85,7 +87,9 @@ int32_t HksClientImportKey(const struct HksBlob *keyAlias, const struct HksParam
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceImportKey(&processInfo, keyAlias, paramSet, key);
 }
@@ -102,7 +106,9 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
 
     return HksServiceImportWrappedKey(&processInfo, keyAlias, wrappingKeyAlias, paramSet, wrappedKeyData);
@@ -121,7 +127,9 @@ int32_t HksClientExportPublicKey(const struct HksBlob *keyAlias, const struct Hk
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceExportPublicKey(&processInfo, keyAlias, key);
 }
@@ -138,13 +146,17 @@ int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParam
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceDeleteKey(&processInfo, keyAlias);
 }
 
-int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSetOut)
+int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
+    struct HksParamSet *paramSetOut)
 {
+    (void)paramSetIn;
     char *processName = NULL;
     char *userId = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(NULL, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
@@ -154,7 +166,9 @@ int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamS
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceGetKeyParamSet(&processInfo, keyAlias, paramSetOut);
 }
@@ -171,7 +185,9 @@ int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamS
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceKeyExist(&processInfo, keyAlias);
 }
@@ -188,7 +204,9 @@ int32_t HksClientSign(const struct HksBlob *key, const struct HksParamSet *param
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceSign(&processInfo, key, paramSet, srcData, signature);
 }
@@ -205,7 +223,9 @@ int32_t HksClientVerify(const struct HksBlob *key, const struct HksParamSet *par
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceVerify(&processInfo, key, paramSet, srcData, signature);
 }
@@ -222,7 +242,9 @@ int32_t HksClientEncrypt(const struct HksBlob *key, const struct HksParamSet *pa
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceEncrypt(&processInfo, key, paramSet, plainText, cipherText);
 }
@@ -239,7 +261,9 @@ int32_t HksClientDecrypt(const struct HksBlob *key, const struct HksParamSet *pa
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceDecrypt(&processInfo, key, paramSet, cipherText, plainText);
 }
@@ -256,7 +280,9 @@ int32_t HksClientAgreeKey(const struct HksParamSet *paramSet, const struct HksBl
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceAgreeKey(&processInfo, paramSet, privateKey, peerPublicKey, agreedKey);
 }
@@ -273,7 +299,9 @@ int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksB
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceDeriveKey(&processInfo, paramSet, mainKey, derivedKey);
 }
@@ -290,13 +318,17 @@ int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramS
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceMac(&processInfo, key, paramSet, srcData, mac);
 }
 
-int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount)
+int32_t HksClientGetKeyInfoList(const struct HksParamSet *paramSet, struct HksKeyInfo *keyInfoList,
+    uint32_t *listCount)
 {
+    (void)paramSet;
     char *processName = NULL;
     char *userId = NULL;
     HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(NULL, &processName, &userId), HKS_ERROR_INTERNAL_ERROR,
@@ -306,7 +338,9 @@ int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCo
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceGetKeyInfoList(&processInfo, keyInfoList, listCount);
 }
@@ -333,7 +367,9 @@ int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
 
     struct HksBlob tokenTmp = { 0, NULL };
@@ -362,7 +398,9 @@ int32_t HksClientUpdate(const struct HksBlob *handle, const struct HksParamSet *
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceUpdate(handle, &processInfo, paramSet, inData, outData);
 }
@@ -379,7 +417,9 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceFinish(handle, &processInfo, paramSet, inData, outData);
 }
@@ -395,7 +435,9 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceAbort(handle, &processInfo, paramSet);
 }
@@ -413,7 +455,9 @@ int32_t HksClientGenerateRandom(struct HksBlob *random, const struct HksParamSet
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName), (uint8_t *)processName },
         0,
-        0
+        0,
+        0,
+        HKS_AUTH_STORAGE_LEVEL_DE
     };
     return HksServiceGenerateRandom(&processInfo, random);
 }

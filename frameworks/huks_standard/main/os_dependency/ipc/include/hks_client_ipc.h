@@ -40,7 +40,8 @@ int32_t HksClientImportWrappedKey(const struct HksBlob *keyAlias, const struct H
 
 int32_t HksClientDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
 
-int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSetOut);
+int32_t HksClientGetKeyParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
+    struct HksParamSet *paramSetOut);
 
 int32_t HksClientKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
 
@@ -67,7 +68,8 @@ int32_t HksClientDeriveKey(const struct HksParamSet *paramSet, const struct HksB
 int32_t HksClientMac(const struct HksBlob *key, const struct HksParamSet *paramSet, const struct HksBlob *srcData,
     struct HksBlob *mac);
 
-int32_t HksClientGetKeyInfoList(struct HksKeyInfo *keyInfoList, uint32_t *listCount);
+int32_t HksClientGetKeyInfoList(const struct HksParamSet *paramSet, struct HksKeyInfo *keyInfoList,
+    uint32_t *listCount);
 
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     struct HksCertChain *certChain, bool needAnonCertChain);

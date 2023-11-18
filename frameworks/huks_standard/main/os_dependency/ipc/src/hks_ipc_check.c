@@ -18,7 +18,7 @@
 #include <stddef.h>
 
 #include "hks_common_check.h"
-#include "hks_ipc_serialization.h"
+#include "hks_client_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
@@ -76,28 +76,64 @@ int32_t HksCheckIpcImportWrappedKey(const struct HksBlob *keyAlias, const struct
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct HksBlob *key)
+int32_t HksCheckIpcDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
 {
-    HKS_IF_NOT_SUCC_RETURN(HksCheckBlob2(keyAlias, key), HKS_ERROR_INVALID_ARGUMENT)
-    if (keyAlias->size > MAX_PROCESS_SIZE) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(key->size)) > MAX_PROCESS_SIZE) {
+    int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
+
+    if (((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
+        HKS_LOG_E("ipc delete key check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckIpcGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSet)
+int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *key)
 {
-    HKS_IF_NOT_SUCC_RETURN(CheckBlob(keyAlias), HKS_ERROR_INVALID_ARGUMENT)
+    int32_t ret = HksCheckBlob2AndParamSet(keyAlias, key, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or key or paramSetIn failed")
+
     if (keyAlias->size > MAX_PROCESS_SIZE) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if (paramSet->paramSetSize == 0) {
+    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(key->size) +
+        ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("ipc export public key check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
-    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(paramSet->paramSetSize)) > MAX_PROCESS_SIZE) {
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcGetKeyParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
+    struct HksParamSet *paramSetOut)
+{
+    int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSetIn);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSetIn failed")
+
+    if (keyAlias->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (paramSetOut->paramSetSize == 0) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if ((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) + sizeof(paramSetOut->paramSetSize) +
+        ALIGN_SIZE(paramSetIn->paramSetSize)) > MAX_PROCESS_SIZE) {
+        HKS_LOG_E("ipc get key paramset check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckIpcKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
+
+    if (((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
+        HKS_LOG_E("ipc key exist check size failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
@@ -135,11 +171,21 @@ int32_t HksCheckIpcDeriveKey(const struct HksParamSet *paramSet, const struct Hk
     return HKS_SUCCESS;
 }
 
-int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, uint32_t listCount)
+int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, const struct HksParamSet *paramSet,
+    uint32_t listCount)
 {
+    HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
+
     if ((listCount == 0) || (listCount > (MAX_PROCESS_SIZE / (sizeof(uint32_t) + sizeof(uint32_t))))) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
+
+    if (listCount > (MAX_PROCESS_SIZE - ALIGN_SIZE(paramSet->paramSetSize) -
+        sizeof(uint32_t)) / (sizeof(uint32_t) + sizeof(uint32_t))) {
+        HKS_LOG_E("ipc get key info check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     for (uint32_t i = 0; i < listCount; ++i) {
         if ((CheckBlob(&keyInfoList[i].alias) != HKS_SUCCESS) ||
             (keyInfoList[i].paramSet == NULL) || (keyInfoList[i].paramSet->paramSetSize == 0)) {
