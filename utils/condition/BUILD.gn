@@ -43,7 +43,7 @@ ohos_static_library("libhuks_utils_condition_static") {
 
   sources = [ "hks_condition.c" ]
 
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static" ]
+  deps = [ "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static" ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",

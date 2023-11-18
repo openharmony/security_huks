@@ -1,0 +1,40 @@
+# Copyright (c) 2023 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+1.0 {
+  global:
+    OH_Huks_GetSdkVersion;
+    OH_Huks_GenerateKeyItem;
+    OH_Huks_ImportKeyItem;
+    OH_Huks_ImportWrappedKeyItem;
+    OH_Huks_ExportPublicKeyItem;
+    OH_Huks_DeleteKeyItem;
+    OH_Huks_GetKeyItemParamSet;
+    OH_Huks_IsKeyItemExist;
+    OH_Huks_AttestKeyItem;
+    OH_Huks_InitSession;
+    OH_Huks_UpdateSession;
+    OH_Huks_FinishSession;
+    OH_Huks_AbortSession;
+    OH_Huks_InitParamSet;
+    OH_Huks_AddParams;
+    OH_Huks_BuildParamSet;
+    OH_Huks_FreeParamSet;
+    OH_Huks_CopyParamSet;
+    OH_Huks_GetParam;
+    OH_Huks_FreshParamSet;
+    OH_Huks_IsParamSetTagValid;
+    OH_Huks_IsParamSetValid;
+    OH_Huks_CheckParamMatch;
+  local: *;
+};

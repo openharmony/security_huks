@@ -39,6 +39,8 @@ ohos_shared_library("huks") {
     "include/v9",
   ]
 
+  version_script = "libhuksnapi.map"
+
   sources = [
     "src/huks_napi.cpp",
     "src/v8/huks_napi_abort.cpp",
@@ -67,7 +69,8 @@ ohos_shared_library("huks") {
   ]
 
   deps = [
-    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
   ]
 
