@@ -46,6 +46,7 @@ ohos_unittest("huks_UT_test") {
     "src/asymmetric_alg_test/hks_rsa_sign_verify_part9_test.cpp",
     "src/asymmetric_alg_test/hks_rsa_sign_verify_test_common.cpp",
     "src/asymmetric_alg_test/hks_sm2_cipher_test.cpp",
+    "src/hks_add_ece_ce_path_test.cpp",
     "src/hks_agree_test_common.cpp",
     "src/hks_attest_key_nonids_test.cpp",
     "src/hks_attest_key_test_common.cpp",
@@ -173,4 +174,8 @@ ohos_unittest("huks_UT_test") {
     "hilog:libhilog",
   ]
   defines += [ "L2_STANDARD" ]
+
+  if (enable_interact_across_local_accounts) {
+    defines += [ "HKS_INTERACT_ABILITY" ]
+  }
 }

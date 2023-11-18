@@ -31,6 +31,7 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "securec.h"
+#define REQUIRED_KEY_NOT_AVAILABLE 126
 
 static int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen)
 {
@@ -122,11 +123,9 @@ static uint32_t FileSize(const char *fileName)
     return fileStat.st_size;
 }
 
-static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
+static int32_t GetRealPath(const char *fileName, char *filePath)
 {
-    (void)offset;
-    char filePath[PATH_MAX + 1] = {0};
-    if (memcpy_s(filePath, sizeof(filePath) - 1, fileName, strlen(fileName)) != EOK) {
+    if (memcpy_s(filePath, PATH_MAX, fileName, strlen(fileName)) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     (void)realpath(fileName, filePath);
@@ -134,10 +133,26 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
         HKS_LOG_E("invalid filePath!");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
+    return HKS_SUCCESS;
+}
+
+static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
+{
+    (void)offset;
+    char filePath[PATH_MAX + 1] = {0};
+    int32_t ret = GetRealPath(fileName, filePath);
+    HKS_IF_NOT_SUCC_LOGE(ret, "get real path faild")
 
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
-    HKS_IF_NULL_LOGE_RETURN(fp, HKS_ERROR_OPEN_FILE_FAIL, "open file fail, errno = 0x%" LOG_PUBLIC "x", errno)
+    if (fp ==  NULL) {
+        if (errno == REQUIRED_KEY_NOT_AVAILABLE) {
+            HKS_LOG_E("Check Permission failed!");
+            return HKS_ERROR_NO_PERMISSION;
+        }
+        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        return HKS_ERROR_OPEN_FILE_FAIL;
+    }
 
     if (chmod(filePath, S_IRUSR | S_IWUSR) < 0) {
         HKS_LOG_E("chmod file fail, errno = 0x%" LOG_PUBLIC "x", errno);

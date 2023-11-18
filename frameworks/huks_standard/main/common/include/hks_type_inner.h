@@ -86,6 +86,8 @@ struct HksProcessInfo {
     struct HksBlob processName;
     int32_t userIdInt;
     uint64_t accessTokenId;
+    int32_t specificUserIdInt;
+    enum HksAuthStorageLevel storageLevel;
 };
 
 struct HksParamOut {

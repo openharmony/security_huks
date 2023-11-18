@@ -282,9 +282,9 @@ if (ohos_kernel_type == "liteos_m") {
     ]
 
     sources += [
+      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_ipc_serialization.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_client_service_ipc.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_check.c",
-      "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_serialization.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_ipc_slice.c",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/src/hks_samgr_client_proxy.c",
     ]

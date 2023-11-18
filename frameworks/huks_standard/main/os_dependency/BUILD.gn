@@ -79,8 +79,8 @@ if (os_level == "standard") {
     public_configs = [ ":huks_config" ]
 
     sources = [
+      "./ipc/src/hks_client_ipc_serialization.c",
       "./ipc/src/hks_ipc_check.c",
-      "./ipc/src/hks_ipc_serialization.c",
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
     ]

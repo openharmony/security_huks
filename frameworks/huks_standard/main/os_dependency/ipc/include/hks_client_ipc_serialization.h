@@ -40,9 +40,15 @@ int32_t HksImportKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlia
 int32_t HksImportWrappedKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias,
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
 
-int32_t HksExportPublicKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *key);
+int32_t HksDeleteKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData);
 
-int32_t HksGetKeyParamSetPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *keyOut);
+int32_t HksExportPublicKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *key, struct HksBlob *destData);
+
+int32_t HksGetKeyParamSetPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *keyOut, struct HksBlob *destData);
+
+int32_t HksKeyExistPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData);
 
 int32_t HksOnceParamPack(struct HksBlob *destData, const struct HksBlob *key, const struct HksParamSet *paramSet,
     uint32_t *offset);
@@ -56,7 +62,8 @@ int32_t HksAgreeKeyPack(struct HksBlob *destData, const struct HksParamSet *para
 int32_t HksDeriveKeyPack(struct HksBlob *destData, const struct HksParamSet *paramSet, const struct HksBlob *kdfKey,
     const struct HksBlob *derivedKey);
 
-int32_t HksGetKeyInfoListPack(struct HksBlob *destData, uint32_t listCount, const struct HksKeyInfo *keyInfoList);
+int32_t HksGetKeyInfoListPack(const struct HksParamSet *paramSet, const struct HksKeyInfo *keyInfoList,
+    struct HksBlob *destData, uint32_t listCount);
 
 int32_t HksGetKeyInfoListUnpackFromService(const struct HksBlob *srcData, uint32_t *listCount,
     struct HksKeyInfo *keyInfoList);

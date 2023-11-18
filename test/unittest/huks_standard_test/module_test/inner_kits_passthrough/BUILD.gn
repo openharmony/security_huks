@@ -160,6 +160,7 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm/inc",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
   ]
   deps = []
 

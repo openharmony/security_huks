@@ -211,11 +211,11 @@ HKS_API_EXPORT int32_t HksGetKeyParamSet(const struct HksBlob *keyAlias,
 {
 #ifdef HKS_SUPPORT_API_GET_KEY_PARAM_SET
     HKS_LOG_I("enter get key paramset");
-    (void)paramSetIn;
+
     if ((keyAlias == NULL) || (paramSetOut == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientGetKeyParamSet(keyAlias, paramSetOut);
+    int32_t ret = HksClientGetKeyParamSet(keyAlias, paramSetIn, paramSetOut);
     HKS_LOG_I("leave get key paramset, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else
@@ -490,11 +490,11 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
 {
 #ifdef HKS_SUPPORT_API_GET_KEY_INFO_LIST
     HKS_LOG_I("enter get key info list");
-    (void)paramSet;
+
     if ((keyInfoList == NULL) || (listCount == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
-    int32_t ret = HksClientGetKeyInfoList(keyInfoList, listCount);
+    int32_t ret = HksClientGetKeyInfoList(paramSet, keyInfoList, listCount);
     HKS_LOG_I("leave get key info list, result = %" LOG_PUBLIC "d", ret);
     return ret;
 #else

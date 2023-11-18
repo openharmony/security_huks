@@ -87,9 +87,9 @@ int32_t HksStoreDestroy(const struct HksBlob *processName);
 int32_t HksGetFileInfo(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, uint32_t storageType,
     struct HksStoreFileInfo *fileInfo);
 
-int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName);
+void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId);
 
-int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo);
+void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo);
 
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
 int32_t HksIsOldKeyPathCleared(uint32_t *keyCount);

@@ -107,6 +107,7 @@ static void AddHuksTagPart1(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_USER_AUTH_TYPE", HKS_TAG_USER_AUTH_TYPE);
     AddInt32Property(env, tag, "HUKS_TAG_AUTH_TIMEOUT", HKS_TAG_AUTH_TIMEOUT);
     AddInt32Property(env, tag, "HUKS_TAG_AUTH_TOKEN", HKS_TAG_AUTH_TOKEN);
+    AddInt32Property(env, tag, "HUKS_TAG_AUTH_STORAGE_LEVEL", HKS_TAG_AUTH_STORAGE_LEVEL);
 }
 
 static void AddHuksTagPart2(napi_env env, napi_value tag)
@@ -634,6 +635,17 @@ static napi_value CreateHuksRsaPssSaltLenType(napi_env env)
 
     return rsaPssSaltLenType;
 }
+
+static napi_value CreateHuksAuthStorageLevel(napi_env env)
+{
+    napi_value value = nullptr;
+    NAPI_CALL(env, napi_create_object(env, &value));
+
+    AddInt32Property(env, value, "HUKS_AUTH_STORAGE_LEVEL_DE", HKS_AUTH_STORAGE_LEVEL_DE);
+    AddInt32Property(env, value, "HUKS_AUTH_STORAGE_LEVEL_CE", HKS_AUTH_STORAGE_LEVEL_CE);
+    AddInt32Property(env, value, "HUKS_AUTH_STORAGE_LEVEL_ECE", HKS_AUTH_STORAGE_LEVEL_ECE);
+    return value;
+}
 }  // namespace HuksNapi
 
 using namespace HuksNapi;
@@ -693,6 +705,7 @@ static napi_value HuksNapiRegister(napi_env env, napi_value exports)
         DECLARE_NAPI_PROPERTY("HuksChallengePosition", CreateHuksChallengePosition(env)),
         DECLARE_NAPI_PROPERTY("HuksSecureSignType", CreateHuksSecureSignType(env)),
         DECLARE_NAPI_PROPERTY("HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType(env)),
+        DECLARE_NAPI_PROPERTY("HuksAuthStorageLevel", CreateHuksAuthStorageLevel(env)),
     };
     napi_property_descriptor desc[HKS_ARRAY_SIZE(NAPI_FUNC_DESC) + HKS_ARRAY_SIZE(propDesc)];
 

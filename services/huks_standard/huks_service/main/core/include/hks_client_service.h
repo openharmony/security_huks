@@ -104,6 +104,9 @@ int32_t HksServiceExportChipsetPlatformPublicKey(const struct HksBlob *salt,
 int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet, int frontUserId);
 
+int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSet *paramSet,
+    struct HksProcessInfo *processInfo);
+
 #ifdef __cplusplus
 }
 #endif

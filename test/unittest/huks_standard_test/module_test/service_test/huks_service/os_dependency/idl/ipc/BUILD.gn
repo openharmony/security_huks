@@ -32,7 +32,7 @@ ohos_unittest("service_ipc_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
   ]
 
-  sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_ipc_serialization.c" ]
+  sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c" ]
 
   deps = [
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",

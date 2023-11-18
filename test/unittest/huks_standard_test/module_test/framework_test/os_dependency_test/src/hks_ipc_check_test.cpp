@@ -19,7 +19,7 @@
 
 #include "file_ex.h"
 #include "hks_ipc_check.h"
-#include "hks_ipc_serialization.h"
+#include "hks_client_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
@@ -177,8 +177,14 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest006, TestSize.Level0)
     struct HksBlob keyAliasBlob = { .size = MAX_PROCESS_SIZE + 1, .data = (uint8_t *)keyAlias };
     const char *keyData = "HksFrameworkIpcCheckTest006";
     struct HksBlob keyBlob = { .size = MAX_PROCESS_SIZE + 1, .data = (uint8_t *)keyData };
-    int32_t ret = HksCheckIpcExportPublicKey(&keyAliasBlob, &keyBlob);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksCheckIpcExportPublicKey(&keyAliasBlob, paramSet, &keyBlob);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
 }
 
 /**
@@ -193,8 +199,14 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest007, TestSize.Level0)
     struct HksBlob keyAliasBlob = { .size = MAX_PROCESS_SIZE - 1, .data = (uint8_t *)keyAlias };
     const char *keyData = "HksFrameworkIpcCheckTest007";
     struct HksBlob keyBlob = { .size = MAX_PROCESS_SIZE / 2 + 1, .data = (uint8_t *)keyData };
-    int32_t ret = HksCheckIpcExportPublicKey(&keyAliasBlob, &keyBlob);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksCheckIpcExportPublicKey(&keyAliasBlob, paramSet, &keyBlob);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
 }
 
 /**
@@ -212,9 +224,15 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest008, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksCheckIpcGetKeyParamSet(&keyAliasBlob, paramSet);
+    struct HksParamSet *paramSetIn = nullptr;
+    ret = HksInitParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksCheckIpcGetKeyParamSet(&keyAliasBlob, paramSetIn, paramSet);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
     HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&paramSetIn);
 }
 
 /**
@@ -233,9 +251,15 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest009, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     paramSet->paramSetSize = 0;
-    ret = HksCheckIpcGetKeyParamSet(&keyAliasBlob, paramSet);
+    struct HksParamSet *paramSetIn = nullptr;
+    ret = HksInitParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksCheckIpcGetKeyParamSet(&keyAliasBlob, paramSetIn, paramSet);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
     HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&paramSetIn);
 }
 
 /**
@@ -254,9 +278,15 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest010, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     paramSet->paramSetSize = MAX_PROCESS_SIZE /2 +1;
-    ret = HksCheckIpcGetKeyParamSet(&keyAliasBlob, paramSet);
+    struct HksParamSet *paramSetIn = nullptr;
+    ret = HksInitParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSetIn);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksCheckIpcGetKeyParamSet(&keyAliasBlob, paramSetIn, paramSet);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
     HksFreeParamSet(&paramSet);
+    HksFreeParamSet(&paramSetIn);
 }
 
 /**
@@ -295,13 +325,13 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest011, TestSize.Level0)
 HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest012, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest012");
-    
+
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    
+
     const char *keyData1 = "HksFrameworkIpcCheckTest012_1";
     struct HksBlob keyBlob1 = { .size = MAX_PROCESS_SIZE / 2+ 1, .data = (uint8_t *)keyData1 };
 
@@ -324,13 +354,13 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest012, TestSize.Level0)
 HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest013, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest013");
-    
+
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    
+
     const char *keyData1 = "HksFrameworkIpcCheckTest013_1";
     struct HksBlob keyBlob1 = { .size = MAX_PROCESS_SIZE + 1, .data = (uint8_t *)keyData1 };
 
@@ -350,13 +380,13 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest013, TestSize.Level0)
 HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest014, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest014");
-    
+
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    
+
     const char *keyData1 = "HksFrameworkIpcCheckTest014_1";
     struct HksBlob keyBlob1 = { .size = MAX_PROCESS_SIZE - 1, .data = (uint8_t *)keyData1 };
 
@@ -376,9 +406,14 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest014, TestSize.Level0)
 HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest015, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest015");
-    
-    int32_t ret = HksCheckIpcGetKeyInfoList(nullptr, 0);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksBuildParamSet(&paramSet);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = HksCheckIpcGetKeyInfoList(nullptr, paramSet, 0);
     ASSERT_TRUE(ret == HKS_ERROR_INVALID_ARGUMENT);
+    HksFreeParamSet(&paramSet);
 }
 
 /**
@@ -389,13 +424,13 @@ HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest015, TestSize.Level0)
 HWTEST_F(HksFrameworkIpcCheckTest, HksFrameworkIpcCheckTest016, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkIpcCheckTest016");
-    
+
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    
+
     const char *keyData1 = "HksFrameworkIpcCheckTest013_1";
     struct HksBlob keyBlob1 = { .size = MAX_PROCESS_SIZE + 1, .data = (uint8_t *)keyData1 };
 

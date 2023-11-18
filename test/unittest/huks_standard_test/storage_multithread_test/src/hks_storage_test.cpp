@@ -48,7 +48,9 @@ public:
         };
         HksProcessInfo hksProcessInfo = {
             .userId = userId,
-            .processName = processName
+            .processName = processName,
+            .specificUserIdInt = 0,
+            .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
         };
         HksStoreDeleteKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY);
     };
@@ -74,7 +76,9 @@ static void PrepareBlob()
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName
+        .processName = processName,
+        .specificUserIdInt = 0,
+        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
     };
 
     int32_t result = HksStoreKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY, &keyBlob);
@@ -101,7 +105,9 @@ HWTEST_F(HksStorageTest, HksStorageTest_00100, Function | SmallTest | Level1)
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName
+        .processName = processName,
+        .specificUserIdInt = 0,
+        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
     };
 
     int32_t result = HksStoreKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY, &keyBlob);
@@ -131,7 +137,9 @@ HWTEST_F(HksStorageTest, HksStorageTest_00200, Function | SmallTest | Level1)
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName
+        .processName = processName,
+        .specificUserIdInt = 0,
+        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
     };
 
     int32_t result = HksStoreGetKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY, &keyBlob);
@@ -156,7 +164,9 @@ HWTEST_F(HksStorageTest, HksStorageTest_00300, Function | SmallTest | Level1)
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName
+        .processName = processName,
+        .specificUserIdInt = 0,
+        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
     };
 
     int32_t result = HksStoreDeleteKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY);
