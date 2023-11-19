@@ -71,7 +71,7 @@ static const uint32_t g_keyParamsetSize = 1024;
 static void ConstructCertChain(struct HksParamSet *paramSet, HksCertChain *certChain,
     enum HksKeyPadding paddingParam)
 {
-    HKS_LOG_I("enter HksAttestKeyNonIdsTest001");
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest");
     int32_t ret = TestGenerateKey(&g_keyAlias, paddingParam);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
