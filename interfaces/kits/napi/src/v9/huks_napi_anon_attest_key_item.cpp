@@ -165,7 +165,8 @@ static napi_value AnonAttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext con
                     return;
                 }
             }
-            napiContext->result = HksAnonAttestKey(napiContext->keyAlias, napiContext->paramSet, napiContext->certChain);
+            napiContext->result = HksAnonAttestKey(napiContext->keyAlias, napiContext->paramSet,
+                napiContext->certChain);
         },
         [](napi_env env, napi_status status, void *data) {
             AttestKeyAsyncContext napiContext = static_cast<AttestKeyAsyncContext>(data);

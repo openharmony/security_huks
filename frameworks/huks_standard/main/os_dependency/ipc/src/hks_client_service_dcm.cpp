@@ -25,6 +25,7 @@
 #include <thread>
 #include <securec.h>
 
+#include "hks_cfi.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
@@ -161,17 +162,17 @@ DcmAttest::~DcmAttest()
     HKS_LOG_W("dlclose ret %" LOG_PUBLIC "d", ret);
 }
 
-int32_t DcmAttest::AttestWithAnon(HksBlob *cert)
+ENABLE_CFI(int32_t DcmAttest::AttestWithAnon(HksBlob *cert))
 {
     HKS_LOG_I("enter attest for dcm.");
     if (dcmAnonymousAttestKey == nullptr) {
         HKS_LOG_E("dcmAnonymousAttestKey is NULL!");
         return HKS_ERROR_IPC_DLOPEN_FAIL;
     }
-    std::thread timerThread([&]() { WaitTimeout(); });
+    std::thread timerThread([this]() { WaitTimeout(); });
     DcmBlob dcmCert = {.size = cert->size, .data = cert->data};
     HKS_LOG_I("begin to pack callback for dcmAnonymousAttestKey");
-    static auto callback = [&](int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
+    static auto callback = [this](int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
         DcmCallback(errCode, errInfo, infoSize, dcmCertChain);
     };
     HKS_LOG_I("begin to call dcmAnonymousAttestKey!");
