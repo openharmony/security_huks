@@ -132,6 +132,7 @@ static uint32_t g_validTags[] = {
 
     HKS_TAG_ACCESS_TOKEN_ID,
     HKS_TAG_BUNDLE_NAME,
+    HKS_TAG_IS_DEVICE_PASSWORD_SET,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)
@@ -413,7 +414,7 @@ HKS_API_EXPORT int32_t HksCheckIsTagAlreadyExist(const struct HksParam *params, 
 
     int32_t ret = HksCheckParamSet(targetParamSet, targetParamSet->paramSetSize);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    
+
     for (uint32_t i = 0; i < targetParamSet->paramsCnt; ++i) {
         for (uint32_t j = 0; j < paramsCnt; ++j) {
             if (params[j].tag == targetParamSet->params[i].tag) {
