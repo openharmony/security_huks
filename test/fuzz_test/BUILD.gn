@@ -22,6 +22,7 @@ group("fuzztest") {
       deps = [
         "//base/security/huks/test/fuzz_test/hksserviceonremoterequest_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksabort_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksanonattestkey_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksattestkey_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksbnexpmod_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksdeletekey_fuzzer:fuzztest",

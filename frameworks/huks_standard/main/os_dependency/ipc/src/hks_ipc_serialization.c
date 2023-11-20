@@ -367,7 +367,7 @@ static int32_t CheckAndCalculateSize(const uint32_t inSize, const uint32_t extra
     return HKS_SUCCESS;
 }
 
-static int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *outBlob)
+int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *outBlob)
 {
     const char begin[] = "-----BEGIN CERTIFICATE-----\n";
     const char end[] = "\n-----END CERTIFICATE-----";
