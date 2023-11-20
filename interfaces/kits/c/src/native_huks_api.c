@@ -90,7 +90,14 @@ struct OH_Huks_Result OH_Huks_IsKeyItemExist(const struct OH_Huks_Blob *keyAlias
 struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain)
 {
-    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain);
+    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain, false);
+    return ConvertApiResult(result);
+}
+
+struct OH_Huks_Result OH_Huks_AnonAttestKeyItem(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain)
+{
+    int32_t result = HuksAttestAdapter(keyAlias, paramSet, certChain, true);
     return ConvertApiResult(result);
 }
 

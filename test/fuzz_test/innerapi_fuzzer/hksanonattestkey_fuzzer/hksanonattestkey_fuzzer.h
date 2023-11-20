@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,16 +12,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef FUZZ_PROJECT_NAME
+#define FUZZ_PROJECT_NAME "hksanonattestkey_fuzzer"
 
-#ifndef HUKS_NAPI_ATTEST_KEY_ITEM_H
-#define HUKS_NAPI_ATTEST_KEY_ITEM_H
-
-#include "napi/native_api.h"
-#include "napi/native_node_api.h"
-#include "hks_type.h"
-
-namespace HuksNapiItem {
-napi_value HuksNapiAttestKeyItem(napi_env env, napi_callback_info info);
-}  // namespace HuksNapiItem
-
-#endif  // HUKS_NAPI_ATTEST_KEY_ITEM_H
+#endif

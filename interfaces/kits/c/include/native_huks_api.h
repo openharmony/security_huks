@@ -181,6 +181,21 @@ struct OH_Huks_Result OH_Huks_AttestKeyItem(const struct OH_Huks_Blob *keyAlias,
     const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain);
 
 /**
+ * @brief Obtain the key certificate chain.
+ *
+ * @param keyAlias Indicates the pointer to the alias of the target key.
+ * @param paramSet Indicates the pointer to the parameters required for obtaining the key certificate.
+ * @param certChain Indicates the pointer to the key certificate chain obtained.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful;
+ *    returns an error code otherwise.
+ * @since 11
+ * @version 1.0
+ * @note this is a networking duration interface caller need to get the certChain in asynchronous thread
+ */
+struct OH_Huks_Result OH_Huks_AnonAttestKeyItem(const struct OH_Huks_Blob *keyAlias,
+    const struct OH_Huks_ParamSet *paramSet, struct OH_Huks_CertChain *certChain);
+
+/**
  * @brief Initializes the key session interface and obtains a handle (mandatory) and challenge value (optional).
  *
  * @param keyAlias Indicates the pointer to the alias of the target key.

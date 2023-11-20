@@ -21,6 +21,7 @@
 #include "hks_type.h"
 #include "huks_napi_abort.h"
 #include "huks_napi_abort_session.h"
+#include "huks_napi_anon_attest_key_item.h"
 #include "huks_napi_attest_key_item.h"
 #include "huks_napi_delete_key.h"
 #include "huks_napi_delete_key_item.h"
@@ -659,6 +660,7 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
     DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
     DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
+    DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
     DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
     DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
