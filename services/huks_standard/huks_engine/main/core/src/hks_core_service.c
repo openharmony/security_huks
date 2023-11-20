@@ -286,6 +286,9 @@ int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParam
     ret = GetGenType(paramSet, &genType);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckIfNeedIsDevicePasswordSet(paramSet), HKS_ERROR_DEVICE_PASSWORD_UNSET,
+        "device password is required but not set yet!")
+
     struct HksBlob key = { 0, NULL };
     switch (genType) {
         case HKS_KEY_GENERATE_TYPE_DEFAULT: {
@@ -1721,6 +1724,13 @@ int32_t HksCoreUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
     ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
 
+    ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("check device password status failed");
+        return ret;
+    }
+
     ret = HksCoreSecureAccessVerifyParams(keyNode, paramSet);
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(sessionId);
@@ -1763,6 +1773,13 @@ int32_t HksCoreFinish(const struct HksBlob *handle, const struct HksParamSet *pa
 
     int32_t ret = GetParamsForUpdateAndFinish(handle, &sessionId, &keyNode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "GetParamsForCoreUpdate failed")
+
+    ret = CheckIfNeedIsDevicePasswordSet(keyNode->keyBlobParamSet);
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKeyNode(sessionId);
+        HKS_LOG_E("check device password status failed");
+        return ret;
+    }
 
     ret = HksBatchCheck(keyNode);
     if (ret != HKS_ERROR_PARAM_NOT_EXIST) {

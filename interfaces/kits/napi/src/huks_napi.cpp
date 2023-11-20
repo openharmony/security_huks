@@ -143,6 +143,7 @@ static void AddHuksTagPart2(napi_env env, napi_value tag)
     AddInt32Property(env, tag, "HUKS_TAG_SECURE_KEY_ALIAS", HKS_TAG_SECURE_KEY_ALIAS);
     AddInt32Property(env, tag, "HUKS_TAG_SECURE_KEY_UUID", HKS_TAG_SECURE_KEY_UUID);
     AddInt32Property(env, tag, "HUKS_TAG_KEY_DOMAIN", HKS_TAG_KEY_DOMAIN);
+    AddInt32Property(env, tag, "HUKS_TAG_IS_DEVICE_PASSWORD_SET", HKS_TAG_IS_DEVICE_PASSWORD_SET);
 
     /* Inner-use TAG: 10001 - 10999 */
     AddInt32Property(env, tag, "HUKS_TAG_PROCESS_NAME", HKS_TAG_PROCESS_NAME);
@@ -470,6 +471,7 @@ static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST", HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_INSUFFICIENT_MEMORY", HUKS_ERR_CODE_INSUFFICIENT_MEMORY);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_CALL_SERVICE_FAILED", HUKS_ERR_CODE_CALL_SERVICE_FAILED);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET", HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET);
 }
 
 static napi_value CreateHuksErrCode(napi_env env)

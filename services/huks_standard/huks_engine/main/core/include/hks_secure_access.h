@@ -40,6 +40,8 @@ int32_t HksProcessIdentityVerify(const struct HksParamSet *blobParamSet, const s
 
 int32_t HksCheckKeybBlobIsSupportUserAuth(const struct HksParamSet *blobParamSet, bool *isSupport);
 
+int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet);
+
 #ifdef __cplusplus
 }
 #endif

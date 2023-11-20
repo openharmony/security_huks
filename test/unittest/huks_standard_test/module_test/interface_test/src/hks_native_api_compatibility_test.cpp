@@ -435,6 +435,9 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest022, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_ERR_CODE_ITEM_NOT_EXIST == 12000011, true);
     ASSERT_EQ((uint32_t)OH_HUKS_ERR_CODE_INTERNAL_ERROR == 12000012, true);
     ASSERT_EQ((uint32_t)OH_HUKS_ERR_CODE_CREDENTIAL_NOT_EXIST == 12000013, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY == 12000014, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_ERR_CODE_CALL_SERVICE_FAILED == 12000015, true);
+    ASSERT_EQ((uint32_t)OH_HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET == 12000016, true);
 }
 
 /**
@@ -608,7 +611,7 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest035, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASSOCIATED_DATA == (uint32_t)HKS_TAG_ASSOCIATED_DATA, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_NONCE == (uint32_t)HKS_TAG_NONCE, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_IV == (uint32_t)HKS_TAG_IV, true);
-    
+
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_INFO == (uint32_t)HKS_TAG_INFO, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_SALT == (uint32_t)HKS_TAG_SALT, true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ITERATION == (uint32_t)HKS_TAG_ITERATION, true);
@@ -703,7 +706,7 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest036, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_TYPE == (OH_HUKS_TAG_TYPE_UINT | 309), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_CHALLENGE_POS == (OH_HUKS_TAG_TYPE_UINT | 310), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_AUTH_PURPOSE == (OH_HUKS_TAG_TYPE_UINT | 311), true);
-    
+
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_CHALLENGE == (OH_HUKS_TAG_TYPE_BYTES | 501), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_APPLICATION_ID == (OH_HUKS_TAG_TYPE_BYTES | 502), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ATTESTATION_ID_ALIAS == (OH_HUKS_TAG_TYPE_BYTES | 511), true);
@@ -719,6 +722,7 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest036, TestSi
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_FLAG == (OH_HUKS_TAG_TYPE_UINT | 1007), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_ASYNCHRONIZED == (OH_HUKS_TAG_TYPE_UINT | 1008), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_KEY_DOMAIN == (OH_HUKS_TAG_TYPE_UINT | 1011), true);
+    ASSERT_EQ((uint32_t)OH_HUKS_TAG_IS_DEVICE_PASSWORD_SET == (OH_HUKS_TAG_TYPE_BOOL | 1012), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_AE_TAG == (OH_HUKS_TAG_TYPE_BYTES | 10009), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_SYMMETRIC_KEY_DATA == (OH_HUKS_TAG_TYPE_BYTES | 20001), true);
     ASSERT_EQ((uint32_t)OH_HUKS_TAG_ASYMMETRIC_PUBLIC_KEY_DATA == (OH_HUKS_TAG_TYPE_BYTES | 20002), true);
@@ -735,7 +739,7 @@ HWTEST_F(HksNativeApiCompatibilityTest, HksNativeApiCompatibilityTest060, TestSi
 {
     ASSERT_EQ(sizeof(struct OH_Huks_Result) == sizeof(struct HksResult), true);
     struct OH_Huks_Result result;
-    
+
     ASSERT_EQ(sizeof(result.errorCode) == sizeof(int32_t), true);
     ASSERT_EQ(sizeof(result.errorMsg) == sizeof(const char *), true);
     ASSERT_EQ(sizeof(result.data) == sizeof(uint8_t *), true);
