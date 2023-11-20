@@ -47,7 +47,7 @@ struct DcmCertChainT {
 };
 using DcmCertChain = DcmCertChainT;
 
-using DcmCallback = void (*)(int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *certChain);
+using DcmCallback = void (*)(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *certChain);
 
 class DcmAttest {
     std::condition_variable attestFinished{};
@@ -62,7 +62,7 @@ class DcmAttest {
     void *certMgrSdkHandle {};
     AttestFunction dcmAnonymousAttestKey {};
 
-    void DcmCallback(int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain);
+    void DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain);
     void WaitTimeout();
   public:
     explicit DcmAttest(HksCertChain *certChain);
@@ -70,7 +70,7 @@ class DcmAttest {
     int32_t AttestWithAnon(HksBlob *cert);
 };
 
-void DcmAttest::DcmCallback(int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
+void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
 {
     callbackCalled = true;
     do {
@@ -172,11 +172,11 @@ ENABLE_CFI(int32_t DcmAttest::AttestWithAnon(HksBlob *cert))
     std::thread timerThread([this]() { WaitTimeout(); });
     DcmBlob dcmCert = {.size = cert->size, .data = cert->data};
     HKS_LOG_I("begin to pack callback for dcmAnonymousAttestKey");
-    static auto callback = [this](int32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
+    static auto callback = [this](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
         DcmCallback(errCode, errInfo, infoSize, dcmCertChain);
     };
     HKS_LOG_I("begin to call dcmAnonymousAttestKey!");
-    int32_t ret = dcmAnonymousAttestKey(&dcmCert, [](int32_t errCode, uint8_t *errInfo, uint32_t infoSize,
+    int32_t ret = dcmAnonymousAttestKey(&dcmCert, [](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize,
         DcmCertChain *dcmCertChain) {
         callback(errCode, errInfo, infoSize, dcmCertChain);
     });
