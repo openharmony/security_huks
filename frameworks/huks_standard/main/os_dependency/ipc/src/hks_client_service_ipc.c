@@ -526,8 +526,6 @@ static void FreeHksCertChain(struct HksCertChain *certChain)
         }
     }
     HksFree(certChain->certs);
-    HksFree(certChain);
-    certChain = NULL;
 }
 
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
@@ -580,7 +578,7 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 
     int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CertificateChainInitBlob fail")
-    struct HksCertChain *certChainNew = NULL;
+    struct HksCertChain certChainNew = { 0 };
     do {
         struct HksParam *isBase64Param = NULL;
         bool isBase64 = false;
@@ -594,25 +592,20 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
         ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
         // vendor need to implement the device cert manager.
-        certChainNew = (struct HksCertChain *)(HksMalloc(sizeof(struct HksCertChain)));;
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
         if (needAnonCertChain) {
-            HKS_IF_NULL_LOGE_BREAK(certChainNew, "malloc certChainNew is null!")
-            ret = InitCertChain(certChainNew);
+            ret = InitCertChain(&certChainNew);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitCertChainNew failed.")
-            ret = DcmGenerateCertChain(&outBlob, certChainNew);
+            ret = DcmGenerateCertChain(&outBlob, &certChainNew);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail result: %" LOG_PUBLIC "d", ret);
             if (!isBase64) {
                 HKS_LOG_I("No need to base64, return certChain to caller.");
                 break;
             }
-            for (uint32_t i = 0; i < certChainNew->certsCount; ++i) {
-                struct HksBlob tmpBlob = { certChainNew->certs[i].size, certChain->certs[i].data };
-                HKS_LOG_I("certChainNew size is %" LOG_PUBLIC "d, certChain size is %" LOG_PUBLIC "d",
-                    certChainNew->certs[i].size, certChain->certs[i].size);
-                ret = EncodeCertChain(&tmpBlob, &certChain->certs[i]);
-                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EncodeCertChain fail after calling dcm service,
-                    ret = %" LOG_PUBLIC "d", ret);
+            for (uint32_t i = 0; i < certChainNew.certsCount; ++i) {
+                ret = EncodeCertChain(&certChainNew.certs[i], &certChain->certs[i]);
+                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EncodeCertChain fail after calling dcm service, ret = %" LOG_PUBLIC
+                    "d", ret);
             }
         }
 #endif
@@ -620,7 +613,7 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
             ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
         }
     } while (0);
-    FreeHksCertChain(certChainNew);
+    FreeHksCertChain(&certChainNew);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
     return ret;
