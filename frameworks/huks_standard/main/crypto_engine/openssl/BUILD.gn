@@ -14,12 +14,14 @@
 import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
-config("huks_config") {
-  include_dirs = [ "include" ]
-  defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
-}
-
 if (os_level == "standard") {
+  config("huks_config") {
+    include_dirs = [ "include" ]
+    if (huks_use_rkc_in_standard) {
+      include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
+    }
+    defines = [ "OPENSSL_SUPPRESS_DEPRECATED" ]
+  }
   ohos_static_library("libhuks_openssl_standard_static") {
     subsystem_name = "security"
     part_name = "huks"
@@ -45,8 +47,35 @@ if (os_level == "standard") {
       "src/hks_openssl_sm3.c",
       "src/hks_openssl_sm4.c",
     ]
+    deps = []
+    defines = []
+    include_dirs = []
+    if (huks_use_rkc_in_standard) {
+      defines += [ "HKS_USE_RKC_IN_STANDARD" ]
 
-    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
+      sources += [
+        "../rkc/src/hks_rkc.c",
+        "../rkc/src/hks_rkc_rw.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_lock.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_file_lock.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
+      ]
+
+      deps += [
+        "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
+        "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
+        "//base/security/huks/utils/mutex:libhuks_utils_mutex_static",
+      ]
+
+      if (huks_enable_upgrade_rkc_v1tov2) {
+        defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
+        sources += [ "../rkc/src/hks_rkc_v1.c" ]
+      }
+    }
+
+    deps += [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
     complete_static_lib = true
 

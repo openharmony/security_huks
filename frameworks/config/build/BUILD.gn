@@ -27,14 +27,17 @@ config("l2_standard_common_config") {
     "-fPIC",
   ]
 
-  cflags +=
-      [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
+  cflags += [
+    "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"",
+  ]
 
   defines = [
-    "_HARDWARE_ROOT_KEY_",
     "_HUKS_LOG_ENABLE_",
     "L2_STANDARD",
   ]
+  if (!huks_use_rkc_in_standard) {
+    defines += [ "_HARDWARE_ROOT_KEY_" ]
+  }
   if (huks_enable_upgrade_key) {
     defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
 
@@ -48,6 +51,12 @@ config("l2_standard_common_config") {
   }
   if (enable_bundle_framework) {
     cflags += [ "-DHKS_SUPPORT_GET_BUNDLE_INFO" ]
+  }
+  if (huks_use_rkc_in_standard) {
+    cflags += [
+      "-DHKS_CONFIG_RKC_STORE_PATH=\"${huks_use_rkc_in_standard_path}\"",
+    ]
+    defines += [ "HKS_USE_RKC_IN_STANDARD" ]
   }
 }
 

@@ -38,6 +38,7 @@ config("soft_huks_config") {
     "../../../frameworks/huks_standard/main/core/include",
     "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/include",
     "../../../frameworks/huks_standard/main/crypto_engine/openssl/include",
+    "../../../frameworks/huks_standard/main/crypto_engine/rkc/include",
     "../../../frameworks/huks_standard/main/os_dependency/ipc/include",
     "../../../frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "../../../services/huks_standard/huks_engine/main/core/include",
@@ -139,8 +140,8 @@ if (ohos_kernel_type == "liteos_m") {
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_kdf.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_rsa.c",
         "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_mbedtls_x25519.c",
-        "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_rkc.c",
-        "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_rkc_rw.c",
+        "../../../frameworks/huks_standard/main/crypto_engine/rkc/src/hks_rkc.c",
+        "../../../frameworks/huks_standard/main/crypto_engine/rkc/src/hks_rkc_rw.c",
       ]
 
       if (huks_dependency_mbedtls_path != "") {
@@ -234,7 +235,7 @@ if (ohos_kernel_type == "liteos_m") {
       defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
 
       # compile code of old version
-      sources += [ "../../../frameworks/huks_standard/main/crypto_engine/mbedtls/src/hks_rkc_v1.c" ]
+      sources += [ "../../../frameworks/huks_standard/main/crypto_engine/rkc/src/hks_rkc_v1.c" ]
     }
 
     if (huks_enable_upgrade_derive_key_alg) {
@@ -347,8 +348,9 @@ if (ohos_kernel_type == "liteos_m") {
   }
 
   ohos_executable("hks_compatibility_bin") {
-    sources =
-        [ "//base/security/huks/utils/compatibility_bin/compatibility_bin.c" ]
+    sources = [
+      "//base/security/huks/utils/compatibility_bin/compatibility_small_bin.c",
+    ]
     deps = [ "//third_party/bounds_checking_function:libsec_shared" ]
   }
 }
