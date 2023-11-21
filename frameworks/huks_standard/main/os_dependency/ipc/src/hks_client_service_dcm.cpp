@@ -53,7 +53,7 @@ class DcmAttest {
     std::condition_variable attestFinished{};
     bool callbackCalled = false;
     bool timeout = false;
-    bool isCallingFailed = true;
+    bool isCallingFailed = false;
 
     std::condition_variable sleepAlarm{};
     HksCertChain *certChain{};
@@ -94,25 +94,23 @@ void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSiz
         for (uint32_t i = 0; i < dcmCertChain->certCount; ++i) {
             if (certChain->certs[i].data == nullptr) {
                 HKS_LOG_E("single cert chain from huks is null.");
+                isCallingFailed = true;
                 break;
             }
             if (dcmCertChain->cert[i].data == nullptr) {
                 HKS_LOG_E("single dcmCertChain buffer is null.");
-                break;
-            }
-            if (certChain->certs[i].size < dcmCertChain->cert[i].size) {
-                HKS_LOG_E("huks certChain cert size is smaller than dcmCertChain certChain size: %" LOG_PUBLIC
-                    "u, dcmCertSize: %" LOG_PUBLIC "u", certChain->certs[i].size, dcmCertChain->cert[i].size);
+                isCallingFailed = true;
                 break;
             }
             if (memcpy_s(certChain->certs[i].data, certChain->certs[i].size, dcmCertChain->cert[i].data,
                 dcmCertChain->cert[i].size) != EOK) {
-                HKS_LOG_E("extract number %" LOG_PUBLIC "u, has failed.", i);
+                HKS_LOG_E("huks certChain cert size is smaller than dcmCertChain certChain size: %" LOG_PUBLIC
+                    "u, dcmCertSize: %" LOG_PUBLIC "u", certChain->certs[i].size, dcmCertChain->cert[i].size);
+                isCallingFailed = true;
                 break;
             }
             certChain->certs[i].size = dcmCertChain->cert[i].size;
         }
-        isCallingFailed = false;
         HKS_LOG_I("Extract anon certChain final Success!");
     } while (0);
     attestFinished.notify_all();
