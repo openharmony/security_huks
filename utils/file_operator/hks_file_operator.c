@@ -293,6 +293,11 @@ int32_t HksGetStoragePath(enum HksStoragePathType pathType, char *path, uint32_t
     } else if (pathType == HKS_STORAGE_BACKUP_PATH) {
         pathLen = strlen(HKS_KEY_STORE_BAK_PATH);
         ret = memcpy_s(path, *len - 1, HKS_KEY_STORE_BAK_PATH, pathLen);
+#ifdef HKS_USE_RKC_IN_STANDARD
+    } else if (pathType == HKS_STORAGE_RKC_PATH) {
+        pathLen = strlen(HKS_KEY_RKC_PATH);
+        ret = memcpy_s(path, *len - 1, HKS_KEY_RKC_PATH, pathLen);
+#endif
     } else {
         return HKS_ERROR_INVALID_ARGUMENT;
     }

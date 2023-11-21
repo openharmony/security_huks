@@ -84,6 +84,14 @@ if (os_level == "standard") {
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
     ]
+
+    if (huks_use_rkc_in_standard) {
+      sources += [
+        "./sysinfo/src/hks_get_process_info_passthrough.c",
+        "./sysinfo/src/hks_get_udid.c",
+      ]
+    }
+
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
     complete_static_lib = true

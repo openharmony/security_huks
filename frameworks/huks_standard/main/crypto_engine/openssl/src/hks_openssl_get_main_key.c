@@ -23,13 +23,21 @@
 #include "hks_template.h"
 #include "hks_openssl_get_main_key.h"
 
+#ifndef _HARDWARE_ROOT_KEY_
+#include "hks_rkc.h"
+#endif
+
 int32_t HksOpensslGetMainKey(const struct HksBlob *message, struct HksBlob *mainKey)
 {
     (void)message;
 
 #ifndef _HARDWARE_ROOT_KEY_
+#ifdef HKS_USE_RKC_IN_STANDARD
+    return HksRkcGetMainKey(mainKey);
+#else
     (void)mainKey;
     return HKS_ERROR_NOT_SUPPORTED;
+#endif
 #else
     /*
      * Currently, root key is implemented using stubs.

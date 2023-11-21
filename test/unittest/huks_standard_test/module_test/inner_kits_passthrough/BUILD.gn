@@ -41,6 +41,9 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
     "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
   ]
+  if (huks_use_rkc_in_standard) {
+    include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
+  }
 }
 
 huks_sources = [

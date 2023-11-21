@@ -43,6 +43,10 @@
 #include <string>
 #include <system_error>
 
+#ifdef HKS_USE_RKC_IN_STANDARD
+#include <dirent.h>
+#endif
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -236,10 +240,15 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return NO_ERROR;
 }
 
-void MoveDirectoryTree()
+#define OLD_PATH "/data/service/el2/public/huks_service/maindata"
+#define NEW_PATH "/data/service/el1/public/huks_service/maindata"
+
+#ifdef HKS_USE_RKC_IN_STANDARD
+#define OLD_MINE_PATH "/data/data/huks_service/maindata"
+#endif
+
+void MoveDirectoryTree(const char *oldDir, const char *newDir)
 {
-    constexpr char oldDir[] = "/data/service/el2/public/huks_service/maindata/";
-    constexpr char newDir[] = "/data/service/el1/public/huks_service/maindata/";
     std::error_code errCode{};
     std::filesystem::create_directory(newDir, errCode);
     if (errCode.value() != 0) {
@@ -255,19 +264,41 @@ void MoveDirectoryTree()
         return;
     }
     HKS_LOG_I("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s ok!", oldDir, newDir);
+#ifdef HKS_USE_RKC_IN_STANDARD
+    auto dir = opendir(oldDir);
+    if (dir == NULL) {
+        HKS_LOG_E("open old dir failed!");
+        return;
+    }
+    struct dirent *ptr;
+    while ((ptr = readdir(dir)) != NULL) {
+        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0 || strcmp(ptr->d_name, "hks_client")) {
+            continue;
+        }
+        std::filesystem::remove_all(ptr->d_name, errCode);
+        if (errCode.value() != 0) {
+            HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
+                ptr->d_name, errCode.message().c_str());
+            return;
+        }
+    }
+#else
     std::filesystem::remove_all(oldDir, errCode);
     if (errCode.value() != 0) {
         HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", oldDir, errCode.message().c_str());
         return;
     }
     HKS_LOG_I("remove_all %" LOG_PUBLIC "s ok!", oldDir);
+#endif
 }
 
 void HksService::OnStart()
 {
-    MoveDirectoryTree();
     HKS_LOG_I("HksService OnStart");
-
+    MoveDirectoryTree(OLD_PATH, NEW_PATH);
+#ifdef HKS_USE_RKC_IN_STANDARD
+    MoveDirectoryTree(OLD_MINE_PATH, NEW_PATH);
+#endif
     if (runningState_ == STATE_RUNNING) {
         HKS_LOG_I("HksService has already Started");
         return;

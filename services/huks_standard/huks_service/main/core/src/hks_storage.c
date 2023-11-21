@@ -53,12 +53,20 @@ enum KeyOperation {
 static bool g_setRootMainPath = false;
 static bool g_setRootBakPath = false;
 
+#ifdef HKS_USE_RKC_IN_STANDARD
+static bool g_setRootRkcPath = false;
+#endif
+
 #ifdef HKS_ENABLE_LITE_HAP
 static bool g_setRootLiteHapPath = false;
 #endif
 
 static char g_keyStoreMainPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
 static char g_keyStoreBakPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
+
+#ifdef HKS_USE_RKC_IN_STANDARD
+static char g_rkcStoreMainPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
+#endif
 
 #ifdef HKS_ENABLE_LITE_HAP
 static char g_keyStoreLiteHapPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
@@ -278,6 +286,16 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
             g_setRootLiteHapPath = true;
         }
         *path = g_keyStoreLiteHapPath;
+#endif
+#ifdef HKS_USE_RKC_IN_STANDARD
+    } else if (type == HKS_STORAGE_RKC_PATH) {
+        if (!g_setRootRkcPath) {
+            uint32_t len = sizeof(g_rkcStoreMainPath);
+            int32_t ret = HksGetStoragePath(HKS_STORAGE_RKC_PATH, g_rkcStoreMainPath, &len);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get rkc storage path fail")
+            g_setRootRkcPath = true;
+        }
+        *path = g_rkcStoreMainPath;
 #endif
     } else {
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -799,7 +817,13 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
         pathType = HKS_STORAGE_LITE_HAP_PATH;
     }
 #endif
-
+    // The HKS_ENABLE_LITE_HAP is for lite device, while the HKS_USE_RKC_IN_STANDARD is for standard device.
+#ifdef HKS_USE_RKC_IN_STANDARD
+    if (strlen(storageName) == strlen(HKS_KEY_STORE_ROOT_KEY_PATH)
+        && HksMemCmp(storageName, HKS_KEY_STORE_ROOT_KEY_PATH, strlen(storageName)) == 0) {
+        pathType = HKS_STORAGE_RKC_PATH;
+    }
+#endif
     int32_t ret = GetStoreRootPath(pathType, &mainRootPath);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get root path failed")
 

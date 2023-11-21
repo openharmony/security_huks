@@ -78,7 +78,7 @@ static void ChangeDirAndFilesPerm(const char *path)
         }
     }
     if (ret != EOK) {
-        printf("chmod dir and file failed! errno = 0x% x \n", errno);
+        printf("chmod dir and file failed! errno = 0x%x \n", errno);
     }
     (void)closedir(dir);
 }
@@ -149,7 +149,7 @@ static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
 {
     if (!opendir(tarPath)) {
         if (mkdir(tarPath, DEFAULT_HUKS_PATH_PERMISSION) != 0) {
-            printf("mkdir failed! errno = 0x% x \n", errno);
+            printf("mkdir failed! errno = 0x%x \n", errno);
             return;
         }
     }
@@ -176,7 +176,7 @@ static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
     }
     (void)closedir(dir);
     if (ret != EOK) {
-        printf("chmod dir and file failed! errno = 0x% x \n", errno);
+        printf("chmod dir and file failed! errno = 0x%x \n", errno);
     }
     (void)rmdir(srcPath);
 }
