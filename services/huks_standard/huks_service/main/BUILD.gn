@@ -55,6 +55,7 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
+    branch_protector_ret = "pac_ret"
     sources = [ "//base/security/huks/utils/compatibility_bin/compatibility_standard_bin.c" ]
     deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
