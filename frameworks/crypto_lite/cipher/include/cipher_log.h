@@ -27,7 +27,7 @@
 #undef LOG_TAG
 #define LOG_TAG "CIPHER"
 #undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD002F00 /* Security subsystem's domain id */
+#define LOG_DOMAIN 0xD002F10 /* Security subsystem crypto framework domain id */
 
 
 enum CipherLogLevel {
