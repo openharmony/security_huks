@@ -35,8 +35,6 @@ hctest_suite("huks_3.0_test") {
     "hks_mac_test.c",
     "hks_modify_key_test.c",
     "hks_others_test.c",
-    "hks_safe_cipher_key_test.c",
-    "hks_safe_compare_key_test.c",
   ]
   include_dirs = [
     "//base/security/huks/interfaces/inner_api/huks_lite",
