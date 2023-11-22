@@ -30,7 +30,7 @@
     #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
     #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
     #ifdef HKS_USE_RKC_IN_STANDARD
-        #define HKS_KEY_RKC_PATH HKS_CONFIG_RKC_STORE_PATH
+        #define HKS_KEY_RKC_PATH HKS_CONFIG_RKC_STORE_PATH "/maindata"
     #endif
 #else
     #ifdef HKS_L1_SMALL
