@@ -267,7 +267,10 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
             g_setRootMainPath = true;
         }
         *path = g_keyStoreMainPath;
-    } else if (type == HKS_STORAGE_BACKUP_PATH) {
+        return HKS_SUCCESS;
+    }
+
+    if (type == HKS_STORAGE_BACKUP_PATH) {
         if (!g_setRootBakPath) {
             uint32_t len = sizeof(g_keyStoreBakPath);
             int32_t ret = HksGetStoragePath(HKS_STORAGE_BACKUP_PATH, g_keyStoreBakPath, &len);
@@ -276,8 +279,11 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
             g_setRootBakPath = true;
         }
         *path = g_keyStoreBakPath;
+        return HKS_SUCCESS;
+    }
+
 #ifdef HKS_ENABLE_LITE_HAP
-    } else if (type == HKS_STORAGE_LITE_HAP_PATH) {
+    if (type == HKS_STORAGE_LITE_HAP_PATH) {
         if (!g_setRootLiteHapPath) {
             uint32_t len = sizeof(g_keyStoreLiteHapPath);
             int32_t ret = HksGetStoragePath(HKS_STORAGE_LITE_HAP_PATH, g_keyStoreLiteHapPath, &len);
@@ -286,9 +292,12 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
             g_setRootLiteHapPath = true;
         }
         *path = g_keyStoreLiteHapPath;
+        return HKS_SUCCESS;
+    }
 #endif
+
 #ifdef HKS_USE_RKC_IN_STANDARD
-    } else if (type == HKS_STORAGE_RKC_PATH) {
+    if (type == HKS_STORAGE_RKC_PATH) {
         if (!g_setRootRkcPath) {
             uint32_t len = sizeof(g_rkcStoreMainPath);
             int32_t ret = HksGetStoragePath(HKS_STORAGE_RKC_PATH, g_rkcStoreMainPath, &len);
@@ -296,11 +305,11 @@ static int32_t GetStoreRootPath(enum HksStoragePathType type, char **path)
             g_setRootRkcPath = true;
         }
         *path = g_rkcStoreMainPath;
-#endif
-    } else {
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return HKS_SUCCESS;
     }
-    return HKS_SUCCESS;
+#endif
+
+    return HKS_ERROR_INVALID_ARGUMENT;
 }
 
 static int32_t MakeDirIfNotExist(const char *path)

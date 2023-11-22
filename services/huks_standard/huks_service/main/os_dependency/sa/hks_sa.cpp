@@ -245,6 +245,40 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
 #ifdef HKS_USE_RKC_IN_STANDARD
 #define OLD_MINE_PATH "/data/data/huks_service/maindata"
+#define DEFAULT_PATH_LEN 1024
+#endif
+
+#ifdef HKS_USE_RKC_IN_STANDARD
+void RemoveMineOldFile(const char *oldDir)
+{
+    auto dir = opendir(oldDir);
+    if (dir == NULL) {
+        HKS_LOG_E("open old dir failed!");
+        return;
+    }
+    struct dirent *ptr;
+    while ((ptr = readdir(dir)) != NULL) {
+        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0 || strcmp(ptr->d_name, "hks_client") == 0) {
+            continue;
+        }
+        char curPath[DEFAULT_PATH_LEN] = { 0 };
+
+        if (strcpy_s(curPath, DEFAULT_PATH_LEN, oldDir) != EOK) {
+            break;
+        }
+        if (strcat_s(curPath, DEFAULT_PATH_LEN, "/") != EOK) {
+            break;
+        }
+        if (strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name) != EOK) {
+            break;
+        }
+        std::filesystem::remove_all(curPath, errCode);
+        if (errCode.value() != 0) {
+            HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", curPath, errCode.message().c_str());
+            return;
+        }
+    }
+}
 #endif
 
 void MoveDirectoryTree(const char *oldDir, const char *newDir)
@@ -265,23 +299,7 @@ void MoveDirectoryTree(const char *oldDir, const char *newDir)
     }
     HKS_LOG_I("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s ok!", oldDir, newDir);
 #ifdef HKS_USE_RKC_IN_STANDARD
-    auto dir = opendir(oldDir);
-    if (dir == NULL) {
-        HKS_LOG_E("open old dir failed!");
-        return;
-    }
-    struct dirent *ptr;
-    while ((ptr = readdir(dir)) != NULL) {
-        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0 || strcmp(ptr->d_name, "hks_client")) {
-            continue;
-        }
-        std::filesystem::remove_all(ptr->d_name, errCode);
-        if (errCode.value() != 0) {
-            HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
-                ptr->d_name, errCode.message().c_str());
-            return;
-        }
-    }
+    RemoveMineOldFile(oldDir);
 #else
     std::filesystem::remove_all(oldDir, errCode);
     if (errCode.value() != 0) {

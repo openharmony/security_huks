@@ -58,9 +58,8 @@ if (os_level == "standard") {
     sources = [ "//base/security/huks/utils/compatibility_bin/compatibility_standard_bin.c" ]
     deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
-    cflags = [
-      "-DHKS_CONFIG_RKC_STORE_PATH=\"${huks_use_rkc_in_standard_path}\"",
-    ]
+    cflags =
+        [ "-DHKS_CONFIG_RKC_STORE_PATH=\"${huks_use_rkc_in_standard_path}\"" ]
     external_deps = [ "hilog:libhilog" ]
     install_enable = true
   }
