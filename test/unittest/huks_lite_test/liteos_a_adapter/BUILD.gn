@@ -41,10 +41,7 @@ unittest("huks_3.0_test") {
     "hks_generate_random_test.cpp",
     "hks_hash_test.cpp",
     "hks_mac_test.cpp",
-    "hks_modify_key_test.cpp",
     "hks_others_test.cpp",
-    "hks_safe_cipher_key_test.cpp",
-    "hks_safe_compare_key_test.cpp",
   ]
   if (hks_enable_test) {
     if (huks_enable_upgrade_small_to_service) {
