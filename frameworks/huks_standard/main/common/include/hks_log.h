@@ -34,7 +34,7 @@
 #undef LOG_TAG
 #define LOG_TAG "HUKS"
 #undef LOG_DOMAIN
-#define LOG_DOMAIN 0xD002F00 /* Security subsystem's domain id */
+#define LOG_DOMAIN 0xD002F06 /* Security subsystem huks domain id */
 
 #ifdef HKS_LOG_ENGINE_LOG_CORE
 #include "hilog/log.h"
