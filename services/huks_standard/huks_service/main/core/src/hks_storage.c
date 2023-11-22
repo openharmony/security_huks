@@ -65,6 +65,7 @@ static char g_keyStoreMainPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
 static char g_keyStoreBakPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
 
 #ifdef HKS_USE_RKC_IN_STANDARD
+// This is rkc root key position, which is independent from normal keys storage.
 static char g_rkcStoreMainPath[HKS_MAX_FILE_NAME_LEN + 1] = {0};
 #endif
 

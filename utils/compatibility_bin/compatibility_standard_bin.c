@@ -97,7 +97,7 @@ static void ChangeDirAndFilesPerm(const char *path)
 
 int main()
 {
-    const char *path = "/data/data/huks_service/maindata";
+    const char *path = "/data/data/huks_service";
     // change directories and files permission
     ChangeDirAndFilesPerm(path);
 }
