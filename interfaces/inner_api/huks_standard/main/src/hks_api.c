@@ -506,8 +506,8 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
 }
 
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
-static int32_t ConstructNewAttestParamSet(struct HksParamSet **newParamSet, const struct HksParamSet *paramSet,
-    enum HksAttestationMode mode)
+static int32_t ConstructNewAttestParamSet(const struct HksParamSet *paramSet, enum HksAttestationMode mode,
+    struct HksParamSet **newParamSet)
 {
     int32_t ret = HksInitParamSet(newParamSet);
     if (ret != HKS_SUCCESS) {
@@ -550,7 +550,7 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
         return HKS_ERROR_NULL_POINTER;
     }
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = ConstructNewAttestParamSet(&newParamSet, paramSet, HKS_ATTESTATION_MODE_DEFAULT);
+    int32_t ret = ConstructNewAttestParamSet(paramSet, HKS_ATTESTATION_MODE_DEFAULT, &newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("construct new paramSet for attest key fail");
         return ret;
@@ -577,7 +577,7 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
         return HKS_ERROR_NULL_POINTER;
     }
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = ConstructNewAttestParamSet(&newParamSet, paramSet, HKS_ATTESTATION_MODE_ANONYMOUS);
+    int32_t ret = ConstructNewAttestParamSet(paramSet, HKS_ATTESTATION_MODE_ANONYMOUS, &newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("construct new paramSet for anonn attest key fail");
         return ret;
