@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#ifndef HUKS_SAFE_CIPHER_KEY_TEST_H
-#define HUKS_SAFE_CIPHER_KEY_TEST_H
+#ifndef HUKS_MODIFY_KEY_TEST_H
+#define HUKS_MODIFY_KEY_TEST_H
 
-int HksSafeCipherKeyTest001(void);
+int HksModifyKeyTest001(void);
 
 #endif
