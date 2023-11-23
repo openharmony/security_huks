@@ -584,6 +584,7 @@ static napi_value CreateHuksAuthAccessType(napi_env env)
 
     AddInt32Property(env, value, "HUKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD", HKS_AUTH_ACCESS_INVALID_CLEAR_PASSWORD);
     AddInt32Property(env, value, "HUKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL", HKS_AUTH_ACCESS_INVALID_NEW_BIO_ENROLL);
+    AddInt32Property(env, value, "HUKS_AUTH_ACCESS_ALWAYS_VALID", HKS_AUTH_ACCESS_ALWAYS_VALID);
 
     return value;
 }
