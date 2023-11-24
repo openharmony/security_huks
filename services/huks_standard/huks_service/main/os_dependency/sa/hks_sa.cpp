@@ -43,6 +43,10 @@
 #include <string>
 #include <system_error>
 
+#ifdef HKS_USE_RKC_IN_STANDARD
+#include <dirent.h>
+#endif
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -236,10 +240,73 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     return NO_ERROR;
 }
 
-void MoveDirectoryTree()
+#define OLD_PATH "/data/service/el2/public/huks_service/maindata"
+#define NEW_PATH "/data/service/el1/public/huks_service/maindata"
+
+#ifdef HKS_USE_RKC_IN_STANDARD
+#define OLD_MINE_PATH "/data/data/huks_service/maindata"
+#define INTERMEDIATE_MINE_RKC_PATH "/data/service/el1/public/huks_service/maindata/hks_client"
+#define NEW_MINE_RKC_PATH "/data/data/huks_service/maindata/hks_client"
+
+#define DEFAULT_PATH_LEN 1024
+#endif
+
+#ifdef HKS_USE_RKC_IN_STANDARD
+void MoveMineOldFile(const char *oldDir, const char *newDir)
 {
-    constexpr char oldDir[] = "/data/service/el2/public/huks_service/maindata/";
-    constexpr char newDir[] = "/data/service/el1/public/huks_service/maindata/";
+    auto dir = opendir(oldDir);
+    if (dir == NULL) {
+        HKS_LOG_E("open old dir failed!");
+        return;
+    }
+    struct dirent *ptr;
+    while ((ptr = readdir(dir)) != NULL) {
+        // move dir expect hks_client, for it is the rkc root key and should be in same position
+        if (strcmp(ptr->d_name, ".") == 0 || strcmp(ptr->d_name, "..") == 0 || strcmp(ptr->d_name, "hks_client") == 0) {
+            continue;
+        }
+        char curPath[DEFAULT_PATH_LEN] = { 0 };
+        if (strcpy_s(curPath, DEFAULT_PATH_LEN, oldDir) != EOK) {
+            break;
+        }
+        if (strcat_s(curPath, DEFAULT_PATH_LEN, "/") != EOK) {
+            break;
+        }
+        if (strcat_s(curPath, DEFAULT_PATH_LEN, ptr->d_name) != EOK) {
+            break;
+        }
+        char newPath[DEFAULT_PATH_LEN] = { 0 };
+        if (strcpy_s(newPath, DEFAULT_PATH_LEN, newDir) != EOK) {
+            break;
+        }
+        if (strcat_s(newPath, DEFAULT_PATH_LEN, "/") != EOK) {
+            break;
+        }
+        if (strcat_s(newPath, DEFAULT_PATH_LEN, ptr->d_name) != EOK) {
+            break;
+        }
+        std::error_code errCode{};
+        std::filesystem::create_directory(newDir, errCode);
+        if (errCode.value() != 0) {
+            HKS_LOG_E("create_directory %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", newPath, errCode.message().c_str());
+        }
+        std::filesystem::copy(curPath, newPath,
+            std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
+        if (errCode.value() != 0) {
+            HKS_LOG_E("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
+                curPath, newPath, errCode.message().c_str());
+            return;
+        }
+        std::filesystem::remove_all(curPath, errCode);
+        if (errCode.value() != 0) {
+            HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", curPath, errCode.message().c_str());
+        }
+    }
+}
+#endif
+
+void MoveDirectoryTree(const char *oldDir, const char *newDir)
+{
     std::error_code errCode{};
     std::filesystem::create_directory(newDir, errCode);
     if (errCode.value() != 0) {
@@ -265,9 +332,14 @@ void MoveDirectoryTree()
 
 void HksService::OnStart()
 {
-    MoveDirectoryTree();
     HKS_LOG_I("HksService OnStart");
-
+    MoveDirectoryTree(OLD_PATH, NEW_PATH);
+#ifdef HKS_USE_RKC_IN_STANDARD
+    // the intermediate mine's rkc is located in INTERMEDIATE_MINE_RKC_PATH, normal keys is located in NEW_PATH
+    MoveDirectoryTree(INTERMEDIATE_MINE_RKC_PATH, NEW_MINE_RKC_PATH);
+    // the original mine's rkc and normal keys are both located in OLD_MINE_PATH, should move all expect for rkc files
+    MoveMineOldFile(OLD_MINE_PATH, NEW_PATH);
+#endif
     if (runningState_ == STATE_RUNNING) {
         HKS_LOG_I("HksService has already Started");
         return;

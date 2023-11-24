@@ -41,10 +41,6 @@
 #include "hks_template.h"
 #include "securec.h"
 
-#ifndef _HARDWARE_ROOT_KEY_
-#include "hks_rkc.h"
-#endif
-
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
 

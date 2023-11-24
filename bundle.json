@@ -21,7 +21,7 @@
       "syscap": [
           "SystemCapability.Security.Huks",
           "SystemCapability.Security.Cipher"
-          ], 
+          ],
       "features": [],
       "adapted_system_type": [
           "standard",
@@ -53,7 +53,7 @@
           "drivers_interface_user_auth",
           "drivers_interface_huks"
         ],
-        "third_party": [ 
+        "third_party": [
           "bounds_checking_function",
           "openssl",
           "mbedtls",

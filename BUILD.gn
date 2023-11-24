@@ -74,6 +74,9 @@ group("service_group") {
       "//base/security/huks/services/huks_standard:huks_service",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_profile:huks_sa_profile",
     ]
+    if (huks_use_rkc_in_standard) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main:hks_compatibility_bin" ]
+    }
     if (huks_security_level == "software") {
       deps += [ "//base/security/huks/services/huks_standard/huks_engine/main/core:huks_engine_core_standard" ]
     }
