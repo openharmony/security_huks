@@ -29,6 +29,9 @@
 #ifdef L2_STANDARD
     #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
     #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+    #ifdef HKS_USE_RKC_IN_STANDARD
+        #define HKS_KEY_RKC_PATH HKS_CONFIG_RKC_STORE_PATH "/maindata"
+    #endif
 #else
     #ifdef HKS_L1_SMALL
         #define HKS_KEY_STORE_PATH            "/storage/data/service/el1/public/huks_service/maindata"
@@ -63,6 +66,9 @@ struct HksFileDirentInfo {
 enum HksStoragePathType {
     HKS_STORAGE_MAIN_PATH,
     HKS_STORAGE_BACKUP_PATH,
+#ifdef HKS_USE_RKC_IN_STANDARD
+    HKS_STORAGE_RKC_PATH,
+#endif
 #ifdef HKS_ENABLE_LITE_HAP
     HKS_STORAGE_LITE_HAP_PATH,
 #endif

@@ -14,11 +14,13 @@
 import("//base/security/huks/build/config.gni")
 import("//build/ohos.gni")
 
-config("huks_config") {
-  include_dirs = [ "include" ]
-}
-
 if (os_level == "standard") {
+  config("huks_config") {
+    include_dirs = [
+      "include",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
+    ]
+  }
   ohos_static_library("libhuks_mbedtls_standard_static") {
     subsystem_name = "security"
     part_name = "huks"
@@ -74,14 +76,24 @@ if (os_level == "standard") {
     external_deps = [ "hilog:libhilog" ]
   }
 } else {
+  config("huks_config") {
+    include_dirs = [
+      "include",
+      "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
+    ]
+  }
+
   ohos_static_library("libhuks_mbedtls_small_static") {
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
+    include_dirs = [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
 
     defines = []
 
     sources = [
+      "../rkc/src/hks_rkc.c",
+      "../rkc/src/hks_rkc_rw.c",
       "src/hks_crypto_ed25519.c",
       "src/hks_mbedtls_ability.c",
       "src/hks_mbedtls_aes.c",
@@ -99,8 +111,6 @@ if (os_level == "standard") {
       "src/hks_mbedtls_kdf.c",
       "src/hks_mbedtls_rsa.c",
       "src/hks_mbedtls_x25519.c",
-      "src/hks_rkc.c",
-      "src/hks_rkc_rw.c",
     ]
 
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c" ]
@@ -110,7 +120,7 @@ if (os_level == "standard") {
       defines += [ "HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG" ]
 
       # compile code of old version
-      sources += [ "src/hks_rkc_v1.c" ]
+      sources += [ "../rkc/src/hks_rkc_v1.c" ]
     }
 
     deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static" ]
