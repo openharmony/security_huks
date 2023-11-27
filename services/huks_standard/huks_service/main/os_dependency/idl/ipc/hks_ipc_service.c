@@ -692,9 +692,14 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
         ret = IpcServiceInit(&processInfo, &keyAlias, inParamSet, outData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ipc service init fail, ret = %" LOG_PUBLIC "d", ret)
+
+        HksSendResponse(context, ret, outData);
     } while (0);
 
-    HksSendResponse(context, ret, outData);
+    if (ret != HKS_SUCCESS) {
+        HksSendResponse(context, ret, NULL);
+    }
+
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
     HKS_FREE_BLOB(processInfo.processName);
@@ -746,9 +751,14 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
             ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceFinish fail, ret = %" LOG_PUBLIC "d", ret)
         }
+
+        HksSendResponse(context, ret, outData);
     } while (0);
 
-    HksSendResponse(context, ret, outData);
+    if (ret != HKS_SUCCESS) {
+        HksSendResponse(context, ret, NULL);
+    }
+
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&inParamSet);
     HKS_FREE_BLOB(processInfo.processName);
@@ -838,9 +848,13 @@ void HksIpcServiceExportChipsetPlatformPublicKey(
         ret = HksServiceExportChipsetPlatformPublicKey(&salt, scene, publicKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
             "HksServiceExportChipsetPlatformPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
+        HksSendResponse(context, ret, publicKey);
     } while (0);
 
-    HksSendResponse(context, ret, publicKey);
+    if (ret != HKS_SUCCESS) {
+        HksSendResponse(context, ret, NULL);
+    }
+
     HksFreeParamSet(&paramSet);
 }
 #endif
