@@ -695,7 +695,7 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
         HksSendResponse(context, ret, outData);
     } while (0);
-    
+
     if (ret != HKS_SUCCESS) {
         HksSendResponse(context, ret, NULL);
     }
@@ -754,7 +754,7 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
 
         HksSendResponse(context, ret, outData);
     } while (0);
-    
+
     if (ret != HKS_SUCCESS) {
         HksSendResponse(context, ret, NULL);
     }
@@ -850,7 +850,7 @@ void HksIpcServiceExportChipsetPlatformPublicKey(
             "HksServiceExportChipsetPlatformPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
         HksSendResponse(context, ret, publicKey);
     } while (0);
-    
+
     if (ret != HKS_SUCCESS) {
         HksSendResponse(context, ret, NULL);
     }
