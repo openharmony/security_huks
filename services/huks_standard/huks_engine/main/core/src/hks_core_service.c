@@ -1502,7 +1502,6 @@ static int32_t HksCoreUpdateProcess(struct HuksKeyNode *keyNode, const struct Hk
     }
 
     if (ret != HKS_SUCCESS || i == size) {
-        HksDeleteKeyNode(keyNode->handle);
         HKS_LOG_E("CoreUpdate failed, pur : %" LOG_PUBLIC "u, ret : %" LOG_PUBLIC "d", pur, ret);
         ret = ((i == size) ? HKS_ERROR_INVALID_ARGUMENT : ret);
     }
