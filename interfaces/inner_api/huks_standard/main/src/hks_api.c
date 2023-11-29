@@ -509,17 +509,22 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
 static int32_t ConstructNewAttestParamSet(const struct HksParamSet *paramSet, enum HksAttestationMode mode,
     struct HksParamSet **newParamSet)
 {
-    int32_t ret = HksInitParamSet(newParamSet);
+    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check paramSet fail");
+        return ret;
+    }
+    ret = HksInitParamSet(newParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("init paramSet fail");
         return ret;
-    };
+    }
     do {
         ret = HksAddParams(*newParamSet, paramSet->params, paramSet->paramsCnt);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("copy params fail");
             break;
-        };
+        }
         struct HksParam attestMode = {
             .tag = HKS_TAG_ATTESTATION_MODE,
             .uint32Param = mode,
@@ -554,7 +559,7 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("construct new paramSet for attest key fail");
         return ret;
-    };
+    }
 
     ret = HksClientAttestKey(keyAlias, newParamSet, certChain, false);
     HKS_LOG_I("leave attest key, result = %" LOG_PUBLIC "d", ret);
@@ -581,7 +586,7 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("construct new paramSet for anonn attest key fail");
         return ret;
-    };
+    }
 
     ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
     HKS_LOG_I("leave anon attest key, result = %" LOG_PUBLIC "d", ret);
