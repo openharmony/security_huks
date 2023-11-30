@@ -22,17 +22,24 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "securec.h"
 
 void *HksMalloc(size_t size)
 {
     if (size == 0) {
         return NULL;
     }
+    void *ret = NULL;
 #if defined(HKS_USE_OHOS_MEM)
-    return OhosMalloc(MEM_TYPE_HICHAIN, size);
+    ret = OhosMalloc(MEM_TYPE_HICHAIN, size);
 #else
-    return malloc(size);
+    ret = malloc(size);
 #endif
+    if (ret == NULL) {
+        return NULL;
+    }
+    (void)memset_s(ret, size, 0, size);
+    return ret;
 }
 
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
