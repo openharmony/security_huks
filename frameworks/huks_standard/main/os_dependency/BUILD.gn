@@ -30,7 +30,10 @@ ohos_static_library("libhuks_os_dependency_standard_static") {
   part_name = "huks"
   public_configs = [ ":huks_config" ]
   configs = [ "//base/security/huks/frameworks/config/build:coverage_flag" ]
-  include_dirs = [ "log" ]
+  include_dirs = [
+    "log",
+    "//third_party/bounds_checking_function/include",
+  ]
   defines = [
     "L2_STANDARD",
     "_HARDWARE_ROOT_KEY_",
