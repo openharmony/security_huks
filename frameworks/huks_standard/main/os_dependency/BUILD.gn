@@ -27,7 +27,10 @@ if (os_level == "standard") {
     subsystem_name = "security"
     part_name = "huks"
     public_configs = [ ":huks_config" ]
-    include_dirs = [ "../common/include" ]
+    include_dirs = [
+      "//third_party/bounds_checking_function/include",
+      "../common/include",
+    ]
     sources = [ "./posix/hks_mem.c" ]
 
     complete_static_lib = true
