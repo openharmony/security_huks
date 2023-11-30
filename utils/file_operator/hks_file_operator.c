@@ -140,7 +140,7 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     }
 
     (void)realpath(fileName, filePath);
- 
+
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
     HKS_IF_NULL_LOGE_RETURN(fp, HKS_ERROR_OPEN_FILE_FAIL, "open file fail, errno = 0x%" LOG_PUBLIC "x", errno)
