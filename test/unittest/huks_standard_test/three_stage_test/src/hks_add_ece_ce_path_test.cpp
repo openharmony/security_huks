@@ -169,23 +169,21 @@ static int32_t SetIdsToken()
 {
     uint64_t tokenId;
     const char *acls[] = {
-        "ohos.permission.ACCESS_IDS", // system_core
         "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
     };
     const char *perms[] = {
         "ohos.permission.PLACE_CALL", // system_basic
-        "ohos.permission.ACCESS_IDS", // system_core
         "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
     };
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 3,
+        .permsNum = 2,
         .dcaps = nullptr,
         .perms = perms,
         .aplStr = "system_basic",
     };
     infoInstance.acls = acls;
-    infoInstance.aclsNum = 2;
+    infoInstance.aclsNum = 1;
     infoInstance.processName = "test_movece";
     tokenId = GetAccessTokenId(&infoInstance);
     int32_t ret = SetSelfTokenID(tokenId);
