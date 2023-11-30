@@ -975,6 +975,7 @@ static int32_t GetDeStorePathByStorageType(const struct HksProcessInfo *info, ui
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
+#ifdef L2_STANDARD
 static int32_t GetEceOrCeStorePathByStorageType(const struct HksProcessInfo *info, uint32_t storageType,
     struct HksStoreFileInfo *fileInfo, bool supportRootKey)
 {
@@ -993,6 +994,7 @@ static int32_t GetEceOrCeStorePathByStorageType(const struct HksProcessInfo *inf
     }
     return HKS_ERROR_NOT_SUPPORTED;
 }
+#endif
 
 static int32_t GetStorePathByStorageLevel(const struct HksProcessInfo *processInfo, const struct HksProcessInfo *info,
     uint32_t storageType, struct HksStoreFileInfo *fileInfo, bool supportRootKey)
