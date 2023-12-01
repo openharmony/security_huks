@@ -22,6 +22,7 @@ ohos_unittest("huks_UT_test") {
   module_out_path = module_output_path
 
   sources = [
+    # "src/hks_add_ece_ce_path_test.cpp",
     "../../../../frameworks/huks_standard/main/common/src/hks_errcode_adapter.c",
     "../../../../interfaces/kits/c/src/native_huks_api.c",
     "../../../../interfaces/kits/c/src/native_huks_param.c",
@@ -173,4 +174,8 @@ ohos_unittest("huks_UT_test") {
     "hilog:libhilog",
   ]
   defines += [ "L2_STANDARD" ]
+
+  if (enable_interact_across_local_accounts) {
+    defines += [ "HKS_INTERACT_ABILITY" ]
+  }
 }

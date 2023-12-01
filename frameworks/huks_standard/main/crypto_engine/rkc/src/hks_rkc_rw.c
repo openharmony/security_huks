@@ -64,7 +64,7 @@ int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
 
     int32_t ret;
     do {
-        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
@@ -525,7 +525,7 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
         ret = FillKsfBufRkc(ksfDataRkc, &ksfBuf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill rkc ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
@@ -555,7 +555,7 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
         ret = FillKsfBufMk(ksfDataMk, &ksfBuf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill mk ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
@@ -572,7 +572,7 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
 
 bool KsfExist(uint8_t ksfType)
 {
-    struct HksProcessInfo processInfo = {{0, NULL}, {0, NULL}, 0, 0};
+    struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
     int32_t ret = GetProcessInfo(&processInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 

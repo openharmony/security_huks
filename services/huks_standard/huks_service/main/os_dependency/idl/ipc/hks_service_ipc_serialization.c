@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_ipc_serialization.h"
+#include "hks_service_ipc_serialization.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -223,7 +223,24 @@ int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob 
     return GetBlobFromBuffer(wrappedKeyData, srcData, &offset);
 }
 
-int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksBlob *key)
+int32_t HksDeleteKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
+
+    if (offset == srcData->size) {
+        return HKS_SUCCESS;
+    }
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
+
+    return HKS_SUCCESS;
+}
+
+int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet,
+    struct HksBlob *key)
 {
     uint32_t offset = 0;
     int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
@@ -232,20 +249,48 @@ int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *
     ret = MallocBlobFromBuffer(srcData, key, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "malloc key data failed")
 
+    if (offset == srcData->size) {
+        return HKS_SUCCESS;
+    }
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
     return ret;
 }
 
 int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
-    struct HksParamSet **paramSet)
+    struct HksParamSet **paramSetIn, struct HksParamSet **paramSetOut)
 {
     uint32_t offset = 0;
     int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
 
-    ret = MallocParamSetFromBuffer(srcData, paramSet, &offset);
+    ret = MallocParamSetFromBuffer(srcData, paramSetOut, &offset);
     HKS_IF_NOT_SUCC_LOGE(ret, "malloc paramSet failed")
 
+    if (offset == srcData->size) {
+        return HKS_SUCCESS;
+    }
+
+    ret = GetParamSetFromBuffer(paramSetIn, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
     return ret;
+}
+
+int32_t HksKeyExistUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(keyAlias, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyAlias failed")
+
+    if (offset == srcData->size) {
+        return HKS_SUCCESS;
+    }
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
+
+    return HKS_SUCCESS;
 }
 
 static int32_t SignVerifyMacUnpack(const struct HksBlob *srcData, struct HksBlob *key, struct HksParamSet **paramSet,
@@ -369,7 +414,8 @@ static int32_t KeyInfoListInit(struct HksKeyInfo *keyInfoList, uint32_t listCoun
     return ret;
 }
 
-int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, uint32_t *listCount, struct HksKeyInfo **keyInfoList)
+int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSet **paramSet, uint32_t *listCount,
+    struct HksKeyInfo **keyInfoList)
 {
     uint32_t offset = 0;
     int32_t ret = GetUint32FromBuffer(listCount, srcData, &offset);
@@ -397,6 +443,12 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, uint32_t *listCou
         HKS_FREE_PTR(*keyInfoList);
     }
 
+    if (offset == srcData->size) {
+        return HKS_SUCCESS;
+    }
+
+    ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
     return ret;
 }
 
@@ -487,4 +539,3 @@ int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamO
     }
     return HKS_SUCCESS;
 }
-

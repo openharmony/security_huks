@@ -145,11 +145,10 @@ int32_t HksGetFrontUserId(int32_t *outId)
 }
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
-int32_t SensitivePermissionCheck(void)
+int32_t SensitivePermissionCheck(const char *permission)
 {
     OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
-    int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId,
-        "ohos.permission.ACCESS_IDS");
+    int result = OHOS::Security::AccessToken::AccessTokenKit::VerifyAccessToken(tokenId, permission);
     if (result == OHOS::Security::AccessToken::PERMISSION_GRANTED) {
         HKS_LOG_I("Check Permission success!");
         return HKS_SUCCESS;

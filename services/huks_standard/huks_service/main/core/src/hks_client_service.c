@@ -39,6 +39,10 @@
 #include "huks_access.h"
 #include "hks_util.h"
 
+#ifdef L2_STANDARD
+#include "hks_response.h"
+#endif
+
 #include "hks_upgrade_key_accesser.h"
 #include "hks_upgrade_helper.h"
 #ifdef HKS_ENABLE_SMALL_TO_SERVICE
@@ -56,6 +60,8 @@
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 #include "hks_bms_api_wrap.h"
 #endif
+
+#define HKS_ROOT_USER_UPPERBOUND 100
 
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
@@ -1606,9 +1612,9 @@ void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo)
     DeleteSessionByProcessInfo(processInfo);
 
     if (processInfo->processName.size == 0) {
-        HksServiceDeleteUserIDKeyAliasFile(processInfo->userId);
+        HksServiceDeleteUserIDKeyAliasFile(&processInfo->userId);
     } else {
-        HksServiceDeleteUIDKeyAliasFile(*processInfo);
+        HksServiceDeleteUIDKeyAliasFile(processInfo);
     }
 #else
     (void)processInfo;
@@ -1676,4 +1682,81 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
         *outParamSet = NULL;
     }
     return ret;
+}
+
+#ifdef L2_STANDARD
+static int32_t AppendIfBothTagExist(struct HksProcessInfo *processInfo, const struct HksParam *storageLevelParam,
+    const struct HksParam *specificUserIdParam)
+{
+    int32_t ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
+
+    if (storageLevelParam->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE) {
+        if (specificUserIdParam->int32Param < 0) {
+            HKS_LOG_E("invalid specificUserId when tag storage level is DE!");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        processInfo->specificUserIdInt = specificUserIdParam->int32Param;
+        processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+    } else {
+        if (specificUserIdParam->int32Param < HKS_ROOT_USER_UPPERBOUND) {
+            HKS_LOG_E("invalid specificUserId when tag storage level is CE or ECE!");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
+        processInfo->specificUserIdInt = specificUserIdParam->int32Param;
+        processInfo->storageLevel = (enum HksAuthStorageLevel)storageLevelParam->uint32Param;
+    }
+    return HKS_SUCCESS;
+}
+
+static int32_t AppendIfOnlyStorageLevelTagExist(struct HksProcessInfo *processInfo,
+    const struct HksParam *storageLevelParam)
+{
+    if (storageLevelParam->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE) {
+        processInfo->specificUserIdInt = processInfo->userIdInt;
+        processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+    } else {
+        if (processInfo->userIdInt < HKS_ROOT_USER_UPPERBOUND) {
+            HKS_LOG_E("invalid userId when tag storage level is CE or ECE!");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        } else {
+            processInfo->specificUserIdInt = processInfo->userIdInt;
+            processInfo->storageLevel = (enum HksAuthStorageLevel)storageLevelParam->uint32Param;
+        }
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSet *paramSet,
+    struct HksProcessInfo *processInfo)
+{
+    (void)paramSet;
+    (void)processInfo;
+#ifdef L2_STANDARD
+    if (paramSet == NULL) {
+        processInfo->specificUserIdInt = processInfo->userIdInt;
+        processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+        return HKS_SUCCESS;
+    }
+
+    struct HksParam *storageLevelParam = NULL;
+    struct HksParam *specificUserIdParam = NULL;
+
+    bool storageLevelExist = HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &storageLevelParam) == HKS_SUCCESS;
+    bool specificUserIdExist = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS;
+
+    if (!storageLevelExist && specificUserIdExist) {
+        HKS_LOG_E("must pass tag storage level when specific userId is passed!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    } else if (storageLevelExist && specificUserIdExist) {
+        return AppendIfBothTagExist(processInfo, storageLevelParam, specificUserIdParam);
+    } else if (storageLevelExist && !specificUserIdExist) {
+        return AppendIfOnlyStorageLevelTagExist(processInfo, storageLevelParam);
+    } else {
+        processInfo->specificUserIdInt = processInfo->userIdInt;
+        processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+    }
+#endif
+    return HKS_SUCCESS;
 }

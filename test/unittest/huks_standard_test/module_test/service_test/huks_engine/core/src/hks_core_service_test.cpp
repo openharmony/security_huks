@@ -285,7 +285,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest010, TestSize.Level0)
     HKS_LOG_I("enter HksCoreServiceTest010");
     const char *alias = "HksCoreServiceTest010";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0 };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
     int32_t ret = TestGenerateKey(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
@@ -421,7 +421,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     HKS_LOG_I("enter HksCoreServiceTest016");
     const char *alias = "HksCoreServiceTest016";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0 };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
     int32_t ret = TestGenerateKey(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksCoreServiceTest016 ret is " << ret;
     struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };

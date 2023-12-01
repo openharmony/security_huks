@@ -28,7 +28,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
 int32_t HksGetFrontUserId(int32_t *outId);
 
-int32_t SensitivePermissionCheck(void);
+int32_t SensitivePermissionCheck(const char *permission);
 
 #ifdef __cplusplus
 }

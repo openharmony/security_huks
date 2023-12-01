@@ -29,6 +29,9 @@
 #ifdef L2_STANDARD
     #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
     #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+    #define HKS_CE_ROOT_PATH              "/data/service/el2"
+    #define HKS_ECE_ROOT_PATH             "/data/service/el4"
+    #define HKS_STORE_SERVICE_PATH        "huks_service/maindata"
     #ifdef HKS_USE_RKC_IN_STANDARD
         #define HKS_KEY_RKC_PATH HKS_CONFIG_RKC_STORE_PATH "/maindata"
     #endif
