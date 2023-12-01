@@ -66,6 +66,7 @@ ohos_shared_library("huks") {
     "src/v9/huks_napi_import_wrapped_key_item.cpp",
     "src/v9/huks_napi_init_session.cpp",
     "src/v9/huks_napi_is_key_item_exist.cpp",
+    "src/v9/huks_napi_is_key_item_exist_v11.cpp",
     "src/v9/huks_napi_update_finish_session.cpp",
   ]
 
