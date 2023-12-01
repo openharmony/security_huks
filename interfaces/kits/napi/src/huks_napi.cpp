@@ -38,7 +38,7 @@
 #include "huks_napi_init.h"
 #include "huks_napi_init_session.h"
 #include "huks_napi_is_key_exist.h"
-#include "huks_napi_is_key_item_exist_v11.h.h"
+#include "huks_napi_is_key_item_exist_v11.h"
 #include "huks_napi_is_key_item_exist.h"
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
