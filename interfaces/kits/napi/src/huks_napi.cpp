@@ -38,6 +38,7 @@
 #include "huks_napi_init.h"
 #include "huks_napi_init_session.h"
 #include "huks_napi_is_key_exist.h"
+#include "huks_napi_is_key_item_exist_v11.h"
 #include "huks_napi_is_key_item_exist.h"
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
@@ -660,6 +661,7 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
     DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
     DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
+    DECLARE_NAPI_FUNCTION("isKeyItemExistV11", HuksNapiisKeyItemExistV11),
     DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
