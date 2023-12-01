@@ -742,7 +742,7 @@ static napi_value GenerateResult(napi_env env, const struct HksSuccessReturnResu
     napi_value result = nullptr;
 
     if (resultData.isOnlyReturnBoolResult) {
-        if (napi_get_boolean(env, true, &result) != napi_ok) {
+        if (napi_get_boolean(env, resultData.boolReturned, &result) != napi_ok) {
             return GetNull(env);
         }
         return result;
@@ -865,6 +865,7 @@ static void PromiseResultSuccess(napi_env env, napi_deferred deferred,
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
 {
     resultData.isOnlyReturnBoolResult = false;
+    resultData.boolReturned = false;
     resultData.handle = nullptr;
     resultData.challenge = nullptr;
     resultData.outData = nullptr;
@@ -883,6 +884,24 @@ void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred
         }
     } else {
         if (errorCode == HKS_SUCCESS) {
+            CallbackResultSuccess(env, callback, resultData);
+        } else {
+            CallbackResultFailure(env, callback, errorCode);
+        }
+    }
+}
+
+void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
+    const struct HksSuccessReturnResult resultData)
+{
+    if (callback == nullptr) {
+        if (errorCode == HKS_SUCCESS || errorCode == HKS_ERROR_NOT_EXIST) {
+            PromiseResultSuccess(env, deferred, resultData);
+        } else {
+            PromiseResultFailure(env, deferred, errorCode);
+        }
+    } else {
+        if (errorCode == HKS_SUCCESS || errorCode == HKS_ERROR_NOT_EXIST) {
             CallbackResultSuccess(env, callback, resultData);
         } else {
             CallbackResultFailure(env, callback, errorCode);
