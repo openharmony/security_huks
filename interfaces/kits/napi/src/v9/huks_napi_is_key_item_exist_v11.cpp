@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_is_key_item_exist.h"
+#include "huks_napi_is_key_item_exist_v11.h"
 
 #include "securec.h"
 
