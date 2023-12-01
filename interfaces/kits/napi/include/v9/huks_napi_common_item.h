@@ -29,6 +29,7 @@
 namespace HuksNapiItem {
 struct HksSuccessReturnResult {
     bool isOnlyReturnBoolResult;
+    bool boolReturned;
     struct HksBlob *handle;
     struct HksBlob *challenge;
     struct HksBlob *outData;
@@ -119,6 +120,9 @@ napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::str
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData);
 
 void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
+    const struct HksSuccessReturnResult resultData);
+
+void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
 }  // namespace HuksNapiItem
 #endif
