@@ -163,13 +163,7 @@ static int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, 
         if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
             return HKS_ERROR_INSUFFICIENT_DATA;
         }
-
-        if ((blob->data[i] < '0') || (blob->data[i] > '~')) {
-            targetName[count++] = '+' + (blob->data[i] >> HKS_ENCODE_OFFSET_LEN);
-            targetName[count++] = '0' + (blob->data[i] & HKS_ENCODE_KEY_SALT_VALUE);
-        } else {
-            targetName[count++] = blob->data[i];
-        }
+        targetName[count++] = blob->data[i];
 
 #ifdef HKS_SUPPORT_POSIX
         ConstructInvalidCharacter(targetName[count - 1], &targetName[count - 1]);
