@@ -576,10 +576,11 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
-    int32_t ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CertificateChainInitBlob fail")
+    int32_t ret = 0;
     struct HksCertChain certChainNew = { 0 };
     do {
+        ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainInitBlob fail")
         struct HksParam *isBase64Param = NULL;
         bool isBase64 = false;
         ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_BASE64, &isBase64Param);
@@ -616,6 +617,11 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
     FreeHksCertChain(&certChainNew);
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+    if (needAnonCertChain) {
+        ReportFaultEventForDcm("HksAnonAttestKey", paramSet, ret);
+    }
+#endif
     return ret;
 }
 

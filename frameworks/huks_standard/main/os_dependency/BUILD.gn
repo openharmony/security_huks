@@ -19,6 +19,9 @@ config("huks_config") {
     "include",
     "ipc/include",
     "sysinfo/include",
+    "../../../../service/huks_standard/huks_service/main/core/include",
+    "../../../../service/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper/include",
+    "../common/include",
   ]
 }
 
@@ -95,7 +98,10 @@ if (os_level == "standard") {
       ]
     }
 
-    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+    deps = [
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
+    ]
 
     complete_static_lib = true
 
