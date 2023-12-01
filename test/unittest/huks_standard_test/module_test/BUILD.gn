@@ -43,6 +43,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/upgrade_key_test/include",
     "//base/security/huks/test/unittest/huks_common_test/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
   ]
 
   sources = []

@@ -89,6 +89,8 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     processInfo->accessTokenId = 0;
     processInfo->userIdInt = 0;
+    processInfo->specificUserIdInt = 0;
+    processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
 
     return HKS_SUCCESS;
 }

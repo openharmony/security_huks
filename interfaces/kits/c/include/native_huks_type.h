@@ -597,6 +597,8 @@ enum OH_Huks_Tag {
 
     /** Purpose of key authentication */
     OH_HUKS_TAG_KEY_AUTH_PURPOSE = OH_HUKS_TAG_TYPE_UINT | 311,
+    /** Security level of access control for key file storage. */
+    OH_HUKS_TAG_AUTH_STORAGE_LEVEL = OH_HUKS_TAG_TYPE_UINT | 316,
 
     /** Tags for key attestation. The value range is 501 to 600. */
     /** Challenge value used in the attestation. */

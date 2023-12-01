@@ -28,9 +28,9 @@ if (os_level == "standard") {
     include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough" ]
 
     sources = [
-      "ipc/hks_ipc_serialization.c",
       "ipc/hks_ipc_service.c",
       "ipc/hks_response.cpp",
+      "ipc/hks_service_ipc_serialization.c",
     ]
 
     if (huks_security_level == "software" && has_huks_hdi_driver) {
@@ -93,9 +93,9 @@ if (os_level == "standard") {
     ]
 
     sources = [
-      "ipc/hks_ipc_serialization.c",
       "ipc/hks_ipc_service.c",
       "ipc/hks_response_samgr.c",
+      "ipc/hks_service_ipc_serialization.c",
       "passthrough/huks_access.c",
       "passthrough/huks_core_dynamic_hal.c",
     ]

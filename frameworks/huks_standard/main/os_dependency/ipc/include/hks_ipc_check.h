@@ -33,9 +33,15 @@ int32_t HksCheckIpcImportKey(const struct HksBlob *keyAlias, const struct HksPar
 int32_t HksCheckIpcImportWrappedKey(const struct HksBlob *keyAlias, const struct HksBlob *wrappingKeyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
 
-int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct HksBlob *key);
+int32_t HksCheckIpcDeleteKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
 
-int32_t HksCheckIpcGetKeyParamSet(const struct HksBlob *keyAlias, struct HksParamSet *paramSet);
+int32_t HksCheckIpcExportPublicKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *key);
+
+int32_t HksCheckIpcGetKeyParamSet(const struct HksBlob *keyAlias, const struct HksParamSet *paramSetIn,
+    struct HksParamSet *paramSetOut);
+
+int32_t HksCheckIpcKeyExist(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet);
 
 int32_t HksCheckIpcAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob *privateKey,
     const struct HksBlob *peerPublicKey, const struct HksBlob *agreedKey);
@@ -43,7 +49,8 @@ int32_t HksCheckIpcAgreeKey(const struct HksParamSet *paramSet, const struct Hks
 int32_t HksCheckIpcDeriveKey(const struct HksParamSet *paramSet, const struct HksBlob *mainKey,
     const struct HksBlob *derivedKey);
 
-int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, uint32_t listCount);
+int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, const struct HksParamSet *paramSet,
+    uint32_t listCount);
 
 int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksCertChain *certChain);

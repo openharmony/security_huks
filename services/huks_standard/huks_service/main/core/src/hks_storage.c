@@ -147,6 +147,32 @@ static bool CheckIsLiteHap(const struct HksBlob *processName)
 }
 #endif
 
+static int32_t ConstructPlainName(const struct HksBlob *blob, char *targetName, uint32_t nameLen)
+{
+    if (blob->size == sizeof(int)) {
+        int32_t offset = sprintf_s(targetName, nameLen, "%d", *(int *)blob->data);
+        if (offset <= 0) {
+            HKS_LOG_E("get plain name failed");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
+        return HKS_SUCCESS;
+    }
+
+    uint32_t count = 0;
+    for (uint32_t i = 0; i < blob->size; ++i) {
+        if (count >= (nameLen - 1)) { /* nameLen can be guaranteed to be greater than 1 */
+            return HKS_ERROR_INSUFFICIENT_DATA;
+        }
+        targetName[count++] = blob->data[i];
+
+#ifdef HKS_SUPPORT_POSIX
+        ConstructInvalidCharacter(targetName[count - 1], &targetName[count - 1]);
+#endif
+    }
+
+    return HKS_SUCCESS;
+}
+
 /* Encode invisible content to visible */
 static int32_t ConstructName(const struct HksBlob *blob, char *targetName, uint32_t nameLen)
 {
@@ -736,12 +762,15 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
     int32_t processLen, const struct HksProcessInfo *processInfo)
 {
     char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
+
     char *user = (char *)HksMalloc(HKS_PROCESS_INFO_LEN);
     HKS_IF_NULL_RETURN(user, HKS_ERROR_MALLOC_FAIL)
 
     (void)memset_s(user, HKS_PROCESS_INFO_LEN, 0, HKS_PROCESS_INFO_LEN);
 
-    int32_t ret = ConstructName(&processInfo->userId, user, HKS_PROCESS_INFO_LEN);
+    struct HksBlob specificUserId = { sizeof(processInfo->specificUserIdInt),
+        (uint8_t *)&processInfo->specificUserIdInt };
+    int32_t ret = ConstructName(&specificUserId, user, HKS_PROCESS_INFO_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
         HksFree(user);
@@ -789,10 +818,7 @@ static int32_t GetStoreBakPath(const struct HksProcessInfo *processInfo,
 
     (void)memset_s(workPath, HKS_MAX_DIRENT_FILE_LEN, 0, HKS_MAX_DIRENT_FILE_LEN);
 
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(&processInfo->userId), HKS_ERROR_NULL_POINTER, "processInfo->userId is NULL")
-
-    if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
-        (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, sizeof(USER_ID_ROOT)) == 0)) {
+    if (processInfo->specificUserIdInt == 0) {
         if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
             return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -840,10 +866,7 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
     ret = MakeDirIfNotExist(mainRootPath);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "makedir main path failed")
 
-    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(&processInfo->userId), HKS_ERROR_NULL_POINTER, "processInfo->userId is NULL")
-
-    if ((processInfo->userId.size == strlen(USER_ID_ROOT)) &&
-        (HksMemCmp(processInfo->userId.data, USER_ID_ROOT, strlen(USER_ID_ROOT)) == 0)) {
+    if (processInfo->specificUserIdInt == 0) {
         if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
             return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -869,12 +892,116 @@ static int32_t GetStorePath(const struct HksProcessInfo *processInfo,
     return ret;
 }
 
+#ifdef L2_STANDARD
+static int32_t GetStoreEceOrCePath(const struct HksProcessInfo *processInfo, const char *storageName,
+    struct HksStoreFileInfo *fileInfo)
+{
+    char mainRootPath[HKS_MAX_DIRENT_FILE_LEN] = "";
+    char userProcess[HKS_PROCESS_INFO_LEN] = "";
+    char workPath[HKS_MAX_DIRENT_FILE_LEN] = "";
+
+    if (memcpy_s(userProcess, HKS_PROCESS_INFO_LEN, processInfo->processName.data,
+        processInfo->processName.size) != EOK) {
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+
+    int32_t offset = 0;
+    if (processInfo->storageLevel == HKS_AUTH_STORAGE_LEVEL_ECE) {
+        offset = sprintf_s(mainRootPath, HKS_MAX_DIRENT_FILE_LEN, "%s/%d/%s",
+            HKS_ECE_ROOT_PATH, processInfo->specificUserIdInt, HKS_STORE_SERVICE_PATH);
+    } else if (processInfo->storageLevel == HKS_AUTH_STORAGE_LEVEL_CE) {
+        offset = sprintf_s(mainRootPath, HKS_MAX_DIRENT_FILE_LEN, "%s/%d/%s",
+            HKS_CE_ROOT_PATH, processInfo->specificUserIdInt, HKS_STORE_SERVICE_PATH);
+    } else {
+        HKS_LOG_E("invalid tag storage level!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (offset <= 0) {
+        HKS_LOG_E("get main root path failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    int32_t ret = MakeDirIfNotExist(mainRootPath);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_NO_PERMISSION)
+
+    ret = MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
+
+    ret = MakeDirIfNotExist(workPath);
+    HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_NO_PERMISSION)
+
+    ret = GetFullPath(mainRootPath, userProcess, storageName, fileInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get full path failed, ret = %" LOG_PUBLIC "d.", ret)
+
+#ifdef SUPPORT_STORAGE_BACKUP
+    ret = GetStoreBakPath(processInfo, storageName, fileInfo, userProcess, workPath);
+#endif
+
+    return ret;
+}
+#endif
+
 static void SaveProcessInfo(uint8_t *processData, int32_t dataLen,
-    const struct HksBlob userData, struct HksProcessInfo *processInfo)
+    const struct HksBlob userData, const struct HksProcessInfo *inProcessInfo, struct HksProcessInfo *processInfo)
 {
     processInfo->processName.data = processData;
     processInfo->processName.size = (uint32_t)dataLen;
     (void)memcpy_s(&processInfo->userId, sizeof(struct HksBlob), &userData, sizeof(struct HksBlob));
+    processInfo->specificUserIdInt = inProcessInfo->specificUserIdInt;
+    processInfo->storageLevel = inProcessInfo->storageLevel;
+}
+
+static int32_t GetDeStorePathByStorageType(const struct HksProcessInfo *info, uint32_t storageType,
+    struct HksStoreFileInfo *fileInfo, bool supportRootKey)
+{
+    if (storageType == HKS_STORAGE_TYPE_KEY) {
+        return GetStorePath(info, HKS_KEY_STORE_KEY_PATH, fileInfo);
+    }
+    if (storageType == HKS_STORAGE_TYPE_CERTCHAIN) {
+        return GetStorePath(info, HKS_KEY_STORE_CERTCHAIN_PATH, fileInfo);
+    }
+    if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
+        if (supportRootKey) {
+            return GetStorePath(info, HKS_KEY_STORE_ROOT_KEY_PATH, fileInfo);
+        } else {
+            return HKS_ERROR_NOT_SUPPORTED;
+        }
+    }
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+
+#ifdef L2_STANDARD
+static int32_t GetEceOrCeStorePathByStorageType(const struct HksProcessInfo *info, uint32_t storageType,
+    struct HksStoreFileInfo *fileInfo, bool supportRootKey)
+{
+    if (storageType == HKS_STORAGE_TYPE_KEY) {
+        return GetStoreEceOrCePath(info, HKS_KEY_STORE_KEY_PATH, fileInfo);
+    }
+    if (storageType == HKS_STORAGE_TYPE_CERTCHAIN) {
+        return GetStoreEceOrCePath(info, HKS_KEY_STORE_CERTCHAIN_PATH, fileInfo);
+    }
+    if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
+        if (supportRootKey) {
+            return GetStoreEceOrCePath(info, HKS_KEY_STORE_ROOT_KEY_PATH, fileInfo);
+        } else {
+            return HKS_ERROR_NOT_SUPPORTED;
+        }
+    }
+    return HKS_ERROR_NOT_SUPPORTED;
+}
+#endif
+
+static int32_t GetStorePathByStorageLevel(const struct HksProcessInfo *processInfo, const struct HksProcessInfo *info,
+    uint32_t storageType, struct HksStoreFileInfo *fileInfo, bool supportRootKey)
+{
+    int32_t ret = HKS_ERROR_NOT_SUPPORTED;
+    if (processInfo->storageLevel == HKS_AUTH_STORAGE_LEVEL_DE) {
+        ret = GetDeStorePathByStorageType(info, storageType, fileInfo, supportRootKey);
+#ifdef L2_STANDARD
+    } else {
+        ret = GetEceOrCeStorePathByStorageType(info, storageType, fileInfo, supportRootKey);
+#endif
+    }
+    return ret;
 }
 
 static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
@@ -897,7 +1024,11 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
         }
     } else {
 #endif
-        ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        if (processInfo->storageLevel == HKS_AUTH_STORAGE_LEVEL_DE) {
+            ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        } else {
+            ret = ConstructPlainName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        }
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
             HKS_FREE_PTR(name);
@@ -907,16 +1038,11 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
     }
 #endif
 
-    ret = HKS_ERROR_NOT_SUPPORTED;
     struct HksProcessInfo info;
-    SaveProcessInfo((uint8_t *)name, strlen(name), processInfo->userId, &info);
-    if (storageType == HKS_STORAGE_TYPE_KEY) {
-        ret = GetStorePath(&info, HKS_KEY_STORE_KEY_PATH, fileInfo);
-    } else if (storageType == HKS_STORAGE_TYPE_CERTCHAIN) {
-        ret = GetStorePath(&info, HKS_KEY_STORE_CERTCHAIN_PATH, fileInfo);
-    } else if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
-        ret = GetStorePath(&info, HKS_KEY_STORE_ROOT_KEY_PATH, fileInfo);
-    }
+    SaveProcessInfo((uint8_t *)name, strlen(name), processInfo->userId, processInfo, &info);
+
+    ret = GetStorePathByStorageLevel(processInfo, &info, storageType, fileInfo, true);
+
     HKS_FREE_PTR(name);
 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get store path failed, ret = %" LOG_PUBLIC "d.", ret)
@@ -1174,7 +1300,11 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
         ret = HKS_SUCCESS;
     } else {
 #endif
-        ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        if (processInfo->storageLevel == HKS_AUTH_STORAGE_LEVEL_DE) {
+            ret = ConstructName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        } else {
+            ret = ConstructPlainName(&processInfo->processName, name, HKS_MAX_FILE_NAME_LEN);
+        }
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
             HKS_FREE_PTR(name);
@@ -1185,14 +1315,9 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
 #endif
 
     struct HksProcessInfo info;
-    SaveProcessInfo((uint8_t *)name, strlen(name), processInfo->userId, &info);
-    if (storageType == HKS_STORAGE_TYPE_KEY) {
-        ret = GetStorePath(&info, HKS_KEY_STORE_KEY_PATH, fileInfo);
-    } else if (storageType == HKS_STORAGE_TYPE_CERTCHAIN) {
-        ret = GetStorePath(&info, HKS_KEY_STORE_CERTCHAIN_PATH, fileInfo);
-    } else {
-        ret = HKS_ERROR_NOT_SUPPORTED;
-    }
+    SaveProcessInfo((uint8_t *)name, strlen(name), processInfo->userId, processInfo, &info);
+
+    ret = GetStorePathByStorageLevel(processInfo, &info, storageType, fileInfo, false);
 
     HKS_FREE_PTR(name);
     return ret;
@@ -1438,17 +1563,17 @@ static int32_t ConstructUserIdPath(const char *userId, char *userIdPath, uint32_
     }
 
     if (strncat_s(userIdPath, pathLen, "/", strlen("/")) != EOK) {
-        HKS_LOG_E("catecnate character / failed.");
+        HKS_LOG_E("concatenate character / failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (strncat_s(userIdPath, pathLen, userId, strlen(userId)) != EOK) {
-        HKS_LOG_E("catecnate userId failed.");
+        HKS_LOG_E("concatenate userId failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (strncat_s(userIdPath, pathLen, "\0", strlen("\0")) != EOK) {
-        HKS_LOG_E("catecnate character 0 at the end failed.");
+        HKS_LOG_E("concatenate character 0 at the end failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
@@ -1463,60 +1588,128 @@ static int32_t ConstructUidPath(const char *userId, const char *uid, char *uidPa
     }
 
     if (strncat_s(uidPath, pathLen, "/", strlen("/")) != EOK) {
-        HKS_LOG_E("catecnate character / 1 failed.");
+        HKS_LOG_E("concatenate character / 1 failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (strncat_s(uidPath, pathLen, userId, strlen(userId)) != EOK) {
-        HKS_LOG_E("catecnate userId failed.");
+        HKS_LOG_E("concatenate userId failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (strncat_s(uidPath, pathLen, "/", strlen("/")) != EOK) {
-        HKS_LOG_E("catecnate character / 2 failed.");
+        HKS_LOG_E("concatenate character / 2 failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (strncat_s(uidPath, pathLen, uid, strlen(uid)) != EOK) {
-        HKS_LOG_E("catecnate uid failed.");
+        HKS_LOG_E("concatenate uid failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     if (strncat_s(uidPath, pathLen, "\0", strlen("\0")) != EOK) {
-        HKS_LOG_E("catecnate character 0 at the end failed.");
+        HKS_LOG_E("concatenate character 0 at the end failed.");
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
     return HKS_SUCCESS;
 }
 
-int32_t HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob processName)
+#ifdef L2_STANDARD
+static int32_t DeleteServiceEceOrCeUserIdPath(const struct HksBlob *userId, const char *rootPath)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
-
     (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-    int32_t ret = ConstructName(&processName, userData, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(userData);
-        HKS_LOG_E("construct user id name failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+    int32_t ret;
+    do {
+        ret = ConstructPlainName(userId, userData, HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
 
-    char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-    ret = ConstructUserIdPath(userData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(userData);
-        HKS_LOG_E("catecnate UserIdPath failed");
-        return ret;
-    }
-
-    HKS_LOG_I("delete path: %" LOG_PUBLIC "s", userProcess);
-
-    ret = HksDeleteDir(userProcess);
+        char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+        int32_t offset = sprintf_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
+            rootPath, userData, HKS_STORE_SERVICE_PATH);
+        if (offset <= 0) {
+            HKS_LOG_E("get user process path failed");
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            break;
+        }
+        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", userProcess);
+        ret = HksDeleteDir(userProcess);
+    } while (0);
     HKS_FREE_PTR(userData);
     return ret;
+}
+
+static int32_t DeleteServiceEceOrCeUidPath(const struct HksProcessInfo *processInfo, const char *rootPath)
+{
+    char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
+    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+
+    int32_t ret;
+    char *uidData = NULL;
+    do {
+        uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+        if (uidData == NULL) {
+            HKS_LOG_E("malloc uid data failed");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+
+        ret = ConstructPlainName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = ConstructPlainName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "construct uid name failed, ret = %" LOG_PUBLIC "d", ret)
+
+        char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+        int32_t offset = sprintf_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
+            rootPath, userData, HKS_STORE_SERVICE_PATH, uidData);
+        if (offset <= 0) {
+            HKS_LOG_E("get user process path failed");
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            break;
+        }
+        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", userProcess);
+        ret = HksDeleteDir(userProcess);
+    } while (0);
+    HKS_FREE_PTR(userData);
+    HKS_FREE_PTR(uidData);
+    return ret;
+}
+#endif
+
+void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId)
+{
+    char *userData = NULL;
+    int32_t ret;
+    do {
+        userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
+
+        (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+        ret = ConstructName(userId, userData, HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
+
+        char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+        ret = ConstructUserIdPath(userData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "concatenate UserIdPath failed, ret = %" LOG_PUBLIC "d", ret)
+
+        // ignore these results for ensure to clear data as most as possible
+        ret = HksDeleteDir(userProcess);
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete de path: %" LOG_PUBLIC "s failed, ret = %" LOG_PUBLIC "d", userProcess, ret)
+#ifdef L2_STANDARD
+        ret = DeleteServiceEceOrCeUserIdPath(userId, HKS_ECE_ROOT_PATH);
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete ece path failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = DeleteServiceEceOrCeUserIdPath(userId, HKS_CE_ROOT_PATH);
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete ce path failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
+    } while (0);
+    HKS_FREE_PTR(userData);
 }
 
 static bool HksIsUserIdRoot(const struct HksProcessInfo *processInfo)
@@ -1529,54 +1722,50 @@ static bool HksIsUserIdRoot(const struct HksProcessInfo *processInfo)
     return false;
 }
 
-int32_t HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo processInfo)
+void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
 {
-    char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
-
-    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
-
+    char *userData = NULL;
+    char *uidData = NULL;
     int32_t ret;
-    if (!HksIsUserIdRoot(&processInfo)) {
-        ret = ConstructName(&processInfo.userId, userData, HKS_MAX_FILE_NAME_LEN);
-        if (ret != HKS_SUCCESS) {
-            HKS_FREE_PTR(userData);
-            HKS_LOG_E("construct user id name failed, ret = %" LOG_PUBLIC "d", ret);
-            return ret;
+    do {
+        userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
+        (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+
+        if (!HksIsUserIdRoot(processInfo)) {
+            ret = ConstructName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
+            HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
         }
-    }
 
-    char *uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
-    if (uidData == NULL) {
-        HKS_FREE_PTR(userData);
-        HKS_LOG_E("malloc user data failed");
-        return HKS_ERROR_MALLOC_FAIL;
-    }
-    (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+        char *uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+        if (uidData == NULL) {
+            HKS_LOG_E("malloc user data failed");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-    ret = ConstructName(&processInfo.processName, uidData, HKS_MAX_FILE_NAME_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(userData);
-        HKS_FREE_PTR(uidData);
-        HKS_LOG_E("construct uid name failed, ret = %" LOG_PUBLIC "d", ret);
-        return ret;
-    }
+        ret = ConstructName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "construct uid name failed, ret = %" LOG_PUBLIC "d", ret)
 
-    char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-    ret = ConstructUidPath(userData, uidData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
-    if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(userData);
-        HKS_FREE_PTR(uidData);
-        HKS_LOG_E("catecnate uidPath failed");
-        return ret;
-    }
+        char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
+        ret = ConstructUidPath(userData, uidData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
+        HKS_IF_NOT_SUCC_BREAK(ret, "concatenate uidPath failed")
+        HKS_LOG_I("delete path : %" LOG_PUBLIC "s", userProcess);
 
-    HKS_LOG_I("delete path : %" LOG_PUBLIC "s", userProcess);
+        // ignore these results for ensure to clear data as most as possible
+        ret = HksDeleteDir(userProcess);
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete de path: %" LOG_PUBLIC "s failed, ret = %" LOG_PUBLIC "d", userProcess, ret)
+#ifdef L2_STANDARD
+        ret = DeleteServiceEceOrCeUidPath(processInfo, HKS_ECE_ROOT_PATH);
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete ece path failed, ret = %" LOG_PUBLIC "d", ret)
 
-    ret = HksDeleteDir(userProcess);
+        ret = DeleteServiceEceOrCeUidPath(processInfo, HKS_CE_ROOT_PATH);
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete ce path failed, ret = %" LOG_PUBLIC "d", ret)
+#endif
+    } while (0);
     HKS_FREE_PTR(userData);
     HKS_FREE_PTR(uidData);
-    return ret;
 }
 #endif
 #endif /* _CUT_AUTHENTICATE_ */

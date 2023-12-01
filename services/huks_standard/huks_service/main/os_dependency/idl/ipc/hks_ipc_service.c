@@ -29,7 +29,7 @@
 
 #include "hks_client_service.h"
 #include "hks_cmd_id.h"
-#include "hks_ipc_serialization.h"
+#include "hks_service_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_response.h"
@@ -58,7 +58,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob keyOut = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
     bool isNoneResponse = false;
 
@@ -79,6 +79,10 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         uint32_t userAuthType, authAccessType;
         ret = HksCheckAndGetUserAuthInfo(inParamSet, &userAuthType, &authAccessType);
@@ -112,7 +116,7 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob key = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -121,6 +125,10 @@ void HksIpcServiceImportKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret =  HksServiceImportKey(&processInfo, &keyAlias, paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceImportKey fail, ret = %" LOG_PUBLIC "d", ret)
@@ -138,7 +146,7 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
     struct HksBlob wrappingKeyAlias = { 0, NULL };
     struct HksParamSet *paramSet = NULL;
     struct HksBlob wrappedKeyData = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -147,6 +155,10 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret =  HksServiceImportWrappedKey(&processInfo, &keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
         HKS_IF_NOT_SUCC_LOGE(ret, "do import wrapped key fail, ret = %" LOG_PUBLIC "d", ret)
@@ -161,16 +173,21 @@ void HksIpcServiceImportWrappedKey(const struct HksBlob *srcData, const uint8_t 
 void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
     struct HksBlob key = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
-        ret  = HksExportPublicKeyUnpack(srcData, &keyAlias, &key);
+        ret  = HksExportPublicKeyUnpack(srcData, &keyAlias, &paramSet, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksExportKeyUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceExportPublicKey(&processInfo, &keyAlias, &key);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceExportPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
@@ -189,13 +206,22 @@ void HksIpcServiceExportPublicKey(const struct HksBlob *srcData, const uint8_t *
 
 void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *context)
 {
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
     do {
+        ret  = HksDeleteKeyUnpack(srcData, &keyAlias, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceDeleteKey(&processInfo, srcData);
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceDeleteKey(&processInfo, &keyAlias);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksIpcServiceDeleteKey fail")
     } while (0);
 
@@ -208,12 +234,13 @@ void HksIpcServiceDeleteKey(const struct HksBlob *srcData, const uint8_t *contex
 void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksBlob keyAlias = { 0, NULL };
-    struct HksParamSet *paramSet = NULL;
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksParamSet *paramSetIn = NULL;
+    struct HksParamSet *paramSetOut = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
-        ret = HksGetKeyParamSetUnpack(srcData, &keyAlias, &paramSet);
+        ret = HksGetKeyParamSetUnpack(srcData, &keyAlias, &paramSetIn, &paramSetOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksGenerateKeyUnpack Ipc fail");
             return HksSendResponse(context, ret, NULL);
@@ -222,32 +249,45 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSet);
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSetIn, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, paramSetOut);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceGetKeyParamSet fail, ret = %" LOG_PUBLIC "d", ret)
 
-        struct HksBlob paramSetOut = { paramSet->paramSetSize, (uint8_t *)paramSet };
-        HksSendResponse(context, ret, &paramSetOut);
+        struct HksBlob paramSet = { paramSetOut->paramSetSize, (uint8_t *)paramSetOut };
+        HksSendResponse(context, ret, &paramSet);
     } while (0);
 
     if (ret != HKS_SUCCESS) {
         HksSendResponse(context, ret, NULL);
     }
 
-    HKS_FREE_PTR(paramSet);
+    HKS_FREE_PTR(paramSetOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
 
 void HksIpcServiceKeyExist(const struct HksBlob *srcData, const uint8_t *context)
 {
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksBlob keyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
+        ret  = HksKeyExistUnpack(srcData, &keyAlias, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDeleteKeyUnpack Ipc fail")
+
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceKeyExist(&processInfo, srcData);
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceKeyExist(&processInfo, &keyAlias);
         HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceKeyExist fail, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
@@ -307,7 +347,7 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob unsignedData = { 0, NULL };
     struct HksBlob signature = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -316,6 +356,10 @@ void HksIpcServiceSign(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceSign(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceSign fail")
@@ -338,7 +382,7 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob unsignedData = { 0, NULL };
     struct HksBlob signature = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -347,6 +391,10 @@ void HksIpcServiceVerify(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceVerify(&processInfo, &keyAlias, inParamSet, &unsignedData, &signature);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceVerify fail")
@@ -364,7 +412,7 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob plainText = { 0, NULL };
     struct HksBlob cipherText = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -373,6 +421,10 @@ void HksIpcServiceEncrypt(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceEncrypt(&processInfo, &keyAlias, inParamSet, &plainText, &cipherText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceEncrypt fail")
@@ -395,7 +447,7 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob plainText = { 0, NULL };
     struct HksBlob cipherText = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -404,6 +456,10 @@ void HksIpcServiceDecrypt(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceDecrypt(&processInfo, &keyAlias, inParamSet, &cipherText, &plainText);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDecrypt fail")
@@ -426,7 +482,7 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
     struct HksBlob peerPublicKey = { 0, NULL };
     struct HksBlob agreedKey = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -435,6 +491,10 @@ void HksIpcServiceAgreeKey(const struct HksBlob *srcData, const uint8_t *context
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceAgreeKey(&processInfo, inParamSet, &privateKey, &peerPublicKey, &agreedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAgreeKey fail, ret = %" LOG_PUBLIC "d", ret)
@@ -456,7 +516,7 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob masterKey = { 0, NULL };
     struct HksBlob derivedKey = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -465,6 +525,10 @@ void HksIpcServiceDeriveKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceDeriveKey(&processInfo, inParamSet, &masterKey, &derivedKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceDeriveKey fail, ret = %" LOG_PUBLIC "d", ret)
@@ -487,7 +551,7 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob inputData = { 0, NULL };
     struct HksBlob mac = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -496,6 +560,10 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context)
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceMac(&processInfo, &key, inParamSet, &inputData, &mac);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceMac fail, ret = %" LOG_PUBLIC "d", ret)
@@ -534,17 +602,22 @@ static void FreeKeyInfo(uint32_t listCount, struct HksKeyInfo **keyInfoList)
 void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *context)
 {
     uint32_t inputCount = 0;
+    struct HksParamSet *paramSet = NULL;
     struct HksKeyInfo *keyInfoList = NULL;
     struct HksBlob keyInfoListBlob = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
-        ret = HksGetKeyInfoListUnpack(srcData, &inputCount, &keyInfoList);
+        ret = HksGetKeyInfoListUnpack(srcData, &paramSet, &inputCount, &keyInfoList);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetKeyInfoListUnpack Ipc fail")
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(paramSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         uint32_t listCount = inputCount;
         ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &listCount);
@@ -584,7 +657,7 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
     for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             if (paramSet->params[j].tag == g_idList[i]) {
-                return SensitivePermissionCheck();
+                return SensitivePermissionCheck("ohos.permission.ACCESS_IDS");
             }
         }
     }
@@ -597,7 +670,7 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
     struct HksBlob certChainBlob = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
     int32_t ret;
 
     do {
@@ -606,6 +679,10 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksAttestAccessControl(inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAttestAccessControl fail, ret = %" LOG_PUBLIC "d", ret)
@@ -665,7 +742,7 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob keyAlias        = { 0, NULL };
     struct HksBlob paramsBlob      = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
@@ -689,6 +766,10 @@ void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outDa
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = IpcServiceInit(&processInfo, &keyAlias, inParamSet, outData);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ipc service init fail, ret = %" LOG_PUBLIC "d", ret)
@@ -715,7 +796,7 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
     struct HksBlob paramsBlob      = { 0, NULL };
     struct HksBlob inData          = { 0, NULL };
     struct HksBlob handle          = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
@@ -742,6 +823,10 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         if (isUpdate) {
             ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
@@ -783,7 +868,7 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
     struct HksParamSet *paramSet   = NULL;
     struct HksBlob handle          = { 0, NULL };
     struct HksBlob paramsBlob      = { 0, NULL };
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, 0 };
 
     do {
         ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
@@ -806,6 +891,10 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceAbort(&handle, &processInfo, inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAbort fail, ret = %" LOG_PUBLIC "d", ret)

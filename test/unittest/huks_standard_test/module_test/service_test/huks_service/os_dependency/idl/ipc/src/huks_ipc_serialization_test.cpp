@@ -20,7 +20,7 @@
 
 #include "file_ex.h"
 #include "hks_log.h"
-#include "hks_ipc_serialization.h"
+#include "hks_service_ipc_serialization.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type_inner.h"

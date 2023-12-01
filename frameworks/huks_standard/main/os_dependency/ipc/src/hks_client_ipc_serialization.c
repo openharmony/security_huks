@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "hks_ipc_serialization.h"
+#include "hks_client_ipc_serialization.h"
 
 #include <stddef.h>
 #include <stdint.h>
@@ -27,7 +27,7 @@
 
 #define NUM_TWO        2
 
-static const uint8_t g_base64Table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+static const uint8_t BASE64_TABLE[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint32_t *destOffset)
 {
@@ -160,20 +160,50 @@ int32_t HksImportWrappedKeyPack(struct HksBlob *destData, const struct HksBlob *
     return CopyBlobToBuffer(wrappedKeyData, destData, &offset);
 }
 
-int32_t HksExportPublicKeyPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *key)
+int32_t HksDeleteKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData)
 {
     uint32_t offset = 0;
     int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
-    return CopyUint32ToBuffer(key->size, destData, &offset);
+
+    ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet failed")
+    return HKS_SUCCESS;
 }
 
-int32_t HksGetKeyParamSetPack(struct HksBlob *destData, const struct HksBlob *keyAlias, const struct HksBlob *keyOut)
+int32_t HksExportPublicKeyPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *key, struct HksBlob *destData)
 {
     uint32_t offset = 0;
     int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
-    return CopyUint32ToBuffer(keyOut->size, destData, &offset);
+
+    ret = CopyUint32ToBuffer(key->size, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keysize failed")
+    return CopyParamSetToBuffer(paramSet, destData, &offset);
+}
+
+int32_t HksGetKeyParamSetPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *keyOut, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
+
+    ret = CopyUint32ToBuffer(keyOut->size, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyOutSize failed")
+    return CopyParamSetToBuffer(paramSet, destData, &offset);
+}
+
+int32_t HksKeyExistPack(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyBlobToBuffer(keyAlias, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy keyAlias failed")
+
+    ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet failed")
+    return HKS_SUCCESS;
 }
 
 int32_t HksOnceParamPack(struct HksBlob *destData, const struct HksBlob *key, const struct HksParamSet *paramSet,
@@ -229,7 +259,8 @@ int32_t HksDeriveKeyPack(struct HksBlob *destData, const struct HksParamSet *par
     return CopyUint32ToBuffer(derivedKey->size, destData, &offset);
 }
 
-int32_t HksGetKeyInfoListPack(struct HksBlob *destData, uint32_t listCount, const struct HksKeyInfo *keyInfoList)
+int32_t HksGetKeyInfoListPack(const struct HksParamSet *paramSet, const struct HksKeyInfo *keyInfoList,
+    struct HksBlob *destData, uint32_t listCount)
 {
     uint32_t offset = 0;
     int32_t ret = CopyUint32ToBuffer(listCount, destData, &offset);
@@ -242,6 +273,9 @@ int32_t HksGetKeyInfoListPack(struct HksBlob *destData, uint32_t listCount, cons
         ret = CopyUint32ToBuffer(keyInfoList[i].paramSet->paramSetSize, destData, &offset);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSetSize failed")
     }
+
+    ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet failed")
     return HKS_SUCCESS;
 }
 
@@ -326,10 +360,10 @@ static int32_t Base64Encode(const uint8_t *srcData, const uint32_t srcDataSize,
         uint32_t byte = (a << (8 * 2)) + (b << (8 * 1)) + (c << (8 * 0));
 
         /* outData each character takes up 6 bits */
-        outData[j++] = g_base64Table[(byte >> (6 * 3)) & 0b00111111]; /* 3 and 6 is offset */
-        outData[j++] = g_base64Table[(byte >> (6 * 2)) & 0b00111111]; /* 2 and 6 is offset */
-        outData[j++] = g_base64Table[(byte >> (6 * 1)) & 0b00111111]; /* 1 and 6 is offset */
-        outData[j++] = g_base64Table[(byte >> (6 * 0)) & 0b00111111]; /* 0 and 6 is offset */
+        outData[j++] = BASE64_TABLE[(byte >> (6 * 3)) & 0b00111111]; /* 3 and 6 is offset */
+        outData[j++] = BASE64_TABLE[(byte >> (6 * 2)) & 0b00111111]; /* 2 and 6 is offset */
+        outData[j++] = BASE64_TABLE[(byte >> (6 * 1)) & 0b00111111]; /* 1 and 6 is offset */
+        outData[j++] = BASE64_TABLE[(byte >> (6 * 0)) & 0b00111111]; /* 0 and 6 is offset */
     }
 
     const int32_t padding = srcDataSize % 3; /* 3 in each group */

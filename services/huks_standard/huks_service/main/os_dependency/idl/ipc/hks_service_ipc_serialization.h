@@ -34,10 +34,15 @@ int32_t HksImportKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAli
 int32_t HksImportWrappedKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
     struct HksBlob *wrappingKeyAlias, struct HksParamSet **paramSet, struct HksBlob *wrappedKeyData);
 
-int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksBlob *key);
+int32_t HksDeleteKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet);
+
+int32_t HksExportPublicKeyUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
+    struct HksParamSet **paramSet, struct HksBlob *key);
 
 int32_t HksGetKeyParamSetUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias,
-    struct HksParamSet **paramSet);
+    struct HksParamSet **paramSetIn, struct HksParamSet **paramSetOut);
+
+int32_t HksKeyExistUnpack(const struct HksBlob *srcData, struct HksBlob *keyAlias, struct HksParamSet **paramSet);
 
 int32_t HksSignUnpack(const struct HksBlob *srcData, struct HksBlob *key, struct HksParamSet **paramSet,
     struct HksBlob *unsignedData, struct HksBlob *signature);
@@ -57,7 +62,8 @@ int32_t HksDeriveKeyUnpack(const struct HksBlob *srcData, struct HksParamSet **p
 int32_t HksHmacUnpack(const struct HksBlob *srcData, struct HksBlob *key, struct HksParamSet **paramSet,
     struct HksBlob *inputData, struct HksBlob *mac);
 
-int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, uint32_t *listCount, struct HksKeyInfo **keyInfoList);
+int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSet **paramSet, uint32_t *listCount,
+    struct HksKeyInfo **keyInfoList);
 
 int32_t HksGetKeyInfoListPackFromService(struct HksBlob *destData, uint32_t listCount,
     const struct HksKeyInfo *keyInfoList);
