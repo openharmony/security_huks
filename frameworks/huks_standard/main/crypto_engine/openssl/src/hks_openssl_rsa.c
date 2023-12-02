@@ -341,9 +341,14 @@ static int32_t HksOpensslRsaCryptInit(EVP_PKEY_CTX *ctx, const struct HksUsageSp
 
     if (usageSpec->padding == HKS_PADDING_OAEP) {
         const EVP_MD *md = GetOpensslAlg(usageSpec->digest);
-        if ((md == NULL) || (EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0) ||
-            (EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, md) <= 0)) {
-            HksLogOpensslError();
+        const EVP_MD *mgfMd;
+        if (usageSpec->digest == HKS_DIGEST_SHA256 && usageSpec->mgfDigest == HKS_DIGEST_SHA1) {
+            mgfMd = GetOpensslAlg(usageSpec->mgfDigest);
+        } else {
+            mgfMd = md;
+        }
+        if ((md == NULL) || mgfMd == NULL || (EVP_PKEY_CTX_set_rsa_oaep_md(ctx, md) <= 0) ||
+            (EVP_PKEY_CTX_set_rsa_mgf1_md(ctx, mgfMd) <= 0)) {
             return HKS_ERROR_CRYPTO_ENGINE_ERROR;
         }
     }
