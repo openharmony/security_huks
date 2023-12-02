@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,6 +232,78 @@ static struct HksParam g_decryptParams043[] = {
     }, {
         .tag = HKS_TAG_BLOCK_MODE,
         .uint32Param = HKS_MODE_ECB
+    }
+};
+static struct HksParam g_genParams044[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_OAEP
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_ECB
+    }, {
+        .tag = HKS_TAG_MGF_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA1
+    }
+};
+static struct HksParam g_encryptParams044[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_OAEP
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_ECB
+    }, {
+        .tag = HKS_TAG_MGF_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA1
+    }
+};
+static struct HksParam g_decryptParams044[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_RSA
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_RSA_KEY_SIZE_2048
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_OAEP
+    }, {
+        .tag = HKS_TAG_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA256
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_ECB
+    }, {
+        .tag = HKS_TAG_MGF_DIGEST,
+        .uint32Param = HKS_DIGEST_SHA1
     }
 };
 
@@ -500,6 +572,38 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test046, TestSize.Level1)
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_decryptParams043, sizeof(g_decryptParams043) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksRsaCipherTestCase(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
+/**
+ * @tc.name: HksRsaCipherPart5Test.HksRsaCipherPart5Test047
+ * @tc.desc: alg-RSA pur-ENCRYPT-DECRYPT size-2048 pad-OAEP dig-SHA256_MGF_SHA1 mode-ECB.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test047, TestSize.Level1)
+{
+    char tmpKeyAlias[] = "HksRSACipherKeyAliasTest047";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob inData = { g_inData_32.length(),
+                              (uint8_t *)g_inData_32.c_str() };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams044, sizeof(g_genParams044) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams044, sizeof(g_encryptParams044) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams044, sizeof(g_decryptParams044) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksRsaCipherTestCase(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, &inData);

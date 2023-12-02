@@ -511,7 +511,7 @@ int32_t HksDecryptAuthToken(struct HksUserAuthToken *authToken)
     struct HksBlob cipherKeyBlob = { HKS_KEY_BLOB_AT_KEY_BYTES, authTokenKey.cipherKey };
     struct HksBlob srcDataBlob = { sizeof(struct HksCiphertextData), (uint8_t *)&authToken->ciphertextData };
     struct HksUsageSpec usageSpec = { HKS_ALG_AES, HKS_MODE_GCM, HKS_PADDING_NONE,
-        HKS_DIGEST_NONE, HKS_KEY_PURPOSE_DECRYPT, 0, NULL };
+        HKS_DIGEST_NONE, HKS_DIGEST_NONE, HKS_KEY_PURPOSE_DECRYPT, 0, NULL };
 
     struct HksAeadParam *aeadParam = (struct HksAeadParam *)HksMalloc(sizeof(struct HksAeadParam));
     HKS_IF_NULL_LOGE_RETURN(aeadParam, HKS_ERROR_MALLOC_FAIL, "aeadParam malloc failed!")
