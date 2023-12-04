@@ -673,7 +673,7 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
     DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
     DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
-    DECLARE_NAPI_FUNCTION("isKeyItemExistV11", HuksNapiisKeyItemExistV11),
+    DECLARE_NAPI_FUNCTION("isKeyItemExistEasy", HuksNapiisKeyItemExistEasy),
     DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
