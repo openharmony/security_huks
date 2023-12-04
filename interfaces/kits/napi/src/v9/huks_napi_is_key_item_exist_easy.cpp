@@ -132,7 +132,7 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
     }
 }
 
-napi_value HuksNapiisKeyItemExistV11(napi_env env, napi_callback_info info)
+napi_value HuksNapiisKeyItemExistEasy(napi_env env, napi_callback_info info)
 {
     IsKeyExistAsyncContext context = CreateIsKeyExistAsyncContext();
     if (context == nullptr) {

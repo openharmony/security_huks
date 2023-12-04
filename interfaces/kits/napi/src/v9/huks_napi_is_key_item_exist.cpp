@@ -111,6 +111,7 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
             HksSuccessReturnResult resultData;
             SuccessReturnResultInit(resultData);
             resultData.isOnlyReturnBoolResult = true;
+            resultData.boolReturned = (napiContext->result == HKS_SUCCESS);
             HksReturnNapiResult(env, napiContext->callback, napiContext->deferred, napiContext->result, resultData);
             DeleteIsKeyExistAsyncContext(env, napiContext);
         },
