@@ -20,7 +20,7 @@
 #include "napi/native_node_api.h"
 
 namespace HuksNapiItem {
-napi_value HuksNapiisKeyItemExistV11(napi_env env, napi_callback_info info);
+napi_value HuksNapiisKeyItemExistEasy(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 
 #endif  // HUKS_NAPI_IS_KEY_ITEM_EXIST_V11_H
