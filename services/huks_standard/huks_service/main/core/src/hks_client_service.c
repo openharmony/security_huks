@@ -1745,7 +1745,6 @@ int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSe
 
     bool storageLevelExist = HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &storageLevelParam) == HKS_SUCCESS;
     bool specificUserIdExist = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS;
-
     if (!storageLevelExist && specificUserIdExist) {
         HKS_LOG_E("must pass tag storage level when specific userId is passed!");
         return HKS_ERROR_INVALID_ARGUMENT;
