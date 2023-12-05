@@ -32,13 +32,13 @@
 #include "huks_napi_get_key_properties.h"
 #include "huks_napi_get_key_item_properties.h"
 #include "huks_napi_get_sdk_version.h"
+#include "huks_napi_has_key_item.h"
 #include "huks_napi_import_key.h"
 #include "huks_napi_import_key_item.h"
 #include "huks_napi_import_wrapped_key_item.h"
 #include "huks_napi_init.h"
 #include "huks_napi_init_session.h"
 #include "huks_napi_is_key_exist.h"
-#include "huks_napi_is_key_item_exist_v11.h"
 #include "huks_napi_is_key_item_exist.h"
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
@@ -673,7 +673,7 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
     DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
     DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
-    DECLARE_NAPI_FUNCTION("isKeyItemExistEasy", HuksNapiisKeyItemExistEasy),
+    DECLARE_NAPI_FUNCTION("hasKeyItem", HuksNapihasKeyItem),
     DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
