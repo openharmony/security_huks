@@ -31,6 +31,7 @@ public:
     static JSIValue abortSession(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
     static JSIValue deleteKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
     static JSIValue isKeyItemExist(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
+    static JSIValue hasKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
 };
 
 void InitHuksModule(JSIValue exports);
