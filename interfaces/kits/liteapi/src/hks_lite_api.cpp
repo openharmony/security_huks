@@ -228,6 +228,7 @@ void InitHuksModule(JSIValue exports)
     JSI::SetModuleAPI(exports, "abortSession", HksLiteModule::abortSession);
     JSI::SetModuleAPI(exports, "deleteKeyItem", HksLiteModule::deleteKeyItem);
     JSI::SetModuleAPI(exports, "isKeyItemExist", HksLiteModule::isKeyItemExist);
+    JSI::SetModuleAPI(exports, "hasKeyItem", HksLiteModule::hasKeyItem);
 
     InitHuksModuleEnum(exports);
 }
