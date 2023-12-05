@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "huks_napi_is_key_item_exist_v11.h"
+#include "huks_napi_has_key_item.h"
 
 #include "securec.h"
 
@@ -132,7 +132,7 @@ static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext conte
     }
 }
 
-napi_value HuksNapiisKeyItemExistEasy(napi_env env, napi_callback_info info)
+napi_value HuksNapihasKeyItem(napi_env env, napi_callback_info info)
 {
     IsKeyExistAsyncContext context = CreateIsKeyExistAsyncContext();
     if (context == nullptr) {
