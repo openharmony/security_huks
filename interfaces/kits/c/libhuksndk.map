@@ -22,6 +22,7 @@
     OH_Huks_GetKeyItemParamSet;
     OH_Huks_IsKeyItemExist;
     OH_Huks_AttestKeyItem;
+    OH_Huks_AnonAttestKeyItem;
     OH_Huks_InitSession;
     OH_Huks_UpdateSession;
     OH_Huks_FinishSession;
