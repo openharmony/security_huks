@@ -25,6 +25,7 @@ ohos_unittest("huks_UT_test") {
     # "src/hks_add_ece_ce_path_test.cpp",
     "../../../../frameworks/huks_standard/main/common/src/hks_errcode_adapter.c",
     "../../../../interfaces/kits/c/src/native_huks_api.c",
+    "../../../../interfaces/kits/c/src/native_huks_api_adapter.c",
     "../../../../interfaces/kits/c/src/native_huks_param.c",
     "src/asymmetric_alg_test/hks_dh_agree_test.cpp",
     "src/asymmetric_alg_test/hks_ecc_sign_verify_part2_test.cpp",
@@ -145,6 +146,7 @@ ohos_unittest("huks_UT_test") {
     "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+    "//base/security/huks/interfaces/kits/c:huks_ndk",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
   ]
   if (huks_security_level == "software") {
