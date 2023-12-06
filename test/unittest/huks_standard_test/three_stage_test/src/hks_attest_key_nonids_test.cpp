@@ -21,6 +21,8 @@
 #include "file_ex.h"
 #endif
 #include "hks_attest_key_test_common.h"
+#include "native_huks_type.h"
+#include "native_huks_api.h"
 
 using namespace testing::ext;
 namespace Unittest::AttestKey {
@@ -57,6 +59,7 @@ void HksAttestKeyNonIdsTest::TearDown()
 }
 
 static const struct HksBlob g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
+static struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
 
 static const struct HksParam g_commonParams[] = {
     { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
@@ -373,7 +376,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest010, TestSize.Level0)
 {
     struct HksParamSet *paramSet = nullptr;
     HksCertChain *certChain = nullptr;
-    HKS_LOG_I("enter HksAttestKeyNonIdsTest10");
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest010");
     int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PKCS1_V1_5);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
@@ -383,6 +386,34 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest010, TestSize.Level0)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksAnonAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
     }
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+}
+
+/**
+ * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest011
+ * @tc.desc: attest with right params.
+ * @tc.type: FUNC
+ * @tc.require: issueI5NY0L
+ */
+HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest011, TestSize.Level0)
+{
+    struct HksParamSet *paramSet = nullptr;
+    HksCertChain *certChain = nullptr;
+    HKS_LOG_I("enter HksAttestKeyNonIdsTest011");
+    int32_t ret = TestGenerateKey(&g_keyAlias, HKS_PADDING_PSS);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = OH_Huks_AnonAttestKeyItem(&oh_g_keyAlias, (struct OH_Huks_ParamSet *) paramSet,
+        (struct OH_Huks_CertChain *) certChain).errorCode;
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("OH_Huks_AnonAttestKeyItem fail, ret is %" LOG_PUBLIC "d!", ret);
+    }
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    FreeCertChain(&certChain, certChain->certsCount);
+    HksFreeParamSet(&paramSet);
+    ret = HksDeleteKey(&g_keyAlias, NULL);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 }
