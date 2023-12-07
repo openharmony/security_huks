@@ -25,7 +25,7 @@ void *HksMalloc(size_t size)
     void *ret = NULL;
     ret = malloc(size);
     if (ret != NULL) {
-        (void)memset_s(ret, size, 0, size); 
+        (void)memset_s(ret, size, 0, size);
     }
     return ret;
 }

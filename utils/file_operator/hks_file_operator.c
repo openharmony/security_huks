@@ -134,14 +134,11 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-      if (strstr(filePath, "../") != NULL) {
+    if (strstr(filePath, "../") != NULL) {
         HKS_LOG_E("invalid filePath!");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
-    if (realpath(fileName, filePath) == NULL) {
-        HKS_LOG_E("invalid filePath, path!");
-        return HKS_ERROR_INVALID_KEY_FILE;
-    }
+    (void)realpath(fileName, filePath);
 
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
