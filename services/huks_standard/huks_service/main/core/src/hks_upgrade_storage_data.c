@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -142,7 +142,7 @@ static int32_t RollBackNewVersionFiles(void)
 {
     char *processName = NULL;
     int32_t ret = HksGetProcessName(&processName);
-    HKS_IF_NOT_SUCC_LOGE(ret, "get process name failed, ret = %" LOG_PUBLIC "d", ret)
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksBlob processNameBlob = { strlen(processName), (uint8_t *)processName };
 
