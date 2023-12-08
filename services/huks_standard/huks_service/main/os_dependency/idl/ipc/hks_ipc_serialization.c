@@ -361,7 +361,7 @@ static int32_t KeyInfoListInit(struct HksKeyInfo *keyInfoList, uint32_t listCoun
     }
 
     if (ret != HKS_SUCCESS) {
-        for (uint32_t j = 0; j < i; ++j) {
+        for (uint32_t j = 0; j <= i; ++j) {
             HKS_FREE_BLOB(keyInfoList[j].alias);
             HKS_FREE_PTR(keyInfoList[j].paramSet);
         }
