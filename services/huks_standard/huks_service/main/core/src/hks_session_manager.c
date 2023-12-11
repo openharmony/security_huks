@@ -121,7 +121,7 @@ static int32_t AddOperation(struct HksOperation *operation)
         HKS_LOG_I("maximum number of sessions reached: delete timeout session.");
         if (!DeleteTimeOutOperation()) {
             pthread_mutex_unlock(&g_lock);
-            HKS_LOG_E("delete timeout session failed or not found timeout session");
+            HKS_LOG_E("delete timeout session failed");
             return HKS_ERROR_BAD_STATE;
         }
     }
