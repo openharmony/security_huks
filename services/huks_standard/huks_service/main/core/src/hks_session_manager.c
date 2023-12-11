@@ -105,6 +105,8 @@ static bool DeleteTimeOutOperation(void)
                 DeleteKeyNode(operation->handle);
                 FreeOperation(&operation);
                 --g_operationCount;
+                HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
+                return true;
             }
         }
     }
@@ -116,7 +118,7 @@ static int32_t AddOperation(struct HksOperation *operation)
     pthread_mutex_lock(&g_lock);
 
     if (g_operationCount >= MAX_OPERATIONS_COUNT) {
-        HKS_LOG_I("maximum number of sessions reached: delete oldest session.");
+        HKS_LOG_I("maximum number of sessions reached: delete timeout session.");
         if (!DeleteTimeOutOperation()) {
             pthread_mutex_unlock(&g_lock);
             HKS_LOG_E("delete timeout session failed");
