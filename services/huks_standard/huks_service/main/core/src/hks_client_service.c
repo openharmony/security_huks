@@ -1353,6 +1353,174 @@ static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, st
 }
 #endif
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
+static void FreeHksCertChain(struct HksCertChain *certChain)
+{
+    if (certChain == NULL) {
+        return;
+    }
+    if (certChain->certsCount > 0 && certChain->certs != NULL) {
+        for (uint32_t i = 0; i < certChain->certsCount; i++) {
+            if (certChain->certs[i].data != NULL) {
+                HKS_FREE_BLOB(certChain->certs[i]);
+                certChain->certs[i].data = NULL;
+            }
+        }
+    }
+    HksFree(certChain->certs);
+}
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+#define CERT_KEY_INDEX 0
+#define CERT_DEVICE_INDEX 1
+#define CERT_CA_INDEX 2
+#define CERT_ROOT_INDEX 3
+
+static int32_t InitCertChain(struct HksCertChain *certChain)
+{
+    certChain->certsCount = HKS_CERT_COUNT;
+    certChain->certs = (struct HksBlob *)(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
+    if (certChain->certs == NULL) {
+        HKS_LOG_E("malloc certChain failed.");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    do {
+        certChain->certs[CERT_KEY_INDEX].size = HKS_CERT_APP_SIZE;
+        certChain->certs[CERT_KEY_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_KEY_INDEX].size));
+        // if data is null, FreeHksCertChain can free wild pointers
+        if (certChain->certs[CERT_KEY_INDEX].data == NULL) {
+            break;
+        }
+        certChain->certs[CERT_DEVICE_INDEX].size = HKS_CERT_DEVICE_SIZE;
+        certChain->certs[CERT_DEVICE_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_DEVICE_INDEX].size));
+        if (certChain->certs[CERT_DEVICE_INDEX].data == NULL) {
+            break;
+        }
+        certChain->certs[CERT_CA_INDEX].size = HKS_CERT_CA_SIZE;
+        certChain->certs[CERT_CA_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_CA_INDEX].size));
+        if (certChain->certs[CERT_CA_INDEX].data == NULL) {
+            break;
+        }
+        certChain->certs[CERT_ROOT_INDEX].size = HKS_CERT_ROOT_SIZE;
+        certChain->certs[CERT_ROOT_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_ROOT_INDEX].size));
+        if (certChain->certs[CERT_ROOT_INDEX].data == NULL) {
+            break;
+        }
+        return HKS_SUCCESS;
+    } while (0);
+
+    FreeHksCertChain(certChain);
+    return HKS_ERROR_INSUFFICIENT_MEMORY;
+}
+#endif
+
+static int32_t GetAttestModeFlag(const struct HksParamSet *paramSet, uint32_t *attestMode)
+{
+    struct HksParam *attestModeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestModeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get attestMode from paramSet fail.")
+    *attestMode = attestModeParam->uint32Param;
+    return HKS_SUCCESS;
+}
+
+static int32_t CopyBlobToBuffer(const struct HksBlob *blob, struct HksBlob *buf)
+{
+    if (buf->size < sizeof(blob->size) + ALIGN_SIZE(blob->size)) {
+        HKS_LOG_E("buf size smaller than blob size");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    if (memcpy_s(buf->data, buf->size, &blob->size, sizeof(blob->size)) != EOK) {
+        HKS_LOG_E("copy buf fail");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    buf->data += sizeof(blob->size);
+    buf->size -= sizeof(blob->size);
+    if (memcpy_s(buf->data, buf->size, blob->data, blob->size) != EOK) {
+        HKS_LOG_E("copy buf fail");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    buf->data += ALIGN_SIZE(blob->size);
+    buf->size -= ALIGN_SIZE(blob->size);
+    return HKS_SUCCESS;
+}
+
+static int32_t PackAttestChain(struct HksCertChain *certChain, struct HksBlob *certChainPacked)
+{
+    if (certChain == NULL || certChain->certs == NULL) {
+        HKS_LOG_E("certChain buffer from caller is null.");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (certChain->certsCount != HKS_CERT_COUNT) {
+        HKS_LOG_E("certs count is not correct");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    struct HksBlob tmp = *certChainPacked;
+    if (tmp.size <= HKS_CERT_COUNT) {
+        HKS_LOG_E("certChainPacked size too small");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    *((uint32_t *)tmp.data) = HKS_CERT_COUNT;
+    tmp.data += sizeof(uint32_t);
+    tmp.size -= sizeof(uint32_t);
+    int32_t ret = 0;
+
+    for (uint32_t i = 0; i < certChain->certsCount; ++i) {
+        if (certChain->certs[i].data == NULL) {
+            HKS_LOG_E("single cert %" LOG_PUBLIC "u from huks is null.", i);
+            ret = HKS_ERROR_NULL_POINTER;
+            break;
+        }
+        ret = CopyBlobToBuffer(&certChain->certs[i], &tmp);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy cert fail")
+    }
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    certChainPacked->size = tmp.data - certChainPacked->data;
+    HKS_LOG_I("certChain size after packing is %" LOG_PUBLIC "u", certChainPacked->size);
+    return HKS_SUCCESS;
+}
+
+static int32_t HksAttestKeyDcmAttest(const struct HksParamSet *paramSet, struct HksBlob *certChain,
+    const uint32_t certChainCapacity)
+{
+    struct HksCertChain certChainNew = { 0 };
+    if (certChainCapacity == 0) {
+        HKS_LOG_E("certChainCapacity is 0");
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+    struct HksBlob certChainPacked = {
+        .size = certChainCapacity,
+        .data = (uint8_t *)HksMalloc(certChainCapacity)
+    };
+    if (certChainPacked.data == NULL) {
+        HKS_LOG_E("certChainPacked data is null.");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    int32_t ret =0;
+    do {
+        ret = InitCertChain(&certChainNew);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitCertChainNew failed.")
+        ret = DcmGenerateCertChain(certChain, &certChainNew);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail result: %" LOG_PUBLIC "d", ret);
+        ret = PackAttestChain(&certChainNew, &certChainPacked);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "PackAttestChain fail result: %" LOG_PUBLIC "d", ret);
+
+        if (memcpy_s(certChain->data, certChainCapacity, certChainPacked.data, certChainPacked.size) != EOK) {
+            HKS_LOG_E("copy certChainPacked fail");
+            ret =  HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+        certChain->size = certChainPacked.size;
+    } while (0);
+
+    HKS_FREE_BLOB(certChainPacked);
+    FreeHksCertChain(&certChainNew);
+    return ret;
+}
+#endif
+
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain)
 {
@@ -1377,8 +1545,21 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
 
+        uint32_t certChainCapacity = certChain->size;
         ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+        uint32_t attestMode = 0;
+        int32_t ret = GetAttestModeFlag(newParamSet, &attestMode);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetAttestMode failed, ret = %" LOG_PUBLIC "d.", ret)
+        if (attestMode != HKS_ATTESTATION_MODE_ANONYMOUS) {
+            HKS_LOG_I("non anonymous attest key.");
+            break;
+        }
+        ret = HksAttestKeyDcmAttest(newParamSet, certChain, certChainCapacity);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAttestKeyDcmAttest fail, ret = %" LOG_PUBLIC "d.", ret)
+#endif
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);

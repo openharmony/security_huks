@@ -707,6 +707,7 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAttestKey fail, ret = %" LOG_PUBLIC "d", ret)
 
+        HKS_LOG_E("get certChainBlob size %" LOG_PUBLIC "u", certChainBlob.size);
         HksSendResponse(context, ret, &certChainBlob);
     } while (0);
 

@@ -65,14 +65,17 @@ void HksSendResponse(const uint8_t *context, int32_t result, const struct HksBlo
         HKS_LOG_E("SendResponse NULL Pointer");
         return;
     }
+    HKS_LOG_E("reply->WriteUint32 result %" LOG_PUBLIC "d", result);
 
     MessageParcel *reply = const_cast<MessageParcel *>(reinterpret_cast<const MessageParcel *>(context));
     HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteInt32(result));
 
     if (response == nullptr) {
+        HKS_LOG_E("reply->WriteUint32 0");
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(0));
     } else {
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteUint32(response->size));
+        HKS_LOG_E("reply->WriteUint32 size = %" LOG_PUBLIC "u", response->size);
         HKS_IF_NOT_TRUE_LOGE_RETURN_VOID(reply->WriteBuffer(response->data, static_cast<size_t>(response->size)));
     }
 }

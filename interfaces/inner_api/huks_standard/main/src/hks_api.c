@@ -551,7 +551,7 @@ HKS_API_EXPORT int32_t HksGetKeyInfoList(const struct HksParamSet *paramSet,
 
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 static int32_t ConstructNewAttestParamSet(const struct HksParamSet *paramSet, enum HksAttestationMode mode,
-    struct HksParamSet **newParamSet)
+    enum HksSendType sendType, struct HksParamSet **newParamSet)
 {
     int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
     if (ret != HKS_SUCCESS) {
@@ -578,6 +578,15 @@ static int32_t ConstructNewAttestParamSet(const struct HksParamSet *paramSet, en
             HKS_LOG_E("add param attestMode fail");
             break;
         }
+        // struct HksParam sendMode = {
+        //     .tag = HKS_TAG_IS_ASYNCHRONIZED,
+        //     .uint32Param = sendType,
+        // };
+        // ret = HksAddParams(*newParamSet, &sendMode, 1);
+        // if (ret != HKS_SUCCESS) {
+        //     HKS_LOG_E("add param sendMode fail");
+        //     break;
+        // }
         ret = HksBuildParamSet(newParamSet);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("build paramSet fail");
@@ -606,7 +615,7 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
             return ret;
         }
 
-        ret = HksClientAttestKey(keyAlias, newParamSet, certChain, false);
+        ret = HksClientAttestKey(keyAlias, newParamSet, certChain);
         HksFreeParamSet(&newParamSet);
     );
     return ret;
@@ -634,7 +643,7 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
             return ret;
         }
 
-        ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
+        ret = HksClientAttestKey(keyAlias, newParamSet, certChain);
         HksFreeParamSet(&newParamSet);
     );
     return ret;

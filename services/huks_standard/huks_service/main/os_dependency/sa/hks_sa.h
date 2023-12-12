@@ -17,6 +17,7 @@
 #define HKS_SA_H
 
 #include "huks_service_ipc_interface_code.h"
+#include "hks_sa_interface.h"
 
 #include "iremote_broker.h"
 #include "iremote_stub.h"
@@ -38,12 +39,7 @@ enum ResponseCode {
 
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 
-class IHksService : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hks.service");
-};
-
-class HksService : public SystemAbility, public IRemoteStub<IHksService> {
+class HksService : public SystemAbility, public HksStub {
     DECLEAR_SYSTEM_ABILITY(HksService)
 
 public:
@@ -52,7 +48,6 @@ public:
     virtual ~HksService();
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
-
     static sptr<HksService> GetInstance();
 
 protected:
@@ -69,6 +64,10 @@ private:
     ServiceRunningState runningState_;
     static std::mutex instanceLock;
     static sptr<HksService> instance;
+
+    int asyncReply_ = { 0 };
+    std::mutex mutex_;
+    std::condition_variable cv_;
 };
 } // namespace Hks
 } // namespace Security

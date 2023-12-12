@@ -15,6 +15,7 @@
 
 #include "hks_sa.h"
 
+#include "huks_service_ipc_interface_code.h"
 #include "ipc_skeleton.h"
 #include "iservice_registry.h"
 #include "string_ex.h"
@@ -231,7 +232,29 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         }
         (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
 
+        sptr<IHksService> hksProxy = nullptr;
+        // since we have wrote a HksStub instance in client side,
+        // we ncan now read it without distinguishing anonymous attestation or normal attestation
+        if (code == HKS_MSG_ATTEST_KEY) {
+            auto ptr = data.ReadRemoteObject();
+            HKS_IF_NULL_LOGE_BREAK(ptr, "ReadRemoteObject ptr failed")
+            std::wstring_convert<std::codecvt_utf8<char16_t>, char16_t> converter;
+            const char16_t *desc = ptr->descriptor_.c_str();
+            std::string descStr = converter.to_bytes(desc);
+            HKS_LOG_E("ptr desc %" LOG_PUBLIC "s", descStr.c_str());
+            hksProxy = iface_cast<IHksService>(ptr);
+            HKS_IF_NULL_LOGE_BREAK(hksProxy, "ReadRemoteObject IHksService failed")
+        }
+
         ret = ProcessMessage(code, outSize, srcData, reply);
+
+        // TODO 这里要做回调
+        if (code == HKS_MSG_ATTEST_KEY) {
+            int replyData = 2333;
+            HKS_LOG_I("begin SendAsyncReply");
+            hksProxy->SendAsyncReply(replyData);
+            HKS_LOG_I("done SendAsyncReply");
+        }
     } while (0);
 
     HKS_FREE_BLOB(srcData);
