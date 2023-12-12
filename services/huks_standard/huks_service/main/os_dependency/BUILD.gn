@@ -53,6 +53,7 @@ if (os_level == "standard") {
     sources += [
       "posix/hks_rwlock.c",
       "sa/hks_sa.cpp",
+      "sa/hks_sa_interface.cpp",
     ]
     defines = []
     if (support_jsapi) {

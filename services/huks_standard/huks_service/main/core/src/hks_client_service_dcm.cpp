@@ -30,9 +30,6 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_type.h"
-#include "hks_type_inner.h"
-#include "hks_report_wrapper.h"
-#include "ipc_skeleton.h"
 
 typedef enum {
     DCM_SUCCESS = 0
@@ -51,8 +48,6 @@ struct DcmCertChainT {
 using DcmCertChain = DcmCertChainT;
 
 using DcmCallback = void (*)(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *certChain);
-
-constexpr static int UID_TRANSFORM_DIVISION = 200000;
 
 class DcmAttest {
     std::condition_variable attestFinished{};
@@ -77,7 +72,9 @@ class DcmAttest {
 
 void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
 {
-    callbackCalled = true;
+    if (timeout) {
+        return;
+    }
     do {
         if (errCode != DCM_SUCCESS) {
             HKS_LOG_I("DcmCallBack result is fail, erroCode = %" LOG_PUBLIC "d", errCode);
@@ -118,6 +115,7 @@ void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSiz
         }
         HKS_LOG_I("Extract anon certChain final Success!");
     } while (0);
+    callbackCalled = true;
     attestFinished.notify_all();
 }
 
@@ -215,78 +213,4 @@ int32_t DcmGenerateCertChain(HksBlob *cert, HksCertChain *certChain)
 {
     DcmAttest attest(certChain);
     return attest.AttestWithAnon(cert);
-}
-
-static int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *processInfo)
-{
-    if ((context == nullptr) || (processInfo == nullptr)) {
-        HKS_LOG_D("Don't need get process name in hosp.");
-        return HKS_SUCCESS;
-    }
-    int32_t ret = 0;
-    auto callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    uint8_t *name = nullptr;
-    uint8_t *name1 = nullptr;
-    int userId = callingUid / UID_TRANSFORM_DIVISION;
-    uint32_t size = sizeof(userId);
-    do {
-        name = static_cast<uint8_t *>(HksMalloc(sizeof(callingUid)));
-        if (name == nullptr) {
-            HKS_LOG_E("user id malloc failed.");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-        name1 = static_cast<uint8_t *>(HksMalloc(size));
-        if (name1 == nullptr) {
-            HKS_LOG_E("user id malloc failed.");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
-        }
-        if (memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid)) != EOK) {
-            HKS_LOG_E("copy callingUid failed!");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
-        if (memcpy_s(name1, size, &userId, size) != EOK) {
-            HKS_LOG_E("copy userId failed!");
-            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
-            break;
-        }
-        processInfo->processName.size = sizeof(callingUid);
-        processInfo->processName.data = name;
-        processInfo->userId.size = size;
-        processInfo->userId.data = name1;
-        processInfo->userIdInt = userId;
-
-#ifdef HKS_SUPPORT_ACCESS_TOKEN
-        processInfo->accessTokenId = static_cast<uint64_t>(OHOS::IPCSkeleton::GetCallingTokenID());
-#endif
-        return HKS_SUCCESS;
-    } while (0);
-    HKS_FREE_PTR(name1);
-    HKS_FREE_PTR(name);
-
-    return ret;
-}
-
-int32_t ReportFaultEventForDcm(const char *funcName, const struct HksParamSet *paramSetIn, int32_t errorCode)
-{
-    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE};
-    const uint8_t context = { 0 };
-    int32_t ret = 0;
-    do {
-        ret = HksGetProcessInfoForIPC(&context, &processInfo);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("report fault event failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
-        ret = ReportFaultEvent(funcName, &processInfo, paramSetIn, errorCode);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("report fault event failed, ret = %" LOG_PUBLIC "d", ret);
-            break;
-        }
-    } while (0);
-    HKS_FREE_BLOB(processInfo.processName);
-    HKS_FREE_BLOB(processInfo.userId);
-    return ret;
 }

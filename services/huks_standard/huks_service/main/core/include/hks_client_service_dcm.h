@@ -23,7 +23,6 @@ extern "C" {
 #endif
 
 int32_t DcmGenerateCertChain(struct HksBlob *cert, struct HksCertChain *certChain);
-int32_t ReportFaultEventForDcm(const char *funcName, const struct HksParamSet *paramSetIn, int32_t errorCode);
 
 #ifdef __cplusplus
 }

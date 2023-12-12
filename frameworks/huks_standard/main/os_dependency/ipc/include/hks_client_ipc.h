@@ -72,7 +72,7 @@ int32_t HksClientGetKeyInfoList(const struct HksParamSet *paramSet, struct HksKe
     uint32_t *listCount);
 
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain, bool needAnonCertChain);
+    struct HksCertChain *certChain);
 
 int32_t HksClientInit(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *handle,
     struct HksBlob *token);
