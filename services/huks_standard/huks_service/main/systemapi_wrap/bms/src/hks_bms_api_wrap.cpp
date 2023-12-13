@@ -17,6 +17,7 @@
 
 #include <cJSON.h>
 #include <cstring>
+#include "securec.h"
 
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
@@ -79,6 +80,39 @@ static int32_t ConvertHapInfoToJson(const std::string &appIdStr, const std::stri
     hapInfo->size = strlen(jsonStr);
     hapInfo->data = (uint8_t *)jsonStr;
     cJSON_Delete(jsonObj);
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName)
+{
+    HKS_LOG_I("HksGetHapName ...");
+    HapTokenInfo tokenInfo;
+    int result = AccessTokenKit::GetHapTokenInfo(tokenId, tokenInfo);
+    if (result != HKS_SUCCESS) {
+        HKS_LOG_I("GetHapTokenInfo failed, tokenId :%" LOG_PUBLIC "d", tokenId);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgrProxy();
+    if (bundleMgrProxy == nullptr) {
+        HKS_LOG_E("bundle mgr proxy is nullptr.");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    AppExecFwk::BundleInfo bundleInfo;
+    bool isGetInfoSuccess = bundleMgrProxy->GetBundleInfo(tokenInfo.bundleName,
+        AppExecFwk::BundleFlag::GET_BUNDLE_WITH_HASH_VALUE, bundleInfo, userId);
+    if (!isGetInfoSuccess) {
+        HKS_LOG_E("GetBundleInfo failed.");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    uint32_t hapNameLen = strlen(tokenInfo.bundleName.data());
+    if (memcpy_s(hapName, HAP_NAME_LEN_MAX - 1, tokenInfo.bundleName.data(), hapNameLen) != EOK) {
+        HKS_LOG_E("memcpy for hapName failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    HKS_LOG_E("Get hapName success! : %" LOG_PUBLIC "s", hapName);
     return HKS_SUCCESS;
 }
 

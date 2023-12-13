@@ -35,12 +35,19 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+#include "hap_token_info.h"
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+#include "hks_bms_api_wrap.h"
+#endif
 
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
 #endif // HAS_OS_ACCOUNT_PART
 
 using namespace OHOS;
+
+static const char  *g_trustListHap[] = HUKS_HAP_TRUST_LIST;
+static const char  *g_trustListSa[] = HUKS_SA_TRUST_LIST;
 
 #ifndef HAS_OS_ACCOUNT_PART
 constexpr static int UID_TRANSFORM_DIVISOR = 200000;
@@ -124,6 +131,98 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     return HKS_SUCCESS;
 }
+
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+static int32_t CheckHapInfo(int32_t tokenId, int32_t userId)
+{
+    HKS_LOG_I("SUPPORT GET_BUNDLE_INFO!");
+    char hapName[HAP_NAME_LEN_MAX] = { 0 };
+    int32_t ret = HksGetHapName(tokenId, userId, hapName);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksGetHapName fail when check name list.")
+    uint32_t arrNum = sizeof(g_trustListHap)/sizeof(g_trustListHap[0]);
+    for (uint32_t i = 0; i < arrNum; i++) {
+        if (strcmp(hapName, g_trustListHap[i]) == 0) {
+            HKS_LOG_I("This hap in permission, hapName: %" LOG_PUBLIC "s", hapName);
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("Not in name list, hapName: %" LOG_PUBLIC "s", hapName);
+    return HKS_ERROR_NO_PERMISSION;
+}
+#else
+static int32_t CheckHapInfo(int32_t tokenId, int32_t userId)
+{
+    HKS_LOG_I("ACCESS_TOKEN no support!");
+    (void)tokenId;
+    (void)userId;
+    (void)g_trustListHap;
+    return HKS_SUCCESS;
+}
+#endif
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+static int32_t CheckProcessInfo(uint32_t tokenId)
+{
+    OHOS::Security::AccessToken::NativeTokenInfo tokenInfo;
+    int32_t ret = OHOS::Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(tokenId, tokenInfo);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("GetNativeTokenInfo failed, tokenId: %" LOG_PUBLIC "d", tokenId);
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    const char *saName = tokenInfo.processName.data();
+    uint32_t arrNum = sizeof(g_trustListSa) / sizeof(g_trustListSa[0]);
+    for (uint32_t i = 0; i < arrNum; i++) {
+        if (strcmp(saName, g_trustListSa[i]) == 0) {
+            HKS_LOG_I("This sa in whiteList, saName: %" LOG_PUBLIC "s", saName);
+            return HKS_SUCCESS;
+        }
+    }
+
+    HKS_LOG_I("Not in name list, saName: %" LOG_PUBLIC "s", saName);
+    return HKS_ERROR_NO_PERMISSION;
+}
+
+int32_t CheckNameList(void)
+{
+    OHOS::Security::AccessToken::AccessTokenID tokenId = IPCSkeleton::GetCallingTokenID();
+    OHOS::Security::AccessToken::ATokenTypeEnum tokenType =
+        OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
+    switch (tokenType) {
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP: {
+            int32_t activeFrontUserId;
+            int32_t ret = HksGetFrontUserId(&activeFrontUserId);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("HksGetFrontUserId fail!");
+                return ret;
+            }
+            HKS_LOG_I("CheckHapInfo...");
+            return CheckHapInfo(tokenId, activeFrontUserId);
+        }
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
+            HKS_LOG_I("CheckProcessInfo...");
+            return CheckProcessInfo(tokenId);
+        default:
+            HKS_LOG_E("This type is Unknow Type.");
+            return HKS_ERROR_NOT_EXIST;
+    }
+    return HKS_ERROR_NOT_EXIST;
+}
+#else
+static int32_t CheckProcessInfo(uint32_t tokenId)
+{
+    (void)tokenId;
+    HKS_LOG_I("ACCESS_TOKEN no support!");
+    return HKS_SUCCESS;
+}
+
+int32_t CheckNameList(void)
+{
+    HKS_LOG_I("ACCESS_TOKEN no support!");
+    return HKS_SUCCESS;
+}
+#endif
 
 int32_t HksGetFrontUserId(int32_t *outId)
 {
