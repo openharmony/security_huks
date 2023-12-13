@@ -13,6 +13,7 @@
 
 import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
+import("//base/security/huks/test/permissionConf.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
@@ -47,6 +48,14 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
     ]
 
+    if (enable_bundle_framework) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
+    }
+
+    cflags = [
+      "-DHUKS_HAP_TRUST_LIST=${huks_hap_trust_list_define}",
+      "-DHUKS_SA_TRUST_LIST=${huks_sa_trust_list_define}",
+    ]
     complete_static_lib = true
 
     branch_protector_ret = "pac_ret"
