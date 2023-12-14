@@ -13,7 +13,7 @@
 
 import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
-import("//base/security/huks/test/permissionConf.gni")
+import("//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/permissionConf.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {

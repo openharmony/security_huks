@@ -22,11 +22,11 @@
 extern "C" {
 #endif
 
-#define HAP_NAME_LEN_MAX 51
+#define HAP_NAME_LEN_MAX 128
 
 int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo);
 
-int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName);
+int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName, int32_t hapNameSize);
 
 #ifdef __cplusplus
 }
