@@ -83,9 +83,8 @@ static int32_t ConvertHapInfoToJson(const std::string &appIdStr, const std::stri
     return HKS_SUCCESS;
 }
 
-int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName)
+int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName, int32_t hapNameSize)
 {
-    HKS_LOG_I("HksGetHapName ...");
     HapTokenInfo tokenInfo;
     int result = AccessTokenKit::GetHapTokenInfo(tokenId, tokenInfo);
     if (result != HKS_SUCCESS) {
@@ -107,8 +106,8 @@ int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName)
         return HKS_ERROR_BAD_STATE;
     }
 
-    uint32_t hapNameLen = strlen(tokenInfo.bundleName.data());
-    if (memcpy_s(hapName, HAP_NAME_LEN_MAX - 1, tokenInfo.bundleName.data(), hapNameLen) != EOK) {
+    uint32_t hapNameLen = strlen(tokenInfo.bundleName.c_str());
+    if (memcpy_s(hapName, hapNameSize, tokenInfo.bundleName.c_str(), hapNameLen) != EOK) {
         HKS_LOG_E("memcpy for hapName failed!");
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
