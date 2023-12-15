@@ -34,7 +34,7 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace Security::AccessToken;
 
-namespace Unittest::SecTest{
+namespace Unittest::SecTest {
 class HksDeviceSecTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -309,7 +309,7 @@ static int32_t ValidateCertChainTest(struct HksCertChain *certChain)
 
 /**
  * @tc.name: HksDeviceSecTest.HksDeviceSecTest001
- * @tc.desc: 
+ * @tc.desc: KeyAttest success
  * @tc.type: FUNC
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
@@ -400,7 +400,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
 
 /**
  * @tc.name: HksDeviceSecTest.HksDeviceSecTest003
- * @tc.desc: 
+ * @tc.desc: test KeyAttest
  * @tc.type: FUNC
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)

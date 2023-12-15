@@ -191,7 +191,8 @@ int32_t CheckNameList(void)
 
 #ifdef HAS_OS_ACCOUNT_PART
             OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-            HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
+            HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %"
+                LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
 #else // HAS_OS_ACCOUNT_PART
             GetOsAccountIdFromUid(callingUid, userId);
             HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d",
