@@ -15,6 +15,4 @@
 huks_hap_trust_list_define = "{}"
 
 # specify the white list for attesetKey
-huks_sa_trust_list_define =
-  "{\"findnetwork\", \"trusted_ring_service\", \"dslm_service\", \"security_guard\", \"local_code_sign\","
-  + "\"dlp_credential_service\"}"
+huks_sa_trust_list_define = "{\"findnetwork\", \"trusted_ring_service\", \"dslm_service\", \"security_guard\", \"local_code_sign\"," + "\"dlp_credential_service\"}"

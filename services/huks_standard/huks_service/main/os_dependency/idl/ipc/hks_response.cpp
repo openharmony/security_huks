@@ -195,8 +195,8 @@ int32_t CheckNameList(void)
                 LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
 #else // HAS_OS_ACCOUNT_PART
             GetOsAccountIdFromUid(callingUid, userId);
-            HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d",
-                callingUid, userId);
+            HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %"
+                LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
 #endif // HAS_OS_ACCOUNT_PART
             HKS_LOG_I("CheckHapInfo...");
             return CheckHapInfo(tokenId, userId);
