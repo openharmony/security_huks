@@ -15,7 +15,10 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "//third_party/bounds_checking_function/include",
+  ]
 }
 
 ohos_static_library("libhuks_bms_systemapi_wrap_static") {

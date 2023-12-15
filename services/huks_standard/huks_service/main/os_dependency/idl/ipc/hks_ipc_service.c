@@ -654,6 +654,7 @@ void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *c
 int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
 {
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
+    // check permisson for attest ids
     for (uint32_t i = 0; i < sizeof(g_idList) / sizeof(g_idList[0]); i++) {
         for (uint32_t j = 0; j < paramSet->paramsCnt; j++) {
             if (paramSet->params[j].tag == g_idList[i]) {
@@ -661,7 +662,15 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
             }
         }
     }
+    // check permisson for attest key
+    if (CheckNameList() == HKS_SUCCESS) {
+        HKS_LOG_I("callers in the checkList no need check permisson!");
+        return HKS_SUCCESS;
+    }
+    HKS_LOG_I("callers not in the checkList, permisson checking!");
+    return SensitivePermissionCheck("ohos.permission.ATTEST_KEY");
 #endif
+    (void)paramSet;
     return HKS_SUCCESS;
 }
 
