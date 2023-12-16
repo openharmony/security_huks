@@ -68,10 +68,12 @@ static int32_t ModifyKey(struct HksBlob *keyAlias)
     if (bufOne == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    uint32_t sizeRead = HksFileRead(g_storePath, (char *)keyAlias->data, 0, bufOne, sizeOne);
+    struct HksBlob blobOne = { .size = sizeOne, .data = bufOne };
+    uint32_t sizeRead = 0;
+    int32_t ret = HksFileRead(g_storePath, (char *)keyAlias->data, 0, &blobOne, &sizeRead);
     (void)memset_s(bufOne, sizeRead, 0, sizeRead);
 
-    int32_t ret = HksFileWrite(g_storePath, (char *)keyAlias->data, 0, bufOne, sizeOne);
+    ret = HksFileWrite(g_storePath, (char *)keyAlias->data, 0, bufOne, sizeOne);
     HksTestFree(bufOne);
 
     return ret;

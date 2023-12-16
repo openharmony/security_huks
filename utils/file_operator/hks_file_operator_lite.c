@@ -108,7 +108,7 @@ static int32_t IsFileExist(const char *fileName)
     return HKS_SUCCESS;
 }
 
-static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     (void)offset;
     int32_t fd = open(fileName, O_RDONLY);
@@ -117,20 +117,20 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
         HILOG_ERROR(HILOG_MODULE_SCY, "failed to open file, errno = 0x%{public}X", errno);
 #endif
-        return 0;
+        return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
-    int32_t size = read(fd, buf, len);
+    int32_t len = read(fd, blob->data, blob->size);
     close(fd);
-    if (size < 0) {
+    if (len < 0) {
         HKS_LOG_E("failed to read file, errno = 0x%" LOG_PUBLIC "x", errno);
 #ifdef HUKS_LOG_MINI_EXT_ENABLED
         HILOG_ERROR(HILOG_MODULE_SCY, "failed to read file, errno = 0x%{public}X", errno);
 #endif
-        return 0;
+        return HKS_ERROR_READ_FILE_FAIL;
     }
-
-    return (uint32_t)size;
+    *size = (uint32_t)len;
+    return HKS_SUCCESS;
 }
 
 static uint32_t FileSize(const char *fileName)
@@ -325,40 +325,40 @@ static int32_t IsFileExist(const char *fileName)
     return HKS_SUCCESS;
 }
 
-static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     /* now offset is 0, but we maybe extend hi1131 file interfaces in the future */
     if (offset != 0) {
-        return 0;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     unsigned int fileSize;
     int32_t ret = UtilsFileStat(fileName, &fileSize);
     if (ret < 0) {
         HKS_LOG_E("stat file failed, errno = 0x%" LOG_PUBLIC "x", ret);
-        return 0;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    if (len > fileSize) {
+    if (blob->size > fileSize) {
         HKS_LOG_E("read data over file size!\n, file size = %" LOG_PUBLIC "d\n, buf len = %" LOG_PUBLIC "d\n",
-            fileSize, len);
-        return 0;
+            fileSize, blob->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int fd = UtilsFileOpen(fileName, O_RDONLY_FS, 0);
     if (fd < 0) {
         HKS_LOG_E("failed to open file, errno = 0x%" LOG_PUBLIC "x", fd);
-        return 0;
+        return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
-    ret = UtilsFileRead(fd, (char *)buf, len);
+    ret = UtilsFileRead(fd, (char *)blob->data, blob->size);
     UtilsFileClose(fd);
     if (ret < 0) {
         HKS_LOG_E("failed to read file, errno = 0x%" LOG_PUBLIC "x", ret);
-        return 0;
+        return HKS_ERROR_READ_FILE_FAIL;
     }
-
-    return len;
+    *size = blob->size;
+    return HKS_SUCCESS;
 }
 
 static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)
@@ -407,19 +407,19 @@ static int32_t FileRemove(const char *fileName)
 
 #endif
 
-uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
-    if ((fileName == NULL) || (buf == NULL) || (len == 0)) {
-        return 0;
+    if ((fileName == NULL) || (blob == NULL) || (blob->data == NULL) || (blob->size == 0)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    HKS_IF_NOT_SUCC_RETURN(ret, 0)
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    uint32_t size = FileRead(fullFileName, offset, buf, len);
+    ret = FileRead(fullFileName, offset, blob, size);
     HKS_FREE_PTR(fullFileName);
-    return size;
+    return ret;
 }
 
 int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)

@@ -177,8 +177,10 @@ static int32_t FreshImageBuffer(const char *fileName)
     uint8_t *buf = (uint8_t *)HksMalloc(totalLen);
     HKS_IF_NULL_RETURN(buf, HKS_ERROR_MALLOC_FAIL)
 
-    fileLen = HksFileRead(HKS_KEY_STORE_PATH, fileName, offset, buf, totalLen);
-    if (fileLen == 0) {
+    struct HksBlob blob = { .size = totalLen, .data = buf };
+
+    int32_t ret = HksFileRead(HKS_KEY_STORE_PATH, fileName, offset, &blob, &fileLen);
+    if (ret != HKS_SUCCESS) {
         HKS_FREE_PTR(buf);
         return HKS_ERROR_READ_FILE_FAIL;
     }
@@ -236,13 +238,13 @@ static int32_t LoadFileToBuffer(const char *fileName)
 {
     /* 1. read key info header */
     uint32_t offset = HksGetStoreFileOffset();
-    uint32_t len = HksFileRead(HKS_KEY_STORE_PATH, fileName, offset,
-        g_storageImageBuffer.data, g_storageImageBuffer.size);
+    uint32_t len = 0;
+    int32_t ret = HksFileRead(HKS_KEY_STORE_PATH, fileName, offset,
+        &g_storageImageBuffer, &len);
 
-    int32_t ret;
     do {
         /* 2. file not exist or read nothing, init image */
-        if (len == 0) {
+        if (ret != HKS_SUCCESS) {
             HKS_LOG_I("file not exist, init buffer.");
             ret = InitImageBuffer();
             HKS_IF_NOT_SUCC_BREAK(ret) /* init fail, need free global buf */
@@ -582,9 +584,10 @@ static int32_t GetRootMaterial(const struct HksBlob *name, struct HksBlob *buffe
     int32_t ret = GetFileName(name, &fileName);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    uint32_t len = HksFileRead(HKS_KEY_STORE_PATH, fileName, 0, buffer->data, buffer->size);
+    uint32_t len = 0;
+    ret = HksFileRead(HKS_KEY_STORE_PATH, fileName, 0, buffer, &len);
     HKS_FREE_PTR(fileName);
-    if (len == 0) {
+    if (ret != HKS_SUCCESS) {
         return HKS_ERROR_READ_FILE_FAIL;
     }
     return HKS_SUCCESS;
