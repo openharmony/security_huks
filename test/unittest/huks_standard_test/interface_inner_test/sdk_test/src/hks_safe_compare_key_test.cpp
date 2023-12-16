@@ -126,7 +126,9 @@ static int32_t CompareKeyData(struct HksBlob *keyAliasOne, struct HksBlob *keyAl
     if (bufOne == nullptr) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    [[maybe_unused]] uint32_t sizeRead = HksFileRead(g_storePath, (char *)keyAliasOne->data, 0, bufOne, sizeOne);
+    struct HksBlob blobOne = { .size = sizeOne, .data = bufOne };
+    [[maybe_unused]] uint32_t sizeRead = 0;
+    int32_t ret = HksFileRead(g_storePath, (char *)keyAliasOne->data, 0, &blobOne, &sizeRead);
 
     uint32_t sizeTwo = HksFileSize(g_storePath, (char *)keyAliasTwo->data);
     uint8_t *bufTwo = (uint8_t *)HksTestMalloc(sizeTwo);
@@ -134,7 +136,8 @@ static int32_t CompareKeyData(struct HksBlob *keyAliasOne, struct HksBlob *keyAl
         HksTestFree(bufOne);
         return HKS_ERROR_MALLOC_FAIL;
     }
-    sizeRead = HksFileRead(g_storePath, (char *)keyAliasTwo->data, 0, bufTwo, sizeOne);
+    struct HksBlob blobTwo = { .size = sizeOne, .data = bufTwo };
+    ret = HksFileRead(g_storePath, (char *)keyAliasTwo->data, 0, &blobTwo, &sizeRead);
     int32_t ret = memcmp(bufOne, bufTwo, sizeOne);
     HksTestFree(bufOne);
     HksTestFree(bufTwo);
