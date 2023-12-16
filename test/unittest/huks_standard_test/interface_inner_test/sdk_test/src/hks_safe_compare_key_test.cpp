@@ -138,7 +138,7 @@ static int32_t CompareKeyData(struct HksBlob *keyAliasOne, struct HksBlob *keyAl
     }
     struct HksBlob blobTwo = { .size = sizeOne, .data = bufTwo };
     ret = HksFileRead(g_storePath, (char *)keyAliasTwo->data, 0, &blobTwo, &sizeRead);
-    int32_t ret = memcmp(bufOne, bufTwo, sizeOne);
+    ret = memcmp(bufOne, bufTwo, sizeOne);
     HksTestFree(bufOne);
     HksTestFree(bufTwo);
     return ret;
