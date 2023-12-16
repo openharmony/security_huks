@@ -67,10 +67,10 @@ int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, ui
     FILE *fp = fopen(filePath, "rb");
     if (fp ==  NULL) {
         if (errno == REQUIRED_KEY_NOT_AVAILABLE) {
-            HKS_LOG_E("Check Permission failed!");
+            HKS_TEST_LOG_E("Check Permission failed!");
             return HKS_ERROR_NO_PERMISSION;
         }
-        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        HKS_TEST_LOG_E("open file fail, errno = 0x%x", errno);
         return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
