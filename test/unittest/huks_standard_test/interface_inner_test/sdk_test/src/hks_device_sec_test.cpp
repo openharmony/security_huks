@@ -616,10 +616,8 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest005, TestSize.Level0)
 {
     uint64_t tokenId;
     const char **acls = new const char *[1];
-    // acls[0] = "ohos.permission.AA"; // system_core
     const char **permsTest = new const char *[1];
     permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
-    // permsTest[1] = ""; // system_core
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 1,
