@@ -662,12 +662,20 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
             }
         }
     }
+    // HKS_ATTESTATION_MODE_ANONYMOUS no need check permission
+    struct HksParam *attestModeParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestModeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get attestation mode fail.")
+
+    if (attestModeParam->uint32Param == HKS_ATTESTATION_MODE_ANONYMOUS) {
+        return HKS_SUCCESS;
+    }
+
     // check permisson for attest key
     if (CheckNameList() == HKS_SUCCESS) {
         HKS_LOG_I("callers in the checkList no need check permisson!");
         return HKS_SUCCESS;
     }
-    HKS_LOG_I("callers not in the checkList, permisson checking!");
     return SensitivePermissionCheck("ohos.permission.ATTEST_KEY");
 #endif
     (void)paramSet;
