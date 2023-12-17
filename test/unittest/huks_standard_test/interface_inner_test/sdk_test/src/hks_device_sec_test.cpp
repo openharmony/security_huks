@@ -34,7 +34,76 @@ using namespace testing::ext;
 using namespace OHOS;
 using namespace Security::AccessToken;
 
-namespace Unittest::SecTest {
+namespace {
+
+PermissionDef g_infoManagerTestPermDef = {
+    .permissionName = "ohos.permission.ATTEST_KEY",
+    .bundleName = "huks_permission_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "test",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC
+};
+
+PermissionStateFull g_infoManagerTestState = {
+    .grantFlags = {1},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .isGeneral = true,
+    .permissionName = "ohos.permission.ATTEST_KEY",
+    .resDeviceID = {"local"}
+};
+
+HapPolicyParams g_infoManagerTestPolicyPrams = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {g_infoManagerTestPermDef},
+    .permStateList = {g_infoManagerTestState}
+};
+
+HapInfoParams g_infoManagerTestInfoParms = {
+    .bundleName = "huks_permission_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "test",
+    .isSystemApp = true
+};
+
+PermissionDef g_infoManagerTestPermDefNoPer = {
+    .permissionName = "",
+    .bundleName = "huks_permission_test",
+    .grantMode = 1,
+    .label = "label",
+    .labelId = 1,
+    .description = "test",
+    .descriptionId = 1,
+    .availableLevel = APL_SYSTEM_BASIC
+};
+
+PermissionStateFull g_infoManagerTestStateNoPer = {
+    .grantFlags = {1},
+    .grantStatus = {PermissionState::PERMISSION_GRANTED},
+    .isGeneral = true,
+    .permissionName = "",
+    .resDeviceID = {"local"}
+};
+
+HapPolicyParams g_infoManagerTestPolicyPramsNoPer = {
+    .apl = APL_SYSTEM_BASIC,
+    .domain = "test.domain",
+    .permList = {g_infoManagerTestPermDefNoPer},
+    .permStateList = {g_infoManagerTestStateNoPer}
+};
+
+HapInfoParams g_infoManagerTestInfoParmsNoPer = {
+    .bundleName = "huks_permission_test",
+    .userID = 1,
+    .instIndex = 0,
+    .appIDDesc = "test",
+    .isSystemApp = true
+};
+
 class HksDeviceSecTest : public testing::Test {
 public:
     static void SetUpTestCase(void);
@@ -191,7 +260,8 @@ static int32_t TestGenerateKey(const struct HksBlob *keyAlias)
     return ret;
 }
 
-static int32_t TestKeyAttest(struct HksCertChain *certChain)
+//Test1 IDS permission
+static int32_t TestKeyAttest1(struct HksCertChain *certChain)
 {
     HKS_TEST_LOG_I("testKeyAttest start");
     char alias[] = "testKey";
@@ -207,6 +277,51 @@ static int32_t TestKeyAttest(struct HksCertChain *certChain)
         { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
         { .tag = HKS_TAG_ATTESTATION_ID_UDID, .blob = g_udid },
         { .tag = HKS_TAG_ATTESTATION_ID_SERIAL, .blob = g_sn },
+        { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias },
+    };
+    struct HksParamSet *paramSet = NULL;
+    ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksAddParams failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksAttestKey(&keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("HksAttestKey failed");
+    }
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
+//Test2 Attest_key permission
+static int32_t TestKeyAttest2(struct HksCertChain *certChain)
+{
+    HKS_TEST_LOG_I("testKeyAttest start");
+    char alias[] = "testKey";
+    struct HksBlob keyAlias = { sizeof(alias), (uint8_t *)alias };
+    int32_t ret = TestGenerateKey(&keyAlias);
+    if (ret != HKS_SUCCESS) {
+        HKS_TEST_LOG_E("TestGenerateKey failed");
+    }
+
+    struct HksParam tmpParams[] = {
+        { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
+        { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
         { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = keyAlias },
     };
     struct HksParamSet *paramSet = NULL;
@@ -257,7 +372,8 @@ static void FreeBuf(uint8_t *a, uint8_t *b, uint8_t *c, uint8_t *d, uint8_t *e)
     }
 }
 
-static int32_t ValidateCertChainTest(struct HksCertChain *certChain)
+//Test1 IDS permission
+static int32_t ValidateCertChainTest1(struct HksCertChain *certChain)
 {
     HKS_TEST_LOG_I("validate cert chain test start");
     uint8_t *challengeData = (uint8_t *)HksTestMalloc(g_size);
@@ -306,6 +422,50 @@ static int32_t ValidateCertChainTest(struct HksCertChain *certChain)
     return ret;
 }
 
+//Test2 Attest Key Permission
+static int32_t ValidateCertChainTest2(struct HksCertChain *certChain)
+{
+    HKS_TEST_LOG_I("validate cert chain test start");
+    uint8_t *challengeData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *secInfoData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *versionData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *snData = (uint8_t *)HksTestMalloc(g_size);
+    uint8_t *udidData = (uint8_t *)HksTestMalloc(g_size);
+    if (challengeData == nullptr || secInfoData == nullptr || versionData == nullptr
+        || snData == nullptr || udidData == nullptr) {
+        FreeBuf(challengeData, secInfoData, versionData, snData, udidData);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    int32_t ret = HKS_ERROR_MALLOC_FAIL;
+    struct HksParamSet *paramSet = nullptr;
+    do {
+        ret = HksInitParamSet(&paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        struct HksParam tmpParam[] = {
+            { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = { g_size, secInfoData } },
+            { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = { g_size, challengeData } },
+            { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = { g_size, versionData } },
+        };
+        ret = HksAddParams(paramSet, tmpParam, sizeof(tmpParam) / sizeof(tmpParam[0]));
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HksBuildParamSet(&paramSet);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = HksValidateCertChain(certChain, paramSet);
+        uint8_t tagCnt = 0;
+        HKS_TEST_LOG_I("validate cert chain result is %x", ret);
+        HKS_TEST_LOG_I("secinfo is %s\n", (char *)paramSet->params[tagCnt++].blob.data);
+        HKS_TEST_LOG_I("challenge is %s\n", (char *)paramSet->params[tagCnt++].blob.data);
+    } while (0);
+    FreeBuf(challengeData, secInfoData, versionData, snData, udidData);
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
 
 /**
  * @tc.name: HksDeviceSecTest.HksDeviceSecTest001
@@ -320,97 +480,6 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest001, TestSize.Level0)
     const char **permsTest = new const char *[2];
     permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
     permsTest[1] = "ohos.permission.ACCESS_IDS"; // system_core
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 2,
-        .dcaps = nullptr,
-        .perms = permsTest,
-        .aplStr = "system_core",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 1;
-    infoInstance.processName = "test_attest";
-    tokenId = GetAccessTokenId(&infoInstance);
-    uint32_t tokenIdHigh32 = (uint32_t)(tokenId >> U32_IS_32_BITS);
-    uint32_t tokenIdLow32 = (uint32_t)tokenId;
-    HKS_TEST_LOG_I("AccessTokenID: high32 = %x, low32 = %x!", tokenIdHigh32, tokenIdLow32);
-
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != 0) {
-        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
-    }
-    ASSERT_TRUE(ret == 0);
-
-    HksCertChain *certChain = NULL;
-    const struct HksTestCertChain certParam = { true, true, true, g_size };
-    ret = ConstructDataToCertChain(&certChain, &certParam);
-    ret = TestKeyAttest(certChain);
-    ASSERT_TRUE(ret == 0);
-
-    ret = ValidateCertChainTest(certChain);
-    ASSERT_TRUE(ret != HKS_SUCCESS);
-
-    ret = ValidateCertChainTest(certChain);
-    FreeCertChain(&certChain, certChain->certsCount);
-}
-
-/**
- * @tc.name: HksDeviceSecTest.HksDeviceSecTest002
- * @tc.desc: test white name List
- * @tc.type: FUNC
- */
-HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
-{
-    uint64_t tokenId;
-    const char **acls = new const char *[2];
-    acls[0] = "ohos.permission.ACCESS_IDS"; // system_core
-    acls[1] = "ohos.permission.ATTEST_KEY";
-    const char **permsTest = new const char *[3];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
-    permsTest[1] = "ohos.permission.ACCESS_IDS"; // system_core
-    permsTest[2] = "ohos.permission.ATTEST_KEY";
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 3,
-        .dcaps = nullptr,
-        .perms = permsTest,
-        .aplStr = "system_core",
-    };
-    infoInstance.acls = acls;
-    infoInstance.aclsNum = 2;
-    infoInstance.processName = "findnetwork";
-    tokenId = GetAccessTokenId(&infoInstance);
-    uint32_t tokenIdHigh32 = (uint32_t)(tokenId >> U32_IS_32_BITS);
-    uint32_t tokenIdLow32 = (uint32_t)tokenId;
-    HKS_TEST_LOG_I("AccessTokenID: high32 = %x, low32 = %x!", tokenIdHigh32, tokenIdLow32);
-
-    int32_t ret = SetSelfTokenID(tokenId);
-    if (ret != 0) {
-        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
-    }
-    ASSERT_TRUE(ret == 0);
-
-    HksCertChain *certChain = NULL;
-    const struct HksTestCertChain certParam = { true, true, true, g_size };
-    ret = ConstructDataToCertChain(&certChain, &certParam);
-    ret = TestKeyAttest(certChain);
-    ASSERT_TRUE(ret == 0);
-    FreeCertChain(&certChain, certChain->certsCount);
-}
-
-/**
- * @tc.name: HksDeviceSecTest.HksDeviceSecTest003
- * @tc.desc: test KeyAttest
- * @tc.type: FUNC
- */
-HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
-{
-    uint64_t tokenId;
-    const char **acls = new const char *[1];
-    acls[0] = "ohos.permission.ATTEST_KEY"; // system_core
-    const char **permsTest = new const char *[2];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
-    permsTest[1] = "ohos.permission.ATTEST_KEY"; // system_core
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 2,
@@ -435,9 +504,148 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
     HksCertChain *certChain = NULL;
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     ret = ConstructDataToCertChain(&certChain, &certParam);
-    ret = TestKeyAttest(certChain);
+    ret = TestKeyAttest1(certChain);
     ASSERT_TRUE(ret == 0);
-    ret = ValidateCertChainTest(certChain);
+
+    ret = ValidateCertChainTest1(certChain);
+    ASSERT_TRUE(ret == 0);
+    FreeCertChain(&certChain, certChain->certsCount);
+}
+
+/**
+ * @tc.name: HksDeviceSecTest.HksDeviceSecTest002
+ * @tc.desc: test hap has ohos.permission.ATTEST_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksDeviceSecTest, HksDeviceSecTest002, TestSize.Level0)
+{
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParms, g_infoManagerTestPolicyPrams);
+    AccessTokenID tokenId = tokenIdEx.tokenIdExStruct.tokenID;
+
+    int32_t ret = SetSelfTokenID(tokenId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+    }
+    ASSERT_TRUE(ret == 0);
+
+    HksCertChain *certChain = NULL;
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ret = TestKeyAttest2(certChain);
+    ASSERT_TRUE(ret != HKS_ERROR_NO_PERMISSION);
+    ret = ValidateCertChainTest2(certChain);
+    FreeCertChain(&certChain, certChain->certsCount);
+}
+
+/**
+ * @tc.name: HksDeviceSecTest.HksDeviceSecTest003
+ * @tc.desc: test sa has ohos.permission.ATTEST_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksDeviceSecTest, HksDeviceSecTest003, TestSize.Level0)
+{
+    uint64_t tokenId;
+    const char **acls = new const char *[1];
+    acls[0] = "ohos.permission.ATTEST_KEY"; // system_basic
+    const char **permsTest = new const char *[2];
+    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    permsTest[1] = "ohos.permission.ATTEST_KEY"; // system_basic
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 2,
+        .dcaps = nullptr,
+        .perms = permsTest,
+        .aplStr = "system_core",
+    };
+    infoInstance.acls = acls;
+    infoInstance.aclsNum = 1;
+    infoInstance.processName = "test_attest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    uint32_t tokenIdHigh32 = (uint32_t)(tokenId >> U32_IS_32_BITS);
+    uint32_t tokenIdLow32 = (uint32_t)tokenId;
+    HKS_TEST_LOG_I("AccessTokenID: high32 = %x, low32 = %x!", tokenIdHigh32, tokenIdLow32);
+
+    int32_t ret = SetSelfTokenID(tokenId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+    }
+    ASSERT_TRUE(ret == 0);
+
+    HksCertChain *certChain = NULL;
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ret = TestKeyAttest2(certChain);
+    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ret = ValidateCertChainTest2(certChain);
+    FreeCertChain(&certChain, certChain->certsCount);
+}
+
+/**
+ * @tc.name: HksDeviceSecTest.HksDeviceSecTest004
+ * @tc.desc: test hap has no ohos.permission.ATTEST_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksDeviceSecTest, HksDeviceSecTest004, TestSize.Level0)
+{
+    AccessTokenIDEx tokenIdEx = {0};
+    tokenIdEx = AccessTokenKit::AllocHapToken(g_infoManagerTestInfoParmsNoPer, g_infoManagerTestPolicyPramsNoPer);
+    AccessTokenID tokenId = tokenIdEx.tokenIdExStruct.tokenID;
+
+    int32_t ret = SetSelfTokenID(tokenId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+    }
+    ASSERT_TRUE(ret == 0);
+
+    HksCertChain *certChain = NULL;
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ret = TestKeyAttest2(certChain);
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
+    ret = ValidateCertChainTest2(certChain);
+    FreeCertChain(&certChain, certChain->certsCount);
+}
+
+/**
+ * @tc.name: HksDeviceSecTest.HksDeviceSecTest005
+ * @tc.desc: test sa not ohos.permission.ATTEST_KEY
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksDeviceSecTest, HksDeviceSecTest005, TestSize.Level0)
+{
+    uint64_t tokenId;
+    const char **acls = new const char *[1];
+    const char **permsTest = new const char *[1];
+    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .dcaps = nullptr,
+        .perms = permsTest,
+        .aplStr = "system_basic",
+    };
+    infoInstance.acls = acls;
+    infoInstance.aclsNum = 0;
+    infoInstance.processName = "test_attest";
+    tokenId = GetAccessTokenId(&infoInstance);
+    uint32_t tokenIdHigh32 = (uint32_t)(tokenId >> U32_IS_32_BITS);
+    uint32_t tokenIdLow32 = (uint32_t)tokenId;
+    HKS_TEST_LOG_I("AccessTokenID: high32 = %x, low32 = %x!", tokenIdHigh32, tokenIdLow32);
+
+
+    int32_t ret = SetSelfTokenID(tokenId);
+    if (ret != 0) {
+        HKS_TEST_LOG_I("SetSelfTokenID fail, ret is %x!", ret);
+    }
+    ASSERT_TRUE(ret == 0);
+
+    HksCertChain *certChain = NULL;
+    const struct HksTestCertChain certParam = { true, true, true, g_size };
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ret = TestKeyAttest2(certChain);
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
+    ret = ValidateCertChainTest2(certChain);
     FreeCertChain(&certChain, certChain->certsCount);
 }
 }

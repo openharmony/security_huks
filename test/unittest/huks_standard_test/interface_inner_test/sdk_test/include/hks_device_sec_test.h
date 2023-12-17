@@ -16,11 +16,14 @@
 #ifndef HUKS_DEVICE_SEC_TEST_H
 #define HUKS_DEVICE_SEC_TEST_H
 
-namespace Unittest::SecTest {
 int HksDeviceSecTest001(void);
 
 int HksDeviceSecTest002(void);
 
 int HksDeviceSecTest003(void);
-}
+
+int HksDeviceSecTest004(void);
+
+int HksDeviceSecTest005(void);
+
 #endif
