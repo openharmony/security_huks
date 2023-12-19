@@ -54,7 +54,7 @@ void HksIpcServiceMac(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *context);
 
-void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context);
+void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject);
 
 void HksIpcServiceInit(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 

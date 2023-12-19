@@ -102,7 +102,7 @@ napi_ref GetCallback(napi_env env, napi_value object);
 
 napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&handleBlob);
 
-void FreeHksCertChain(HksCertChain *&certChain);
+void FreeHksCertChain(HksCertChain *&certChain, uint32_t certChainCapacity);
 
 void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref &callback,
     struct HksBlob *&blob, struct HksParamSet *&paramSet);

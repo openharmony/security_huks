@@ -888,7 +888,7 @@ protected:
         } else {
             EXPECT_EQ(EcdsaVerify(&pubKey, digest, &message, &signature), testCaseParams.verifyResult);
         }
-        
+
         (void)HksDeleteKey(&authId, nullptr);
         if (storage == HKS_STORAGE_TEMP) {
             HksFree(authId.data);

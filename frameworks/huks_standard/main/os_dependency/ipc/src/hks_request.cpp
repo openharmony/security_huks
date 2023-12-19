@@ -15,12 +15,17 @@
 
 #include "hks_request.h"
 
+#include <iservice_registry.h>
+#include <message_option.h>
 #include <securec.h>
-#include "iservice_registry.h"
 
+#include "hks_base_check.h" // for HksAttestIsAnonymous
 #include "hks_log.h"
 #include "hks_param.h"
+#include "hks_sa_interface.h"
 #include "hks_template.h"
+#include "hks_type.h"
+#include "huks_service_ipc_interface_code.h"
 
 using namespace OHOS;
 
@@ -69,6 +74,54 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
     return HKS_SUCCESS;
 }
 
+static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, const struct HksParamSet *paramSet,
+    sptr<IRemoteObject> hksProxy, sptr<Security::Hks::HksStub> hksCallback, struct HksBlob *outBlob)
+{
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT, "invalid outBlob");
+    MessageParcel reply{};
+    // We send the request in sync mode, and we send a stub instance in the request.
+    // We wait for the instance callback later.
+    MessageOption option = MessageOption::TF_SYNC;
+    int error = hksProxy->SendRequest(HKS_MSG_ATTEST_KEY, data, reply, option);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(error, HKS_ERROR_IPC_MSG_FAIL, "hksProxy->SendRequest failed %" LOG_PUBLIC "d", error);
+
+    HksBlob tmpBlob = *outBlob;
+    int ret = HksReadRequestReply(reply, &tmpBlob);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksSendAnonAttestRequestAndWaitAsyncReply HksReadRequestReply failed %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+
+    int timeout = 10; // seconds
+    auto [errCode, packedCerts, packedSize] = hksCallback->WaitForAsyncReply(timeout);
+    if (errCode != HKS_SUCCESS || packedCerts == nullptr || packedSize == 0) {
+        HKS_LOG_E("errCode %" LOG_PUBLIC "u fail or packedCerts empty or size %" LOG_PUBLIC "u 0", errCode, packedSize);
+        return HUKS_ERR_CODE_EXTERNAL_ERROR;
+    }
+
+    if (outBlob->size < packedSize) {
+        HKS_LOG_E("out blob empty or too small %" LOG_PUBLIC "u %" LOG_PUBLIC "u", outBlob->size, packedSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    errno_t err = memcpy_s(outBlob->data, outBlob->size, packedCerts.get(), packedSize);
+    if (err != EOK) {
+        HKS_LOG_E("memcpy_s failed destMax %" LOG_PUBLIC "u count %" LOG_PUBLIC "u", outBlob->size, packedSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    outBlob->size = packedSize;
+    return HKS_SUCCESS;
+#else
+    (void)(data);
+    (void)(paramSet);
+    (void)(hksProxy);
+    (void)(hksCallback);
+    (void)(outBlob);
+    return HKS_SUCCESS;
+#endif
+}
+
 int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBlob,
     struct HksBlob *outBlob, const struct HksParamSet *paramSet)
 {
@@ -100,8 +153,25 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     sptr<IRemoteObject> hksProxy = GetHksProxy();
     HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
 
+    if (type == HKS_MSG_ATTEST_KEY) {
+        sptr<Security::Hks::HksStub> hksCallback = new (std::nothrow) Security::Hks::HksStub();
+        HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed")
+        // We write a HksStub instance if type == HKS_MSG_ATTEST_KEY,
+        // then we can read it in the server side if type == HKS_MSG_ATTEST_KEY.
+        bool result = data.WriteRemoteObject(hksCallback);
+        if (!result) {
+            HKS_LOG_E("WriteRemoteObject hksCallback failed %" LOG_PUBLIC "d", result);
+            return HKS_ERROR_IPC_MSG_FAIL;
+        }
+        if (HksAttestIsAnonymous(paramSet)) {
+            return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, hksProxy, hksCallback, outBlob);
+        }
+        // If the mode is non-anonymous attest, we write a HksStub instance here, then go back and process as normal.
+    }
+
     int error = hksProxy->SendRequest(type, data, reply, option);
     if (error != 0) {
+        HKS_LOG_E("hksProxy->SendRequest failed %" LOG_PUBLIC "d", error);
         return HKS_ERROR_IPC_MSG_FAIL;
     }
 

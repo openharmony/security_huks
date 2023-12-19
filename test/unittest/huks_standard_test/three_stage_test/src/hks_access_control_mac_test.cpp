@@ -220,7 +220,7 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest005, TestSize.Level0)
     HKS_LOG_I("Enter HksAccessMacPartTest005");
     uint8_t alias[] = "testCheckAuthMac";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    
+
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());
@@ -240,7 +240,7 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest005, TestSize.Level0)
     struct HksParamSet *macParamSet = nullptr;
     ret = InitParamSet(&macParamSet, macParams, sizeof(macParams) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    
+
     uint8_t out[256] = {0};
     struct HksBlob outBlob = { sizeof(out), out };
     ret = HksMac(&keyAlias, macParamSet, &outBlob, &outBlob);

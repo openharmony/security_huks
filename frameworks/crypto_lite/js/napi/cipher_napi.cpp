@@ -95,7 +95,7 @@ static int32_t GetString(napi_env env, napi_value object, char **element, size_t
         CIPHER_LOG_E("input is not a string-type object");
         return ERROR_SUCCESS;
     }
-        
+
     status = napi_get_value_string_utf8(env, object, nullptr, 0, len);
     if (status != napi_ok) {
         return ERROR_CODE_GENERAL;
@@ -491,7 +491,7 @@ void SetFail(napi_env env, CallbackContext *asyncContext)
 
     napi_value errorCode = nullptr;
     napi_create_int32(env, ERROR_CODE, &errorCode);
-    
+
     napi_value params[FAIL_ARG] = { result, errorCode };
     napi_get_reference_value(env, asyncContext->callbackFail, &callback);
     napi_call_function(env, nullptr, callback, FAIL_ARG, params, &ret);

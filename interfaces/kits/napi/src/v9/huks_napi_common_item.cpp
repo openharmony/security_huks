@@ -444,14 +444,14 @@ static napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, 
     return array;
 }
 
-void FreeHksCertChain(HksCertChain *&certChain)
+void FreeHksCertChain(HksCertChain *&certChain, uint32_t certChainCapacity)
 {
     if (certChain == nullptr) {
         return;
     }
 
-    if (certChain->certsCount > 0 && certChain->certs != nullptr) {
-        for (uint32_t i = 0; i < certChain->certsCount; i++) {
+    if (certChainCapacity > 0 && certChain->certs != nullptr) {
+        for (uint32_t i = 0; i < certChainCapacity; i++) {
             if (certChain->certs[i].data != nullptr) {
                 HksFree(certChain->certs[i].data);
                 certChain->certs[i].data = nullptr;

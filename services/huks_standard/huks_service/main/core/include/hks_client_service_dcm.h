@@ -16,13 +16,14 @@
 #ifndef HKS_CLIENT_SERVICE_DCM_H
 #define HKS_CLIENT_SERVICE_DCM_H
 
+#include "hks_param.h"
 #include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t DcmGenerateCertChain(struct HksBlob *cert, struct HksCertChain *certChain);
+int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *remoteObject);
 
 #ifdef __cplusplus
 }

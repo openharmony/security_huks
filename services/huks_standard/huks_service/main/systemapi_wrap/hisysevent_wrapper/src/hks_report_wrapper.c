@@ -28,6 +28,7 @@
 #define STRING_TAG_UNWRAP_ALGORITHM_SUITE "unwrapAlgorithmSuit"
 #define STRING_TAG_ITERATION "iteration"
 #define STRING_TAG_PURPOSE "purpose"
+#define STRING_TAG_ATTESTATION_MODE "attestationMode"
 
 static const struct HksBlob g_tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
 static const struct HksBlob g_tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
@@ -36,6 +37,8 @@ static const struct HksBlob g_tagUnwrapAlgorithmSuit = {sizeof(STRING_TAG_UNWRAP
     (uint8_t *)STRING_TAG_UNWRAP_ALGORITHM_SUITE};
 static const struct HksBlob g_tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, (uint8_t *)STRING_TAG_ITERATION};
 static const struct HksBlob g_tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
+static const struct HksBlob g_tagAttestationMode = {
+    sizeof(STRING_TAG_ATTESTATION_MODE) - 1, (uint8_t *)STRING_TAG_ATTESTATION_MODE};
 
 static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut, uint32_t *index)
 {
@@ -139,6 +142,7 @@ static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
     AppendIfExist(HKS_TAG_BLOCK_MODE, paramSetIn, &g_tagBlockMode, extraOut, &index);
     AppendIfExist(HKS_TAG_UNWRAP_ALGORITHM_SUITE, paramSetIn, &g_tagUnwrapAlgorithmSuit, extraOut, &index);
     AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &g_tagIteration, extraOut, &index);
+    AppendIfExist(HKS_TAG_ATTESTATION_MODE, paramSetIn, &g_tagAttestationMode, extraOut, &index);
 }
 
 int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo,

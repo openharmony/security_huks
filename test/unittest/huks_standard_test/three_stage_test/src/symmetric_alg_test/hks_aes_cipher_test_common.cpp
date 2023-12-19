@@ -265,7 +265,7 @@ int32_t HksAesCipherTestCaseGcm3(const struct HksBlob *keyAlias, struct HksParam
     struct HksBlob cipherText = { AES_COMMON_SIZE, cipher };
     ret = HksAesCipherTestEncryptWithoutNonce(keyAlias, encryptParamSet, &inData, &cipherText, needAccessControl);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestEncrypt failed.";
-    
+
     cipherText.size -= NONCE_SIZE;
     cipherText.size -= AEAD_SIZE;
 
@@ -354,7 +354,7 @@ int32_t HksAesCipherTestCaseGcm4(const struct HksBlob *keyAlias, struct HksParam
     if (ret != HKS_SUCCESS) {
         return ret;
     }
-    
+
     cipherText.size -= NONCE_SIZE;
     cipherText.size -= AEAD_SIZE;
 

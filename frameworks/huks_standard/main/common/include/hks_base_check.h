@@ -125,6 +125,15 @@ int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool
 int32_t HksCheckNeedCache(uint32_t alg, uint32_t digest);
 
 int32_t HksCheckUserAuthKeyInfoValidity(const struct HksParamSet *paramSet);
+
+inline bool HksAttestIsAnonymous(const struct HksParamSet *paramSet)
+{
+    struct HksParam *attestParam = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestParam) == HKS_SUCCESS) {
+        return attestParam->uint32Param == HKS_ATTESTATION_MODE_ANONYMOUS;
+    }
+    return false;
+}
 #ifdef __cplusplus
 }
 #endif

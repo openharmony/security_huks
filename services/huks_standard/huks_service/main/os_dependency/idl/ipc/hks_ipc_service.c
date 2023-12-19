@@ -27,14 +27,16 @@
 #include "hks_config.h"
 #endif
 
+#include "hks_base_check.h" // for HksAttestIsAnonymous
+#include "hks_client_check.h"
+#include "hks_client_service_dcm.h"
 #include "hks_client_service.h"
 #include "hks_cmd_id.h"
-#include "hks_service_ipc_serialization.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_response.h"
+#include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
-#include "hks_client_check.h"
 
 #define MAX_KEY_SIZE         2048
 
@@ -663,11 +665,7 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
         }
     }
     // HKS_ATTESTATION_MODE_ANONYMOUS no need check permission
-    struct HksParam *attestModeParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_MODE, &attestModeParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get attestation mode fail.")
-
-    if (attestModeParam->uint32Param == HKS_ATTESTATION_MODE_ANONYMOUS) {
+    if (HksAttestIsAnonymous(paramSet)) {
         return HKS_SUCCESS;
     }
 
@@ -682,7 +680,7 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
     return HKS_SUCCESS;
 }
 
-void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context)
+void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *context, const uint8_t *remoteObject)
 {
     struct HksBlob keyAlias = { 0, NULL };
     struct HksParamSet *inParamSet = NULL;
@@ -704,10 +702,11 @@ void HksIpcServiceAttestKey(const struct HksBlob *srcData, const uint8_t *contex
         ret = HksAttestAccessControl(inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAttestAccessControl fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob);
+        ret = HksServiceAttestKey(&processInfo, &keyAlias, inParamSet, &certChainBlob, remoteObject);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAttestKey fail, ret = %" LOG_PUBLIC "d", ret)
 
-        HKS_LOG_E("get certChainBlob size %" LOG_PUBLIC "u", certChainBlob.size);
+        // certChainBlob.size would be 0 if attestation mode is anonymous
+        HKS_LOG_I("got certChainBlob size %" LOG_PUBLIC "u", certChainBlob.size);
         HksSendResponse(context, ret, &certChainBlob);
     } while (0);
 

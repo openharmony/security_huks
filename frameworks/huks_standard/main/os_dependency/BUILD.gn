@@ -86,10 +86,19 @@ if (os_level == "standard") {
       "./ipc/src/hks_ipc_check.c",
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/hks_sa_interface.cpp"
+
+      # both client side and server side will include hks_sa_interface.cpp
+      "../../../../services/huks_standard/huks_service/main/os_dependency/sa/hks_sa_interface.cpp",
     ]
 
-    include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa" ]
+    if (huks_security_level == "software") {
+      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    }
+
+    include_dirs = [
+      # hks_sa_interface.cpp will include hks_sa_interface.h which is in the following directory.
+      "../../../../services/huks_standard/huks_service/main/os_dependency/sa",
+    ]
 
     if (huks_use_rkc_in_standard) {
       sources += [

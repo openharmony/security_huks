@@ -61,7 +61,7 @@ void HksAccessControlSecureSignTest::TearDown()
 static const std::string g_inData = "Hks_SM4_Cipher_Test_000000000000000000000000000000000000000000000000000000000000"
     "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
     "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
-    
+
 static const std::string g_inDataLess64 = "Hks_SM4_Cipher_Test_000000000000000000000000000000000000";
 
 static const uint32_t g_authHeadSize = 24;
@@ -265,7 +265,7 @@ static struct HksParam g_importDsaKeyParams[] = {
     }
 };
 
-    
+
 static struct HksParam g_importDsaKeyParamsNoAuthInfo[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DSA },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
@@ -503,7 +503,7 @@ static int32_t BuildImportKeyParamsForRsa(struct HksTestSecureSignImportParams *
         importParams->inputParamSize = isAuth ? sizeof(g_importRsaKeyParams)/sizeof(g_importRsaKeyParams[0]) :
             sizeof(g_importRsaKeyParamsNoAuth)/sizeof(g_importRsaKeyParamsNoAuth[0]);
     }
-    
+
     importParams->expectResult = HKS_SUCCESS;
     uint8_t *keyBuffer = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
     if (keyBuffer == nullptr) {
@@ -742,7 +742,7 @@ int32_t HksTestUpdateFinishSignAuthInfo(struct HksTestSecureSignVerifyUpdateFini
     }
 
     genAuthTokenParams->authChallenge = &challenge;
-    
+
     struct HksParamSet *newParamSet = nullptr;
     ret = HksBuildAuthTokenSecure(paramSet, genAuthTokenParams, &newParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksBuildAuthTokenSecure failed.";
@@ -772,7 +772,7 @@ int32_t HksTestUpdateFinishSignAuthInfo(struct HksTestSecureSignVerifyUpdateFini
         HksFreeParamSet(&newParamSet);
         return HKS_FAILURE;
     }
-    
+
     HksFreeParamSet(&paramSet);
     HksFreeParamSet(&newParamSet);
     return ret;
@@ -847,7 +847,7 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
         HksFreeParamSet(&newParamSet);
         return HKS_FAILURE;
     }
-    
+
     return ret;
 }
 
