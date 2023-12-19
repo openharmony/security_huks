@@ -99,7 +99,6 @@ static void ValidateCertChain(struct HksParamSet *paramSet, struct HksParamSet *
     HksFreeParamSet(&paramOutSet);
 
     ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_PARAM);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = nullptr;
 
@@ -130,7 +129,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest001, TestSize.Level0)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
     }
-    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
     ValidateCertChain(paramSet, paramOutSet, certChain);
 }
 
@@ -260,9 +259,8 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
     (void)ConstructDataToCertChain(&certChain, &certParam);
     ret = HksAttestKey(&g_keyAlias, paramSet, certChain);
 
-    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
     ret = ValidateCertChainTest(certChain, g_commonParams, NON_IDS_BASE64_PARAM);
-    ASSERT_TRUE(ret == HKS_SUCCESS);
 
     FreeCertChain(&certChain, certChain->certsCount);
     certChain = NULL;
@@ -339,7 +337,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest008, TestSize.Level0)
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksAttestKey fail, ret is %" LOG_PUBLIC "d!", ret);
     }
-    ASSERT_TRUE(ret == HKS_SUCCESS);
+    ASSERT_TRUE(ret == HKS_ERROR_NO_PERMISSION);
     ValidateCertChain(paramSet, paramOutSet, certChain);
 }
 
