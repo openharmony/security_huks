@@ -515,10 +515,10 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
         ret = HksStorageReadFile(srcPath, srcFileName, 0, &blob, &size);
         if (ret != HKS_SUCCESS) {
             if (ret == HKS_ERROR_NO_PERMISSION) {
-                HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "u.", ret);
+                HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
                 break;
             }
-            HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "u.", ret);
+            HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
             ret = HKS_ERROR_READ_FILE_FAIL;
             break;
         }
@@ -576,10 +576,10 @@ static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct
     int32_t ret = HksStorageReadFile(path, fileName, 0, keyBlob, &size);
     if (ret != HKS_SUCCESS) {
         if (ret == HKS_ERROR_NO_PERMISSION) {
-            HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "u.", ret);
+            HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
             return ret;
         }
-        HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "u.", ret);
+        HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
         return HKS_ERROR_READ_FILE_FAIL;
     }
     keyBlob->size = size;
