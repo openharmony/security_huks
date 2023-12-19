@@ -760,7 +760,7 @@ HWTEST_F(HksChipsetPlatformDecryptTest, HksChipsetPlatformDecryptTest011, TestSi
 {
     HKS_LOG_E("enter HksChipsetPlatformDecryptTest011");
     struct HksChipsetPlatformTestCase t(DECRYPT_KEY_NORMAL_CASES[0]);
-    
+
     t.cipher.emplace_back(1);
 
     auto decryptParams = CipherMaterialsToDecryptInputParams(t);
@@ -784,7 +784,7 @@ HWTEST_F(HksChipsetPlatformDecryptTest, HksChipsetPlatformDecryptTest012, TestSi
 {
     HKS_LOG_E("enter HksChipsetPlatformDecryptTest012");
     struct HksChipsetPlatformTestCase t(DECRYPT_KEY_NORMAL_CASES[0]);
-    
+
     t.cipher = std::vector<uint8_t>(PLATFORM_KEY_TEXT_MAX_LEN + 1);
 
     auto decryptParams = CipherMaterialsToDecryptInputParams(t);
@@ -808,7 +808,7 @@ HWTEST_F(HksChipsetPlatformDecryptTest, HksChipsetPlatformDecryptTest013, TestSi
 {
     HKS_LOG_E("enter HksChipsetPlatformDecryptTest013");
     struct HksChipsetPlatformTestCase t(DECRYPT_KEY_NORMAL_CASES[0]);
-    
+
     t.aad.emplace_back(1);
 
     auto decryptParams = CipherMaterialsToDecryptInputParams(t);
@@ -832,7 +832,7 @@ HWTEST_F(HksChipsetPlatformDecryptTest, HksChipsetPlatformDecryptTest014, TestSi
 {
     HKS_LOG_E("enter HksChipsetPlatformDecryptTest014");
     struct HksChipsetPlatformTestCase t(DECRYPT_KEY_NORMAL_CASES[0]);
-    
+
     t.iv.emplace_back(1);
 
     auto decryptParams = CipherMaterialsToDecryptInputParams(t);
@@ -856,7 +856,7 @@ HWTEST_F(HksChipsetPlatformDecryptTest, HksChipsetPlatformDecryptTest015, TestSi
 {
     HKS_LOG_E("enter HksChipsetPlatformDecryptTest015");
     struct HksChipsetPlatformTestCase t(DECRYPT_KEY_NORMAL_CASES[0]);
-    
+
     t.mac.emplace_back(1);
 
     auto decryptParams = CipherMaterialsToDecryptInputParams(t);

@@ -285,7 +285,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest005, TestSize.Level0
     HKS_LOG_I("Enter HksAccessDerivePartTest005");
     uint8_t alias[] = "testCheckAuthDerive";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    
+
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());
@@ -305,7 +305,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest005, TestSize.Level0
     struct HksParamSet *deriveParamSet = nullptr;
     ret = InitParamSet(&deriveParamSet, deriveParams, sizeof(deriveParams) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    
+
     uint8_t out[256] = {0};
     struct HksBlob outBlob = { sizeof(out), out };
     ret = HksDeriveKey(deriveParamSet, &keyAlias, &outBlob);

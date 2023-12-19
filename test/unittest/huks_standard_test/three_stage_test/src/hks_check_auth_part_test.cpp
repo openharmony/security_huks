@@ -308,7 +308,7 @@ static int32_t getParamSetAuthTest(struct HksParamSet **paramOutSet, const struc
     }
     HksAddParams(*paramOutSet, &localSecureKey, 1);
     HksBuildParamSet(paramOutSet);
- 
+
     return HKS_SUCCESS;
 }
 
@@ -361,7 +361,7 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
         HKS_LOG_I("InitParamSet(gen) failed, ret : %" LOG_PUBLIC "d", ret);
         return ret;
     }
-    
+
     uint8_t alias[] = "testCheckAuth";
     struct HksBlob keyAlias = { sizeof(alias), alias };
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);

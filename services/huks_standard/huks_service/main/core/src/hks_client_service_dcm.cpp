@@ -13,204 +13,62 @@
  * limitations under the License.
  */
 
+#ifdef HKS_CONFIG_FILE
+#include HKS_CONFIG_FILE
+#else
+#include "hks_config.h"
+#endif
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+
 #include "hks_client_service_dcm.h"
 
-#include <algorithm>
-#include <chrono>
-#include <condition_variable>
-#include <cstdio>
-#include <dlfcn.h>
-#include <memory>
-#include <mutex>
-#include <thread>
+#include <cinttypes>
 #include <securec.h>
 
 #include "hks_cfi.h"
+#include "hks_dcm_callback_handler.h"
 #include "hks_log.h"
-#include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_type.h"
 
-typedef enum {
-    DCM_SUCCESS = 0
-} DcmErrorCode;
-
-struct DcmBlobT {
-    uint32_t size;
-    uint8_t *data;
-};
-using DcmBlob = DcmBlobT;
-
-struct DcmCertChainT {
-    DcmBlob *cert;
-    uint32_t certCount;
-};
-using DcmCertChain = DcmCertChainT;
-
-using DcmCallback = void (*)(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *certChain);
-
-class DcmAttest {
-    std::condition_variable attestFinished{};
-    bool callbackCalled = false;
-    bool timeout = false;
-    bool isCallingFailed = false;
-
-    std::condition_variable sleepAlarm{};
-    HksCertChain *certChain{};
-
-    using AttestFunction = int32_t (*)(const DcmBlob *localAttestCert, DcmCallback callback);
-    void *certMgrSdkHandle {};
-    AttestFunction dcmAnonymousAttestKey {};
-
-    void DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain);
-    void WaitTimeout();
-  public:
-    explicit DcmAttest(HksCertChain *certChain);
-    ~DcmAttest();
-    int32_t AttestWithAnon(HksBlob *cert);
-};
-
-void DcmAttest::DcmCallback(uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain)
+ENABLE_CFI(int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *remoteObject))
 {
-    if (timeout) {
-        return;
-    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(cert), HKS_ERROR_INVALID_ARGUMENT, "invalid in cert");
+    AttestFunction fun = HksOpenDcmFunction();
+    HKS_IF_NULL_LOGE_RETURN(fun, HKS_ERROR_UNKNOWN_ERROR, "HksOpenDcmFunction failed");
+    int ret = HKS_ERROR_UNKNOWN_ERROR;
     do {
-        if (errCode != DCM_SUCCESS) {
-            HKS_LOG_I("DcmCallBack result is fail, erroCode = %" LOG_PUBLIC "d", errCode);
-            break;
-        }
-        if (certChain == nullptr || certChain->certs == nullptr) {
-            HKS_LOG_E("certChain buffer from caller is null.");
-            break;
-        }
-        if (dcmCertChain == nullptr) {
-            HKS_LOG_E("dcmCertChain is NULL");
-            break;
-        }
-        if (certChain->certsCount < dcmCertChain->certCount) {
-            HKS_LOG_E("cert count from huks is not enough to load dcm certChain.");
-            break;
-        }
-        HKS_LOG_I("Begin to extract anon certChain.");
-        for (uint32_t i = 0; i < dcmCertChain->certCount; ++i) {
-            if (certChain->certs[i].data == nullptr) {
-                HKS_LOG_E("single cert chain from huks is null.");
-                isCallingFailed = true;
+        DcmAnonymousRequest request = {
+            .blob = { .size = cert->size, .data = cert->data },
+            .requestId = 0,
+        };
+        {
+            // We got a requestId after invoking DcmAnonymousAttestKey function,
+            // and the implementation of DcmAnonymousAttestKey will invoke our HksDcmCallback in a new thread.
+            // To avoid that the new thread will call HksDcmCallback before
+            // HksDcmCallbackHandlerSetRequestIdWithoutLock, we bind the getting requestId operation and setting
+            // requestId openration with one lock guard.
+            std::lock_guard<std::mutex> lockGuard(HksDcmCallbackHandlerGetMapMutex());
+            ret = fun(&request, [](DcmAnonymousResponse *response) {
+                HksDcmCallback(response);
+            });
+            HKS_LOG_I("got requestId %" LOG_PUBLIC PRIu64, request.requestId);
+            if (ret != DCM_SUCCESS) {
+                HKS_LOG_E("DcmAnonymousAttestKey failed %" LOG_PUBLIC "d", ret);
+                ret = HUKS_ERR_CODE_EXTERNAL_ERROR;
+                // We will not add callback instance into map and ignore callback in case of error.
                 break;
             }
-            if (dcmCertChain->cert[i].data == nullptr) {
-                HKS_LOG_E("single dcmCertChain buffer is null.");
-                isCallingFailed = true;
-                break;
-            }
-            if (memcpy_s(certChain->certs[i].data, certChain->certs[i].size, dcmCertChain->cert[i].data,
-                dcmCertChain->cert[i].size) != EOK) {
-                HKS_LOG_E("huks certChain cert size is smaller than dcmCertChain certChain size: %" LOG_PUBLIC
-                    "u, dcmCertSize: %" LOG_PUBLIC "u", certChain->certs[i].size, dcmCertChain->cert[i].size);
-                isCallingFailed = true;
-                break;
-            }
-            certChain->certs[i].size = dcmCertChain->cert[i].size;
+            ret = HksDcmCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
         }
-        HKS_LOG_I("Extract anon certChain final Success!");
-    } while (0);
-    callbackCalled = true;
-    attestFinished.notify_all();
-}
 
-void DcmAttest::WaitTimeout()
-{
-    HKS_LOG_I("begin wait_for");
-    {
-        std::mutex sleepLock{};
-        std::unique_lock<std::mutex> lock(sleepLock);
-        std::cv_status waitResult =
-            sleepAlarm.wait_for(lock, std::chrono::seconds(10));
-        if (waitResult == std::cv_status::timeout) {
-            HKS_LOG_E("watting for dcm is timeout!");
-        } else {
-            HKS_LOG_I("finished successfully! waked up!");
-        }
-    }
-    timeout = true;
-    attestFinished.notify_all();
-}
-
-DcmAttest::DcmAttest(HksCertChain *certChain) : certChain(certChain)
-{
-    HKS_LOG_I("begin dlopen libdevice_cert_mgr_sdk.z.so");
-    certMgrSdkHandle = dlopen("libdevice_cert_mgr_sdk.z.so", RTLD_NOW);
-    if (certMgrSdkHandle == nullptr) {
-        HKS_LOG_E("dlopen libdevice_cert_mgr_sdk.z.so failed! %" LOG_PUBLIC "s", dlerror());
-        return;
-    }
-    HKS_LOG_I("dlopen ok!");
-    dcmAnonymousAttestKey = reinterpret_cast<AttestFunction>(dlsym(certMgrSdkHandle, "DcmAnonymousAttestKey"));
-    if (dcmAnonymousAttestKey == nullptr) {
-        HKS_LOG_E("dlsym failed %" LOG_PUBLIC "s", dlerror());
-        return;
-    }
-    HKS_LOG_I("dlsym ok!");
-}
-
-DcmAttest::~DcmAttest()
-{
-    if (certMgrSdkHandle == nullptr) {
-        return;
-    }
-    int ret = dlclose(certMgrSdkHandle);
-    HKS_LOG_W("dlclose ret %" LOG_PUBLIC "d", ret);
-}
-
-ENABLE_CFI(int32_t DcmAttest::AttestWithAnon(HksBlob *cert))
-{
-    HKS_LOG_I("enter attest for dcm.");
-    if (dcmAnonymousAttestKey == nullptr) {
-        HKS_LOG_E("dcmAnonymousAttestKey is NULL!");
-        return HKS_ERROR_IPC_DLOPEN_FAIL;
-    }
-    std::thread timerThread([this]() { WaitTimeout(); });
-    DcmBlob dcmCert = {.size = cert->size, .data = cert->data};
-    HKS_LOG_I("begin to pack callback for dcmAnonymousAttestKey");
-    static auto callback = [this](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize, DcmCertChain *dcmCertChain) {
-        DcmCallback(errCode, errInfo, infoSize, dcmCertChain);
-    };
-    HKS_LOG_I("begin time: anon sa attest key!");
-    int32_t ret = dcmAnonymousAttestKey(&dcmCert, [](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize,
-        DcmCertChain *dcmCertChain) {
-        HKS_LOG_I("end time: anon sa attest key, receive callback!");
-        callback(errCode, errInfo, infoSize, dcmCertChain);
-    });
-    if (ret != DCM_SUCCESS) {
-        HKS_LOG_E("calling dcm anon attestKey not success,ret = %" LOG_PUBLIC "d", ret);
-        sleepAlarm.notify_all();
-        timerThread.join();
-        return ret;
-    }
-    HKS_LOG_I("Calling DcmanonymousAttestKey ok, begin to wait callback!");
-    std::mutex mtx{};
-    std::unique_lock<std::mutex> lock(mtx);
-    // only wait callback if ret is success
-    attestFinished.wait(lock, [&] { return callbackCalled || timeout; });
-    if (callbackCalled) {
-        HKS_LOG_I("callbackCalled return certchain.");
-    } else {
-        HKS_LOG_E("no callbackCalled");
-        ret = HKS_ERROR_COMMUNICATION_TIMEOUT;
-    }
-    if (isCallingFailed) {
-        ret = HKS_ERROR_BUFFER_TOO_SMALL;
-    }
-    HKS_LOG_I("begin notify sleep thread");
-    sleepAlarm.notify_all();
-    HKS_LOG_I("begin timerThread.join()");
-    timerThread.join();
+        // We will not return data on the sync interface, we will send the cert chain in the callback.
+        cert->size = 0;
+        return HKS_SUCCESS;
+    } while (false);
     return ret;
 }
 
-int32_t DcmGenerateCertChain(HksBlob *cert, HksCertChain *certChain)
-{
-    DcmAttest attest(certChain);
-    return attest.AttestWithAnon(cert);
-}
+#endif // HKS_UNTRUSTED_RUNNING_ENV

@@ -210,7 +210,7 @@ namespace Unittest::ImportWrappedKey {
                                         &commonAad, &commonNonce, &kekTag, &keyMaterialLen, plainCipher };
         int32_t ret = BuildWrappedKeyData(blobArray, HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS, wrappedKeyData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "BuildWrappedKeyData failed.";
-        
+
         struct HksParam *purpose = nullptr;
         ret = HksGetParam(params->importWrappedKeyParamSet, HKS_TAG_PURPOSE, &purpose);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Get wrapped purpose param failed.";

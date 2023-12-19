@@ -29,7 +29,7 @@
 struct HuksKeyNode {
     struct DoubleList listHead;
     struct HksParamSet *keyBlobParamSet;
-    
+
     /**
      * @brief used to cache params of caller and state or temp prop in memory during using key
      * CURRENT state:

@@ -131,7 +131,7 @@ int32_t TestBatchUpdateLoopFinish(const struct HksBlob *handle, const struct Hks
     if (MallocAndCheckBlobData(&outDataSeg, outDataSeg.size) != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
-    
+
     int32_t ret = HksUpdate(handle, paramSet, &inDataSeg, &outDataSeg);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksUpdate Failed.");
@@ -156,7 +156,7 @@ int32_t TestBatchUpdateLoopFinish(const struct HksBlob *handle, const struct Hks
         HksFree(outDataFinish.data);
         return HKS_FAILURE;
     }
-    
+
     if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
         HksFree(outDataFinish.data);
         return HKS_ERROR_BUFFER_TOO_SMALL;
@@ -216,7 +216,7 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
         HksFree(outDataFinish.data);
         return HKS_FAILURE;
     }
-    
+
     if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
         HksFree(outDataFinish.data);
         return HKS_ERROR_BUFFER_TOO_SMALL;

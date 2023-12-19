@@ -48,6 +48,7 @@ public:
     virtual ~HksService();
 
     int OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option) override;
+
     static sptr<HksService> GetInstance();
 
 protected:
@@ -64,10 +65,6 @@ private:
     ServiceRunningState runningState_;
     static std::mutex instanceLock;
     static sptr<HksService> instance;
-
-    int asyncReply_ = { 0 };
-    std::mutex mutex_;
-    std::condition_variable cv_;
 };
 } // namespace Hks
 } // namespace Security

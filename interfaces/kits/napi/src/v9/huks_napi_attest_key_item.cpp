@@ -44,6 +44,7 @@ struct AttestKeyAsyncContextT {
     struct HksBlob *keyAlias = nullptr;
     struct HksParamSet *paramSet = nullptr;
     struct HksCertChain *certChain = nullptr;
+    uint32_t certChainCapacity = 0;
 };
 using AttestKeyAsyncContext = AttestKeyAsyncContextT *;
 
@@ -62,7 +63,7 @@ static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &con
         return;
     }
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
-    FreeHksCertChain(context->certChain);
+    FreeHksCertChain(context->certChain, context->certChainCapacity);
     HksFree(context);
     context = nullptr;
 }
@@ -107,11 +108,12 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
     return GetInt32(env, 0);
 }
 
-static void InitCertChain(struct HksCertChain *certChain)
+static void InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
 {
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
     if (certChain->certs != nullptr) {
+        *certChainCapacity = certChain->certsCount;
         certChain->certs[INDEX_0].size = HKS_CERT_APP_SIZE;
         certChain->certs[INDEX_0].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_0].size));
         certChain->certs[INDEX_1].size = HKS_CERT_DEVICE_SIZE;
@@ -142,7 +144,7 @@ static napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context
 
             napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (napiContext->certChain != nullptr) {
-                InitCertChain(napiContext->certChain);
+                InitCertChain(napiContext->certChain, &napiContext->certChainCapacity);
             }
 
             napiContext->result = HksAttestKey(napiContext->keyAlias, napiContext->paramSet, napiContext->certChain);
