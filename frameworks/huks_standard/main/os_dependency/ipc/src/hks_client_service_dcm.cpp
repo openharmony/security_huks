@@ -181,6 +181,7 @@ ENABLE_CFI(int32_t DcmAttest::AttestWithAnon(HksBlob *cert))
     HKS_LOG_I("begin time: anon sa attest key!");
     int32_t ret = dcmAnonymousAttestKey(&dcmCert, [](uint32_t errCode, uint8_t *errInfo, uint32_t infoSize,
         DcmCertChain *dcmCertChain) {
+        HKS_LOG_I("end time: anon sa attest key, receive callback!");
         callback(errCode, errInfo, infoSize, dcmCertChain);
     });
     if (ret != DCM_SUCCESS) {
@@ -189,7 +190,7 @@ ENABLE_CFI(int32_t DcmAttest::AttestWithAnon(HksBlob *cert))
         timerThread.join();
         return ret;
     }
-    HKS_LOG_I("end time: anon sa attest key, begin to wait callback!");
+    HKS_LOG_I("Calling DcmanonymousAttestKey ok, begin to wait callback!");
     std::mutex mtx{};
     std::unique_lock<std::mutex> lock(mtx);
     // only wait callback if ret is success
