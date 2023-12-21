@@ -59,15 +59,15 @@
 #endif
 
 #define ENTER_LOG_AND_COST(body) do { \
-        uint64_t enterTime = 0; \
-        (void)HksElapsedRealTime(&enterTime); \
-        HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime); \
-        body \
-        uint64_t leaveTime = 0; \
-        (void)HksElapsedRealTime(&leaveTime); \
-        HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC \
-            "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime); \
-    } while (0)
+    uint64_t enterTime = 0; \
+    (void)HksElapsedRealTime(&enterTime); \
+    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime); \
+    body \
+    uint64_t leaveTime = 0; \
+    (void)HksElapsedRealTime(&leaveTime); \
+    HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC \
+        "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime); \
+} while (0)
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
 {
