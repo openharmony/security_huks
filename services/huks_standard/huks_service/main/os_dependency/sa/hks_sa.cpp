@@ -40,6 +40,7 @@
 #include "hks_event_observer.h"
 #endif
 
+#include <cinttypes>
 #include <filesystem>
 #include <string>
 #include <system_error>
@@ -198,7 +199,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, enter time is %" LOG_PUBLIC "llu ms", code, enterTime);
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, enter time is %" LOG_PUBLIC PRIu64 " ms", code, enterTime);
 
     // check that the code is valid
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
@@ -242,8 +243,8 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
-    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC "llu ms, total cost %" LOG_PUBLIC "llu ms",
-        code, leaveTime, leaveTime - enterTime);
+    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC PRIu64 " ms, total cost %"
+        LOG_PUBLIC PRIu64 " ms", code, leaveTime, leaveTime - enterTime);
 
     return NO_ERROR;
 }
