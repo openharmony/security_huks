@@ -21,6 +21,7 @@
 
 #include "hks_api.h"
 
+#include <inttypes.h>
 #include <stddef.h>
 #include <string.h>
 
@@ -61,12 +62,12 @@
 #define ENTER_LOG_AND_COST(body) do { \
     uint64_t enterTime = 0; \
     (void)HksElapsedRealTime(&enterTime); \
-    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime); \
+    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC PRIu64, __func__, enterTime); \
     body \
     uint64_t leaveTime = 0; \
     (void)HksElapsedRealTime(&leaveTime); \
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC \
-        "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime); \
+        PRIu64 ", total cost is %" LOG_PUBLIC PRIu64 " ms", __func__, ret, leaveTime, leaveTime - enterTime); \
 } while (0)
 
 HKS_API_EXPORT int32_t HksGetSdkVersion(struct HksBlob *sdkVersion)
@@ -336,7 +337,7 @@ HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksPar
 #ifdef HKS_SUPPORT_API_CIPHER
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime);
+    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC PRIu64, __func__, enterTime);
     if ((key == NULL) || (paramSet == NULL) || (plainText == NULL) || (cipherText == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -354,7 +355,7 @@ HKS_API_EXPORT int32_t HksEncrypt(const struct HksBlob *key, const struct HksPar
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC
-        "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime);
+        PRIu64 ", total cost is %" LOG_PUBLIC PRIu64 " ms", __func__, ret, leaveTime, leaveTime - enterTime);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -374,7 +375,7 @@ HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksPar
 #ifdef HKS_SUPPORT_API_CIPHER
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime);
+    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC PRIu64, __func__, enterTime);
     if ((key == NULL) || (paramSet == NULL) || (cipherText == NULL) || (plainText == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -391,7 +392,7 @@ HKS_API_EXPORT int32_t HksDecrypt(const struct HksBlob *key, const struct HksPar
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC
-        "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime);
+        PRIu64 ", total cost is %" LOG_PUBLIC PRIu64 " ms", __func__, ret, leaveTime, leaveTime - enterTime);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -441,7 +442,7 @@ HKS_API_EXPORT int32_t HksDeriveKey(const struct HksParamSet *paramSet, const st
 #ifdef HKS_SUPPORT_API_DERIVE_KEY
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime);
+    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC PRIu64, __func__, enterTime);
     if ((paramSet == NULL) || (mainKey == NULL) || (derivedKey == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -458,7 +459,7 @@ HKS_API_EXPORT int32_t HksDeriveKey(const struct HksParamSet *paramSet, const st
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC
-        "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime);
+        PRIu64 ", total cost is %" LOG_PUBLIC PRIu64 " ms", __func__, ret, leaveTime, leaveTime - enterTime);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
@@ -477,7 +478,7 @@ HKS_API_EXPORT int32_t HksMac(const struct HksBlob *key, const struct HksParamSe
 #ifdef HKS_SUPPORT_API_MAC
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC "llu", __func__, enterTime);
+    HKS_LOG_I("enter %" LOG_PUBLIC "s, enter time is %" LOG_PUBLIC PRIu64, __func__, enterTime);
     if ((key == NULL) || (paramSet == NULL) || (srcData == NULL) || (mac == NULL)) {
         return HKS_ERROR_NULL_POINTER;
     }
@@ -494,7 +495,7 @@ HKS_API_EXPORT int32_t HksMac(const struct HksBlob *key, const struct HksParamSe
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
     HKS_LOG_I("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC
-        "llu, total cost is %" LOG_PUBLIC "llu ms", __func__, ret, leaveTime, leaveTime - enterTime);
+        PRIu64 ", total cost is %" LOG_PUBLIC PRIu64 " ms", __func__, ret, leaveTime, leaveTime - enterTime);
     return ret;
 #else
     return HKS_ERROR_NOT_SUPPORTED;
