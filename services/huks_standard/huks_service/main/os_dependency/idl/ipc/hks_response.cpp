@@ -35,6 +35,8 @@
 #include "hks_mem.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
+#include "hks_util.h"
+
 #include "hap_token_info.h"
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 #include "hks_bms_api_wrap.h"
@@ -92,12 +94,14 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     int userId = 0;
 #ifdef HAS_OS_ACCOUNT_PART
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
 #else // HAS_OS_ACCOUNT_PART
     GetOsAccountIdFromUid(callingUid, userId);
-    HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d",
-        callingUid, userId);
 #endif // HAS_OS_ACCOUNT_PART
+
+    uint64_t currentTime = 0;
+    (void)HksElapsedRealTime(&currentTime);
+    HKS_LOG_I("Get callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d, current time is %" LOG_PUBLIC "llu",
+        callingUid, userId, currentTime);
 
     uint32_t size;
     if (userId == 0) {
