@@ -15,6 +15,7 @@
 
 #include "hks_response.h"
 
+#include <cinttypes>
 #include <dlfcn.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -100,7 +101,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     uint64_t currentTime = 0;
     (void)HksElapsedRealTime(&currentTime);
-    HKS_LOG_I("Get callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d, current time is %" LOG_PUBLIC "llu",
+    HKS_LOG_I("Get callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d, current time is %" LOG_PUBLIC PRIu64,
         callingUid, userId, currentTime);
 
     uint32_t size;
