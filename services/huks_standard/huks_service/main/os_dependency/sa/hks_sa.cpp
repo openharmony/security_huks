@@ -25,6 +25,7 @@
 #include "hks_mem.h"
 #include "hks_message_handler.h"
 #include "hks_template.h"
+#include "hks_util.h"
 
 #include "hks_response.h"
 
@@ -178,9 +179,8 @@ static void HksInitMemPolicy(void)
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
     // disable mem cache and delay free because the size of mem data in HUKS is associated with caller tasks and
     // changeable, which is not suitable for this case
-    int32_t ret1 = mallopt(M_SET_THREAD_CACHE, M_THREAD_CACHE_DISABLE);
-    int32_t ret2 = mallopt(M_DELAYED_FREE, M_DELAYED_FREE_DISABLE);
-    HKS_LOG_I("disable cache and delay free, result[%" LOG_PUBLIC "d, %" LOG_PUBLIC "d]", ret1, ret2);
+    (void)mallopt(M_SET_THREAD_CACHE, M_THREAD_CACHE_DISABLE);
+    (void)mallopt(M_DELAYED_FREE, M_DELAYED_FREE_DISABLE);
 #endif
 }
 
@@ -196,7 +196,10 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return HW_SYSTEM_ERROR;
     }
 
-    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d", code);
+    uint64_t enterTime = 0;
+    (void)HksElapsedRealTime(&enterTime);
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, enter time is %" LOG_PUBLIC "llu ms", code, enterTime);
+
     // check that the code is valid
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -236,6 +239,11 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         HKS_LOG_E("handle ipc msg failed!");
         HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
     }
+
+    uint64_t leaveTime = 0;
+    (void)HksElapsedRealTime(&leaveTime);
+    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC "llu ms, total cost %" LOG_PUBLIC "llu ms",
+        code, leaveTime, leaveTime - enterTime);
 
     return NO_ERROR;
 }

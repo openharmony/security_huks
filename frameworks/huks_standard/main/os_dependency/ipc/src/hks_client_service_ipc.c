@@ -760,7 +760,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
 
         if (token != NULL) {
             if (outBlob.size < (HANDLE_SIZE + TOKEN_SIZE)) {
-                HKS_LOG_W("client init success without out token");
+                HKS_LOG_D("client init success without out token");
                 token->size = 0;
                 break;
             }
