@@ -29,7 +29,6 @@
 
 #include "hks_response.h"
 
-
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
 #include "malloc.h"
 #endif
