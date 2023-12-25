@@ -391,19 +391,19 @@ static int32_t HksStorageWriteFile(
 #endif
 }
 
-static uint32_t HksStorageReadFile(
-    const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+static int32_t HksStorageReadFile(
+    const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
 #ifdef HKS_SUPPORT_THREAD
     HksStorageFileLock *lock = CreateStorageFileLock(path, fileName);
     HksStorageFileLockRead(lock);
-    uint32_t size = HksFileRead(path, fileName, offset, buf, len);
+    int32_t ret = HksFileRead(path, fileName, offset, blob, size);
     HksStorageFileUnlockRead(lock);
     HksStorageFileLockRelease(lock);
 #else
-    uint32_t size = HksFileRead(path, fileName, offset, buf, len);
+    int32_t ret = HksFileRead(path, fileName, offset, blob, size);
 #endif
-    return size;
+    return ret;
 }
 
 #ifdef HKS_ENABLE_CLEAN_FILE
@@ -508,11 +508,17 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
 
     (void)memset_s(buffer, size, 0, size);
 
+    struct HksBlob blob = { .size = size, .data = buffer };
+
     int32_t ret;
     do {
-        size = HksStorageReadFile(srcPath, srcFileName, 0, buffer, size);
-        if (size == 0) {
-            HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "u.", size);
+        ret = HksStorageReadFile(srcPath, srcFileName, 0, &blob, &size);
+        if (ret != HKS_SUCCESS) {
+            if (ret == HKS_ERROR_NO_PERMISSION) {
+                HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
+                break;
+            }
+            HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
             ret = HKS_ERROR_READ_FILE_FAIL;
             break;
         }
@@ -567,12 +573,15 @@ static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct
         return HKS_ERROR_INSUFFICIENT_DATA;
     }
 
-    size = HksStorageReadFile(path, fileName, 0, keyBlob->data, keyBlob->size);
-    if (size == 0) {
-        HKS_LOG_E("file read failed, ret = %" LOG_PUBLIC "u.", size);
+    int32_t ret = HksStorageReadFile(path, fileName, 0, keyBlob, &size);
+    if (ret != HKS_SUCCESS) {
+        if (ret == HKS_ERROR_NO_PERMISSION) {
+            HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
+            return ret;
+        }
+        HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
         return HKS_ERROR_READ_FILE_FAIL;
     }
-
     keyBlob->size = size;
     return HKS_SUCCESS;
 }

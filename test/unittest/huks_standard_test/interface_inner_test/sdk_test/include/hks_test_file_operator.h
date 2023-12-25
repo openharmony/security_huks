@@ -26,7 +26,7 @@ int32_t HksIsFileExist(const char *path, const char *fileName);
 
 uint32_t HksFileSize(const char *path, const char *fileName);
 
-uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len);
+int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size);
 
 int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len);
 
