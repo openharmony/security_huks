@@ -910,9 +910,9 @@ enum HksChipsetPlatformDecryptScene {
  * @brief hks auth storage level
  */
 enum HksAuthStorageLevel {
-    HKS_AUTH_STORAGE_LEVEL_ECE = 1,
-    HKS_AUTH_STORAGE_LEVEL_CE = 2,
-    HKS_AUTH_STORAGE_LEVEL_DE = 3,
+    HKS_AUTH_STORAGE_LEVEL_DE = 0,
+    HKS_AUTH_STORAGE_LEVEL_CE = 1,
+    HKS_AUTH_STORAGE_LEVEL_ECE = 2,
 };
 
 #ifdef __cplusplus
