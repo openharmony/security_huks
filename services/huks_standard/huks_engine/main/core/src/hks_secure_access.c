@@ -1127,12 +1127,15 @@ int32_t CheckIfNeedIsDevicePasswordSet(const struct HksParamSet *paramSet)
         return HKS_SUCCESS;
     }
     struct HksParam *userId = NULL;
-    if (HksGetParam(paramSet, HKS_TAG_USER_ID, &userId) != HKS_SUCCESS) {
-        HKS_LOG_E("get user id from paramset failed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &userId);
+    if (ret != HKS_SUCCESS) {
+        if (ret != HKS_ERROR_PARAM_NOT_EXIST || HksGetParam(paramSet, HKS_TAG_USER_ID, &userId) != HKS_SUCCESS) {
+            HKS_LOG_E("get user id from paramset failed!");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
     }
     uint32_t numOfAuthInfo = 0;
-    int32_t ret = HksUserIdmGetAuthInfoNum(userId->uint32Param, HKS_USER_AUTH_TYPE_PIN, &numOfAuthInfo);
+    ret = HksUserIdmGetAuthInfoNum(userId->uint32Param, HKS_USER_AUTH_TYPE_PIN, &numOfAuthInfo);
     if (ret == HKS_ERROR_CREDENTIAL_NOT_EXIST || numOfAuthInfo == 0) {
         HKS_LOG_E("have not enrolled the pin.");
         return HKS_ERROR_DEVICE_PASSWORD_UNSET;
