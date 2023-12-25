@@ -88,8 +88,8 @@ HWTEST_F(HksFileOperatorTest, HksFileOperatorTest002, TestSize.Level0)
 HWTEST_F(HksFileOperatorTest, HksFileOperatorTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFileOperatorTest003");
-    int32_t ret = HksFileRead(nullptr, nullptr, 0, nullptr, 0);
-    ASSERT_EQ(ret, 0) << "HksFileRead failed, ret = " << ret;
+    int32_t ret = HksFileRead(nullptr, nullptr, 0, nullptr, nullptr);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksFileRead failed, ret = " << ret;
 }
 
 /**

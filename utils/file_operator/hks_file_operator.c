@@ -85,32 +85,39 @@ static int32_t IsFileExist(const char *fileName)
     return HKS_SUCCESS;
 }
 
-static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     (void)offset;
-    HKS_IF_NOT_SUCC_RETURN(IsFileExist(fileName), 0)
+    HKS_IF_NOT_SUCC_RETURN(IsFileExist(fileName), HKS_ERROR_NOT_EXIST)
 
     if (strstr(fileName, "../") != NULL) {
         HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", fileName);
-        return 0;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     char filePath[PATH_MAX + 1] = {0};
     if (realpath(fileName, filePath) == NULL) {
         HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", fileName);
-        return 0;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     FILE *fp = fopen(filePath, "rb");
-    HKS_IF_NULL_LOGE_RETURN(fp, 0, "failed to open file, errno = 0x%" LOG_PUBLIC "x", errno)
-
-    uint32_t size = fread(buf, 1, len, fp);
-    if (fclose(fp) < 0) {
-        HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
-        return 0;
+    if (fp ==  NULL) {
+        if (errno == REQUIRED_KEY_NOT_AVAILABLE) {
+            HKS_LOG_E("Check Permission failed!");
+            return HKS_ERROR_NO_PERMISSION;
+        }
+        HKS_LOG_E("open file fail, errno = 0x%" LOG_PUBLIC "x", errno);
+        return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
-    return size;
+    uint32_t len = fread(blob->data, 1, blob->size, fp);
+    if (fclose(fp) < 0) {
+        HKS_LOG_E("failed to close file, errno = 0x%" LOG_PUBLIC "x", errno);
+        return HKS_ERROR_CLOSE_FILE_FAIL;
+    }
+    *size = len;
+    return HKS_SUCCESS;
 }
 
 static uint32_t FileSize(const char *fileName)
@@ -132,7 +139,7 @@ static int32_t GetRealPath(const char *fileName, char *filePath)
     if (memcpy_s(filePath, PATH_MAX, fileName, strlen(fileName)) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-    
+
     if (strstr(filePath, "../") != NULL) {
         HKS_LOG_E("invalid filePath!");
         return HKS_ERROR_INVALID_KEY_FILE;
@@ -471,19 +478,19 @@ int32_t HksDeleteDir(const char *path)
     return ret;
 }
 
-uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
-    if ((fileName == NULL) || (buf == NULL) || (len == 0)) {
-        return 0;
+    if ((fileName == NULL) || (blob == NULL) || (blob->data == NULL) || (blob->size == 0) || (size == NULL)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
-    HKS_IF_NOT_SUCC_RETURN(ret, 0)
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    uint32_t size = FileRead(fullFileName, offset, buf, len);
+    ret = FileRead(fullFileName, offset, blob, size);
     HKS_FREE_PTR(fullFileName);
-    return size;
+    return ret;
 }
 
 int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)

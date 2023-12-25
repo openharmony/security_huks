@@ -50,33 +50,37 @@ int32_t IsFileExist(const char *fileName)
     return HKS_SUCCESS;
 }
 
-uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     (void)offset;
     if (IsFileExist(fileName) != HKS_SUCCESS) {
-        return 0;
+        return HKS_ERROR_NOT_EXIST;
     }
 
     char filePath[PATH_MAX + 1] = {0};
     (void)realpath(fileName, filePath);
     if (strstr(filePath, "../") != NULL) {
         HKS_TEST_LOG_E("invalid filePath, path %s", filePath);
-        return 0;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     FILE *fp = fopen(filePath, "rb");
-    if (fp == NULL) {
-        HKS_TEST_LOG_E("failed to open file");
-        return 0;
+    if (fp ==  NULL) {
+        if (errno == REQUIRED_KEY_NOT_AVAILABLE) {
+            HKS_TEST_LOG_E("Check Permission failed!");
+            return HKS_ERROR_NO_PERMISSION;
+        }
+        HKS_TEST_LOG_E("open file fail, errno = 0x%x", errno);
+        return HKS_ERROR_OPEN_FILE_FAIL;
     }
 
-    uint32_t size = fread(buf, 1, len, fp);
+    uint32_t len = fread(blob->data, 1, blob->size, fp);
     if (fclose(fp) < 0) {
         HKS_TEST_LOG_E("failed to close file");
-        return 0;
+        return HKS_ERROR_CLOSE_FILE_FAIL;
     }
-
-    return size;
+    *size = len;
+    return HKS_SUCCESS;
 }
 
 uint32_t FileSize(const char *fileName)

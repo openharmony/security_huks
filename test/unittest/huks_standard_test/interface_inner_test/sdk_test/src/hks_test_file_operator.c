@@ -54,21 +54,21 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
     return ret;
 }
 
-uint32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len)
+int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
     char *fullFileName = NULL;
-    if ((fileName == NULL) || (buf == NULL) || (len == 0)) {
-        return 0;
+    if ((fileName == NULL) || (blob == NULL) || (blob->data == NULL) || (blob->size == 0) || (size == NULL)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
     if (ret != HKS_SUCCESS) {
-        return 0;
+        return ret;
     }
 
-    uint32_t size = FileRead(fullFileName, offset, buf, len);
+    ret = FileRead(fullFileName, offset, blob, size);
     HKS_FREE_PTR(fullFileName);
-    return size;
+    return ret;
 }
 
 int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len)

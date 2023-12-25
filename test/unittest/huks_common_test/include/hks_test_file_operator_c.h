@@ -29,12 +29,13 @@
 #include "securec.h"
 
 #define HKS_MAX_FILE_NAME_LEN 512
+#define REQUIRED_KEY_NOT_AVAILABLE 126
 
 int32_t GetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen);
 
 int32_t IsFileExist(const char *fileName);
 
-uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len);
+int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size);
 
 uint32_t FileSize(const char *fileName);
 
