@@ -27,7 +27,7 @@
 #include "hks_type.h"
 
 #define HKS_PARAM_SET_MAX_SIZE (4 * 1024 * 1024)
-#define HKS_DEFAULT_PARAM_SET_SIZE 512
+#define HKS_DEFAULT_PARAM_SET_SIZE 1024
 #define HKS_DEFAULT_PARAM_CNT ((uint32_t)((HKS_DEFAULT_PARAM_SET_SIZE - sizeof(struct HksParamSet)) / \
     sizeof(struct HksParam)))
 #define HKS_TAG_TYPE_MASK (0xF << 28)
