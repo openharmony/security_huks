@@ -480,7 +480,7 @@ int32_t HksDeleteDir(const char *path)
 
 int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, struct HksBlob *blob, uint32_t *size)
 {
-    if ((fileName == NULL) || (blob == NULL) || (blob->data == NULL) || (blob->size == 0)) {
+    if ((fileName == NULL) || (blob == NULL) || (blob->data == NULL) || (blob->size == 0) || (size == NULL)) {
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
