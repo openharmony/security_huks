@@ -20,12 +20,13 @@
 #endif
 
 #include "hks_client_service.h"
-#include "hks_client_service_dcm.h"
 
 #include <stdbool.h>
 #include <stddef.h>
 
+#include "hks_base_check.h" // for HksAttestIsAnonymous
 #include "hks_client_check.h"
+#include "hks_client_service_dcm.h"
 #include "hks_client_service_util.h"
 #include "hks_common_check.h"
 #include "hks_hitrace.h"
@@ -1354,7 +1355,7 @@ static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, st
 #endif
 
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    const struct HksParamSet *paramSet, struct HksBlob *certChain)
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject)
 {
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
@@ -1379,6 +1380,17 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 
         ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+        if (!HksAttestIsAnonymous(paramSet)) {
+            HKS_LOG_I("non anonymous attest key.");
+            break;
+        }
+        ret = DcmGenerateCertChain(certChain, remoteObject);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail, ret = %" LOG_PUBLIC "d.", ret)
+#else
+        (void)(remoteObject);
+#endif
     } while (0);
 
     HKS_FREE_BLOB(keyFromFile);
@@ -1394,6 +1406,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     (void)keyAlias;
     (void)paramSet;
     (void)certChain;
+    (void)remoteObject;
     return HKS_ERROR_NOT_SUPPORTED;
 #endif
 }

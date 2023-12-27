@@ -219,7 +219,7 @@
                  HDI_ADAPTER_PARAM(paramSet, &paramSetCore),  \
                  HDI_ADAPTER_PARAM(srcData, &srcDataCore),  \
                  HDI_ADAPTER_PARAM(signature, &signatureCore));
-    
+
 #define HDI_CONVERTER_FUNC_ENCRYPT(key, paramSet, plainText, cipherText, ret, func)  \
     struct HuksBlob keyCore = {0};  \
     struct HuksParamSet paramSetCore = {0};  \

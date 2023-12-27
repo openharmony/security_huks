@@ -535,7 +535,7 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest014, TestSize.Level0
     HKS_LOG_I("Enter HksAccessCipherPartTest014");
     uint8_t alias[] = "testCheckAuthCipher";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    
+
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());

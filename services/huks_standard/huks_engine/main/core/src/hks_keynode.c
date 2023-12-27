@@ -252,7 +252,7 @@ static void FreeParamsForBuildKeyNode(struct HksBlob *aad, struct HksParamSet **
     if (keyblobParamSet != NULL && *keyblobParamSet != NULL) {
         FreeKeyBlobParamSet(keyblobParamSet);
     }
-    
+
     if (keyNode != NULL) {
         HksFree(keyNode);
     }

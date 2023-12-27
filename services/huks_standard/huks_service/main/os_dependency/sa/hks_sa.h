@@ -17,6 +17,7 @@
 #define HKS_SA_H
 
 #include "huks_service_ipc_interface_code.h"
+#include "hks_sa_interface.h"
 
 #include "iremote_broker.h"
 #include "iremote_stub.h"
@@ -38,12 +39,7 @@ enum ResponseCode {
 
 constexpr int SA_ID_KEYSTORE_SERVICE = 3510;
 
-class IHksService : public IRemoteBroker {
-public:
-    DECLARE_INTERFACE_DESCRIPTOR(u"ohos.security.hks.service");
-};
-
-class HksService : public SystemAbility, public IRemoteStub<IHksService> {
+class HksService : public SystemAbility, public HksStub {
     DECLEAR_SYSTEM_ABILITY(HksService)
 
 public:

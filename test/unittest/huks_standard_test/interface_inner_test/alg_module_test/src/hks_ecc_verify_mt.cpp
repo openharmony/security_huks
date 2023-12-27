@@ -871,7 +871,7 @@ protected:
         } else {
             EXPECT_EQ(EcdsaSign(&authId, digest, &message, &signature), testCaseParams.signResult);
         }
-        
+
         if (storage == HKS_STORAGE_TEMP) {
             EXPECT_EQ(HksVerify(&pubKey, paramInSet, &message, &signature), testCaseParams.verifyResult);
         } else if (storage == HKS_STORAGE_PERSISTENT) {

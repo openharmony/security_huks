@@ -52,9 +52,16 @@ if (os_level == "standard") {
     }
     sources += [
       "posix/hks_rwlock.c",
+      "sa/hks_dcm_callback_handler.cpp",
       "sa/hks_sa.cpp",
+
+      # both client side and server side will include hks_sa_interface.cpp
+      "sa/hks_sa_interface.cpp",
     ]
     defines = []
+    if (huks_security_level == "software") {
+      defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    }
     if (support_jsapi) {
       sources += [ "sa/hks_event_observer.cpp" ]
       defines += [ "SUPPORT_COMMON_EVENT" ]

@@ -32,7 +32,7 @@ namespace OHOS {
         if (data == nullptr || size <= (TRIPLE_BLOB_SIZE + sizeof(struct HksParamSet))) {
             return false;
         }
-        
+
         uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
         if (myData == nullptr) {
             return false;

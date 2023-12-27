@@ -47,7 +47,7 @@ struct HksLiteApiResult {
 
 int32_t HksParseParamSetWithAdd(const JSIValue* args, uint32_t index, struct HksParamSet **outParamSet,
     struct HksParam *paramsToAdd, uint32_t paramsToAddSize);
-    
+
 int32_t HksParseKeyAlias(const JSIValue* args, uint32_t index, struct HksBlob *outKeyAliasBlob);
 
 int32_t HksParseHandle(const JSIValue* args, uint32_t index, struct HksBlob *outHandle);

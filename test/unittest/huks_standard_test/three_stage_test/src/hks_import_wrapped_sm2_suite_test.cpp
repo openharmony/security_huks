@@ -594,7 +594,7 @@ namespace Unittest::ImportWrappedKey {
             ret = BuildWrappedKeyData(blobArray, HKS_IMPORT_WRAPPED_KEY_NO_VERIFY_TOTAL_BLOBS,
                 isSigned, &wrappedKeyData);
         }
-        
+
         EXPECT_EQ(ret, HKS_SUCCESS) << "BuildWrappedKeyData failed.";
         HKS_LOG_I("start HksImportWrappedKey");
         ret = HksImportWrappedKey(params->importKeyAlias, params->wrappingKeyAlias,
@@ -914,7 +914,7 @@ namespace Unittest::ImportWrappedKey {
         // The caller guarantees that the access will not cross the border
         int32_t ret = ConstructImportedSm2Key(HKS_SM2_KEY_SIZE_256, HKS_KEY_TYPE_PRIVATE_KEY, &key);
         EXPECT_EQ(ret, HKS_SUCCESS) << "init sm2 key failed .";
-        
+
         g_importWrappedSm2Params[TAG_ALG_PURPOSE_TYPE_ID].uint32Param = HKS_KEY_PURPOSE_SIGN;
         g_importWrappedSm2Params[TAG_ALG_SUIT_ID].uint32Param =
             HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3;

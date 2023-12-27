@@ -43,6 +43,7 @@ enum HksIpcInterfaceCode {
     HKS_MSG_FINISH,
     HKS_MSG_ABORT,
     HKS_MSG_CHIPSET_PLATFORM_DECRYPT,
+    HKS_MSG_ATTEST_KEY_ASYNC_REPLY,
 
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,

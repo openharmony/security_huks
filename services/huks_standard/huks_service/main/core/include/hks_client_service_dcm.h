@@ -1,10 +1,10 @@
 /*
- * Copyright (C) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *    http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,18 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef HKS_ATTEST_KEY_NONIDS_TEST_H
-#define HKS_ATTEST_KEY_NONIDS_TEST_H
+#ifndef HKS_CLIENT_SERVICE_DCM_H
+#define HKS_CLIENT_SERVICE_DCM_H
 
-namespace Unittest::AttestKey {
-int HksAttestKeyNonIdsTest001(void);
-int HksAttestKeyNonIdsTest002(void);
-int HksAttestKeyNonIdsTest003(void);
-int HksAttestKeyNonIdsTest004(void);
-int HksAttestKeyNonIdsTest005(void);
-int HksAttestKeyNonIdsTest006(void);
-int HksAttestKeyNonIdsTest007(void);
-int HksAttestKeyNonIdsTest008(void);
-}
+#include "hks_param.h"
+#include "hks_type.h"
 
+#ifdef __cplusplus
+extern "C" {
 #endif
+
+int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *remoteObject);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif // HKS_CLIENT_SERVICE_DCM_H

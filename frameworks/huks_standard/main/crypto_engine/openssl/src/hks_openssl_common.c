@@ -75,7 +75,7 @@ static int32_t HksOpensslFillRandomInner(struct HksBlob *randomData, bool isPriv
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     HKS_LOG_D("generate random success, isPriv =%" LOG_PUBLIC "d", isPriv);
-             
+
     return HKS_SUCCESS;
 }
 

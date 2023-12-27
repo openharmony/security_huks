@@ -680,7 +680,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest012, TestSize.
     HKS_LOG_I("Enter HksAcRsaSignVerifyTest0012");
     uint8_t alias[] = "testCheckAuthSigner";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    
+
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_RSA_SIGN_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_RSA_SIGN_001_PARAMS.genParams.size());

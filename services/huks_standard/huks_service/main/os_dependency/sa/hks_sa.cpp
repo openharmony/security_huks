@@ -15,19 +15,22 @@
 
 #include "hks_sa.h"
 
-#include "ipc_skeleton.h"
-#include "iservice_registry.h"
-#include "string_ex.h"
-#include "system_ability_definition.h"
+#include <ipc_skeleton.h>
+#include <iservice_registry.h>
+#include <string_ex.h>
+#include <system_ability_definition.h>
 
 #include "hks_client_service.h"
+#include "hks_dcm_callback_handler.h"
+#include "hks_ipc_service.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_message_handler.h"
-#include "hks_template.h"
-#include "hks_util.h"
-
 #include "hks_response.h"
+#include "hks_template.h"
+#include "hks_type.h"
+#include "hks_util.h"
+#include "huks_service_ipc_interface_code.h"
 
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
 #include "malloc.h"
@@ -185,6 +188,23 @@ static void HksInitMemPolicy(void)
 #endif
 }
 
+static int32_t ProcessAttestOrNormalMessage(
+    uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
+{
+    // Since we have wrote a HksStub instance in client side,
+    // we can now read it without distinguishing anonymous attestation from normal attestation.
+    if (code == HKS_MSG_ATTEST_KEY) {
+        auto ptr = data.ReadRemoteObject();
+        HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_MSG_FAIL, "ReadRemoteObject ptr failed")
+
+        HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
+            reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
+        return HKS_SUCCESS;
+    } else {
+        return ProcessMessage(code, outSize, srcData, reply);
+    }
+}
+
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     MessageParcel &reply, MessageOption &option)
 {
@@ -230,8 +250,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
             break;
         }
         (void)memcpy_s(srcData.data, srcData.size, pdata, srcData.size);
-
-        ret = ProcessMessage(code, outSize, srcData, reply);
+        ret = ProcessAttestOrNormalMessage(code, data, outSize, srcData, reply);
     } while (0);
 
     HKS_FREE_BLOB(srcData);
@@ -386,6 +405,9 @@ void HksService::OnStop()
     HKS_LOG_I("HksService Service OnStop");
     runningState_ = STATE_NOT_START;
     registerToService_ = false;
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+    HksCloseDcmFunction();
+#endif // HKS_UNTRUSTED_RUNNING_ENV
 }
 } // namespace Hks
 } // namespace Security
