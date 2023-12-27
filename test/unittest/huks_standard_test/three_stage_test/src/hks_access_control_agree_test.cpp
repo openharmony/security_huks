@@ -368,7 +368,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest007, TestSize.Level0)
     struct HksBlob keyAlias = { sizeof(alias), alias };
     uint8_t alias2[] = "testCheckAuthAgree2";
     struct HksBlob keyAlias2 = { sizeof(alias2), alias2 };
-    
+
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());

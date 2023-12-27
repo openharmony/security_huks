@@ -287,7 +287,7 @@ int32_t HksParseParamSetWithAdd(const JSIValue* args, uint32_t index, struct Hks
     struct HksParam *paramsToAdd, uint32_t paramsToAddSize)
 {
     std::vector<HksParam> paramsVector;
-    
+
     JSIValue paramSetValue = nullptr;
     int32_t ret;
     do {

@@ -651,7 +651,7 @@ static int32_t UpdateAesGcmNonce(struct HksParamSet **runtimeParamSet, const str
         HKS_LOG_E("get random failed");
         return ret;
     }
-    
+
     ret = AddNonceToParamSet(runtimeParamSet, params, HKS_ARRAY_SIZE(params));
     HksFree(params[0].blob.data);
     if (ret != HKS_SUCCESS) {

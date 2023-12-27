@@ -346,12 +346,11 @@ int32_t HksClientGetKeyInfoList(const struct HksParamSet *paramSet, struct HksKe
 }
 
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain, bool needAnonCertChain)
+    struct HksCertChain *certChain)
 {
     (void)keyAlias;
     (void)paramSet;
     (void)certChain;
-    (void)needAnonCertChain;
     return HKS_ERROR_NOT_SUPPORTED;
 }
 

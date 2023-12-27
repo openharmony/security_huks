@@ -137,7 +137,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest005, TestSize.Level0)
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest006");
-    
+
     int32_t ret = HksCheckSignature(0, HKS_ALG_RSA, HKS_ECC_KEY_SIZE_256, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckSignature failed, ret = " << ret;
 }
@@ -150,7 +150,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest006, TestSize.Level0)
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest007, TestSize.Level0)
 {
     HKS_LOG_I("enter HksBaseCheckTest007");
-    
+
     int32_t ret = HksCheckSignature(0, HKS_ALG_ECC, HKS_RSA_KEY_SIZE_1024, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckSignature failed, ret = " << ret;
 }

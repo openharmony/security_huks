@@ -93,7 +93,7 @@ HWTEST_F(HksEventObserverTest, HksEventObserverTest002, TestSize.Level0)
     HKS_LOG_I("enter HksEventObserverTest002");
     Want want;
     want.SetAction(OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
-    
+
     CommonEventData data;
     data.SetWant(want);
 

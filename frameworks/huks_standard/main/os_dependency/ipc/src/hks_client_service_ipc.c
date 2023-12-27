@@ -25,7 +25,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "hks_client_service_dcm.h"
 #include "hks_common_check.h"
 #include "hks_ipc_check.h"
 #include "hks_client_ipc_serialization.h"
@@ -608,73 +607,13 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-
-static void FreeHksCertChain(struct HksCertChain *certChain)
-{
-    if (certChain == NULL) {
-        return;
-    }
-    if (certChain->certsCount > 0 && certChain->certs != NULL) {
-        for (uint32_t i = 0; i < certChain->certsCount; i++) {
-            if (certChain->certs[i].data != NULL) {
-                HksFree(certChain->certs[i].data);
-                certChain->certs[i].data = NULL;
-            }
-        }
-    }
-    HksFree(certChain->certs);
-}
-
-#ifndef HKS_UNTRUSTED_RUNNING_ENV
-#define CERT_KEY_INDEX 0
-#define CERT_DEVICE_INDEX 1
-#define CERT_CA_INDEX 2
-#define CERT_ROOT_INDEX 3
-
-static int32_t InitCertChain(struct HksCertChain *certChain)
-{
-    certChain->certsCount = HKS_CERT_COUNT;
-    certChain->certs = (struct HksBlob *)(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
-    if (certChain->certs == NULL) {
-        HKS_LOG_E("malloc certChain failed.");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    certChain->certs[CERT_KEY_INDEX].size = HKS_CERT_APP_SIZE;
-    certChain->certs[CERT_KEY_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_KEY_INDEX].size));
-    if (certChain->certs[CERT_KEY_INDEX].data == NULL) {
-        FreeHksCertChain(certChain);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    certChain->certs[CERT_DEVICE_INDEX].size = HKS_CERT_DEVICE_SIZE;
-    certChain->certs[CERT_DEVICE_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_DEVICE_INDEX].size));
-    if (certChain->certs[CERT_DEVICE_INDEX].data == NULL) {
-        FreeHksCertChain(certChain);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    certChain->certs[CERT_CA_INDEX].size = HKS_CERT_CA_SIZE;
-    certChain->certs[CERT_CA_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_CA_INDEX].size));
-    if (certChain->certs[CERT_CA_INDEX].data == NULL) {
-        FreeHksCertChain(certChain);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    certChain->certs[CERT_ROOT_INDEX].size = HKS_CERT_ROOT_SIZE;
-    certChain->certs[CERT_ROOT_INDEX].data = (uint8_t *)(HksMalloc(certChain->certs[CERT_ROOT_INDEX].size));
-    if (certChain->certs[CERT_ROOT_INDEX].data == NULL) {
-        FreeHksCertChain(certChain);
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    return HKS_SUCCESS;
-}
-#endif
-
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain, bool needAnonCertChain)
+    struct HksCertChain *certChain)
 {
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
 
     int32_t ret = 0;
-    struct HksCertChain certChainNew = { 0 };
     do {
         ret = CertificateChainInitBlob(&inBlob, &outBlob, keyAlias, paramSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainInitBlob fail")
@@ -689,36 +628,13 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
 
         ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
-        // vendor need to implement the device cert manager.
-#ifndef HKS_UNTRUSTED_RUNNING_ENV
-        if (needAnonCertChain) {
-            ret = InitCertChain(&certChainNew);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "InitCertChainNew failed.")
-            ret = DcmGenerateCertChain(&outBlob, &certChainNew);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail result: %" LOG_PUBLIC "d", ret);
-            if (!isBase64) {
-                HKS_LOG_I("No need to base64, return certChain to caller.");
-                break;
-            }
-            for (uint32_t i = 0; i < certChainNew.certsCount; ++i) {
-                ret = EncodeCertChain(&certChainNew.certs[i], &certChain->certs[i]);
-                HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "EncodeCertChain fail after calling dcm service, ret = %" LOG_PUBLIC
-                    "d", ret);
-            }
-        }
-#endif
-        if (!needAnonCertChain) {
-            ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
-        }
+
+        ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainUnpackFromService fail")
     } while (0);
-    FreeHksCertChain(&certChainNew);
+
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
-#ifndef HKS_UNTRUSTED_RUNNING_ENV
-    if (needAnonCertChain) {
-        ReportFaultEventForDcm("HksAnonAttestKey", paramSet, ret);
-    }
-#endif
     return ret;
 }
 

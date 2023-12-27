@@ -19,9 +19,6 @@ config("huks_config") {
     "include",
     "ipc/include",
     "sysinfo/include",
-    "../../../../service/huks_standard/huks_service/main/core/include",
-    "../../../../service/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper/include",
-    "../common/include",
   ]
 }
 
@@ -89,6 +86,18 @@ if (os_level == "standard") {
       "./ipc/src/hks_ipc_check.c",
       "./ipc/src/hks_ipc_slice.c",
       "./ipc/src/hks_request.cpp",
+
+      # both client side and server side will include hks_sa_interface.cpp
+      "../../../../services/huks_standard/huks_service/main/os_dependency/sa/hks_sa_interface.cpp",
+    ]
+
+    if (huks_security_level == "software") {
+      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    }
+
+    include_dirs = [
+      # hks_sa_interface.cpp will include hks_sa_interface.h which is in the following directory.
+      "../../../../services/huks_standard/huks_service/main/os_dependency/sa",
     ]
 
     if (huks_use_rkc_in_standard) {
@@ -98,10 +107,7 @@ if (os_level == "standard") {
       ]
     }
 
-    deps = [
-      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
-      "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
-    ]
+    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
 
     complete_static_lib = true
 
@@ -115,13 +121,8 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
-    if (huks_security_level == "software") {
-      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
-    }
+
     sources += [ "./ipc/src/hks_client_service_ipc.c" ]
-    if (huks_security_level == "trusted_environment") {
-      sources += [ "./ipc/src/hks_client_service_dcm.cpp" ]
-    }
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]

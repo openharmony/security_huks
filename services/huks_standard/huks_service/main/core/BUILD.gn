@@ -40,6 +40,15 @@ if (os_level == "standard") {
       "src/hks_storage_file_lock.c",
     ]
 
+    if (huks_security_level == "software") {
+      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+    }
+
+    if (huks_security_level == "trusted_environment") {
+      sources += [ "src/hks_client_service_dcm.cpp" ]
+      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa" ]  # hks_dcm_callback_handler.h
+    }
+
     sources += [
       "src/hks_upgrade_helper.c",
       "src/hks_upgrade_key_accesser.c",
