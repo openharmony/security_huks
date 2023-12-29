@@ -43,29 +43,24 @@ ENABLE_CFI(int32_t DcmGenerateCertChain(struct HksBlob *cert, const uint8_t *rem
             .blob = { .size = cert->size, .data = cert->data },
             .requestId = 0,
         };
-        {
-            // We got a requestId after invoking DcmAnonymousAttestKey function,
-            // and the implementation of DcmAnonymousAttestKey will invoke our HksDcmCallback in a new thread.
-            // To avoid that the new thread will call HksDcmCallback before
-            // HksDcmCallbackHandlerSetRequestIdWithoutLock, we bind the getting requestId operation and setting
-            // requestId openration with one lock guard.
-            std::lock_guard<std::mutex> lockGuard(HksDcmCallbackHandlerGetMapMutex());
-            ret = fun(&request, [](DcmAnonymousResponse *response) {
-                HksDcmCallback(response);
-            });
-            HKS_LOG_I("got requestId %" LOG_PUBLIC PRIu64, request.requestId);
-            if (ret != DCM_SUCCESS) {
-                HKS_LOG_E("DcmAnonymousAttestKey failed %" LOG_PUBLIC "d", ret);
-                ret = HUKS_ERR_CODE_EXTERNAL_ERROR;
-                // We will not add callback instance into map and ignore callback in case of error.
-                break;
-            }
-            ret = HksDcmCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
+        // We got a requestId after invoking DcmAnonymousAttestKey function,
+        // and the implementation of DcmAnonymousAttestKey will invoke our HksDcmCallback in a new thread.
+        // To avoid that the new thread will call HksDcmCallback before
+        // HksDcmCallbackHandlerSetRequestIdWithoutLock, we bind the getting requestId operation and setting
+        // requestId openration with one lock guard.
+        std::lock_guard<std::mutex> lockGuard(HksDcmCallbackHandlerGetMapMutex());
+        ret = fun(&request, [](DcmAnonymousResponse *response) {
+            HksDcmCallback(response);
+        });
+        HKS_LOG_I("got requestId %" LOG_PUBLIC PRIu64, request.requestId);
+        if (ret != DCM_SUCCESS) {
+            HKS_LOG_E("DcmAnonymousAttestKey failed %" LOG_PUBLIC "d", ret);
+            ret = HUKS_ERR_CODE_EXTERNAL_ERROR;
+            // We will not add callback instance into map and ignore callback in case of error.
+            break;
         }
-
-        // We will not return data on the sync interface, we will send the cert chain in the callback.
-        cert->size = 0;
+        ret = HksDcmCallbackHandlerSetRequestIdWithoutLock(remoteObject, request.requestId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksDcmCallbackHandlerSetRequestIdWithoutLock failed %" LOG_PUBLIC "d", ret)
         return HKS_SUCCESS;
     } while (false);
     return ret;

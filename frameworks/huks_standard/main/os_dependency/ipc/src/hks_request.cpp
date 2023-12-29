@@ -77,7 +77,6 @@ static int32_t HksReadRequestReply(MessageParcel &reply, struct HksBlob *outBlob
 static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, const struct HksParamSet *paramSet,
     sptr<IRemoteObject> hksProxy, sptr<Security::Hks::HksStub> hksCallback, struct HksBlob *outBlob)
 {
-#ifndef HKS_UNTRUSTED_RUNNING_ENV
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(outBlob), HKS_ERROR_INVALID_ARGUMENT, "invalid outBlob");
     MessageParcel reply{};
     // We send the request in sync mode, and we send a stub instance in the request.
@@ -86,13 +85,13 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
     int error = hksProxy->SendRequest(HKS_MSG_ATTEST_KEY, data, reply, option);
     HKS_IF_NOT_SUCC_LOGE_RETURN(error, HKS_ERROR_IPC_MSG_FAIL, "hksProxy->SendRequest failed %" LOG_PUBLIC "d", error);
 
-    HksBlob tmpBlob = *outBlob;
-    int ret = HksReadRequestReply(reply, &tmpBlob);
+    int ret = HksReadRequestReply(reply, outBlob);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksSendAnonAttestRequestAndWaitAsyncReply HksReadRequestReply failed %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
     int timeout = 10; // seconds
     auto [errCode, packedCerts, packedSize] = hksCallback->WaitForAsyncReply(timeout);
     if (errCode != HKS_SUCCESS || packedCerts == nullptr || packedSize == 0) {
@@ -113,12 +112,9 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
     outBlob->size = packedSize;
     return HKS_SUCCESS;
 #else
-    (void)(data);
     (void)(paramSet);
-    (void)(hksProxy);
     (void)(hksCallback);
-    (void)(outBlob);
-    return HKS_SUCCESS;
+    return ret;
 #endif
 }
 
