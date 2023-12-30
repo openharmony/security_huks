@@ -195,7 +195,10 @@ static int32_t ProcessAttestOrNormalMessage(
     // we can now read it without distinguishing anonymous attestation from normal attestation.
     if (code == HKS_MSG_ATTEST_KEY) {
         auto ptr = data.ReadRemoteObject();
-        HKS_IF_NULL_LOGE_RETURN(ptr, HKS_ERROR_IPC_MSG_FAIL, "ReadRemoteObject ptr failed")
+        if (ptr == nullptr) {
+            // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
+            HKS_LOG_E("ReadRemoteObject ptr failed");
+        }
 
         HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
             reinterpret_cast<const uint8_t *>(&reply), reinterpret_cast<const uint8_t *>(ptr.GetRefPtr()));
