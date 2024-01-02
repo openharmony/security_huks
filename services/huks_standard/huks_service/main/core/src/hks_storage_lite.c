@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -593,10 +593,10 @@ static int32_t GetRootMaterial(const struct HksBlob *name, struct HksBlob *buffe
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyAlias,
     enum HksStorageType storageType, const struct HksBlob *keyBlob)
 {
-    (void)processInfo;
+    (void)fileInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return StoreRootMaterial(keyAlias, keyBlob);
     }
@@ -622,10 +622,10 @@ int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct H
     return HksFileWrite(HKS_KEY_STORE_PATH, HKS_KEY_STORE_FILE_NAME, fileOffset, g_storageImageBuffer.data, totalLen);
 }
 
-int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
+int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
-    (void)processInfo;
+    (void)fileInfo;
     (void)storageType;
 
     /* 1. check key exist or not */
@@ -660,10 +660,10 @@ int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
         g_storageImageBuffer.data, keyInfoHead->totalLen);
 }
 
-int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
+int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType)
 {
-    (void)processInfo;
+    (void)fileInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return IsRootMaterialExist(keyAlias);
     }
@@ -672,10 +672,10 @@ int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
     return GetKeyOffsetByKeyAlias(keyAlias, &offset);
 }
 
-int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
+int32_t HksStoreGetKeyBlob(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob)
 {
-    (void)processInfo;
+    (void)fileInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return GetRootMaterial(keyAlias, keyBlob);
     }

@@ -136,6 +136,7 @@ inline bool HksAttestIsAnonymous(const struct HksParamSet *paramSet)
     }
     return false;
 }
+
 #ifdef __cplusplus
 }
 #endif

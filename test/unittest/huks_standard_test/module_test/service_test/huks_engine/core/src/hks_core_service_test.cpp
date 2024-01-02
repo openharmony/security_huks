@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,11 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_type.h"
 #include "hks_type_inner.h"
 
 #include "hks_client_service.h"
-#include "hks_storage.h"
+#include "hks_storage_manager.h"
 
 #include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c"
 
@@ -285,12 +286,18 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest010, TestSize.Level0)
     HKS_LOG_I("enter HksCoreServiceTest010");
     const char *alias = "HksCoreServiceTest010";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0 };
     int32_t ret = TestGenerateKey(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
     ASSERT_NE(keyBlob.data, nullptr);
-    ret = HksStoreGetKeyBlob(&processInfo, &keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksManageStoreGetKeyBlob(&processInfo, paramSet, &keyAlias, &keyBlob, HKS_STORAGE_TYPE_KEY);
+    ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
     struct HksParam accessTokenIdRuntime = { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = 1 };
@@ -301,7 +308,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest010, TestSize.Level0)
     ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, &keyOutBlob);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
 
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
     HKS_FREE(keyOutBlob.data);
     HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
@@ -421,12 +428,17 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     HKS_LOG_I("enter HksCoreServiceTest016");
     const char *alias = "HksCoreServiceTest016";
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
-    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+    struct HksProcessInfo processInfo = { g_userId, g_processName, USER_ID_INT, 0 };
     int32_t ret = TestGenerateKey(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksCoreServiceTest016 ret is " << ret;
     struct HksBlob keyBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
     ASSERT_NE(keyBlob.data, nullptr);
-    ret = HksStoreGetKeyBlob(&processInfo, &keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+
+    struct HksParamSet *paramSet = nullptr;
+    struct HksParam storageLevel = { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE };
+    ret = BuildParamSetWithParam(&paramSet, &storageLevel);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    ret = HksManageStoreGetKeyBlob(&processInfo, paramSet, &keyAlias, &keyBlob, HKS_STORAGE_TYPE_KEY);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
     struct HksParamSet *runtimeParamSet = nullptr;
@@ -441,7 +453,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     HKS_FREE(keyOutBlob.data);
     HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
 }
 
 /**

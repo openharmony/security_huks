@@ -287,3 +287,20 @@ int32_t SystemApiPermissionCheck(int callerUserId)
     }
 }
 #endif
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
+{
+    struct HksParam *specificUserId = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserId);
+    if (ret == HKS_SUCCESS) {
+        ret = SystemApiPermissionCheck(callerUserId);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
+        ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
+    } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+       return HKS_SUCCESS;
+    }
+    return ret;
+}
+#endif

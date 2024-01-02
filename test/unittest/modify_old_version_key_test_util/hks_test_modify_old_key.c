@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,6 +21,7 @@
 #include "hks_storage.h"
 #include "hks_param.h"
 #include "hks_log.h"
+#include "hks_storage_manager.h"
 
 #include <dirent.h>
 #include <errno.h>
@@ -55,7 +56,7 @@ int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksPa
 
     (void)HksCoreGenerateKey(keyAlias, newParamSet, NULL, &keyBlob);
 
-    (void)HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyBlob);
+    (void)HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &keyBlob, HKS_STORAGE_TYPE_KEY);
 
     HksFreeParamSet(&newParamSet);
     return HKS_SUCCESS;
@@ -63,7 +64,7 @@ int32_t HksTestGenerateOldKey(const struct HksBlob *keyAlias, const struct HksPa
 
 int32_t HksTestDeleteOldKey(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
 {
-    return HksServiceDeleteKey(processInfo, keyAlias);
+    return HksServiceDeleteKey(processInfo, keyAlias, NULL);
 }
 
 int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias)
@@ -76,7 +77,7 @@ int32_t HksTestOldKeyExist(const struct HksBlob *keyAlias)
         0,
         0
     };
-    return HksServiceKeyExist(&processInfo, keyAlias);
+    return HksServiceKeyExist(&processInfo, keyAlias, NULL);
 }
 
 int32_t HksTestInitialize(void)
