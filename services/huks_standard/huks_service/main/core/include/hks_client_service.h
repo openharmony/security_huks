@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,12 +48,14 @@ int32_t HksServiceEncrypt(const struct HksProcessInfo *processInfo, const struct
 int32_t HksServiceDecrypt(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, const struct HksBlob *cipherText, struct HksBlob *plainText);
 
-int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias);
+int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
 
-int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias);
+int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet);
 
 int32_t HksServiceGetKeyParamSet(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    struct HksParamSet *paramSet);
+    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
 
 int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struct HksBlob *random);
 
@@ -61,7 +63,7 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
     const struct HksParamSet *paramSet, const struct HksBlob *key);
 
 int32_t HksServiceExportPublicKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    struct HksBlob *key);
+    const struct HksParamSet *paramSet, struct HksBlob *key);
 
 int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksBlob *wrappingKeyAlias, const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
@@ -75,8 +77,8 @@ int32_t HksServiceDeriveKey(const struct HksProcessInfo *processInfo, const stru
 int32_t HksServiceMac(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, const struct HksBlob *srcData, struct HksBlob *mac);
 
-int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
-    uint32_t *listCount);
+int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    struct HksKeyInfo *keyInfoList, uint32_t *listCount);
 
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject);
@@ -84,13 +86,13 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token);
 
-int32_t HksServiceUpdate(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
+int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t HksServiceFinish(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
+int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t HksServiceAbort(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
+int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet);
 
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
@@ -100,9 +102,6 @@ int32_t HksServiceExportChipsetPlatformPublicKey(const struct HksBlob *salt,
 
 int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet, int frontUserId);
-
-int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSet *paramSet,
-    struct HksProcessInfo *processInfo);
 
 #ifdef __cplusplus
 }

@@ -89,8 +89,6 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
     processInfo->accessTokenId = 0;
     processInfo->userIdInt = 0;
-    processInfo->specificUserIdInt = 0;
-    processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
 
     return HKS_SUCCESS;
 }
@@ -99,5 +97,12 @@ int32_t HksGetFrontUserId(int32_t *outId)
 {
     *outId = -1;
     HKS_LOG_I("QueryActiveOsFrontUserIds, no os account part, set FrontUserId= -1");
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
+{
+    (void)paramSet;
+    (void)callerUserId;
     return HKS_SUCCESS;
 }

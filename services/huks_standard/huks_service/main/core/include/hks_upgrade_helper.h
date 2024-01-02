@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,7 +38,7 @@ void HksMarkOldKeyClearedIfEmpty(void);
 #endif
 
 int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, int32_t mode);
+    const struct HksBlob *keyAlias, enum HksStorageType mode);
 
 int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias);
 
