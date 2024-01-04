@@ -1354,10 +1354,10 @@ static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, st
 }
 #endif
 
+#ifdef HKS_SUPPORT_API_ATTEST_KEY
 int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject)
 {
-#ifdef HKS_SUPPORT_API_ATTEST_KEY
     struct HksHitraceId traceId = HksHitraceBegin(__func__, HKS_HITRACE_FLAG_DEFAULT);
     struct HksBlob keyFromFile = { 0, NULL };
     struct HksParamSet *newParamSet = NULL;
@@ -1378,6 +1378,9 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
 
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+        uint32_t certChainCapacity = certChain->size;
+#endif
         ret = HuksAccessAttestKey(&keyFromFile, newParamSet, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessAttestKey fail, ret = %" LOG_PUBLIC "d.", ret)
 
@@ -1388,6 +1391,9 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         }
         ret = DcmGenerateCertChain(certChain, remoteObject);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DcmGenerateCertChain fail, ret = %" LOG_PUBLIC "d.", ret)
+
+        (void)memset_s(certChain->data, certChainCapacity, 0, certChainCapacity);
+        certChain->size = certChainCapacity; // restore capacity size
 #else
         (void)(remoteObject);
 #endif
@@ -1401,15 +1407,19 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
     HksReport(__func__, processInfo, paramSet, ret);
 
     return ret;
-#else
+}
+#else // HKS_SUPPORT_API_ATTEST_KEY
+int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject)
+{
     (void)processInfo;
     (void)keyAlias;
     (void)paramSet;
     (void)certChain;
     (void)remoteObject;
     return HKS_ERROR_NOT_SUPPORTED;
-#endif
 }
+#endif // HKS_SUPPORT_API_ATTEST_KEY
 
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
