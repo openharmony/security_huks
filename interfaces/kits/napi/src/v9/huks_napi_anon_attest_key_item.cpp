@@ -32,6 +32,7 @@ constexpr int HUKS_NAPI_ATTEST_KEY_MAX_ARGS = 3;
 constexpr int INDEX_0 = 0;
 constexpr int INDEX_1 = 1;
 constexpr int INDEX_2 = 2;
+constexpr int INDEX_3 = 3;
 }  // namespace
 
 struct AttestKeyAsyncContextT {
@@ -109,7 +110,7 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
 
 static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
 {
-    certChain->certsCount = HKS_ANON_CERT_COUNT;
+    certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
     if (certChain->certs == nullptr) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -130,6 +131,12 @@ static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChain
     certChain->certs[INDEX_2].size = HKS_CERT_CA_SIZE;
     certChain->certs[INDEX_2].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_2].size));
     if (certChain->certs[INDEX_2].data == nullptr) {
+        FreeHksCertChain(certChain, *certChainCapacity);
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
+    certChain->certs[INDEX_3].size = HKS_CERT_CA_SIZE;
+    certChain->certs[INDEX_3].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_3].size));
+    if (certChain->certs[INDEX_3].data == nullptr) {
         FreeHksCertChain(certChain, *certChainCapacity);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
