@@ -608,7 +608,7 @@ static int32_t CertificateChainInitBlob(struct HksBlob *inBlob, struct HksBlob *
 }
 
 int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-    struct HksCertChain *certChain)
+    struct HksCertChain *certChain, bool needAnonCertChain)
 {
     struct HksBlob inBlob = { 0, NULL };
     struct HksBlob outBlob = { 0, NULL };
@@ -626,8 +626,13 @@ int32_t HksClientAttestKey(const struct HksBlob *keyAlias, const struct HksParam
         ret = HksCertificateChainPack(&inBlob, keyAlias, paramSet, &outBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCertificateChainPack fail")
 
-        ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
+        if (needAnonCertChain) {
+            ret = HksSendRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, &inBlob, &outBlob, paramSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAnonAttest request fail")
+        } else {
+            ret = HksSendRequest(HKS_MSG_ATTEST_KEY, &inBlob, &outBlob, paramSet);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainGetOrAttest request fail")
+        }
 
         ret = HksCertificateChainUnpackFromService(&outBlob, isBase64, certChain);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CertificateChainUnpackFromService fail")
