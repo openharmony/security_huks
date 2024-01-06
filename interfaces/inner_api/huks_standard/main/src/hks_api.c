@@ -606,7 +606,7 @@ HKS_API_EXPORT int32_t HksAttestKey(const struct HksBlob *keyAlias, const struct
             return ret;
         }
 
-        ret = HksClientAttestKey(keyAlias, newParamSet, certChain);
+        ret = HksClientAttestKey(keyAlias, newParamSet, certChain, false);
         HksFreeParamSet(&newParamSet);
     );
     return ret;
@@ -634,7 +634,7 @@ HKS_API_EXPORT int32_t HksAnonAttestKey(const struct HksBlob *keyAlias, const st
             return ret;
         }
 
-        ret = HksClientAttestKey(keyAlias, newParamSet, certChain);
+        ret = HksClientAttestKey(keyAlias, newParamSet, certChain, true);
         HksFreeParamSet(&newParamSet);
     );
     return ret;

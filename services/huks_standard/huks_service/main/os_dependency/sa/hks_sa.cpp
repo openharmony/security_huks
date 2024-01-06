@@ -191,9 +191,12 @@ static void HksInitMemPolicy(void)
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
 {
-    // Since we have wrote a HksStub instance in client side,
-    // we can now read it without distinguishing anonymous attestation from normal attestation.
+    // Since we have wrote a HksStub instance in client side, we can now read it if it is anonymous attestation.
     if (code == HKS_MSG_ATTEST_KEY) {
+        HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
+            reinterpret_cast<const uint8_t *>(&reply), nullptr);
+        return HKS_SUCCESS;
+    } else if (code == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
         auto ptr = data.ReadRemoteObject();
         if (ptr == nullptr) {
             // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
