@@ -82,7 +82,7 @@ static int32_t HksSendAnonAttestRequestAndWaitAsyncReply(MessageParcel &data, co
     // We send the request in sync mode, and we send a stub instance in the request.
     // We wait for the instance callback later.
     MessageOption option = MessageOption::TF_SYNC;
-    int error = hksProxy->SendRequest(HKS_MSG_ATTEST_KEY, data, reply, option);
+    int error = hksProxy->SendRequest(HKS_MSG_ATTEST_KEY_ASYNC_REPLY, data, reply, option);
     HKS_IF_NOT_SUCC_LOGE_RETURN(error, HKS_ERROR_IPC_MSG_FAIL, "hksProxy->SendRequest failed %" LOG_PUBLIC "d", error);
 
     int ret = HksReadRequestReply(reply, outBlob);
@@ -149,19 +149,17 @@ int32_t HksSendRequest(enum HksIpcInterfaceCode type, const struct HksBlob *inBl
     sptr<IRemoteObject> hksProxy = GetHksProxy();
     HKS_IF_NULL_LOGE_RETURN(hksProxy, HKS_ERROR_BAD_STATE, "GetHksProxy registry is null")
 
-    if (type == HKS_MSG_ATTEST_KEY) {
+    if (type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY) {
         sptr<Security::Hks::HksStub> hksCallback = new (std::nothrow) Security::Hks::HksStub();
         HKS_IF_NULL_LOGE_RETURN(hksCallback, HKS_ERROR_INSUFFICIENT_MEMORY, "new HksStub failed")
-        // We write a HksStub instance if type == HKS_MSG_ATTEST_KEY,
-        // then we can read it in the server side if type == HKS_MSG_ATTEST_KEY.
+        // We write a HksStub instance if type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY,
+        // then we can read it in the server side if type == HKS_MSG_ATTEST_KEY_ASYNC_REPLY.
         bool result = data.WriteRemoteObject(hksCallback);
         if (!result) {
             HKS_LOG_E("WriteRemoteObject hksCallback failed %" LOG_PUBLIC "d", result);
             return HKS_ERROR_IPC_MSG_FAIL;
         }
-        if (HksAttestIsAnonymous(paramSet)) {
-            return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, hksProxy, hksCallback, outBlob);
-        }
+        return HksSendAnonAttestRequestAndWaitAsyncReply(data, paramSet, hksProxy, hksCallback, outBlob);
         // If the mode is non-anonymous attest, we write a HksStub instance here, then go back and process as normal.
     }
 
