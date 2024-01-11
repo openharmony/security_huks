@@ -31,7 +31,7 @@ HksLock *HksLockCreate(void)
     if (lock != NULL) {
         lock->lock = HksRwlockCreate();
         if (lock->lock == NULL) {
-            HksFree(lock);
+            HKS_FREE(lock);
             lock = NULL;
         }
     }
@@ -72,5 +72,5 @@ void HksLockClose(HksLock *lock)
         return;
     }
     HksRwlockClose(lock->lock);
-    HksFree(lock);
+    HKS_FREE(lock);
 }

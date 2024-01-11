@@ -160,7 +160,7 @@ static int32_t OpensslBlockCipherHandleFinalThree(
     struct HksOpensslBlockCipherCtx *blockCipherCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)blockCipherCtx->append;
     if (ctx == NULL) {
-        HKS_FREE_PTR(*cryptoCtx);
+        HKS_FREE(*cryptoCtx);
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -192,7 +192,7 @@ static int32_t OpensslBlockCipherHandleFinalThree(
 
     EVP_CIPHER_CTX_free(ctx);
     blockCipherCtx->append = NULL;
-    HKS_FREE_PTR(*cryptoCtx);
+    HKS_FREE(*cryptoCtx);
 
     return ret;
 }
@@ -567,7 +567,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
 
     if (ctx == NULL) {
-        HKS_FREE_PTR(*cryptoCtx);
+        HKS_FREE(*cryptoCtx);
         return HKS_ERROR_NULL_POINTER;
     }
 
@@ -601,7 +601,7 @@ static int32_t OpensslAesAeadEncryptFinalGCM(void **cryptoCtx, const struct HksB
 
     EVP_CIPHER_CTX_free(ctx);
     aesCtx->append = NULL;
-    HKS_FREE_PTR(*cryptoCtx);
+    HKS_FREE(*cryptoCtx);
 
     return ret;
 }
@@ -613,7 +613,7 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
     EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
 
     if (ctx == NULL) {
-        HksFree(aesCtx);
+        HKS_FREE(aesCtx);
         *cryptoCtx = NULL;
         return HKS_ERROR_NULL_POINTER;
     }
@@ -651,7 +651,7 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
 
     EVP_CIPHER_CTX_free(ctx);
     aesCtx->append = NULL;
-    HKS_FREE_PTR(*cryptoCtx);
+    HKS_FREE(*cryptoCtx);
     return ret;
 }
 #endif
@@ -976,7 +976,7 @@ void HksOpensslAesHalFreeCtx(void **cryptoCtx)
             break;
     }
 
-    HKS_FREE_PTR(*cryptoCtx);
+    HKS_FREE(*cryptoCtx);
 }
 
 int32_t HksOpensslAesEncrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,

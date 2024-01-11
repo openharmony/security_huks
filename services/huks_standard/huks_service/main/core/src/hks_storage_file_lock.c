@@ -43,7 +43,7 @@ static void FreeFileLock(HksStorageFileLock *lock)
     }
 
     if (lock->path) {
-        HksFree(lock->path);
+        HKS_FREE(lock->path);
         lock->path = NULL;
     }
 
@@ -52,7 +52,7 @@ static void FreeFileLock(HksStorageFileLock *lock)
         lock->lock = NULL;
     }
 
-    HksFree(lock);
+    HKS_FREE(lock);
 }
 
 static void ClearLockList(void)

@@ -225,8 +225,8 @@ HWTEST_F(HksUseridmWrapTest, HksUseridmWrapTest012, TestSize.Level0)
     EXPECT_EQ(secInfo->enrolledInfo[0].authType, HKS_USER_AUTH_TYPE_PIN);
     EXPECT_EQ(secInfo->enrolledInfo[0].enrolledId, g_enrolledIdForPin);
     if (secInfo != NULL) {
-        HKS_FREE_PTR(secInfo->enrolledInfo);
-        HKS_FREE_PTR(secInfo);
+        HKS_FREE(secInfo->enrolledInfo);
+        HKS_FREE(secInfo);
     }
 }
 }

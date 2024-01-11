@@ -186,8 +186,8 @@ static int32_t UpdateSessionTest(struct HksBlob *handle)
     ret = HksUpdate(handle, encryptParamSet, &indataBlob, &outdataBlob);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksUpdate failed.")
     HksFreeParamSet(&encryptParamSet);
-    HksFree(indata);
-    HksFree(outdata);
+    HKS_FREE(indata);
+    HKS_FREE(outdata);
     return ret;
 }
 
@@ -206,8 +206,8 @@ static int32_t FinishSessionTest(struct HksBlob *handle)
     ret = HksFinish(handle, encryptParamSet, &indataBlob, &outdataBlob);
     HKS_IF_NOT_SUCC_LOGE(ret, "HksFinish failed.")
     HksFreeParamSet(&encryptParamSet);
-    HksFree(indata);
-    HksFree(outdata);
+    HKS_FREE(indata);
+    HKS_FREE(outdata);
     return ret;
 }
 

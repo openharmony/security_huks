@@ -283,14 +283,14 @@ namespace Unittest::ImportWrappedKey {
 
         // copy struct material
         if (memcpy_s(dataTest, size, &material, sizeof(material)) != EOK) {
-            HksFree(dataTest);
+            HKS_FREE(dataTest);
             return HKS_ERROR_BAD_STATE;
         }
 
         uint32_t offset = sizeof(material);
         // copy nData
         if (memcpy_s(dataTest + offset, size - offset, nDataBlob->data, nDataBlob->size) != EOK) {
-            HksFree(dataTest);
+            HKS_FREE(dataTest);
             return HKS_ERROR_BAD_STATE;
         }
 
@@ -298,7 +298,7 @@ namespace Unittest::ImportWrappedKey {
         // copy eData
         if (!isPriKey) {
             if (memcpy_s(dataTest + offset, size - offset, &g_eData, sizeof(g_eData)) != EOK) {
-                HksFree(dataTest);
+                HKS_FREE(dataTest);
                 return HKS_ERROR_BAD_STATE;
             }
             offset += material.eSize;
@@ -306,7 +306,7 @@ namespace Unittest::ImportWrappedKey {
 
         // copy dData
         if (memcpy_s(dataTest + offset, size - offset, dDataBlob->data, dDataBlob->size) != EOK) {
-            HksFree(dataTest);
+            HKS_FREE(dataTest);
             return HKS_ERROR_BAD_STATE;
         }
 

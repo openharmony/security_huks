@@ -216,7 +216,7 @@ static int32_t TestCheckKeyVersionIsExpected(struct HksBlob *keyAlias, uint32_t 
     (void)HksInitParamSet(&paramOutSet);
     (void)HksAddParams(paramOutSet, &getParam, 1);
     (void)HksBuildParamSet(&paramOutSet);
-    HksFree(getParam.blob.data);
+    HKS_FREE(getParam.blob.data);
     int32_t ret = HksGetKeyParamSet(keyAlias, nullptr, paramOutSet);
     EXPECT_TRUE(ret == HKS_SUCCESS);
 

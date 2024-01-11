@@ -68,7 +68,7 @@ static int32_t GetFullFileName(const char *path, const char *fileName, char **fu
     int32_t ret = GetFileName(path, fileName, tmpFileName, nameLen);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get full fileName failed");
-        HKS_FREE_PTR(tmpFileName);
+        HKS_FREE(tmpFileName);
         return ret;
     }
 
@@ -238,7 +238,7 @@ int32_t HksFileRemove(const char *path, const char *fileName)
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileRemove(fullFileName);
-    HKS_FREE_PTR(fullFileName);
+    HKS_FREE(fullFileName);
     return ret;
 }
 
@@ -251,7 +251,7 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = IsFileExist(fullFileName);
-    HKS_FREE_PTR(fullFileName);
+    HKS_FREE(fullFileName);
     return ret;
 }
 
@@ -489,7 +489,7 @@ int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, str
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileRead(fullFileName, offset, blob, size);
-    HKS_FREE_PTR(fullFileName);
+    HKS_FREE(fullFileName);
     return ret;
 }
 
@@ -504,7 +504,7 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = FileWrite(fullFileName, offset, buf, len);
-    HKS_FREE_PTR(fullFileName);
+    HKS_FREE(fullFileName);
     return ret;
 }
 
@@ -517,7 +517,7 @@ uint32_t HksFileSize(const char *path, const char *fileName)
     HKS_IF_NOT_SUCC_RETURN(ret, 0)
 
     uint32_t size = FileSize(fullFileName);
-    HKS_FREE_PTR(fullFileName);
+    HKS_FREE(fullFileName);
     return size;
 }
 

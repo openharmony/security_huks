@@ -472,7 +472,7 @@ protected:
                 testCaseParams.encryptResult);
             EXPECT_EQ(AesGcmDecrypt(paramInSet, &cipherText, &plainTextDecrypt, &symmetricKey, &tagAead),
                 testCaseParams.decryptResult);
-            HksFree(tagAead.data);
+            HKS_FREE(tagAead.data);
         } else {
             EXPECT_EQ(AesEncrypt(paramInSet, &plainText, &cipherText, &symmetricKey), testCaseParams.encryptResult);
             EXPECT_EQ(
@@ -481,10 +481,10 @@ protected:
         EXPECT_EQ(plainTextDecrypt.size, testCaseParams.hexData.length());
         EXPECT_EQ(HksMemCmp(plainText.data, plainTextDecrypt.data, testCaseParams.hexData.length()), 0);
 
-        HksFree(paramSetOut);
-        HksFree(symmetricKey.data);
-        HksFree(cipherText.data);
-        HksFree(plainTextDecrypt.data);
+        HKS_FREE(paramSetOut);
+        HKS_FREE(symmetricKey.data);
+        HKS_FREE(cipherText.data);
+        HKS_FREE(plainTextDecrypt.data);
         HksFreeParamSet(&paramInSet);
     }
 };

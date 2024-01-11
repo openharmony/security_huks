@@ -29,7 +29,7 @@ HksLock *HksLockCreate(void)
     if (lock != NULL) {
         lock->lock = HksMutexCreate();
         if (lock->lock == NULL) {
-            HksFree(lock);
+            HKS_FREE(lock);
             lock = NULL;
         }
     }
@@ -70,5 +70,5 @@ void HksLockClose(HksLock *lock)
         return;
     }
     HksMutexClose(lock->lock);
-    HksFree(lock);
+    HKS_FREE(lock);
 }

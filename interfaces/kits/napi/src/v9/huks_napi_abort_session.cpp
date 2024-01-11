@@ -56,7 +56,7 @@ static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context)
         return;
     }
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->handle, context->paramSet);
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

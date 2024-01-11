@@ -392,14 +392,14 @@ static int32_t ConstructKey(const struct HksBlob *nDataBlob, const struct HksBlo
 
     // copy struct material
     if (memcpy_s(data, sizeTest, &material, sizeof(material)) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     uint32_t offset = sizeof(material);
     // copy nData
     if (memcpy_s(data + offset, sizeTest - offset, nDataBlob->data, nDataBlob->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -407,7 +407,7 @@ static int32_t ConstructKey(const struct HksBlob *nDataBlob, const struct HksBlo
     // copy eData
     if (!isPriKey) {
         if (memcpy_s(data + offset, sizeTest - offset, &g_eData, sizeof(g_eData)) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
         }
         offset += material.eSize;
@@ -415,7 +415,7 @@ static int32_t ConstructKey(const struct HksBlob *nDataBlob, const struct HksBlo
 
     // copy dData
     if (memcpy_s(data + offset, sizeTest - offset, dDataBlob->data, dDataBlob->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -528,7 +528,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *
         return ret;
     }
     ret = HksImportKey(keyAlias, paramSet, &key);
-    HKS_FREE_PTR(key.data);
+    HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
 }
@@ -550,7 +550,7 @@ static int32_t ImportKeyNew(const struct HksBlob *keyAlias, const struct HksPara
         return ret;
     }
     ret = HksImportKey(keyAlias, paramSet, &key);
-    HKS_FREE_PTR(key.data);
+    HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
 }
@@ -666,7 +666,7 @@ static int32_t DoDecrpyt(const struct HksBlob *keyAlias, const struct HksBlob *c
     int32_t ret = DoOpDetail(keyAlias, g_initOp2Params, sizeof(g_initOp2Params) / sizeof(struct HksParam),
         cipherData, &plainData);
     if (ret != HKS_SUCCESS) {
-        HksFree(plainBuf);
+        HKS_FREE(plainBuf);
         return ret;
     }
 
@@ -676,7 +676,7 @@ static int32_t DoDecrpyt(const struct HksBlob *keyAlias, const struct HksBlob *c
         ret = HKS_FAILURE;
     }
 
-    HksFree(plainBuf);
+    HKS_FREE(plainBuf);
     return ret;
 }
 
@@ -699,7 +699,7 @@ static int32_t DoOperation(const struct HksBlob *priKeyAlias, const struct HksBl
 
     uint8_t *outDataBuf = (uint8_t *)HksMalloc(LENGTH_MAX);
     if (outDataBuf == nullptr) {
-        HksFree(inDataBuf);
+        HKS_FREE(inDataBuf);
         return HKS_ERROR_MALLOC_FAIL;
     }
 
@@ -725,8 +725,8 @@ static int32_t DoOperation(const struct HksBlob *priKeyAlias, const struct HksBl
         }
     } while (0);
 
-    HksFree(inDataBuf);
-    HksFree(outDataBuf);
+    HKS_FREE(inDataBuf);
+    HKS_FREE(outDataBuf);
     return ret;
 }
 

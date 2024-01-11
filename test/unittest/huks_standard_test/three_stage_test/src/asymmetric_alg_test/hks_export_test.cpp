@@ -69,7 +69,7 @@ public:
 
         /* 3. Delete Key */
         (void)HksDeleteKey(&authId, nullptr);
-        HksFree(publicKey.data);
+        HKS_FREE(publicKey.data);
 
         return ret;
     }

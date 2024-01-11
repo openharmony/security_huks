@@ -68,7 +68,7 @@ int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, co
     HksBuildParamSet(&paramOutSet);
 
     if (HksGenerateKey(authId, paramSetIn, paramOutSet) != HKS_SUCCESS) {
-        HksFree(localData);
+        HKS_FREE(localData);
         HksFreeParamSet(&paramOutSet);
         return HKS_FAILURE;
     }
@@ -83,7 +83,7 @@ int32_t LocalHksGenerate(const uint32_t keyLen, const struct HksBlob *authId, co
     pubKey->size = pubParam->blob.size;
     (void)memcpy_s(pubKey->data, pubParam->blob.size, pubParam->blob.data, pubParam->blob.size);
 
-    HksFree(localData);
+    HKS_FREE(localData);
     HksFreeParamSet(&paramOutSet);
     return HKS_SUCCESS;
 }
@@ -571,11 +571,11 @@ protected:
         EXPECT_EQ(HksAgreeKey(agreeKeyParams, &bob, &x509KeyAlise, agreeKeyBob), testCaseParams.agreeResult);
 
         (void)HksDeleteKey(&bob, nullptr);
-        HksFree(alise.data);
-        HksFree(x509KeyAlise.data);
-        HksFree(x509KeyBob.data);
-        HksFree(pubKeyAlise.data);
-        HksFree(pubKeyBob.data);
+        HKS_FREE(alise.data);
+        HKS_FREE(x509KeyAlise.data);
+        HKS_FREE(x509KeyBob.data);
+        HKS_FREE(pubKeyAlise.data);
+        HKS_FREE(pubKeyBob.data);
         HksFreeParamSet(&agreeKeyParams);
     }
 
@@ -605,8 +605,8 @@ protected:
             EXPECT_EQ(EcdhAgreeKey(keySize, &priKeyAlise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
             EXPECT_EQ(EcdhAgreeKey(keySize, &priKeyBob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
             (void)HksDeleteKey(&bob, nullptr);
-            HksFree(priKeyAlise.data);
-            HksFree(priKeyBob.data);
+            HKS_FREE(priKeyAlise.data);
+            HKS_FREE(priKeyBob.data);
         } else if (scenario == 1) {
             struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
             ASSERT_NE(alise.data, nullptr);
@@ -618,12 +618,12 @@ protected:
             EXPECT_EQ(GetEccPubKey(&bob, &pubKeyBob), ECC_SUCCESS);
             EXPECT_EQ(HksAgreeKey(agreeKeyParams, &alise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
             EXPECT_EQ(HksAgreeKey(agreeKeyParams, &bob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
-            HksFree(alise.data);
-            HksFree(bob.data);
+            HKS_FREE(alise.data);
+            HKS_FREE(bob.data);
         }
         HksFreeParamSet(&agreeKeyParams);
-        HksFree(pubKeyAlise.data);
-        HksFree(pubKeyBob.data);
+        HKS_FREE(pubKeyAlise.data);
+        HKS_FREE(pubKeyBob.data);
     }
 
     void EcdhRunTestCase(const TestCaseParams &testCaseParams, int32_t scenario)
@@ -650,8 +650,8 @@ protected:
         EXPECT_EQ(HksMemCmp(agreeKeyAlise.data, agreeKeyBob.data, agreeKeyAlise.size), HKS_SUCCESS);
 
         HksFreeParamSet(&generateKeyParams);
-        HksFree(agreeKeyAlise.data);
-        HksFree(agreeKeyBob.data);
+        HKS_FREE(agreeKeyAlise.data);
+        HKS_FREE(agreeKeyBob.data);
     }
 
 #ifdef HKS_SUPPORT_DH_C
@@ -677,8 +677,8 @@ protected:
             EXPECT_EQ(DhAgreeKey(keySize, &priKeyAlise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
             EXPECT_EQ(DhAgreeKey(keySize, &priKeyBob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
             (void)HksDeleteKey(&bob, nullptr);
-            HksFree(priKeyAlise.data);
-            HksFree(priKeyBob.data);
+            HKS_FREE(priKeyAlise.data);
+            HKS_FREE(priKeyBob.data);
         } else if (scenario == 1) {
             struct HksBlob alise = { .size = KEY_MEMORY, .data = (uint8_t *)HksMalloc(KEY_MEMORY) };
             ASSERT_NE(alise.data, nullptr);
@@ -690,11 +690,11 @@ protected:
             EXPECT_EQ(DhGetDhPubKey(&bob, &pubKeyBob), DH_SUCCESS);
             EXPECT_EQ(HksAgreeKey(paramInSet, &alise, &pubKeyBob, agreeKeyAlise), testCaseParams.agreeResult);
             EXPECT_EQ(HksAgreeKey(paramInSet, &bob, &pubKeyAlise, agreeKeyBob), testCaseParams.agreeResult);
-            HksFree(alise.data);
-            HksFree(bob.data);
+            HKS_FREE(alise.data);
+            HKS_FREE(bob.data);
         }
-        HksFree(pubKeyAlise.data);
-        HksFree(pubKeyBob.data);
+        HKS_FREE(pubKeyAlise.data);
+        HKS_FREE(pubKeyBob.data);
     }
 
     void DhRunTestCase(const TestCaseParams &testCaseParams, int32_t scenario)
@@ -720,8 +720,8 @@ protected:
         EXPECT_EQ(HksMemCmp(agreeKeyAlise.data, agreeKeyBob.data, agreeKeyAlise.size), HKS_SUCCESS);
 
         HksFreeParamSet(&paramInSet);
-        HksFree(agreeKeyAlise.data);
-        HksFree(agreeKeyBob.data);
+        HKS_FREE(agreeKeyAlise.data);
+        HKS_FREE(agreeKeyBob.data);
     }
 #endif
 

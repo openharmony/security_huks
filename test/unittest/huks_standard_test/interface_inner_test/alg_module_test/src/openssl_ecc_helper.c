@@ -486,17 +486,17 @@ static int32_t EcKeyToPublicKey(const EC_KEY *ecKey, struct HksBlob *eccPublicKe
         pubKeyInfo->eOrYSize = ySize;
         if (BN_bn2binpad(x, keyBuffer + sizeof(struct HksPubKeyInfo), xSize) == 0 ||
             BN_bn2binpad(y, keyBuffer + sizeof(struct HksPubKeyInfo) + xSize, ySize) == 0) {
-            HKS_FREE_PTR(keyBuffer);
+            HKS_FREE(keyBuffer);
             break;
         }
 
         ret = ECC_SUCCESS;
         eccPublicKey->size = totalSize;
         if (memcpy_s(eccPublicKey->data, eccPublicKey->size, keyBuffer, totalSize) != 0) {
-            HKS_FREE_PTR(keyBuffer);
+            HKS_FREE(keyBuffer);
             break;
         }
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
     } while (0);
 
     SELF_FREE_PTR(x, BN_free)
@@ -640,7 +640,7 @@ int32_t EcdhDerive(EVP_PKEY_CTX *ctx, EVP_PKEY *peerKey, struct HksBlob *sharedK
         }
     }
     if (EVP_PKEY_derive(ctx, sharedKey->data, &keyLen) != 1) {
-        HksFree(sharedKey->data);
+        HKS_FREE(sharedKey->data);
         return ECC_FAILED;
     }
     sharedKey->size = keyLen;

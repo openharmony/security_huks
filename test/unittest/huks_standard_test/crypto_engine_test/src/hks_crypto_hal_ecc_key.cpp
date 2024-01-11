@@ -104,7 +104,7 @@ protected:
         if (testCaseParams.generateKeyResult == HKS_SUCCESS) {
             ASSERT_NE((uint32_t)0, keyTest02.size);
             ASSERT_NE(nullptr, keyTest02.data);
-            HksFree(keyTest02.data);
+            HKS_FREE(keyTest02.data);
         }
     }
 };

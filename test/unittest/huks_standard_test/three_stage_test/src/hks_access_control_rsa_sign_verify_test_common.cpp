@@ -44,14 +44,14 @@ static int32_t RSAAuthTokenSign(struct HksBlob *challenge,
 
     int ret = HksAccessControlPartTest::AuthTokenEncrypt(testIDMParams, challenge, authTokenHal);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(authTokenHal);
+        HKS_FREE(authTokenHal);
         HKS_LOG_E("AuthTokenEncrypt Failed.");
         return ret;
     }
 
     std::vector<uint8_t> token;
     ret = HksAccessControlPartTest::AuthTokenSign(testIDMParams, authTokenHal, token);
-    HKS_FREE_PTR(authTokenHal);
+    HKS_FREE(authTokenHal);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AuthTokenSign Failed.");
         return ret;

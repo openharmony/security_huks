@@ -93,7 +93,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest001, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest001 failed, ret = " << ret;
     ret = HksOpensslAesDecryptInit(&encryptCtx, &key, &usageSpec);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest001 failed, ret = " << ret;
-    HksFree(encryptCtx);
+    HKS_FREE(encryptCtx);
 }
 
 /**
@@ -125,7 +125,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest002, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest002 failed, ret = " << ret;
     ret = HksOpensslAesDecryptUpdate(reinterpret_cast<void *>(ctx), nullptr, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAesEngineTest002 failed, ret = " << ret;
-    HksFree(ctx);
+    HKS_FREE(ctx);
 }
 
 /**
@@ -183,7 +183,7 @@ HWTEST_F(HksAesEngineTest, HksAesEngineTest003, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest003 failed, ret = " << ret;
     ret = HksOpensslAesDecryptFinal(reinterpret_cast<void **>(&ctx), data, data, data);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksAesEngineTest003 failed, ret = " << ret;
-    HksFree(ctx);
+    HKS_FREE(ctx);
 }
 
 /**

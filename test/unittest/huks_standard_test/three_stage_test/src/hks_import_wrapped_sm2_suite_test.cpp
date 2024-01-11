@@ -728,7 +728,7 @@ namespace Unittest::ImportWrappedKey {
 
         // copy struct material
         if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
         }
 
@@ -737,7 +737,7 @@ namespace Unittest::ImportWrappedKey {
             // copy xData
             if (memcpy_s(data + offset, size - offset, keyTest->publicOrXData.data,
                 keyTest->publicOrXData.size) != EOK) {
-                HksFree(data);
+                HKS_FREE(data);
                 return HKS_ERROR_BAD_STATE;
             }
 
@@ -745,7 +745,7 @@ namespace Unittest::ImportWrappedKey {
             // copy yData
             if (memcpy_s(data + offset, size - offset, keyTest->privateOrYData.data,
                 keyTest->privateOrYData.size) != EOK) {
-                HksFree(data);
+                HKS_FREE(data);
                 return HKS_ERROR_BAD_STATE;
             }
             offset += material.ySize;
@@ -753,7 +753,7 @@ namespace Unittest::ImportWrappedKey {
 
         // copy zData
         if (memcpy_s(data + offset, size - offset, keyTest->zData.data, keyTest->zData.size) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
         }
 

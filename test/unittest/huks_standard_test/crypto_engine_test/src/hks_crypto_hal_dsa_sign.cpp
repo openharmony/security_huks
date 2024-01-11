@@ -123,10 +123,10 @@ protected:
 
         EXPECT_EQ(HksCryptoHalVerify(&pubKey, &hksUsageSpec, &hash, &signature), HKS_SUCCESS);
 
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(signature.data);
-        HksFree(pubKey.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(signature.data);
+        HKS_FREE(pubKey.data);
     }
 };
 

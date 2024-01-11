@@ -97,7 +97,7 @@ int32_t HksExportPublicKeyAdapter(const struct HksBlob *keyAlias,
         struct HksBlob x509Key = { 0, NULL };
         ret = TranslateToX509PublicKey(&publicKey, &x509Key);
         if (ret != HKS_SUCCESS) {
-            HKS_FREE_PTR(buffer);
+            HKS_FREE(buffer);
             return ret;
         }
 

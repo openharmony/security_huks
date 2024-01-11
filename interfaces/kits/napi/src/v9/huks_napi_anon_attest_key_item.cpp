@@ -64,7 +64,7 @@ static void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &con
     }
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
     FreeHksCertChain(context->certChain, context->certChainCapacity);
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

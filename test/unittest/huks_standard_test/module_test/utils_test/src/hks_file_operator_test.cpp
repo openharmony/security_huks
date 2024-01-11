@@ -166,7 +166,7 @@ HWTEST_F(HksFileOperatorTest, HksFileOperatorTest011, TestSize.Level0)
     (void)memset_s(fileName, fileNameSize, 1, fileNameSize);
     int32_t ret = HksIsFileExist(path, fileName);
     ASSERT_EQ(ret, HKS_ERROR_INTERNAL_ERROR) << "HksIsFileExist failed, ret = " << ret;
-    HksFree(fileName);
+    HKS_FREE(fileName);
 }
 
 /**
@@ -195,6 +195,6 @@ HWTEST_F(HksFileOperatorTest, HksFileOperatorTest013, TestSize.Level0)
     (void)memset_s(fileName, fileNameSize, 1, fileNameSize);
     int32_t ret = HksFileRemove(path, fileName);
     ASSERT_EQ(ret, HKS_ERROR_INTERNAL_ERROR) << "HksFileRemove failed, ret = " << ret;
-    HksFree(fileName);
+    HKS_FREE(fileName);
 }
 }

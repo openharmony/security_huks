@@ -48,14 +48,14 @@ static void DeleteKeyNode(uint64_t operationHandle)
 
     struct HksParamSet *paramSet = NULL;
     if (HksInitParamSet(&paramSet) != HKS_SUCCESS) {
-        HksFree(handle);
+        HKS_FREE(handle);
         return;
     }
 
     (void)HuksAccessAbort(&handleBlob, paramSet);
 
     HksFreeParamSet(&paramSet);
-    HksFree(handle);
+    HKS_FREE(handle);
 }
 
 /* Need to lock before calling FreeOperation */
@@ -67,7 +67,7 @@ static void FreeOperation(struct HksOperation **operation)
     RemoveDoubleListNode(&(*operation)->listHead);
     HKS_FREE_BLOB((*operation)->processInfo.userId);
     HKS_FREE_BLOB((*operation)->processInfo.processName);
-    HKS_FREE_PTR(*operation);
+    HKS_FREE(*operation);
 }
 
 /* Need to lock before calling DeleteFirstAbortableOperation */
@@ -154,7 +154,7 @@ static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *proces
     uint8_t *processName = (uint8_t *)HksMalloc(processNameLen);
     if (processName == NULL) {
         HKS_LOG_E("malloc operation process name failed");
-        HKS_FREE_PTR(userId);
+        HKS_FREE(userId);
         return HKS_ERROR_MALLOC_FAIL;
     }
 
@@ -229,7 +229,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
     int32_t ret = ConstructOperationProcessInfo(processInfo, operation);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("constrtct operation process info failed");
-        HKS_FREE_PTR(operation);
+        HKS_FREE(operation);
         return ret;
     }
 
@@ -238,7 +238,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
         HKS_LOG_E("constrtct operation handle failed");
         HKS_FREE_BLOB(operation->processInfo.processName);
         HKS_FREE_BLOB(operation->processInfo.userId);
-        HKS_FREE_PTR(operation);
+        HKS_FREE(operation);
         return ret;
     }
 
@@ -251,7 +251,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
             HKS_LOG_E("constrtct operation handle failed");
             HKS_FREE_BLOB(operation->processInfo.processName);
             HKS_FREE_BLOB(operation->processInfo.userId);
-            HKS_FREE_PTR(operation);
+            HKS_FREE(operation);
             return ret;
         }
     }
@@ -260,7 +260,7 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
     if (ret != HKS_SUCCESS) {
         HKS_FREE_BLOB(operation->processInfo.processName);
         HKS_FREE_BLOB(operation->processInfo.userId);
-        HKS_FREE_PTR(operation);
+        HKS_FREE(operation);
     }
 
     return ret;

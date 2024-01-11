@@ -92,12 +92,12 @@ inline void FreeHksBlob(HksBlob *&blob)
     }
 
     if (blob->data != nullptr) {
-        HksFree(blob->data);
+        HKS_FREE(blob->data);
         blob->data = nullptr;
     }
     blob->size = 0;
 
-    HksFree(blob);
+    HKS_FREE(blob);
     blob = nullptr;
 }
 

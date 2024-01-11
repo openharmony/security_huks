@@ -190,9 +190,9 @@ static const uint32_t g_defaultCertSize = 10240;
 
 static void FreeCertChainBlob(struct HksBlob *certChain)
 {
-    HKS_FREE_PTR(certChain->data);
+    HKS_FREE(certChain->data);
     certChain->size = 0;
-    HKS_FREE_PTR(certChain);
+    HKS_FREE(certChain);
 }
 
 static int32_t ConstructCertChainBlob(struct HksBlob **outCertChain)
@@ -592,7 +592,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest010, TestSize.Level0)
     (void)memcpy_s(key.data, paramSet->paramSetSize, paramSet, paramSet->paramSetSize);
     ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
-    HksFree(key.data);
+    HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
 }
 
@@ -619,7 +619,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest011, TestSize.Level0)
 
     ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
-    HksFree(key.data);
+    HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
 }
 
@@ -645,7 +645,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest012, TestSize.Level0)
     (void)memcpy_s(key.data, paramSet->paramSetSize, paramSet, paramSet->paramSetSize);
     ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(key.data);
+    HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
 }
 #endif /** HKS_ENABLE_UPGRADE_KEY*/

@@ -253,11 +253,11 @@ int32_t DhX509ToHksBlob(const struct HksBlob *x509Key, struct HksBlob *publicKey
     publicKey->size = sizeof(struct KeyMaterialDh) + dhpubKeySize;
     if (memcpy_s(publicKey->data, publicKey->size, keyBuffer, sizeof(struct KeyMaterialDh) + dhpubKeySize) != 0) {
         EVP_PKEY_free(pkey);
-        HksFree(keyBuffer);
+        HKS_FREE(keyBuffer);
         return DH_FAILED;
     }
 
-    HksFree(keyBuffer);
+    HKS_FREE(keyBuffer);
     EVP_PKEY_free(pkey);
     return DH_SUCCESS;
 }

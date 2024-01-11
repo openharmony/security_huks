@@ -46,7 +46,7 @@ namespace OHOS {
 
         (void)HksImportKey(&keyAlias, paramSet, &pubKey);
 
-        HksFree(myDataTest);
+        HKS_FREE(myDataTest);
         return true;
     }
 }

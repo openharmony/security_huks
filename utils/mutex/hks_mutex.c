@@ -31,7 +31,7 @@ HksMutex *HksMutexCreate(void)
     if (mutex != NULL) {
         int result = pthread_mutex_init(&mutex->mutex, NULL);
         if (result != 0) {
-            HksFree(mutex);
+            HKS_FREE(mutex);
             mutex = NULL;
         }
     }
@@ -59,5 +59,5 @@ void HksMutexClose(HksMutex *mutex)
     }
 
     pthread_mutex_destroy(&mutex->mutex);
-    HksFree(mutex);
+    HKS_FREE(mutex);
 }

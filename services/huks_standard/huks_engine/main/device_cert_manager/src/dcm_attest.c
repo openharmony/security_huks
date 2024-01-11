@@ -774,14 +774,14 @@ static int32_t CreateTbs(const struct HksBlob *template, const struct HksAttestS
     ret = CreateAttestExtension(attestSpec, &extension);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("create extensions failed!");
-        HksFree(extBuf);
+        HKS_FREE(extBuf);
         return ret;
     }
 
     struct HksAsn1Blob extBlob = { ASN_1_TAG_TYPE_CTX_SPEC3, extension.size, extension.data };
     draftTbs.extensions.value = extBlob;
     ret = EncodeTbs(&draftTbs, tbs);
-    HksFree(extBuf);
+    HKS_FREE(extBuf);
     return ret;
 }
 
@@ -859,7 +859,7 @@ int32_t HksGetDevicePrivateKey(const struct HksBlob *key, struct HksBlob *out)
     ret = GetPrivateKeyMaterial(&val, &materialBlob);
     if (ret != HKS_SUCCESS) {
         (void)memset_s(material, materialLen, 0, materialLen);
-        HksFree(material);
+        HKS_FREE(material);
         HKS_LOG_E("get key materail fail!");
         return ret;
     }
@@ -898,7 +898,7 @@ static int32_t SignTbs(struct HksBlob *sig, const struct HksBlob *tbs, const str
 
     ret = HksCryptoHalSign(&priKey, &usageSpec, &message, sig);
     (void)memset_s(priKey.data, priKey.size, 0, priKey.size);
-    HksFree(priKey.data);
+    HKS_FREE(priKey.data);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sign tbs failed!")
 
     return HKS_SUCCESS;
@@ -1295,20 +1295,20 @@ static void FreeAttestSpec(struct HksAttestSpec **attestSpec)
         return;
     }
     if (spec->claims.data != NULL) {
-        HKS_FREE_PTR(spec->claims.data);
+        HKS_FREE(spec->claims.data);
     }
     if (spec->devCert.data != NULL) {
-        HKS_FREE_PTR(spec->devCert.data);
+        HKS_FREE(spec->devCert.data);
     }
     if (spec->devKey.data != NULL) {
         (void)memset_s(spec->devKey.data, spec->devKey.size, 0, spec->devKey.size);
-        HKS_FREE_PTR(spec->devKey.data);
+        HKS_FREE(spec->devKey.data);
     }
     if (spec->attestKey.data != NULL) {
         (void)memset_s(spec->attestKey.data, spec->attestKey.size, 0, spec->attestKey.size);
-        HKS_FREE_PTR(spec->attestKey.data);
+        HKS_FREE(spec->attestKey.data);
     }
-    HksFree(spec);
+    HKS_FREE(spec);
     *attestSpec = NULL;
 }
 
@@ -1381,7 +1381,7 @@ static int32_t CreateHwAttestCert(const struct HksAttestSpec *attestSpec, struct
     struct HksBlob attestCert = { HKS_ATTEST_CERT_SIZE + attestSpec->claims.size, attest };
     int32_t ret = CreateAttestCert(&attestCert, &template, attestSpec, signAlg);
     if (ret != HKS_SUCCESS) {
-        HksFree(attest);
+        HKS_FREE(attest);
         HKS_LOG_E("CreateAttestCert failed!");
         return ret;
     }
@@ -1410,7 +1410,7 @@ static int32_t FormatCertToBuf(enum HksCertType type, struct HksBlob *buf)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_BAD_STATE, "get cert failed!")
 
     ret = CopyBlobToBuffer(&cert, buf);
-    HksFree(cert.data);
+    HKS_FREE(cert.data);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy cert fail")
 
     return ret;

@@ -227,7 +227,7 @@ static void HksReleaseParamVectors(std::vector<HksParam> &params)
     while (paramCount > 0) {
         paramCount--;
         if ((param->tag & HKS_TAG_TYPE_MASK) == HKS_TAG_TYPE_BYTES) {
-            HKS_FREE_PTR(param->blob.data);
+            HKS_FREE(param->blob.data);
             param->blob.size = 0;
         }
         ++param;

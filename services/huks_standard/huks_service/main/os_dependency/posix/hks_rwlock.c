@@ -30,7 +30,7 @@ HksRwlock *HksRwlockCreate(void)
     if (rwLock != NULL) {
         int result = pthread_rwlock_init(&rwLock->lock, NULL);
         if (result != 0) {
-            HksFree(rwLock);
+            HKS_FREE(rwLock);
             rwLock = NULL;
         }
     }
@@ -72,5 +72,5 @@ void HksRwlockClose(HksRwlock *lock)
     }
 
     pthread_rwlock_destroy(&lock->lock);
-    HksFree(lock);
+    HKS_FREE(lock);
 }

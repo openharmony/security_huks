@@ -44,9 +44,7 @@ int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
     } \
 }
 
-#define HKS_FREE_PTR(p) SELF_FREE_PTR(p, HksFreeImpl)
-
-#define HksFree(p) SELF_FREE_PTR(p, HksFreeImpl)
+#define HKS_FREE(p) ({SELF_FREE_PTR(p, HksFreeImpl)})
 
 #define HKS_FREE_BLOB(blob) do { \
     if ((blob).data != HKS_NULL_POINTER) { \
