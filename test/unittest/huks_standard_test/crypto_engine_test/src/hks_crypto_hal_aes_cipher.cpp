@@ -519,8 +519,8 @@ protected:
                 point = point + HKS_UPDATE_DATA_MAX;
                 outPoint = outPoint + out.size;
             }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
+            HKS_FREE(out.data);
+            HKS_FREE(messageUpdate.data);
 
             uint32_t lastLen = inLen - point;
             uint32_t lastOutLen = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT;
@@ -533,7 +533,7 @@ protected:
             (void)memcpy_s((encryptOut->data + outPoint), enMessageLastOut.size, enMessageLastOut.data,
                 enMessageLastOut.size);
             encryptOut->size += enMessageLastOut.size;
-            HksFree(enMessageLast.data);
+            HKS_FREE(enMessageLast.data);
         } else {
             HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
             ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
@@ -546,7 +546,7 @@ protected:
             HksBlob enMessageLastOut = { .size = 0, .data = nullptr };
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
-            HksFree(out.data);
+            HKS_FREE(out.data);
         }
     }
 
@@ -573,8 +573,8 @@ protected:
                 decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
                 decrytooutPoint = decrytooutPoint + out.size;
             }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
+            HKS_FREE(out.data);
+            HKS_FREE(messageUpdate.data);
 
             uint32_t lastLen = decrytoinLen - decrytopoint;
             HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
@@ -591,7 +591,7 @@ protected:
                 messageLastOut.size);
             decryptOut->size += messageLastOut.size;
 
-            HksFree(messageLast.data);
+            HKS_FREE(messageLast.data);
         } else {
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
             ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
@@ -605,8 +605,8 @@ protected:
             EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, &messageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
 
-            HksFree(deMessageLast.data);
-            HksFree(out.data);
+            HKS_FREE(deMessageLast.data);
+            HKS_FREE(out.data);
         }
     }
 
@@ -639,10 +639,10 @@ protected:
             EXPECT_EQ(HksMemCmp(message.data, decryptAll.data, decryptAll.size), HKS_SUCCESS) << "compare data failed.";
         }
 
-        HksFree(encryptAll.data);
-        HksFree(decryptAll.data);
-        HksFree(key.data);
-        HksFree(tagAead.data);
+        HKS_FREE(encryptAll.data);
+        HKS_FREE(decryptAll.data);
+        HKS_FREE(key.data);
+        HKS_FREE(tagAead.data);
     }
 
     void RunTestGcmDecrypt(const HksUsageSpec &usageSpec, struct HksBlob *key, struct HksBlob *decryptMsg,
@@ -669,8 +669,8 @@ protected:
                 decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
                 decrytooutPoint = decrytooutPoint + out.size;
             }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
+            HKS_FREE(out.data);
+            HKS_FREE(messageUpdate.data);
 
             uint32_t lastLen = decrytoinLen - decrytopoint;
             uint32_t lastOutLen = HKS_UPDATE_DATA_MAX + HKS_PADDING_SUPPLENMENT;
@@ -684,8 +684,8 @@ protected:
                 messageLastOut.size);
             decryptOut->size += messageLastOut.size;
 
-            HksFree(messageLast.data);
-            HksFree(messageLastOut.data);
+            HKS_FREE(messageLast.data);
+            HKS_FREE(messageLastOut.data);
         } else {
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
             ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
@@ -700,8 +700,8 @@ protected:
             EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, &messageLastOut, tagAead,
                 usageSpec.algType), HKS_SUCCESS);
 
-            HksFree(deMessageLast.data);
-            HksFree(out.data);
+            HKS_FREE(deMessageLast.data);
+            HKS_FREE(out.data);
         }
     }
 
@@ -746,10 +746,10 @@ protected:
             EXPECT_EQ(HksMemCmp(message.data, decryptAll.data, decryptAll.size), HKS_SUCCESS) << "compare data failed.";
         }
 
-        HksFree(encryptAll.data);
-        HksFree(decryptAll.data);
-        HksFree(key.data);
-        HksFree(tagAead.data);
+        HKS_FREE(encryptAll.data);
+        HKS_FREE(decryptAll.data);
+        HKS_FREE(key.data);
+        HKS_FREE(tagAead.data);
     }
 
     void RunTestCase(const TestCaseParams &testCaseParams) const
@@ -799,10 +799,10 @@ protected:
             EXPECT_EQ(HksMemCmp(message.data, plaintext.data, plaintext.size), HKS_SUCCESS);
         }
 
-        HksFree(key.data);
-        HksFree(cipherText.data);
-        HksFree(plaintext.data);
-        HksFree(tagAead.data);
+        HKS_FREE(key.data);
+        HKS_FREE(cipherText.data);
+        HKS_FREE(plaintext.data);
+        HKS_FREE(tagAead.data);
     }
 };
 

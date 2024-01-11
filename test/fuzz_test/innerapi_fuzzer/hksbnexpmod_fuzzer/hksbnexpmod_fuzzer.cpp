@@ -47,7 +47,7 @@ namespace OHOS {
 
         (void)HksBnExpMod(&x, &a, &e, &n);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

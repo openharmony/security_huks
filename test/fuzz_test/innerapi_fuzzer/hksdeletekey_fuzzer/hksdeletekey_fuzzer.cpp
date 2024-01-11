@@ -39,7 +39,7 @@ namespace OHOS {
 
         (void)HksDeleteKey(&keyAlias, paramSetIn);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

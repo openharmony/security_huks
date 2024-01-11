@@ -49,7 +49,7 @@ namespace OHOS {
 
         (void)HksUpdate(&handle, paramSet, &inData, &outData);
 
-        HksFree(myDataTest);
+        HKS_FREE(myDataTest);
         return true;
     }
 }

@@ -530,7 +530,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_017, Function | SmallTes
     key = { .size = 1, .data = buff };
     ASSERT_EQ(HksCryptoHalHmacInit(&key, NULL, &hmactestctx), HKS_ERROR_INVALID_DIGEST);
 
-    HksFree(hmactestctx);
+    HKS_FREE(hmactestctx);
     hmactestctx = nullptr;
     ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, NULL), HKS_ERROR_INVALID_ARGUMENT);
 }
@@ -549,7 +549,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_018, Function | SmallTes
     ASSERT_NE(hmactestctx, nullptr);
 
     ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
+    HKS_FREE(hmactestctx);
 
     key = { .size = 0, .data = nullptr };
     HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = 256, .algParam = nullptr};
@@ -559,7 +559,7 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_018, Function | SmallTes
     ASSERT_NE(hmactestctx, nullptr);
     ASSERT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, &hmactestctx), HKS_SUCCESS);
     ASSERT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
+    HKS_FREE(hmactestctx);
 
     message = { .size = 1, .data = buff };
     ASSERT_EQ(HksCryptoHalHmacUpdate(&message, NULL), HKS_ERROR_INVALID_ARGUMENT);
@@ -596,8 +596,8 @@ HWTEST_F(HksCryptoHalApiMbedtls, HksCryptoHalApiMbedtls_019, Function | SmallTes
 
     signature = { .size = 0, .data = nullptr };
     ASSERT_EQ(HksCryptoHalHmacFinal(&message, &hmactestctx, &signature), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
-    HksFree(message.data);
+    HKS_FREE(hmactestctx);
+    HKS_FREE(message.data);
 }
 
 /**

@@ -76,7 +76,7 @@ HWTEST_F(HksCryptoHalHmacKey, HksCryptoHalHmacKey_001, Function | SmallTest | Le
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_NE((uint32_t)0, key.size);
     ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
+    HKS_FREE(key.data);
 #else
     ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
 #endif

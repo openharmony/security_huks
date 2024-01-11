@@ -124,7 +124,7 @@ static TEEC_Result OpenSession(TEEC_Context *context, TEEC_Session **session)
     uint32_t origin = 0;
     ret = TEEC_OpenSession(context, localSession, &uuid, TEEC_LOGIN_IDENTIFY, NULL, &operation, &origin);
     if (ret != TEEC_SUCCESS) {
-        HksFree(localSession);
+        HKS_FREE(localSession);
         HKS_LOG_E("open ta session failed, ret=0x%" LOG_PUBLIC "x, origin=%" LOG_PUBLIC "u", ret, origin);
         return ret;
     }
@@ -146,14 +146,14 @@ static TEEC_Result TeecOpen(void)
     TEEC_Result result = TEEC_InitializeContext(NULL, g_context);
     if (result != TEEC_SUCCESS) {
         HKS_LOG_E("Initialize TEE context failed, ret=0x%" LOG_PUBLIC "x", result);
-        HKS_FREE_PTR(g_context);
+        HKS_FREE(g_context);
         return result;
     }
 
     result = OpenSession(g_context, &g_sessionSelfStart);
     if (result != TEEC_SUCCESS) {
         TEEC_FinalizeContext(g_context);
-        HKS_FREE_PTR(g_context);
+        HKS_FREE(g_context);
         HKS_LOG_E("Open Session failed!");
     }
 

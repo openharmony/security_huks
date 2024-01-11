@@ -58,7 +58,7 @@ static int32_t GetSalt(enum DeriveType type, const struct HksBlob *random, struc
 
     if ((memcpy_s(salt->data, salt->size, random->data, random->size) != EOK) ||
         (memcpy_s(salt->data + random->size, salt->size - random->size, tag.data, tag.size) != EOK)) {
-        HKS_FREE_PTR(salt->data);
+        HKS_FREE(salt->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
@@ -112,7 +112,7 @@ static int32_t BuildKeyBlobUsageSpec(const struct HksBlob *cipherKey, const stru
     ret = GetDeriveMaterial(DERIVE_NONCE, random, &nonce);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get derive material nonce failed, ret = %" LOG_PUBLIC "d", ret);
-        HKS_FREE_PTR(nonce.data);
+        HKS_FREE(nonce.data);
         return ret;
     }
 
@@ -196,7 +196,7 @@ static int32_t CopyKey(const struct HksBlob *key, struct HksBlob *adjustedKey)
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     if (memcpy_s(adjustedKey->data, adjustedKey->size, key->data, key->size) != EOK) {
-        HKS_FREE_PTR(adjustedKey->data);
+        HKS_FREE(adjustedKey->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
@@ -227,7 +227,7 @@ static int32_t Ed25519BlobToKeyMaterial(const struct HksBlob *key, struct HksBlo
         key->data, (HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256) << 1)) != EOK) {
         HKS_LOG_E("copy ed25519 public and private value failed");
         (void)memset_s(adjustedKey->data, adjustedKey->size, 0, adjustedKey->size);
-        HKS_FREE_PTR(adjustedKey->data);
+        HKS_FREE(adjustedKey->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
@@ -256,7 +256,7 @@ static int32_t Ed25519KeyMaterialToBlob(const struct HksBlob *key, struct HksBlo
     if (memcpy_s(adjustedKey->data, adjustedKey->size, key->data + sizeof(*keyMaterial),
         keyMaterial->pubKeySize + keyMaterial->priKeySize) != EOK) {
         HKS_LOG_E("copy pubKey and private key failed.");
-        HKS_FREE_PTR(adjustedKey->data);
+        HKS_FREE(adjustedKey->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
@@ -328,7 +328,7 @@ struct HksKeyNode *HksGenerateKeyNode(const struct HksBlob *key)
     } while (0);
 
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(keyNode);
+        HKS_FREE(keyNode);
         return NULL;
     }
 

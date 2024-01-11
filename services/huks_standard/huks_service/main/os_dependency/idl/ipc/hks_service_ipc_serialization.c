@@ -408,7 +408,7 @@ static int32_t KeyInfoListInit(struct HksKeyInfo *keyInfoList, uint32_t listCoun
     if (ret != HKS_SUCCESS) {
         for (uint32_t j = 0; j <= i; ++j) {
             HKS_FREE_BLOB(keyInfoList[j].alias);
-            HKS_FREE_PTR(keyInfoList[j].paramSet);
+            HKS_FREE(keyInfoList[j].paramSet);
         }
     }
     return ret;
@@ -440,7 +440,7 @@ int32_t HksGetKeyInfoListUnpack(const struct HksBlob *srcData, struct HksParamSe
     ret = KeyInfoListInit(*keyInfoList, *listCount, srcData, &offset);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("KeyInfoListInit failed");
-        HKS_FREE_PTR(*keyInfoList);
+        HKS_FREE(*keyInfoList);
     }
 
     if (offset == srcData->size) {

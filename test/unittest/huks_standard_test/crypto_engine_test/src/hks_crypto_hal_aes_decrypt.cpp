@@ -356,9 +356,9 @@ protected:
                 testCaseParams.decryptResult);
         }
 
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(cipherText.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(cipherText.data);
     }
 
     void RunTestAesDecrypt(struct HksBlob *key, const TestCaseParams &testCaseParams, struct HksBlob *decryptMsg,
@@ -385,8 +385,8 @@ protected:
                     testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
                 decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
             }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
+            HKS_FREE(out.data);
+            HKS_FREE(messageUpdate.data);
 
             uint32_t lastLen = decrytoinLen - decrytopoint;
             HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
@@ -396,8 +396,8 @@ protected:
             ASSERT_EQ(outLast.data == nullptr, false) << "outLast malloc failed.";
             EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, &outLast, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult) << "HksCryptoHalEncryptFinal failed.";
-            HksFree(messageLast.data);
-            HksFree(outLast.data);
+            HKS_FREE(messageLast.data);
+            HKS_FREE(outLast.data);
         } else {
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
             ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
@@ -408,7 +408,7 @@ protected:
             EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.decryptResult);
 
-            HksFree(out.data);
+            HKS_FREE(out.data);
         }
     }
 
@@ -433,8 +433,8 @@ protected:
                 EXPECT_EQ(HksCryptoHalDecryptUpdate(&messageUpdate, decryptCtx, &out, usageSpec->algType), HKS_SUCCESS);
                 decrytopoint = decrytopoint + HKS_UPDATE_DATA_MAX;
             }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
+            HKS_FREE(out.data);
+            HKS_FREE(messageUpdate.data);
 
             uint32_t lastLen = decrytoinLen - decrytopoint;
             HksBlob messageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
@@ -444,8 +444,8 @@ protected:
             ASSERT_EQ(outLast.data == nullptr, false) << "outLast malloc failed.";
             EXPECT_EQ(HksCryptoHalDecryptFinal(&messageLast, &decryptCtx, &outLast, tagAead,
                 usageSpec->algType), HKS_SUCCESS) << "HksCryptoHalEncryptFinal failed.";
-            HksFree(messageLast.data);
-            HksFree(outLast.data);
+            HKS_FREE(messageLast.data);
+            HKS_FREE(outLast.data);
         } else {
             HksBlob out = { .size = decrytoinLen, .data = (uint8_t *)HksMalloc(decrytoinLen) };
             ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
@@ -455,7 +455,7 @@ protected:
             EXPECT_EQ(HksCryptoHalDecryptFinal(&deMessageLast, &decryptCtx, decryptOut, tagAead,
                 usageSpec->algType), HKS_SUCCESS);
 
-            HksFree(out.data);
+            HKS_FREE(out.data);
         }
     }
 
@@ -503,10 +503,10 @@ protected:
             EXPECT_EQ(HksCryptoHalDecrypt(&key, &usageSpec, &message, &cipherText), testCaseParamsForGcm.decryptResult);
         }
 
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(cipherText.data);
-        HksFree(tagDecBlob.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(cipherText.data);
+        HKS_FREE(tagDecBlob.data);
     }
 };
 

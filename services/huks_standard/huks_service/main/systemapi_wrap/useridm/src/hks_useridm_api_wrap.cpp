@@ -103,7 +103,7 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
             HksMalloc(sizeof(struct EnrolledInfoWrap) * info.enrolledInfo.size()));
         if ((*outSecInfo)->enrolledInfo == NULL) {
             HKS_LOG_E("Malloc enrolledInfo failed!");
-            HKS_FREE_PTR(*outSecInfo);
+            HKS_FREE(*outSecInfo);
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
@@ -121,8 +121,8 @@ void GetSecUserInfoCallbackImplHuks::OnSecUserInfo(const USER_IAM::SecUserInfo &
     } while (0);
     if (ret != HKS_SUCCESS) {
         if (*outSecInfo != NULL) {
-            HKS_FREE_PTR((*outSecInfo)->enrolledInfo);
-            HKS_FREE_PTR(*outSecInfo);
+            HKS_FREE((*outSecInfo)->enrolledInfo);
+            HKS_FREE(*outSecInfo);
         }
     }
     isCallbacked = true;

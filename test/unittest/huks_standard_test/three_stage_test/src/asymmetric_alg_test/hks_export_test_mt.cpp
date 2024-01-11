@@ -90,7 +90,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt00100, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_SUCCESS);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00200
@@ -105,7 +105,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0020, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(nullptr, nullptr, &publicKey), HKS_ERROR_NULL_POINTER);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00300
@@ -133,7 +133,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0040, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00500
@@ -151,7 +151,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0050, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00600
@@ -167,7 +167,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0060, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00700
@@ -182,7 +182,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0070, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&authId, nullptr, &publicKey), HKS_ERROR_INSUFFICIENT_DATA);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00800
@@ -197,7 +197,7 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0080, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&authId, nullptr, &publicKey), HKS_ERROR_BAD_STATE);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 /**
  * @tc.number    : HksExportTestMt00900
@@ -212,6 +212,6 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0090, TestSize.Level0)
         EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_NOT_EXIST);
     }
     EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_ERROR_NOT_EXIST);
-    HksFree(publicKey.data);
+    HKS_FREE(publicKey.data);
 }
 }

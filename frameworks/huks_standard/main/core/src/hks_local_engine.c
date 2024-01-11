@@ -114,7 +114,7 @@ int32_t HksLocalGenerateKey(const struct HksParamSet *paramSetIn, struct HksPara
 
     ret = HksFormatKeyFromMaterial(spec.algType, &key, paramSetOut);
     (void)memset_s(key.data, key.size, 0, key.size);
-    HKS_FREE_PTR(key.data);
+    HKS_FREE(key.data);
     return ret;
 }
 
@@ -139,7 +139,7 @@ int32_t HksLocalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlo
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("set pubkey to materail failed, ret:%" LOG_PUBLIC "x!", ret);
         (void)memset_s(privateKeyMaterial.data, privateKeyMaterial.size, 0, privateKeyMaterial.size);
-        HKS_FREE_PTR(privateKeyMaterial.data);
+        HKS_FREE(privateKeyMaterial.data);
         return ret;
     }
 
@@ -148,9 +148,9 @@ int32_t HksLocalAgreeKey(const struct HksParamSet *paramSet, const struct HksBlo
     HKS_IF_NOT_SUCC_LOGE(ret, "local engine agree key failed, ret:%" LOG_PUBLIC "x!", ret)
 
     (void)memset_s(privateKeyMaterial.data, privateKeyMaterial.size, 0, privateKeyMaterial.size);
-    HKS_FREE_PTR(privateKeyMaterial.data);
+    HKS_FREE(privateKeyMaterial.data);
     (void)memset_s(publicKeyMaterial.data, publicKeyMaterial.size, 0, publicKeyMaterial.size);
-    HKS_FREE_PTR(publicKeyMaterial.data);
+    HKS_FREE(publicKeyMaterial.data);
     return ret;
 }
 #endif
@@ -302,7 +302,7 @@ static int32_t GetSignVerifyMessage(struct HksUsageSpec *usageSpec, const struct
         int32_t ret = HksCryptoHalHash(usageSpec->digest, srcData, message);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("SignVerify calc hash failed!");
-            HKS_FREE_PTR(message->data);
+            HKS_FREE(message->data);
             return ret;
         }
 
@@ -336,10 +336,10 @@ int32_t HksLocalSign(const struct HksBlob *key, const struct HksParamSet *paramS
 
     if (keyMaterial.data != NULL) {
         (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
-        HKS_FREE_PTR(keyMaterial.data);
+        HKS_FREE(keyMaterial.data);
     }
     if (needFree) {
-        HKS_FREE_PTR(message.data);
+        HKS_FREE(message.data);
     }
     return ret;
 }
@@ -369,11 +369,11 @@ int32_t HksLocalVerify(const struct HksBlob *key, const struct HksParamSet *para
     } while (0);
 
     if (needFree) {
-        HKS_FREE_PTR(message.data);
+        HKS_FREE(message.data);
     }
     if (keyMaterial.data != NULL) {
         (void)memset_s(keyMaterial.data, keyMaterial.size, 0, keyMaterial.size);
-        HKS_FREE_PTR(keyMaterial.data);
+        HKS_FREE(keyMaterial.data);
     }
     return ret;
 }

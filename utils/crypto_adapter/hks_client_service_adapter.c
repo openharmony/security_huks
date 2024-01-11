@@ -67,7 +67,7 @@ static int32_t EvpKeyToX509Format(EVP_PKEY *pkey, struct HksBlob *x509Key)
     uint8_t *tmp = key;
     if ((uint32_t)i2d_PUBKEY(pkey, &tmp) != keyLength) {
         HKS_LOG_E("i2d_PUBKEY error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
-        HksFree(key)
+        HKS_FREE(key);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -241,7 +241,7 @@ static int32_t ConstructSm2ParamsPushPubKey(OSSL_PARAM_BLD *paramBld,
         }
         ret = HKS_SUCCESS;
     } while (false);
-    HksFree(uncompressedPublicKey)
+    HKS_FREE(uncompressedPublicKey);
     return ret;
 }
 
@@ -602,7 +602,7 @@ static int32_t X509PublicKeyToRsa(EVP_PKEY *pkey, struct HksBlob *rsaPublicKey)
     if (BN_bn2bin(RSA_get0_n(rsa), keyBuffer + sizeof(struct HksPubKeyInfo)) == 0 ||
         BN_bn2bin(RSA_get0_e(rsa), keyBuffer + sizeof(struct HksPubKeyInfo) + (uint32_t)nSize) == 0) {
         HKS_LOG_E("BN_bn2bin error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return HKS_ERROR_INTERNAL_ERROR;
     }
 
@@ -654,7 +654,7 @@ static int32_t EcKeyToPublicKey(const uint32_t alg, const EC_KEY *ecKey, struct 
         if (BN_bn2binpad(x, keyBuffer + sizeof(struct HksPubKeyInfo), xSize) == 0 ||
             BN_bn2binpad(y, keyBuffer + sizeof(struct HksPubKeyInfo) + xSize, ySize) == 0) {
             HKS_LOG_E("BN_bn2binpad error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
-            HKS_FREE_PTR(keyBuffer);
+            HKS_FREE(keyBuffer);
             break;
         }
 
@@ -712,7 +712,7 @@ static int32_t EvpPkeyToHksPubKeyInfo(
         pubYRet = memcpy_s(rawInfo + offset, pubYBlob.size, pubYBlob.data, pubYBlob.size);
         if (pubXRet != EOK || pubYRet != EOK) {
             HKS_LOG_E("memcpy_s failed");
-            HksFree(rawInfo)
+            HKS_FREE(rawInfo);
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
@@ -720,8 +720,8 @@ static int32_t EvpPkeyToHksPubKeyInfo(
         sm2PublicKey->size = rawInfoLen;
         ret = HKS_SUCCESS;
     } while (false);
-    HksFree(pubXBlob.data)
-    HksFree(pubYBlob.data)
+    HKS_FREE(pubXBlob.data);
+    HKS_FREE(pubYBlob.data);
     return ret;
 }
 
@@ -789,7 +789,7 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
 
     if ((ySize > UINT32_MAX - HKS_BITS_PER_BYTE) ||
         ((ySize + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE > UINT32_MAX / (HKS_BITS_PER_BYTE * HKS_BITS_PER_BYTE))) {
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -807,7 +807,7 @@ static int32_t X509PublicKeyToDsa(EVP_PKEY *pkey, struct HksBlob *dsaPublicKey)
         (BN_bn2bin(q, keyBuffer + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize + pSize) == 0) ||
         (BN_bn2bin(g, keyBuffer + sizeof(struct KeyMaterialDsa) + keyMaterial->xSize + ySize + pSize + qSize) == 0)) {
         HKS_LOG_E("BN_bn2bin error %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     dsaPublicKey->size = totalSize;

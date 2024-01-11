@@ -891,12 +891,12 @@ protected:
 
         (void)HksDeleteKey(&authId, nullptr);
         if (storage == HKS_STORAGE_TEMP) {
-            HksFree(authId.data);
+            HKS_FREE(authId.data);
         }
         HksFreeParamSet(&paramInSet);
-        HksFree(pubKey.data);
-        HksFree(x509Key.data);
-        HksFree(signature.data);
+        HKS_FREE(pubKey.data);
+        HKS_FREE(x509Key.data);
+        HKS_FREE(signature.data);
     }
 
 public:

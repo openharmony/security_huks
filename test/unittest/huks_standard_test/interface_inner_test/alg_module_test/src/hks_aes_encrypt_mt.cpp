@@ -475,7 +475,7 @@ protected:
                 cipherText.size = AAD_SIZE;
                 EXPECT_EQ(AesGcmDecrypt(paramInSet, &cipherText, &plainTextDecrypt, &authId, &tagAead),
                     testCaseParams.decryptResult);
-                HksFree(tagAead.data);
+                HKS_FREE(tagAead.data);
             } else {
                 EXPECT_EQ(
                     AesDecrypt(paramInSet, &cipherText, &plainTextDecrypt, &authId), testCaseParams.decryptResult);
@@ -484,9 +484,9 @@ protected:
             EXPECT_EQ(HksMemCmp(plainText.data, plainTextDecrypt.data, testCaseParams.hexData.length()), 0);
         }
 
-        HksFree(authId.data);
-        HksFree(cipherText.data);
-        HksFree(plainTextDecrypt.data);
+        HKS_FREE(authId.data);
+        HKS_FREE(cipherText.data);
+        HKS_FREE(plainTextDecrypt.data);
         HksFreeParamSet(&paramInSet);
     }
 };

@@ -56,7 +56,7 @@ static void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext &c
         return;
     }
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

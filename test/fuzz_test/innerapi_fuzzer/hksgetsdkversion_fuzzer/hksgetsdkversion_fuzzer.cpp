@@ -39,7 +39,7 @@ namespace OHOS {
 
         (void)HksGetSdkVersion(&sdkVersion);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

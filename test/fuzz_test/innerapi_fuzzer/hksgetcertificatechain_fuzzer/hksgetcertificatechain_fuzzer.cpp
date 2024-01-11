@@ -54,10 +54,10 @@ namespace OHOS {
         (void)HksGetCertificateChain(&keyAlias, paramSet, certChain);
 
         if (certChain != nullptr) {
-            HksFree(certChain);
+            HKS_FREE(certChain);
         }
 
-        HksFree(myDataTest);
+        HKS_FREE(myDataTest);
         return true;
     }
 }

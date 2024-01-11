@@ -262,7 +262,7 @@ void HksOpensslSm4HalFreeCtx(void **cryptoCtx)
             break;
     }
 
-    HKS_FREE_PTR(*cryptoCtx);
+    HKS_FREE(*cryptoCtx);
 }
 
 int32_t HksOpensslSm4Encrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,

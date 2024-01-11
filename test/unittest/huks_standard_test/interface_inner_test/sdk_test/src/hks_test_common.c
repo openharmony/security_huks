@@ -20,6 +20,6 @@ void TestFreeBlob(struct HksBlob **key)
     if (key == NULL || *key == NULL) {
         return;
     }
-    HKS_FREE_PTR((*key)->data);
-    HKS_FREE_PTR(*key);
+    HKS_FREE((*key)->data);
+    HKS_FREE(*key);
 }

@@ -326,13 +326,13 @@ protected:
         EXPECT_EQ(macMessage.size, macForHuks->size);
         EXPECT_EQ(HksMemCmp(macMessage.data, macForHuks->data, macForHuks->size), HKS_SUCCESS);
         if (scenario == 1) {
-            HksFree(authId->data);
+            HKS_FREE(authId->data);
         }
         HksFreeParamSet(&paramInSet);
         HksFreeParamSet(&paramOutSet);
-        HksFree(localKey.blob.data);
-        HksFree(macMessage.data);
-        HksFree(key.data);
+        HKS_FREE(localKey.blob.data);
+        HKS_FREE(macMessage.data);
+        HKS_FREE(key.data);
     }
 
     void RunTestCase(const TestCaseParams &testCaseParams, int32_t scenario)
@@ -362,7 +362,7 @@ protected:
 
         (void)HksDeleteKey(&authId, nullptr);
         HksFreeParamSet(&paramInSet);
-        HksFree(macForHuks.data);
+        HKS_FREE(macForHuks.data);
     }
 
 public:

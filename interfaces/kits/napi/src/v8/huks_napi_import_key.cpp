@@ -63,7 +63,7 @@ static void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext &con
         }
         FreeHksBlob(context->key);
     }
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

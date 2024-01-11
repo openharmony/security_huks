@@ -92,7 +92,7 @@ static int32_t EvpPkeyToKeyMaterialEc(const struct HksKeySpec *spec, const EVP_P
         priRet = memcpy_s(rawMaterial + offset, privBlob.size, privBlob.data, privBlob.size);
         if (pubXRet != EOK || pubYRet != EOK || priRet != EOK) {
             HKS_LOG_E("memcpy_s failed");
-            HksFree(rawMaterial)
+            HKS_FREE(rawMaterial);
             ret = HKS_ERROR_BAD_STATE;
             break;
         }
@@ -100,9 +100,9 @@ static int32_t EvpPkeyToKeyMaterialEc(const struct HksKeySpec *spec, const EVP_P
         key->size = rawMaterialLen;
         ret = HKS_SUCCESS;
     } while (false);
-    HksFree(privBlob.data)
-    HksFree(pubXBlob.data)
-    HksFree(pubYBlob.data)
+    HKS_FREE(privBlob.data);
+    HKS_FREE(pubXBlob.data);
+    HKS_FREE(pubYBlob.data);
     return ret;
 }
 
@@ -216,7 +216,7 @@ static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMateria
         }
         ret = HKS_SUCCESS;
     } while (false);
-    HksFree(uncompressedPublicKey)
+    HKS_FREE(uncompressedPublicKey);
     return ret;
 }
 

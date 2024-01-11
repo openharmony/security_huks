@@ -1500,10 +1500,10 @@ protected:
         EXPECT_EQ(
             HksCryptoHalVerify(&pubKey, &testCaseParams.usageSpec, pBlob, &signature), testCaseParams.verifyResult);
 
-        HksFree(message.data);
-        HksFree(signature.data);
-        HksFree(pubKey.data);
-        HksFree(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(signature.data);
+        HKS_FREE(pubKey.data);
+        HKS_FREE(key.data);
     }
 };
 

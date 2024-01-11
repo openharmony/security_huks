@@ -148,7 +148,7 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
     }
 
     (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
-    HksFree(bufBlob.data);
+    HKS_FREE(bufBlob.data);
     return rsa;
 }
 
@@ -168,28 +168,28 @@ static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct
 
     uint8_t tmp_buff[keyByteLen];
     if (memset_s(tmp_buff, keyByteLen, 0, keyByteLen) != EOK) {
-        HksFree(rawMaterial);
+        HKS_FREE(rawMaterial);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     uint32_t offset = sizeof(*keyMaterial);
     keyMaterial->nSize = (uint32_t)BN_bn2bin(RSA_get0_n(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->nSize) != EOK) {
-        HksFree(rawMaterial);
+        HKS_FREE(rawMaterial);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     offset += keyMaterial->nSize;
     keyMaterial->eSize = (uint32_t)BN_bn2bin(RSA_get0_e(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->eSize) != EOK) {
-        HksFree(rawMaterial);
+        HKS_FREE(rawMaterial);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     offset += keyMaterial->eSize;
     keyMaterial->dSize = (uint32_t)BN_bn2bin(RSA_get0_d(rsa), tmp_buff);
     if (memcpy_s(rawMaterial + offset, keyByteLen, tmp_buff, keyMaterial->dSize) != EOK) {
-        HksFree(rawMaterial);
+        HKS_FREE(rawMaterial);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 

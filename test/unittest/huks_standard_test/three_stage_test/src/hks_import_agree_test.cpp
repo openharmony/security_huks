@@ -669,21 +669,21 @@ static int32_t ConstructCurve25519Key(struct TestImportKeyData *key,
 
     // copy struct material
     if (memcpy_s(dataTest, size, &material, sizeof(material)) != EOK) {
-        HksFree(dataTest);
+        HKS_FREE(dataTest);
         return HKS_ERROR_BAD_STATE;
     }
 
     uint32_t offset = sizeof(material);
     // copy publicData
     if (memcpy_s(dataTest + offset, size - offset, key->publicOrXData.data, key->publicOrXData.size) != EOK) {
-        HksFree(dataTest);
+        HKS_FREE(dataTest);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.pubKeySize;
 
     // copy privateData
     if (memcpy_s(dataTest + offset, size - offset, key->privateOrYData.data, key->privateOrYData.size) != EOK) {
-        HksFree(dataTest);
+        HKS_FREE(dataTest);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -716,7 +716,7 @@ static int32_t ConstructEccKey(struct TestImportKeyData *key,
 
     // copy struct material
     if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -724,14 +724,14 @@ static int32_t ConstructEccKey(struct TestImportKeyData *key,
     if (!isPriKey) {
         // copy xData
         if (memcpy_s(data + offset, size - offset, key->publicOrXData.data, key->publicOrXData.size) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
         }
 
         offset += material.xSize;
         // copy yData
         if (memcpy_s(data + offset, size - offset, key->privateOrYData.data, key->privateOrYData.size) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
         }
         offset += material.ySize;
@@ -739,7 +739,7 @@ static int32_t ConstructEccKey(struct TestImportKeyData *key,
 
     // copy zData
     if (memcpy_s(data + offset, size - offset, key->zData.data, key->zData.size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -772,7 +772,7 @@ static int32_t ConstructDhKey(struct TestImportKeyData *key,
 
     // copy struct material
     if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -780,7 +780,7 @@ static int32_t ConstructDhKey(struct TestImportKeyData *key,
     if (!isPriKey) {
         // copy publicData
         if (memcpy_s(data + offset, size - offset, key->publicOrXData.data, key->publicOrXData.size) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
         }
         offset += material.pubKeySize;
@@ -788,7 +788,7 @@ static int32_t ConstructDhKey(struct TestImportKeyData *key,
 
     // copy privateData
     if (memcpy_s(data + offset, size - offset, key->privateOrYData.data, key->privateOrYData.size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -963,7 +963,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, uint32_t id,
     }
 
     ret = HksImportKey(keyAlias, paramSet, &key);
-    HKS_FREE_PTR(key.data);
+    HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
 }
@@ -1091,7 +1091,7 @@ static int32_t TestAgreeOp(const struct HksBlob *keyAlias1, const struct HksBlob
     }
     ret = ConstructAgreePubKey(alg, keySize, 1, &pubKey2);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(pubKey1.data);
+        HKS_FREE(pubKey1.data);
         return ret;
     }
 
@@ -1116,8 +1116,8 @@ static int32_t TestAgreeOp(const struct HksBlob *keyAlias1, const struct HksBlob
         ret = TestCmpKeyAliasHash(&agreeKey1, &agreeKey2);
     } while (0);
 
-    HKS_FREE_PTR(pubKey1.data);
-    HKS_FREE_PTR(pubKey2.data);
+    HKS_FREE(pubKey1.data);
+    HKS_FREE(pubKey2.data);
     return ret;
 }
 

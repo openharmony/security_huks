@@ -46,7 +46,7 @@ namespace OHOS {
 
         (void)HksExportPublicKey(&keyAlias, paramSet, &pubKey);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

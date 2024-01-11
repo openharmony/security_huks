@@ -882,13 +882,13 @@ protected:
             EXPECT_EQ(HksImportKey(&pubId, paramInSet, &x509Key), HKS_SUCCESS);
             EXPECT_EQ(HksVerify(&pubId, paramInSet, &message, &signature), testCaseParams.verifyResult);
             (void)HksDeleteKey(&pubId, nullptr);
-            HksFree(x509Key.data);
+            HKS_FREE(x509Key.data);
         }
 
-        HksFree(authId.data);
+        HKS_FREE(authId.data);
         HksFreeParamSet(&paramInSet);
-        HksFree(pubKey.data);
-        HksFree(signature.data);
+        HKS_FREE(pubKey.data);
+        HKS_FREE(signature.data);
     }
 public:
     static void SetUpTestCase(void);

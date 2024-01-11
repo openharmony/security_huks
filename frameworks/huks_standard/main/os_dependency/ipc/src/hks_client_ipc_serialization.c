@@ -441,7 +441,7 @@ int32_t EncodeCertChain(const struct HksBlob *inBlob, struct HksBlob *outBlob)
         outBlob->size = tmpBlob.size;
     } while (0);
 
-    HksFree(tmpBlob.data);
+    HKS_FREE(tmpBlob.data);
     return ret;
 }
 

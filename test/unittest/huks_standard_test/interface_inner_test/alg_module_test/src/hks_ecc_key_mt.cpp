@@ -495,11 +495,11 @@ protected:
 
         (void)HksDeleteKey(&authId, nullptr);
         HksFreeParamSet(&paramInSet);
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramOutSet);
-        HksFree(priKey.data);
-        HksFree(pubKey.data);
-        HksFree(signature.data);
+        HKS_FREE(priKey.data);
+        HKS_FREE(pubKey.data);
+        HKS_FREE(signature.data);
     }
 };
 

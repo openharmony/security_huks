@@ -230,13 +230,13 @@ static void FreeKeyInfoList(struct HksKeyInfo **keyInfoList, uint32_t listCount)
         if ((*keyInfoList)[i].alias.data == nullptr) {
             break;
         }
-        HKS_FREE_PTR((*keyInfoList)[i].alias.data);
+        HKS_FREE((*keyInfoList)[i].alias.data);
         if ((*keyInfoList)[i].paramSet == nullptr) {
             break;
         }
         HksFreeParamSet(&((*keyInfoList)[i].paramSet));
     }
-    HKS_FREE_PTR(*keyInfoList);
+    HKS_FREE(*keyInfoList);
 }
 
 static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t listCount)
@@ -685,7 +685,7 @@ HWTEST_F(HksAddEceCePathTest, HksAddEceCePathPartTest009, TestSize.Level0)
 
         ret = HksDeleteKey(&g_keyAlias003, exportParamSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
-        HksFree(publicKey.data);
+        HKS_FREE(publicKey.data);
         HksFreeParamSet(&paramSet);
         HksFreeParamSet(&exportParamSet);
     }
@@ -715,7 +715,7 @@ HWTEST_F(HksAddEceCePathTest, HksAddEceCePathPartTest010, TestSize.Level0)
 
         ret = HksExportPublicKey(&g_keyAlias003, exportParamSet, &publicKey);
         ASSERT_NE(ret, HKS_SUCCESS);
-        HksFree(publicKey.data);
+        HKS_FREE(publicKey.data);
         HksFreeParamSet(&exportParamSet);
     }
     ret = HksDeleteKey(&g_keyAlias003, paramSet);
@@ -775,7 +775,7 @@ HWTEST_F(HksAddEceCePathTest, HksAddEceCePathPartTest011, TestSize.Level0)
 
         ret = HksDeleteKey(&g_keyAlias003, paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
-        HksFree(getParam.blob.data);
+        HKS_FREE(getParam.blob.data);
         HksFreeParamSet(&paramSet);
         HksFreeParamSet(&paramSetIn);
         HksFreeParamSet(&paramSetOut);
@@ -820,7 +820,7 @@ HWTEST_F(HksAddEceCePathTest, HksAddEceCePathPartTest012, TestSize.Level0)
         ret = HksGetKeyParamSet(&g_keyAlias003, paramSetIn, paramSetOut);
         ASSERT_NE(ret, HKS_SUCCESS);
 
-        HksFree(getParam.blob.data);
+        HKS_FREE(getParam.blob.data);
         HksFreeParamSet(&paramSetIn);
         HksFreeParamSet(&paramSetOut);
     }

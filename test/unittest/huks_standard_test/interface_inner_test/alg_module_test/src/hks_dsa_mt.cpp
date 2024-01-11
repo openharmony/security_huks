@@ -692,11 +692,11 @@ protected:
             EXPECT_EQ(OpensslVerifyDsa(&plainText, &signData, &publicKey, testCaseParams.keyDigest),
                 testCaseParams.verifyResult);
 
-            HksFree(publicKey.data);
-            HksFree(privateKey.data);
-            HksFree(signData.data);
+            HKS_FREE(publicKey.data);
+            HKS_FREE(privateKey.data);
+            HKS_FREE(signData.data);
         }
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
         HksFreeParamSet(&paramInSet01);
     }
@@ -754,11 +754,11 @@ protected:
             EXPECT_EQ(OpensslVerifyDsa(&plainText, &signData, &publicKey, testCaseParams.keyDigest),
                 testCaseParams.verifyResult);
 
-            HksFree(publicKey.data);
-            HksFree(privateKey.data);
-            HksFree(signData.data);
+            HKS_FREE(publicKey.data);
+            HKS_FREE(privateKey.data);
+            HKS_FREE(signData.data);
         }
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
         HksFreeParamSet(&paramInSet);
     }
@@ -813,12 +813,12 @@ protected:
             EXPECT_EQ(OpensslVerifyDsa(&plainText, &signData, &publicKey, testCaseParams.keyDigest),
                 testCaseParams.verifyResult);
 
-            HksFree(publicKey.data);
-            HksFree(signData.data);
+            HKS_FREE(publicKey.data);
+            HKS_FREE(signData.data);
         }
 
         (void)HksDeleteKey(&authId, nullptr);
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramSetOut);
         HksFreeParamSet(&paramInSet);
     }
@@ -878,11 +878,11 @@ protected:
 
             EXPECT_EQ(HksVerify(&publicKey, paramInSet, &plainText, &signData), testCaseParams.verifyResult);
 
-            HksFree(publicKey.data);
-            HksFree(privateKey.data);
-            HksFree(signData.data);
+            HKS_FREE(publicKey.data);
+            HKS_FREE(privateKey.data);
+            HKS_FREE(signData.data);
         }
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramSetOutTest);
         HksFreeParamSet(&paramInSet);
     }
@@ -928,9 +928,9 @@ protected:
 
         (void)HksDeleteKey(&authId, nullptr);
         EVP_PKEY_free(pkey);
-        HksFree(signData.data);
-        HksFree(x509Key.data);
-        HksFree(opensslDsaKeyInfo.data);
+        HKS_FREE(signData.data);
+        HKS_FREE(x509Key.data);
+        HKS_FREE(opensslDsaKeyInfo.data);
         HksFreeParamSet(&paramInSet);
     }
 };

@@ -89,7 +89,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
-            HksFree(rawMaterial);
+            HKS_FREE(rawMaterial);
             break;
         }
 
@@ -98,7 +98,7 @@ static int32_t DhSaveKeyMaterial(const mbedtls_dhm_context *ctx, const uint32_t 
         if (ret != HKS_MBEDTLS_SUCCESS) {
             HKS_LOG_E("mbedtls_mpi_write_binary failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
             (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
-            HksFree(rawMaterial);
+            HKS_FREE(rawMaterial);
             break;
         }
 
@@ -147,7 +147,7 @@ int32_t HksMbedtlsDhGenerateKey(const struct HksKeySpec *spec, struct HksBlob *k
         } else {
             ret = DhSaveKeyMaterial(&ctx, spec->keyLen, key);
         }
-        HksFree(output);
+        HKS_FREE(output);
     } while (0);
 
     mbedtls_dhm_free(&ctx);

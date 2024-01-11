@@ -135,7 +135,7 @@ int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *
     inputHashBlob.size = hashSize;
     inputHashBlob.data = (uint8_t *)HksMalloc(inputHashBlob.size);
     if (inputHashBlob.data == NULL) {
-        HKS_FREE_PTR(appendedKeyData.data);
+        HKS_FREE(appendedKeyData.data);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memcpy_s(inputHashBlob.data, inputHashBlob.size, appendedKeyData.data, appendedKeyData.size);

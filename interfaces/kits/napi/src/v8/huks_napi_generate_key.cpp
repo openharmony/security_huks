@@ -60,7 +60,7 @@ static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext 
     if (context->paramSetOut != nullptr) {
         HksFreeParamSet(&context->paramSetOut);
     }
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

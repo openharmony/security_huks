@@ -46,7 +46,7 @@ namespace OHOS {
 
         (void)HksHash(paramSet, &srcData, &hash);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

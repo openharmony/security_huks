@@ -800,9 +800,9 @@ protected:
 
         EXPECT_EQ(
             HksCryptoHalDecrypt(&key, &testCaseParams.usageSpec, &message, &cipherText), testCaseParams.decryptResult);
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(cipherText.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(cipherText.data);
     }
 };
 

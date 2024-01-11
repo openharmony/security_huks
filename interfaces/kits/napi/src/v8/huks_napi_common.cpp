@@ -55,7 +55,7 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
     size_t result = 0;
     status = napi_get_value_string_utf8(env, object, data, length + 1, &result);
     if (status != napi_ok) {
-        HksFree(data);
+        HKS_FREE(data);
         GET_AND_THROW_LAST_ERROR((env));
         HKS_LOG_E("could not get string");
         return nullptr;
@@ -63,7 +63,7 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 
     alias = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (alias == nullptr) {
-        HksFree(data);
+        HKS_FREE(data);
         napi_throw_error(env, NULL, "could not alloc memory");
         HKS_LOG_E("could not alloc memory");
         return nullptr;
@@ -160,7 +160,7 @@ void FreeParsedParams(std::vector<HksParam> &params)
     while (paramCount > 0) {
         paramCount--;
         if ((param->tag & HKS_TAG_TYPE_MASK) == HKS_TAG_TYPE_BYTES) {
-            HKS_FREE_PTR(param->blob.data);
+            HKS_FREE(param->blob.data);
             param->blob.size = 0;
         }
         ++param;
@@ -293,12 +293,12 @@ static napi_value GenerateArrayBuffer(napi_env env, uint8_t *data, uint32_t size
     (void)memcpy_s(buffer, size, data, size);
 
     napi_status status = napi_create_external_arraybuffer(
-        env, buffer, size, [](napi_env env, void *data, void *hint) { HksFree(data); }, nullptr, &outBuffer);
+        env, buffer, size, [](napi_env env, void *data, void *hint) { HKS_FREE(data); }, nullptr, &outBuffer);
     if (status == napi_ok) {
         // free by finalize callback
         buffer = nullptr;
     } else {
-        HksFree(buffer);
+        HKS_FREE(buffer);
         GET_AND_THROW_LAST_ERROR((env));
     }
 
@@ -447,13 +447,13 @@ void FreeHksCertChain(HksCertChain *&certChain)
     if (certChain->certsCount > 0 && certChain->certs != nullptr) {
         for (uint32_t i = 0; i < certChain->certsCount; i++) {
             if (certChain->certs[i].data != nullptr) {
-                HksFree(certChain->certs[i].data);
+                HKS_FREE(certChain->certs[i].data);
                 certChain->certs[i].data = nullptr;
             }
         }
     }
 
-    HksFree(certChain);
+    HKS_FREE(certChain);
     certChain = nullptr;
 }
 
@@ -536,7 +536,7 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
 
     handleBlob->data = static_cast<uint8_t *>(HksMalloc(sizeof(uint64_t)));
     if (handleBlob->data == nullptr) {
-        HKS_FREE_PTR(handleBlob);
+        HKS_FREE(handleBlob);
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }

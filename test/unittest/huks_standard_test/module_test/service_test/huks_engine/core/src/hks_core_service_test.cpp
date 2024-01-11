@@ -302,8 +302,8 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest010, TestSize.Level0)
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
 
     (void)HksServiceDeleteKey(&processInfo, &keyAlias);
-    HksFree(keyOutBlob.data);
-    HksFree(keyBlob.data);
+    HKS_FREE(keyOutBlob.data);
+    HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
 }
 
@@ -369,8 +369,8 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest014, TestSize.Level0)
     ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, nullptr);
     ret = HksCoreExportPublicKey(nullptr, runtimeParamSet, &keyOutBlob);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(keyOutBlob.data);
-    HksFree(keyBlob.data);
+    HKS_FREE(keyOutBlob.data);
+    HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
 }
 
@@ -438,8 +438,8 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, &keyOutBlob);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
 
-    HksFree(keyOutBlob.data);
-    HksFree(keyBlob.data);
+    HKS_FREE(keyOutBlob.data);
+    HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
     (void)HksServiceDeleteKey(&processInfo, &keyAlias);
 }
