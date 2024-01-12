@@ -73,6 +73,14 @@ static int32_t BuildParamSetNotNull(const struct HksParamSet *paramSetIn, struct
     int32_t ret;
     struct HksParamSet *tmpParamSet = NULL;
     do {
+        if (paramSetIn != NULL) {
+            ret = HksCheckParamSet(paramSetIn, paramSetIn->paramSetSize);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("check paramSet failed");
+                return ret;
+            }
+        }
+
         ret = HksInitParamSet(&tmpParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed")
 
