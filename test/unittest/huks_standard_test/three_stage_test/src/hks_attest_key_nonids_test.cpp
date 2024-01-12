@@ -57,7 +57,6 @@ void HksAttestKeyNonIdsTest::TearDown()
 }
 
 static const struct HksBlob g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
-static struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
 
 static const struct HksParam g_commonParams[] = {
     { .tag = HKS_TAG_ATTESTATION_ID_SEC_LEVEL_INFO, .blob = g_secInfo },
@@ -330,6 +329,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest008, TestSize.Level0)
     ValidateCertChain(paramSet, paramOutSet, certChain);
 }
 
+#ifndef ENABLE_NETWORK
 /**
  * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest009
  * @tc.desc: attest with right params and validate success.
@@ -392,6 +392,7 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest011, TestSize.Level0)
     GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
     const struct HksTestCertChain certParam = { true, true, true, g_size };
     (void)ConstructDataToCertChain(&certChain, &certParam);
+    const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
     ret = OH_Huks_AnonAttestKeyItem(&oh_g_keyAlias, (struct OH_Huks_ParamSet *) paramSet,
         (struct OH_Huks_CertChain *) certChain).errorCode;
     if (ret != HKS_SUCCESS) {
@@ -403,4 +404,5 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest011, TestSize.Level0)
     ret = HksDeleteKey(&g_keyAlias, NULL);
     ASSERT_EQ(ret, HKS_SUCCESS);
 }
+#endif
 }

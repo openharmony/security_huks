@@ -81,7 +81,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_rsa_test.cpp",
   ]
 
-  defines = []
+  defines = [ "ENABLE_NETWORK" ]
   if (huks_security_level == "software") {
     defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
     sources += [
