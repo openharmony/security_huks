@@ -181,7 +181,7 @@ static void MoveOldFolderToNew(const char *srcPath, const char *tarPath)
     (void)rmdir(srcPath);
 }
 
-int main()
+int main(void)
 {
     const char *oldPath = "/storage/maindata";
     const char *newPath = "/storage/data/service/el1/public/huks_service/maindata";
