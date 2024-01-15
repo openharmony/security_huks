@@ -60,7 +60,7 @@ static void GetProcessInfo(int userId, int uid, struct HksProcessInfo *processIn
     uint8_t *uidData = static_cast<uint8_t *>(HksMalloc(uidSize));
     if (uidData == nullptr) {
         HKS_LOG_E("uid malloc failed.");
-        HksFree(userData);
+        HKS_FREE(userData);
         processInfo->userId.data = nullptr;
         return;
     }

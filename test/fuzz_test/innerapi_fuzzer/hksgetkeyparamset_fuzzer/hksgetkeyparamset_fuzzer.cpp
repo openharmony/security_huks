@@ -50,7 +50,7 @@ namespace OHOS {
 
         (void)HksGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

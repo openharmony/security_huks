@@ -81,8 +81,8 @@ HWTEST_F(HksClientServiceAdapterTest, HksClientServiceAdapterTest001, TestSize.L
     x509Key->size = sizeof(HksBlob);
     ret = TranslateFromX509PublicKey(HKS_ALG_RSA, x509Key, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterTest001 failed, ret = " << ret;
-    HksFree(x509Key->data);
-    HksFree(x509Key);
+    HKS_FREE(x509Key->data);
+    HKS_FREE(x509Key);
 }
 
 /**
@@ -115,7 +115,7 @@ HWTEST_F(HksClientServiceAdapterTest, HksClientServiceAdapterTest002, TestSize.L
     ret = TranslateToX509PublicKey(pubKey, pubKey);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterTest002 failed, ret = " << ret;
 
-    HksFree(pubKey->data);
-    HksFree(pubKey);
+    HKS_FREE(pubKey->data);
+    HKS_FREE(pubKey);
 }
 }

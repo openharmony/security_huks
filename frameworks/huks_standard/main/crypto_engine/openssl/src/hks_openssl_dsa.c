@@ -56,11 +56,11 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     BIGNUM *x = NULL;
     if (needPrivateExponent) {
         if (keyMaterial->xSize == 0) {
-            HksFree(buff);
+            HKS_FREE(buff);
             return HKS_ERROR_INVALID_ARGUMENT;
         } else {
             if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->xSize) != EOK) {
-                HksFree(buff);
+                HKS_FREE(buff);
                 return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
             x = BN_bin2bn(buff, keyMaterial->xSize, NULL);
@@ -68,7 +68,7 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     }
     *offset += keyMaterial->xSize;
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->ySize) != EOK) {
-        HksFree(buff);
+        HKS_FREE(buff);
         SELF_FREE_PTR(x, BN_free);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -83,7 +83,7 @@ static int InitDsaStructKey(const struct HksBlob *key, const bool needPrivateExp
     }
 
     (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
-    HksFree(buff);
+    HKS_FREE(buff);
     return ret;
 }
 
@@ -95,13 +95,13 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
     HKS_IF_NULL_RETURN(buff, HKS_ERROR_INSUFFICIENT_MEMORY)
 
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->pSize) != EOK) {
-        HksFree(buff);
+        HKS_FREE(buff);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     BIGNUM *p = BN_bin2bn(buff, keyMaterial->pSize, NULL);
     *offset += keyMaterial->pSize;
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->qSize) != EOK) {
-        HksFree(buff);
+        HKS_FREE(buff);
         SELF_FREE_PTR(p, BN_free);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -109,7 +109,7 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
     *offset += keyMaterial->qSize;
     if (memcpy_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), key->data + *offset, keyMaterial->gSize) != EOK) {
         (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
-        HksFree(buff);
+        HKS_FREE(buff);
         SELF_FREE_PTR(p, BN_free);
         SELF_FREE_PTR(q, BN_free);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
@@ -126,7 +126,7 @@ static int InitDsaStructParameter(const struct HksBlob *key, const bool needPriv
     }
 
     (void)memset_s(buff, HKS_KEY_BYTES(keyMaterial->keySize), 0, HKS_KEY_BYTES(keyMaterial->keySize));
-    HksFree(buff);
+    HKS_FREE(buff);
     return ret;
 }
 
@@ -250,11 +250,11 @@ static int32_t DsaSaveKeyMaterial(const DSA *dsa, const uint32_t keySize, uint8_
     (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
 
     if (DsaKeyMaterialParam(rawMaterial, dsa, keyLen) != HKS_SUCCESS) {
-        HksFree(rawMaterial);
+        HKS_FREE(rawMaterial);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     if (DsaKeyMaterialData(rawMaterial, dsa) != HKS_SUCCESS) {
-        HksFree(rawMaterial);
+        HKS_FREE(rawMaterial);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 

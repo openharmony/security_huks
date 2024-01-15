@@ -188,14 +188,14 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls mpi write to x25519 public key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
-        HKS_FREE_PTR(rawMaterial);
+        HKS_FREE(rawMaterial);
         return ret;
     }
 
     ret = EndianSwap(rawMaterial + offset, keyMaterial->pubKeySize);
     if (ret != HKS_SUCCESS) {
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
-        HKS_FREE_PTR(rawMaterial);
+        HKS_FREE(rawMaterial);
         return ret;
     }
 
@@ -204,7 +204,7 @@ static int32_t X25519SaveKeyMaterial(const mbedtls_ecp_point *pub,
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("Mbedtls mpi write to x25519 private key failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
-        HKS_FREE_PTR(rawMaterial);
+        HKS_FREE(rawMaterial);
         return ret;
     }
 
@@ -289,7 +289,7 @@ static int32_t X25519KeyMaterialToPub(const struct HksBlob *pubKey, mbedtls_ecp_
         }
     } while (0);
 
-    HKS_FREE_PTR(tmpPubKey);
+    HKS_FREE(tmpPubKey);
     return ret;
 }
 
@@ -764,27 +764,27 @@ void HksFreeKeyInfo(struct HksEd25519ToX25519Blob *key)
 {
     if (key->rawNativeKey.data != NULL) {
         (void)memset_s(key->rawNativeKey.data, key->rawNativeKey.size, 0, key->rawNativeKey.size);
-        HKS_FREE_PTR(key->rawNativeKey.data);
+        HKS_FREE(key->rawNativeKey.data);
     }
     if (key->rawPubKey.data != NULL) {
         (void)memset_s(key->rawPubKey.data, key->rawPubKey.size, 0, key->rawPubKey.size);
-        HKS_FREE_PTR(key->rawPubKey.data);
+        HKS_FREE(key->rawPubKey.data);
     }
     if (key->rawX25519NativeKey.data != NULL) {
         (void)memset_s(key->rawX25519NativeKey.data, key->rawX25519NativeKey.size, 0, key->rawX25519NativeKey.size);
-        HKS_FREE_PTR(key->rawX25519NativeKey.data);
+        HKS_FREE(key->rawX25519NativeKey.data);
     }
     if (key->rawX25519PubKey.data != NULL) {
         (void)memset_s(key->rawX25519PubKey.data, key->rawX25519PubKey.size, 0, key->rawX25519PubKey.size);
-        HKS_FREE_PTR(key->rawX25519PubKey.data);
+        HKS_FREE(key->rawX25519PubKey.data);
     }
     if (key->kmX25519NativeKey.data != NULL) {
         (void)memset_s(key->kmX25519NativeKey.data, key->kmX25519NativeKey.size, 0, key->kmX25519NativeKey.size);
-        HKS_FREE_PTR(key->kmX25519NativeKey.data);
+        HKS_FREE(key->kmX25519NativeKey.data);
     }
     if (key->kmX25519PubKey.data != NULL) {
         (void)memset_s(key->kmX25519PubKey.data, key->kmX25519PubKey.size, 0, key->kmX25519PubKey.size);
-        HKS_FREE_PTR(key->kmX25519PubKey.data);
+        HKS_FREE(key->kmX25519PubKey.data);
     }
 }
 

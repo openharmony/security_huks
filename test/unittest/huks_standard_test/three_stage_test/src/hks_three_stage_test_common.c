@@ -49,7 +49,7 @@ static int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct Hks
         return HKS_FAILURE;
     }
     int32_t ret = HksUpdate(handle, paramSet, inData, &tmpOutData);
-    HksFree(tmpOutData.data);
+    HKS_FREE(tmpOutData.data);
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
@@ -66,7 +66,7 @@ static int32_t TestLessThanMaxSeg(const struct HksBlob *handle, const struct Hks
     } else {
         ret = HksFinish(handle, paramSet, &tmpInData, outData);
     }
-    HksFree(tmpInData.data);
+    HKS_FREE(tmpInData.data);
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
@@ -99,10 +99,10 @@ int32_t HksTestUpdate(const struct HksBlob *handle, const struct HksParamSet *pa
         }
         if (HksUpdate(handle, paramSet, &inDataSeg, &outDataSeg) != HKS_SUCCESS) {
             HKS_LOG_E("HksUpdate Failed.");
-            HksFree(outDataSeg.data);
+            HKS_FREE(outDataSeg.data);
             return HKS_FAILURE;
         }
-        HksFree(outDataSeg.data);
+        HKS_FREE(outDataSeg.data);
         if ((isFinished == false) && (inDataSeg.data + MAX_UPDATE_SIZE > lastPtr)) {
             return HKS_SUCCESS;
         }
@@ -135,13 +135,13 @@ int32_t TestBatchUpdateLoopFinish(const struct HksBlob *handle, const struct Hks
     int32_t ret = HksUpdate(handle, paramSet, &inDataSeg, &outDataSeg);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksUpdate Failed.");
-        HksFree(outDataSeg.data);
+        HKS_FREE(outDataSeg.data);
         return ret;
     }
     (void)memcpy_s(cur, outDataSeg.size, outDataSeg.data, outDataSeg.size);
     cur += outDataSeg.size;
     outData->size += outDataSeg.size;
-    HksFree(outDataSeg.data);
+    HKS_FREE(outDataSeg.data);
     if ((isFinished == false) && (inDataSeg.data + MAX_UPDATE_SIZE > lastPtr)) {
         return HKS_FAILURE;
     }
@@ -153,16 +153,16 @@ int32_t TestBatchUpdateLoopFinish(const struct HksBlob *handle, const struct Hks
     }
 
     if (HksFinish(handle, paramSet, &inDataSeg, &outDataFinish) != HKS_SUCCESS) {
-        HksFree(outDataFinish.data);
+        HKS_FREE(outDataFinish.data);
         return HKS_FAILURE;
     }
 
     if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
-        HksFree(outDataFinish.data);
+        HKS_FREE(outDataFinish.data);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     outData->size += outDataFinish.size;
-    HksFree(outDataFinish.data);
+    HKS_FREE(outDataFinish.data);
 
     return HKS_SUCCESS;
 }
@@ -194,13 +194,13 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
         }
         if (HksUpdate(handle, paramSet, &inDataSeg, &outDataSeg) != HKS_SUCCESS) {
             HKS_LOG_E("HksUpdate Failed.");
-            HksFree(outDataSeg.data);
+            HKS_FREE(outDataSeg.data);
             return HKS_FAILURE;
         }
         (void)memcpy_s(cur, outDataSeg.size, outDataSeg.data, outDataSeg.size);
         cur += outDataSeg.size;
         outData->size += outDataSeg.size;
-        HksFree(outDataSeg.data);
+        HKS_FREE(outDataSeg.data);
         if ((isFinished == false) && (inDataSeg.data + MAX_UPDATE_SIZE > lastPtr)) {
             return HKS_FAILURE;
         }
@@ -213,16 +213,16 @@ int32_t TestUpdateLoopFinish(const struct HksBlob *handle, const struct HksParam
     }
 
     if (HksFinish(handle, paramSet, &inDataSeg, &outDataFinish) != HKS_SUCCESS) {
-        HksFree(outDataFinish.data);
+        HKS_FREE(outDataFinish.data);
         return HKS_FAILURE;
     }
 
     if (memcpy_s(cur, curSize, outDataFinish.data, outDataFinish.size) != EOK) {
-        HksFree(outDataFinish.data);
+        HKS_FREE(outDataFinish.data);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
     outData->size += outDataFinish.size;
-    HksFree(outDataFinish.data);
+    HKS_FREE(outDataFinish.data);
 
     return HKS_SUCCESS;
 }
@@ -255,10 +255,10 @@ int32_t TestUpdateFinish(const struct HksBlob *handle, const struct HksParamSet 
         }
         if (HksUpdate(handle, paramSet, &inDataSeg, &outDataSeg) != HKS_SUCCESS) {
             HKS_LOG_E("HksUpdate Failed.");
-            HksFree(outDataSeg.data);
+            HKS_FREE(outDataSeg.data);
             return HKS_FAILURE;
         }
-        HksFree(outDataSeg.data);
+        HKS_FREE(outDataSeg.data);
         if ((isFinished == false) && (inDataSeg.data + MAX_UPDATE_SIZE > lastPtr)) {
             return HKS_FAILURE;
         }
@@ -315,28 +315,28 @@ int32_t TestCmpKeyAliasHash(const struct HksBlob *srcData1, const struct HksBlob
     ret = HksHash(hashParamSet, srcData1, &hash1);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&hashParamSet);
-        HksFree(hash1.data);
+        HKS_FREE(hash1.data);
         return HKS_FAILURE;
     }
 
     struct HksBlob hash2 = { MAX_OUTDATA_SIZE, NULL };
     if (MallocAndCheckBlobData(&hash2, hash2.size) != HKS_SUCCESS) {
-        HksFree(hash1.data);
+        HKS_FREE(hash1.data);
         HksFreeParamSet(&hashParamSet);
         return HKS_FAILURE;
     }
     ret = HksHash(hashParamSet, srcData2, &hash2);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&hashParamSet);
-        HksFree(hash1.data);
-        HksFree(hash2.data);
+        HKS_FREE(hash1.data);
+        HKS_FREE(hash2.data);
         return HKS_FAILURE;
     }
 
     ret = HksMemCmp(hash1.data, hash2.data, hash2.size);
     HksFreeParamSet(&hashParamSet);
-    HksFree(hash1.data);
-    HksFree(hash2.data);
+    HKS_FREE(hash1.data);
+    HKS_FREE(hash2.data);
 
     return ret;
 }

@@ -517,7 +517,7 @@ static int32_t BuildImportKeyParamsForRsa(struct HksTestSecureSignImportParams *
     int32_t ret = Unittest::HksAccessControlPartTest::ConstructRsaKeyPair(&nDataBlob, &dData2048, &eData,
         HKS_RSA_KEY_SIZE_2048, &importParams->importKey);
     if (ret != HKS_SUCCESS) {
-        HksFree(keyBuffer);
+        HKS_FREE(keyBuffer);
     }
     return ret;
 }
@@ -549,7 +549,7 @@ static int32_t BuildImportKeyParamsForDSA(struct HksTestSecureSignImportParams *
     int32_t ret = Unittest::HksAccessControlPartTest::ConstructDsaKeyPair(HKS_RSA_KEY_SIZE_2048, &dsaKeyParams,
         &importParams->importKey);
     if (ret != HKS_SUCCESS) {
-        HksFree(keyBuffer);
+        HKS_FREE(keyBuffer);
     }
     return HKS_SUCCESS;
 }
@@ -585,7 +585,7 @@ static int32_t BuildImportKeyTestParams(struct HksTestSecureSignImportParams *im
             ret = ConstructEd25519KeyPair(HKS_CURVE25519_KEY_SIZE_256, HKS_ALG_ED25519, &ed25519PubData,
                 &ed25519PriData, &importParams->importKey);
             if (ret != HKS_SUCCESS) {
-                HksFree(keyBuffer);
+                HKS_FREE(keyBuffer);
             }
             return ret;
         }

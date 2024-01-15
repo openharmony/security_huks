@@ -94,7 +94,7 @@ static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
         }
     } while (0);
 
-    HksFree(bnOutput);
+    HKS_FREE(bnOutput);
     return ret;
 }
 

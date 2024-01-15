@@ -85,13 +85,13 @@ void HksRsaCommonMt::GenerateKeyTestCase(const GenerateKeyCaseParams &testCasePa
             testCaseParams.decryptResult);
         EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
 
-        HksFree(decryptedText.data);
+        HKS_FREE(decryptedText.data);
     }
 
-    HksFree(publicKey.data);
-    HksFree(privateKey.data);
-    HksFree(paramSetOut);
-    HksFree(cipherText.data);
+    HKS_FREE(publicKey.data);
+    HKS_FREE(privateKey.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -152,12 +152,12 @@ void HksRsaCommonMt::EncryptLocalTestCase(const EncryptLocalCaseParams &testCase
 
         EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
 
-        HksFree(decryptedText.data);
+        HKS_FREE(decryptedText.data);
     }
-    HksFree(paramSetOut);
-    HksFree(publicKey.data);
-    HksFree(privateKey.data);
-    HksFree(cipherText.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(publicKey.data);
+    HKS_FREE(privateKey.data);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -215,14 +215,14 @@ void HksRsaCommonMt::EncryptServiceTestCase(const EncryptServiceCaseParams &test
 
         EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
 
-        HksFree(decryptedText.data);
+        HKS_FREE(decryptedText.data);
     }
 
     (void)HksDeleteKey(&authId, nullptr);
     EVP_PKEY_free(pkey);
-    HksFree(cipherText.data);
-    HksFree(x509Key.data);
-    HksFree(opensslRsaKeyInfo.data);
+    HKS_FREE(cipherText.data);
+    HKS_FREE(x509Key.data);
+    HKS_FREE(opensslRsaKeyInfo.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -280,12 +280,12 @@ void HksRsaCommonMt::DecryptLocalTestCase(const DecryptLocalCaseParams &testCase
         if (testCaseParams.decryptResult == HKS_SUCCESS) {
             EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
         }
-        HksFree(decryptedText.data);
+        HKS_FREE(decryptedText.data);
     }
-    HksFree(paramSetOut);
-    HksFree(publicKey.data);
-    HksFree(privateKey.data);
-    HksFree(cipherText.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(publicKey.data);
+    HKS_FREE(privateKey.data);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -340,13 +340,13 @@ void HksRsaCommonMt::DecryptServiceTestCase(const DecryptServiceCaseParams &test
         if (testCaseParams.decryptResult == HKS_SUCCESS) {
             EXPECT_EQ((memcmp(plainText.data, decryptedText.data, decryptedText.size)), 0);
         }
-        HksFree(decryptedText.data);
+        HKS_FREE(decryptedText.data);
     }
 
     (void)HksDeleteKey(&authId, nullptr);
-    HksFree(paramSetOut);
-    HksFree(publicKey.data);
-    HksFree(cipherText.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(publicKey.data);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -406,12 +406,12 @@ void HksRsaCommonMt::SignLocalTestCase(const SignLocalCaseParams &testCaseParams
                 &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
                 testCaseParams.verifyResult);
         }
-        HksFree(publicKey.data);
+        HKS_FREE(publicKey.data);
     }
 
-    HksFree(paramSetOut);
-    HksFree(privateKey.data);
-    HksFree(signData.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(privateKey.data);
+    HKS_FREE(signData.data);
     HksFreeParamSet(&paramInSetTest);
 }
 
@@ -468,12 +468,12 @@ void HksRsaCommonMt::SignServiceTestCase(const SignServiceCaseParams &testCasePa
                 &publicKey, testCaseParams.padding, testCaseParams.keyDigest),
                 testCaseParams.verifyResult);
         }
-        HksFree(publicKey.data);
+        HKS_FREE(publicKey.data);
     }
 
     (void)HksDeleteKey(&authId, nullptr);
-    HksFree(paramSetOut);
-    HksFree(signData.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(signData.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -529,11 +529,11 @@ void HksRsaCommonMt::VerifyLocalTestCase(const VerifyLocalCaseParams &testCasePa
         ASSERT_NE(publicKey.data, nullptr);
         (void)memcpy_s(publicKey.data, pubKeyExport->blob.size, pubKeyExport->blob.data, pubKeyExport->blob.size);
         EXPECT_EQ(HksVerify(&publicKey, paramInSet, &plainText, &signData), testCaseParams.verifyResult);
-        HksFree(publicKey.data);
+        HKS_FREE(publicKey.data);
     }
-    HksFree(paramSetOut);
-    HksFree(privateKey.data);
-    HksFree(signData.data);
+    HKS_FREE(paramSetOut);
+    HKS_FREE(privateKey.data);
+    HKS_FREE(signData.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -592,9 +592,9 @@ void HksRsaCommonMt::VerifyServiceTestCase(const VerifyServiceCaseParams &testCa
 
     (void)HksDeleteKey(&authId, nullptr);
     EVP_PKEY_free(pkey);
-    HksFree(signData.data);
-    HksFree(x509Key.data);
-    HksFree(opensslRsaKeyInfo.data);
+    HKS_FREE(signData.data);
+    HKS_FREE(x509Key.data);
+    HKS_FREE(opensslRsaKeyInfo.data);
     HksFreeParamSet(&paramInSet);
 }
 }  // namespace MT

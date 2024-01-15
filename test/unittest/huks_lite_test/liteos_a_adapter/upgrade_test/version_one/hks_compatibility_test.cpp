@@ -434,13 +434,13 @@ static void FreeKeyInfoList(struct HksKeyInfo **infoList, uint32_t listCount)
         if ((*infoList)[i].alias.data == nullptr) {
             break;
         }
-        HKS_FREE_PTR((*infoList)[i].alias.data);
+        HKS_FREE((*infoList)[i].alias.data);
         if ((*infoList)[i].paramSet == nullptr) {
             break;
         }
         HksFreeParamSet(&((*infoList)[i].paramSet));
     }
-    HKS_FREE_PTR(*infoList);
+    HKS_FREE(*infoList);
 }
 
 static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t listCount)

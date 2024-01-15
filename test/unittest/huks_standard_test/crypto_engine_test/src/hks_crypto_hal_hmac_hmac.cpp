@@ -142,9 +142,9 @@ protected:
             EXPECT_EQ(HksCryptoHalHmac(&key, testCaseParams.digest, &message, &signature), testCaseParams.hmacResult);
         }
 
-        HksFree(message.data);
-        HksFree(signature.data);
-        HksFree(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(signature.data);
+        HKS_FREE(key.data);
     }
 };
 

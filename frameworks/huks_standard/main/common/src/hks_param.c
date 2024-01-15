@@ -207,11 +207,11 @@ static int32_t BuildParamSet(struct HksParamSet **paramSet)
         HKS_IF_NULL_LOGE_RETURN(freshParamSet, HKS_ERROR_MALLOC_FAIL, "malloc params failed!")
 
         if (memcpy_s(freshParamSet, size, *paramSet, offset) != EOK) {
-            HKS_FREE_PTR(freshParamSet);
+            HKS_FREE(freshParamSet);
             HKS_LOG_E("copy params failed!");
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
-        HKS_FREE_PTR(*paramSet);
+        HKS_FREE(*paramSet);
         *paramSet = freshParamSet;
     }
 
@@ -283,7 +283,7 @@ HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet)
         HKS_LOG_E("invalid free paramset!");
         return;
     }
-    HKS_FREE_PTR(*paramSet);
+    HKS_FREE(*paramSet);
 }
 
 static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
@@ -365,7 +365,7 @@ HKS_API_EXPORT int32_t HksGetParamSet(const struct HksParamSet *inParamSet,
 
     ret = FreshParamSet(buf, false);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(buf);
+        HKS_FREE(buf);
         return ret;
     }
     *outParamSet = buf;

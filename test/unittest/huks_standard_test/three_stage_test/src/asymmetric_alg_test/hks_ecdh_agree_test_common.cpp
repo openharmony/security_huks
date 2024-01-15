@@ -114,16 +114,16 @@ void HksEcdhAgreeFreeParamSet(struct HksParamSet *paramSet1, struct HksParamSet 
 
 void HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2)
 {
-    HksFree(blob1->data);
-    HksFree(blob2->data);
+    HKS_FREE(blob1->data);
+    HKS_FREE(blob2->data);
 }
 
 void HksEcdhAgreeFreeBlob(struct HksBlob *blob1, struct HksBlob *blob2,
     struct HksBlob *blob3, struct HksBlob *blob4)
 {
-    HksFree(blob1->data);
-    HksFree(blob2->data);
-    HksFree(blob3->data);
-    HksFree(blob4->data);
+    HKS_FREE(blob1->data);
+    HKS_FREE(blob2->data);
+    HKS_FREE(blob3->data);
+    HKS_FREE(blob4->data);
 }
 }

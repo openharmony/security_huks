@@ -71,7 +71,7 @@ HWTEST_F(HksAPITest, HksAPITest001, TestSize.Level0)
     struct HksBlob sdkVer = { .size = sdkSize, .data = (uint8_t *)HksMalloc(sdkSize)};
     int32_t ret = HksGetSdkVersion(&sdkVer);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetSdkVersion failed, ret = " << ret;
-    HksFree(sdkVer.data);
+    HKS_FREE(sdkVer.data);
 }
 
 /**

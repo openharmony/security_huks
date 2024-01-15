@@ -82,9 +82,9 @@ void HksFreeUsageSpec(struct HksUsageSpec **usageSpec)
     }
 
     if ((*usageSpec)->algParam != NULL) {
-        HKS_FREE_PTR((*usageSpec)->algParam);
+        HKS_FREE((*usageSpec)->algParam);
     }
-    HKS_FREE_PTR(*usageSpec);
+    HKS_FREE(*usageSpec);
 }
 
 void HksFillKeyDerivationParam(const struct HksParamSet *paramSet, struct HksKeyDerivationParam *param)
@@ -428,7 +428,7 @@ static int32_t FormatRsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
 
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
-    HksFree(publicKey);
+    HKS_FREE(publicKey);
     return ret;
 }
 #endif
@@ -459,7 +459,7 @@ static int32_t FormatDsaKey(const struct HksBlob *keyIn, struct HksParamSet *par
 
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
-    HksFree(publicKey);
+    HKS_FREE(publicKey);
     return ret;
 }
 #endif
@@ -485,7 +485,7 @@ static int32_t FormatEccKey(const struct HksBlob *keyIn, struct HksParamSet *par
     ((struct KeyMaterialEcc *)publicKey)->zSize = 0;
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
-    HksFree(publicKey);
+    HKS_FREE(publicKey);
     return ret;
 }
 #endif
@@ -511,7 +511,7 @@ static int32_t FormatDhKey(const struct HksBlob *keyIn, struct HksParamSet *para
     ((struct KeyMaterialDh *)publicKey)->priKeySize = 0;
     int32_t ret = FormatKeyInner(publicKeySize, publicKey, keyIn, paramSetOut);
     (void)memset_s(publicKey, publicKeySize, 0, publicKeySize);
-    HksFree(publicKey);
+    HKS_FREE(publicKey);
     return ret;
 }
 #endif

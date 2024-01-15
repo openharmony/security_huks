@@ -344,7 +344,7 @@ static int32_t GetNewCachedData(const struct HksBlob *cachedBlob, const struct H
 
     int32_t ret = CopyNewCachedData(cachedBlob, inData, newData, newSize);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(newData);
+        HKS_FREE(newData);
         return ret;
     }
 
@@ -369,12 +369,12 @@ static int32_t UpdateCachedData(const struct HuksKeyNode *keyNode, const struct 
     ret = GetNewCachedData(cachedData, srcData, newCachedBlob);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get new cached data failed, ret = %" LOG_PUBLIC "d", ret);
-        HKS_FREE_PTR(newCachedBlob);
+        HKS_FREE(newCachedBlob);
         return ret;
     }
 
-    HKS_FREE_PTR(cachedData->data);
-    HKS_FREE_PTR(cachedData);
+    HKS_FREE(cachedData->data);
+    HKS_FREE(cachedData);
     ctxParam->uint64Param = (uint64_t)(uintptr_t)newCachedBlob;
     return HKS_SUCCESS;
 }
@@ -386,9 +386,9 @@ static void FreeCachedData(struct HksBlob **cachedData)
     }
     if ((*cachedData)->data != NULL) {
         (void)memset_s((*cachedData)->data, (*cachedData)->size, 0, (*cachedData)->size);
-        HKS_FREE_PTR((*cachedData)->data);
+        HKS_FREE((*cachedData)->data);
     }
-    HKS_FREE_PTR(*cachedData);
+    HKS_FREE(*cachedData);
 }
 
 static int32_t FinishCachedData(const struct HuksKeyNode *keyNode, const struct HksBlob *srcData,
@@ -513,7 +513,7 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
         usageSpec.purpose, ret)
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-    HKS_FREE_PTR(rawKey.data);
+    HKS_FREE(rawKey.data);
     return ret;
 }
 
@@ -647,13 +647,13 @@ static int32_t UpdateAesGcmNonce(struct HksParamSet **runtimeParamSet, const str
     HKS_IF_NULL_LOGE_RETURN(params[0].blob.data, HKS_ERROR_MALLOC_FAIL, "malloc nonce param set failed!")
     ret = HksCryptoHalFillRandom(&params[0].blob);
     if (ret != HKS_SUCCESS) {
-        HksFree(params[0].blob.data);
+        HKS_FREE(params[0].blob.data);
         HKS_LOG_E("get random failed");
         return ret;
     }
 
     ret = AddNonceToParamSet(runtimeParamSet, params, HKS_ARRAY_SIZE(params));
-    HksFree(params[0].blob.data);
+    HKS_FREE(params[0].blob.data);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("add nonce failed");
         return ret;
@@ -700,7 +700,7 @@ static int32_t CoreCipherInit(const struct HuksKeyNode *keyNode)
     if (rawKey.data != NULL) {
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     }
-    HKS_FREE_PTR(rawKey.data);
+    HKS_FREE(rawKey.data);
     HksFreeUsageSpec(&usageSpec);
     return ret;
 }
@@ -901,7 +901,7 @@ static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct H
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("rsa cipher finish check data size failed");
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-        HKS_FREE_PTR(rawKey.data);
+        HKS_FREE(rawKey.data);
         return ret;
     }
 
@@ -915,7 +915,7 @@ static int32_t RsaCipherFinish(const struct HuksKeyNode *keyNode, const struct H
         usageSpec.purpose, ret)
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-    HKS_FREE_PTR(rawKey.data);
+    HKS_FREE(rawKey.data);
     return ret;
 }
 
@@ -935,7 +935,7 @@ static int32_t Sm2CipherFinish(const struct HuksKeyNode *keyNode, const struct H
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("sm2 cipher finish check data size failed");
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-        HKS_FREE_PTR(rawKey.data);
+        HKS_FREE(rawKey.data);
         return ret;
     }
 
@@ -949,7 +949,7 @@ static int32_t Sm2CipherFinish(const struct HuksKeyNode *keyNode, const struct H
         usageSpec.purpose, ret)
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-    HKS_FREE_PTR(rawKey.data);
+    HKS_FREE(rawKey.data);
     return ret;
 }
 
@@ -1020,8 +1020,8 @@ static void FreeOutBlob(struct HksBlob **out)
     if ((out == NULL) || (*out == NULL)) {
         return;
     }
-    HKS_FREE_PTR((*out)->data);
-    HKS_FREE_PTR(*out);
+    HKS_FREE((*out)->data);
+    HKS_FREE(*out);
 }
 
 static int32_t ConstructDervieBlob(const struct HksParamSet *paramSet, struct HksBlob **out)
@@ -1041,7 +1041,7 @@ static int32_t ConstructDervieBlob(const struct HksParamSet *paramSet, struct Hk
 
     tempOut->data = (uint8_t *)HksMalloc(deriveSize);
     if (tempOut->data == NULL) {
-        HKS_FREE_PTR(tempOut);
+        HKS_FREE(tempOut);
         HKS_LOG_E("malloc out derive blob data failed.");
         return HKS_ERROR_MALLOC_FAIL;
     }
@@ -1059,7 +1059,7 @@ static int32_t ConstructAgreeBlob(struct HksBlob **agreeOut)
     agreeTemp->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
     if (agreeTemp->data == NULL) {
         HKS_LOG_E("malloc agreeTemp data failed.");
-        HKS_FREE_PTR(agreeTemp);
+        HKS_FREE(agreeTemp);
         return HKS_ERROR_MALLOC_FAIL;
     }
     *agreeOut = agreeTemp;
@@ -1309,7 +1309,7 @@ int32_t HksCoreDeriveThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
     if (rawKey.data != NULL) {
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     }
-    HKS_FREE_PTR(rawKey.data);
+    HKS_FREE(rawKey.data);
 
     return ret;
 }
@@ -1471,8 +1471,8 @@ int32_t HksCoreAgreeThreeStageUpdate(const struct HuksKeyNode *keyNode, const st
     if (rawKey.data != NULL) {
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     }
-    HKS_FREE_PTR(rawKey.data);
-    HKS_FREE_PTR(publicKey.data);
+    HKS_FREE(rawKey.data);
+    HKS_FREE(publicKey.data);
     return ret;
 }
 
@@ -1537,7 +1537,7 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
     if (rawKey.data != NULL) {
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     }
-    HKS_FREE_PTR(rawKey.data);
+    HKS_FREE(rawKey.data);
 
     return ret;
 }

@@ -511,7 +511,7 @@ void ApiPressureTest::GetSdkVersionTest()
 
         EXPECT_EQ(HksGetSdkVersion(&sdkVersion), HKS_SUCCESS);
 
-        HksFree(sdkVersion.data);
+        HKS_FREE(sdkVersion.data);
     } while (1);
 }
 
@@ -566,7 +566,7 @@ void ApiPressureTest::ImportKeyTest(const struct HksBlob *authId, const struct H
         struct HksBlob importId = { (uint32_t)strlen(IMPORT_KEY), (uint8_t *)IMPORT_KEY };
         EXPECT_EQ(HksImportKey(&importId, paramInSet, &pubKey), HKS_SUCCESS);
     } while (1);
-    HksFree(pubKey.data);
+    HKS_FREE(pubKey.data);
 }
 
 void ApiPressureTest::ExportPublicKeyTest(const struct HksBlob *authId, const struct HksParamSet *paramInSet)
@@ -580,7 +580,7 @@ void ApiPressureTest::ExportPublicKeyTest(const struct HksBlob *authId, const st
 
         EXPECT_EQ(HksExportPublicKey(authId, paramInSet, &pubKey), HKS_SUCCESS);
 
-        HksFree(pubKey.data);
+        HKS_FREE(pubKey.data);
     } while (1);
 }
 
@@ -621,7 +621,7 @@ void ApiPressureTest::GetKeyParamSetTest(const struct HksBlob *authId, const str
             break;
         }
         EXPECT_EQ(HksGetKeyParamSet(authId, paramInSet, paramOutSet), HKS_SUCCESS);
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramOutSet);
     } while (1);
 }
@@ -656,7 +656,7 @@ void ApiPressureTest::GenerateRandomTest()
         }
         EXPECT_EQ(HksGenerateRandom(paramInSet, &authId), HKS_SUCCESS);
     } while (1);
-    HksFree(authId.data);
+    HKS_FREE(authId.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -670,7 +670,7 @@ void ApiPressureTest::SignTest(
         HksBlob signature = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
         ASSERT_NE(signature.data, nullptr);
         EXPECT_EQ(HksSign(authId, paramInSet, message, &signature), HKS_SUCCESS);
-        HksFree(signature.data);
+        HKS_FREE(signature.data);
     } while (1);
 }
 
@@ -698,7 +698,7 @@ void ApiPressureTest::EncryptTest(const struct HksBlob *authId, const struct Hks
         HksBlob cipherText = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
         ASSERT_NE(cipherText.data, nullptr);
         EXPECT_EQ(HksEncrypt(authId, paramInSet, &plainText, &cipherText), HKS_SUCCESS);
-        HksFree(cipherText.data);
+        HKS_FREE(cipherText.data);
     } while (1);
 }
 
@@ -712,7 +712,7 @@ void ApiPressureTest::DecryptTest(const struct HksBlob *authId, const struct Hks
         HksBlob plainTextDecrypt = { .size = *inLen, .data = (uint8_t *)HksMalloc(*inLen) };
         ASSERT_NE(plainTextDecrypt.data, nullptr);
         EXPECT_EQ(HksDecrypt(authId, paramInSet, cipherText, &plainTextDecrypt), HKS_SUCCESS);
-        HksFree(plainTextDecrypt.data);
+        HKS_FREE(plainTextDecrypt.data);
     } while (1);
 }
 
@@ -740,9 +740,9 @@ void ApiPressureTest::AgreeKeyTest(const struct HksBlob *authId)
         HksBlob agreeKey = { .size = HKS_ECC_KEY_SIZE_224, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_224) };
         ASSERT_NE(agreeKey.data, nullptr);
         EXPECT_EQ(HksAgreeKey(paramInSet, authId, &pubKey, &agreeKey), HKS_SUCCESS);
-        HksFree(agreeKey.data);
+        HKS_FREE(agreeKey.data);
     } while (1);
-    HksFree(pubKey.data);
+    HKS_FREE(pubKey.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -755,7 +755,7 @@ void ApiPressureTest::DeriveKeyTest(const struct HksBlob *authId, const struct H
         HksBlob derivedKey = { .size = DERIVE_KEY_SIZE, .data = (uint8_t *)HksMalloc(DERIVE_KEY_SIZE) };
         ASSERT_NE(derivedKey.data, nullptr);
         EXPECT_EQ(HksDeriveKey(paramInSet, authId, &derivedKey), HKS_SUCCESS);
-        HksFree(derivedKey.data);
+        HKS_FREE(derivedKey.data);
     } while (1);
 }
 
@@ -771,7 +771,7 @@ void ApiPressureTest::MacTest(const struct HksBlob *authId, const struct HksPara
         HksBlob macMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
         ASSERT_NE(macMessage.data, nullptr);
         EXPECT_EQ(HksMac(authId, paramInSet, &message, &macMessage), HKS_SUCCESS);
-        HksFree(macMessage.data);
+        HKS_FREE(macMessage.data);
     } while (1);
 }
 
@@ -792,7 +792,7 @@ void ApiPressureTest::HashTest()
         HksBlob shaMessage = { .size = MESSAGE_SIZE, .data = (uint8_t *)HksMalloc(MESSAGE_SIZE) };
         ASSERT_NE(shaMessage.data, nullptr);
         EXPECT_EQ(HksHash(paramInSet, &message, &shaMessage), HKS_SUCCESS);
-        HksFree(shaMessage.data);
+        HKS_FREE(shaMessage.data);
     } while (1);
     HksFreeParamSet(&paramInSet);
 }
@@ -836,8 +836,8 @@ void ApiPressureTest::CipherScene(uint32_t ii)
         ASSERT_NE(plainTextDecrypt.data, nullptr);
         EXPECT_EQ(HksDecrypt(&authId, paramInSet, &cipherText, &plainTextDecrypt), HKS_SUCCESS);
         (void)HksDeleteKey(&authId, nullptr);
-        HksFree(plainTextDecrypt.data);
-        HksFree(cipherText.data);
+        HKS_FREE(plainTextDecrypt.data);
+        HKS_FREE(cipherText.data);
         HksFreeParamSet(&paramInSet);
     } while (1);
 }
@@ -870,7 +870,7 @@ void ApiPressureTest::SignScene(uint32_t ii)
         HksSign(&authId, paramInSet, &message, &signature);
         EXPECT_EQ(HksVerify(&authId, paramInSet, &message, &signature), HKS_SUCCESS);
         (void)HksDeleteKey(&authId, nullptr);
-        HksFree(signature.data);
+        HKS_FREE(signature.data);
         HksFreeParamSet(&paramInSet);
     } while (1);
 }
@@ -906,8 +906,8 @@ void ApiPressureTest::AgreeScene(uint32_t ii)
         ASSERT_NE(agreeKey.data, nullptr);
         EXPECT_EQ(HksAgreeKey(agreeKeyParam, &authId, &pubKey, &agreeKey), HKS_SUCCESS);
         (void)HksDeleteKey(&authId, nullptr);
-        HksFree(agreeKey.data);
-        HksFree(pubKey.data);
+        HKS_FREE(agreeKey.data);
+        HKS_FREE(pubKey.data);
         HksFreeParamSet(&generateKeyParam);
         HksFreeParamSet(&agreeKeyParam);
     } while (1);
@@ -1241,7 +1241,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01200, TestSize.Level1)
         t.join();
     }
     (void)HksDeleteKey(&authId, nullptr);
-    HksFree(signature.data);
+    HKS_FREE(signature.data);
     HksFreeParamSet(&paramInSet);
 }
 
@@ -1336,7 +1336,7 @@ HWTEST_F(ApiPressureTest, ApiPressureTest01400, TestSize.Level1)
         t.join();
     }
     (void)HksDeleteKey(&authId, nullptr);
-    HksFree(cipherText.data);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
 }
 

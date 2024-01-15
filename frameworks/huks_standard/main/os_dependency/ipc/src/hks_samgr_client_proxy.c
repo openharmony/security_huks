@@ -159,8 +159,8 @@ static int32_t HksIpcCall(IUnknown *iUnknown, enum HksIpcInterfaceCode type, con
 
         ret = SynchronizeOutput(&replyHandle, outBlob);
     } while (0);
-    HKS_FREE_PTR(dataReq);
-    HKS_FREE_PTR(dataReply);
+    HKS_FREE(dataReq);
+    HKS_FREE(dataReply);
 
     return ret;
 }

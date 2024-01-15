@@ -66,7 +66,7 @@ static int32_t PkCtxToX509(mbedtls_pk_context *ctx, struct HksBlob *x509Key)
         /* mbedtls_pk_write_pubkey_der use little-endian for storage */
         if (memcpy_s(x509KeyData, x509Size, tmpBuf + MAX_KEY_SIZE - x509Size, x509Size) != EOK) {
             HKS_LOG_E("public key to x509 memcpy to x509key failed!");
-            HKS_FREE_PTR(x509KeyData);
+            HKS_FREE(x509KeyData);
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
             break;
         }
@@ -75,7 +75,7 @@ static int32_t PkCtxToX509(mbedtls_pk_context *ctx, struct HksBlob *x509Key)
         x509Key->data = x509KeyData;
     } while (0);
 
-    HKS_FREE_PTR(tmpBuf);
+    HKS_FREE(tmpBuf);
     return ret;
 }
 
@@ -222,7 +222,7 @@ static int32_t Curve25519ToX509PublicKey(const struct HksBlob *publicKey, struct
 
     if (memcpy_s(x509Key->data, publicKey->size, publicKey->data, publicKey->size) != EOK) {
         HKS_LOG_E("X25519/Ed25519 to x509 public key memcpy to x509 key data failed!");
-        HKS_FREE_PTR(x509Key->data);
+        HKS_FREE(x509Key->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     x509Key->size = publicKey->size;
@@ -323,7 +323,7 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
     ret = mbedtls_mpi_write_binary(&rsaCtx->MBEDTLS_PRIVATE(N), keyBuffer + sizeof(struct HksPubKeyInfo), nSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("X509 public key to rsa write N failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return ret;
     }
 
@@ -331,7 +331,7 @@ static int32_t X509PublicKeyToRsa(mbedtls_rsa_context *rsaCtx, struct HksBlob *r
         keyBuffer + sizeof(struct HksPubKeyInfo) + nSize, eSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("X509 public key to rsa write E failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return ret;
     }
 
@@ -369,7 +369,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
         "X509 public key to ecc malloc keyBuffer failed!")
 
     if (mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)) > UINT32_MAX / HKS_BITS_PER_BYTE) {
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         HKS_LOG_E("invalid param, the size is :%" LOG_PUBLIC "u", mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)));
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -385,7 +385,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
                                    keyBuffer + sizeof(struct HksPubKeyInfo), xSize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("X509 public key to ecc write X failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return ret;
     }
 
@@ -393,7 +393,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
                                     keyBuffer + sizeof(struct HksPubKeyInfo) + xSize, ySize);
     if (ret != HKS_MBEDTLS_SUCCESS) {
         HKS_LOG_E("X509 public key to ecc write Y failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-        HKS_FREE_PTR(keyBuffer);
+        HKS_FREE(keyBuffer);
         return ret;
     }
 

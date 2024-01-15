@@ -107,6 +107,6 @@ HWTEST_F(HksClientServiceAdapterCommonTest, HksClientServiceAdapterCommonTest003
     };
     ret = GetHksPubKeyInnerFormat(nullptr, &key, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksClientServiceAdapterCommonTest003 failed, ret = " << ret;
-    HksFree(key.data);
+    HKS_FREE(key.data);
 }
 }

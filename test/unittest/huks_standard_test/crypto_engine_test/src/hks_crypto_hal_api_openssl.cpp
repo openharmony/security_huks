@@ -612,7 +612,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_021, Function | SmallTes
 
     EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_NONE, &hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
 
-    HksFree(hmactestctx);
+    HKS_FREE(hmactestctx);
     hmactestctx = nullptr;
     EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, NULL), HKS_ERROR_INVALID_ARGUMENT);
 }
@@ -631,7 +631,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_022, Function | SmallTes
     ASSERT_NE(hmactestctx, nullptr);
 
     EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
+    HKS_FREE(hmactestctx);
 
     key = { .size = 0, .data = nullptr };
     HksKeySpec spec = {.algType = HKS_ALG_HMAC, .keyLen = KEY_LEN_256, .algParam = nullptr};
@@ -641,7 +641,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_022, Function | SmallTes
     ASSERT_NE(hmactestctx, nullptr);
     EXPECT_EQ(HksCryptoHalHmacInit(&key, HKS_DIGEST_SHA512, &hmactestctx), HKS_SUCCESS);
     EXPECT_EQ(HksCryptoHalHmacUpdate(&message, hmactestctx), HKS_ERROR_INVALID_ARGUMENT);
-    HksFree(hmactestctx);
+    HKS_FREE(hmactestctx);
 
     message = { .size = 1, .data = buff };
     EXPECT_EQ(HksCryptoHalHmacUpdate(&message, NULL), HKS_ERROR_INVALID_ARGUMENT);
@@ -678,7 +678,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_024, Function | SmallTes
 
     ret = HksCryptoHalEncryptInit(&key, &spec, &ctx);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
-    HksFree(ctx);
+    HKS_FREE(ctx);
     ctx = nullptr;
 }
 
@@ -715,7 +715,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_025, Function | SmallTes
     spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
     ret = HksCryptoHalEncryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
-    HksFree(ctx);
+    HKS_FREE(ctx);
     ctx = nullptr;
 }
 
@@ -789,7 +789,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_027, Function | SmallTes
 
     ret = HksCryptoHalDecryptInit(&key, &spec, &ctx);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
-    HksFree(ctx);
+    HKS_FREE(ctx);
     ctx = nullptr;
 }
 
@@ -826,7 +826,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_028, Function | SmallTes
     spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
     ret = HksCryptoHalDecryptUpdate(&message, ctx, &out, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
-    HksFree(ctx);
+    HKS_FREE(ctx);
     ctx = nullptr;
 }
 
@@ -868,7 +868,7 @@ HWTEST_F(HksCryptoHalApiOpenssl, HksCryptoHalApiOpenssl_029, Function | SmallTes
     spec = { .algType = HKS_ALG_AES, .mode = 0xffff };
     ret = HksCryptoHalDecryptFinal(&messageLast, nullptr, &cipherText, &tagAead, spec.algType);
     ASSERT_EQ(HKS_ERROR_INVALID_ARGUMENT, ret);
-    HksFree(ctx);
+    HKS_FREE(ctx);
     ctx = nullptr;
 }
 }  // namespace UnitTest

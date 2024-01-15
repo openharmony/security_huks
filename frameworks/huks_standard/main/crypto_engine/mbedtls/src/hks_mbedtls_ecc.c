@@ -206,7 +206,7 @@ static int32_t EccSaveKeyMaterial(const mbedtls_ecp_keypair *ecp,
 
     if (ret != HKS_MBEDTLS_SUCCESS) {
         (void)memset_s(rawMaterial, rawMaterialLen, 0, rawMaterialLen);
-        HKS_FREE_PTR(rawMaterial);
+        HKS_FREE(rawMaterial);
     }
 
     return ret;

@@ -900,11 +900,11 @@ protected:
             EXPECT_EQ(outResult, testCaseParams.decryptResult);
             EXPECT_EQ(inscription.size, message.size);
             EXPECT_EQ(HksMemCmp(message.data, inscription.data, inscription.size), HKS_SUCCESS);
-            HksFree(inscription.data);
+            HKS_FREE(inscription.data);
         }
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(cipherText.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(cipherText.data);
     }
 };
 

@@ -40,7 +40,7 @@ static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey,
 
     if (EVP_PKEY_get_raw_public_key(pKey, buffer + offset, &tmpPubKeyLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        HksFree(buffer);
+        HKS_FREE(buffer);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     uint32_t pubKeyLen = (uint32_t)tmpPubKeyLen;
@@ -48,7 +48,7 @@ static int32_t SaveCurve25519KeyMaterial(uint32_t algType, const EVP_PKEY *pKey,
     offset += pubKeyLen;
     if (EVP_PKEY_get_raw_private_key(pKey, buffer + offset, &tmpPriKeyLen) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
-        HksFree(buffer);
+        HKS_FREE(buffer);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
     uint32_t priKeyLen = (uint32_t)tmpPriKeyLen;

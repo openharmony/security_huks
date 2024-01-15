@@ -356,7 +356,7 @@ static int32_t ExtractTlvDataAndHeadSize(const uint8_t *in, uint32_t inLen,
 
     ret = ExtractTlvData(in, inLen, *out, outLen);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(*out);
+        HKS_FREE(*out);
         HKS_LOG_E("ExtractTlvData fail!");
     }
     return ret;
@@ -423,7 +423,7 @@ static int32_t GetKeyDescriptionSeqValue(const struct HksCertInfo *cert, uint8_t
 
     if (*len >= MAX_ATTEST_EXTENSION_BUF_LEN) {
         (void)memset_s(*data, *len, 0, *len);
-        HKS_FREE_PTR(*data);
+        HKS_FREE(*data);
         HKS_LOG_E("the length of extension data is too long");
         ret = HKS_ERROR_INSUFFICIENT_MEMORY;
     }
@@ -473,17 +473,17 @@ static int32_t GetClaimDataParamSet(uint8_t *data, uint32_t len, struct HksParam
 
             if (claimSize >= MAX_ATTEST_CLAIM_BUF_LEN) {
                 HKS_LOG_E("the length of claim is too long");
-                HKS_FREE_PTR(claimData);
+                HKS_FREE(claimData);
                 return HKS_ERROR_INSUFFICIENT_MEMORY;
             }
 
             ret = ConstructParamSetOut(g_oidParams[i].tag, claimData, claimSize, paramSetOut);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("ConstructParamSetOut fail");
-                HKS_FREE_PTR(claimData);
+                HKS_FREE(claimData);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
-            HKS_FREE_PTR(claimData);
+            HKS_FREE(claimData);
             return HKS_SUCCESS;
         }
     }
@@ -515,17 +515,17 @@ static int32_t FillAttestExtendParamSet(uint8_t *data, uint32_t length,
 
         if (valueLength >= MAX_ATTEST_CLAIM_BUF_LEN) {
             HKS_LOG_E("the length of claim is too long");
-            HKS_FREE_PTR(value);
+            HKS_FREE(value);
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
 
         ret = GetClaimDataParamSet(value, valueLength, paramSetOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("GetClaimDataParamSet failed, ret = %" LOG_PUBLIC "d", ret);
-            HKS_FREE_PTR(value);
+            HKS_FREE(value);
             return ret;
         }
-        HKS_FREE_PTR(value);
+        HKS_FREE(value);
         tmp += (valueLength + headSize);
         leftSize -= (valueLength + headSize);
     }
@@ -551,7 +551,7 @@ static int32_t FillAttestExtendInfo(uint8_t *data, uint32_t length, struct HksPa
         *version, paramSetOut);
     HKS_IF_NOT_SUCC_LOGE(ret, "fill attest extend paramSet fail")
 
-    HKS_FREE_PTR(version);
+    HKS_FREE(version);
     return ret;
 }
 
@@ -567,7 +567,7 @@ static int32_t GetParamSetOutInfo(const struct HksCertInfo *certs, struct HksPar
     HKS_IF_NOT_SUCC_LOGE(ret, "fill attest extend info fail")
 
     (void)memset_s(keyDescription, keyDescLen, 0, keyDescLen);
-    HKS_FREE_PTR(keyDescription);
+    HKS_FREE(keyDescription);
     return ret;
 }
 
@@ -598,7 +598,7 @@ static int32_t InitCertChainInfo(const struct HksCertChain *certChain, struct Hk
     }
 
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(certsInfo);
+        HKS_FREE(certsInfo);
         return ret;
     }
     *certs = certsInfo;
@@ -613,7 +613,7 @@ static void FreeCertChainInfo(struct HksCertInfo **certs, uint32_t certNum)
                 X509_free((*certs)[i].x509);
             }
         }
-        HKS_FREE_PTR(*certs);
+        HKS_FREE(*certs);
     }
 }
 

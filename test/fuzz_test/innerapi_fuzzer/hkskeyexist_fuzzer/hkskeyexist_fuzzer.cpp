@@ -42,7 +42,7 @@ namespace OHOS {
 
         (void)HksKeyExist(&keyAlias, paramSetIn);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

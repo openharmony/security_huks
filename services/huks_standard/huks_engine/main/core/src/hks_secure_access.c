@@ -351,7 +351,7 @@ static int32_t ParseAuthToken(const struct HksBlob *inAuthTokenParam, struct Hks
         return HKS_SUCCESS;
     } while (0);
 
-    HKS_FREE_PTR(authToken);
+    HKS_FREE(authToken);
     return ret;
 }
 
@@ -622,14 +622,14 @@ static int32_t AssignVerifyResultAndFree(int32_t outRet, struct HksParam *authRe
         ret = HksAddVerifiedAuthTokenIfNeed(keyNode, authToken);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("add verified auth token failed!");
-            HKS_FREE_PTR(authToken);
+            HKS_FREE(authToken);
             return HKS_ERROR_BAD_STATE;
         }
     } else {
         authResult->uint32Param = HKS_AUTH_RESULT_FAILED;
-        HKS_FREE_PTR(authToken);
+        HKS_FREE(authToken);
     }
-    HKS_FREE_PTR(authToken);
+    HKS_FREE(authToken);
     return ret;
 }
 
@@ -758,14 +758,14 @@ static int32_t DoAppendPrefixAuthInfoToUpdateInData(const struct HuksKeyNode *ke
     int32_t ret = HksGetParam(keyNode->authRuntimeParamSet, HKS_TAG_APPENDED_DATA_PREFIX, &appendDataPrefixParam);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get append prefix data failed");
-        HKS_FREE_PTR(outData);
+        HKS_FREE(outData);
         return HKS_ERROR_BAD_STATE;
     }
 
     if (memcpy_s(appendDataPrefixParam->blob.data, appendDataPrefixParam->blob.size, secureSignInfo,
         sizeof(struct HksSecureSignAuthInfo)) != EOK) {
         HKS_LOG_E("get append prefix data failed");
-        HKS_FREE_PTR(outData);
+        HKS_FREE(outData);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     outDataBlob->data = outData;
@@ -839,11 +839,11 @@ static int32_t DoAppendPrefixDataToFinishData(const struct HuksKeyNode *keyNode,
 
     if (memcpy_s(inOutData->data, inOutDataOriginSize, cacheOutData, cacheOutDataSize) != 0) {
         HKS_LOG_E("memcpy cacheOutData to inOutData failed!");
-        HKS_FREE_PTR(cacheOutData);
+        HKS_FREE(cacheOutData);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     inOutData->size = cacheOutDataSize;
-    HKS_FREE_PTR(cacheOutData);
+    HKS_FREE(cacheOutData);
     return HKS_SUCCESS;
 }
 

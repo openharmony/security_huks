@@ -71,7 +71,7 @@ static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context)
         FreeHksBlob(context->token);
     }
 
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

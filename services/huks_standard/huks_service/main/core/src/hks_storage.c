@@ -227,19 +227,19 @@ static int32_t ConstructBlob(const char *src, struct HksBlob *blob)
     }
 
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(outputBlob);
+        HKS_FREE(outputBlob);
         return ret;
     }
 
     if (blob->size < count) {
-        HKS_FREE_PTR(outputBlob);
+        HKS_FREE(outputBlob);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
     (void)memcpy_s(blob->data, blob->size, outputBlob, count);
 
     blob->size = count;
-    HKS_FREE_PTR(outputBlob);
+    HKS_FREE(outputBlob);
     return ret;
 }
 
@@ -366,12 +366,12 @@ static HksStorageFileLock *CreateStorageFileLock(const char *path, const char *f
     int32_t ret = HksGetFileName(path, fileName, fullPath, HKS_MAX_FILE_NAME_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get full path failed, ret = %" LOG_PUBLIC "d.", ret);
-        HksFree(fullPath);
+        HKS_FREE(fullPath);
         return NULL;
     }
 
     HksStorageFileLock *lock = HksStorageFileLockCreate(fullPath);
-    HksFree(fullPath);
+    HKS_FREE(fullPath);
     return lock;
 }
 #endif
@@ -441,7 +441,7 @@ static int32_t CleanFile(const char *path, const char *fileName)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file random failed!")
     } while (0);
 
-    HksFree(buf);
+    HKS_FREE(buf);
 
     return ret;
 }
@@ -530,7 +530,7 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "file write destPath failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
-    HKS_FREE_PTR(buffer);
+    HKS_FREE(buffer);
     return ret;
 }
 
@@ -740,15 +740,15 @@ static int32_t FileInfoInit(struct HksStoreFileInfo *fileInfo)
 
 static void FileInfoFree(struct HksStoreFileInfo *fileInfo)
 {
-    HKS_FREE_PTR(fileInfo->mainPath.processPath);
-    HKS_FREE_PTR(fileInfo->mainPath.path);
-    HKS_FREE_PTR(fileInfo->mainPath.fileName);
+    HKS_FREE(fileInfo->mainPath.processPath);
+    HKS_FREE(fileInfo->mainPath.path);
+    HKS_FREE(fileInfo->mainPath.fileName);
     fileInfo->mainPath.size = 0;
 
 #ifdef SUPPORT_STORAGE_BACKUP
-    HKS_FREE_PTR(fileInfo->bakPath.processPath);
-    HKS_FREE_PTR(fileInfo->bakPath.path);
-    HKS_FREE_PTR(fileInfo->bakPath.fileName);
+    HKS_FREE(fileInfo->bakPath.processPath);
+    HKS_FREE(fileInfo->bakPath.path);
+    HKS_FREE(fileInfo->bakPath.fileName);
     fileInfo->bakPath.size = 0;
 #endif
 }
@@ -782,15 +782,15 @@ static int32_t MakeUserAndProcessNamePath(const char *mainRootPath, char *userPr
     int32_t ret = ConstructName(&specificUserId, user, HKS_PROCESS_INFO_LEN);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
-        HksFree(user);
+        HKS_FREE(user);
         return ret;
     }
 
     if (memcpy_s(userProcess, processLen, user, strlen(user)) != EOK) {
-        HksFree(user);
+        HKS_FREE(user);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-    HksFree(user);
+    HKS_FREE(user);
 
     ret = MakeSubPath(mainRootPath, userProcess, workPath, HKS_MAX_DIRENT_FILE_LEN);
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INTERNAL_ERROR)
@@ -1028,7 +1028,7 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
         if (memcpy_s(name, HKS_MAX_FILE_NAME_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
             HKS_LOG_E("construct name failed, name buffer is too small.");
-            HKS_FREE_PTR(name);
+            HKS_FREE(name);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
     } else {
@@ -1040,7 +1040,7 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
         }
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
-            HKS_FREE_PTR(name);
+            HKS_FREE(name);
             return ret;
         }
 #ifdef HKS_ENABLE_LITE_HAP
@@ -1052,7 +1052,7 @@ static int32_t GetFileInfo(const struct HksProcessInfo *processInfo,
 
     ret = GetStorePathByStorageLevel(processInfo, &info, storageType, fileInfo, true);
 
-    HKS_FREE_PTR(name);
+    HKS_FREE(name);
 
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get store path failed, ret = %" LOG_PUBLIC "d.", ret)
 
@@ -1114,7 +1114,7 @@ static int32_t RecordKeyOperation(uint32_t operation, const char *path, const ch
             ret = HKS_ERROR_INVALID_ARGUMENT;
     }
 
-    HKS_FREE_PTR(outKeyAlias);
+    HKS_FREE(outKeyAlias);
     return ret;
 }
 
@@ -1303,7 +1303,7 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
         if (memcpy_s(name, HKS_MAX_FILE_NAME_LEN, processInfo->processName.data,
             processInfo->processName.size) != EOK) {
             HKS_LOG_E("construct name failed, name buffer is too small.");
-            HKS_FREE_PTR(name);
+            HKS_FREE(name);
             return HKS_ERROR_BUFFER_TOO_SMALL;
         }
         ret = HKS_SUCCESS;
@@ -1316,7 +1316,7 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
         }
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("construct name failed, ret = %" LOG_PUBLIC "d.", ret);
-            HKS_FREE_PTR(name);
+            HKS_FREE(name);
             return ret;
         }
 #ifdef HKS_ENABLE_LITE_HAP
@@ -1328,7 +1328,7 @@ static int32_t GetFilePath(const struct HksProcessInfo *processInfo,
 
     ret = GetStorePathByStorageLevel(processInfo, &info, storageType, fileInfo, false);
 
-    HKS_FREE_PTR(name);
+    HKS_FREE(name);
     return ret;
 }
 
@@ -1336,9 +1336,9 @@ static void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCou
 {
     if (fileNameList != NULL && *fileNameList != NULL) {
         for (uint32_t i = 0; i < keyCount; ++i) {
-            HKS_FREE_PTR((*fileNameList)[i].fileName);
+            HKS_FREE((*fileNameList)[i].fileName);
         }
-        HKS_FREE_PTR(*fileNameList);
+        HKS_FREE(*fileNameList);
     }
 }
 
@@ -1472,20 +1472,20 @@ static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t
     int32_t ret = GetPath(storePath, typePath, destroyPath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get Path failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        HKS_FREE_PTR(destroyPath);
+        HKS_FREE(destroyPath);
         return ret;
     }
 
     ret = HksIsDirExist(destroyPath);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(destroyPath);
+        HKS_FREE(destroyPath);
         return HKS_SUCCESS;
     }
 
     ret = HksRemoveDir(destroyPath);
     HKS_IF_NOT_SUCC_LOGE(ret, "Destroy dir failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-    HKS_FREE_PTR(destroyPath);
+    HKS_FREE(destroyPath);
     return ret;
 }
 
@@ -1508,7 +1508,7 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
     ret = GetPath(rootPath, processNameEncoded, storePath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get Path failed! ret = 0x%" LOG_PUBLIC "X", ret);
-        HKS_FREE_PTR(storePath);
+        HKS_FREE(storePath);
         return ret;
     }
 
@@ -1527,7 +1527,7 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
         HKS_LOG_I("Destroy certchain dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
     }
 
-    HKS_FREE_PTR(storePath);
+    HKS_FREE(storePath);
     return HKS_SUCCESS;
 }
 
@@ -1552,7 +1552,7 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
 #endif
     } while (0);
 
-    HKS_FREE_PTR(name);
+    HKS_FREE(name);
     return ret;
 }
 
@@ -1647,7 +1647,7 @@ static int32_t DeleteServiceEceOrCeUserIdPath(const struct HksBlob *userId, cons
         HKS_LOG_I("delete path: %" LOG_PUBLIC "s", userProcess);
         ret = HksDeleteDir(userProcess);
     } while (0);
-    HKS_FREE_PTR(userData);
+    HKS_FREE(userData);
     return ret;
 }
 
@@ -1685,8 +1685,8 @@ static int32_t DeleteServiceEceOrCeUidPath(const struct HksProcessInfo *processI
         HKS_LOG_I("delete path: %" LOG_PUBLIC "s", userProcess);
         ret = HksDeleteDir(userProcess);
     } while (0);
-    HKS_FREE_PTR(userData);
-    HKS_FREE_PTR(uidData);
+    HKS_FREE(userData);
+    HKS_FREE(uidData);
     return ret;
 }
 #endif
@@ -1718,7 +1718,7 @@ void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId)
         HKS_IF_NOT_SUCC_LOGE(ret, "delete ce path failed, ret = %" LOG_PUBLIC "d", ret)
 #endif
     } while (0);
-    HKS_FREE_PTR(userData);
+    HKS_FREE(userData);
 }
 
 static bool HksIsUserIdRoot(const struct HksProcessInfo *processInfo)
@@ -1773,8 +1773,8 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
         HKS_IF_NOT_SUCC_LOGE(ret, "delete ce path failed, ret = %" LOG_PUBLIC "d", ret)
 #endif
     } while (0);
-    HKS_FREE_PTR(userData);
-    HKS_FREE_PTR(uidData);
+    HKS_FREE(userData);
+    HKS_FREE(uidData);
 }
 #endif
 #endif /* _CUT_AUTHENTICATE_ */

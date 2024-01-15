@@ -96,7 +96,7 @@ HWTEST_F(HksCryptoHalSm3Kdf, HksCryptoHalSm3Kdf_001, Function | SmallTest | Leve
     uint8_t hashData[19] = {0};
     struct HksBlob hash = { 19, hashData };
     RunTestCase(&message, &hash);
-    HksFree(message.data);
+    HKS_FREE(message.data);
 }
 
 /**
@@ -118,7 +118,7 @@ HWTEST_F(HksCryptoHalSm3Kdf, HksCryptoHalSm3Kdf_002, Function | SmallTest | Leve
     uint8_t hashData[32] = {0};
     struct HksBlob hash = { 32, hashData };
     RunTestCase(&message, &hash);
-    HksFree(message.data);
+    HKS_FREE(message.data);
 }
 /**
  * @tc.number    : HksCryptoHalSm3Kdf_003
@@ -140,7 +140,7 @@ HWTEST_F(HksCryptoHalSm3Kdf, HksCryptoHalSm3Kdf_003, Function | SmallTest | Leve
     uint8_t hashData[46] = {0};
     struct HksBlob hash = { 46, hashData };
     RunTestCase(&message, &hash);
-    HksFree(message.data);
+    HKS_FREE(message.data);
 }
 }  // namespace UnitTest
 }  // namespace Huks

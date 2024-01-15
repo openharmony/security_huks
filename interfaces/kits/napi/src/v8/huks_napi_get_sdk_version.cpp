@@ -35,7 +35,7 @@ napi_value HuksNapiGetSdkVersion(napi_env env, napi_callback_info info)
 
     sdkVersion->data = static_cast<uint8_t *>(HksMalloc(MAX_SDK_VERSION_SIZE));
     if (sdkVersion->data == nullptr) {
-        HksFree(sdkVersion);
+        HKS_FREE(sdkVersion);
         return nullptr;
     }
 
@@ -43,15 +43,15 @@ napi_value HuksNapiGetSdkVersion(napi_env env, napi_callback_info info)
 
     int32_t result = HksGetSdkVersion(sdkVersion);
     if (result != HKS_SUCCESS) {
-        HksFree(sdkVersion->data);
-        HksFree(sdkVersion);
+        HKS_FREE(sdkVersion->data);
+        HKS_FREE(sdkVersion);
         return nullptr;
     }
 
     napi_value version = nullptr;
     napi_create_string_latin1(env, reinterpret_cast<const char *>(sdkVersion->data), NAPI_AUTO_LENGTH, &version);
-    HksFree(sdkVersion->data);
-    HksFree(sdkVersion);
+    HKS_FREE(sdkVersion->data);
+    HKS_FREE(sdkVersion);
     return version;
 }
 }  // namespace HuksNapi

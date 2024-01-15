@@ -185,14 +185,14 @@ int32_t HksOpensslHmacFinal(void **cryptoCtx, struct HksBlob *msg, struct HksBlo
     struct HksOpensslHmacCtx *hmacCtx = (struct HksOpensslHmacCtx *)*cryptoCtx;
     if (hmacCtx == NULL) {
         HKS_LOG_E("hmacCtx invalid");
-        HKS_FREE_PTR(*cryptoCtx);
+        HKS_FREE(*cryptoCtx);
         return HKS_ERROR_NULL_POINTER;
     }
 
     HMAC_CTX *context = (HMAC_CTX *)hmacCtx->append;
     if (context == NULL) {
         HKS_LOG_E("context is null");
-        HKS_FREE_PTR(*cryptoCtx);
+        HKS_FREE(*cryptoCtx);
         return HKS_FAILURE;
     }
 
@@ -236,7 +236,7 @@ void HksOpensslHmacHalFreeCtx(void **cryptoCtx)
         opensslHmacCtx->append = NULL;
     }
 
-    HKS_FREE_PTR(*cryptoCtx);
+    HKS_FREE(*cryptoCtx);
 }
 #endif /* HKS_SUPPORT_HMAC_SHA1 */
 #endif /* HKS_SUPPORT_HMAC_C */

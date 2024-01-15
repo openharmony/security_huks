@@ -330,9 +330,9 @@ protected:
 
         EXPECT_EQ(HksCryptoHalEncrypt(&key, &testCaseParams.usageSpec, &message, &cipherText, &tagAead),
             testCaseParams.encryptResult);
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(cipherText.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(cipherText.data);
     }
 };
 
