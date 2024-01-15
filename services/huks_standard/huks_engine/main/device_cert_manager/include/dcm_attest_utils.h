@@ -23,10 +23,10 @@
 #include "hks_type.h"
 
 #define DECLARE_TAG(name, id) \
-    static uint8_t name##Tag[] = { 0x06, id##_SIZE, id };
+    static uint8_t name##Tag[] = { 0x06, id##_SIZE, id }
 
 #define DECLARE_OID(name) \
-    static const struct HksBlob name##Oid = { sizeof(name##Tag), name##Tag };
+    static const struct HksBlob name##Oid = { sizeof(name##Tag), name##Tag }
 
 enum KmTagType {
     KM_INVALID = 0 << 28,

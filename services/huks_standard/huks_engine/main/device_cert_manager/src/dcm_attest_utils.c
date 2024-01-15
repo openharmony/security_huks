@@ -44,10 +44,10 @@ static const uint8_t g_p521SpkiHeader[] = {
 };
 
 static uint8_t g_rsaEnTag[] = { 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x01 };
-DECLARE_OID(g_rsaEn)
+DECLARE_OID(g_rsaEn);
 
 static uint8_t g_x25519Tag[] = { 0x06, 0x03, 0x2B, 0x65, 0x6E };
-DECLARE_OID(g_x25519)
+DECLARE_OID(g_x25519);
 
 #define ENCODED_SEC_LEVEL_SIZE 3
 static uint32_t EncodeSecurityLevel(uint8_t *out, uint32_t level)
