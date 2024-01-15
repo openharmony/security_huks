@@ -172,7 +172,8 @@ HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest007, TestSize.Level0)
 
 /**
  * @tc.name: HksAttestUtilsTest.HksAttestUtilsTest008
- * @tc.desc: tdd DcmGetPublicKey, get ECC public key which key size is 384 but total size is not equal with key size, expect HKS_ERROR_BUFFER_TOO_SMALL
+ * @tc.desc: tdd DcmGetPublicKey, get ECC public key which key size is 384 but total size is not equal with key size,
+ *    expect HKS_ERROR_BUFFER_TOO_SMALL
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest008, TestSize.Level0)
@@ -188,7 +189,8 @@ HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest008, TestSize.Level0)
 
 /**
  * @tc.name: HksAttestUtilsTest.HksAttestUtilsTest009
- * @tc.desc: tdd DcmGetPublicKey, get ECC public key which key size is 521 but total size is not equal with key size, expect HKS_ERROR_BUFFER_TOO_SMALL
+ * @tc.desc: tdd DcmGetPublicKey, get ECC public key which key size is 521 but total size is not equal with key size,
+ *    expect HKS_ERROR_BUFFER_TOO_SMALL
  * @tc.type: FUNC
  */
 HWTEST_F(HksAttestUtilsTest, HksAttestUtilsTest009, TestSize.Level0)

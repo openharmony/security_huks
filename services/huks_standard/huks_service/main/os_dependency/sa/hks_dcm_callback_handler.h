@@ -16,9 +16,8 @@
 #ifndef HKS_DCM_CALLBACK_HANDLER_H
 #define HKS_DCM_CALLBACK_HANDLER_H
 
-#include <stdint.h>
-
 #ifdef __cplusplus
+#include <cstdint>
 #include <mutex>
 #endif
 
