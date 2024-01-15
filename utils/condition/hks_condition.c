@@ -78,7 +78,7 @@ HksCondition *HksConditionCreate(void)
     condition->waited = false;
     int32_t ret = pthread_mutex_init(&condition->mutex, NULL);
     if (ret != 0) {
-        HksFree(condition);
+        HKS_FREE(condition);
         return NULL;
     }
 
@@ -88,7 +88,7 @@ HksCondition *HksConditionCreate(void)
     pthread_condattr_destroy(&attr);
     if (ret != 0) {
         pthread_mutex_destroy(&condition->mutex);
-        HksFree(condition);
+        HKS_FREE(condition);
         return NULL;
     }
     return condition;
@@ -101,7 +101,7 @@ void HksConditionDestroy(HksCondition* condition)
     }
     pthread_mutex_destroy(&condition->mutex);
     pthread_cond_destroy(&condition->cond);
-    HksFree(condition);
+    HKS_FREE(condition);
 }
 
 #ifdef __cplusplus

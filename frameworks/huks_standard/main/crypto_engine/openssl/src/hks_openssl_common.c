@@ -45,7 +45,7 @@ int32_t HksOpensslGenerateRandomKey(const uint32_t keySize, struct HksBlob *key)
 
     if (ret != HKS_SUCCESS) {
         (void)memset_s(tmpKey, keySizeByte, 0, keySizeByte);
-        HksFree(tmpKey);
+        HKS_FREE(tmpKey);
     }
     return ret;
 }

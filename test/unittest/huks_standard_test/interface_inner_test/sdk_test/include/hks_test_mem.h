@@ -33,7 +33,7 @@ void HksTestFree(void *ptr);
     } \
 }
 
-#define HKS_FREE_PTR(p) SELF_FREE_PTR(p, HksTestFree)
+#define HKS_FREE(p) ({SELF_FREE_PTR(p, HksTestFree)})
 
 #define HKS_FREE_BLOB(blob) do { \
     if ((blob).data != NULL) { \

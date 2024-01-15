@@ -136,13 +136,13 @@ static int32_t EccSaveKeyMaterial(const EC_KEY *eccKey, const struct HksKeySpec 
         if ((pubX == NULL) || (pubY == NULL)) {
             HKS_LOG_E("BN_new x or y failed");
             ret = HKS_ERROR_NULL_POINTER;
-            HksFree(rawMaterial);
+            HKS_FREE(rawMaterial);
             break;
         }
         ret = TransEccKeyToKeyBlob(eccKey, keyMaterial, pubX, pubY, rawMaterial);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("transfer ecc key to key blob failed");
-            HksFree(rawMaterial);
+            HKS_FREE(rawMaterial);
             break;
         }
         *output = rawMaterial;

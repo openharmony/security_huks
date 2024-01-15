@@ -461,11 +461,11 @@ protected:
             EXPECT_EQ(HksDecrypt(&authId, paramInSet, &cipherText, &plainTextDecrypt), testCaseParams.decryptResult);
             EXPECT_EQ(plainTextDecrypt.size, testCaseParams.hexData.length());
             EXPECT_EQ(HksMemCmp(plainText.data, plainTextDecrypt.data, testCaseParams.hexData.length()), 0);
-            HksFree(plainTextDecrypt.data);
+            HKS_FREE(plainTextDecrypt.data);
         }
 
         (void)HksDeleteKey(&authId, nullptr);
-        HksFree(cipherText.data);
+        HKS_FREE(cipherText.data);
         HksFreeParamSet(&paramInSet);
     }
 

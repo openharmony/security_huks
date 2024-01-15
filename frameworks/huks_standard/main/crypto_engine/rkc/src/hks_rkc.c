@@ -349,7 +349,7 @@ static char *CloneNewStr(const char *srcStr, const uint32_t strLenMax)
 
     if (memcpy_s(newBuf, strLen, srcStr, strLen) != EOK) {
         HKS_LOG_E("Memcpy new buffer failed!");
-        HKS_FREE_PTR(newBuf);
+        HKS_FREE(newBuf);
         return NULL;
     }
     newBuf[strLen] = '\0';
@@ -591,8 +591,8 @@ void HksMkDestroy(void)
 void HksCfgClearMem(void)
 {
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
-        HKS_FREE_PTR(g_hksRkcCfg.ksfAttrRkc.name[i]);
-        HKS_FREE_PTR(g_hksRkcCfg.ksfAttrMk.name[i]);
+        HKS_FREE(g_hksRkcCfg.ksfAttrRkc.name[i]);
+        HKS_FREE(g_hksRkcCfg.ksfAttrMk.name[i]);
     }
 
     (void)memset_s(&g_hksRkcCfg, sizeof(g_hksRkcCfg), 0, sizeof(g_hksRkcCfg));

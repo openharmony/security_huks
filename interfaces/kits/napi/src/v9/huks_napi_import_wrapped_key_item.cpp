@@ -72,7 +72,7 @@ static void DeleteImportWrappedKeyAsyncContext(napi_env env, ImportWrappedKeyAsy
         FreeHksBlob(context->wrappedData);
     }
 
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

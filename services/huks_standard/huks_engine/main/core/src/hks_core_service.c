@@ -177,7 +177,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
     struct HksBlob tempKey = { size, buffer };
     struct HksKeyNode *keyNode = HksGenerateKeyNode(&tempKey);
     (void)memset_s(buffer, size, 0, size);
-    HKS_FREE_PTR(buffer);
+    HKS_FREE(buffer);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generating keynode with agree key failed")
 
     bool isSupportUserAuth = false;
@@ -234,14 +234,14 @@ static int32_t GenAgreeKey(const struct HksParamSet *paramSet, const struct HksB
     } else if (agreeAlgParam->uint32Param == HKS_ALG_ED25519) {
         agreeSpec.algType = HKS_ALG_ED25519;
     } else {
-        HKS_FREE_PTR(agreedKey->data);
+        HKS_FREE(agreedKey->data);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     ret = HksCryptoHalAgreeKey(privateKey, peerPublicKey, &agreeSpec, agreedKey);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("agree key failed, ret = %" LOG_PUBLIC "d", ret);
-        HKS_FREE_PTR(agreedKey->data); /* X25519AgreeKey will memset sharedKey if fail */
+        HKS_FREE(agreedKey->data); /* X25519AgreeKey will memset sharedKey if fail */
     }
     return ret;
 }
@@ -390,7 +390,7 @@ static int32_t GetSignVerifyMessage(const struct HksParamSet *nodeParamSet, cons
         ret = HksCryptoHalHash(digestParam->uint32Param, srcData, message);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("SignVerify calc hash failed!");
-            HKS_FREE_PTR(message->data);
+            HKS_FREE(message->data);
             return ret;
         }
 
@@ -440,12 +440,12 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
             ret = HksCryptoHalVerify(&rawKey, &usageSpec, &message, signature);
         }
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-        HKS_FREE_PTR(rawKey.data);
+        HKS_FREE(rawKey.data);
     }while (0);
 
     HksFreeKeyNode(&keyNode);
     if (needFree) {
-        HKS_FREE_PTR(message.data);
+        HKS_FREE(message.data);
     }
     return ret;
 }
@@ -497,7 +497,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("build cipher usageSpec failed!");
             (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-            HKS_FREE_PTR(rawKey.data);
+            HKS_FREE(rawKey.data);
             break;
         }
 
@@ -507,7 +507,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
             ret = HksCryptoHalDecrypt(&rawKey, usageSpec, &tmpInData, outData);
         }
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-        HKS_FREE_PTR(rawKey.data);
+        HKS_FREE(rawKey.data);
 
         HksFreeUsageSpec(&usageSpec);
         HKS_IF_NOT_SUCC_LOGE(ret, "cipher[%" LOG_PUBLIC "x] failed!", cmdId)
@@ -681,7 +681,7 @@ static int32_t AgreeSharedSecretWithPeerPublicKey(const struct HksBlob *wrapping
     HksFreeParamSet(&agreeKeyParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("agree with peer public key failed! ret = %" LOG_PUBLIC "d", ret);
-        HKS_FREE_PTR(sharedSecret.data);
+        HKS_FREE(sharedSecret.data);
         return ret;
     }
 
@@ -749,7 +749,7 @@ static int32_t DecryptKekWithAgreeSharedSecret(const struct HksBlob *wrappedKeyD
     HksFreeUsageSpec(&decKekUsageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("decrypt kek data failed!");
-        HKS_FREE_PTR(kek.data);
+        HKS_FREE(kek.data);
         return ret;
     }
 
@@ -822,7 +822,7 @@ static int32_t DecryptImportedKeyWithKek(const struct HksBlob *wrappedKeyData, c
     struct HksUsageSpec *decOriginKeyUsageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
     if (decOriginKeyUsageSpec == NULL) {
         HKS_LOG_E("malloc originKeyBuffer memory failed!");
-        HKS_FREE_PTR(originKey.data);
+        HKS_FREE(originKey.data);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(decOriginKeyUsageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
@@ -830,7 +830,7 @@ static int32_t DecryptImportedKeyWithKek(const struct HksBlob *wrappedKeyData, c
     ret = BuildDecryptUsageSpecOfUnwrap(&kekAadPart, &kekNoncePart, &kekTagPart, payloadSize, decOriginKeyUsageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("build decrypt wrapped data origin key usageSpec failed!");
-        HKS_FREE_PTR(originKey.data);
+        HKS_FREE(originKey.data);
         HksFreeUsageSpec(&decOriginKeyUsageSpec);
         return ret;
     }
@@ -839,7 +839,7 @@ static int32_t DecryptImportedKeyWithKek(const struct HksBlob *wrappedKeyData, c
     HksFreeUsageSpec(&decOriginKeyUsageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("decrypt importKey failed!");
-        HKS_FREE_PTR(originKey.data);
+        HKS_FREE(originKey.data);
         return ret;
     }
 
@@ -854,22 +854,22 @@ static void ClearAndFreeKeyBlobsIfNeed(struct HksBlob *peerPublicKey, struct Hks
 {
     if (originKey->data != NULL) {
         (void)memset_s(originKey->data, originKey->size, 0, originKey->size);
-        HKS_FREE_PTR(originKey->data);
+        HKS_FREE(originKey->data);
     }
 
     if (kek->data != NULL) {
         (void)memset_s(kek->data, kek->size, 0, kek->size);
-        HKS_FREE_PTR(kek->data);
+        HKS_FREE(kek->data);
     }
 
     if (agreeSharedSecret->data != NULL) {
         (void)memset_s(agreeSharedSecret->data, agreeSharedSecret->size, 0, agreeSharedSecret->size);
-        HKS_FREE_PTR(agreeSharedSecret->data);
+        HKS_FREE(agreeSharedSecret->data);
     }
 
     if (peerPublicKey->data != NULL) {
         (void)memset_s(peerPublicKey->data, peerPublicKey->size, 0, peerPublicKey->size);
-        HKS_FREE_PTR(peerPublicKey->data);
+        HKS_FREE(peerPublicKey->data);
     }
 }
 
@@ -1092,7 +1092,7 @@ int32_t HksCoreExportPublicKey(const struct HksBlob *key,
 
         ret = HksCryptoHalGetPubKey(&rawKey, keyOut);
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-        HKS_FREE_PTR(rawKey.data);
+        HKS_FREE(rawKey.data);
     } while (0);
 
     HksFreeKeyNode(&keyNode);
@@ -1131,7 +1131,7 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
 
         ret = HksCryptoHalAgreeKey(&key, peerPublicKey, &agreeSpec, agreedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
-        HKS_FREE_PTR(key.data);
+        HKS_FREE(key.data);
     } while (0);
 
     HksFreeKeyNode(&privateKeyNode);
@@ -1164,7 +1164,7 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
 
         ret = HksCryptoHalDeriveKey(&key, &derivationSpec, derivedKey);
         (void)memset_s(key.data, key.size, 0, key.size);
-        HKS_FREE_PTR(key.data);
+        HKS_FREE(key.data);
     } while (0);
 
     HksFreeKeyNode(&keyNode);
@@ -1197,7 +1197,7 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
 
         ret = HksCryptoHalHmac(&rawKey, digestParam->uint32Param, srcData, mac);
         (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
-        HKS_FREE_PTR(rawKey.data);
+        HKS_FREE(rawKey.data);
     } while (0);
 
     HksFreeKeyNode(&keyNode);

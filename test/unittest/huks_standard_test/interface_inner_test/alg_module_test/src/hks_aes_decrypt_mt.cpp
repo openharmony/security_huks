@@ -512,7 +512,7 @@ protected:
                 AesGcmEncrypt(paramInSet, &plainText, &cipherText, &authId, &tagAead), testCaseParams.encryptResult);
             cipherText.size += AAD_SIZE;
             EXPECT_EQ(memcpy_s(cipherText.data + AAD_SIZE, AAD_SIZE, tagAead.data, AAD_SIZE), 0);
-            HksFree(tagAead.data);
+            HKS_FREE(tagAead.data);
         } else {
             EXPECT_EQ(AesEncrypt(paramInSet, &plainText, &cipherText, &authId), testCaseParams.encryptResult);
         }
@@ -522,9 +522,9 @@ protected:
             EXPECT_EQ(HksMemCmp(plainText.data, plainTextDecrypt.data, testCaseParams.hexData.length()), 0);
         }
 
-        HksFree(authId.data);
-        HksFree(cipherText.data);
-        HksFree(plainTextDecrypt.data);
+        HKS_FREE(authId.data);
+        HKS_FREE(cipherText.data);
+        HKS_FREE(plainTextDecrypt.data);
         HksFreeParamSet(&paramInSet);
     }
 };

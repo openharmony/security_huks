@@ -44,7 +44,7 @@ namespace OHOS {
 
         (void)HksAbort(&handle, paramSet);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

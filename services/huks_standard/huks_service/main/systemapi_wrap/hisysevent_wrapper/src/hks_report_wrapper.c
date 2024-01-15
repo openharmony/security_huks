@@ -187,6 +187,6 @@ int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *proc
         struct EventValues eventValues = { userId, processName, algorithmTag, errorCode };
         ret = WriteEvent(FAULT, funcName, &eventValues, extra);
     } while (0);
-    HKS_FREE_PTR(extra);
+    HKS_FREE(extra);
     return ret;
 }

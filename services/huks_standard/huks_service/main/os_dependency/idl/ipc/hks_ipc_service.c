@@ -266,7 +266,7 @@ void HksIpcServiceGetKeyParamSet(const struct HksBlob *srcData, const uint8_t *c
         HksSendResponse(context, ret, NULL);
     }
 
-    HKS_FREE_PTR(paramSetOut);
+    HKS_FREE(paramSetOut);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
 }
@@ -593,12 +593,12 @@ static void FreeKeyInfo(uint32_t listCount, struct HksKeyInfo **keyInfoList)
             HKS_FREE_BLOB((*keyInfoList)[i].alias);
         }
         if ((*keyInfoList)[i].paramSet != NULL) {
-            HksFree((*keyInfoList)[i].paramSet);
+            HKS_FREE((*keyInfoList)[i].paramSet);
             (*keyInfoList)[i].paramSet = NULL;
         }
     }
 
-    HKS_FREE_PTR(*keyInfoList);
+    HKS_FREE(*keyInfoList);
 }
 
 void HksIpcServiceGetKeyInfoList(const struct HksBlob *srcData, const uint8_t *context)

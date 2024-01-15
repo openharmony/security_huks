@@ -390,7 +390,7 @@ static int32_t AddEnrolledInfoInParamSet(struct SecInfoWrap *secInfo, struct Hks
         ret = HksAddParams(paramSet, &tmpParam, 1);
         return ret;
     } while (0);
-    HKS_FREE_PTR(enrolledInfo->data);
+    HKS_FREE(enrolledInfo->data);
     return ret;
 }
 
@@ -451,10 +451,10 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
 
         *outParamSet = newParamSet;
     } while (0);
-    HKS_FREE_PTR(enrolledInfo.data);
+    HKS_FREE(enrolledInfo.data);
     if (secInfo != NULL) {
-        HKS_FREE_PTR(secInfo->enrolledInfo);
-        HKS_FREE_PTR(secInfo);
+        HKS_FREE(secInfo->enrolledInfo);
+        HKS_FREE(secInfo);
     }
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&newParamSet);
@@ -809,11 +809,11 @@ int32_t HksServiceGenerateKey(const struct HksProcessInfo *processInfo, const st
         HKS_IF_NOT_SUCC_LOGE(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    HKS_FREE_PTR(keyOutBuffer);
+    HKS_FREE(keyOutBuffer);
     if (keyIn.data != NULL) {
         (void)memset_s(keyIn.data, keyIn.size, 0, keyIn.size);
     }
-    HKS_FREE_PTR(keyIn.data);
+    HKS_FREE(keyIn.data);
     HksFreeParamSet(&newParamSet);
 
 #ifdef L2_STANDARD
@@ -1070,12 +1070,12 @@ int32_t HksServiceImportKey(const struct HksProcessInfo *processInfo, const stru
         ret = HuksAccessImportKey(keyAlias, key, newParamSet, &keyOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level import public key failed, ret = %" LOG_PUBLIC "d", ret);
-            HKS_FREE_PTR(keyOutBuffer);
+            HKS_FREE(keyOutBuffer);
             break;
         }
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyOut);
-        HKS_FREE_PTR(keyOutBuffer);
+        HKS_FREE(keyOutBuffer);
     } while (0);
 
     HksFreeParamSet(&newParamSet);
@@ -1139,12 +1139,12 @@ int32_t HksServiceImportWrappedKey(const struct HksProcessInfo *processInfo, con
         ret = HuksAccessImportWrappedKey(wrappingKeyAlias, &wrappingKeyFromFile, wrappedKeyData, newParamSet, &keyOut);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("access level import wrapped key failed, ret = %" LOG_PUBLIC "d", ret);
-            HKS_FREE_PTR(keyOutBuffer);
+            HKS_FREE(keyOutBuffer);
             break;
         }
 
         ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keyOut);
-        HKS_FREE_PTR(keyOutBuffer);
+        HKS_FREE(keyOutBuffer);
     } while (0);
 
     HKS_FREE_BLOB(wrappingKeyFromFile);
@@ -1545,7 +1545,7 @@ static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksB
     (void)memset_s(output->data, output->size, 0, output->size);
     if (!isStorage) {
         if ((memcpy_s(output->data, output->size, outData->data, outData->size) != EOK)) {
-            HKS_FREE_PTR(output->data);
+            HKS_FREE(output->data);
             return HKS_ERROR_INSUFFICIENT_MEMORY;
         }
     }

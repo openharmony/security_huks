@@ -44,7 +44,7 @@ namespace OHOS {
 
         (void)HksGenerateKey(&keyAlias, paramSetIn, NULL);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

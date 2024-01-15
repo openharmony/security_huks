@@ -49,7 +49,7 @@ namespace OHOS {
 
         (void)HksImportWrappedKey(&keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
 
-        HksFree(myData);
+        HKS_FREE(myData);
         return true;
     }
 }

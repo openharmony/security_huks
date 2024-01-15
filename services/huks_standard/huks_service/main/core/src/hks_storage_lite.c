@@ -181,7 +181,7 @@ static int32_t FreshImageBuffer(const char *fileName)
 
     int32_t ret = HksFileRead(HKS_KEY_STORE_PATH, fileName, offset, &blob, &fileLen);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(buf);
+        HKS_FREE(buf);
         return HKS_ERROR_READ_FILE_FAIL;
     }
 
@@ -225,7 +225,7 @@ static int32_t RefreshKeyInfoHeaderHmac(struct HksStoreHeaderInfo *keyInfoHead)
     (void)memcpy_s(buffer, sizeof(*keyInfoHead), keyInfoHead, sizeof(*keyInfoHead));
 
     int32_t ret = CalcHeaderMac(&salt, buffer, size, &mac);
-    HKS_FREE_PTR(buffer);
+    HKS_FREE(buffer);
     return ret;
 }
 
@@ -395,14 +395,14 @@ static int32_t AdjustImageBuffer(uint32_t totalLenAdded, const struct HksBlob *k
 
     /* copy old imagebuf to new malloc buf */
     if (memcpy_s(buf, newBufLen, g_storageImageBuffer.data, keyInfoHead->totalLen) != EOK) {
-        HKS_FREE_PTR(buf);
+        HKS_FREE(buf);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
     /* append new add key buffer to the end */
     if (memcpy_s(buf + keyInfoHead->totalLen, newBufLen - keyInfoHead->totalLen,
         keyBlob->data, keyBlob->size) != EOK) {
-        HKS_FREE_PTR(buf);
+        HKS_FREE(buf);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -561,7 +561,7 @@ static int32_t StoreRootMaterial(const struct HksBlob *name, const struct HksBlo
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = HksFileWrite(HKS_KEY_STORE_PATH, fileName, 0, buffer->data, buffer->size);
-    HKS_FREE_PTR(fileName);
+    HKS_FREE(fileName);
     return ret;
 }
 
@@ -572,7 +572,7 @@ static int32_t IsRootMaterialExist(const struct HksBlob *name)
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     ret = HksIsFileExist(HKS_KEY_STORE_PATH, fileName);
-    HKS_FREE_PTR(fileName);
+    HKS_FREE(fileName);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NOT_EXIST, "file not exist")
 
     return ret;
@@ -586,7 +586,7 @@ static int32_t GetRootMaterial(const struct HksBlob *name, struct HksBlob *buffe
 
     uint32_t len = 0;
     ret = HksFileRead(HKS_KEY_STORE_PATH, fileName, 0, buffer, &len);
-    HKS_FREE_PTR(fileName);
+    HKS_FREE(fileName);
     if (ret != HKS_SUCCESS) {
         return HKS_ERROR_READ_FILE_FAIL;
     }
@@ -695,7 +695,7 @@ int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
 
     if (memcpy_s(keyBlob->data, keyBlob->size, tmpBuf, keyInfo->keyInfoLen) != EOK) {
         HKS_LOG_E("memcpy to key blob failed.");
-        HKS_FREE_PTR(keyBlob->data);
+        HKS_FREE(keyBlob->data);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -876,7 +876,7 @@ static int32_t CleanFile(const char *path, const char *fileName)
         ret = HksFileWrite(path, fileName, 0, buf, size);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "write file random failed!")
     } while (0);
-    HksFree(buf);
+    HKS_FREE(buf);
     return ret;
 }
 #endif

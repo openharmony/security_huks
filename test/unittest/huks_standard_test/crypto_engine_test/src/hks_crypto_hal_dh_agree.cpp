@@ -105,12 +105,12 @@ protected:
         EXPECT_EQ(agreeKeyAlise.size, agreeKeyBob.size);
         EXPECT_EQ(HksMemCmp(agreeKeyAlise.data, agreeKeyBob.data, agreeKeyAlise.size), HKS_SUCCESS);
 
-        HksFree(alise.data);
-        HksFree(bob.data);
-        HksFree(pubKeyAlise.data);
-        HksFree(pubKeyBob.data);
-        HksFree(agreeKeyAlise.data);
-        HksFree(agreeKeyBob.data);
+        HKS_FREE(alise.data);
+        HKS_FREE(bob.data);
+        HKS_FREE(pubKeyAlise.data);
+        HKS_FREE(pubKeyBob.data);
+        HKS_FREE(agreeKeyAlise.data);
+        HKS_FREE(agreeKeyBob.data);
     }
 };
 

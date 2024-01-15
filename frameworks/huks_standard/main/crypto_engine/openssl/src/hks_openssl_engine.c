@@ -553,7 +553,7 @@ int32_t GetBnBinpadFromPkey(const EVP_PKEY *pkey, const char *keyName, struct Hk
         if (osRet != len) {
             HKS_LOG_E("BN_bn2binpad ret = %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
                 osRet, ERR_reason_error_string(ERR_get_error()));
-            HksFree(out->data);
+            HKS_FREE(out->data);
             break;
         }
         out->size = (uint32_t)(len);

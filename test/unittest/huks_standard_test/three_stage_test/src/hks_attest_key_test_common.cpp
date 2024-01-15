@@ -39,24 +39,24 @@ void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
     }
 
     if ((*certChain)->certs == nullptr) {
-        HksFree(*certChain);
+        HKS_FREE(*certChain);
         *certChain = nullptr;
         return;
     }
     for (uint32_t j = 0; j < pos; j++) {
         if ((*certChain)->certs[j].data != nullptr) {
-            HksFree((*certChain)->certs[j].data);
+            HKS_FREE((*certChain)->certs[j].data);
             (*certChain)->certs[j].data = nullptr;
         }
     }
 
     if ((*certChain)->certs != nullptr) {
-        HksFree((*certChain)->certs);
+        HKS_FREE((*certChain)->certs);
         (*certChain)->certs = nullptr;
     }
 
     if (*certChain != nullptr) {
-        HksFree(*certChain);
+        HKS_FREE(*certChain);
         *certChain = nullptr;
     }
 }
@@ -126,7 +126,7 @@ int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     (*certChain)->certs = static_cast<struct HksBlob *>(HksMalloc(sizeof(struct HksBlob) *
     ((*certChain)->certsCount)));
     if ((*certChain)->certs == nullptr) {
-        HksFree(*certChain);
+        HKS_FREE(*certChain);
         *certChain = nullptr;
         return HKS_ERROR_MALLOC_FAIL;
     }

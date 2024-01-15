@@ -214,5 +214,5 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
 
 void HuksDestoryHdiDevicePtr(struct HuksHdi *hdiDevicePtr)
 {
-    HKS_FREE_PTR(hdiDevicePtr);
+    HKS_FREE(hdiDevicePtr);
 }

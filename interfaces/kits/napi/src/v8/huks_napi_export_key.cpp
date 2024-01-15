@@ -63,7 +63,7 @@ static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &con
         FreeHksBlob(context->key);
     }
     DeleteCommonAsyncContext(env, context->asyncWork, context->callback, context->keyAlias, context->paramSet);
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

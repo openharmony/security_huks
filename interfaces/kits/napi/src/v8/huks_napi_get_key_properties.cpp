@@ -63,7 +63,7 @@ static void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsy
     if (context->paramSetOut != nullptr) {
         HksFreeParamSet(&context->paramSetOut);
     }
-    HksFree(context);
+    HKS_FREE(context);
     context = nullptr;
 }
 

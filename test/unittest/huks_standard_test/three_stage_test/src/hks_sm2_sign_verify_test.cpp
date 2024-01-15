@@ -379,13 +379,13 @@ static int CreateImportKeyAlias(struct HksBlob *importKeyAlias, const struct Hks
     }
 
     if (memcpy_s(importKeyAlias->data, importKeyAlias->size, keyAlias->data, keyAlias->size) != EOK) {
-        HKS_FREE_PTR(importKeyAlias->data);
+        HKS_FREE(importKeyAlias->data);
         return HKS_ERROR_BAD_STATE;
     }
 
     if (memcpy_s(importKeyAlias->data + keyAlias->size,
         importKeyAlias->size - keyAlias->size, tmp, strlen(tmp)) != EOK) {
-        HKS_FREE_PTR(importKeyAlias->data);
+        HKS_FREE(importKeyAlias->data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -466,7 +466,7 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const Gen
     } while (0);
 
     FreeBuffAndDeleteKey(&genParamSet, &signParamSet, &verifyParamSet, keyAlias, &importKeyAlias);
-    HKS_FREE_PTR(importKeyAlias.data);
+    HKS_FREE(importKeyAlias.data);
     return ret;
 }
 

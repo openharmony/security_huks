@@ -208,7 +208,7 @@ static RSA *InitRsa(struct HksBlob *key, const bool needPrivateExponent)
             BN_free(d);
         }
     }
-    HksFree(buff);
+    HKS_FREE(buff);
 
     return rsa;
 }

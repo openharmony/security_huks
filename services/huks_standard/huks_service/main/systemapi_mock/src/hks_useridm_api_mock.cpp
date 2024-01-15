@@ -85,7 +85,7 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
     (*outSecInfo)->enrolledInfo = static_cast<struct EnrolledInfoWrap *>(
         HksMalloc(sizeof(struct EnrolledInfoWrap) * SecInfoParams[g_ParamsId].enrolledInfoLen));
     if ((*outSecInfo)->enrolledInfo == NULL) {
-        HKS_FREE_PTR(*outSecInfo);
+        HKS_FREE(*outSecInfo);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (*outSecInfo)->secureUid = SecInfoParams[g_ParamsId].secureUid;

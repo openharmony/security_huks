@@ -688,7 +688,7 @@ static int32_t ImportTest(const ImportKeyCaseParams &testCaseParams)
     struct HksBlob keyAlias = { sizeof(alias), alias };
     ret = HksImportKey(&keyAlias, importParamSet, &key);
     HksFreeParamSet(&importParamSet);
-    HksFree(key.data);
+    HKS_FREE(key.data);
     EXPECT_EQ(ret, testCaseParams.importKeyResult);
     if (ret == HKS_SUCCESS) {
         (void)HksDeleteKey(&keyAlias, nullptr);

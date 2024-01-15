@@ -81,7 +81,7 @@ static void ValidateCertChain(struct HksParamSet *paramSet, struct HksParamSet *
     HksInitParamSet(&paramOutSet);
     HksAddParams(paramOutSet, &g_getParam, 1);
     HksBuildParamSet(&paramOutSet);
-    HksFree(g_getParam.blob.data);
+    HKS_FREE(g_getParam.blob.data);
     int32_t ret = HksGetKeyParamSet(&g_keyAlias, nullptr, paramOutSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ret = HksGetParam(paramOutSet, HKS_TAG_KEY_SIZE, &keySizeParam);

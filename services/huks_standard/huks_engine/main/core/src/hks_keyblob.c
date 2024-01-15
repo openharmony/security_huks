@@ -68,7 +68,7 @@ void HksFreeKeyNode(struct HksKeyNode **keyNode)
     if (((*keyNode)->status == HKS_KEYNODE_INACTIVE) && ((*keyNode)->refCnt == 0)) {
         CleanKey((*keyNode)->paramSet);
         HksFreeParamSet(&(*keyNode)->paramSet);
-        HKS_FREE_PTR(*keyNode);
+        HKS_FREE(*keyNode);
         *keyNode = NULL;
     }
 }
@@ -157,7 +157,7 @@ static int32_t GetDeriveKey(const struct HksParamSet *paramSet, const struct Hks
     ret = HksCryptoHalDeriveKey(&encryptKey, &derivationSpec, derivedKey);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get keyblob derived key failed!");
-        HKS_FREE_PTR(derivedKey->data);
+        HKS_FREE(derivedKey->data);
     }
 
     (void)memset_s(encryptKeyData, HKS_KEY_BLOB_MAIN_KEY_SIZE, 0, HKS_KEY_BLOB_MAIN_KEY_SIZE);
@@ -300,7 +300,7 @@ static int32_t InitKeyBlobInfo(const struct HksBlob *key, struct HksBlob *keyInf
     } while (0);
 
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(keyInfo->data);
+        HKS_FREE(keyInfo->data);
     }
     return ret;
 }
@@ -362,7 +362,7 @@ static int32_t BuildKeyBlobWithKeyParam(const struct HksBlob *key, enum HksKeyFl
 
     if (tmpKey.data != NULL) {
         (void)memset_s(tmpKey.data, tmpKey.size, 0, tmpKey.size);
-        HKS_FREE_PTR(tmpKey.data);
+        HKS_FREE(tmpKey.data);
     }
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&newParamSet);
@@ -383,7 +383,7 @@ static int32_t GetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *a
     struct HksParamSet *keyBlobParamSet = NULL;
     int32_t ret = HksGetParamSet((const struct HksParamSet *)keyBlob, inData->size, &keyBlobParamSet);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(keyBlob);
+        HKS_FREE(keyBlob);
         HKS_LOG_E("get keyBlobParamSet failed");
         return ret;
     }
@@ -391,14 +391,14 @@ static int32_t GetAadAndParamSet(const struct HksBlob *inData, struct HksBlob *a
     struct HksParam *keyParam = NULL;
     ret = HksGetParam(keyBlobParamSet, HKS_TAG_KEY, &keyParam);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(keyBlob);
+        HKS_FREE(keyBlob);
         HksFreeParamSet(&keyBlobParamSet);
         HKS_LOG_E("aad get key param failed!");
         return ret;
     }
 
     if (keyParam->blob.data + keyParam->blob.size != (uint8_t *)keyBlobParamSet + keyBlobParamSet->paramSetSize) {
-        HKS_FREE_PTR(keyBlob);
+        HKS_FREE(keyBlob);
         HksFreeParamSet(&keyBlobParamSet);
         HKS_LOG_E("invalid keyblob, keyParam should be the last param!");
         return HKS_ERROR_INVALID_ARGUMENT;
@@ -528,7 +528,7 @@ int32_t HksDecryptAuthToken(struct HksUserAuthToken *authToken)
     ret = HksCryptoHalDecrypt(&cipherKeyBlob, &usageSpec, &srcDataBlob, &srcDataBlob);
     (void)memset_s(&authTokenKey, sizeof(struct HksAuthTokenKey), 0, sizeof(struct HksAuthTokenKey));
     HKS_IF_NOT_SUCC_LOGE(ret, "decrypt authtoken data failed!");
-    HksFree(aeadParam);
+    HKS_FREE(aeadParam);
     return ret;
 }
 

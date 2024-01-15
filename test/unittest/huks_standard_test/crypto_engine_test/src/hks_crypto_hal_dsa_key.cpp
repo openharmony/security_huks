@@ -77,11 +77,11 @@ HWTEST_F(HksCryptoHalDsaKey, HksCryptoHalDsaKey_001, Function | SmallTest | Leve
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_NE((uint32_t)0, key.size);
     ASSERT_NE(nullptr, key.data);
-    HksFree(key.data);
+    HKS_FREE(key.data);
 #endif
 #if defined(_USE_MBEDTLS_)
     ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);
-    HksFree(key.data);
+    HKS_FREE(key.data);
 #endif
 #else
     ASSERT_EQ(HKS_ERROR_NOT_SUPPORTED, ret);

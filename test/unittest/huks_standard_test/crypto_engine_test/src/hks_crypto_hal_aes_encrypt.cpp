@@ -370,8 +370,8 @@ protected:
                     testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
                 point = point + HKS_UPDATE_DATA_MAX;
             }
-            HksFree(out.data);
-            HksFree(messageUpdate.data);
+            HKS_FREE(out.data);
+            HKS_FREE(messageUpdate.data);
 
             uint32_t lastLen = inLen - point;
             HksBlob enMessageLast = { .size = lastLen, .data = (uint8_t *)HksMalloc(lastLen) };
@@ -385,14 +385,14 @@ protected:
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, &enMessageLastOut, tagAead,
                 testCaseParams.usageSpec.algType), testCaseParams.encryptResult) << "HksCryptoHalEncryptFinal failed.";
 
-            HksFree(enMessageLast.data);
-            HksFree(enMessageLastOut.data);
+            HKS_FREE(enMessageLast.data);
+            HKS_FREE(enMessageLastOut.data);
         } else {
             HksBlob out = { .size = inLen, .data = (uint8_t *)HksMalloc(inLen) };
             ASSERT_EQ(out.data == nullptr, false) << "out malloc failed.";
             EXPECT_EQ(HksCryptoHalEncryptUpdate(encryptMsg, encryptCtx, &out, testCaseParams.usageSpec.algType),
                 testCaseParams.encryptResult) << "HksCryptoHalEncryptUpdate failed.";
-            HksFree(out.data);
+            HKS_FREE(out.data);
 
             HksBlob enMessageLast = { .size = 0, .data = nullptr };
             EXPECT_EQ(HksCryptoHalEncryptFinal(&enMessageLast, &encryptCtx, encryptOut, tagAead,
@@ -431,10 +431,10 @@ protected:
                 testCaseParams.encryptResult);
         }
 
-        HksFree(key.data);
-        HksFree(message.data);
-        HksFree(cipherText.data);
-        HksFree(tagAead.data);
+        HKS_FREE(key.data);
+        HKS_FREE(message.data);
+        HKS_FREE(cipherText.data);
+        HKS_FREE(tagAead.data);
     }
 };
 

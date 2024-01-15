@@ -192,7 +192,7 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
         HksLogOpensslError();
         BN_free(pub);
         DH_free(dh);
-        HksFree(computeKey);
+        HKS_FREE(computeKey);
         return HKS_ERROR_CRYPTO_ENGINE_ERROR;
     }
 
@@ -211,7 +211,7 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     (void)memset_s(computeKey, DH_size(dh), 0, DH_size(dh));
     BN_free(pub);
     DH_free(dh);
-    HksFree(computeKey);
+    HKS_FREE(computeKey);
     return ret;
 }
 #endif /* HKS_SUPPORT_DH_AGREE_KEY */

@@ -59,7 +59,7 @@ static void ClearAndFreeKeyBlob(struct HksBlob *blobData)
     }
     if (blobData->data != NULL) {
         (void)memset_s(blobData->data, blobData->size, 0, blobData->size);
-        HKS_FREE_PTR(blobData->data);
+        HKS_FREE(blobData->data);
     }
 }
 
@@ -211,7 +211,7 @@ static int32_t DecryptKekWithSm2(const struct HksBlob *wrappedKeyData, const str
     ClearAndFreeKeyBlob(&rawKey);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get decrypt param failed!");
-        HKS_FREE_PTR(plainTextBlob.data);
+        HKS_FREE(plainTextBlob.data);
         return ret;
     }
     if (dataParams->signatureDataLength == 0) {
@@ -256,8 +256,8 @@ static int32_t SplitKekAndSignData(struct HksSmWrappedKeyDataBlob *dataParams)
             signatureDataBlob.size);
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(signatureDataBlob.data);
-        HKS_FREE_PTR(kekDataBlob.data);
+        HKS_FREE(signatureDataBlob.data);
+        HKS_FREE(kekDataBlob.data);
         return ret;
     }
     dataParams->kekData.size = kekDataBlob.size;
@@ -329,7 +329,7 @@ static int32_t DeriveKeyBySm3(const struct HksBlob *srcData, const struct HksBlo
     struct HksKeySpec derivationSpec = { HKS_ALG_GMKDF, HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128), &derParam };
     int32_t ret = HksCryptoHalDeriveKey(srcData, &derivationSpec, &deriveBlob);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(deriveBlob.data);
+        HKS_FREE(deriveBlob.data);
         HKS_LOG_E("derive key failed!");
         return ret;
     }
@@ -360,8 +360,8 @@ static int32_t DeriveKeyByFactor(const struct HksBlob *wrappedKeyData, struct Hk
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "derive kek2 data failed!") ;
     } while (0);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(deriveKek1->data);
-        HKS_FREE_PTR(deriveKek2->data);
+        HKS_FREE(deriveKek1->data);
+        HKS_FREE(deriveKek2->data);
         return ret;
     }
     *partOffset = offset;
@@ -389,7 +389,7 @@ static int32_t CompareWrapKeyHmac(const struct HksBlob *wrappedKeyData, struct H
         ret = HksMemCmp(originKeyEncMac.data, mac.data, mac.size);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "compare kek enc data mac failed!")
     } while (0);
-    HKS_FREE_PTR(mac.data);
+    HKS_FREE(mac.data);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("compare mac failed!");
         return ret;
@@ -447,14 +447,14 @@ static int32_t DecryptImportedSmKey(const struct HksBlob *wrappedKeyData, struct
     struct HksUsageSpec *decOriginKeyUsageSpec = (struct HksUsageSpec *)HksMalloc(sizeof(struct HksUsageSpec));
     if (decOriginKeyUsageSpec == NULL) {
         HKS_LOG_E("malloc originKeyBuffer memory failed!");
-        HKS_FREE_PTR(originKey.data);
+        HKS_FREE(originKey.data);
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memset_s(decOriginKeyUsageSpec, sizeof(struct HksUsageSpec), 0, sizeof(struct HksUsageSpec));
     ret = BuildDecryptUsageSpecOfSmUnwrap(&ivParam, decOriginKeyUsageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("build decrypt wrapped data origin key usageSpec failed!");
-        HKS_FREE_PTR(originKey.data);
+        HKS_FREE(originKey.data);
         HksFreeUsageSpec(&decOriginKeyUsageSpec);
         return ret;
     }
@@ -462,7 +462,7 @@ static int32_t DecryptImportedSmKey(const struct HksBlob *wrappedKeyData, struct
     HksFreeUsageSpec(&decOriginKeyUsageSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("decrypt importKey failed!");
-        HKS_FREE_PTR(originKey.data);
+        HKS_FREE(originKey.data);
         return ret;
     }
     ret = SubPaddingPlaintext(&originKey, &dataParams->originKey, keyMaterialSize);

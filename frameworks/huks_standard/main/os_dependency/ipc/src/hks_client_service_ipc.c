@@ -704,7 +704,7 @@ static int32_t ClientInit(const struct HksBlob *inData, const struct HksParamSet
         }
     } while (0);
 
-    HKS_FREE_PTR(tmpOut);
+    HKS_FREE(tmpOut);
     return ret;
 }
 

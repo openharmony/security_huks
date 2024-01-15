@@ -209,12 +209,12 @@ int32_t AuthTokenEncrypt(const IDMParams &testIDMParams, struct HksBlob *authCha
             break;
         }
 
-        HKS_FREE_PTR(cipherTextData);
+        HKS_FREE(cipherTextData);
         HksFreeParamSet(&cipherParamSet);
         return ret;
     } while (0);
     (void)HksDeleteKey(&keyAlias, nullptr);
-    HKS_FREE_PTR(cipherTextData);
+    HKS_FREE(cipherTextData);
     HksFreeParamSet(&cipherParamSet);
     return ret;
 }
@@ -321,12 +321,12 @@ int32_t HksBuildAuthtoken(struct HksParamSet **initParamSet, struct HksBlob *aut
 
     int ret = AuthTokenEncrypt(testIDMParams, authChallenge, authTokenHal);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(authTokenHal);
+        HKS_FREE(authTokenHal);
         return ret;
     }
 
     ret = AuthTokenSign(testIDMParams, authTokenHal, token);
-    HKS_FREE_PTR(authTokenHal);
+    HKS_FREE(authTokenHal);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -381,12 +381,12 @@ int32_t HksBuildAuthTokenSecure(struct HksParamSet *paramSet,
 
     int ret = AuthTokenEncrypt(testIDMParams, genAuthTokenParams->authChallenge, authTokenHal);
     if (ret != HKS_SUCCESS) {
-        HKS_FREE_PTR(authTokenHal);
+        HKS_FREE(authTokenHal);
         return ret;
     }
 
     ret = AuthTokenSign(testIDMParams, authTokenHal, token);
-    HKS_FREE_PTR(authTokenHal);
+    HKS_FREE(authTokenHal);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -716,28 +716,28 @@ int32_t ConstructRsaKeyPair(const struct HksBlob *nDataBlob, const struct HksBlo
 
     // copy struct material
     if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     uint32_t offset = sizeof(material);
     // copy nData
     if (memcpy_s(data + offset, size - offset, nDataBlob->data, nDataBlob->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.nSize;
 
     // copy eData
     if (memcpy_s(data + offset, size - offset, eDataBlob->data, eDataBlob->size) != EOK) {
-            HksFree(data);
+            HKS_FREE(data);
             return HKS_ERROR_BAD_STATE;
     }
     offset += material.eSize;
 
     // copy dData
     if (memcpy_s(data + offset, size - offset, dDataBlob->data, dDataBlob->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -764,21 +764,21 @@ int32_t ConstructEd25519KeyPair(uint32_t keySize, uint32_t alg, struct HksBlob *
 
     // copy struct material
     if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     uint32_t offset = sizeof(material);
     // copy publicData
     if (memcpy_s(data + offset, size - offset, ed25519PubData, ed25519PubData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.pubKeySize;
 
     // copy privateData
     if (memcpy_s(data + offset, size - offset, ed25519PrivData, ed25519PrivData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
@@ -807,42 +807,42 @@ int32_t ConstructDsaKeyPair(uint32_t keySize, const struct TestDsaKeyParams *par
 
     // copy struct material
     if (memcpy_s(data, size, &material, sizeof(material)) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     uint32_t offset = sizeof(material);
     // copy xData
     if (memcpy_s(data + offset, size - offset, params->xData->data, params->xData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 
     offset += material.xSize;
     // copy yData
     if (memcpy_s(data + offset, size - offset, params->yData->data, params->yData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.ySize;
 
     // copy pData
     if (memcpy_s(data + offset, size - offset, params->pData->data, params->pData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.pSize;
 
     // copy qData
     if (memcpy_s(data + offset, size - offset, params->qData->data, params->qData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
     offset += material.qSize;
 
     // copy gData
     if (memcpy_s(data + offset, size - offset, params->gData->data, params->gData->size) != EOK) {
-        HksFree(data);
+        HKS_FREE(data);
         return HKS_ERROR_BAD_STATE;
     }
 

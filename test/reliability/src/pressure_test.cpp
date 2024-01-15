@@ -93,7 +93,7 @@ int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBl
     HksBuildParamSet(&paramOutSet);
 
     if (HksGenerateKey(authId, paramSetIn, paramOutSet) != HKS_SUCCESS) {
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramOutSet);
         return HKS_SUCCESS;
     }
@@ -108,7 +108,7 @@ int32_t PressureTest::LocalHksGenerate(const uint32_t keyLen, const struct HksBl
     pubKey->size = pubParam->blob.size;
     (void)memcpy_s(pubKey->data, pubParam->blob.size, pubParam->blob.data, pubParam->blob.size);
 
-    HksFree(localKey.blob.data);
+    HKS_FREE(localKey.blob.data);
     HksFreeParamSet(&paramOutSet);
     return HKS_SUCCESS;
 }
@@ -131,7 +131,7 @@ HWTEST_F(PressureTest, PressureTest00100, TestSize.Level1)
         auto end = std::chrono::time_point_cast<std::chrono::microseconds>(std::chrono::system_clock::now());
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
-        HksFree(sdkVersion.data);
+        HKS_FREE(sdkVersion.data);
     }
     HKS_LOG_I("HksGetSdkVersion Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -243,7 +243,7 @@ HWTEST_F(PressureTest, PressureTest00500, TestSize.Level1)
         HksDeleteKey(&importId, paramInSet);
     }
     HksDeleteKey(&authId, paramInSet);
-    HksFree(pubKey.data);
+    HKS_FREE(pubKey.data);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("HksImportKey Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -279,7 +279,7 @@ HWTEST_F(PressureTest, PressureTest00600, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(pubKey.data);
+        HKS_FREE(pubKey.data);
     }
     HksDeleteKey(&authId, paramInSet);
     HksFreeParamSet(&paramInSet);
@@ -357,7 +357,7 @@ HWTEST_F(PressureTest, PressureTest00800, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramOutSet);
     }
     HksDeleteKey(&authId, paramInSet);
@@ -430,7 +430,7 @@ HWTEST_F(PressureTest, PressureTest01000, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(authId.data);
+        HKS_FREE(authId.data);
         HksFreeParamSet(&paramInSet);
     }
     HKS_LOG_I("HksGenerateRandom Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
@@ -477,7 +477,7 @@ HWTEST_F(PressureTest, PressureTest01100, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(signature.data);
+        HKS_FREE(signature.data);
     }
     HksDeleteKey(&authId, paramInSet);
     HksFreeParamSet(&paramInSet);
@@ -528,7 +528,7 @@ HWTEST_F(PressureTest, PressureTest01200, TestSize.Level1)
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
     }
     HksDeleteKey(&authId, paramInSet);
-    HksFree(signature.data);
+    HKS_FREE(signature.data);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("HksVerify Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -584,7 +584,7 @@ HWTEST_F(PressureTest, PressureTest01300, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(cipherText.data);
+        HKS_FREE(cipherText.data);
     }
     HksDeleteKey(&authId, paramInSet);
     HksFreeParamSet(&paramInSet);
@@ -645,10 +645,10 @@ HWTEST_F(PressureTest, PressureTest01400, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(plainTextDecrypt.data);
+        HKS_FREE(plainTextDecrypt.data);
     }
     HksDeleteKey(&authId, paramInSet);
-    HksFree(cipherText.data);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("HksDecrypt Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -704,10 +704,10 @@ HWTEST_F(PressureTest, PressureTest01500, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(agreeKey.data);
+        HKS_FREE(agreeKey.data);
     }
     HksDeleteKey(&authId, paramInSet);
-    HksFree(pubKey.data);
+    HKS_FREE(pubKey.data);
     HksFreeParamSet(&paramInSetForKey);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("HksAgreeKey Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
@@ -766,7 +766,7 @@ HWTEST_F(PressureTest, PressureTest01600, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(derivedKey.data);
+        HKS_FREE(derivedKey.data);
     }
     HksDeleteKey(&authId, paramInSet);
     HksFreeParamSet(&paramInSet);
@@ -814,7 +814,7 @@ HWTEST_F(PressureTest, PressureTest01700, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(macMessage.data);
+        HKS_FREE(macMessage.data);
     }
     HksDeleteKey(&authId, paramInSet);
     HksFreeParamSet(&paramInSet);
@@ -849,7 +849,7 @@ HWTEST_F(PressureTest, PressureTest01800, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(shaMessage.data);
+        HKS_FREE(shaMessage.data);
     }
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("HksHash Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
@@ -896,7 +896,7 @@ HWTEST_F(PressureTest, PressureTest01900, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(localKey.blob.data);
+        HKS_FREE(localKey.blob.data);
         HksFreeParamSet(&paramInSet);
         HksFreeParamSet(&paramOutSet);
     }
@@ -951,10 +951,10 @@ HWTEST_F(PressureTest, PressureTest02000, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(signature.data);
+        HKS_FREE(signature.data);
     }
-    HksFree(priKey.data);
-    HksFree(pubKey.data);
+    HKS_FREE(priKey.data);
+    HKS_FREE(pubKey.data);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("Local HksSign Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -1008,9 +1008,9 @@ HWTEST_F(PressureTest, PressureTest02100, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
     }
-    HksFree(priKey.data);
-    HksFree(pubKey.data);
-    HksFree(signature.data);
+    HKS_FREE(priKey.data);
+    HKS_FREE(pubKey.data);
+    HKS_FREE(signature.data);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("Local HksVerify Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -1066,10 +1066,10 @@ HWTEST_F(PressureTest, PressureTest02200, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(cipherText.data);
+        HKS_FREE(cipherText.data);
     }
-    HksFree(localKey.blob.data);
-    HksFree(authKey.data);
+    HKS_FREE(localKey.blob.data);
+    HKS_FREE(authKey.data);
     HksFreeParamSet(&paramInSet);
     HksFreeParamSet(&paramOutSet);
     HKS_LOG_I("Local HksEncrypt Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
@@ -1130,11 +1130,11 @@ HWTEST_F(PressureTest, PressureTest02300, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(plainTextDecrypt.data);
+        HKS_FREE(plainTextDecrypt.data);
     }
-    HksFree(localKey.blob.data);
-    HksFree(authKey.data);
-    HksFree(cipherText.data);
+    HKS_FREE(localKey.blob.data);
+    HKS_FREE(authKey.data);
+    HKS_FREE(cipherText.data);
     HksFreeParamSet(&paramInSet);
     HksFreeParamSet(&paramOutSet);
     HKS_LOG_I("Local HksDecrypt Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
@@ -1192,10 +1192,10 @@ HWTEST_F(PressureTest, PressureTest02400, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(agreeKey.data);
+        HKS_FREE(agreeKey.data);
     }
-    HksFree(priKey.data);
-    HksFree(pubKey.data);
+    HKS_FREE(priKey.data);
+    HKS_FREE(pubKey.data);
     HksFreeParamSet(&paramInSetForKey);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("Local HksAgreeKey Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
@@ -1238,9 +1238,9 @@ HWTEST_F(PressureTest, PressureTest02500, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(derivedKey.data);
+        HKS_FREE(derivedKey.data);
     }
-    HksFree(authId.data);
+    HKS_FREE(authId.data);
     HksFreeParamSet(&paramInSet);
     HKS_LOG_I("Local HksDeriveKey Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
 }
@@ -1299,10 +1299,10 @@ HWTEST_F(PressureTest, PressureTest02600, TestSize.Level1)
         EXPECT_EQ(ret, HKS_SUCCESS);
         programTimes += (end.time_since_epoch().count() - start.time_since_epoch().count());
 
-        HksFree(macMessage.data);
+        HKS_FREE(macMessage.data);
     }
-    HksFree(localKey.blob.data);
-    HksFree(authKey.data);
+    HKS_FREE(localKey.blob.data);
+    HKS_FREE(authKey.data);
     HksFreeParamSet(&paramInSet);
     HksFreeParamSet(&paramOutSet);
     HKS_LOG_I("Local HksMac Interface Call Duration: %" LOG_PUBLIC "f", (programTimes / TEST_FREQUENCY));
