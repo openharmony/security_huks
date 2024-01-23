@@ -89,10 +89,14 @@ static uint32_t FileRead(const char *fileName, uint32_t offset, uint8_t *buf, ui
     (void)offset;
     HKS_IF_NOT_SUCC_RETURN(IsFileExist(fileName), 0)
 
+    if (strstr(fileName, "../") != NULL) {
+        HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", fileName);
+        return 0;
+    }
+
     char filePath[PATH_MAX + 1] = {0};
-    (void)realpath(fileName, filePath);
-    if (strstr(filePath, "../") != NULL) {
-        HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", filePath);
+    if (realpath(fileName, filePath) == NULL) {
+        HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", fileName);
         return 0;
     }
 
@@ -129,11 +133,12 @@ static int32_t FileWrite(const char *fileName, uint32_t offset, const uint8_t *b
     if (memcpy_s(filePath, sizeof(filePath) - 1, fileName, strlen(fileName)) != EOK) {
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
-    (void)realpath(fileName, filePath);
+
     if (strstr(filePath, "../") != NULL) {
         HKS_LOG_E("invalid filePath!");
         return HKS_ERROR_INVALID_KEY_FILE;
     }
+    (void)realpath(fileName, filePath);
 
     /* caller function ensures that the folder exists */
     FILE *fp = fopen(filePath, "wb+");
