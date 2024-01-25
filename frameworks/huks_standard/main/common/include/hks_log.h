@@ -61,4 +61,14 @@
 #define HKS_LOG_D(...)
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern uint32_t g_sessionId;
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif /* HKS_LOG_H */
