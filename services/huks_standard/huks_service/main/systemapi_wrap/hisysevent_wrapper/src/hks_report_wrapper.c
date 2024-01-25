@@ -118,7 +118,7 @@ static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, co
         ret = AppendToExtra(tagString, temp, extraOut, index);
         HKS_IF_NOT_SUCC_LOGE(ret, "Append extra data failed!")
     } else {
-        HKS_LOG_I("Tag not exist.");
+        HKS_LOG_D("Tag not exist.");
     }
 }
 
