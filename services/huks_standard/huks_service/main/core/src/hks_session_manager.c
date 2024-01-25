@@ -137,7 +137,7 @@ static int32_t AddOperation(struct HksOperation *operation)
 
     AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
     ++g_operationCount;
-    HKS_LOG_I("add operation count:%" LOG_PUBLIC "u", g_operationCount);
+    HKS_LOG_D("add operation count:%" LOG_PUBLIC "u", g_operationCount);
     pthread_mutex_unlock(&g_lock);
     return HKS_SUCCESS;
 }
@@ -334,7 +334,7 @@ void DeleteOperation(const struct HksBlob *operationHandle)
             }
             FreeOperation(&operation);
             --g_operationCount;
-            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
+            HKS_LOG_D("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
             pthread_mutex_unlock(&g_lock);
             return;
         }
