@@ -52,6 +52,8 @@
 #include <dirent.h>
 #endif
 
+uint32_t g_session_id = 0;
+
 namespace OHOS {
 namespace Security {
 namespace Hks {
@@ -225,7 +227,8 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
-    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, enter time is %" LOG_PUBLIC PRIu64 " ms", code, enterTime);
+    g_session_id++;
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, session id = %" LOG_PUBLIC "d", code, g_session_id);
 
     // check that the code is valid
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
@@ -268,8 +271,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
 
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
-    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, leave time is %" LOG_PUBLIC PRIu64 " ms, total cost %"
-        LOG_PUBLIC PRIu64 " ms", code, leaveTime, leaveTime - enterTime);
+    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, session id = %" LOG_PUBLIC "d", code, g_session_id);
 
     return NO_ERROR;
 }
