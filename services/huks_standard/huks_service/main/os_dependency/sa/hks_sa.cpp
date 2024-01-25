@@ -225,6 +225,8 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         return HW_SYSTEM_ERROR;
     }
 
+    uint64_t enterTime = 0;
+    (void)HksElapsedRealTime(&enterTime);
     g_sessionId++;
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
@@ -267,7 +269,10 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
         HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
     }
 
-    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
+    uint64_t leaveTime = 0;
+    (void)HksElapsedRealTime(&leaveTime);
+    HKS_LOG_I("finish code:%" LOG_PUBLIC "d, total cost %" LOG_PUBLIC PRIu64 " ms, sessionId = %"
+        LOG_PUBLIC "u", code, leaveTime - enterTime, g_sessionId);
 
     return NO_ERROR;
 }
