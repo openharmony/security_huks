@@ -99,10 +99,8 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     GetOsAccountIdFromUid(callingUid, userId);
 #endif // HAS_OS_ACCOUNT_PART
 
-    uint64_t currentTime = 0;
-    (void)HksElapsedRealTime(&currentTime);
-    HKS_LOG_I("Get callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d, current time is %" LOG_PUBLIC PRIu64,
-        callingUid, userId, currentTime);
+    HKS_LOG_I("Get callingUid = %" LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u",
+        callingUid, userId, g_sessionId);
 
     uint32_t size;
     if (userId == 0) {

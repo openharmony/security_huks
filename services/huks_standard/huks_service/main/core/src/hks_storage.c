@@ -1100,15 +1100,13 @@ static int32_t RecordKeyOperation(uint32_t operation, const char *path, const ch
     int32_t ret = HKS_SUCCESS;
     switch (operation) {
         case KEY_OPERATION_SAVE:
-            HKS_LOG_I("generate key or certchain, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s",
-                path, outKeyAlias);
+            HKS_LOG_I("generate key, path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s", path, outKeyAlias);
             break;
         case KEY_OPERATION_GET:
-            HKS_LOG_I("use key, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s", path, outKeyAlias);
+            HKS_LOG_I("use key, path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s", path, outKeyAlias);
             break;
         case KEY_OPERATION_DELETE:
-            HKS_LOG_I("delete key or certchain, storage path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s",
-                path, outKeyAlias);
+            HKS_LOG_I("delete key, path: %" LOG_PUBLIC "s, key alias: %" LOG_PUBLIC "s", path, outKeyAlias);
             break;
         default:
             ret = HKS_ERROR_INVALID_ARGUMENT;
