@@ -65,7 +65,7 @@
 extern "C" {
 #endif
 
-extern uint32_t g_session_id;
+extern uint32_t g_sessionId;
 
 #ifdef __cplusplus
 }
