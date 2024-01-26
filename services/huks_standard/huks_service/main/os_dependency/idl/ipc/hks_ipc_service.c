@@ -86,9 +86,10 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
             "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
-        uint32_t userAuthType, authAccessType;
-        ret = HksCheckAndGetUserAuthInfo(inParamSet, &userAuthType, &authAccessType);
-        if (ret == HKS_SUCCESS && authAccessType == HKS_AUTH_ACCESS_ALWAYS_VALID) {
+        struct HksParam *accessTypeParam = NULL;
+        ret = HksGetParam(inParamSet, HKS_TAG_KEY_AUTH_ACCESS_TYPE, &accessTypeParam);
+        if (ret == HKS_SUCCESS && accessTypeParam != NULL &&
+            accessTypeParam->uint32Param == HKS_AUTH_ACCESS_ALWAYS_VALID) {
             int32_t activeFrontUserId;
             ret = HksGetFrontUserId(&activeFrontUserId);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetFrontUserId fail! ret=%" LOG_PUBLIC "d", ret);
