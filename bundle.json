@@ -19,7 +19,8 @@
       "name": "huks",
       "subsystem": "security",
       "syscap": [
-          "SystemCapability.Security.Huks",
+          "SystemCapability.Security.Huks.Extension",
+          "SystemCapability.Security.Huks.Core",
           "SystemCapability.Security.Cipher"
           ],
       "features": [],
