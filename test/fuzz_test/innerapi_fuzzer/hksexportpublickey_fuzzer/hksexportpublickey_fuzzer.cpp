@@ -21,39 +21,34 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
-const int DOUBLE_BLOB_SIZE = 20;
+#include "../hks_fuzz_util.h"
+
+constexpr int ALIAS_SIZE = 10;
+constexpr int PUB_KEY_SIZE = 1024;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t)*size));
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob keyAlias = { BLOB_SIZE, myData };
-        struct HksBlob pubKey = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + DOUBLE_BLOB_SIZE);
-
-        paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
-
-        (void)HksExportPublicKey(&keyAlias, paramSet, &pubKey);
-
-        HKS_FREE(myData);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= ALIAS_SIZE) {
+        return -1;
     }
+
+    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    std::vector<uint8_t> pubKeyBuffer(PUB_KEY_SIZE);
+    struct HksBlob pubKey = { pubKeyBuffer.size(), pubKeyBuffer.data() };
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksExportPublicKey(&keyAlias, ps.s, &pubKey);
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
 

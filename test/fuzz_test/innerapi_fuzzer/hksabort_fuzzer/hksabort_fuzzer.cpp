@@ -21,36 +21,30 @@
 #include "hks_type.h"
 #include "hks_param.h"
 
-const int BLOB_SIZE = 10;
+#include "../hks_fuzz_util.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-    {
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
+namespace Security {
+namespace Hks {
 
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + BLOB_SIZE)) {
-            return false;
-        }
-
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob handle = { BLOB_SIZE, myData };
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + BLOB_SIZE);
-        paramSet->paramSetSize = size - BLOB_SIZE;
-
-        (void)HksAbort(&handle, paramSet);
-
-        HKS_FREE(myData);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < sizeof(uint64_t)) {
+        return -1;
     }
+
+    struct HksBlob handle = { sizeof(uint64_t), ReadData<uint8_t *>(data, size, sizeof(uint64_t)) };
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksAbort(&handle, ps.s);
+
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
     return 0;
 }

@@ -22,7 +22,9 @@
 #include "hks_type.h"
 #include "hks_param.h"
 
-namespace {
+namespace OHOS {
+namespace Security {
+namespace Hks {
 struct HksChipsetPlatformTestCase {
     std::vector<uint8_t> salt {};
     std::vector<uint8_t> tmpPk {};
@@ -65,6 +67,13 @@ inline std::vector<HksParam> CipherMaterialsToDecryptInputParams(struct HksChips
 
 struct WrapParamSet {
     struct HksParamSet *s = nullptr;
+    WrapParamSet() = default;
+    WrapParamSet(WrapParamSet &&other)
+    {
+        s = other.s;
+        other.s = nullptr;
+    }
+    WrapParamSet(WrapParamSet &other) = delete;
     ~WrapParamSet()
     {
         if (s == nullptr) {
@@ -73,6 +82,6 @@ struct WrapParamSet {
         HksFreeParamSet(&s);
     }
 };
-} // anonymous namespace
+}}}
 
 #endif // HKS_CHIPSET_PLATFORM_TEST_H

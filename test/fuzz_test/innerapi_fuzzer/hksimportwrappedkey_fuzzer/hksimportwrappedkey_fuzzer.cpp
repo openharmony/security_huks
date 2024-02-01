@@ -22,43 +22,39 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
-const int DOUBLE_BLOB_SIZE = 20;
-const int TRIPLE_BLOB_SIZE = 30;
+#include "../hks_fuzz_util.h"
+
+constexpr int ALIAS_SIZE = 10;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= (TRIPLE_BLOB_SIZE + sizeof(struct HksParamSet))) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob keyAlias = { BLOB_SIZE, myData };
-        struct HksBlob wrappingKeyAlias = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksBlob wrappedKeyData = { BLOB_SIZE, static_cast<uint8_t *>(myData + DOUBLE_BLOB_SIZE) };
-
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + TRIPLE_BLOB_SIZE);
-        paramSet->paramSetSize = size - TRIPLE_BLOB_SIZE;
-
-        (void)HksImportWrappedKey(&keyAlias, &wrappingKeyAlias, paramSet, &wrappedKeyData);
-
-        HKS_FREE(myData);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < (ALIAS_SIZE + ALIAS_SIZE + sizeof(uint32_t))) {
+        return -1;
     }
+
+    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    struct HksBlob wrappingKeyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    uint32_t wrappedKeySize = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
+    if (size < wrappedKeySize) {
+        return -1;
+    }
+    struct HksBlob wrappedKeyData = { wrappedKeySize, ReadData<uint8_t *>(data, size, wrappedKeySize) };
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksImportWrappedKey(&keyAlias, &wrappingKeyAlias, ps.s, &wrappedKeyData);
+
+    return 0;
 }
+}}}
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
 
