@@ -22,42 +22,36 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
-const int DOUBLE = 2;
+#include "../hks_fuzz_util.h"
+
+constexpr int ALIAS_SIZE = 10;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) * DOUBLE + BLOB_SIZE)) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob keyAlias = { BLOB_SIZE, myData };
-
-        int paramSize = (size - BLOB_SIZE) / DOUBLE;
-        struct HksParamSet *paramSetIn = reinterpret_cast<struct HksParamSet *>(myData + BLOB_SIZE);
-        paramSetIn->paramSetSize = paramSize;
-
-        struct HksParamSet *paramSetOut = reinterpret_cast<struct HksParamSet *>(myData + BLOB_SIZE + paramSize);
-        paramSetOut->paramSetSize = paramSize;
-
-        (void)HksGetKeyParamSet(&keyAlias, paramSetIn, paramSetOut);
-
-        HKS_FREE(myData);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < ALIAS_SIZE) {
+        return -1;
     }
+
+    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    size_t inSize = size >> 1; // same as size / 2 to avoid magic number
+    WrapParamSet psIn = ConstructHksParamSetFromFuzz(data, inSize);
+    size -= inSize;
+
+    WrapParamSet psOut = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksGetKeyParamSet(&keyAlias, psIn.s, psOut.s);
+
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
 

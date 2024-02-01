@@ -21,39 +21,34 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
-const int DOUBLE_BLOB_SIZE = 20;
-const int TRIPLE_BLOB_SIZE = 30;
-const int FOURFOLD_BLOB_SIZE = 40;
+#include "../hks_fuzz_util.h"
+
+constexpr int BN_SIZE = 10;
+constexpr int BN_COUNT = 4;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-    {
-        if (data == nullptr || size <= FOURFOLD_BLOB_SIZE) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob x = { BLOB_SIZE, myData };
-        struct HksBlob a = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksBlob e = { BLOB_SIZE, static_cast<uint8_t *>(myData + DOUBLE_BLOB_SIZE) };
-        struct HksBlob n = { BLOB_SIZE, static_cast<uint8_t *>(myData + TRIPLE_BLOB_SIZE) };
-
-        (void)HksBnExpMod(&x, &a, &e, &n);
-
-        HKS_FREE(myData);
-        return true;
+bool DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < (BN_SIZE * BN_COUNT)) {
+        return -1;
     }
+
+    struct HksBlob x = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
+    struct HksBlob a = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
+    struct HksBlob e = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
+    struct HksBlob n = { BN_SIZE, ReadData<uint8_t *>(data, size, BN_SIZE) };
+
+    [[maybe_unused]] int ret = HksBnExpMod(&x, &a, &e, &n);
+
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
