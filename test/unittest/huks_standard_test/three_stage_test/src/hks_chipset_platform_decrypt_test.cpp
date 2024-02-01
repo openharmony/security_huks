@@ -34,6 +34,7 @@
 #include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_chipset_platform_decrypt.c"
 
 using namespace testing::ext;
+using namespace OHOS::Security::Hks;
 namespace Unittest::HksChipsetPlatformDecryptTest {
 namespace {
 std::vector<HksChipsetPlatformTestCase> DECRYPT_KEY_NORMAL_CASES = {

@@ -48,6 +48,7 @@
 #include <openssl/x509.h>
 
 using namespace testing::ext;
+using namespace OHOS::Security::Hks;
 namespace {
 std::vector<HksCipsetPlatformEncryptInput> g_encryptInputs = {
     {

@@ -21,39 +21,38 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int DOUBLE_BLOB_SIZE = 20;
-const int BLOB_SIZE = 10;
+#include "../hks_fuzz_util.h"
+
+constexpr int ALIAS_SIZE = 10;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myDataTest = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t)*size));
-        if (myDataTest == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myDataTest, size, data, size);
-
-        struct HksBlob keyAlias = { BLOB_SIZE, myDataTest };
-        struct HksBlob pubKey = { BLOB_SIZE, static_cast<uint8_t *>(myDataTest + BLOB_SIZE) };
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myDataTest + DOUBLE_BLOB_SIZE);
-
-        paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
-
-        (void)HksImportKey(&keyAlias, paramSet, &pubKey);
-
-        HKS_FREE(myDataTest);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= (ALIAS_SIZE + sizeof(uint32_t))) {
+        return -1;
     }
+
+    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    uint32_t pubKeySize = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
+    if (size < pubKeySize) {
+        return -1;
+    }
+    struct HksBlob pubKey = { pubKeySize, ReadData<uint8_t *>(data, size, pubKeySize) };
+
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksImportKey(&keyAlias, ps.s, &pubKey);
+
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
 
