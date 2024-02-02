@@ -35,6 +35,7 @@ ohos_fuzztest("HksHashFuzzTest") {
   sources = [ "hkshash_fuzzer.cpp" ]
 
   deps = [
+    "..:hks_fuzz_util",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//third_party/bounds_checking_function:libsec_static",

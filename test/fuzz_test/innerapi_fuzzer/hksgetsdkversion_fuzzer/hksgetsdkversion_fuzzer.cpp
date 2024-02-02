@@ -21,31 +21,21 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
+#include <vector>
+
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-    {
-        if (data == nullptr) {
-            return false;
-        }
-
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob sdkVersion = { size, myData };
-
-        (void)HksGetSdkVersion(&sdkVersion);
-
-        HKS_FREE(myData);
-        return true;
-    }
+namespace Security {
+namespace Hks {
+void DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
+{
+    std::vector<uint8_t> buf(data, data + size);
+    struct HksBlob sdkVersion = { buf.size(), buf.data() };
+    [[maybe_unused]] int ret = HksGetSdkVersion(&sdkVersion);
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
+    OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(data, size);
     return 0;
 }
