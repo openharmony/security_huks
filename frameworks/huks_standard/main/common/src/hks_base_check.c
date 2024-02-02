@@ -1409,7 +1409,13 @@ static int32_t CheckCipherAeAadMaterial(uint32_t mode, const struct HksParamSet 
 {
     struct HksParam *aadParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_AAD_FAIL, "cipher get aad param failed!")
+    if (mode == HKS_MODE_GCM && ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_W("gcm no input aad");
+        return HKS_SUCCESS;
+    } else if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("cipher get aad param failed!");
+        return HKS_ERROR_CHECK_GET_AAD_FAIL;
+    }
     HKS_IF_NOT_SUCC_RETURN(CheckBlob(&aadParam->blob), HKS_ERROR_INVALID_AAD)
 
     /* gcmMode: aadSize greater than 0 (has been checked); ccmMode: aadSize no less than 4 */
