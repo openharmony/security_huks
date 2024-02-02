@@ -21,7 +21,7 @@ namespace Hks {
 std::vector<HksParam> ConstructHksParams(uint8_t *&data, size_t &size)
 {
     std::vector<HksParam> params {};
-    while(size >= sizeof(HksParam)) {
+    while (size >= sizeof(HksParam)) {
         HksParam *p = ReadData<HksParam *>(data, size, sizeof(HksParam));
         if (GetTagType(static_cast<HksTag>(p->tag)) != HKS_TAG_TYPE_BYTES) {
             params.emplace_back(*p);
