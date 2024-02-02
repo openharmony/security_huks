@@ -116,9 +116,22 @@ int32_t HksFillAeadParam(
     int32_t ret = HksGetParam(paramSet, HKS_TAG_NONCE, &nonceParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get nonce param failed!")
 
+    struct HksParam emptyAadParam = {
+        .tag = HKS_TAG_ASSOCIATED_DATA,
+        .blob = {
+            .size = 0,
+            .data = NULL
+        }
+    };
     struct HksParam *aadParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_ASSOCIATED_DATA, &aadParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksFillAeadParam get aad param failed!")
+    if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
+        HKS_LOG_W("HksFillAeadParam no input aad, do not use aad");
+        aadParam = &emptyAadParam;
+    } else if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksFillAeadParam get aad param failed!");
+        return ret;
+    }
 
     struct HksParam tagParam;
     if (!isEncrypt) {

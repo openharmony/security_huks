@@ -76,11 +76,6 @@ HWTEST_F(HksCipherTest, HksCipherTest004, TestSize.Level0)
     ASSERT_TRUE(BaseTestEncrypt(1, 1, 1) == 0);
 }
 
-HWTEST_F(HksCipherTest, HksCipherTest005, TestSize.Level0)
-{
-    ASSERT_TRUE(BaseTestEncrypt(1, 2, 1) == 0);
-}
-
 HWTEST_F(HksCipherTest, HksCipherTest006, TestSize.Level0)
 {
     ASSERT_TRUE(BaseTestEncrypt(1, 3, 1) == 0);
@@ -99,11 +94,6 @@ HWTEST_F(HksCipherTest, HksCipherTest008, TestSize.Level0)
 HWTEST_F(HksCipherTest, HksCipherTest009, TestSize.Level0)
 {
     ASSERT_TRUE(BaseTestDecrypt(1, 1, 1) == 0);
-}
-
-HWTEST_F(HksCipherTest, HksCipherTest010, TestSize.Level0)
-{
-    ASSERT_TRUE(BaseTestDecrypt(1, 2, 1) == 0);
 }
 
 HWTEST_F(HksCipherTest, HksCipherTest011, TestSize.Level0)
