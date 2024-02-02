@@ -21,40 +21,37 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
-const int DOUBLE_BLOB_SIZE = 20;
-const int TRIPLE_BLOB_SIZE = 30;
+#include "../hks_fuzz_util.h"
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-    {
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + TRIPLE_BLOB_SIZE)) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob handle = { BLOB_SIZE, myData };
-        struct HksBlob inData = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksBlob outData = { BLOB_SIZE, static_cast<uint8_t *>(myData + DOUBLE_BLOB_SIZE) };
-
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + TRIPLE_BLOB_SIZE);
-        paramSet->paramSetSize = size - TRIPLE_BLOB_SIZE;
-
-        (void)HksFinish(&handle, paramSet, &inData, &outData);
-
-        HKS_FREE(myData);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size <= (sizeof(uint64_t) + sizeof(uint32_t))) {
+        return -1;
     }
+
+    struct HksBlob handle = { sizeof(uint64_t), ReadData<uint8_t *>(data, size, sizeof(uint64_t)) };
+    uint32_t inDataSize = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
+    if (size < inDataSize) {
+        return -1;
+    }
+    struct HksBlob inData = { inDataSize, ReadData<uint8_t *>(data, size, inDataSize) };
+    std::vector<uint8_t> outDataBuffer(inDataSize);
+    struct HksBlob outData = { outDataBuffer.size(), outDataBuffer.data() };
+
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksFinish(&handle, ps.s, &inData, &outData);
+
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
