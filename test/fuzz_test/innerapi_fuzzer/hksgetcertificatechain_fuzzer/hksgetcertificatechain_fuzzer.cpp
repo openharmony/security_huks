@@ -22,51 +22,50 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-const int BLOB_SIZE = 10;
-const int CERT_COUNT = 4;
+#include "../hks_fuzz_util.h"
+
+constexpr int ALIAS_SIZE = 10;
+constexpr int CERT_SIZE = 4096;
+constexpr int CERT_COUNT = 4;
 
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t* data, size_t size)
-    {
-        if (data == nullptr ||
-            size <= (BLOB_SIZE + sizeof(struct HksParamSet) + sizeof(struct HksBlob) * CERT_COUNT)) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        uint8_t *myDataTest = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myDataTest == nullptr) {
-            return false;
-        }
-
-        (void)memcpy_s(myDataTest, size, data, size);
-
-        struct HksBlob keyAlias = { BLOB_SIZE, myDataTest };
-
-        struct HksCertChain *certChain =
-            reinterpret_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
-        certChain->certsCount = CERT_COUNT;
-        certChain->certs = reinterpret_cast<struct HksBlob *>(myDataTest + BLOB_SIZE);
-
-        struct HksParamSet *paramSet =
-            reinterpret_cast<struct HksParamSet *>(myDataTest + BLOB_SIZE + sizeof(struct HksBlob) * CERT_COUNT);
-        paramSet->paramSetSize = size - BLOB_SIZE - sizeof(struct HksBlob) * CERT_COUNT;
-
-        (void)HksGetCertificateChain(&keyAlias, paramSet, certChain);
-
-        if (certChain != nullptr) {
-            HKS_FREE(certChain);
-        }
-
-        HKS_FREE(myDataTest);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < ALIAS_SIZE) {
+        return -1;
     }
+
+    struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
+    std::vector<uint8_t> certRootBuffer(CERT_SIZE);
+    std::vector<uint8_t> certCaBuffer(CERT_SIZE);
+    std::vector<uint8_t> certDeviceBuffer(CERT_SIZE);
+    std::vector<uint8_t> certAppBuffer(CERT_SIZE);
+    struct HksBlob resultCerts[CERT_COUNT] = {
+        { CERT_SIZE, certRootBuffer.data() },
+        { CERT_SIZE, certCaBuffer.data() },
+        { CERT_SIZE, certDeviceBuffer.data() },
+        { CERT_SIZE, certAppBuffer.data() },
+    };
+    struct HksCertChain certChain = {
+        .certs = resultCerts,
+        .certsCount = CERT_COUNT
+    };
+
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksGetCertificateChain(&keyAlias, ps.s, &certChain);
+
+    return 0;
 }
+}}}
 
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 {
-    /* Run your code on data */
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
 

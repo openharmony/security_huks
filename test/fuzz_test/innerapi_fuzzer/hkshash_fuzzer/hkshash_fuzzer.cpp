@@ -21,38 +21,36 @@
 
 #include <securec.h>
 
-const int DOUBLE_BLOB_SIZE = 20;
-const int BLOB_SIZE = 10;
+#include "../hks_fuzz_util.h"
 
+constexpr int HASH_SIZE = 512;
 namespace OHOS {
-    bool DoSomethingInterestingWithMyAPI(const uint8_t *data, size_t size)
-    {
-        uint8_t *myData = static_cast<uint8_t *>(HksMalloc(sizeof(uint8_t) * size));
-        if (myData == nullptr) {
-            return false;
-        }
+namespace Security {
+namespace Hks {
 
-        if (data == nullptr || size <= (sizeof(struct HksParamSet) + DOUBLE_BLOB_SIZE)) {
-            return false;
-        }
-
-        (void)memcpy_s(myData, size, data, size);
-
-        struct HksBlob srcData = { BLOB_SIZE, myData };
-        struct HksBlob hash = { BLOB_SIZE, static_cast<uint8_t *>(myData + BLOB_SIZE) };
-        struct HksParamSet *paramSet = reinterpret_cast<struct HksParamSet *>(myData + DOUBLE_BLOB_SIZE);
-
-        paramSet->paramSetSize = size - DOUBLE_BLOB_SIZE;
-
-        (void)HksHash(paramSet, &srcData, &hash);
-
-        HKS_FREE(myData);
-        return true;
+int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
+{
+    if (data == nullptr || size < sizeof(uint32_t)) {
+        return -1;
     }
+
+    uint32_t srcDataSize = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
+    if (size < srcDataSize) {
+        return -1;
+    }
+    struct HksBlob srcData = { srcDataSize, ReadData<uint8_t *>(data, size, srcDataSize) };
+    std::vector<uint8_t> hashBuf(HASH_SIZE);
+    struct HksBlob hash = { hashBuf.size(), hashBuf.data() };
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+
+    [[maybe_unused]] int ret = HksHash(ps.s, &srcData, &hash);
+
+    return 0;
 }
+}}}
 
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
-    OHOS::DoSomethingInterestingWithMyAPI(data, size);
-    return 0;
+    std::vector<uint8_t> v(data, data + size);
+    return OHOS::Security::Hks::DoSomethingInterestingWithMyAPI(v.data(), v.size());
 }
