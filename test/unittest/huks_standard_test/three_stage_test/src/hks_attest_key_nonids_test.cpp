@@ -27,7 +27,6 @@ namespace Unittest::AttestKey {
 static struct HksBlob g_secInfo = { sizeof(SEC_INFO_DATA), (uint8_t *)SEC_INFO_DATA };
 static struct HksBlob g_challenge = { sizeof(CHALLENGE_DATA), (uint8_t *)CHALLENGE_DATA };
 static struct HksBlob g_version = { sizeof(VERSION_DATA), (uint8_t *)VERSION_DATA };
-static struct HksBlob g_appInfo = { sizeof(APP_ID), (uint8_t *)APP_ID };
 
 class HksAttestKeyNonIdsTest : public testing::Test {
 public:
@@ -63,7 +62,6 @@ static const struct HksParam g_commonParams[] = {
     { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
     { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
     { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
-    { .tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = g_appInfo },
 };
 
 static const uint32_t g_keyParamsetSize = 1024;
@@ -246,7 +244,6 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest005, TestSize.Level0)
         { .tag = HKS_TAG_ATTESTATION_CHALLENGE, .blob = g_challenge },
         { .tag = HKS_TAG_ATTESTATION_ID_VERSION_INFO, .blob = g_version },
         { .tag = HKS_TAG_ATTESTATION_ID_ALIAS, .blob = g_keyAlias },
-        { .tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = g_appInfo },
         { .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true },
     };
     struct HksParamSet *paramSet = NULL;
@@ -329,7 +326,6 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest008, TestSize.Level0)
     ValidateCertChain(paramSet, paramOutSet, certChain);
 }
 
-#ifndef ENABLE_NETWORK
 /**
  * @tc.name: HksAttestKeyNonIdsTest.HksAttestKeyNonIdsTest009
  * @tc.desc: attest with right params and validate success.
@@ -399,10 +395,12 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest011, TestSize.Level0)
         HKS_LOG_I("OH_Huks_AnonAttestKeyItem fail, ret is %" LOG_PUBLIC "d!", ret);
     }
     ASSERT_EQ(ret, HKS_SUCCESS);
+    for (uint32_t i = 0; i < certChain->certsCount; i++) {
+        printf("Get certChain[%d]:\n %s \n", i, certChain->certs[i].data);
+    }
     FreeCertChain(&certChain, certChain->certsCount);
     HksFreeParamSet(&paramSet);
     ret = HksDeleteKey(&g_keyAlias, NULL);
     ASSERT_EQ(ret, HKS_SUCCESS);
 }
-#endif
 }
