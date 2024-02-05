@@ -1318,37 +1318,51 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
 }
 
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-static int32_t AddHapInfoToParamSet(const struct HksProcessInfo *processInfo, struct HksParamSet *paramSet,
+static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet)
 {
     int32_t ret;
-    struct HksBlob hapInfo = {0, NULL};
+    struct HksBlob appInfo = {0, NULL};
     struct HksParamSet *newParamSet = NULL;
 
     do {
         ret = AppendToNewParamSet(paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
 
-        ret = HksGetHapInfo(processInfo, &hapInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapInfo failed")
+        enum HksAppIdType appidType;
+        HksGetAppIdType(&appidType);
 
-        if (CheckBlob(&hapInfo) == HKS_SUCCESS) {
-            struct HksParam hapInfoParam;
-            hapInfoParam.tag = HKS_TAG_ATTESTATION_APPLICATION_ID;
-            hapInfoParam.blob = hapInfo;
-            ret = HksAddParams(newParamSet, &hapInfoParam, 1);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add hapInfo failed")
+        if (appidType == HKS_HAP_APPID) {
+            ret = HksGetHapInfo(processInfo, &appInfo);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapInfo failed")
+        } else if (appidType == HKS_SA_APPID) {
+            ret = HksGetSaInfo(processInfo, &appInfo);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetSaInfo failed")
+        } else {
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "invalid appidType!")
+        }
+
+        ret = CheckBlob(&appInfo);
+        if (ret == HKS_SUCCESS) {
+            struct HksParam params[] = {
+                {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = appInfo},
+                {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE, .uint32Param = appidType}
+            };
+            ret = HksAddParams(newParamSet, params, 2);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add appInfo failed")
+        } else {
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check appInfo Blob failed!")
         }
 
         ret = HksBuildParamSet(&newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
 
         *outParamSet = newParamSet;
-        HKS_FREE_BLOB(hapInfo);
+        HKS_FREE_BLOB(appInfo);
         return ret;
     } while (0);
 
-    HKS_FREE_BLOB(hapInfo);
+    HKS_FREE_BLOB(appInfo);
     HksFreeParamSet(&newParamSet);
     return ret;
 }
@@ -1371,8 +1385,8 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &processInfoParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = AddHapInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddHapInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
+        ret = AddAppInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #else
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)

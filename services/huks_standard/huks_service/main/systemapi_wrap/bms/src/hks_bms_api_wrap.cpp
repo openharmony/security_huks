@@ -36,6 +36,9 @@
 #include "hks_config.h"
 #endif
 
+#define SYSTEM_BASIC "system_basic"
+#define SYSTEM_CORE "system_core"
+
 using namespace OHOS;
 using namespace Security::AccessToken;
 
@@ -81,6 +84,64 @@ static int32_t ConvertHapInfoToJson(const std::string &appIdStr, const std::stri
     hapInfo->data = (uint8_t *)jsonStr;
     cJSON_Delete(jsonObj);
     return HKS_SUCCESS;
+}
+
+static int32_t ConvertSaInfoToJson(const std::string &appIdStr, HksBlob *hapInfo, int32_t apl)
+{
+    if (apl < 1 || apl > 3) {
+        HKS_LOG_E("apl level is invaild.");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    cJSON *jsonObj = cJSON_CreateObject();
+    HKS_IF_NULL_LOGE_RETURN(jsonObj, HKS_ERROR_NULL_POINTER, "create cjson object failed.")
+
+    const char jsonKeyAppId[] = "processName";
+    const char jsonKeyApl[] = "APL";
+    const char * aplStr;
+
+    if (apl == 1) {
+        aplStr = "";
+    } else if (apl == 2) {
+        aplStr = SYSTEM_BASIC;
+    } else {
+        aplStr = SYSTEM_CORE;
+    }
+
+    if ((cJSON_AddStringToObject(jsonObj, jsonKeyAppId, appIdStr.c_str()) == nullptr) ||
+        (cJSON_AddStringToObject(jsonObj, jsonKeyApl, aplStr) == nullptr)) {
+        HKS_LOG_E("add string to json object is failed.");
+        cJSON_Delete(jsonObj);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    char *jsonStr = cJSON_PrintUnformatted(jsonObj);
+    if (jsonStr == nullptr) {
+        HKS_LOG_E("cJSON_PrintUnformatted failed.");
+        cJSON_Delete(jsonObj);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    hapInfo->size = strlen(jsonStr);
+    hapInfo->data = (uint8_t *)jsonStr;
+    cJSON_Delete(jsonObj);
+    return HKS_SUCCESS;
+}
+
+void HksGetAppIdType(enum HksAppIdType *appIdType) {
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    switch (AccessTokenKit::GetTokenType(callingTokenId)) {
+        case ATokenTypeEnum::TOKEN_HAP:
+            *appIdType = HKS_HAP_APPID;
+            return;
+        case ATokenTypeEnum::TOKEN_NATIVE:
+        case ATokenTypeEnum::TOKEN_SHELL:
+            *appIdType = HKS_SA_APPID;
+            return;
+        default:
+            *appIdType = HKS_UNIFIED_APPID;
+            return;
+    } 
 }
 
 int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName, int32_t hapNameSize)
@@ -150,5 +211,33 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     int32_t ret = ConvertHapInfoToJson(bundleInfo.appId, bundleNameStr, hapInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConvertHapInfoToJson failed.")
 
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo)
+{
+    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
+    HKS_IF_NULL_LOGE_RETURN(saInfo, HKS_ERROR_NULL_POINTER, "saInfo is nullptr.")
+
+    // if it is not hap, default no need to get hap info.
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    if (AccessTokenKit::GetTokenType(callingTokenId) == ATokenTypeEnum::TOKEN_HAP) {
+        HKS_LOG_E("caller is  from hap, not support to get sa info.");
+        return HKS_SUCCESS;
+    }
+    NativeTokenInfo saTokenInfo;
+    int32_t ret = AccessTokenKit::GetNativeTokenInfo(callingTokenId, saTokenInfo);
+    if (ret != AccessTokenKitRet::RET_SUCCESS) {
+        HKS_LOG_E("Get sa info failed from access token kit.");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    if (saTokenInfo.apl >= ATokenAplEnum::APL_SYSTEM_BASIC) {
+        ret = ConvertSaInfoToJson(saTokenInfo.processName, saInfo, saTokenInfo.apl);
+    } else {
+        HKS_LOG_E("The normal process, hide the process information.");
+        ret = ConvertSaInfoToJson("", saInfo, saTokenInfo.apl);
+    }
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConvertSaInfoToJson failed.")
     return HKS_SUCCESS;
 }

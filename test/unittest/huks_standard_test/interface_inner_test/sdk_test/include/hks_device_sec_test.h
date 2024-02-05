@@ -26,4 +26,14 @@ int HksDeviceSecTest004(void);
 
 int HksDeviceSecTest005(void);
 
+int HksDeviceSecTest006(void);
+
+int HksDeviceSecTest007(void);
+
+int HksDeviceSecTest008(void);
+
+int HksDeviceSecTest009(void);
+
+int HksDeviceSecTest010(void);
+
 #endif
