@@ -25,24 +25,10 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_EXPORT_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_EXPORT_KEY_MAX_ARGS = 3;
-}  // namespace
 
-struct ExportKeyAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-    struct HksBlob *key = nullptr;
-};
-using ExportKeyAsyncContext = ExportKeyAsyncContextT *;
-
-static ExportKeyAsyncContext CreateExportKeyAsyncContext()
+ExportKeyAsyncContext CreateExportKeyAsyncContext()
 {
     ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(HksMalloc(sizeof(ExportKeyAsyncContextT)));
     if (context != nullptr) {
@@ -51,7 +37,7 @@ static ExportKeyAsyncContext CreateExportKeyAsyncContext()
     return context;
 }
 
-static void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &context)
+void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -74,7 +60,7 @@ static napi_value ExportKeyParseParams(napi_env env, napi_callback_info info, Ex
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_EXPORT_KEY_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -109,7 +95,7 @@ static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
     return HKS_SUCCESS;
 }
 
-static napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context)
+napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

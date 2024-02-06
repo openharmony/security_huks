@@ -25,26 +25,12 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_GET_KEY_PROPERTIES_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_GET_KEY_PROPERTIES_MAX_ARGS = 3;
 
 constexpr int HKS_DEFAULT_OUTPARAMSET_SIZE = 2048;
-}  // namespace
 
-struct GetKeyPropertiesAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksParamSet *paramSetIn = nullptr;
-    struct HksParamSet *paramSetOut = nullptr;
-};
-using GetKeyPropertiesAsyncContext = GetKeyPropertiesAsyncContextT *;
-
-static GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext()
+GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext()
 {
     GetKeyPropertiesAsyncContext context =
         static_cast<GetKeyPropertiesAsyncContext>(HksMalloc(sizeof(GetKeyPropertiesAsyncContextT)));
@@ -54,7 +40,7 @@ static GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext()
     return context;
 }
 
-static void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsyncContext &context)
+void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -75,7 +61,7 @@ static napi_value GetKeyPropertiesParseParams(
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_GET_KEY_PROPERTIES_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -95,7 +81,7 @@ static napi_value GetKeyPropertiesParseParams(
     return GetInt32(env, 0);
 }
 
-static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext context)
+napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

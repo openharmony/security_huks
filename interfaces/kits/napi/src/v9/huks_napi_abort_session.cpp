@@ -25,23 +25,10 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_ABORT_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_ABORT_MAX_ARGS = 3;
-}  // namespace
 
-struct AbortAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *handle = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-};
-using AbortAsyncContext = AbortAsyncContextT *;
-
-static AbortAsyncContext CreateAbortAsyncContext()
+AbortAsyncContext CreateAbortAsyncContext()
 {
     AbortAsyncContext context = static_cast<AbortAsyncContext>(HksMalloc(sizeof(AbortAsyncContextT)));
     if (context != nullptr) {
@@ -50,7 +37,7 @@ static AbortAsyncContext CreateAbortAsyncContext()
     return context;
 }
 
-static void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context)
+void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -67,15 +54,27 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_ABORT_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
 
     size_t index = 0;
-    napi_value result = ParseHandleAndHksParamSet(env, argv, index, context->handle, context->paramSet);
+    napi_value result = GetHandleValue(env, argv[index], context->handle);
     if (result == nullptr) {
-        HKS_LOG_E("abort parse failed");
+        HKS_LOG_E("could not get handle value");
+        return nullptr;
+    }
+
+    index++;
+    napi_value property = GetPropertyFromOptions(env, argv[index], HKS_OPTIONS_PROPERTY_PROPERTIES);
+    if (property == nullptr) {
+        return nullptr;
+    }
+
+    result = ParseHksParamSetAndAddParam(env, property, context->paramSet);
+    if (result == nullptr) {
+        HKS_LOG_E("could not get paramset");
         return nullptr;
     }
 
@@ -87,7 +86,7 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
     return GetInt32(env, 0);
 }
 
-static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
+napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

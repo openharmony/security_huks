@@ -33,34 +33,31 @@ constexpr size_t ASYNCCALLBACK_ARGC = 2;
 napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
 {
     napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, object, &valueType);
-    if (status != napi_ok) {
-        HKS_LOG_E("could not get object type");
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_typeof(env, object, &valueType));
 
     if (valueType != napi_valuetype::napi_string) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "the type of alias isn't string");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the type of alias isn't string");
         HKS_LOG_E("no string type");
         return nullptr;
     }
 
     size_t length = 0;
-    status = napi_get_value_string_utf8(env, object, nullptr, 0, &length);
+    napi_status status = napi_get_value_string_utf8(env, object, nullptr, 0, &length);
     if (status != napi_ok) {
-        HKS_LOG_E("could not get string length");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string length");
+        HKS_LOG_E("could not get string length %" LOG_PUBLIC "d", status);
         return nullptr;
     }
 
     if (length > HKS_MAX_DATA_LEN) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
-            "the length of alias is too long");
-        HKS_LOG_E("input key alias length too large");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the length of alias is too long");
+        HKS_LOG_E("input key alias length %" LOG_PUBLIC "zu too large", length);
         return nullptr;
     }
 
     char *data = static_cast<char *>(HksMalloc(length + 1));
     if (data == nullptr) {
+        HksNapiThrowInsufficientMemory(env);
         HKS_LOG_E("could not alloc memory");
         return nullptr;
     }
@@ -69,13 +66,15 @@ napi_value ParseKeyAlias(napi_env env, napi_value object, HksBlob *&alias)
     size_t result = 0;
     status = napi_get_value_string_utf8(env, object, data, length + 1, &result);
     if (status != napi_ok) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get string");
         HKS_FREE(data);
-        HKS_LOG_E("could not get string");
+        HKS_LOG_E("could not get string %" LOG_PUBLIC "d", status);
         return nullptr;
     }
 
     alias = static_cast<HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (alias == nullptr) {
+        HksNapiThrowInsufficientMemory(env);
         HKS_FREE(data);
         HKS_LOG_E("could not alloc memory");
         return nullptr;
@@ -97,14 +96,14 @@ napi_value GetUint8Array(napi_env env, napi_value object, HksBlob &arrayBlob)
     NAPI_CALL(
         env, napi_get_typedarray_info(env, object, &arrayType, &length, &rawData, &arrayBuffer, &offset));
     if (arrayType != napi_uint8_array) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
             "the type of data is not Uint8Array");
         HKS_LOG_E("the type of  data is not Uint8Array");
         return nullptr;
     }
 
     if (length > HKS_MAX_DATA_LEN) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
             "the length of data is too long");
         HKS_LOG_E("data len is too large, len = %" LOG_PUBLIC "zx", length);
         return nullptr;
@@ -130,11 +129,7 @@ static napi_value CheckParamValueType(napi_env env, uint32_t tag, napi_value val
 {
     napi_value result = nullptr;
     napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, value, &valueType);
-    if (status != napi_ok) {
-        HKS_LOG_E("could not get object type");
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_typeof(env, value, &valueType));
 
     switch (tag & HKS_TAG_TYPE_MASK) {
         case HKS_TAG_TYPE_INT:
@@ -168,7 +163,7 @@ static napi_value CheckParamValueType(napi_env env, uint32_t tag, napi_value val
     }
 
     if (result == nullptr) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
             "the value of the tag is of an incorrect type");
         HKS_LOG_E("invalid tag or the type of value, tag = 0x%" LOG_PUBLIC "x, type = %" LOG_PUBLIC "u",
             tag, valueType);
@@ -231,18 +226,10 @@ static napi_value GetHksParam(napi_env env, napi_value object, HksParam &param)
 
 void FreeParsedParams(std::vector<HksParam> &params)
 {
-    HksParam *param = params.data();
-    size_t paramCount = params.size();
-    if (param == nullptr) {
-        return;
-    }
-    while (paramCount > 0) {
-        paramCount--;
-        if ((param->tag & HKS_TAG_TYPE_MASK) == HKS_TAG_TYPE_BYTES) {
-            HKS_FREE(param->blob.data);
-            param->blob.size = 0;
+    for (HksParam &p : params) {
+        if (GetTagType(static_cast<HksTag>(p.tag)) == HKS_TAG_TYPE_BYTES) {
+            HKS_FREE_BLOB(p.blob);
         }
-        ++param;
     }
 }
 
@@ -258,6 +245,7 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
         HksParam param = { 0 };
         result = GetHksParam(env, element, param);
         if (result == nullptr) {
+            HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "GetHksParam fail");
             HKS_LOG_E("get param failed when parse input params.");
             return nullptr;
         }
@@ -268,22 +256,11 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
     return GetInt32(env, 0);
 }
 
-static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet *&paramSet)
-{
-    for (auto &param : params) {
-        int32_t ret = HksAddParams(paramSet, &param, 1);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param.tag[%" LOG_PUBLIC "x] failed", param.tag);
-            return ret;
-        }
-    }
-    return HKS_SUCCESS;
-}
-
-static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, HksParamSet *&paramSet,
-    HksParam *addParam)
+napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet,
+    const std::vector<HksParam> &addParams)
 {
     if (paramSet != nullptr) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "paramSet is nullptr");
         HKS_LOG_E("param input invalid");
         return nullptr;
     }
@@ -292,25 +269,31 @@ static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, Hk
     HksParamSet *outParamSet = nullptr;
     do {
         if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
+            HksNapiThrowInsufficientMemory(env);
             HKS_LOG_E("paramset init failed");
             break;
         }
 
         if (ParseParams(env, object, params) == nullptr) {
+            HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "ParseParams fail");
             HKS_LOG_E("parse params failed");
             break;
         }
 
-        if (addParam != nullptr) {
-            params.push_back(*addParam);
+        if (!addParams.empty()) {
+            params.insert(std::end(params), std::begin(addParams), std::end(addParams));
         }
 
-        if (AddParams(params, outParamSet) != HKS_SUCCESS) {
-            HKS_LOG_E("add params failed");
-            break;
+        if (!params.empty()) {
+            if (HksAddParams(outParamSet, params.data(), params.size()) != HKS_SUCCESS) {
+                HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "HksAddParams fail");
+                HKS_LOG_E("add params failed");
+                break;
+            }
         }
 
         if (HksBuildParamSet(&outParamSet) != HKS_SUCCESS) {
+            HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "HksBuildParamSet fail");
             HKS_LOG_E("HksBuildParamSet failed");
             break;
         }
@@ -325,24 +308,22 @@ static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, Hk
     return nullptr;
 }
 
-static napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
+napi_value ParseHksParamSetWithToken(napi_env env, struct HksBlob *&token, napi_value object, HksParamSet *&paramSet)
 {
-    return ParseHksParamSetOrAddParam(env, object, paramSet, nullptr);
-}
-
-napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet, HksParam *addParam)
-{
-    return ParseHksParamSetOrAddParam(env, object, paramSet, addParam);
+    std::vector<HksParam> params {};
+    if (CheckBlob(token) == HKS_SUCCESS) { /* has token param */
+        params.emplace_back(HksParam{
+            .tag = HKS_TAG_AUTH_TOKEN,
+            .blob = *token
+        });
+    }
+    return ParseHksParamSetAndAddParam(env, object, paramSet, params);
 }
 
 napi_ref GetCallback(napi_env env, napi_value object)
 {
     napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, object, &valueType);
-    if (status != napi_ok) {
-        HKS_LOG_E("could not get object type");
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_typeof(env, object, &valueType));
 
     if (valueType != napi_valuetype::napi_function) {
         HKS_LOG_I("no callback fun, process as promise func");
@@ -350,7 +331,7 @@ napi_ref GetCallback(napi_env env, napi_value object)
     }
 
     napi_ref ref = nullptr;
-    status = napi_create_reference(env, object, 1, &ref);
+    napi_status status = napi_create_reference(env, object, 1, &ref);
     if (status != napi_ok) {
         HKS_LOG_E("could not create reference");
         return nullptr;
@@ -471,20 +452,16 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
     }
 
     napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, object, &valueType);
-    if (status != napi_ok) {
-        HKS_LOG_E("could not get object type");
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_typeof(env, object, &valueType));
 
     if (valueType != napi_valuetype::napi_number) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
             "the type of handle isn't number");
         return nullptr;
     }
 
     uint32_t handleTmp = 0;
-    status = napi_get_value_uint32(env, object, &handleTmp);
+    napi_status status = napi_get_value_uint32(env, object, &handleTmp);
     if (status != napi_ok) {
         HKS_LOG_E("Retrieve field failed");
         return nullptr;
@@ -508,6 +485,27 @@ napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&hand
 
     if (memcpy_s(handleBlob->data, sizeof(uint64_t), &handle, sizeof(uint64_t)) != EOK) {
         // the memory of handleBlob free by finalize callback
+        return nullptr;
+    }
+
+    return GetInt32(env, 0);
+}
+
+napi_value GetUserIdValue(napi_env env, napi_value object, int &userId)
+{
+    napi_valuetype valueType = napi_valuetype::napi_undefined;
+    NAPI_CALL(env, napi_typeof(env, object, &valueType));
+
+    if (valueType != napi_valuetype::napi_number) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "the type of userId isn't number");
+        HKS_LOG_E("valueType %" LOG_PUBLIC "d not napi_number", valueType);
+        return nullptr;
+    }
+
+    napi_status status = napi_get_value_int32(env, object, &userId);
+    if (status != napi_ok) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "get int32 userId failed");
+        HKS_LOG_E("get int32 userId failed %" LOG_PUBLIC "d", status);
         return nullptr;
     }
 
@@ -539,24 +537,20 @@ void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref
 napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::string propertyStr)
 {
     napi_valuetype valueType = napi_valuetype::napi_undefined;
-    napi_status status = napi_typeof(env, value, &valueType);
-    if (status != napi_ok) {
-        HKS_LOG_E("could not get object type");
-        return nullptr;
-    }
+    NAPI_CALL(env, napi_typeof(env, value, &valueType));
 
     if (valueType != napi_valuetype::napi_object) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
             "the type is not object");
         HKS_LOG_E("no object type");
         return nullptr;
     }
 
     napi_value property = nullptr;
-    status = napi_get_named_property(env, value,
+    napi_status status = napi_get_named_property(env, value,
         propertyStr.c_str(), &property);
     if (status != napi_ok || property == nullptr) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(),
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
             "get value failed, maybe the target does not exist");
         HKS_LOG_E("could not get property %" LOG_PUBLIC "s", propertyStr.c_str());
         return nullptr;
@@ -572,7 +566,7 @@ static napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSe
         return nullptr;
     }
 
-    napi_value result = ParseHksParamSet(env, property, paramSet);
+    napi_value result = ParseHksParamSetAndAddParam(env, property, paramSet);
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
@@ -581,25 +575,17 @@ static napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSe
     return GetInt32(env, 0);
 }
 
-napi_value ParseHandleAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
-    HksBlob *&handleBlob, HksParamSet *&paramSet)
+static napi_value ParseGetHksParamSetAsUser(napi_env env, int userId, napi_value value, HksParamSet *&paramSet)
 {
-    // the index is controlled by the caller and needs to ensure that it does not overflow
-    if (argv == nullptr || handleBlob != nullptr || paramSet != nullptr) {
-        HKS_LOG_E("param input invalid");
+    napi_value property = GetPropertyFromOptions(env, value, HKS_OPTIONS_PROPERTY_PROPERTIES);
+    if (property == nullptr) {
         return nullptr;
     }
 
-    napi_value result = GetHandleValue(env, argv[index], handleBlob);
+    napi_value result = ParseHksParamSetAndAddParam(env, property, paramSet,
+        {{.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = userId}});
     if (result == nullptr) {
-        HKS_LOG_E("could not get handle value");
-        return nullptr;
-    }
-
-    index++;
-    result = ParseGetHksParamSet(env, argv[index], paramSet);
-    if (result == nullptr) {
-        HKS_LOG_E("could not get hksParamSet");
+        HKS_LOG_E("could not get paramset");
         return nullptr;
     }
 
@@ -617,12 +603,40 @@ napi_value ParseKeyAliasAndHksParamSet(napi_env env, napi_value *argv, size_t &i
 
     napi_value result = ParseKeyAlias(env, argv[index], keyAliasBlob);
     if (result == nullptr) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get key alias");
         HKS_LOG_E("could not get keyAlias");
         return nullptr;
     }
 
     index++;
     result = ParseGetHksParamSet(env, argv[index], paramSet);
+    if (result == nullptr) {
+        HKS_LOG_E("get hksParamSet failed");
+        return nullptr;
+    }
+
+    return GetInt32(env, 0);
+}
+
+napi_value ParseKeyAliasAndHksParamSetAsUser(napi_env env, int userId, napi_value *argv, size_t &index,
+    std::pair<HksBlob *&, HksParamSet *&> out)
+{
+    auto &[ keyAliasBlob, paramSet ] = out;
+    // the index is controlled by the caller and needs to ensure that it does not overflow
+    if (argv == nullptr || keyAliasBlob != nullptr || paramSet != nullptr) {
+        HKS_LOG_E("param input invalid");
+        return nullptr;
+    }
+
+    napi_value result = ParseKeyAlias(env, argv[index], keyAliasBlob);
+    if (result == nullptr) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get key alias");
+        HKS_LOG_E("could not get keyAlias");
+        return nullptr;
+    }
+
+    index++;
+    result = ParseGetHksParamSetAsUser(env, userId, argv[index], paramSet);
     if (result == nullptr) {
         HKS_LOG_E("get hksParamSet failed");
         return nullptr;
@@ -792,7 +806,7 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
         uint8_t errorMsgBuf[errorMsgLen];
         (void)memcpy_s(errorMsgBuf, errorMsgLen, errInfo.errorMsg, errorMsgLen);
         struct HksBlob msgBlob = { errorMsgLen, errorMsgBuf };
-        msg = GenerateStringArray(env, &msgBlob, sizeof(msgBlob) / sizeof(struct HksBlob));
+        msg = GenerateStringArray(env, &msgBlob, 1);
         msg = ((msg == nullptr) ? GetNull(env) : msg);
 #endif
     }
@@ -907,5 +921,18 @@ void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred defe
             CallbackResultFailure(env, callback, errorCode);
         }
     }
+}
+
+napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg)
+{
+    napi_value code = nullptr;
+    NAPI_CALL(env, napi_create_int32(env, errCode, &code));
+
+    napi_value message = nullptr;
+    NAPI_CALL(env, napi_create_string_utf8(env, errorMsg, strlen(errorMsg), &message));
+
+    napi_value result = nullptr;
+    NAPI_CALL(env, napi_create_error(env, code, message, &result));
+    return result;
 }
 }  // namespace HuksNapiItem

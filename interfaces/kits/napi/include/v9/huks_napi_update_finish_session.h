@@ -18,8 +18,35 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "hks_type.h"
 
 namespace HuksNapiItem {
+struct UpdateAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *handle = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob *inData = nullptr;
+    struct HksBlob *outData = nullptr;
+    struct HksBlob *token = nullptr;
+    bool isUpdate = false;
+};
+using UpdateAsyncContext = UpdateAsyncContextT *;
+
+UpdateAsyncContext CreateUpdateAsyncContext();
+
+int32_t FillContextInDataAndOutBlob(napi_env env, napi_value *argv, UpdateAsyncContext context, size_t index);
+
+int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncContext context,
+    size_t index, size_t maxIndex);
+
+void DeleteUpdateAsyncContext(napi_env env, UpdateAsyncContext &context);
+
+napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context);
+
 napi_value HuksNapiUpdateSession(napi_env env, napi_callback_info info);
 
 napi_value HuksNapiFinishSession(napi_env env, napi_callback_info info);

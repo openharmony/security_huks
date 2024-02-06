@@ -18,8 +18,27 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "hks_type.h"
 
 namespace HuksNapiItem {
+struct ExportKeyAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob *key = nullptr;
+};
+using ExportKeyAsyncContext = ExportKeyAsyncContextT *;
+
+ExportKeyAsyncContext CreateExportKeyAsyncContext();
+
+void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &context);
+
+napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context);
+
 napi_value HuksNapiExportKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 

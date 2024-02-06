@@ -25,25 +25,10 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
-    constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MIN_ARGS = 3;
-    constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MAX_ARGS = 4;
-}  // namespace
+constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MIN_ARGS = 3;
+constexpr int HUKS_NAPI_IMPORT_WRAPPED_KEY_MAX_ARGS = 4;
 
-struct ImportWrappedKeyAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksBlob *wrappingKeyAlias = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-    struct HksBlob *wrappedData = nullptr;
-};
-using ImportWrappedKeyAsyncContext = ImportWrappedKeyAsyncContextT *;
-
-static ImportWrappedKeyAsyncContext CreateImportWrappedKeyAsyncContext()
+ImportWrappedKeyAsyncContext CreateImportWrappedKeyAsyncContext()
 {
     ImportWrappedKeyAsyncContext context =
         static_cast<ImportWrappedKeyAsyncContext>(HksMalloc(sizeof(ImportWrappedKeyAsyncContextT)));
@@ -53,7 +38,7 @@ static ImportWrappedKeyAsyncContext CreateImportWrappedKeyAsyncContext()
     return context;
 }
 
-static void DeleteImportWrappedKeyAsyncContext(napi_env env, ImportWrappedKeyAsyncContext &context)
+void DeleteImportWrappedKeyAsyncContext(napi_env env, ImportWrappedKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -84,7 +69,7 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_IMPORT_WRAPPED_KEY_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -92,6 +77,7 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     size_t index = 0;
     napi_value result = ParseKeyAlias(env, argv[index], context->keyAlias);
     if (result == nullptr) {
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "could not get key alias");
         HKS_LOG_E("importWrappedKey parse keyAlias failed");
         return nullptr;
     }
@@ -117,7 +103,7 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     return GetInt32(env, 0);
 }
 
-static napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext context)
+napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

@@ -18,8 +18,29 @@
 
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
+#include "hks_type.h"
 
 namespace HuksNapiItem {
+struct InitAsyncContext {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int64_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob *handle = nullptr;
+    struct HksBlob *token = nullptr;
+};
+
+using InitAsyncCtxPtr = InitAsyncContext *;
+
+InitAsyncCtxPtr CreateInitAsyncContext();
+
+void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context);
+
+napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context);
+
 napi_value HuksNapiInitSession(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 
