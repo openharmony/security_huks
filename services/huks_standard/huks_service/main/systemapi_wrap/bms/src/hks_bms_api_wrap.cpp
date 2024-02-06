@@ -89,7 +89,8 @@ static int32_t ConvertCallerInfoToJson(const std::string &idStr, const std::stri
     return HKS_SUCCESS;
 }
 
-enum HksCallerType HksGetCallerType(void) {
+enum HksCallerType HksGetCallerType(void)
+{
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
     switch (AccessTokenKit::GetTokenType(callingTokenId)) {
         case ATokenTypeEnum::TOKEN_HAP:
@@ -99,7 +100,7 @@ enum HksCallerType HksGetCallerType(void) {
             return HKS_SA_TYPE;
         default:
             return HKS_UNIFIED_TYPE;
-    } 
+    }
 }
 
 int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName, int32_t hapNameSize)
