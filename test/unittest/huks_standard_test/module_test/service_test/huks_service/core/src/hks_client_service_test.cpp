@@ -219,7 +219,6 @@ static struct HksBlob g_udid = { sizeof(UDID_DATA), (uint8_t *)UDID_DATA };
 static struct HksBlob g_sn = { sizeof(SN_DATA), (uint8_t *)SN_DATA };
 static struct HksBlob g_dId = { sizeof(DEVICE_ID), (uint8_t *)DEVICE_ID };
 
-static struct HksBlob g_appIdBlob = { sizeof(APP_ID), (uint8_t *)APP_ID };
 static struct HksBlob g_brandBlob = { sizeof(ATTEST_BRAND), (uint8_t *)ATTEST_BRAND };
 
 /**
@@ -256,7 +255,6 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest003, TestSize.Level0)
         { .tag = HKS_TAG_ATTESTATION_ID_MANUFACTURER, .blob = manufacturerBlob },
         { .tag = HKS_TAG_ATTESTATION_ID_MODEL, .blob = modelBlob },
         { .tag = HKS_TAG_ATTESTATION_ID_SOCID, .blob = socidBlob },
-        { .tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = g_appIdBlob },
     };
     uint32_t userIdInt = 0;
     struct HksBlob userId = { sizeof(userIdInt), (uint8_t *)(&userIdInt)};
