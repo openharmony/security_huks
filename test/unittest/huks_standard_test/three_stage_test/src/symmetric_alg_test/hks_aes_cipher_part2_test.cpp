@@ -250,7 +250,7 @@ static struct HksParam g_decrypt1Params011[] = {
         .tag = HKS_TAG_KEY_SIZE,
         .uint32Param = HKS_AES_KEY_SIZE_192
     },
-    NO_DIGEST_NOR_PADDING
+    NO_DIGEST_NO_PADDING
 };
 
 static struct HksParam g_genParams012[] = {
@@ -477,6 +477,58 @@ static struct HksParam g_decryptParams014[] = {
 #endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 
+static struct HksParam g_genParams015[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_192
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_GCM
+    }
+};
+static struct HksParam g_encryptParams015[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    },
+    HKS_AES_192_NO_AAD
+};
+static struct HksParam g_decryptParams015[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    },
+    HKS_AES_192_NO_AAD
+};
+static struct HksParam g_decrypt1Params015[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_192
+    },
+    NO_DIGEST_NO_PADDING_NO_AAD
+};
+
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test008
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-CBC pad-NONE size-192.
@@ -664,6 +716,41 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test014, TestSize.Level0)
 }
 #endif
 #endif // HKS_UNTRUSTED_RUNNING_ENV
+
+/**
+ * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test015
+ * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE aad-NONE size-192.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksAESCipherKeyAliasTest015";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams015, sizeof(g_genParams015) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams015, sizeof(g_encryptParams015) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams015, sizeof(g_decryptParams015) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    struct HksParamSet *decrypt1ParamSet = nullptr;
+    ret = InitParamSet(&decrypt1ParamSet, g_decrypt1Params015, sizeof(g_decrypt1Params015) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt1) failed.";
+
+    ret = HksAesCipherTestCaseGcm2(&keyAlias, genParamSet, encryptParamSet, decryptParamSet, decrypt1ParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
 #else
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test011
@@ -685,6 +772,36 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test011, TestSize.Level0)
 
     struct HksParamSet *decryptParamSet = nullptr;
     ret = InitParamSet(&decryptParamSet, g_decryptParams011, sizeof(g_decryptParams011) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksAesCipherTestCaseGcm1(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
+/**
+ * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test015
+ * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE aad-NONE size-192.
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksAESCipherKeyAliasTest015";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams015, sizeof(g_genParams015) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams015, sizeof(g_encryptParams015) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams015, sizeof(g_decryptParams015) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksAesCipherTestCaseGcm1(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
