@@ -623,7 +623,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest005, TestSize.Level0)
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    permsTest[0] = "ohos.permission.PLACE_CALL";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 1,
@@ -664,13 +664,13 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest006, TestSize.Level0)
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    permsTest[0] = "ohos.permission.PLACE_CALL";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 1,
         .dcaps = nullptr,
         .perms = permsTest,
-        .aplStr = "system_basic",
+        .aplStr = "normal",
     };
     infoInstance.acls = acls;
     infoInstance.aclsNum = 0;
@@ -708,7 +708,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest007, TestSize.Level0)
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    permsTest[0] = "ohos.permission.PLACE_CALL";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 1,
@@ -758,7 +758,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest008, TestSize.Level0)
         .permsNum = 1,
         .dcaps = nullptr,
         .perms = permsTest,
-        .aplStr = "system_basic",
+        .aplStr = "system_core",
     };
     infoInstance.acls = acls;
     infoInstance.aclsNum = 0;
@@ -788,7 +788,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest008, TestSize.Level0)
 
 /**
  * @tc.name: HksDeviceSecTest.HksDeviceSecTest009
- * @tc.desc: test normal sa has ohos.permission.ATTEST_KEY
+ * @tc.desc: test normal sa has ohos.permission.ATTEST_KEY use keyAttest
  * @tc.type: FUNC
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest009, TestSize.Level0)
@@ -834,7 +834,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest009, TestSize.Level0)
 
 /**
  * @tc.name: HksDeviceSecTest.HksDeviceSecTest010
- * @tc.desc: test system_basic sa has ohos.permission.ATTEST_KEY
+ * @tc.desc: test system_basic sa has ohos.permission.ATTEST_KEY use keyAttest
  * @tc.type: FUNC
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest010, TestSize.Level0)
