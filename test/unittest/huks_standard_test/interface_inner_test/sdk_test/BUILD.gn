@@ -81,7 +81,6 @@ ohos_unittest("hukssdk_test") {
     "//third_party/googletest:gtest_main",
   ]
   external_deps = [
-    "access_token:libaccesstoken_sdk",
     "c_utils:utils",
     "hilog:libhilog",
   ]

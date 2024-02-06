@@ -345,9 +345,8 @@ static int32_t TestKeyAttest2(struct HksCertChain *certChain, bool isAnon)
         HksFreeParamSet(&paramSet);
         return ret;
     }
-
-    if (ret != HKS_SUCCESS) {
     ret = isAnon ? HksAnonAttestKey(&keyAlias, paramSet, certChain) : HksAttestKey(&keyAlias, paramSet, certChain);
+    if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_E("HksAnonAttestKey/HksAttestKey failed");
     }
     HksFreeParamSet(&paramSet);
@@ -753,7 +752,7 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest008, TestSize.Level0)
     uint64_t tokenId;
     const char **acls = new const char *[1];
     const char **permsTest = new const char *[1];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
+    permsTest[0] = "ohos.permission.PLACE_CALL";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 1,
@@ -796,10 +795,10 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest009, TestSize.Level0)
 {
     uint64_t tokenId;
     const char **acls = new const char *[1];
-    acls[0] = "ohos.permission.ATTEST_KEY"; // system_basic
+    acls[0] = "ohos.permission.ATTEST_KEY";
     const char **permsTest = new const char *[2];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
-    permsTest[1] = "ohos.permission.ATTEST_KEY"; // system_basic
+    permsTest[0] = "ohos.permission.PLACE_CALL";
+    permsTest[1] = "ohos.permission.ATTEST_KEY";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 2,
@@ -835,23 +834,23 @@ HWTEST_F(HksDeviceSecTest, HksDeviceSecTest009, TestSize.Level0)
 
 /**
  * @tc.name: HksDeviceSecTest.HksDeviceSecTest010
- * @tc.desc: test system_base sa has ohos.permission.ATTEST_KEY
+ * @tc.desc: test system_basic sa has ohos.permission.ATTEST_KEY
  * @tc.type: FUNC
  */
 HWTEST_F(HksDeviceSecTest, HksDeviceSecTest010, TestSize.Level0)
 {
     uint64_t tokenId;
     const char **acls = new const char *[1];
-    acls[0] = "ohos.permission.ATTEST_KEY"; // system_basic
+    acls[0] = "ohos.permission.ATTEST_KEY";
     const char **permsTest = new const char *[2];
-    permsTest[0] = "ohos.permission.PLACE_CALL"; // system_basic
-    permsTest[1] = "ohos.permission.ATTEST_KEY"; // system_basic
+    permsTest[0] = "ohos.permission.PLACE_CALL";
+    permsTest[1] = "ohos.permission.ATTEST_KEY";
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
         .permsNum = 2,
         .dcaps = nullptr,
         .perms = permsTest,
-        .aplStr = "system_base",
+        .aplStr = "system_basic",
     };
     infoInstance.acls = acls;
     infoInstance.aclsNum = 1;

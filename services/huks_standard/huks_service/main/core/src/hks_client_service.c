@@ -1328,14 +1328,12 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, st
     do {
         ret = AppendToNewParamSet(paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
-
-        enum HksAppIdType appidType;
-        HksGetAppIdType(&appidType);
-
-        if (appidType == HKS_HAP_APPID) {
+        
+        enum HksCallerType appidType = HksGetCallerType();
+        if (appidType == HKS_HAP_TYPE) {
             ret = HksGetHapInfo(processInfo, &appInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapInfo failed")
-        } else if (appidType == HKS_SA_APPID) {
+        } else if (appidType == HKS_SA_TYPE) {
             ret = HksGetSaInfo(processInfo, &appInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetSaInfo failed")
         } else {

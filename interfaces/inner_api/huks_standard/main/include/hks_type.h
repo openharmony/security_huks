@@ -510,12 +510,12 @@ enum HksAttestationMode {
 };
 
 /**
- * @brief hks attestation AppIdType
+ * @brief hks attestation Caller Type
  */
-enum HksAppIdType {
-    HKS_HAP_APPID = 0x1,
-    HKS_SA_APPID,
-    HKS_UNIFIED_APPID,
+enum HksCallerType {
+    HKS_HAP_TYPE = 0x1,
+    HKS_SA_TYPE,
+    HKS_UNIFIED_TYPE,
 };
 
 #define HKS_ASSIGN_ENUM_VALUE(x, y) x = y,
