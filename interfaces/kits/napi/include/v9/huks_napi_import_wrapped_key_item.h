@@ -19,8 +19,27 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "hks_type.h"
+
 namespace HuksNapiItem {
-    napi_value HuksNapiImportWrappedKeyItem(napi_env env, napi_callback_info info);
+struct ImportWrappedKeyAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksBlob *wrappingKeyAlias = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksBlob *wrappedData = nullptr;
+};
+
+using ImportWrappedKeyAsyncContext = ImportWrappedKeyAsyncContextT *;
+ImportWrappedKeyAsyncContext CreateImportWrappedKeyAsyncContext();
+void DeleteImportWrappedKeyAsyncContext(napi_env env, ImportWrappedKeyAsyncContext &context);
+napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext context);
+
+napi_value HuksNapiImportWrappedKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 
 #endif // HUKS_NAPI_IMPORT_WRAPPED_KEY_ITEM_H

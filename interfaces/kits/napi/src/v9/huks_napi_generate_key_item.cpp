@@ -25,24 +25,10 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_GETNRATEKEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_GENERATEKEY_MAX_ARGS = 3;
-}  // namespace
 
-struct GenerateKeyAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksParamSet *paramSetIn = nullptr;
-    struct HksParamSet *paramSetOut = nullptr;
-};
-using GenerateKeyAsyncContext = GenerateKeyAsyncContextT *;
-
-static GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
+GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
 {
     GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(HksMalloc(sizeof(GenerateKeyAsyncContextT)));
     if (context != nullptr) {
@@ -51,7 +37,7 @@ static GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
     return context;
 }
 
-static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext &context)
+void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -71,7 +57,7 @@ static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, 
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_GETNRATEKEY_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -91,7 +77,7 @@ static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, 
     return GetInt32(env, 0);
 }
 
-static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context)
+napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

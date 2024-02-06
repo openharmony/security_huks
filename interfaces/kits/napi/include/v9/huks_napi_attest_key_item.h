@@ -21,7 +21,29 @@
 #include "hks_type.h"
 
 namespace HuksNapiItem {
+struct AttestKeyAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+    struct HksCertChain *certChain = nullptr;
+    uint32_t certChainCapacity = 0;
+    bool isAnon = false;
+};
+using AttestKeyAsyncContext = AttestKeyAsyncContextT *;
+
+AttestKeyAsyncContext CreateAttestKeyAsyncContext(bool isAnon);
+
+void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &context);
+
+napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context);
+
 napi_value HuksNapiAttestKeyItem(napi_env env, napi_callback_info info);
+
+napi_value HuksNapiAnonAttestKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 
 #endif  // HUKS_NAPI_ATTEST_KEY_ITEM_H

@@ -21,22 +21,30 @@
 #include "hks_type.h"
 #include "huks_napi_abort.h"
 #include "huks_napi_abort_session.h"
-#include "huks_napi_anon_attest_key_item.h"
+#include "huks_napi_attest_key_item_as_user.h"
 #include "huks_napi_attest_key_item.h"
 #include "huks_napi_delete_key.h"
+#include "huks_napi_delete_key_item_as_user.h"
 #include "huks_napi_delete_key_item.h"
 #include "huks_napi_export_key.h"
+#include "huks_napi_export_key_item_as_user.h"
 #include "huks_napi_export_key_item.h"
 #include "huks_napi_generate_key.h"
+#include "huks_napi_generate_key_item_as_user.h"
 #include "huks_napi_generate_key_item.h"
-#include "huks_napi_get_key_properties.h"
+#include "huks_napi_get_key_item_properties_as_user.h"
 #include "huks_napi_get_key_item_properties.h"
+#include "huks_napi_get_key_properties.h"
 #include "huks_napi_get_sdk_version.h"
+#include "huks_napi_has_key_item_as_user.h"
 #include "huks_napi_has_key_item.h"
 #include "huks_napi_import_key.h"
+#include "huks_napi_import_key_item_as_user.h"
 #include "huks_napi_import_key_item.h"
+#include "huks_napi_import_wrapped_key_item_as_user.h"
 #include "huks_napi_import_wrapped_key_item.h"
 #include "huks_napi_init.h"
+#include "huks_napi_init_session_as_user.h"
 #include "huks_napi_init_session.h"
 #include "huks_napi_is_key_exist.h"
 #include "huks_napi_is_key_item_exist.h"
@@ -667,16 +675,26 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("abort", HuksNapiAbort),
 
     DECLARE_NAPI_FUNCTION("generateKeyItem", HuksNapiItemGenerateKey),
+    DECLARE_NAPI_FUNCTION("generateKeyItemAsUser", HuksNapiItemGenerateKeyAsUser),
     DECLARE_NAPI_FUNCTION("deleteKeyItem", HuksNapiDeleteKeyItem),
+    DECLARE_NAPI_FUNCTION("deleteKeyItemAsUser", HuksNapiDeleteKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("importKeyItem", HuksNapiImportKeyItem),
+    DECLARE_NAPI_FUNCTION("importKeyItemAsUser", HuksNapiImportKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("importWrappedKeyItem", HuksNapiImportWrappedKeyItem),
+    DECLARE_NAPI_FUNCTION("importWrappedKeyItemAsUser", HuksNapiImportWrappedKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("exportKeyItem", HuksNapiExportKeyItem),
+    DECLARE_NAPI_FUNCTION("exportKeyItemAsUser", HuksNapiExportKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("getKeyItemProperties", HuksNapiGetKeyItemProperties),
+    DECLARE_NAPI_FUNCTION("getKeyItemPropertiesAsUser", HuksNapiGetKeyItemPropertiesAsUser),
     DECLARE_NAPI_FUNCTION("isKeyItemExist", HuksNapiIsKeyItemExist),
     DECLARE_NAPI_FUNCTION("hasKeyItem", HuksNapihasKeyItem),
+    DECLARE_NAPI_FUNCTION("hasKeyItemAsUser", HuksNapiHasKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("attestKeyItem", HuksNapiAttestKeyItem),
+    DECLARE_NAPI_FUNCTION("attestKeyItemAsUser", HuksNapiAttestKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("anonAttestKeyItem", HuksNapiAnonAttestKeyItem),
+    DECLARE_NAPI_FUNCTION("anonAttestKeyItemAsUser", HuksNapiAnonAttestKeyItemAsUser),
     DECLARE_NAPI_FUNCTION("initSession", HuksNapiInitSession),
+    DECLARE_NAPI_FUNCTION("initSessionAsUser", HuksNapiInitSessionAsUser),
     DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
     DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
     DECLARE_NAPI_FUNCTION("abortSession", HuksNapiAbortSession),
