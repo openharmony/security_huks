@@ -102,6 +102,37 @@ int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t keyPadding)
     return ret;
 }
 
+int32_t TestGenerateKeyCommon(const struct HksBlob *keyAlias, const struct HksParam *tmpParams, int32_t arrNum)
+{
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = HksInitParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    ret = HksAddParams(paramSet, tmpParams, arrNum);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksAddParams failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksBuildParamSet(&paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(&paramSet);
+        return ret;
+    }
+
+    ret = HksGenerateKey(keyAlias, paramSet, nullptr);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksGenerateKey failed");
+    }
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
 int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     const struct HksTestCertChain *certChainParam)
 {
