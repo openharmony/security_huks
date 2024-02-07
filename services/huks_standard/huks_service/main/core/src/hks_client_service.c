@@ -1346,7 +1346,7 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, st
                 {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = appInfo},
                 {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE, .uint32Param = appidType}
             };
-            ret = HksAddParams(newParamSet, params, 2);
+            ret = HksAddParams(newParamSet, params, sizeof(params) / sizeof(params[0]));
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add appInfo failed")
         } else {
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Check appInfo Blob failed!")
