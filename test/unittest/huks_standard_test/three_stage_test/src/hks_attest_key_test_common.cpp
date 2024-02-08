@@ -61,6 +61,46 @@ void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos)
     }
 }
 
+int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
+{
+    int32_t ret = HksInitParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    if (tmpParams != nullptr) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
+    }
+
+    ret = HksBuildParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+    return ret;
+}
+
+int32_t TestGenerateKeyCommon(const struct HksBlob *keyAlias, const struct HksParam tmpParams[], uint32_t paramCount)
+{
+    struct HksParamSet *paramSet = nullptr;
+
+    int32_t ret = GenerateParamSet(&paramSet, tmpParams, paramCount);
+
+    ret = HksGenerateKey(keyAlias, paramSet, nullptr);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksGenerateKey failed");
+    }
+    HksFreeParamSet(&paramSet);
+    return ret;
+}
+
 int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t keyPadding)
 {
     struct HksParam tmpParams[] = {
@@ -73,32 +113,11 @@ int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t keyPadding)
         { .tag = HKS_TAG_KEY_GENERATE_TYPE, .uint32Param = HKS_KEY_GENERATE_TYPE_DEFAULT },
         { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_ECB },
     };
-    struct HksParamSet *paramSet = nullptr;
-    int32_t ret = HksInitParamSet(&paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksInitParamSet failed");
-        return ret;
-    }
 
-    ret = HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksAddParams failed");
-        HksFreeParamSet(&paramSet);
-        return ret;
-    }
-
-    ret = HksBuildParamSet(&paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksBuildParamSet failed");
-        HksFreeParamSet(&paramSet);
-        return ret;
-    }
-
-    ret = HksGenerateKey(keyAlias, paramSet, nullptr);
+    int32_t ret = TestGenerateKeyCommon(keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksGenerateKey failed");
     }
-    HksFreeParamSet(&paramSet);
     return ret;
 }
 
@@ -141,32 +160,6 @@ int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
         memset_s((*certChain)->certs[i].data, certChainParam->certDataSize, 0, certChainParam->certDataSize);
     }
     return 0;
-}
-
-int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
-{
-    int32_t ret = HksInitParamSet(paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksInitParamSet failed");
-        return ret;
-    }
-
-    if (tmpParams != nullptr) {
-        ret = HksAddParams(*paramSet, tmpParams, paramCount);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksAddParams failed");
-            HksFreeParamSet(paramSet);
-            return ret;
-        }
-    }
-
-    ret = HksBuildParamSet(paramSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksBuildParamSet failed");
-        HksFreeParamSet(paramSet);
-        return ret;
-    }
-    return ret;
 }
 
 static int32_t ValidataAndCompareCertInfo(ParamType type, const struct HksCertChain *certChain,
