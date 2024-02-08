@@ -55,7 +55,7 @@ void FreeCertChain(struct HksCertChain **certChain, const uint32_t pos);
 
 int32_t TestGenerateKey(const struct HksBlob *keyAlias, uint32_t keyPadding);
 
-int32_t TestGenerateKeyCommon(const struct HksBlob *keyAlias, const struct HksParam *tmpParams, int32_t arrNum);
+int32_t TestGenerateKeyCommon(const struct HksBlob *keyAlias, const struct HksParam tmpParams[], uint32_t paramCount);
 
 int32_t ConstructDataToCertChain(struct HksCertChain **certChain,
     const struct HksTestCertChain *certChainParam);

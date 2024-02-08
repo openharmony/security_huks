@@ -419,19 +419,18 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest012, TestSize.Level0)
         { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_ECC_KEY_SIZE_256 },
         { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY },
         { .tag = HKS_TAG_DIGEST, .uint32Param = HKS_DIGEST_SHA384 },
-        { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
     };
     int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    ret = GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
     const struct HksTestCertChain certParam = { true, true, true, g_size };
-    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
     const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
     ret = OH_Huks_AnonAttestKeyItem(&oh_g_keyAlias, (struct OH_Huks_ParamSet *) paramSet,
         (struct OH_Huks_CertChain *) certChain).errorCode;
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("OH_Huks_AnonAttestKeyItem fail, ret is %" LOG_PUBLIC "d!", ret);
-    }
+    HKS_LOG_I("OH_Huks_AnonAttestKeyItem, ret is %" LOG_PUBLIC "d!", ret);
     ASSERT_EQ(ret, HKS_SUCCESS);
     for (uint32_t i = 0; i < certChain->certsCount; i++) {
         printf("Get certChain[%d]:\n %s \n", i, certChain->certs[i].data);
@@ -460,15 +459,15 @@ HWTEST_F(HksAttestKeyNonIdsTest, HksAttestKeyNonIdsTest013, TestSize.Level0)
     };
     int32_t ret = TestGenerateKeyCommon(&g_keyAlias, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    ret = GenerateParamSet(&paramSet, g_commonParams, sizeof(g_commonParams) / sizeof(g_commonParams[0]));
+    ASSERT_EQ(ret, HKS_SUCCESS);
     const struct HksTestCertChain certParam = { true, true, true, g_size };
-    (void)ConstructDataToCertChain(&certChain, &certParam);
+    ret = ConstructDataToCertChain(&certChain, &certParam);
+    ASSERT_EQ(ret, HKS_SUCCESS);
     const struct OH_Huks_Blob oh_g_keyAlias = { sizeof(ALIAS), (uint8_t *)ALIAS };
     ret = OH_Huks_AnonAttestKeyItem(&oh_g_keyAlias, (struct OH_Huks_ParamSet *) paramSet,
         (struct OH_Huks_CertChain *) certChain).errorCode;
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("OH_Huks_AnonAttestKeyItem fail, ret is %" LOG_PUBLIC "d!", ret);
-    }
+    HKS_LOG_I("OH_Huks_AnonAttestKeyItem, ret is %" LOG_PUBLIC "d!", ret);
     ASSERT_EQ(ret, HKS_SUCCESS);
     for (uint32_t i = 0; i < certChain->certsCount; i++) {
         printf("Get certChain[%d]:\n %s \n", i, certChain->certs[i].data);
