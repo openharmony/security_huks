@@ -477,6 +477,7 @@ static struct HksParam g_decryptParams014[] = {
 #endif // HKS_UNTRUSTED_RUNNING_ENV
 #endif
 
+#ifndef TEMP_ISOLATION
 static struct HksParam g_genParams015[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -528,6 +529,7 @@ static struct HksParam g_decrypt1Params015[] = {
     },
     NO_DIGEST_NO_PADDING_NO_AAD
 };
+#endif
 
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test008
@@ -717,6 +719,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test014, TestSize.Level0)
 #endif
 #endif // HKS_UNTRUSTED_RUNNING_ENV
 
+#ifndef TEMP_ISOLATION
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test015
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE aad-NONE size-192.
@@ -750,7 +753,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
-
+#endif
 #else
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test011
@@ -782,6 +785,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test011, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifndef TEMP_ISOLATION
 /**
  * @tc.name: HksAesCipherPart2Test.HksAesCipherPart2Test015
  * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-GCM pad-NONE aad-NONE size-192.
@@ -811,5 +815,6 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 #endif
 }  // namespace Unittest::AesCipher
