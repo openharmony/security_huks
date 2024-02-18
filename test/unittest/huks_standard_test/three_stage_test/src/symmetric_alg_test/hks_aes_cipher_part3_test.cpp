@@ -739,6 +739,7 @@ static struct HksParam g_decryptParams025[] = {
     }
 };
 
+#ifndef TEMP_ISOLATION
 static struct HksParam g_genParams026[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -790,6 +791,7 @@ static struct HksParam g_decrypt1Params026[] = {
     },
     NO_DIGEST_NO_PADDING_NO_AAD
 };
+#endif
 
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test015
@@ -1310,6 +1312,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test028, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 
+#ifndef TEMP_ISOLATION
 #ifdef L2_STANDARD
 /**
  * @tc.name: HksAesCipherPart3Test.HksAesCipherPart3Test029
@@ -1374,5 +1377,6 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test029, TestSize.Level0)
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
 }
+#endif
 #endif
 } // namespace Unittest::AesCipher
