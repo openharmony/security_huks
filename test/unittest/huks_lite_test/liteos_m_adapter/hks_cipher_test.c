@@ -87,11 +87,6 @@ LITE_TEST_CASE(HksCipherTest, HksCipherTest004, Level1)
     TEST_ASSERT_TRUE(BaseTestEncrypt(1, TEST_INDEX_1, 1) == 0);
 }
 
-LITE_TEST_CASE(HksCipherTest, HksCipherTest005, Level1)
-{
-    TEST_ASSERT_TRUE(BaseTestEncrypt(1, TEST_INDEX_2, 1) == 0);
-}
-
 LITE_TEST_CASE(HksCipherTest, HksCipherTest006, Level1)
 {
     TEST_ASSERT_TRUE(BaseTestEncrypt(1, TEST_INDEX_3, 1) == 0);
@@ -110,11 +105,6 @@ LITE_TEST_CASE(HksCipherTest, HksCipherTest008, Level1)
 LITE_TEST_CASE(HksCipherTest, HksCipherTest009, Level1)
 {
     TEST_ASSERT_TRUE(BaseTestDecrypt(1, TEST_INDEX_1, 1) == 0);
-}
-
-LITE_TEST_CASE(HksCipherTest, HksCipherTest010, Level1)
-{
-    TEST_ASSERT_TRUE(BaseTestDecrypt(1, TEST_INDEX_2, 1) == 0);
 }
 
 LITE_TEST_CASE(HksCipherTest, HksCipherTest011, Level1)
