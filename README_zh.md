@@ -30,11 +30,11 @@ HUKS部件架构如下图所示：
 
 ```
 ├── build                              # 编译配置文件
-├── frameworks                         # 框架代码, 作为基础功能目录, 被interfaces和services使用.
+├── frameworks                         # 框架代码, 作为基础功能目录, 被interfaces和services使用
 │   ├── huks_lite                      # 小型和轻量系统编译脚本
 │   └── huks_standard                  # 代码实现
 ├── interfaces                         # 接口API代码
-│   ├── innerkits                      # inner api接口
+│   ├── inner_api                      # inner api接口
 │   └── kits                           # 对外api接口
 ├── services                           # 服务框架代码
 │   └── huks_standard
@@ -61,7 +61,7 @@ HUKS部件架构如下图所示：
 
 ### 接口说明
 
-[接口文档](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-universal-keystore-kit/js-apis-huks.md)
+[接口文档](https://gitee.com/openharmony/docs/blob/master/zh-cn/application-dev/reference/apis-universal-keystore-kit/Readme-CN.md)
 
 ### 使用说明
 
