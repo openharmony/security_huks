@@ -39,7 +39,7 @@ int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
     struct HksBlob keyAlias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) };
     size_t inSize = size >> 1; // same as size / 2 to avoid magic number
     WrapParamSet psIn = ConstructHksParamSetFromFuzz(data, inSize);
-    size -= inSize;
+    size = size - ((size >> 1) - inSize);
 
     WrapParamSet psOut = ConstructHksParamSetFromFuzz(data, size);
 
