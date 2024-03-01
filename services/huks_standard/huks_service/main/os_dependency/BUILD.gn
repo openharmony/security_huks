@@ -85,6 +85,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
     external_deps += [
+      "access_token:libaccesstoken_sdk",
       "hilog:libhilog",
       "ipc:ipc_single",
       "safwk:system_ability_fwk",
