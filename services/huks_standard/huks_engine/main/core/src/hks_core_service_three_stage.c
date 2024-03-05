@@ -135,15 +135,15 @@ static int32_t CheckAesCipherAead(bool isEncrypt, const struct HksBlob *inData,
     return HKS_SUCCESS;
 }
 
-static int32_t CheckBlockCipherOther(bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
+static int32_t CheckBlockCipherOther(uint32_t mode, bool isEncrypt, uint32_t padding, const struct HksBlob *inData,
     const struct HksBlob *outData)
 {
     uint32_t paddingSize = 0;
 
     if (isEncrypt) {
         if (padding == HKS_PADDING_NONE) {
-            if (inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
-                HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %" LOG_PUBLIC "u", inData->size);
+            if ((mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) && inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
+                HKS_LOG_E("encrypt cbc or ecb no-padding, invalid inSize: %" LOG_PUBLIC "u", inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
         } else {
@@ -176,11 +176,17 @@ static int32_t CheckBlockCipherData(bool isEncrypt, const struct HksUsageSpec *u
     const uint32_t mode = usageSpec->mode;
     const uint32_t alg = usageSpec->algType;
     int32_t ret = HKS_ERROR_NOT_SUPPORTED;
-    if (((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM4)) &&
-        ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB))) {
-        ret = CheckBlockCipherOther(isEncrypt, padding, inData, outData);
-    } else if ((alg == HKS_ALG_AES) && ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM))) {
-        ret = CheckAesCipherAead(isEncrypt, inData, outData);
+
+    if (mode == HKS_MODE_GCM || mode == HKS_MODE_CCM) {
+        if (alg == HKS_ALG_AES) {
+            ret = CheckAesCipherAead(isEncrypt, inData, outData);
+        }
+    } else if (mode == HKS_MODE_CFB || mode == HKS_MODE_OFB) {
+        if (alg == HKS_ALG_SM4) {
+            ret = CheckBlockCipherOther(mode, isEncrypt, padding, inData, outData);
+        }
+    } else if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_ECB) {
+        ret = CheckBlockCipherOther(mode, isEncrypt, padding, inData, outData);
     }
 
     return ret;
@@ -844,7 +850,7 @@ static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
 {
     int32_t ret = HksCheckFinishOutSize(true, keyNode->runtimeParamSet, inData, outData);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "aes encrypt finish check data size failed")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "sm4 encrypt finish check data size failed")
 
     struct HksParam *ctxParam = NULL;
     ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
@@ -855,7 +861,7 @@ static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
 
     ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, NULL, alg);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("aes encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("sm4 encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
         return ret;
     }

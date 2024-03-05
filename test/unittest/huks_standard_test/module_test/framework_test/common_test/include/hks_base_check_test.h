@@ -24,5 +24,17 @@ int HksBaseCheckTest004(void);
 int HksBaseCheckTest005(void);
 int HksBaseCheckTest006(void);
 int HksBaseCheckTest007(void);
+int HksBaseCheckTest008(void);
+int HksBaseCheckTest009(void);
+int HksBaseCheckTest010(void);
+int HksBaseCheckTest011(void);
+int HksBaseCheckTest012(void);
+int HksBaseCheckTest013(void);
+int HksBaseCheckTest014(void);
+int HksBaseCheckTest015(void);
+int HksBaseCheckTest016(void);
+int HksBaseCheckTest017(void);
+int HksBaseCheckTest018(void);
+int HksBaseCheckTest019(void);
 }
 #endif // HKS_BASE_CHECK_TEST_H

@@ -65,7 +65,8 @@ int32_t HksOpensslAesDecrypt(const struct HksBlob *key, const struct HksUsageSpe
     defined(HKS_SUPPORT_AES_ECB_NOPADDING) || defined(HKS_SUPPORT_AES_GCM) ||              \
     defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||        \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) ||    \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||        \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
 typedef struct HksOpensslBlockCipherCtx {
     uint32_t algType;
     uint32_t mode;

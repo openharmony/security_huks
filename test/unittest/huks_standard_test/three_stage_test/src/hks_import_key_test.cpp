@@ -415,6 +415,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_026_PARAMS = {
     .importKeyResult = HKS_ERROR_INVALID_KEY_SIZE,
 };
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 /* 027: sm4-invalid-mode-gcm */
 const ImportKeyCaseParams HKS_IMPORT_TEST_027_PARAMS = {
     .params =
@@ -428,6 +429,7 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_027_PARAMS = {
     .keySize = HKS_SM4_KEY_SIZE_128 / HKS_BITS_PER_BYTE,
     .importKeyResult = HKS_ERROR_INVALID_MODE,
 };
+#endif
 
 /* 028: sm4-invalid-padding-ctr-pcks7 */
 const ImportKeyCaseParams HKS_IMPORT_TEST_028_PARAMS = {
@@ -831,10 +833,12 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest026, TestSize.Level0)
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_026_PARAMS), HKS_SUCCESS);
 }
 
+#ifdef HKS_UNTRUSTED_RUNNING_ENV
 HWTEST_F(HksImportKeyTest, HksImportKeyTest027, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_027_PARAMS), HKS_SUCCESS);
 }
+#endif
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest028, TestSize.Level0)
 {

@@ -32,6 +32,20 @@ int HksSm4CipherPartTest006(void);
 int HksSm4CipherPartTest007(void);
 
 int HksSm4CipherPartTest008(void);
+
+int HksSm4CipherPartTest009(void);
+
+int HksSm4CipherPartTest010(void);
+
+int HksSm4CipherPartTest011(void);
+
+int HksSm4CipherPartTest012(void);
+
+int HksSm4CipherPartTest013(void);
+
+int HksSm4CipherPartTest014(void);
+
+int HksSm4CipherPartTest015(void);
 #endif
 } // namespace Unittest::Sm4Cipher
 #endif // HKS_SM4_CIPHER_PART2_TEST_H
