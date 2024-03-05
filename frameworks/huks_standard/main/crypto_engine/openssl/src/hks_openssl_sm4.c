@@ -53,39 +53,26 @@ int32_t HksOpensslSm4GenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 }
 #endif
 
-static const EVP_CIPHER *GetSm4CbcCipherType(uint32_t keySize)
-{
-    switch (keySize) {
-        case HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128):
-            return EVP_sm4_cbc();
-        default:
-            return NULL;
-    }
-}
-
-static const EVP_CIPHER *GetSm4CtrCipherType(uint32_t keySize)
-{
-    switch (keySize) {
-        case HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128):
-            return EVP_sm4_ctr();
-        default:
-            return NULL;
-    }
-}
-
-static const EVP_CIPHER *GetSm4EcbCipherType(uint32_t keySize)
-{
-    switch (keySize) {
-        case HKS_KEY_BYTES(HKS_AES_KEY_SIZE_128):
-            return EVP_sm4_ecb();
-        default:
-            return NULL;
-    }
-}
-
 static const EVP_CIPHER *GetSm4CipherType(uint32_t keySize, uint32_t mode)
 {
-    return GetBlockCipherType(keySize, mode, GetSm4CbcCipherType, GetSm4CtrCipherType, GetSm4EcbCipherType);
+    if (keySize != HKS_KEY_BYTES(HKS_SM4_KEY_SIZE_128)) {
+        return NULL;
+    }
+    switch (mode) {
+        case HKS_MODE_CBC:
+            return EVP_sm4_cbc();
+        case HKS_MODE_ECB:
+            return EVP_sm4_ecb();
+        case HKS_MODE_CTR:
+            return EVP_sm4_ctr();
+        case HKS_MODE_CFB:
+            return EVP_sm4_cfb();
+        case HKS_MODE_OFB:
+            return EVP_sm4_ofb();
+        default:
+            HKS_LOG_E("Unsupport sm4 mode! mode = %" LOG_PUBLIC "u", mode);
+            return NULL;
+    }
 }
 
 int32_t HksOpensslSm4EncryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec)
@@ -94,10 +81,13 @@ int32_t HksOpensslSm4EncryptInit(void **cryptoCtx, const struct HksBlob *key, co
     switch (usageSpec->mode) {
 #if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             ret = OpensslBlockCipherCryptInit(key, usageSpec, true, cryptoCtx, GetSm4CipherType);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslBlockCipherCryptInit for sm4 fail, ret = %" LOG_PUBLIC "d", ret)
@@ -122,10 +112,13 @@ int32_t HksOpensslSm4EncryptUpdate(void *cryptoCtx, const struct HksBlob *messag
     switch (mode) {
 #if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             ret = OpensslBlockCipherEncryptUpdate(cryptoCtx, message, cipherText);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslBlockCipherEncryptUpdate for sm4 fail, ret = %" LOG_PUBLIC "d", ret)
@@ -150,10 +143,13 @@ int32_t HksOpensslSm4EncryptFinal(void **cryptoCtx, const struct HksBlob *messag
     switch (mode) {
 #if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             ret = OpensslBlockCipherEncryptFinalThree(cryptoCtx, message, cipherText);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslBlockCipherEncryptFinalThree for sm4 fail, ret = %" LOG_PUBLIC "d", ret)
@@ -172,13 +168,20 @@ int32_t HksOpensslSm4DecryptInit(void **cryptoCtx, const struct HksBlob *key,
 {
     int32_t ret;
     switch (usageSpec->mode) {
+#if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
+    defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             ret = OpensslBlockCipherCryptInit(key, usageSpec, false, cryptoCtx, GetSm4CipherType);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslBlockCipherCryptInit for sm4 fail, ret = %" LOG_PUBLIC "d", ret)
             break;
+#endif
         default:
             HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", usageSpec->mode);
             return HKS_ERROR_INVALID_ARGUMENT;
@@ -194,13 +197,20 @@ int32_t HksOpensslSm4DecryptUpdate(void *cryptoCtx, const struct HksBlob *messag
 
     int32_t ret;
     switch (mode) {
+#if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
+    defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             ret = OpensslBlockCipherDecryptUpdate(cryptoCtx, message, plainText);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslBlockCipherDecryptUpdate for sm4 fail, ret = %" LOG_PUBLIC "d", ret)
             break;
+#endif
         default:
             HKS_LOG_E("Unsupport sm4 mode! mode = 0x%" LOG_PUBLIC "x", mode);
             return HKS_ERROR_INVALID_ARGUMENT;
@@ -219,10 +229,13 @@ int32_t HksOpensslSm4DecryptFinal(void **cryptoCtx, const struct HksBlob *messag
     switch (mode) {
 #if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             ret = OpensslBlockCipherDecryptFinalThree(cryptoCtx, message, cipherText);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslBlockCipherDecryptFinalThree for sm4 fail, ret = %" LOG_PUBLIC "d", ret)
@@ -247,10 +260,13 @@ void HksOpensslSm4HalFreeCtx(void **cryptoCtx)
     switch (opensslSm4Ctx->mode) {
 #if defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||     \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) || \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||     \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
+        case HKS_MODE_CFB:
+        case HKS_MODE_OFB:
             if ((EVP_CIPHER_CTX *)opensslSm4Ctx->append != NULL) {
                 EVP_CIPHER_CTX_free((EVP_CIPHER_CTX *)opensslSm4Ctx->append);
                 opensslSm4Ctx->append = NULL;

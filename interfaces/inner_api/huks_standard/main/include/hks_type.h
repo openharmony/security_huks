@@ -160,6 +160,7 @@ enum HksCipherMode {
     HKS_MODE_CBC = 2,
     HKS_MODE_CTR = 3,
     HKS_MODE_OFB = 4,
+    HKS_MODE_CFB = 5,
     HKS_MODE_CCM = 31,
     HKS_MODE_GCM = 32,
 };

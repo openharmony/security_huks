@@ -73,7 +73,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest001, TestSize.Level0)
 
 /**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest002
- * @tc.desc: tdd HksCheckCipherData, expecting HKS_ERROR_INVALID_MODE
+ * @tc.desc: tdd HksCheckCipherData, expecting HKS_ERROR_INVALID_ARGUMENT
  * @tc.type: FUNC
  */
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest002, TestSize.Level0)
@@ -83,7 +83,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest002, TestSize.Level0)
     struct Params param = { true, HKS_MODE_OFB };
     values.mode = param;
     int32_t ret = HksCheckCipherData(0, HKS_ALG_SM4, &values, nullptr, nullptr);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_MODE) << "HksCheckCipherData failed, ret = " << ret;
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksCheckCipherData failed, ret = " << ret;
 }
 
 /**
@@ -112,7 +112,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest004, TestSize.Level0)
 
 /**
  * @tc.name: HksBaseCheckTest.HksBaseCheckTest005
- * @tc.desc: tdd HksCheckCipherMutableParams, expecting HKS_ERROR_INVALID_ARGUMENT
+ * @tc.desc: tdd HksCheckCipherMutableParams, expecting HKS_ERROR_INVALID_PADDING
  * @tc.type: FUNC
  */
 HWTEST_F(HksBaseCheckTest, HksBaseCheckTest005, TestSize.Level0)
@@ -123,7 +123,7 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest005, TestSize.Level0)
     values.purpose = purParam;
     struct Params modeParam = { true, HKS_MODE_OFB };
     values.mode = modeParam;
-    struct Params paddingParam = { true, HKS_PADDING_NONE };
+    struct Params paddingParam = { true, HKS_PADDING_PKCS7 };
     values.padding = paddingParam;
     int32_t ret = HksCheckCipherMutableParams(HKS_CMD_ID_ENCRYPT, HKS_ALG_SM4, &values);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "HksCheckCipherMutableParams failed, ret = " << ret;
@@ -354,5 +354,24 @@ HWTEST_F(HksBaseCheckTest, HksBaseCheckTest018, TestSize.Level0)
     ret = HksGetKeySize(HKS_ALG_RSA, &key, &keySize);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_KEY_FILE) << "HksGetKeySize failed, ret = " << ret;
     HksFreeParamSet(&paramSet);
+}
+
+/**
+ * @tc.name: HksBaseCheckTest.HksBaseCheckTest019
+ * @tc.desc: tdd HksCheckCipherMutableParams, expecting HKS_ERROR_INVALID_PADDING
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksBaseCheckTest, HksBaseCheckTest019, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksBaseCheckTest019");
+    struct ParamsValues values;
+    struct Params purParam = { true, HKS_KEY_PURPOSE_ENCRYPT };
+    values.purpose = purParam;
+    struct Params modeParam = { true, HKS_MODE_CFB };
+    values.mode = modeParam;
+    struct Params paddingParam = { true, HKS_PADDING_PKCS7 };
+    values.padding = paddingParam;
+    int32_t ret = HksCheckCipherMutableParams(HKS_CMD_ID_ENCRYPT, HKS_ALG_SM4, &values);
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "HksCheckCipherMutableParams failed, ret = " << ret;
 }
 }

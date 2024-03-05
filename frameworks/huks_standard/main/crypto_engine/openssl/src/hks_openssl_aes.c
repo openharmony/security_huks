@@ -37,7 +37,8 @@
     defined(HKS_SUPPORT_AES_ECB_NOPADDING) || defined(HKS_SUPPORT_AES_GCM) ||              \
     defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||        \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) ||    \
-    defined(HKS_SUPPORT_SM4_ECB_PKCS7)
+    defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||        \
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
 
 ENABLE_CFI(const EVP_CIPHER *GetBlockCipherType(uint32_t keySize, uint32_t mode,
     const EVP_CIPHER *(*getCbcCipherType)(uint32_t keySize),

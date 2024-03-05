@@ -179,7 +179,7 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test007, TestSize.Lev
 HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test008, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test008");
-    const EVP_CIPHER *ret = GetSm4CbcCipherType(0);
+    const EVP_CIPHER *ret = GetSm4CipherType(0, HKS_MODE_CBC);
     ASSERT_EQ(ret, nullptr) << "HksFrameworkOpensslSm4Test008 failed, ret = " << ret;
 }
 
@@ -191,7 +191,7 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test008, TestSize.Lev
 HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test009, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test009");
-    const EVP_CIPHER *ret = GetSm4CtrCipherType(0);
+    const EVP_CIPHER *ret = GetSm4CipherType(0, HKS_MODE_CTR);
     ASSERT_EQ(ret, nullptr) << "HksFrameworkOpensslSm4Test009 failed, ret = " << ret;
 }
 
@@ -203,7 +203,7 @@ HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test009, TestSize.Lev
 HWTEST_F(HksFrameworkOpensslSm4Test, HksFrameworkOpensslSm4Test010, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFrameworkOpensslSm4Test010");
-    const EVP_CIPHER *ret = GetSm4EcbCipherType(0);
+    const EVP_CIPHER *ret = GetSm4CipherType(0, HKS_MODE_ECB);
     ASSERT_EQ(ret, nullptr) << "HksFrameworkOpensslSm4Test010 failed, ret = " << ret;
 }
 
