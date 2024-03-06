@@ -13,24 +13,6 @@
 
 import("//build/ohos.gni")
 
-ohos_ndk_library("libhuks_ndk") {
-  output_name = "huks_ndk"
-  output_extension = "z.so"
-  ndk_description_file = "./libhuks.ndk.json"
-  min_compact_version = "1"
-
-  # system_capability = "SystemCapability.Security.Huks"
-}
-
-ohos_ndk_headers("huks_header") {
-  dest_dir = "$ndk_headers_out_dir/huks"
-  sources = [
-    "./include/native_huks_api.h",
-    "./include/native_huks_param.h",
-    "./include/native_huks_type.h",
-  ]
-}
-
 config("huks_config") {
   include_dirs = [ "include" ]
 }
