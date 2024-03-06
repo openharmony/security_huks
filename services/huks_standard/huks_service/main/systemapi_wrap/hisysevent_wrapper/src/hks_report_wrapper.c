@@ -16,9 +16,10 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-#include "hks_type_inner.h"
 #include "hks_report_wrapper.h"
 #include "hks_template.h"
+#include "hks_type.h"
+#include "hks_type_inner.h"
 
 #define EXTRA_DATA_SIZE 512
 
@@ -29,6 +30,7 @@
 #define STRING_TAG_ITERATION "iteration"
 #define STRING_TAG_PURPOSE "purpose"
 #define STRING_TAG_ATTESTATION_MODE "attestationMode"
+#define STRING_TAG_PACKAGE_NAME "packageName"
 
 static const struct HksBlob g_tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
 static const struct HksBlob g_tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
@@ -39,9 +41,21 @@ static const struct HksBlob g_tagIteration = {sizeof(STRING_TAG_ITERATION) - 1, 
 static const struct HksBlob g_tagPurpose = {sizeof(STRING_TAG_PURPOSE) - 1, (uint8_t *)STRING_TAG_PURPOSE};
 static const struct HksBlob g_tagAttestationMode = {
     sizeof(STRING_TAG_ATTESTATION_MODE) - 1, (uint8_t *)STRING_TAG_ATTESTATION_MODE};
+static const struct HksBlob g_tagPackageName = {
+    sizeof(STRING_TAG_PACKAGE_NAME) - 1, (uint8_t *)STRING_TAG_PACKAGE_NAME};
 
 static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut, uint32_t *index)
 {
+    if (paramIn->tag == HKS_TAG_PACKAGE_NAME) {
+        int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%s",
+            paramIn->blob.data);
+        if (num < 0) {
+            HKS_LOG_E("snprintf_s failed!");
+            return HKS_ERROR_BAD_STATE;
+        }
+        *index = *index + num;
+        return HKS_SUCCESS;
+    }
     switch (GetTagType(paramIn->tag)) {
         case HKS_TAG_TYPE_UINT: {
             int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%u",
@@ -143,6 +157,7 @@ static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
     AppendIfExist(HKS_TAG_UNWRAP_ALGORITHM_SUITE, paramSetIn, &g_tagUnwrapAlgorithmSuit, extraOut, &index);
     AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &g_tagIteration, extraOut, &index);
     AppendIfExist(HKS_TAG_ATTESTATION_MODE, paramSetIn, &g_tagAttestationMode, extraOut, &index);
+    AppendIfExist(HKS_TAG_PACKAGE_NAME, paramSetIn, &g_tagPackageName, extraOut, &index);
 }
 
 int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo,

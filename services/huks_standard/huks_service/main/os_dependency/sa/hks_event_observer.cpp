@@ -86,10 +86,7 @@ namespace OHOS {
 namespace Security {
 namespace Hks {
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::systemEventSubscriber_ = nullptr;
-
-SystemEventSubscriber::SystemEventSubscriber(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo)
-    : OHOS::EventFwk::CommonEventSubscriber(subscriberInfo)
-{}
+bool SystemEventObserver::userUnlocked_ = false;
 
 void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
@@ -116,6 +113,9 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 
         GetUserId(userId, &(processInfo.userId));
         HksServiceDeleteProcessInfo(&processInfo);
+    } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
+        HKS_LOG_I("the credential-encrypted storage has become unlocked");
+        userUnlocked_ = true;
     }
 
     HKS_FREE_BLOB(processInfo.userId);
@@ -135,8 +135,9 @@ bool SystemEventObserver::SubscribeSystemEvent()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
+    matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo);
+    systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo, userUnlocked_);
 
     HKS_IF_NULL_LOGE_RETURN(systemEventSubscriber_, false, "huks system subscriber nullptr")
 
