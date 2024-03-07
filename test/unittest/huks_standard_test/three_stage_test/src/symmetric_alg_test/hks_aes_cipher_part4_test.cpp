@@ -39,16 +39,10 @@ public:
 
 void HksAesCipherPart4Test::SetUpTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "0");
-#endif
 }
 
 void HksAesCipherPart4Test::TearDownTestCase(void)
 {
-#ifdef L2_STANDARD
-    OHOS::SaveStringToFile("/sys/fs/selinux/enforce", "1");
-#endif
 }
 
 void HksAesCipherPart4Test::SetUp()
