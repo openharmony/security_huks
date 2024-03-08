@@ -79,6 +79,7 @@ ohos_shared_library("huks_ndk") {
     "-Werror",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   part_name = "huks"
   subsystem_name = "security"
 }
