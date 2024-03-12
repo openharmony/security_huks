@@ -29,6 +29,7 @@ ohos_static_library("ace_kit_huks") {
   if (huks_config_file != "") {
     print(huks_config_file)
     cflags += [ "-DHKS_CONFIG_FILE=\"${huks_config_file}\"" ]
+    cflags_cc = cflags
   }
 
   sources = [
