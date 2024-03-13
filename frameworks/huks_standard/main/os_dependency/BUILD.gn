@@ -35,7 +35,10 @@ if (os_level == "standard") {
       "./ipc/src/hks_request.cpp",
       "./posix/hks_mem.c",
     ]
-    deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+    deps = [ 
+      "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+      "//third_party/bounds_checking_function:libsec_shared",
+      ]
 
     complete_static_lib = true
 
