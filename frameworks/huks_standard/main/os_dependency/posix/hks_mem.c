@@ -18,7 +18,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
-#include "secure.h"
+#include "securec.h"
 
 void *HksMalloc(size_t size)
 {
