@@ -18,10 +18,16 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include "securec.h"
 
 void *HksMalloc(size_t size)
 {
-    return malloc(size);
+    void *ret = NULL;
+    ret = malloc(size);
+    if (ret != NULL) {
+        (void)memset_s(ret, size, 0, size);
+    }
+    return ret;
 }
 
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size)
