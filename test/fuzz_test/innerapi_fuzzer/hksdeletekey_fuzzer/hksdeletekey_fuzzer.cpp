@@ -21,7 +21,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-#include "../hks_fuzz_util.h"
+#include "hks_fuzz_util.h"
 
 namespace OHOS {
 namespace Security {
