@@ -20,6 +20,7 @@ ohos_fuzztest("HksGetCertificateChainFuzzTest") {
   fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksgetcertificatechain_fuzzer"
   include_dirs = [
     ".",
+    "..",
     "//third_party/bounds_checking_function/include",
     "//unittest/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
