@@ -52,13 +52,15 @@
           "samgr",
           "user_auth_framework",
           "drivers_interface_user_auth",
-          "drivers_interface_huks"
+          "drivers_interface_huks",
+          "openssl",
+          "bounds_checking_function",
+          "mbedtls",
+          "cJSON"
         ],
         "third_party": [
           "bounds_checking_function",
-          "openssl",
-          "mbedtls",
-          "cJSON"
+          "mbedtls"
         ]
       },
       "build": {

@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "../../../../../../../../services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c"
+#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c"
 
 #include "file_ex.h"
 #include "hks_log.h"

@@ -46,7 +46,6 @@ if (os_level == "standard") {
   ohos_executable("hks_compatibility_bin") {
     subsystem_name = "security"
     part_name = "huks"
-    include_dirs = [ "//third_party/bounds_checking_function/include" ]
     sanitize = {
       integer_overflow = true
       cfi = true
@@ -57,11 +56,13 @@ if (os_level == "standard") {
     }
     branch_protector_ret = "pac_ret"
     sources = [ "//base/security/huks/utils/compatibility_bin/compatibility_standard_bin.c" ]
-    deps = [ "//third_party/bounds_checking_function:libsec_static" ]
 
     cflags =
         [ "-DHKS_CONFIG_RKC_STORE_PATH=\"${huks_use_rkc_in_standard_path}\"" ]
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "bounds_checking_function:libsec_static",
+      "hilog:libhilog",
+    ]
     install_enable = true
   }
 } else {

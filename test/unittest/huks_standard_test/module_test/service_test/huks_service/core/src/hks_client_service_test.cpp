@@ -30,7 +30,7 @@
 
 #include "hks_test_modify_old_key.h"
 
-#include "../../../../../../../../services/huks_standard/huks_service/main/core/src/hks_client_service.c"
+#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_client_service.c"
 
 using namespace testing::ext;
 using namespace Unittest::AttestKey;

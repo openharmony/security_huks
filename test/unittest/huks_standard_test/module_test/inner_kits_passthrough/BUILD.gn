@@ -121,8 +121,7 @@ config("soft_huks_config") {
   cflags += [ "-D_DEFAULT_SOURCE" ]
 }
 config("hilog_dir") {
-  include_dirs =
-      [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
+  include_dirs = []
 }
 ohos_static_library("libhukssdk_static") {
   sanitize = {
@@ -172,14 +171,14 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl:libhuks_openssl_standard_static",
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency:libhuks_core_hal_api_static",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper:libhuks_utils_hisysevent_wrapper_static",
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/openssl:libcrypto_shared",
   ]
   external_deps = [
+    "bounds_checking_function:libsec_shared",
     "c_utils:utils",
     "hilog:libhilog",
     "hitrace:hitrace_meter",
     "hitrace:libhitracechain",
+    "openssl:libcrypto_shared",
     "safwk:system_ability_fwk",
     "samgr:samgr_proxy",
   ]
