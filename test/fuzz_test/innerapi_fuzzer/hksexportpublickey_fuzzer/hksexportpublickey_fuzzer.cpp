@@ -21,7 +21,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 
-#include "../hks_fuzz_util.h"
+#include "hks_fuzz_util.h"
 
 constexpr int ALIAS_SIZE = 10;
 constexpr int PUB_KEY_SIZE = 1024;

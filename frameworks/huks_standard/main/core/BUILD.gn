@@ -48,8 +48,10 @@ if (os_level == "standard") {
       ubsan = true
     }
     sources += [ "./src/hks_verifier.c" ]
-    deps += [ "//third_party/openssl:libcrypto_shared" ]
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "hilog:libhilog",
+      "openssl:libcrypto_shared",
+    ]
   }
 } else {
   ohos_static_library("libhuks_core_small_static") {

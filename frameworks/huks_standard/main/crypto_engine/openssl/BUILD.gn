@@ -89,15 +89,15 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
-    if (huks_dependency_openssl_path != "") {
-      deps += [ huks_dependency_openssl_path ]
-    } else {
-      deps += [ "//third_party/openssl:libcrypto_shared" ]
-    }
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
     ]
+    if (huks_dependency_openssl_path != "") {
+      deps += [ huks_dependency_openssl_path ]
+    } else {
+      external_deps += [ "openssl:libcrypto_shared" ]
+    }
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]

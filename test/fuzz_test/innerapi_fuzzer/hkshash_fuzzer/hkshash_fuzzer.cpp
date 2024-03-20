@@ -21,7 +21,7 @@
 
 #include <securec.h>
 
-#include "../hks_fuzz_util.h"
+#include "hks_fuzz_util.h"
 
 constexpr int HASH_SIZE = 512;
 namespace OHOS {

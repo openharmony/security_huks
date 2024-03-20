@@ -18,7 +18,7 @@
 #include <gtest/gtest.h>
 #include <string>
 
-#include "../../../../../../../../services/huks_standard/huks_engine/main/core/src/hks_keyblob.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_keyblob.c"
 
 #include "file_ex.h"
 #include "hks_api.h"

@@ -21,6 +21,7 @@ ohos_fuzztest("HksAnonAttestKeyFuzzTest") {
 
   include_dirs = [
     ".",
+    "..",
     "//third_party/bounds_checking_function/include",
     "../../../../frameworks/huks_standard/main/common/include/",
   ]
