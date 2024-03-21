@@ -15,7 +15,6 @@
 
 #include "hks_event_observer.h"
 
-#include "bundle_constants.h"
 #include "common_event_support.h"
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
@@ -93,10 +92,11 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
     struct HksProcessInfo processInfo = { { 0, nullptr }, { 0, nullptr } };
 
     auto want = data.GetWant();
+    constexpr const char* UID = "uid";
     std::string action = want.GetAction();
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
         action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED) {
-        int uid = want.GetIntParam(AppExecFwk::Constants::UID, -1);
+        int uid = want.GetIntParam(UID, -1);
         int userId = -1;
 #ifdef HAS_OS_ACCOUNT_PART
         OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(uid, userId);

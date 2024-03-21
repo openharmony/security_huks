@@ -57,10 +57,6 @@
           "bounds_checking_function",
           "mbedtls",
           "cJSON"
-        ],
-        "third_party": [
-          "bounds_checking_function",
-          "mbedtls"
         ]
       },
       "build": {
