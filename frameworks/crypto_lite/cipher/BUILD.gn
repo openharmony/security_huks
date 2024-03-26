@@ -32,21 +32,16 @@ ohos_shared_library("cipher_shared") {
     sources += [ "src/cipher_log.c" ]
   }
 
-  include_dirs = [
-    "include",
-    "//third_party/bounds_checking_function/include",
-  ]
-  deps = [
-    "//third_party/bounds_checking_function:libsec_shared",
-    "//third_party/mbedtls",
+  include_dirs = [ "include" ]
+  external_deps = [
+    "bounds_checking_function:libsec_shared",
+    "mbedtls:mbedtls_shared",
   ]
 
   if (os_level == "small") {
-    external_deps = [ "hilog_lite:hilog_shared" ]
+    external_deps += [ "hilog_lite:hilog_shared" ]
   } else if (os_level == "standard") {
-    external_deps = [ "hilog:libhilog" ]
-    include_dirs +=
-        [ "//base/hiviewdfx/hilog/interfaces/native/innerkits/include" ]
+    external_deps += [ "hilog:libhilog" ]
   }
 
   cflags = [
