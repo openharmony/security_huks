@@ -29,8 +29,6 @@ config("public_huks_config") {
     "//base/security/huks/frameworks/huks_standard/main/core/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
-    "//commonlibrary/utils_lite/memory/include/",
-    "//commonlibrary/utils_lite/include/",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
     "//base/security/huks/utils/crypto_adapter",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm/inc",
@@ -39,7 +37,6 @@ config("public_huks_config") {
     "//base/security/huks/services/huks_standard/huks_engine/main/core_dependency/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hisysevent_wrapper/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
-    "//foundation/bundlemanager/bundle_framework/interfaces/inner_api/appexecfwk_base/include",
   ]
   if (huks_use_rkc_in_standard) {
     include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
@@ -151,8 +148,6 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/frameworks/huks_standard/main/core/include",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency/sysinfo/include",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
-    "//commonlibrary/utils_lite/memory/include/",
-    "//commonlibrary/utils_lite/include/",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough",
     "//base/security/huks/utils/crypto_adapter",
 
