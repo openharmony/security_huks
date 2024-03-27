@@ -462,6 +462,7 @@ static napi_value CreateHuksErrorCode(napi_env env)
 static void AddHuksErrCodePart(napi_env env, napi_value errorCode)
 {
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_PERMISSION_FAIL", HUKS_ERR_CODE_PERMISSION_FAIL);
+    AddInt32Property(env, errorCode, "HUKS_ERR_CODE_NOT_SYSTEM_APP", HUKS_ERR_CODE_NOT_SYSTEM_APP);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_ILLEGAL_ARGUMENT", HUKS_ERR_CODE_ILLEGAL_ARGUMENT);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_NOT_SUPPORTED_API", HUKS_ERR_CODE_NOT_SUPPORTED_API);
     AddInt32Property(env, errorCode, "HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED", HUKS_ERR_CODE_FEATURE_NOT_SUPPORTED);
