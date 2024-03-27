@@ -29,6 +29,7 @@
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
+#include "tokenid_kit.h"
 #endif
 #include "ipc_skeleton.h"
 
@@ -256,5 +257,31 @@ int32_t SensitivePermissionCheck(const char *permission)
         HKS_LOG_E("Check Permission failed!%" LOG_PUBLIC "s", permission);
         return HKS_ERROR_NO_PERMISSION;
     }
+}
+
+int32_t SystemApiPermissionCheck(int callerUserId)
+{
+    auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
+    switch (OHOS::Security::AccessToken::AccessTokenKit::GetTokenType(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx))) {
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
+            if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
+                HKS_LOG_E("not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC "lu",
+                    accessTokenIDEx);
+                return HKS_ERROR_NOT_SYSTEM_APP;
+            }
+            if (callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND) {
+                HKS_LOG_E("not system hap, check permission failed, callerUserId %" LOG_PUBLIC "d", callerUserId);
+                return HKS_ERROR_NO_PERMISSION;
+            }
+            break;
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
+            break;
+        default:
+            HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC "lu", accessTokenIDEx);
+            return HKS_UNIFIED_TYPE;
+    }
+    return HKS_SUCCESS;
 }
 #endif

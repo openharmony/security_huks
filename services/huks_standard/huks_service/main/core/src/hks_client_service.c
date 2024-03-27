@@ -1328,7 +1328,7 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, st
     do {
         ret = AppendToNewParamSet(paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
-        
+
         enum HksCallerType appidType = HksGetCallerType();
         if (appidType == HKS_HAP_TYPE) {
             ret = HksGetHapInfo(processInfo, &appInfo);
@@ -1725,17 +1725,21 @@ static int32_t AppendIfBothTagExist(struct HksProcessInfo *processInfo, const st
 {
     int32_t ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
+    ret = SystemApiPermissionCheck(processInfo->userIdInt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
 
     if (storageLevelParam->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE) {
         if (specificUserIdParam->int32Param < 0) {
-            HKS_LOG_E("invalid specificUserId when tag storage level is DE!");
+            HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d, when tag storage level is DE!",
+                specificUserIdParam->int32Param);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         processInfo->specificUserIdInt = specificUserIdParam->int32Param;
         processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
     } else {
         if (specificUserIdParam->int32Param < HKS_ROOT_USER_UPPERBOUND) {
-            HKS_LOG_E("invalid specificUserId when tag storage level is CE or ECE!");
+            HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d, when tag storage level is CE or ECE!",
+                specificUserIdParam->int32Param);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         processInfo->specificUserIdInt = specificUserIdParam->int32Param;
@@ -1761,6 +1765,23 @@ static int32_t AppendIfOnlyStorageLevelTagExist(struct HksProcessInfo *processIn
     }
     return HKS_SUCCESS;
 }
+
+static int32_t AppendIfOnlySpecificUserIdTagExist(struct HksProcessInfo *processInfo,
+    const struct HksParam *specificUserIdParam)
+{
+    int32_t ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
+    ret = SystemApiPermissionCheck(processInfo->userIdInt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
+
+    if (specificUserIdParam->int32Param < HKS_ROOT_USER_UPPERBOUND) {
+        HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d!", specificUserIdParam->int32Param);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    processInfo->specificUserIdInt = specificUserIdParam->int32Param;
+    processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_CE;
+    return HKS_SUCCESS;
+}
 #endif
 
 int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSet *paramSet,
@@ -1781,8 +1802,7 @@ int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSe
     bool storageLevelExist = HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &storageLevelParam) == HKS_SUCCESS;
     bool specificUserIdExist = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS;
     if (!storageLevelExist && specificUserIdExist) {
-        HKS_LOG_E("must pass tag storage level when specific userId is passed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
+        return AppendIfOnlySpecificUserIdTagExist(processInfo, specificUserIdParam);
     } else if (storageLevelExist && specificUserIdExist) {
         return AppendIfBothTagExist(processInfo, storageLevelParam, specificUserIdParam);
     } else if (storageLevelExist && !specificUserIdExist) {

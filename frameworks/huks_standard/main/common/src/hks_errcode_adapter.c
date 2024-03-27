@@ -38,6 +38,13 @@ static struct HksError g_errCodeTable[] = {
             .data = NULL
         }
     }, {
+        .innerErrCode = HKS_ERROR_NOT_SYSTEM_APP,
+        .hksResult = {
+            .errorCode = HUKS_ERR_CODE_NOT_SYSTEM_APP,
+            .errorMsg = "Non-system applications are not allowed to use system APIs.",
+            .data = NULL
+        }
+    }, {
         .innerErrCode = HKS_ERROR_INVALID_ARGUMENT,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
