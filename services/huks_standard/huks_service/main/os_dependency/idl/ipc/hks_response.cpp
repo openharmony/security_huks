@@ -33,6 +33,7 @@
 #endif
 #include "ipc_skeleton.h"
 
+#include "hks_base_check.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
@@ -266,7 +267,7 @@ int32_t SystemApiPermissionCheck(int callerUserId)
         static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx))) {
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
             if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
-                HKS_LOG_E("not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC "lu",
+                HKS_LOG_E("not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC PRIu64,
                     accessTokenIDEx);
                 return HKS_ERROR_NOT_SYSTEM_APP;
             }
@@ -279,7 +280,7 @@ int32_t SystemApiPermissionCheck(int callerUserId)
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
             break;
         default:
-            HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC "lu", accessTokenIDEx);
+            HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
             return HKS_UNIFIED_TYPE;
     }
     return HKS_SUCCESS;
