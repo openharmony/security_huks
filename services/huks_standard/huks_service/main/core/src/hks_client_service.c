@@ -62,8 +62,6 @@
 #include "hks_bms_api_wrap.h"
 #endif
 
-#define HKS_ROOT_USER_UPPERBOUND 100
-
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
 static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
