@@ -842,10 +842,6 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
 
-        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
-            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
-
         if (isUpdate) {
             ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret)
@@ -909,10 +905,6 @@ void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outD
 
         ret = HksGetProcessInfoForIPC(context, &processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = AppendSpecificUserIdAndStorageLevelToProcessInfo(inParamSet, &processInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
-            "AppendSpecificUserIdAndStorageLevelToProcessInfo fail, ret = %" LOG_PUBLIC "d", ret)
 
         ret = HksServiceAbort(&handle, &processInfo, inParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceAbort fail, ret = %" LOG_PUBLIC "d", ret)
