@@ -31,6 +31,8 @@ struct HksOperation {
     bool isInUse;
     uint64_t batchOperationTimestamp;
     bool isBatchOperation;
+    bool isUserIdPassedDuringInit;
+    int userIdPassedDuringInit;
 };
 
 #ifdef __cplusplus

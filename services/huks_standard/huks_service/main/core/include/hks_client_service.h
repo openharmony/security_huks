@@ -84,13 +84,13 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
 int32_t HksServiceInit(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
     const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token);
 
-int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+int32_t HksServiceUpdate(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+int32_t HksServiceFinish(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+int32_t HksServiceAbort(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet);
 
 void HksServiceDeleteProcessInfo(const struct HksProcessInfo *processInfo);
