@@ -262,27 +262,28 @@ int32_t SensitivePermissionCheck(const char *permission)
 
 int32_t SystemApiPermissionCheck(int callerUserId)
 {
+    if (callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND) {
+        HKS_LOG_E("invalid callerUserId %" LOG_PUBLIC "d", callerUserId);
+        return HKS_ERROR_NO_PERMISSION;
+    }
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
-    switch (OHOS::Security::AccessToken::AccessTokenKit::GetTokenType(
-        static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx))) {
+    auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
+        static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx));
+    switch (tokenType) {
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
+        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
+            return HKS_SUCCESS;
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP:
             if (!OHOS::Security::AccessToken::TokenIdKit::IsSystemAppByFullTokenID(accessTokenIDEx)) {
                 HKS_LOG_E("not system hap, check permission failed, accessTokenIDEx %" LOG_PUBLIC PRIu64,
                     accessTokenIDEx);
                 return HKS_ERROR_NOT_SYSTEM_APP;
+            } else {
+                return HKS_SUCCESS;
             }
-            if (callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND) {
-                HKS_LOG_E("not system hap, check permission failed, callerUserId %" LOG_PUBLIC "d", callerUserId);
-                return HKS_ERROR_NO_PERMISSION;
-            }
-            break;
-        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
-        case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:
-            break;
         default:
             HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
-            return HKS_UNIFIED_TYPE;
+            return HKS_ERROR_INVALID_ACCESS_TYPE;
     }
-    return HKS_SUCCESS;
 }
 #endif

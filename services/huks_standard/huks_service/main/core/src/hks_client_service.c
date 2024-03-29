@@ -62,6 +62,10 @@
 #include "hks_bms_api_wrap.h"
 #endif
 
+#ifdef L2_STANDARD
+#define PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS"
+#endif
+
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
 static int32_t GetKeyData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
@@ -1740,10 +1744,11 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
 static int32_t AppendIfBothTagExist(struct HksProcessInfo *processInfo, const struct HksParam *storageLevelParam,
     const struct HksParam *specificUserIdParam)
 {
-    int32_t ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
-    ret = SystemApiPermissionCheck(processInfo->userIdInt);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
+    int32_t ret = SystemApiPermissionCheck(processInfo->userIdInt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed")
+    ret = SensitivePermissionCheck(PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendIfBothTagExist check %" LOG_PUBLIC "s permission fail",
+        PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)
 
     if (storageLevelParam->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE) {
         if (specificUserIdParam->int32Param < 0) {
@@ -1786,10 +1791,11 @@ static int32_t AppendIfOnlyStorageLevelTagExist(struct HksProcessInfo *processIn
 static int32_t AppendIfOnlySpecificUserIdTagExist(struct HksProcessInfo *processInfo,
     const struct HksParam *specificUserIdParam)
 {
-    int32_t ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
-    ret = SystemApiPermissionCheck(processInfo->userIdInt);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed");
+    int32_t ret = SystemApiPermissionCheck(processInfo->userIdInt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed")
+    ret = SensitivePermissionCheck(PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendIfOnlySpecificUserIdTagExist check %" LOG_PUBLIC "s permission fail",
+        PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)
 
     if (specificUserIdParam->int32Param < HKS_ROOT_USER_UPPERBOUND) {
         HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d!", specificUserIdParam->int32Param);
@@ -1847,7 +1853,7 @@ static int32_t AppendSpecificUserIdAndStorageLevelToProcessInfoWithOperation(
             storageLevelExist, specificUserIdExist,
             storageLevelParam, specificUserIdParam, processInfo);
     }
-    
+
     struct HksParam userIdPassedDuringInitParam = { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = 0 };
     if (!specificUserIdExist && operation->isUserIdPassedDuringInit) {
         // current param set does not contain specific user id, we will use the one passsed during init.
@@ -1855,7 +1861,8 @@ static int32_t AppendSpecificUserIdAndStorageLevelToProcessInfoWithOperation(
         specificUserIdParam = &userIdPassedDuringInitParam;
         specificUserIdExist = true;
     } else if (specificUserIdExist && operation->isUserIdPassedDuringInit) {
-        HKS_LOG_W("got userIdPassedDuringInit %" LOG_PUBLIC "u and current param set user id %" LOG_PUBLIC "u, ignore the one passed during init",
+        HKS_LOG_W("got userIdPassedDuringInit %" LOG_PUBLIC "u and current param set user id %"
+            LOG_PUBLIC "u, ignore the one passed during init",
             operation->userIdPassedDuringInit, specificUserIdParam->uint32Param);
     }
 
