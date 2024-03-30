@@ -27,27 +27,10 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_UPDATE_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_UPDATE_MAX_ARGS = 4;
-}  // namespace
 
-struct UpdateAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *handle = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-    struct HksBlob *inData = nullptr;
-    struct HksBlob *outData = nullptr;
-    struct HksBlob *token = nullptr;
-    bool isUpdate = false;
-};
-using UpdateAsyncContext = UpdateAsyncContextT *;
-
-static UpdateAsyncContext CreateUpdateAsyncContext()
+UpdateAsyncContext CreateUpdateAsyncContext()
 {
     UpdateAsyncContext context = static_cast<UpdateAsyncContext>(HksMalloc(sizeof(UpdateAsyncContextT)));
     if (context != nullptr) {
@@ -56,7 +39,7 @@ static UpdateAsyncContext CreateUpdateAsyncContext()
     return context;
 }
 
-static void DeleteUpdateAsyncContext(napi_env env, UpdateAsyncContext &context)
+void DeleteUpdateAsyncContext(napi_env env, UpdateAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -113,7 +96,7 @@ static int32_t FillContextInDataAndOutData(napi_env env, napi_value *argv, Updat
     return HKS_SUCCESS;
 }
 
-static int32_t FillContextInDataAndOutBlob(napi_env env, napi_value *argv, UpdateAsyncContext context, size_t index)
+int32_t FillContextInDataAndOutBlob(napi_env env, napi_value *argv, UpdateAsyncContext context, size_t index)
 {
     context->outData = static_cast<struct HksBlob *>(HksMalloc(sizeof(HksBlob)));
     if (context->outData == nullptr) {
@@ -178,7 +161,7 @@ static int32_t GetToken(napi_env env, napi_value object, UpdateAsyncContext cont
     return HKS_SUCCESS;
 }
 
-static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncContext context,
+int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncContext context,
     size_t index, size_t maxIndex)
 {
     if (index >= maxIndex) { /* only 2 input params */
@@ -231,76 +214,6 @@ static int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncCon
     return HKS_ERROR_BAD_STATE;
 }
 
-static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet *&paramSet)
-{
-    const HksParam *param = params.data();
-    size_t paramCount = params.size();
-    if (param == nullptr) {
-        return HKS_SUCCESS;
-    }
-
-    for (uint32_t i = 0; i < paramCount; ++i) {
-        int32_t ret = HksAddParams(paramSet, param, 1);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param[%" LOG_PUBLIC "u] failed", i);
-            return ret;
-        }
-        param++;
-    }
-    return HKS_SUCCESS;
-}
-
-static int32_t GetInputParamSet(napi_env env, napi_value object, struct HksBlob *&token, HksParamSet *&paramSet)
-{
-    std::vector<HksParam> params;
-    napi_value result = ParseParams(env, object, params);
-    if (result == nullptr) {
-        HKS_LOG_E("parse params failed");
-        FreeParsedParams(params);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-
-    HksParamSet *outParamSet = nullptr;
-    int32_t ret;
-    do {
-        ret = HksInitParamSet(&outParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("init paramSet failed");
-            break;
-        }
-
-        if (CheckBlob(token) == HKS_SUCCESS) { /* has token param */
-            HksParam tokenParam = {
-                .tag = HKS_TAG_AUTH_TOKEN,
-                .blob = *token
-            };
-            ret = HksAddParams(outParamSet, &tokenParam, 1);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("add token param failed.");
-                break;
-            }
-        }
-
-        ret = AddParams(params, outParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add params failed");
-            break;
-        }
-
-        ret = HksBuildParamSet(&outParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("build params failed");
-            break;
-        }
-    } while (0);
-    FreeParsedParams(params);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&outParamSet);
-    }
-    paramSet = outParamSet;
-    return ret;
-}
-
 static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, UpdateAsyncContext context)
 {
     size_t argc = HUKS_NAPI_UPDATE_MAX_ARGS;
@@ -308,7 +221,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_UPDATE_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -338,7 +251,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
         return nullptr;
     }
 
-    if (GetInputParamSet(env, properties, context->token, context->paramSet) != HKS_SUCCESS) {
+    if (ParseHksParamSetWithToken(env, context->token, properties, context->paramSet) == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
     }
@@ -346,7 +259,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     return GetInt32(env, 0);
 }
 
-static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context)
+napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

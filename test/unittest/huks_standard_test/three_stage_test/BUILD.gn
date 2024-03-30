@@ -23,10 +23,6 @@ ohos_unittest("huks_UT_test") {
 
   sources = [
     # "src/hks_add_ece_ce_path_test.cpp",
-    "../../../../frameworks/huks_standard/main/common/src/hks_errcode_adapter.c",
-    "../../../../interfaces/kits/c/src/native_huks_api.c",
-    "../../../../interfaces/kits/c/src/native_huks_api_adapter.c",
-    "../../../../interfaces/kits/c/src/native_huks_param.c",
     "src/asymmetric_alg_test/hks_dh_agree_test.cpp",
     "src/asymmetric_alg_test/hks_ecc_sign_verify_part2_test.cpp",
     "src/asymmetric_alg_test/hks_ecc_sign_verify_part3_test.cpp",

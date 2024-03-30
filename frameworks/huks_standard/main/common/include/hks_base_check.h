@@ -83,6 +83,8 @@ struct AuthAcceessKeyInfoChecker {
     uint32_t paramsCnt;
 };
 
+#define HKS_ROOT_USER_UPPERBOUND 100
+
 #ifdef __cplusplus
 extern "C" {
 #endif

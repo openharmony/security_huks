@@ -96,22 +96,27 @@ void FreeParsedParams(std::vector<HksParam> &params);
 
 napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &params);
 
-napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet, HksParam *addParam);
+napi_value ParseHksParamSetWithToken(napi_env env, struct HksBlob *&token, napi_value object, HksParamSet *&paramSet);
+
+napi_value ParseHksParamSetAndAddParam(
+    napi_env env, napi_value object, HksParamSet *&paramSet, const std::vector<HksParam> &addParam = {});
 
 napi_ref GetCallback(napi_env env, napi_value object);
 
 napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&handleBlob);
+
+napi_value GetUserIdValue(napi_env env, napi_value object, int &userId);
 
 void FreeHksCertChain(HksCertChain *&certChain, uint32_t certChainCapacity);
 
 void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref &callback,
     struct HksBlob *&blob, struct HksParamSet *&paramSet);
 
-napi_value ParseHandleAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
-    HksBlob *&handleBlob, HksParamSet *&paramSet);
-
 napi_value ParseKeyAliasAndHksParamSet(napi_env env, napi_value *argv, size_t &index,
     HksBlob *&keyAliasBlob, HksParamSet *&paramSet);
+
+napi_value ParseKeyAliasAndHksParamSetAsUser(napi_env env, int userId, napi_value *argv, size_t &index,
+    std::pair<HksBlob *&, HksParamSet *&> out);
 
 napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob);
 
@@ -124,5 +129,26 @@ void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred
 
 void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
+
+napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
+
+inline void HksNapiThrow(napi_env env, int32_t errCode, const char *errorMsg)
+{
+    napi_throw(env, CreateJsError(env, errCode, errorMsg));
+}
+
+inline void HksNapiThrowInsufficientMemory(napi_env env)
+{
+    HksNapiThrow(env, HUKS_ERR_CODE_INSUFFICIENT_MEMORY, "Insufficient memory.");
+}
+inline void HksNapiThrowInvalidParamCount(napi_env env)
+{
+    HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT,
+        "The number of parameters does not meet the expectation.");
+}
+inline void HksNapiThrowGetUserIdFail(napi_env env)
+{
+    HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "GetUserIdValue failed");
+}
 }  // namespace HuksNapiItem
 #endif
