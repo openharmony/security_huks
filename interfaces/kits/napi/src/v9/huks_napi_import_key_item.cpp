@@ -25,24 +25,9 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_IMPORT_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_IMPORT_KEY_MAX_ARGS = 3;
-}  // namespace
-
-struct ImportKeyAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-    struct HksBlob *key = nullptr;
-};
-using ImportKeyAsyncContext = ImportKeyAsyncContextT *;
-
-static ImportKeyAsyncContext CreateImportKeyAsyncContext()
+ImportKeyAsyncContext CreateImportKeyAsyncContext()
 {
     ImportKeyAsyncContext context = static_cast<ImportKeyAsyncContext>(HksMalloc(sizeof(ImportKeyAsyncContextT)));
     if (context != nullptr) {
@@ -51,7 +36,7 @@ static ImportKeyAsyncContext CreateImportKeyAsyncContext()
     return context;
 }
 
-static void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext &context)
+void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -74,7 +59,7 @@ static napi_value ImportKeyParseParams(napi_env env, napi_callback_info info, Im
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_IMPORT_KEY_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -100,7 +85,7 @@ static napi_value ImportKeyParseParams(napi_env env, napi_callback_info info, Im
     return GetInt32(env, 0);
 }
 
-static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context)
+napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

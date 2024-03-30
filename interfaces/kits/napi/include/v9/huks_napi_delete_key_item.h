@@ -19,7 +19,27 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "hks_type.h"
+
 namespace HuksNapiItem {
+struct DeleteKeyAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+};
+
+using DeleteKeyAsyncContext = DeleteKeyAsyncContextT *;
+
+DeleteKeyAsyncContext CreateDeleteKeyAsyncContext();
+
+void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext &context);
+
+napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context);
+
 napi_value HuksNapiDeleteKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 

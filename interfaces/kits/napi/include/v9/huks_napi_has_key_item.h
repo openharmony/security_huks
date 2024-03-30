@@ -19,7 +19,27 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "hks_type.h"
+
 namespace HuksNapiItem {
+struct IsKeyExistAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+};
+
+using IsKeyExistAsyncContext = IsKeyExistAsyncContextT *;
+
+IsKeyExistAsyncContext CreateIsKeyExistAsyncContext();
+
+void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext &context);
+
+napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext context);
+
 napi_value HuksNapihasKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 

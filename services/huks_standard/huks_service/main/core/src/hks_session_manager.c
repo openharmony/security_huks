@@ -256,6 +256,12 @@ int32_t CreateOperation(const struct HksProcessInfo *processInfo, const struct H
         }
     }
 
+    struct HksParam *specificUserIdParam = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS) {
+        operation->isUserIdPassedDuringInit = true;
+        operation->userIdPassedDuringInit = specificUserIdParam->uint32Param;
+    }
+
     ret = AddOperation(operation);
     if (ret != HKS_SUCCESS) {
         HKS_FREE_BLOB(operation->processInfo.processName);

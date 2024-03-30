@@ -19,7 +19,27 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "hks_param.h"
+
 namespace HuksNapiItem {
+struct GenerateKeyAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSetIn = nullptr;
+    struct HksParamSet *paramSetOut = nullptr;
+};
+using GenerateKeyAsyncContext = GenerateKeyAsyncContextT *;
+
+GenerateKeyAsyncContext CreateGenerateKeyAsyncContext();
+
+void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext &context);
+
+napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context);
+
 napi_value HuksNapiItemGenerateKey(napi_env env, napi_callback_info info);
 }  // namespace HuksNapi
 

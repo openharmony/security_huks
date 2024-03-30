@@ -19,7 +19,28 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "hks_type.h"
+
 namespace HuksNapiItem {
+struct GetKeyPropertiesAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *keyAlias = nullptr;
+    struct HksParamSet *paramSetIn = nullptr;
+    struct HksParamSet *paramSetOut = nullptr;
+};
+
+using GetKeyPropertiesAsyncContext = GetKeyPropertiesAsyncContextT *;
+
+GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext();
+
+void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsyncContext &context);
+
+napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext context);
+
 napi_value HuksNapiGetKeyItemProperties(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 

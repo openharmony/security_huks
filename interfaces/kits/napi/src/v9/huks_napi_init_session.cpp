@@ -25,28 +25,12 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-namespace {
 constexpr int HUKS_NAPI_INIT_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_INIT_MAX_ARGS = 3;
 
 constexpr int HKS_MAX_TOKEN_SIZE = 2048;
-}  // namespace
 
-struct InitAsyncContext {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int64_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-    struct HksBlob *handle = nullptr;
-    struct HksBlob *token = nullptr;
-};
-
-using InitAsyncCtxPtr = InitAsyncContext *;
-
-static InitAsyncCtxPtr CreateInitAsyncContext()
+InitAsyncCtxPtr CreateInitAsyncContext()
 {
     InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(HksMalloc(sizeof(InitAsyncContext)));
     if (context != nullptr) {
@@ -55,7 +39,7 @@ static InitAsyncCtxPtr CreateInitAsyncContext()
     return context;
 }
 
-static void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context)
+void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context)
 {
     if (context == nullptr) {
         return;
@@ -82,7 +66,7 @@ static napi_value ParseInitParams(napi_env env, napi_callback_info info, InitAsy
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_INIT_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -131,7 +115,7 @@ static int32_t InitOutParams(InitAsyncCtxPtr context)
     return HKS_SUCCESS;
 }
 
-static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
+napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

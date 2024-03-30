@@ -70,9 +70,12 @@ if (os_level == "standard") {
       ubsan = true
     }
 
-    external_deps = [ "ipc:ipc_single" ]
+    external_deps = [
+      "access_token:libaccesstoken_sdk",
+      "access_token:libtokenid_sdk",
+      "ipc:ipc_single",
+    ]
 
-    external_deps += [ "access_token:libaccesstoken_sdk" ]
     defines = []
 
     if (has_os_account_part) {

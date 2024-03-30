@@ -62,7 +62,9 @@
 #include "hks_bms_api_wrap.h"
 #endif
 
-#define HKS_ROOT_USER_UPPERBOUND 100
+#ifdef L2_STANDARD
+#define PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS"
+#endif
 
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
@@ -1328,7 +1330,7 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, st
     do {
         ret = AppendToNewParamSet(paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "int paramset failed")
-        
+
         enum HksCallerType appidType = HksGetCallerType();
         if (appidType == HKS_HAP_TYPE) {
             ret = HksGetHapInfo(processInfo, &appInfo);
@@ -1477,7 +1479,11 @@ static int32_t HksServiceCheckBatchUpdateTime(struct HksOperation *operation)
     return ret;
 }
 
-int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+static int32_t AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort(
+    const struct HksParamSet *paramSet, const struct HksOperation *operation,
+    struct HksProcessInfo *processInfo);
+
+int32_t HksServiceUpdate(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksHitraceId traceId = {0};
@@ -1494,6 +1500,11 @@ int32_t HksServiceUpdate(const struct HksBlob *handle, const struct HksProcessIn
             ret = HKS_ERROR_NOT_EXIST;
             break;
         }
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort(
+            paramSet, operation, processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort fail %" LOG_PUBLIC "d", ret)
 
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
         if (operation->accessTokenId != processInfo->accessTokenId) {
@@ -1564,7 +1575,7 @@ static int32_t InitOutputDataForFinish(struct HksBlob *output, const struct HksB
     return HKS_SUCCESS;
 }
 
-int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+int32_t HksServiceFinish(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
 {
     struct HksHitraceId traceId = {0};
@@ -1590,6 +1601,11 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
         ret = AppendAndQueryInFinish(handle, processInfo, paramSet, &newParamSet, &operation);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AppendAndQueryInFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort(
+            paramSet, operation, processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort fail %" LOG_PUBLIC "d", ret)
+
         ret = HuksAccessFinish(handle, newParamSet, inData, &output);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HuksAccessFinish fail, ret = %" LOG_PUBLIC "d", ret)
 
@@ -1609,7 +1625,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     return ret;
 }
 
-int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+int32_t HksServiceAbort(const struct HksBlob *handle, struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet)
 {
     struct HksHitraceId traceId = {0};
@@ -1627,6 +1643,11 @@ int32_t HksServiceAbort(const struct HksBlob *handle, const struct HksProcessInf
             ret = HKS_SUCCESS; /* return success if the handle is not found */
             break;
         }
+
+        ret = AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort(
+            paramSet, operation, processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
+            "AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort fail %" LOG_PUBLIC "d", ret)
 
         ret = HuksAccessAbort(handle, paramSet);
         HKS_IF_NOT_SUCC_LOGE(ret, "HuksAccessAbort fail, ret = %" LOG_PUBLIC "d", ret)
@@ -1723,19 +1744,24 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
 static int32_t AppendIfBothTagExist(struct HksProcessInfo *processInfo, const struct HksParam *storageLevelParam,
     const struct HksParam *specificUserIdParam)
 {
-    int32_t ret = SensitivePermissionCheck("ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS");
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check interact across local accounts permission failed")
+    int32_t ret = SystemApiPermissionCheck(processInfo->userIdInt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed")
+    ret = SensitivePermissionCheck(PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendIfBothTagExist check %" LOG_PUBLIC "s permission fail",
+        PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)
 
     if (storageLevelParam->uint32Param == HKS_AUTH_STORAGE_LEVEL_DE) {
         if (specificUserIdParam->int32Param < 0) {
-            HKS_LOG_E("invalid specificUserId when tag storage level is DE!");
+            HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d, when tag storage level is DE!",
+                specificUserIdParam->int32Param);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         processInfo->specificUserIdInt = specificUserIdParam->int32Param;
         processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
     } else {
         if (specificUserIdParam->int32Param < HKS_ROOT_USER_UPPERBOUND) {
-            HKS_LOG_E("invalid specificUserId when tag storage level is CE or ECE!");
+            HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d, when tag storage level is CE or ECE!",
+                specificUserIdParam->int32Param);
             return HKS_ERROR_INVALID_ARGUMENT;
         }
         processInfo->specificUserIdInt = specificUserIdParam->int32Param;
@@ -1761,12 +1787,53 @@ static int32_t AppendIfOnlyStorageLevelTagExist(struct HksProcessInfo *processIn
     }
     return HKS_SUCCESS;
 }
+
+static int32_t AppendIfOnlySpecificUserIdTagExist(struct HksProcessInfo *processInfo,
+    const struct HksParam *specificUserIdParam)
+{
+    int32_t ret = SystemApiPermissionCheck(processInfo->userIdInt);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check systemapi permission failed")
+    ret = SensitivePermissionCheck(PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "AppendIfOnlySpecificUserIdTagExist check %" LOG_PUBLIC "s permission fail",
+        PERMISSION_INTERACT_ACROSS_LOCAL_ACCOUNTS)
+
+    if (specificUserIdParam->int32Param < HKS_ROOT_USER_UPPERBOUND) {
+        HKS_LOG_E("invalid specificUserId = %" LOG_PUBLIC "d!", specificUserIdParam->int32Param);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    processInfo->specificUserIdInt = specificUserIdParam->int32Param;
+    processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_CE;
+    return HKS_SUCCESS;
+}
 #endif
 
-int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSet *paramSet,
+#ifdef L2_STANDARD
+static int32_t AppendSpecificUserIdAndStorageLevelToProcessInfoWithParam(
+    bool storageLevelExist, bool specificUserIdExist,
+    const struct HksParam *storageLevelParam, const struct HksParam *specificUserIdParam,
+    struct HksProcessInfo *processInfo)
+{
+    if (!storageLevelExist && specificUserIdExist) {
+        return AppendIfOnlySpecificUserIdTagExist(processInfo, specificUserIdParam);
+    } else if (storageLevelExist && specificUserIdExist) {
+        return AppendIfBothTagExist(processInfo, storageLevelParam, specificUserIdParam);
+    } else if (storageLevelExist && !specificUserIdExist) {
+        return AppendIfOnlyStorageLevelTagExist(processInfo, storageLevelParam);
+    } else {
+        processInfo->specificUserIdInt = processInfo->userIdInt;
+        processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+        return HKS_SUCCESS;
+    }
+}
+#endif
+
+static int32_t AppendSpecificUserIdAndStorageLevelToProcessInfoWithOperation(
+    const struct HksParamSet *paramSet,
+    const struct HksOperation *operation,
     struct HksProcessInfo *processInfo)
 {
     (void)paramSet;
+    (void)operation;
     (void)processInfo;
 #ifdef L2_STANDARD
     if (paramSet == NULL) {
@@ -1780,17 +1847,42 @@ int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSe
 
     bool storageLevelExist = HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &storageLevelParam) == HKS_SUCCESS;
     bool specificUserIdExist = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam) == HKS_SUCCESS;
-    if (!storageLevelExist && specificUserIdExist) {
-        HKS_LOG_E("must pass tag storage level when specific userId is passed!");
-        return HKS_ERROR_INVALID_ARGUMENT;
-    } else if (storageLevelExist && specificUserIdExist) {
-        return AppendIfBothTagExist(processInfo, storageLevelParam, specificUserIdParam);
-    } else if (storageLevelExist && !specificUserIdExist) {
-        return AppendIfOnlyStorageLevelTagExist(processInfo, storageLevelParam);
-    } else {
-        processInfo->specificUserIdInt = processInfo->userIdInt;
-        processInfo->storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+
+    if (operation == NULL) {
+        return AppendSpecificUserIdAndStorageLevelToProcessInfoWithParam(
+            storageLevelExist, specificUserIdExist,
+            storageLevelParam, specificUserIdParam, processInfo);
     }
+
+    struct HksParam userIdPassedDuringInitParam = { .tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = 0 };
+    if (!specificUserIdExist && operation->isUserIdPassedDuringInit) {
+        // current param set does not contain specific user id, we will use the one passsed during init.
+        userIdPassedDuringInitParam.uint32Param = operation->userIdPassedDuringInit;
+        specificUserIdParam = &userIdPassedDuringInitParam;
+        specificUserIdExist = true;
+    } else if (specificUserIdExist && operation->isUserIdPassedDuringInit) {
+        HKS_LOG_W("got userIdPassedDuringInit %" LOG_PUBLIC "u and current param set user id %"
+            LOG_PUBLIC "u, ignore the one passed during init",
+            operation->userIdPassedDuringInit, specificUserIdParam->uint32Param);
+    }
+
+    return AppendSpecificUserIdAndStorageLevelToProcessInfoWithParam(
+        storageLevelExist, specificUserIdExist,
+        storageLevelParam, specificUserIdParam, processInfo);
 #endif
     return HKS_SUCCESS;
+}
+
+int32_t AppendSpecificUserIdAndStorageLevelToProcessInfo(const struct HksParamSet *paramSet,
+    struct HksProcessInfo *processInfo)
+{
+    return AppendSpecificUserIdAndStorageLevelToProcessInfoWithOperation(paramSet, NULL, processInfo);
+}
+
+static int32_t AppendSpecificUserIdAndStorageLevelToProcessInfoForUpdateOrFinishOrAbort(
+    const struct HksParamSet *paramSet,
+    const struct HksOperation *operation,
+    struct HksProcessInfo *processInfo)
+{
+    return AppendSpecificUserIdAndStorageLevelToProcessInfoWithOperation(paramSet, operation, processInfo);
 }

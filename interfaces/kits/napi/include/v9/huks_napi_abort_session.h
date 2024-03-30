@@ -19,7 +19,27 @@
 #include "napi/native_api.h"
 #include "napi/native_node_api.h"
 
+#include "hks_type.h"
+
 namespace HuksNapiItem {
+struct AbortAsyncContextT {
+    napi_async_work asyncWork = nullptr;
+    napi_deferred deferred = nullptr;
+    napi_ref callback = nullptr;
+
+    int32_t result = 0;
+    struct HksBlob *handle = nullptr;
+    struct HksParamSet *paramSet = nullptr;
+};
+
+using AbortAsyncContext = AbortAsyncContextT *;
+
+AbortAsyncContext CreateAbortAsyncContext();
+
+void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context);
+
+napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context);
+
 napi_value HuksNapiAbortSession(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
 

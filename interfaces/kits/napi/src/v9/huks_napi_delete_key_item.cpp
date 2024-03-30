@@ -30,18 +30,7 @@ constexpr int HUKS_NAPI_DELETE_KEY_MIN_ARGS = 2;
 constexpr int HUKS_NAPI_DELETE_KEY_MAX_ARGS = 3;
 }  // namespace
 
-struct DeleteKeyAsyncContextT {
-    napi_async_work asyncWork = nullptr;
-    napi_deferred deferred = nullptr;
-    napi_ref callback = nullptr;
-
-    int32_t result = 0;
-    struct HksBlob *keyAlias = nullptr;
-    struct HksParamSet *paramSet = nullptr;
-};
-using DeleteKeyAsyncContext = DeleteKeyAsyncContextT *;
-
-static DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
+DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
 {
     DeleteKeyAsyncContext context = static_cast<DeleteKeyAsyncContext>(HksMalloc(sizeof(DeleteKeyAsyncContextT)));
     if (context != nullptr) {
@@ -50,7 +39,7 @@ static DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
     return context;
 }
 
-static void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext &context)
+void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext &context)
 {
     if (context == nullptr) {
         return;
@@ -67,7 +56,7 @@ static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, De
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
     if (argc < HUKS_NAPI_DELETE_KEY_MIN_ARGS) {
-        napi_throw_error(env, std::to_string(HUKS_ERR_CODE_ILLEGAL_ARGUMENT).c_str(), "no enough params input");
+        HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;
     }
@@ -87,7 +76,7 @@ static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, De
     return GetInt32(env, 0);
 }
 
-static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context)
+napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
