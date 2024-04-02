@@ -97,6 +97,7 @@ void HksIpcServiceGenerateKey(const struct HksBlob *srcData, const uint8_t *cont
             ret = BuildFrontUserIdParamSet(inParamSet, &newParamSet, activeFrontUserId);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "BuildFrontUserIdParamSet fail! ret=%" LOG_PUBLIC "d", ret);
             ret = HksServiceGenerateKey(&processInfo, &keyAlias, newParamSet, &keyOut);
+            HksFreeParamSet(&newParamSet);
         } else {
             ret = HksServiceGenerateKey(&processInfo, &keyAlias, inParamSet, &keyOut);
         }
