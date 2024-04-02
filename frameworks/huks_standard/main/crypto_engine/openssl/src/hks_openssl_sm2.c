@@ -169,76 +169,36 @@ static int GetSm2Modules(const struct HksBlob *keyBlob, struct KeyMaterialEcc *o
 }
 
 static int32_t PushPubKeyToParam(const uint8_t *keyPair, const struct KeyMaterialEcc *size,
-    OSSL_PARAM_BLD *paramBld)
+    uint32_t fullSize, uint8_t *uncompressedPublicKey, OSSL_PARAM_BLD *paramBld)
 {
     HKS_LOG_I("begin PushPubKeyToParam");
-    // sizes have been checked in GetSm2Modules
-    uint32_t fullSize = 1 + HKS_KEY_BYTES(size->keySize) + HKS_KEY_BYTES(size->keySize);
-    uint8_t *uncompressedPublicKey = HksMalloc(fullSize);
-    if (uncompressedPublicKey == NULL) {
-        HKS_LOG_E("HksMalloc failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    // https://www.mail-archive.com/openssl-users@openssl.org/msg90185.html
+    // Unfortunately supplying x and y separately is not supported for import.
+    // You have to instead use OSSL_PKEY_PARAM_PUB_KEY.
+    // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
+    // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
+
+    // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(size->keySize)
+    // e.g. assuming that HKS_KEY_BYTES(size->keySize) is 32, x size might be 32, 31, 30, etc.
+    uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
+    errno_t memRet = memcpy_s(uncompressedPublicKey + 1 + HKS_KEY_BYTES(size->keySize) - size->xSize, size->xSize,
+        keyPair + sizeof(struct KeyMaterialEcc), size->xSize);
+    if (memRet != EOK) {
+        HKS_LOG_E("copy x fail");
+        return HKS_ERROR_BAD_STATE;
     }
-    int ret = HKS_ERROR_BAD_STATE;
-    do {
-        if (memset_s(uncompressedPublicKey, fullSize, 0, fullSize) != EOK) {
-            HKS_LOG_E("memset zero fail");
-            break;
-        }
-
-        // https://www.mail-archive.com/openssl-users@openssl.org/msg90185.html
-        // Unfortunately supplying x and y separately is not supported for import.
-        // You have to instead use OSSL_PKEY_PARAM_PUB_KEY.
-        // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
-        // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
-
-        // NOTICE! x size and y size are smaller than or equal to HKS_KEY_BYTES(size->keySize)
-        // e.g. assuming that HKS_KEY_BYTES(size->keySize) is 32, x size might be 32, 31, 30, etc.
-        uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
-        errno_t memRet = memcpy_s(uncompressedPublicKey + 1 + HKS_KEY_BYTES(size->keySize) - size->xSize, size->xSize,
-            keyPair + sizeof(struct KeyMaterialEcc), size->xSize);
-        if (memRet != EOK) {
-            HKS_LOG_E("copy x fail");
-            break;
-        }
-        memRet = memcpy_s(uncompressedPublicKey + fullSize - size->ySize, size->ySize,
-            keyPair + sizeof(struct KeyMaterialEcc) + size->xSize, size->ySize);
-        if (memRet != EOK) {
-            HKS_LOG_E("copy y fail");
-            break;
-        }
-        int osRet = OSSL_PARAM_BLD_push_octet_string(paramBld, OSSL_PKEY_PARAM_PUB_KEY,
-            uncompressedPublicKey, fullSize);
-        if (osRet != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("OSSL_PARAM_BLD_push_octet_string failed %" LOG_PUBLIC "d", osRet);
-            HksLogOpensslError();
-            break;
-        }
-        ret = HKS_SUCCESS;
-    } while (false);
-    HKS_FREE(uncompressedPublicKey);
-    return ret;
-}
-
-static int32_t PushPrivKeyToParam(const uint8_t *keyPair, const struct KeyMaterialEcc *size, OSSL_PARAM_BLD *paramBld)
-{
-    HKS_LOG_I("decrypt or sign, read private key privateSize = %" LOG_PUBLIC "u", size->zSize);
-    if (size->zSize == 0) {
-        HKS_LOG_E("private key empty");
-        return HKS_ERROR_INVALID_ARGUMENT;
+    memRet = memcpy_s(uncompressedPublicKey + fullSize - size->ySize, size->ySize,
+        keyPair + sizeof(struct KeyMaterialEcc) + size->xSize, size->ySize);
+    if (memRet != EOK) {
+        HKS_LOG_E("copy y fail");
+        return HKS_ERROR_BAD_STATE;
     }
-    BIGNUM *privateBn = BN_bin2bn(keyPair + sizeof(struct KeyMaterialEcc) + size->xSize + size->ySize,
-        size->zSize, NULL);
-    if (privateBn == NULL) {
-        HKS_LOG_E("BN_bin2bn failed %" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()));
+    int osRet = OSSL_PARAM_BLD_push_octet_string(paramBld, OSSL_PKEY_PARAM_PUB_KEY,
+        uncompressedPublicKey, fullSize);
+    if (osRet != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("OSSL_PARAM_BLD_push_octet_string failed %" LOG_PUBLIC "d", osRet);
         HksLogOpensslError();
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
-    }
-    int ret = OSSL_PARAM_BLD_push_BN(paramBld, OSSL_PKEY_PARAM_PRIV_KEY, privateBn);
-    BN_free(privateBn);
-    if (ret != HKS_OPENSSL_SUCCESS) {
-        HKS_LOG_E("OSSL_PARAM_BLD_push_BN failed %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        return HKS_ERROR_BAD_STATE;
     }
     return HKS_SUCCESS;
 }
@@ -250,12 +210,10 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawKey(
     // publicXSize publicYSize privateSize lengthes all are not greater than HKS_MAX_KEY_LEN
     // have been checked in GetSm2Modules
     OSSL_PARAM_BLD *paramBld = OSSL_PARAM_BLD_new();
-    if (paramBld == NULL) {
-        HKS_LOG_E("OSSL_PARAM_BLD_new failed");
-        HksLogOpensslError();
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramBld, NULL, "OSSL_PARAM_BLD_new failed")
     OSSL_PARAM *params = NULL;
+    uint8_t *uncompressedPublicKey = NULL;
+    BIGNUM *priBn = NULL;
     do {
         int ret = OSSL_PARAM_BLD_push_utf8_string(paramBld, OSSL_PKEY_PARAM_GROUP_NAME, SN_sm2, 0);
         if (ret != HKS_OPENSSL_SUCCESS) {
@@ -266,30 +224,37 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawKey(
 
         // push public key if it is present
         if (size->xSize != 0 && size->ySize != 0) {
-            ret = PushPubKeyToParam(keyPair, size, paramBld);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("PushPubKeyToParam failed %" LOG_PUBLIC "d", ret);
-                break;
-            }
+            // sizes have been checked in GetSm2Modules
+            uint32_t fullSize = 1 + HKS_KEY_BYTES(size->keySize) + HKS_KEY_BYTES(size->keySize);
+            uncompressedPublicKey = HksMalloc(fullSize);
+            HKS_IF_NULL_LOGE_BREAK(uncompressedPublicKey, "uncompressedPublicKey HksMalloc NULL")
+            ret = PushPubKeyToParam(keyPair, size, fullSize, uncompressedPublicKey, paramBld);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "PushPubKeyToParam failed %" LOG_PUBLIC "d", ret)
         }
 
         // push private key if required
         if ((keyPurpose == HKS_KEY_PURPOSE_DECRYPT) || (keyPurpose == HKS_KEY_PURPOSE_SIGN)) {
-            ret = PushPrivKeyToParam(keyPair, size, paramBld);
-            if (ret != HKS_SUCCESS) {
-                HKS_LOG_E("PushPrivKeyToParam failed %" LOG_PUBLIC "d", ret);
+            if (size->zSize == 0) {
+                HKS_LOG_E("decrypt or sign but private key empty");
+                break;
+            }
+            priBn = BN_bin2bn(keyPair + sizeof(struct KeyMaterialEcc) + size->xSize + size->ySize,
+                size->zSize, NULL);
+            HKS_IF_NULL_LOGE_BREAK(priBn, "BN_bin2bn fail%" LOG_PUBLIC "s", ERR_reason_error_string(ERR_get_error()))
+            ret = OSSL_PARAM_BLD_push_BN(paramBld, OSSL_PKEY_PARAM_PRIV_KEY, priBn);
+            if (ret != HKS_OPENSSL_SUCCESS) {
+                HKS_LOG_E("OSSL_PARAM_BLD_push_BN failed %" LOG_PUBLIC "d", ret);
                 break;
             }
         }
 
         params = OSSL_PARAM_BLD_to_param(paramBld);
-        if (params == NULL) {
-            HKS_LOG_E("OSSL_PARAM_BLD_to_param failed");
-            HksLogOpensslError();
-            break;
-        }
+        HKS_IF_NULL_LOGE_BREAK(params, "OSSL_PARAM_BLD_to_param fail %" LOG_PUBLIC "s",
+            ERR_reason_error_string(ERR_get_error()))
     } while (0);
     SELF_FREE_PTR(paramBld, OSSL_PARAM_BLD_free)
+    HKS_FREE(uncompressedPublicKey);
+    BN_free(priBn);
     return params;
 }
 
