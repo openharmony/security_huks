@@ -197,52 +197,34 @@ static int32_t EccToX509PublicKey(
 
 #if defined(HKS_SUPPORT_SM2_C) && defined(HKS_SUPPORT_SM2_GET_PUBLIC_KEY)
 static int32_t ConstructSm2ParamsPushPubKey(OSSL_PARAM_BLD *paramBld,
-    uint32_t keySize, const struct HksBlob *x, const struct HksBlob *y)
+    uint32_t keySize, const struct HksBlob *x, const struct HksBlob *y, struct HksBlob* uncompressed)
 {
-    // sizes have been checked in ConstructSm2ParamsFromRawPubKey
-    uint32_t fullSize = 1 + HKS_KEY_BYTES(keySize) + HKS_KEY_BYTES(keySize);
-    uint8_t *uncompressedPublicKey = HksMalloc(fullSize);
-    if (uncompressedPublicKey == NULL) {
-        HKS_LOG_E("HksMalloc failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    // https://www.mail-archive.com/openssl-users@openssl.org/msg90185.html
+    // Unfortunately supplying x and y separately is not supported for import.
+    // You have to instead use OSSL_PKEY_PARAM_PUB_KEY.
+    // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
+    // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
+
+    // NOTICE: x size is less than or equal to HKS_KEY_BYTES(keySize),
+    // and such cases means that x has leading zeros, so does y.
+    uncompressed->data[0] = POINT_CONVERSION_UNCOMPRESSED;
+    int memRet = memcpy_s(uncompressed->data + 1 + HKS_KEY_BYTES(keySize) - x->size, x->size, x->data, x->size);
+    if (memRet != EOK) {
+        HKS_LOG_E("copy x fail");
+        return HKS_ERROR_BAD_STATE;
     }
-    int ret = HKS_ERROR_BAD_STATE;
-    do {
-        errno_t memRet = memset_s(uncompressedPublicKey, fullSize, 0, fullSize);
-        if (memRet != EOK) {
-            HKS_LOG_E("set zero fail");
-            break;
-        }
-
-        // https://www.mail-archive.com/openssl-users@openssl.org/msg90185.html
-        // Unfortunately supplying x and y separately is not supported for import.
-        // You have to instead use OSSL_PKEY_PARAM_PUB_KEY.
-        // You can supply the key as an uncompressed public key simply be concatenating the byte "04",
-        // the x co-ord (padded to the appropriate size if necessary) and the y co-cord (also padded as appropriate).
-
-        // NOTICE: x size is less than or equal to HKS_KEY_BYTES(keySize),
-        // and such cases means that x has leading zeros, so does y.
-        uncompressedPublicKey[0] = POINT_CONVERSION_UNCOMPRESSED;
-        memRet = memcpy_s(uncompressedPublicKey + 1 + HKS_KEY_BYTES(keySize) - x->size, x->size, x->data, x->size);
-        if (memRet != EOK) {
-            HKS_LOG_E("copy x fail");
-            break;
-        }
-        memRet = memcpy_s(uncompressedPublicKey + fullSize - y->size, y->size, y->data, y->size);
-        if (memRet != EOK) {
-            HKS_LOG_E("copy y fail");
-            break;
-        }
-        int osRet = OSSL_PARAM_BLD_push_octet_string(paramBld, OSSL_PKEY_PARAM_PUB_KEY,
-            uncompressedPublicKey, fullSize);
-        if (osRet != HKS_OPENSSL_SUCCESS) {
-            HKS_LOG_E("OSSL_PARAM_BLD_push_octet_string failed %" LOG_PUBLIC "d", osRet);
-            break;
-        }
-        ret = HKS_SUCCESS;
-    } while (false);
-    HKS_FREE(uncompressedPublicKey);
-    return ret;
+    memRet = memcpy_s(uncompressed->data + uncompressed->size - y->size, y->size, y->data, y->size);
+    if (memRet != EOK) {
+        HKS_LOG_E("copy y fail");
+        return HKS_ERROR_BAD_STATE;
+    }
+    int osRet = OSSL_PARAM_BLD_push_octet_string(paramBld, OSSL_PKEY_PARAM_PUB_KEY,
+        uncompressed->data, uncompressed->size);
+    if (osRet != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("OSSL_PARAM_BLD_push_octet_string failed %" LOG_PUBLIC "d", osRet);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    return HKS_SUCCESS;
 }
 
 // Notice: you must call OSSL_PARAM_free after using the return value.
@@ -253,12 +235,9 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawPubKey(uint32_t keySize, const struc
         return NULL;
     }
     OSSL_PARAM_BLD *paramBld = OSSL_PARAM_BLD_new();
-    if (paramBld == NULL) {
-        HKS_LOG_E("OSSL_PARAM_BLD_new failed");
-        HksLogOpensslError();
-        return NULL;
-    }
+    HKS_IF_NULL_LOGE_RETURN(paramBld, NULL, "OSSL_PARAM_BLD_new failed")
     OSSL_PARAM *params = NULL;
+    struct HksBlob uncompressedPublicKey = { 1 + HKS_KEY_BYTES(keySize) + HKS_KEY_BYTES(keySize), NULL };
     do {
         int ret = OSSL_PARAM_BLD_push_utf8_string(paramBld, OSSL_PKEY_PARAM_GROUP_NAME, SN_sm2, 0);
         if (ret != HKS_OPENSSL_SUCCESS) {
@@ -267,7 +246,11 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawPubKey(uint32_t keySize, const struc
             break;
         }
 
-        ret = ConstructSm2ParamsPushPubKey(paramBld, keySize, x, y);
+        // sizes have been checked in ConstructSm2ParamsFromRawPubKey
+        uncompressedPublicKey.data = HksMalloc(uncompressedPublicKey.size);
+        HKS_IF_NULL_LOGE_BREAK(uncompressedPublicKey.data, "HksMalloc uncompressedPublicKey failed")
+
+        ret = ConstructSm2ParamsPushPubKey(paramBld, keySize, x, y, &uncompressedPublicKey);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("ConstructSm2ParamsPushPubKey failed %" LOG_PUBLIC "d", ret);
             break;
@@ -281,6 +264,7 @@ static OSSL_PARAM *ConstructSm2ParamsFromRawPubKey(uint32_t keySize, const struc
         }
     } while (0);
     SELF_FREE_PTR(paramBld, OSSL_PARAM_BLD_free)
+    HKS_FREE(uncompressedPublicKey.data);
     return params;
 }
 
