@@ -200,7 +200,7 @@ ohos_unittest("huks_module_test") {
     ]
   }
 
-  defines = []
+  defines = [ "UNAVAILABLE_FOR_SM4_GCM" ]
   if (use_crypto_lib == "openssl") {
     defines += [
       "_USE_OPENSSL_",

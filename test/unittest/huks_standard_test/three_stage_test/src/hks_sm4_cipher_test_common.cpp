@@ -89,18 +89,89 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     uint8_t cipher[SM4_COMMON_SIZE] = {0};
     struct HksBlob cipherText = { SM4_COMMON_SIZE, cipher };
     ret = HksSm4CipherTestEncrypt(keyAlias, encryptParamSet, &inData, &cipherText);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestEncrypt failed.";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksSm4CipherTestEncrypt failed.";
 
     /* 3. Decrypt Three Stage */
     uint8_t plain[SM4_COMMON_SIZE] = {0};
     struct HksBlob plainText = { SM4_COMMON_SIZE, plain };
     ret = HksSm4CipherTestDecrypt(keyAlias, decryptParamSet, &cipherText, &plainText, &inData);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestDecrypt failed.";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksSm4CipherTestDecrypt failed.";
 
     /* 3. Delete Key */
     EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     return ret;
 }
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
+{
+    struct HksBlob inData = {
+        g_inData.length(),
+        const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
+    };
+
+    /* 1. Generate Key */
+    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    /* 2. Encrypt Three Stage */
+    // Init
+    uint8_t cipher[SM4_COMMON_SIZE] = {0};
+    uint8_t handleE[sizeof(uint64_t)] = {0};
+    struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
+    ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+
+    // Update & Finish
+    struct HksBlob cipherText = { SM4_COMMON_SIZE, cipher };
+    ret = TestUpdateLoopFinish(&handleEncrypt, encryptParamSet, &inData, &cipherText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
+    EXPECT_NE(memcmp(inData.data, cipherText.data, inData.size), HKS_SUCCESS) << "cipherText equals inData";
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKey(keyAlias, genParamSet);
+        return ret;
+    }
+
+    cipherText.size -= AEAD_SIZE;
+
+    uint32_t i = 0;
+    for (i = 0; i < decryptParamSet->paramsCnt; i++) {
+        if (decryptParamSet->params[i].tag == HKS_TAG_AE_TAG) {
+            uint8_t *tempPtr = cipherText.data;
+            (void)memcpy_s(decryptParamSet->params[i].blob.data, AEAD_SIZE,
+                tempPtr + cipherText.size, AEAD_SIZE);
+            break;
+        }
+    }
+
+    /* 3. Decrypt Three Stage */
+    // Init
+    uint8_t handleD[sizeof(uint64_t)] = {0};
+    struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
+    ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
+
+    // Update & Finish
+    uint8_t plain[SM4_COMMON_SIZE] = {0};
+    struct HksBlob plainText = { SM4_COMMON_SIZE, plain };
+    ret = TestUpdateLoopFinish(&handleDecrypt, decryptParamSet, &cipherText, &plainText);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
+    EXPECT_EQ(memcmp(inData.data, plainText.data, inData.size), HKS_SUCCESS) << "plainText not equals inData";
+    if (ret != HKS_SUCCESS) {
+        HksDeleteKey(keyAlias, genParamSet);
+        return ret;
+    }
+
+    /* 3. Delete Key */
+    ret = HksDeleteKey(keyAlias, genParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
+    return ret;
+}
+#endif
 #endif
 #endif
 }
