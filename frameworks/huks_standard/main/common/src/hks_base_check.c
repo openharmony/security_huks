@@ -132,7 +132,9 @@ static const uint32_t g_sm4Purpose[] = {
 static const uint32_t g_sm4Mode[] = {
     HKS_MODE_CBC,
     HKS_MODE_CTR,
-    HKS_MODE_ECB
+    HKS_MODE_ECB,
+    HKS_MODE_CFB,
+    HKS_MODE_OFB,
 };
 static const uint32_t g_sm4CbcPadding[] = {
     HKS_PADDING_NONE,
@@ -144,6 +146,12 @@ static const uint32_t g_sm4CtrPadding[] = {
 static const uint32_t g_sm4EcbPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_PKCS7
+};
+static const uint32_t g_sm4CfbPadding[] = {
+    HKS_PADDING_NONE
+};
+static const uint32_t g_sm4OfbPadding[] = {
+    HKS_PADDING_NONE
 };
 #endif
 
@@ -1258,7 +1266,7 @@ static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData
 #endif
 
 #if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
-static int32_t CheckBlockCbcCipherData(uint32_t cmdId, uint32_t padding,
+static int32_t CheckBlockCbcCipherData(uint32_t mode, uint32_t cmdId, uint32_t padding,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
     /*
@@ -1271,8 +1279,10 @@ static int32_t CheckBlockCbcCipherData(uint32_t cmdId, uint32_t padding,
         case HKS_CMD_ID_ENCRYPT: {
             uint32_t paddingSize = 0;
             if (padding == HKS_PADDING_NONE) {
-                if (inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
-                    HKS_LOG_E("encrypt cbc no-padding, invalid inSize: %" LOG_PUBLIC "u", inData->size);
+                if ((mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) &&
+                    inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
+                    HKS_LOG_E("encrypt, mode id: %" LOG_PUBLIC "u, no-padding, invalid inSize: %" LOG_PUBLIC "u",
+                        mode, inData->size);
                     return HKS_ERROR_INVALID_ARGUMENT;
                 }
             } else {
@@ -1290,8 +1300,9 @@ static int32_t CheckBlockCbcCipherData(uint32_t cmdId, uint32_t padding,
             break;
         }
         case HKS_CMD_ID_DECRYPT:
-            if ((inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE) != 0) {
-                HKS_LOG_E("decrypt, invalid inData size: %" LOG_PUBLIC "u", inData->size);
+            if ((mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) && inData->size % HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE != 0) {
+                HKS_LOG_E("decrypt, mode id: %" LOG_PUBLIC "u, invalid inData size: %" LOG_PUBLIC "u",
+                    mode, inData->size);
                 return HKS_ERROR_INVALID_ARGUMENT;
             }
             if (outData->size < inData->size) {
@@ -1312,17 +1323,25 @@ static int32_t CheckBlockCipherData(uint32_t cmdId, const struct ParamsValues *i
 {
     uint32_t mode = inputParams->mode.value;
 
-#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
-    if (((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM4)) &&
-        ((mode == HKS_MODE_CBC) || (mode == HKS_MODE_CTR) || (mode == HKS_MODE_ECB))) {
-        uint32_t padding = inputParams->padding.value;
-        return CheckBlockCbcCipherData(cmdId, padding, inData, outData);
+#if defined(HKS_SUPPORT_AES_C)
+    if (alg == HKS_ALG_AES) {
+        if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_ECB) {
+            uint32_t padding = inputParams->padding.value;
+            return CheckBlockCbcCipherData(mode, cmdId, padding, inData, outData);
+        } else if (mode == HKS_MODE_GCM || mode == HKS_MODE_CCM) {
+            return CheckAesAeCipherData(cmdId, inData, outData);
+        }
+    }
 #endif
-#ifdef HKS_SUPPORT_AES_C
-    } else if ((alg == HKS_ALG_AES) && ((mode == HKS_MODE_GCM) || (mode == HKS_MODE_CCM))) {
-        return CheckAesAeCipherData(cmdId, inData, outData);
-#endif
-#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+
+#if defined(HKS_SUPPORT_SM4_C)
+    if (alg == HKS_ALG_SM4) {
+        for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_sm4Mode); i++) {
+            if (mode == g_sm4Mode[i]) {
+                uint32_t padding = inputParams->padding.value;
+                return CheckBlockCbcCipherData(mode, cmdId, padding, inData, outData);
+            }
+        }
     }
 #endif
 
@@ -1483,6 +1502,14 @@ static int32_t CheckSm4Padding(const struct ParamsValues *inputParams)
 
     if (mode == HKS_MODE_ECB) {
         return HksCheckValue(padding, g_sm4EcbPadding, HKS_ARRAY_SIZE(g_sm4EcbPadding));
+    }
+
+    if (mode == HKS_MODE_CFB) {
+        return HksCheckValue(padding, g_sm4CfbPadding, HKS_ARRAY_SIZE(g_sm4CfbPadding));
+    }
+
+    if (mode == HKS_MODE_OFB) {
+        return HksCheckValue(padding, g_sm4OfbPadding, HKS_ARRAY_SIZE(g_sm4OfbPadding));
     }
 
     return HKS_ERROR_INVALID_ARGUMENT;
@@ -1931,7 +1958,7 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
 #ifdef HKS_SUPPORT_SM4_C
     if (alg == HKS_ALG_SM4) {
         uint32_t mode = inputParams->mode.value;
-        if (mode == HKS_MODE_CBC) {
+        if (mode == HKS_MODE_CBC || mode == HKS_MODE_CTR || mode == HKS_MODE_CFB || mode == HKS_MODE_OFB) {
             return CheckBlockCipherIvMaterial(paramSet);
         }
     }

@@ -310,6 +310,7 @@ static napi_value CreateHuksCipherMode(napi_env env)
     AddInt32Property(env, keyCipherMode, "HUKS_MODE_CBC", HKS_MODE_CBC);
     AddInt32Property(env, keyCipherMode, "HUKS_MODE_CTR", HKS_MODE_CTR);
     AddInt32Property(env, keyCipherMode, "HUKS_MODE_OFB", HKS_MODE_OFB);
+    AddInt32Property(env, keyCipherMode, "HUKS_MODE_CFB", HKS_MODE_CFB);
     AddInt32Property(env, keyCipherMode, "HUKS_MODE_CCM", HKS_MODE_CCM);
     AddInt32Property(env, keyCipherMode, "HUKS_MODE_GCM", HKS_MODE_GCM);
 

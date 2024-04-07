@@ -58,6 +58,76 @@
     } \
 }
 
+#define HKS_CFB_128 \
+{ \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_SM4_KEY_SIZE_128 \
+}, { \
+    .tag = HKS_TAG_PADDING, \
+    .uint32Param = HKS_PADDING_NONE \
+}, { \
+    .tag = HKS_TAG_BLOCK_MODE, \
+    .uint32Param = HKS_MODE_CFB \
+}, { \
+    .tag = HKS_TAG_IV, \
+    .blob = { \
+        .size = HKS_SM4_IV_SIZE, \
+        .data = (uint8_t *)g_hksSm4TestIv \
+    } \
+}
+
+#define HKS_OFB_128 \
+{ \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_SM4_KEY_SIZE_128 \
+}, { \
+    .tag = HKS_TAG_PADDING, \
+    .uint32Param = HKS_PADDING_NONE \
+}, { \
+    .tag = HKS_TAG_BLOCK_MODE, \
+    .uint32Param = HKS_MODE_OFB \
+}, { \
+    .tag = HKS_TAG_IV, \
+    .blob = { \
+        .size = HKS_SM4_IV_SIZE, \
+        .data = (uint8_t *)g_hksSm4TestIv \
+    } \
+}
+
+#define HKS_GCM_128_NO_AAD \
+{ \
+    .tag = HKS_TAG_KEY_SIZE, \
+    .uint32Param = HKS_SM4_KEY_SIZE_128 \
+}, { \
+    .tag = HKS_TAG_PADDING, \
+    .uint32Param = HKS_PADDING_NONE \
+}, { \
+    .tag = HKS_TAG_BLOCK_MODE, \
+    .uint32Param = HKS_MODE_GCM \
+},  { \
+    .tag = HKS_TAG_NONCE, \
+    .blob = { \
+        .size = NONCE_SIZE, \
+        .data = (uint8_t *)NONCE \
+    } \
+},  { \
+    .tag = HKS_TAG_AE_TAG, \
+    .blob = { \
+        .size = AEAD_SIZE, \
+        .data = (uint8_t *)AEAD \
+    } \
+},
+
+#define HKS_GCM_128 \
+HKS_GCM_128_NO_AAD \
+{ \
+    .tag = HKS_TAG_ASSOCIATED_DATA, \
+    .blob = { \
+        .size = AAD_SIZE, \
+        .data = (uint8_t *)AAD \
+    } \
+}
+
 using namespace testing::ext;
 namespace Unittest::Sm4Cipher {
 class HksSm4CipherPartTest : public testing::Test {
@@ -197,6 +267,86 @@ static struct HksParam g_genParams006[] = {
         .uint32Param = HKS_SM4_KEY_SIZE_128
     }
 };
+#endif
+
+static struct HksParam g_genParams007[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_SM4_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_CFB
+    }
+};
+
+static struct HksParam g_genParams008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_SM4_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_OFB
+    }
+};
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+#ifndef UNAVAILABLE_FOR_SM4_GCM
+static struct HksParam g_genParams009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_SM4_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_GCM
+    }
+};
+
+static struct HksParam g_genParams010[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+    }, {
+        .tag = HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_SM4_KEY_SIZE_128
+    }, {
+        .tag = HKS_TAG_PADDING,
+        .uint32Param = HKS_PADDING_NONE
+    }, {
+        .tag = HKS_TAG_BLOCK_MODE,
+        .uint32Param = HKS_MODE_GCM
+    }
+};
+#endif
 #endif
 
 static uint8_t g_hksSm4TestIv[HKS_SM4_IV_SIZE] = {0};
@@ -339,6 +489,54 @@ static struct HksParam g_encryptParams006[] = {
 };
 #endif
 
+static struct HksParam g_encryptParams007[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    },
+    HKS_CFB_128
+};
+
+static struct HksParam g_encryptParams008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    },
+    HKS_OFB_128
+};
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+#ifndef UNAVAILABLE_FOR_SM4_GCM
+static struct HksParam g_encryptParams009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    },
+    HKS_GCM_128
+};
+
+static struct HksParam g_encryptParams010[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+    },
+    HKS_GCM_128_NO_AAD
+};
+#endif
+#endif
+
 static struct HksParam g_decryptParams001[] = {
     {
         .tag = HKS_TAG_ALGORITHM,
@@ -477,6 +675,54 @@ static struct HksParam g_decryptParams006[] = {
 };
 #endif
 
+static struct HksParam g_decryptParams007[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    },
+    HKS_CFB_128
+};
+
+static struct HksParam g_decryptParams008[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    },
+    HKS_OFB_128
+};
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+#ifndef UNAVAILABLE_FOR_SM4_GCM
+static struct HksParam g_decryptParams009[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    },
+    HKS_GCM_128
+};
+
+static struct HksParam g_decryptParams010[] = {
+    {
+        .tag = HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_SM4,
+    }, {
+        .tag = HKS_TAG_PURPOSE,
+        .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+    },
+    HKS_GCM_128_NO_AAD
+};
+#endif
+#endif
+
 static const struct FailureCaseParam g_genFailParams[] = {
     {   0,
         HKS_ERROR_INVALID_KEY_SIZE,
@@ -520,7 +766,7 @@ static const struct FailureCaseParam g_genFailParams[] = {
     },
 
     {   2,
-        HKS_ERROR_INVALID_MODE,
+        HKS_ERROR_INVALID_PADDING,
         {
             HKS_SM4_128
             {
@@ -532,6 +778,29 @@ static const struct FailureCaseParam g_genFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_OFB
+            }, {
+                .tag = HKS_TAG_IV,
+                .blob = {
+                    .size = HKS_SM4_IV_SIZE,
+                    .data = (uint8_t *)g_hksSm4TestIv
+                }
+            },
+        },
+    },
+
+    {   3,
+        HKS_ERROR_INVALID_PADDING,
+        {
+            HKS_SM4_128
+            {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT
+            }, {
+                .tag = HKS_TAG_PADDING,
+                .uint32Param = HKS_PADDING_PKCS7
+            }, {
+                .tag = HKS_TAG_BLOCK_MODE,
+                .uint32Param = HKS_MODE_CFB
             }, {
                 .tag = HKS_TAG_IV,
                 .blob = {
@@ -585,7 +854,7 @@ static const struct FailureCaseParam g_encryptFailParams[] = {
     },
 
     {   2,
-        HKS_ERROR_INVALID_MODE,
+        HKS_ERROR_INVALID_PADDING,
         {
             HKS_SM4_128
             {
@@ -597,6 +866,29 @@ static const struct FailureCaseParam g_encryptFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_OFB
+            }, {
+                .tag = HKS_TAG_IV,
+                .blob = {
+                    .size = HKS_SM4_IV_SIZE,
+                    .data = (uint8_t *)g_hksSm4TestIv
+                }
+            },
+        },
+    },
+
+    {   3,
+        HKS_ERROR_INVALID_PADDING,
+        {
+            HKS_SM4_128
+            {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_ENCRYPT
+            }, {
+                .tag = HKS_TAG_PADDING,
+                .uint32Param = HKS_PADDING_PKCS7
+            }, {
+                .tag = HKS_TAG_BLOCK_MODE,
+                .uint32Param = HKS_MODE_CFB
             }, {
                 .tag = HKS_TAG_IV,
                 .blob = {
@@ -650,7 +942,7 @@ static const struct FailureCaseParam g_decryptFailParams[] = {
     },
 
     {   2,
-        HKS_ERROR_INVALID_MODE,
+        HKS_ERROR_INVALID_PADDING,
         {
             HKS_SM4_128
             {
@@ -662,6 +954,29 @@ static const struct FailureCaseParam g_decryptFailParams[] = {
             }, {
                 .tag = HKS_TAG_BLOCK_MODE,
                 .uint32Param = HKS_MODE_OFB
+            }, {
+                .tag = HKS_TAG_IV,
+                .blob = {
+                    .size = HKS_SM4_IV_SIZE,
+                    .data = (uint8_t *)g_hksSm4TestIv
+                }
+            },
+        },
+    },
+
+    {   3,
+        HKS_ERROR_INVALID_PADDING,
+        {
+            HKS_SM4_128
+            {
+                .tag = HKS_TAG_PURPOSE,
+                .uint32Param = HKS_KEY_PURPOSE_DECRYPT
+            }, {
+                .tag = HKS_TAG_PADDING,
+                .uint32Param = HKS_PADDING_PKCS7
+            }, {
+                .tag = HKS_TAG_BLOCK_MODE,
+                .uint32Param = HKS_MODE_CFB
             }, {
                 .tag = HKS_TAG_IV,
                 .blob = {
@@ -880,7 +1195,7 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest008, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
-    EXPECT_EQ(ret, HKS_ERROR_INVALID_MODE) << "this case failed.";
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "this case failed.";
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
@@ -920,5 +1235,138 @@ HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest009, TestSize.Level0)
     HksFreeParamSet(&decryptParamSet);
 }
 #endif //HKS_UNTRUSTED_RUNNING_ENV
+
+HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest010, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest010";
+    uint32_t index = 3;
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genFailParams[index].params,
+        sizeof(g_genFailParams[index].params) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptFailParams[index].params,
+        sizeof(g_encryptFailParams[index].params) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptFailParams[index].params,
+        sizeof(g_decryptFailParams[index].params) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_PADDING) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
+HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest011, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest011";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams007, sizeof(g_encryptParams007) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams007, sizeof(g_decryptParams007) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
+HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest012, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest012";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams008, sizeof(g_encryptParams008) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams008, sizeof(g_decryptParams008) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksSm4CipherTestCaseOther(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
+#ifndef HKS_UNTRUSTED_RUNNING_ENV
+#ifndef UNAVAILABLE_FOR_SM4_GCM
+HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest013, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest013";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams009, sizeof(g_encryptParams009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams009, sizeof(g_decryptParams009) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksSm4CipherTestCaseGcm(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+
+HWTEST_F(HksSm4CipherPartTest, HksSm4CipherPartTest014, TestSize.Level0)
+{
+    char tmpKeyAlias[] = "HksSm4CipherKeyAliasTest014";
+    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+
+    struct HksParamSet *genParamSet = nullptr;
+    int32_t ret = InitParamSet(&genParamSet, g_genParams010, sizeof(g_genParams010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
+
+    struct HksParamSet *encryptParamSet = nullptr;
+    ret = InitParamSet(&encryptParamSet, g_encryptParams010, sizeof(g_encryptParams010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
+
+    struct HksParamSet *decryptParamSet = nullptr;
+    ret = InitParamSet(&decryptParamSet, g_decryptParams010, sizeof(g_decryptParams010) / sizeof(HksParam));
+    EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
+
+    ret = HksSm4CipherTestCaseGcm(&keyAlias, genParamSet, encryptParamSet, decryptParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
+
+    HksFreeParamSet(&genParamSet);
+    HksFreeParamSet(&encryptParamSet);
+    HksFreeParamSet(&decryptParamSet);
+}
+#endif
+#endif
 #endif
 }

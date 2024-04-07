@@ -44,5 +44,7 @@ struct FailureCaseParam {
 
 int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
+int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
+    struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet);
 } // namespace Unittest::Sm4Cipher
 #endif // HKS_SM4_CIPHER_TEST_COMMON_H
