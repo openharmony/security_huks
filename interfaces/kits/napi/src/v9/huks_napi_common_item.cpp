@@ -265,7 +265,7 @@ napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParam
         return nullptr;
     }
 
-    std::vector<HksParam> params;
+    std::vector<HksParam> params{};
     HksParamSet *outParamSet = nullptr;
     do {
         if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
@@ -281,7 +281,13 @@ napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParam
         }
 
         if (!addParams.empty()) {
-            params.insert(std::end(params), std::begin(addParams), std::end(addParams));
+            // the memory of some blobs in addParams is allocated before stepping into current function,
+            // and we will FreeParsedParams(params) later, therefore we can not append addParams into params.
+            if (HksAddParams(outParamSet, addParams.data(), addParams.size()) != HKS_SUCCESS) {
+                HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "HksAddParams addParams fail");
+                HKS_LOG_E("add params addParams failed");
+                break;
+            }
         }
 
         if (!params.empty()) {
