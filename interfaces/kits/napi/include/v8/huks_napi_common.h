@@ -55,8 +55,6 @@ void FreeParsedParams(std::vector<HksParam> &params);
 
 napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &params);
 
-napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet, HksParam *addParam);
-
 napi_ref GetCallback(napi_env env, napi_value object);
 
 napi_value GenerateHksResult(napi_env env, int32_t error, uint8_t *data, uint32_t size);

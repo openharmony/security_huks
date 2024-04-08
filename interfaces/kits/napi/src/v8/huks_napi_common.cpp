@@ -189,27 +189,14 @@ napi_value ParseParams(napi_env env, napi_value object, std::vector<HksParam> &p
     return GetInt32(env, 0);
 }
 
-static int32_t AddParams(const std::vector<HksParam> &params, struct HksParamSet *&paramSet)
-{
-    for (auto &param : params) {
-        int32_t ret = HksAddParams(paramSet, &param, 1);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("add param.tag[%" LOG_PUBLIC "x] failed", param.tag);
-            return ret;
-        }
-    }
-    return HKS_SUCCESS;
-}
-
-static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, HksParamSet *&paramSet,
-    HksParam *addParam)
+napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
 {
     if (paramSet != nullptr) {
         HKS_LOG_E("param input invalid");
         return nullptr;
     }
 
-    std::vector<HksParam> params;
+    std::vector<HksParam> params{};
     HksParamSet *outParamSet = nullptr;
     do {
         if (HksInitParamSet(&outParamSet) != HKS_SUCCESS) {
@@ -223,13 +210,11 @@ static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, Hk
             break;
         }
 
-        if (addParam != nullptr) {
-            params.push_back(*addParam);
-        }
-
-        if (AddParams(params, outParamSet) != HKS_SUCCESS) {
-            HKS_LOG_E("add params failed");
-            break;
+        if (!params.empty()) {
+            if (HksAddParams(outParamSet, params.data(), params.size()) != HKS_SUCCESS) {
+                HKS_LOG_E("add params failed");
+                break;
+            }
         }
 
         if (HksBuildParamSet(&outParamSet) != HKS_SUCCESS) {
@@ -245,16 +230,6 @@ static napi_value ParseHksParamSetOrAddParam(napi_env env, napi_value object, Hk
     HksFreeParamSet(&outParamSet);
     FreeParsedParams(params);
     return nullptr;
-}
-
-napi_value ParseHksParamSet(napi_env env, napi_value object, HksParamSet *&paramSet)
-{
-    return ParseHksParamSetOrAddParam(env, object, paramSet, nullptr);
-}
-
-napi_value ParseHksParamSetAndAddParam(napi_env env, napi_value object, HksParamSet *&paramSet, HksParam *addParam)
-{
-    return ParseHksParamSetOrAddParam(env, object, paramSet, addParam);
 }
 
 napi_ref GetCallback(napi_env env, napi_value object)
