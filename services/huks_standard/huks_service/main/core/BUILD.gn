@@ -1,4 +1,4 @@
-# Copyright (C) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (C) 2021-2024 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -38,6 +38,8 @@ if (os_level == "standard") {
       "src/hks_session_manager.c",
       "src/hks_storage.c",
       "src/hks_storage_file_lock.c",
+      "src/hks_storage_manager.c",
+      "src/hks_storage_utils.c",
     ]
 
     if (huks_security_level == "software") {
@@ -118,6 +120,7 @@ if (os_level == "standard") {
     ]
 
     include_dirs = [
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
     ]
@@ -130,6 +133,8 @@ if (os_level == "standard") {
       "src/hks_session_manager.c",
       "src/hks_storage_file_lock.c",
       "src/hks_storage_lite.c",
+      "src/hks_storage_manager.c",
+      "src/hks_storage_utils.c",
     ]
     sources += [
       "src/hks_hitrace.c",

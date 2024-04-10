@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,7 +111,7 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
     int32_t ret = HksConstructRootProcessInfo(&rootProcessInfo);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
     uint32_t keySize = 0;
-    ret = HksStoreGetKeyBlobSize(&rootProcessInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &keySize);
+    ret = HksManageStoreGetKeyBlobSize(&rootProcessInfo, NULL, keyAlias, &keySize, HKS_STORAGE_TYPE_KEY);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyblob size from storage failed, ret = %" LOG_PUBLIC "d.", ret)
 
     if (keySize > MAX_KEY_SIZE) {
@@ -125,7 +125,7 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-        ret = HksStoreGetKeyBlob(&rootProcessInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &oldKey);
+        ret = HksManageStoreGetKeyBlob(&rootProcessInfo, NULL, keyAlias, &oldKey, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_BREAK(ret)
         ret = HksIsKeyExpectedVersion(&oldKey, HKS_OLD_KEY_VERSION_FOR_SDK_HUKS);
         if (ret != HKS_SUCCESS) {
@@ -133,7 +133,7 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
             break;
         }
 
-        ret = HksStoreDeleteKeyBlob(&rootProcessInfo, keyAlias, HKS_STORAGE_TYPE_KEY);
+        ret = HksManageStoreDeleteKeyBlob(&rootProcessInfo, NULL, keyAlias, HKS_STORAGE_TYPE_KEY);
         if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
             HKS_LOG_E("service delete main key failed, ret = %" LOG_PUBLIC "d", ret);
         }
@@ -148,7 +148,7 @@ int32_t HksDeleteOldKeyForSmallToService(const struct HksBlob *keyAlias)
 }
 
 static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, int32_t mode)
+    const struct HksBlob *keyAlias, enum HksStorageType mode)
 {
     HKS_LOG_I("enter HksChangeKeyOwner");
     struct HksProcessInfo rootProcessInfo;
@@ -162,7 +162,7 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
 
     do {
         // get old key
-        ret = GetKeyFileData(&rootProcessInfo, keyAlias, &oldKey, mode);
+        ret = GetKeyFileData(&rootProcessInfo, NULL, keyAlias, &oldKey, mode);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "not have old key")
 
         ret = ConstructUpgradeKeyParamSet(processInfo, paramSet, &upgradeParamSet);
@@ -182,7 +182,7 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
         ret = HksDoUpgradeKeyAccess(&oldKey, upgradeParamSet, &newKey);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access change key owner failed!")
 
-        ret = HksStoreKeyBlob(processInfo, keyAlias, HKS_STORAGE_TYPE_KEY, &newKey);
+        ret = HksManageStoreKeyBlob(processInfo, NULL, keyAlias, &newKey, HKS_STORAGE_TYPE_KEY);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store new key failed!")
 
         // delete old key only after new key stored successfully
@@ -200,7 +200,7 @@ static int32_t HksChangeKeyOwner(const struct HksProcessInfo *processInfo, const
 }
 
 int32_t HksChangeKeyOwnerForSmallToService(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, int32_t mode)
+    const struct HksBlob *keyAlias, enum HksStorageType mode)
 {
     HKS_LOG_I("enter get new key");
     return HksChangeKeyOwner(processInfo, paramSet, keyAlias, mode);
@@ -214,11 +214,11 @@ static int32_t HksGetkeyInfoListByProcessName(const struct HksProcessInfo *proce
     // the number for infos really added in keyInfoList
     uint32_t realCnt = 0;
     do {
-        ret = HksGetKeyAliasByProcessName(processInfo, keyInfoList, listCount);
+        ret = HksManageGetKeyAliasByProcessName(processInfo, NULL, keyInfoList, listCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get old key alias list from storage failed, ret = %" LOG_PUBLIC "d", ret)
         for (uint32_t i = 0; i < *listCount; ++i) {
             struct HksBlob keyFromFile = { 0, NULL };
-            ret = GetKeyFileData(processInfo, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
+            ret = GetKeyFileData(processInfo, NULL, &(keyInfoList[i].alias), &keyFromFile, HKS_STORAGE_TYPE_KEY);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get old key data failed, ret = %" LOG_PUBLIC "d", ret)
             if (HksIsKeyExpectedVersion(&keyFromFile, HKS_OLD_KEY_VERSION_FOR_SDK_HUKS) != HKS_SUCCESS) {
                 HKS_FREE_BLOB(keyFromFile);
@@ -249,7 +249,7 @@ int32_t HksGetOldKeyInfoListForSmallToService(const struct HksProcessInfo *proce
         struct HksProcessInfo rootProcessInfo;
         ret = HksConstructRootProcessInfo(&rootProcessInfo);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct root process info failed!")
-        ret = HksGetkeyInfoListByProcessName(&rootProcessInfo, keyInfoList + *listCount, &listCountOld);
+        ret = HksGetkeyInfoListByProcessName(&rootProcessInfo, NULL, keyInfoList + *listCount, &listCountOld);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key info list in old path failed!")
 
         *listCount = *listCount + listCountOld;

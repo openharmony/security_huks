@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "hks_param.h"
 #include "hks_mem.h"
 #include "hks_template.h"
-#include "hks_storage.h"
+#include "hks_storage_manager.h"
 
 #ifdef _STORAGE_LITE_
 #include "hks_storage_adapter.h"
@@ -80,11 +80,11 @@ int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
     return ret;
 }
 
-int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    struct HksBlob *key, int32_t mode)
+int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    const struct HksBlob *keyAlias, struct HksBlob *key, enum HksStorageType mode)
 {
     uint32_t size;
-    int32_t ret = HksStoreGetKeyBlobSize(processInfo, keyAlias, mode, &size);
+    int32_t ret = HksManageStoreGetKeyBlobSize(processInfo, paramSet, keyAlias, &size, mode);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get keyblob size from storage failed, ret = %" LOG_PUBLIC "d.", ret)
 
     if (size > MAX_KEY_SIZE) {
@@ -96,7 +96,7 @@ int32_t GetKeyFileData(const struct HksProcessInfo *processInfo, const struct Hk
     HKS_IF_NULL_LOGE_RETURN(key->data, HKS_ERROR_MALLOC_FAIL, "get key data: malloc failed")
 
     key->size = size;
-    ret = HksStoreGetKeyBlob(processInfo, keyAlias, mode, key);
+    ret = HksManageStoreGetKeyBlob(processInfo, paramSet, keyAlias, key, mode);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get keyblob from storage failed, ret = %" LOG_PUBLIC "d", ret);
         HKS_FREE_BLOB(*key);

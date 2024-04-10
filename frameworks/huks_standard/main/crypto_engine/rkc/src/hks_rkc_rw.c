@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_rkc.h"
-#include "hks_storage.h"
+#include "hks_storage_manager.h"
 #include "hks_template.h"
 
 #define HKS_RKC_HASH_LEN 32         /* the hash value length of root key component */
@@ -64,13 +64,13 @@ int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
 
     int32_t ret;
     do {
-        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0 };
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
 
-        ret = HksStoreGetKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, tmpKsf);
+        ret = HksManageStoreGetKeyBlob(&processInfo, NULL, &fileNameBlob, tmpKsf, HKS_STORAGE_TYPE_ROOT_KEY);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         return HKS_SUCCESS;
@@ -525,13 +525,13 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
         ret = FillKsfBufRkc(ksfDataRkc, &ksfBuf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill rkc ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0 };
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-        ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
+        ret = HksManageStoreKeyBlob(&processInfo, NULL, &fileNameBlob, &ksfBuf, HKS_STORAGE_TYPE_ROOT_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "Store rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
@@ -555,13 +555,13 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
         ret = FillKsfBufMk(ksfDataMk, &ksfBuf);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Fill mk ksf buf failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
-        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+        struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0 };
         ret = GetProcessInfo(&processInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get process info failed")
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-        ret = HksStoreKeyBlob(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY, &ksfBuf);
+        ret = HksManageStoreKeyBlob(&processInfo, NULL, &fileNameBlob, &ksfBuf, HKS_STORAGE_TYPE_ROOT_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "Store mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
@@ -572,7 +572,7 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
 
 bool KsfExist(uint8_t ksfType)
 {
-    struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+    struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0 };
     int32_t ret = GetProcessInfo(&processInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
@@ -588,7 +588,7 @@ bool KsfExist(uint8_t ksfType)
             continue;
         }
         struct HksBlob fileNameBlob = { strlen(ksfFileName->name[i]), (uint8_t *)(ksfFileName->name[i]) };
-        if (HksStoreIsKeyBlobExist(&processInfo, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY) == HKS_SUCCESS) {
+        if (HksManageStoreIsKeyBlobExist(&processInfo, NULL, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY) == HKS_SUCCESS) {
             return true;
         }
     }

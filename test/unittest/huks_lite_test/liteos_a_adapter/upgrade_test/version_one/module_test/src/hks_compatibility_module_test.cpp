@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -232,7 +232,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
         0
     };
 
-    ret = HksServiceKeyExist(&processInfo1, &keyAlias);
+    ret = HksServiceKeyExist(&processInfo1, &keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     uint32_t uid = 999;
@@ -246,7 +246,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
         0
     };
 
-    ret = HksServiceKeyExist(&processInfo2, &keyAlias);
+    ret = HksServiceKeyExist(&processInfo2, &keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
@@ -316,7 +316,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Lev
         0
     };
 
-    ret = HksServiceDeleteKey(&processInfo, &keyAlias);
+    ret = HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
 
     ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST) << "ret is " << ret;
 
@@ -395,7 +395,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     struct HksKeyInfo *keyInfoList = nullptr;
     ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &keyInfoListSize);
+    ret = HksServiceGetKeyInfoList(&processInfo, nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
 
@@ -439,11 +439,11 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Lev
     struct HksKeyInfo *keyInfoList = nullptr;
     ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksServiceGetKeyInfoList(&processInfo, keyInfoList, &keyInfoListSize);
+    ret = HksServiceGetKeyInfoList(&processInfo, nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(keyInfoListSize, 1) << "keyInfoListSize is " << keyInfoListSize;
 
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias2);
+    (void)HksServiceDeleteKey(&processInfo, &keyAlias2, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias1, &OLD_PROCESS_INFO);
 
     uint32_t hitCnt = 0;

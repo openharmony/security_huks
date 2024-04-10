@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,76 +16,50 @@
 #ifndef HKS_STORAGE_H
 #define HKS_STORAGE_H
 
-#include <stdint.h>
-
-#include "hks_type_inner.h"
-
-enum HksStorageType {
-    HKS_STORAGE_TYPE_KEY = 0,
-    HKS_STORAGE_TYPE_CERTCHAIN,
-    HKS_STORAGE_TYPE_ROOT_KEY,
-};
+#include "hks_storage_utils.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-struct HksStoreInfo {
-    char *processPath; /* file path include process */
-    char *path; /* file path include process/key(or certchain) */
-    char *fileName; /* file name that can be recognized by the file system */
-    uint32_t size;
-};
-
-struct HksStoreFileInfo {
-    struct HksStoreInfo mainPath;
-#ifdef SUPPORT_STORAGE_BACKUP
-    struct HksStoreInfo bakPath;
-#endif
-};
-
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
-int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyAlias,
     enum HksStorageType storageType, const struct HksBlob *keyBlob);
 
-int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo,
+int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType);
-int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo,
+
+int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType);
-int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo,
+
+int32_t HksStoreGetKeyBlob(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob);
+
 int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName,
     const struct HksBlob *keyAlias, uint32_t storageType, uint32_t *keyBlobSize);
+
 int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t *fileCount);
 #else // _STORAGE_LITE_
 
-int32_t HksStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    enum HksStorageType storageType, const struct HksBlob *keyBlob);
+int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyBlob);
 
-int32_t HksStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    uint32_t storageType);
+int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo);
 
-int32_t HksStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    uint32_t storageType);
+int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo);
 
-int32_t HksStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    uint32_t storageType, struct HksBlob *keyBlob);
+int32_t HksStoreGetKeyBlob(const struct HksStoreFileInfo *fileInfo, struct HksBlob *keyBlob);
 
-int32_t HksStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
-    uint32_t storageType, uint32_t *keyBlobSize);
+int32_t HksStoreGetKeyBlobSize(const struct HksStoreFileInfo *fileInfo, uint32_t *keyBlobSize);
 
-int32_t HksGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, uint32_t *fileCount);
+int32_t HksGetKeyCountByProcessName(const struct HksStoreFileInfo *fileInfo, uint32_t *fileCount);
 #endif // _STORAGE_LITE_
 #endif // _CUT_AUTHENTICATE_
 
-int32_t HksGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, struct HksKeyInfo *keyInfoList,
+int32_t HksGetKeyAliasByProcessName(const struct HksStoreFileInfo *fileInfo, struct HksKeyInfo *keyInfoList,
     uint32_t *listCount);
 
 int32_t HksStoreDestroy(const struct HksBlob *processName);
-
-int32_t HksGetFileInfo(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias, uint32_t storageType,
-    struct HksStoreFileInfo *fileInfo);
 
 void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId);
 
