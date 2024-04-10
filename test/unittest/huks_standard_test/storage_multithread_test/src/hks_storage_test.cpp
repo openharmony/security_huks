@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,7 +17,12 @@
 
 #include <string>
 
-#include "hks_storage.h"
+#include "hks_config.h"
+#include "hks_storage_manager.h"
+#include "hks_param.h"
+#include "hks_log.h"
+#include "hks_template.h"
+#include "hks_type.h"
 
 using namespace testing::ext;
 
@@ -29,6 +34,38 @@ const std::string TEST_KEY_ALIAS = "key_alias";
 constexpr uint32_t TEST_BLOB_SIZE = 16;
 constexpr uint8_t TEST_BLOB[TEST_BLOB_SIZE] = {0};
 }  // namespace
+
+static int32_t BuildParamSet(const struct HksParam *param, uint32_t paramCnt, struct HksParamSet **paramSetOut)
+{
+    int32_t ret;
+    struct HksParamSet *paramSet = nullptr;
+    do {
+        ret = HksInitParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+
+        if (param != nullptr && paramCnt > 0) {
+            ret = HksAddParams(paramSet, param, paramCnt);
+            HKS_IF_NOT_SUCC_BREAK(ret)
+        }
+
+        ret = HksBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_BREAK(ret)
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(&paramSet);
+    }
+    *paramSetOut = paramSet;
+    return HKS_SUCCESS;
+}
+
+static const struct HksParam g_genParams[] = {
+    { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
+    { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
+    { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
+    { .tag = HKS_TAG_PADDING, .uint32Param = HKS_PADDING_NONE },
+    { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
+    { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+};
 
 class HksStorageTest : public testing::Test {
 public:
@@ -48,11 +85,14 @@ public:
         };
         HksProcessInfo hksProcessInfo = {
             .userId = userId,
-            .processName = processName,
-            .specificUserIdInt = 0,
-            .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
+            .processName = processName
         };
-        HksStoreDeleteKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY);
+
+        struct HksParamSet *paramSet = nullptr;
+        int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+        ASSERT_EQ(ret, HKS_SUCCESS);
+        HksManageStoreDeleteKeyBlob(&hksProcessInfo, paramSet, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY);
+        HksFreeParamSet(&paramSet);
     };
 };
 
@@ -76,13 +116,16 @@ static void PrepareBlob()
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName,
-        .specificUserIdInt = 0,
-        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
+        .processName = processName
     };
 
-    int32_t result = HksStoreKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY, &keyBlob);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    int32_t result = HksManageStoreKeyBlob(&hksProcessInfo, paramSet, &keyAlias,
+        &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
     EXPECT_EQ(result, (int32_t)0);
+    HksFreeParamSet(&paramSet);
 }
 
 HWTEST_F(HksStorageTest, HksStorageTest_00100, Function | SmallTest | Level1)
@@ -105,13 +148,16 @@ HWTEST_F(HksStorageTest, HksStorageTest_00100, Function | SmallTest | Level1)
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName,
-        .specificUserIdInt = 0,
-        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
+        .processName = processName
     };
 
-    int32_t result = HksStoreKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY, &keyBlob);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    int32_t result = HksManageStoreKeyBlob(&hksProcessInfo, paramSet, &keyAlias,
+        &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
     EXPECT_EQ(result, (int32_t)0);
+    HksFreeParamSet(&paramSet);
 }
 
 HWTEST_F(HksStorageTest, HksStorageTest_00200, Function | SmallTest | Level1)
@@ -137,13 +183,16 @@ HWTEST_F(HksStorageTest, HksStorageTest_00200, Function | SmallTest | Level1)
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName,
-        .specificUserIdInt = 0,
-        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
+        .processName = processName
     };
 
-    int32_t result = HksStoreGetKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY, &keyBlob);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    int32_t result = HksManageStoreGetKeyBlob(&hksProcessInfo, paramSet,
+        &keyAlias, &keyBlob, HksStorageType::HKS_STORAGE_TYPE_KEY);
     EXPECT_EQ(result, (int32_t)0);
+    HksFreeParamSet(&paramSet);
 }
 
 HWTEST_F(HksStorageTest, HksStorageTest_00300, Function | SmallTest | Level1)
@@ -164,12 +213,14 @@ HWTEST_F(HksStorageTest, HksStorageTest_00300, Function | SmallTest | Level1)
     };
     HksProcessInfo hksProcessInfo = {
         .userId = userId,
-        .processName = processName,
-        .specificUserIdInt = 0,
-        .storageLevel = HKS_AUTH_STORAGE_LEVEL_DE
+        .processName = processName
     };
-
-    int32_t result = HksStoreDeleteKeyBlob(&hksProcessInfo, &keyAlias, HksStorageType::HKS_STORAGE_TYPE_KEY);
+    struct HksParamSet *paramSet = nullptr;
+    int32_t ret = BuildParamSet(g_genParams, HKS_ARRAY_SIZE(g_genParams), &paramSet);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    int32_t result = HksManageStoreDeleteKeyBlob(&hksProcessInfo, paramSet, &keyAlias,
+        HksStorageType::HKS_STORAGE_TYPE_KEY);
     EXPECT_EQ(result, (int32_t)0);
+    HksFreeParamSet(&paramSet);
 }
 }  // namespace

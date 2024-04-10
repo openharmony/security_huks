@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,7 +23,7 @@
 #include "hks_type_inner.h"
 #include "hks_param.h"
 
-#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c"
+#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c"
 
 using namespace testing::ext;
 namespace Unittest::HksStorageTest {

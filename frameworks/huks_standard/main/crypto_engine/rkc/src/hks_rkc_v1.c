@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2020-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,7 +21,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_rkc.h"
-#include "hks_storage.h"
+#include "hks_storage_manager.h"
 #include "hks_template.h"
 
 static int32_t RkcExtractKsfBufV1(const struct HksBlob *ksfFromFile, struct HksRkcKsfDataV1 *ksfData)
@@ -222,18 +222,18 @@ static int32_t RkcLoadKsfV1(struct HksBlob *mkBlob)
 
 static int32_t RkcDeleteAllKsfV1(void)
 {
-    struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0, HKS_AUTH_STORAGE_LEVEL_DE };
+    struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0 };
     int32_t ret = GetProcessInfo(&processInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksBlob fileNameBlob1 = { strlen("info1.data"), (uint8_t *)"info1.data" };
-    ret = HksStoreDeleteKeyBlob(&processInfo, &fileNameBlob1, HKS_STORAGE_TYPE_ROOT_KEY);
+    ret = HksManageStoreDeleteKeyBlob(&processInfo, NULL, &fileNameBlob1, HKS_STORAGE_TYPE_ROOT_KEY);
     if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
         HKS_LOG_E("delete rkc keystore file failed, ret = %" LOG_PUBLIC "d", ret);
     }
 
     struct HksBlob fileNameBlob2 = { strlen("info2.data"), (uint8_t *)"info2.data" };
-    ret = HksStoreDeleteKeyBlob(&processInfo, &fileNameBlob2, HKS_STORAGE_TYPE_ROOT_KEY);
+    ret = HksManageStoreDeleteKeyBlob(&processInfo, NULL, &fileNameBlob2, HKS_STORAGE_TYPE_ROOT_KEY);
     if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
         HKS_LOG_E("delete rkc keystore file failed, ret = %" LOG_PUBLIC "d", ret);
     }
