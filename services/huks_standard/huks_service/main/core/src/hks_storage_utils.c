@@ -37,10 +37,6 @@
 #include "hks_param.h"
 #include "securec.h"
 
-#ifdef L2_STANDARD
-#include "hks_response.h"
-#endif
-
 #define HKS_ENCODE_OFFSET_LEN         6
 #define HKS_ENCODE_KEY_SALT_VALUE     0x3f
 #define KEY_ALIAS_ANONYMOUS_LEN       4
@@ -417,32 +413,6 @@ void FileInfoFree(struct HksStoreFileInfo *fileInfo)
     HKS_FREE(fileInfo->bakPath.fileName);
     fileInfo->bakPath.size = 0;
 #endif
-}
-
-static int32_t DataStrCopy(char **data, uint32_t size, const char *cpyData)
-{
-    *data = (char *)HksMalloc(size);
-    HKS_IF_NULL_RETURN(*data, HKS_ERROR_MALLOC_FAIL)
-
-    (void)strcpy_s(*data, size, cpyData);
-    return HKS_SUCCESS;
-}
-
-int32_t CopyFileInfo(const struct HksStoreFileInfo *fileInfoFrom, struct HksStoreFileInfo *fileInfoTo)
-{
-    fileInfoTo->mainPath.size = fileInfoFrom->mainPath.size;
-    int32_t ret = DataStrCopy(&fileInfoTo->mainPath.processPath, fileInfoTo->mainPath.size, fileInfoFrom->mainPath.processPath);
-    ret += DataStrCopy(&fileInfoTo->mainPath.path, fileInfoTo->mainPath.size, fileInfoFrom->mainPath.path);
-    ret += DataStrCopy(&fileInfoTo->mainPath.fileName, fileInfoTo->mainPath.size, fileInfoFrom->mainPath.fileName);
-
-#ifdef SUPPORT_STORAGE_BACKUP
-    fileInfoTo->bakPath.size = fileInfoFrom->mainPath.size;
-    ret += DataStrCopy(&fileInfoTo->bakPath.processPath, fileInfoTo->bakPath.size, fileInfoFrom->bakPath.processPath);
-    ret += DataStrCopy(&fileInfoTo->bakPath.path, fileInfoTo->bakPath.size, fileInfoFrom->bakPath.path);
-    ret += DataStrCopy(&fileInfoTo->bakPath.fileName, fileInfoTo->bakPath.size, fileInfoFrom->bakPath.fileName);
-#endif
-
-    return ret;
 }
 
 static int32_t MakeSubPath(const char *mainPath, const char *tmpPath, char *outPath, uint32_t outPathLen)

@@ -36,6 +36,7 @@
 #include "hks_cmd_id.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_permission_check.h"
 #include "hks_response.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
