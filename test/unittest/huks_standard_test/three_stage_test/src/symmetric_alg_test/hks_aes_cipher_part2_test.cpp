@@ -539,7 +539,7 @@ static struct HksParam g_decrypt1Params015[] = {
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test008, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest008";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
@@ -569,7 +569,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test008, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test009, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest009";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams009, sizeof(g_genParams009) / sizeof(HksParam));
@@ -600,7 +600,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test009, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test011, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest011";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams011, sizeof(g_genParams011) / sizeof(HksParam));
@@ -634,7 +634,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test011, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test012, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest012";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams012, sizeof(g_genParams012) / sizeof(HksParam));
@@ -665,7 +665,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test012, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test013, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest013";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams013, sizeof(g_genParams013) / sizeof(HksParam));
@@ -695,7 +695,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test013, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test014, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest014";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams014, sizeof(g_genParams014) / sizeof(HksParam));
@@ -728,7 +728,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test014, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest015";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams015, sizeof(g_genParams015) / sizeof(HksParam));
@@ -763,7 +763,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test011, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest011";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams011, sizeof(g_genParams011) / sizeof(HksParam));
@@ -794,7 +794,7 @@ HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test011, TestSize.Level0)
 HWTEST_F(HksAesCipherPart2Test, HksAesCipherPart2Test015, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest015";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams015, sizeof(g_genParams015) / sizeof(HksParam));

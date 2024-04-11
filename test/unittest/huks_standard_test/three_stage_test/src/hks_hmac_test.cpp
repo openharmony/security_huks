@@ -341,7 +341,7 @@ static const struct GenerateKeyCaseParam g_hmacParamsFail[] = {
 static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSet *genParamSet,
     struct HksParamSet *hmacParamSet)
 {
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
 
     /* 1. Generate Key */
     int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
@@ -396,7 +396,7 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
 HWTEST_F(HksHmacTest, HksHmacTest001, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest001";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
@@ -419,7 +419,7 @@ HWTEST_F(HksHmacTest, HksHmacTest001, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest002, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest002";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams002, sizeof(g_genParams002) / sizeof(HksParam));
@@ -444,7 +444,7 @@ HWTEST_F(HksHmacTest, HksHmacTest002, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest003, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest003";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
@@ -467,7 +467,7 @@ HWTEST_F(HksHmacTest, HksHmacTest003, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest004, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest004";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams004, sizeof(g_genParams004) / sizeof(HksParam));
@@ -490,7 +490,7 @@ HWTEST_F(HksHmacTest, HksHmacTest004, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest005, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest005";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams005, sizeof(g_genParams005) / sizeof(HksParam));
@@ -514,8 +514,8 @@ HWTEST_F(HksHmacTest, HksHmacTest005, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest006";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
-    struct HksBlob inData = { g_inData.length(), (uint8_t *)g_inData.c_str() };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
     int32_t ret = HKS_FAILURE;
 
     /* 2. Generate Key */
@@ -564,7 +564,7 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest007";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
     int32_t ret = HKS_FAILURE;
 
     /* 2. Generate Key */
@@ -608,7 +608,7 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest008, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksHMACKeyAliasTest008";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams006, sizeof(g_genParams006) / sizeof(HksParam));
@@ -631,7 +631,7 @@ HWTEST_F(HksHmacTest, HksHmacTest008, TestSize.Level0)
 HWTEST_F(HksHmacTest, HksHmacTest009, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksSM3KeyAliasTest009";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams007, sizeof(g_genParams007) / sizeof(HksParam));
@@ -655,7 +655,7 @@ HWTEST_F(HksHmacTest, HksHmacTest010, TestSize.Level0)
 {
     char tmpKeyAlias[] = "HksSM3KeyAliasTest010";
     uint32_t index = 0;
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParamsFail[index].params,
@@ -682,7 +682,7 @@ HWTEST_F(HksHmacTest, HksHmacTest011, TestSize.Level0)
 {
     HKS_LOG_E("Enter HksHmacTest011");
     char tmpKeyAlias[] = "HksHMACKeyAliasTest011";
-    struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
+    struct HksBlob keyAlias = { (uint32_t)strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, g_genParams008, sizeof(g_genParams008) / sizeof(HksParam));
