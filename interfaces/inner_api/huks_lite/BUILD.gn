@@ -191,6 +191,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_upgrade_key.c",
       "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_helper.c",
       "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_permission_check.cpp",
     ]
     sources += [ "hks_tmp_client.c" ]
 
@@ -213,7 +214,7 @@ if (ohos_kernel_type == "liteos_m") {
     include_dirs = [
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
     ]
 
     defines = [
@@ -277,7 +278,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//foundation/systemabilitymgr/samgr_lite/interfaces/kits/registry",
       "//foundation/systemabilitymgr/samgr_lite/samgr_endpoint/source",
 
-      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr",
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
     ]
@@ -287,6 +288,7 @@ if (ohos_kernel_type == "liteos_m") {
     sources = [
       "//base/security/huks/interfaces/inner_api/huks_standard/main/src/hks_api.c",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/src/hks_api_adapter.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_permission_check.cpp",
     ]
 
     sources += [
@@ -322,6 +324,7 @@ if (ohos_kernel_type == "liteos_m") {
     sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/service_pro_main.c" ]
 
     sources += [
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_permission_check.cpp",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/hks_samgr_service.c",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/sa_mgr/hks_samgr_service_feature.c",
     ]
@@ -330,6 +333,7 @@ if (ohos_kernel_type == "liteos_m") {
 
     include_dirs += [
       "//base/security/huks/frameworks/huks_standard/main/os_dependency/ipc/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",
     ]
 

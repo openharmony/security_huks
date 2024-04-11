@@ -33,8 +33,8 @@
 #include "hks_storage.h"
 #include "hks_storage_manager.h"
 
-static int32_t HksConstructStoreFileInfo(const struct HksProcessInfo *processInfo, const struct HksStoreMaterial *material,
-    struct HksStoreFileInfo *fileInfo, bool supportRootKey)
+static int32_t HksConstructStoreFileInfo(const struct HksProcessInfo *processInfo,
+    const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo, bool supportRootKey)
 {
     int32_t ret;
     do {

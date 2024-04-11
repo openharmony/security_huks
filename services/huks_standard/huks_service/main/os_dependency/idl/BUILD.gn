@@ -31,6 +31,7 @@ if (os_level == "standard") {
 
     sources = [
       "ipc/hks_ipc_service.c",
+      "ipc/hks_permission_check.cpp",
       "ipc/hks_response.cpp",
       "ipc/hks_service_ipc_serialization.c",
     ]
