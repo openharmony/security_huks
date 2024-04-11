@@ -76,7 +76,7 @@ static int32_t TestAgreedKeyEncryptDecrypt(const struct HksBlob *keyAlias1, cons
     const struct HksBlob *keyAlias2, struct HksParamSet *decryptParamSet)
 {
     const char *plainTest = "test_plain_test_";
-    struct HksBlob plaindata = { .size = strlen(plainTest), .data = (uint8_t *)plainTest };
+    struct HksBlob plaindata = { .size = (uint32_t)strlen(plainTest), .data = (uint8_t *)plainTest };
     const uint32_t cipherMaxSize = 1024;
     uint8_t cipherBuffer[cipherMaxSize] = { 0 };
     struct HksBlob cipherData = { .size = cipherMaxSize, .data = (uint8_t *)cipherBuffer };

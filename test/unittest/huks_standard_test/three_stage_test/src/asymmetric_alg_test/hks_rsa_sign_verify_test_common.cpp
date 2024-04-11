@@ -29,7 +29,7 @@ static int32_t RsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksPa
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, const struct RsaSignVerifyParamStruct param)
 {
     struct HksBlob inData = {
-        g_inData.length(),
+        (uint32_t)g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     uint8_t tmpIn[] = "tempIn";
@@ -68,7 +68,7 @@ static int32_t RsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksPa
 
     /* 4. Import Key */
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
     if (param.isGenParamSetSameAsImport) {
         ret = HksImportKey(&newKeyAlias, genParamSet, &publicKey);
     } else {
@@ -200,7 +200,7 @@ int32_t RSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSe
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, const uint32_t *hashAlgIndex)
 {
     struct HksBlob inData = {
-        g_inData.length(),
+        (uint32_t)g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     struct HksBlob finishInData = { 0, NULL };
@@ -240,7 +240,7 @@ int32_t RSASignVerifyTestAbnormalCase(struct HksBlob keyAlias, struct HksParamSe
 
     /* 4. Import Key */
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 

@@ -99,7 +99,7 @@ static int32_t HksEd25519SignVerifyTestNormalCase(struct HksBlob keyAlias, struc
     struct HksParamSet *signParamSet, struct HksParamSet *verifyParamSet, uint32_t loopIndex)
 {
     struct HksBlob inData = {
-        tmpInData.length(),
+        (uint32_t)tmpInData.length(),
         (uint8_t *)tmpInData.c_str()
     };
     int32_t ret = HKS_FAILURE;
@@ -130,7 +130,7 @@ static int32_t HksEd25519SignVerifyTestNormalCase(struct HksBlob keyAlias, struc
 
     /* 4. Import Key */
     char newKey[] = "ECC_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
@@ -167,7 +167,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest001, TestSize.Level0)
         sizeof(g_verifyParamsTest001) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     /* 1. Generate Key */
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
@@ -187,7 +187,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest001, TestSize.Level0)
 
     /* 4. Import Key */
     char newKey[] = "ECC_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
@@ -213,7 +213,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest002, TestSize.Level0)
     struct HksParamSet *genParamSet = nullptr;
     struct HksParamSet *signParamSet = nullptr;
     struct HksParamSet *verifyParamSet = nullptr;
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
 
     int32_t ret = InitParamSet(&genParamSet, g_genParamsTest002,
         sizeof(g_genParamsTest002) / sizeof(HksParam));
@@ -253,7 +253,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest002, TestSize.Level0)
 
     /* 4. Import Key */
     char newKey[] = "ED25519_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
@@ -287,7 +287,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest002, TestSize.Level0)
 HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest003, TestSize.Level0)
 {
     const char *keyAliasString = "HksED25519SignVerifyKeyAliasTest003";
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -332,7 +332,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest003, TestSize.Level0)
 HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest004, TestSize.Level0)
 {
     const char *keyAliasString = "HksED25519SignVerifyKeyAliasTest004";
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -388,7 +388,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest005, TestSize.Level0)
         sizeof(g_verifyParamsTest005) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
             HKS_LOG_E("HksEd25519SignVerifyTest005 loop: %d", i);
@@ -424,7 +424,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest006, TestSize.Level0)
         sizeof(g_verifyParamsTest006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
             HKS_LOG_E("HksEd25519SignVerifyTest006 loop: %d", i);
@@ -457,7 +457,7 @@ HWTEST_F(HksEd25519SignVerifyTest, HksEd25519SignVerifyTest007, TestSize.Level0)
     ret = InitParamSet(&verifyParamSet, g_verifyParamsTest007, sizeof(g_verifyParamsTest007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
-    struct HksBlob keyAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
+    struct HksBlob keyAlias = { (uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString };
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         for (uint32_t i = 0; i < (sizeof(g_inDataArrayAfterHash) / sizeof(g_inDataArrayAfterHash[0])); i++) {
             HKS_LOG_E("HksEd25519SignVerifyTest007 loop: %d", i);

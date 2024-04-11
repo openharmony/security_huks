@@ -86,7 +86,7 @@ static int CurrentCallback(IOwner owner, int code, IpcIo *reply)
         return HKS_ERROR_NULL_POINTER;
     }
     if (memcpy_s(curReply->io->bufferCur, curReply->io->bufferLeft, reply->bufferCur, reply->bufferLeft) != EOK) {
-        HKS_LOG_E("data copy for curReply failed, cur size is %d, reply size is %d", curReply->io->bufferLeft,
+        HKS_LOG_E("data copy for curReply failed, cur size is %zu, reply size is %zu", curReply->io->bufferLeft,
             reply->bufferLeft);
         curReply->state = HKS_IPC_MSG_ERROR;
         curReply->io->bufferLeft = 0;
