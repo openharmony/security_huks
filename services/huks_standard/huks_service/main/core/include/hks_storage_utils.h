@@ -81,8 +81,6 @@ int32_t FileInfoInit(struct HksStoreFileInfo *fileInfo);
 
 void FileInfoFree(struct HksStoreFileInfo *fileInfo);
 
-int32_t CopyFileInfo(const struct HksStoreFileInfo *fileInfoFrom, struct HksStoreFileInfo *fileInfoTo);
-
 int32_t RecordKeyOperation(uint32_t operation, const char *path, const char *keyAlias);
 
 void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCount);

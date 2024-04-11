@@ -373,7 +373,8 @@ int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct Hk
         ret = RecordKeyOperation(KEY_OPERATION_SAVE, fileInfo->mainPath.path, fileInfo->mainPath.fileName);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = SaveKeyBlob(fileInfo->mainPath.processPath, fileInfo->mainPath.path, fileInfo->mainPath.fileName, keyBlob);
+        ret = SaveKeyBlob(fileInfo->mainPath.processPath, fileInfo->mainPath.path, fileInfo->mainPath.fileName,
+            keyBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks save key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
