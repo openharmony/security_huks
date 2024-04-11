@@ -778,8 +778,6 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
           .blob = *handle },
         { .tag = HKS_TAG_PARAM2_BUFFER,
           .blob = *inData },
-        { .tag = HKS_TAG_PARAM3_BUFFER,
-          .blob = *outData },
     };
 
     int32_t ret = HksParamsToParamSet(finishParams, HKS_ARRAY_SIZE(finishParams), &sendParamSet);

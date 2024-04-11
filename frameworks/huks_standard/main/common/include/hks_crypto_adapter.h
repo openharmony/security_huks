@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,6 +44,8 @@ int32_t HksBuildCipherUsageSpec(const struct HksParamSet *paramSet, bool isEncry
 
 int32_t HksGetEncryptAeTag(const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData,
     struct HksBlob *tagAead);
+
+int32_t HksGetDecryptAeTag(const struct HksParamSet *runtimeParamSet, struct HksUsageSpec *spec);
 
 int32_t HksSetKeyToMaterial(uint32_t alg, bool isPubKey, const struct HksBlob *key, struct HksBlob *keyMaterial);
 

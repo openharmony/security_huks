@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -311,6 +311,20 @@ static const EVP_CIPHER *GetGcmCipherType(uint32_t keySize)
     }
 }
 
+static const EVP_CIPHER *GetCcmCipherType(uint32_t keySize)
+{
+    switch (keySize) {
+        case (HKS_AES_KEY_SIZE_128 / HKS_BITS_PER_BYTE):
+            return EVP_aes_128_ccm();
+        case (HKS_AES_KEY_SIZE_192 / HKS_BITS_PER_BYTE):
+            return EVP_aes_192_ccm();
+        case (HKS_AES_KEY_SIZE_256 / HKS_BITS_PER_BYTE):
+            return EVP_aes_256_ccm();
+        default:
+            return NULL;
+    }
+}
+
 static const EVP_CIPHER *GetAesCipherType(uint32_t keySize, uint32_t mode)
 {
     return GetBlockCipherType(keySize, mode, GetAesCbcCipherType, GetAesCtrCipherType, GetAesEcbCipherType);
@@ -321,10 +335,15 @@ static const EVP_CIPHER *GetAeadCipherType(uint32_t keySize, uint32_t mode)
     if (mode == HKS_MODE_GCM) {
         return GetGcmCipherType(keySize);
     }
+
+    if (mode == HKS_MODE_CCM) {
+        return GetCcmCipherType(keySize);
+    }
+
     return NULL;
 }
 
-#ifdef HKS_SUPPORT_AES_GCM
+#if defined(HKS_SUPPORT_AES_GCM) || defined(HKS_SUPPORT_AES_CCM)
 static int32_t OpensslAesAeadInit(
     const struct HksBlob *key, const struct HksUsageSpec *usageSpec, bool isEncrypt, EVP_CIPHER_CTX **ctx)
 {
@@ -653,6 +672,198 @@ static int32_t OpensslAesAeadDecryptFinalGCM(void **cryptoCtx, const struct HksB
     EVP_CIPHER_CTX_free(ctx);
     aesCtx->append = NULL;
     HKS_FREE(*cryptoCtx);
+    return ret;
+}
+
+static int32_t OpensslAesAeadCipherSetParam(const struct HksBlob *key, const struct HksUsageSpec *spec,
+    const bool isEncrypt, EVP_CIPHER_CTX *ctx)
+{
+    if (spec == NULL || key == NULL || ctx == NULL) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksAeadParam *aeadParam = (struct HksAeadParam *)spec->algParam;
+    if (aeadParam == NULL) {
+        HKS_LOG_E("aeadParam is null!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (!isEncrypt && spec->mode ==  HKS_MODE_CCM) {
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, aeadParam->tagDec.size, aeadParam->tagDec.data) !=
+            HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("EVP_CIPHER_CTX_ctrl failed, tag aead size %" LOG_PUBLIC "d", aeadParam->tagDec.size);
+            HksLogOpensslError();
+            return  HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+
+    int32_t ret = EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_IVLEN, aeadParam->nonce.size, NULL);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("set iv length error");
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    int enc = (isEncrypt ? 1 : 0);
+    ret = EVP_CipherInit_ex(ctx, NULL, NULL, key->data, aeadParam->nonce.data, enc);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("set key and iv error");
+        HksLogOpensslError();
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    return HKS_SUCCESS;
+}
+
+static int32_t OpensslAesAeadCipherInit(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const bool isEncrypt, void **cryptoCtx)
+{
+    EVP_CIPHER_CTX *ctx = EVP_CIPHER_CTX_new();
+    if (ctx == NULL) {
+        HksLogOpensslError();
+        HKS_LOG_E("cipher init get ctx failed!");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    int enc = (isEncrypt ? 1 : 0);
+    int32_t ret = EVP_CipherInit_ex(ctx, GetAeadCipherType(key->size, usageSpec->mode), NULL, NULL, NULL, enc);
+    if (ret != HKS_OPENSSL_SUCCESS) {
+        HKS_LOG_E("EVP_CipherInit_ex exec failed!");
+        HksLogOpensslError();
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    if (isEncrypt && usageSpec->mode ==  HKS_MODE_CCM) {
+        if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, HKS_AE_TAG_LEN, NULL) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("EVP_CIPHER_CTX_ctrl set tag len failed!");
+            HksLogOpensslError();
+            EVP_CIPHER_CTX_free(ctx);
+            return  HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+
+    ret = OpensslAesAeadCipherSetParam(key, usageSpec, isEncrypt, ctx);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OpensslAesAeadCipherSetParam set params failed!");
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    struct HksOpensslBlockCipherCtx *outCtx =
+        (struct HksOpensslBlockCipherCtx *)HksMalloc(sizeof(HksOpensslBlockCipherCtx));
+    if (outCtx == NULL) {
+        HKS_LOG_E("HksOpensslBlockCipherCtx malloc fail");
+        EVP_CIPHER_CTX_free(ctx);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
+    outCtx->algType = usageSpec->algType;
+    outCtx->mode = usageSpec->mode;
+    outCtx->padding = 0;
+    outCtx->append = (void *)ctx;
+
+    *cryptoCtx = (void *)outCtx;
+
+    return HKS_SUCCESS;
+}
+
+static int32_t OpensslAesAeadCipherUpdate(void *cryptoCtx, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *input, struct HksBlob *output)
+{
+    struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)cryptoCtx;
+    int32_t outLen = output->size;
+
+    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
+    if (ctx == NULL) {
+        HKS_LOG_E("EVP_CIPHER_CTX is null!");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    struct HksAeadParam *aeadParam = (struct HksAeadParam *)usageSpec->algParam;
+    if (aeadParam == NULL) {
+        HKS_LOG_E("aeadParam is null!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if (aesCtx->mode == HKS_MODE_CCM) {
+        if (EVP_CipherUpdate(ctx, NULL, &outLen, NULL, input->size) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            HKS_LOG_E("cipher update set ccm data length failed!");
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+
+    if (aeadParam->aad.size != 0) {
+        if (EVP_CipherUpdate(ctx, NULL, &outLen, aeadParam->aad.data, aeadParam->aad.size) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            HKS_LOG_E("update aad faild, outLen->%" LOG_PUBLIC "d", outLen);
+            return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        }
+    }
+
+    if (EVP_CipherUpdate(ctx, output->data, &outLen, input->data, input->size) != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        HKS_LOG_E("cipher update exec failed!");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    output->size = (uint32_t)outLen;
+
+    return HKS_SUCCESS;
+}
+
+static int32_t OpensslAesAeadCipherFinal(void **cryptoCtx, const struct HksUsageSpec *usageSpec, bool isEncrypt,
+    const struct HksBlob *input, struct HksBlob *output, struct HksBlob *tagAead)
+{
+    struct HksOpensslBlockCipherCtx *aesCtx = (struct HksOpensslBlockCipherCtx *)*cryptoCtx;
+    EVP_CIPHER_CTX *ctx = (EVP_CIPHER_CTX *)aesCtx->append;
+    if (ctx == NULL) {
+        HKS_FREE(*cryptoCtx);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HKS_SUCCESS;
+    do {
+        int32_t outLen = 0;
+        if (input->size != 0) {
+            ret = OpensslAesAeadCipherUpdate(*cryptoCtx, usageSpec, input, output);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("cipher final update input data failed");
+                break;
+            }
+        }
+
+        // for gcm mode in decrypt process need set aead tag before EVP_CipherFinal_ex
+        if (!isEncrypt && aesCtx->mode == HKS_MODE_GCM) {
+            if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_SET_TAG, tagAead->size, tagAead->data) !=
+                HKS_OPENSSL_SUCCESS) {
+                HKS_LOG_E("EVP_CIPHER_CTX_ctrl failed, tagAead->size->%" LOG_PUBLIC "d", tagAead->size);
+                HksLogOpensslError();
+                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+                break;
+            }
+        }
+
+        if (EVP_CipherFinal_ex(ctx, output->data + output->size, &outLen) != HKS_OPENSSL_SUCCESS) {
+            HksLogOpensslError();
+            HKS_LOG_E("EVP_CipherFinal_ex faild, outLen->%" LOG_PUBLIC "d", outLen);
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+        output->size += (uint32_t)outLen;
+
+        if (isEncrypt) {
+            if (EVP_CIPHER_CTX_ctrl(ctx, EVP_CTRL_AEAD_GET_TAG, HKS_AE_TAG_LEN, tagAead->data) != HKS_OPENSSL_SUCCESS) {
+                HksLogOpensslError();
+                HKS_LOG_E("EVP_CIPHER_CTX_ctrl get aead faild");
+                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+                break;
+            }
+        }
+    } while (0);
+
+    EVP_CIPHER_CTX_free(ctx);
+    aesCtx->append = NULL;
+    HKS_FREE(*cryptoCtx);
+
     return ret;
 }
 #endif
@@ -999,6 +1210,16 @@ int32_t HksOpensslAesEncrypt(const struct HksBlob *key, const struct HksUsageSpe
                 "OpensslAesAeadEncryptFinal fail, ret = %" LOG_PUBLIC "d", ret)
             break;
 #endif
+#ifdef HKS_SUPPORT_AES_CCM
+        case HKS_MODE_CCM:
+            ret = OpensslAesAeadCipherInit(key, usageSpec, true, (void **)(&ctx));
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadCipherInit for aes ccm enc fail, ret = %" LOG_PUBLIC "d", ret)
+            ret = OpensslAesAeadCipherFinal((void **)(&ctx), usageSpec, true, message, &tmpCipherText, tagAead);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadCipherFinal for aes ccm enc fail, ret = %" LOG_PUBLIC "d", ret)
+            break;
+#endif
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||     \
     defined(HKS_SUPPORT_AES_CTR_NOPADDING) || defined(HKS_SUPPORT_AES_ECB_NOPADDING) || \
     defined(HKS_SUPPORT_AES_ECB_PKCS7PADDING)
@@ -1040,6 +1261,17 @@ int32_t HksOpensslAesDecrypt(const struct HksBlob *key, const struct HksUsageSpe
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
                 "OpensslAesAeadDecryptFinal fail, ret = %" LOG_PUBLIC "d", ret)
             break;
+#ifdef HKS_SUPPORT_AES_CCM
+        case HKS_MODE_CCM:
+            ret = OpensslAesAeadCipherInit(key, usageSpec, false, (void **)(&ctx));
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadCipherInit for aes ccm dec fail, ret = %" LOG_PUBLIC "d", ret)
+            struct HksBlob tag = {0, NULL};
+            ret = OpensslAesAeadCipherFinal((void **)(&ctx), usageSpec, false, message, &tmpPlainText, &tag);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
+                "OpensslAesAeadCipherFinal for aes ccm dec fail, ret = %" LOG_PUBLIC "d", ret)
+            break;
+#endif
         case HKS_MODE_CBC:
         case HKS_MODE_CTR:
         case HKS_MODE_ECB:
