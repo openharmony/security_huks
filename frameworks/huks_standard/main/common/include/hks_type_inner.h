@@ -28,6 +28,8 @@
 #define HANDLE_SIZE              8
 #define DEFAULT_AUTH_TIMEOUT     5
 
+#define HKS_CIPHER_CCM_MODE_MAX_DATA_LEN (100 * 1024)
+
 /* EnrolledIdInfo stored format: |-enrolledId len-|-enrolledId1 type-|-enrolledId1 value-|...|  */
 #define ENROLLED_ID_INFO_MIN_LEN  (sizeof(uint32_t) + (sizeof(uint32_t) + sizeof(uint64_t)))
 

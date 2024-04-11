@@ -34,7 +34,7 @@ int32_t HksOpensslAesGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 
 #if defined(HKS_SUPPORT_AES_CBC_NOPADDING) || defined(HKS_SUPPORT_AES_CBC_PKCS7) ||        \
     defined(HKS_SUPPORT_AES_ECB_PKCS7PADDING) || defined(HKS_SUPPORT_AES_CTR_NOPADDING) || \
-    defined(HKS_SUPPORT_AES_ECB_NOPADDING) || defined(HKS_SUPPORT_AES_GCM)
+    defined(HKS_SUPPORT_AES_ECB_NOPADDING) || defined(HKS_SUPPORT_AES_GCM) || defined(HKS_SUPPORT_AES_CCM)
 int32_t HksOpensslAesEncryptInit(void **cryptoCtx, const struct HksBlob *key, const struct HksUsageSpec *usageSpec);
 
 int32_t HksOpensslAesEncryptUpdate(void *cryptoCtx, const struct HksBlob *message, struct HksBlob *cipherText);
@@ -66,7 +66,7 @@ int32_t HksOpensslAesDecrypt(const struct HksBlob *key, const struct HksUsageSpe
     defined(HKS_SUPPORT_SM4_CBC_NOPADDING) || defined(HKS_SUPPORT_SM4_CBC_PKCS7) ||        \
     defined(HKS_SUPPORT_SM4_CTR_NOPADDING) || defined(HKS_SUPPORT_SM4_ECB_NOPADDING) ||    \
     defined(HKS_SUPPORT_SM4_ECB_PKCS7) || defined(HKS_SUPPORT_SM4_CFB_NOPADDING) ||        \
-    defined(HKS_SUPPORT_SM4_OFB_NOPADDING)
+    defined(HKS_SUPPORT_SM4_OFB_NOPADDING) || defined(HKS_SUPPORT_AES_CCM)
 typedef struct HksOpensslBlockCipherCtx {
     uint32_t algType;
     uint32_t mode;
