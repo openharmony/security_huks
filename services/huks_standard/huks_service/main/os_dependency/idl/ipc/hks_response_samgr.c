@@ -99,10 +99,3 @@ int32_t HksGetFrontUserId(int32_t *outId)
     HKS_LOG_I("QueryActiveOsFrontUserIds, no os account part, set FrontUserId= -1");
     return HKS_SUCCESS;
 }
-
-int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)
-{
-    (void)paramSet;
-    (void)callerUserId;
-    return HKS_SUCCESS;
-}
