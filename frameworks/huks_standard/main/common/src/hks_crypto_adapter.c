@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -242,6 +242,38 @@ int32_t HksGetEncryptAeTag(
 
     tagAead->data = outData->data + inData->size;
     tagAead->size = HKS_AE_TAG_LEN;
+    return HKS_SUCCESS;
+}
+
+int32_t HksGetDecryptAeTag(const struct HksParamSet *runtimeParamSet, struct HksUsageSpec *spec)
+{
+    if (runtimeParamSet == NULL || spec == NULL) {
+        HKS_LOG_E("input param is NULL!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    bool isAes = false;
+    bool isAeMode = false;
+    (void)HksCheckAesAeMode(runtimeParamSet, &isAes, &isAeMode);
+    if (!(isAes && isAeMode)) {
+        HKS_LOG_E("not aes aead mode!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksAeadParam *aeadParam = (struct HksAeadParam *)spec->algParam;
+    if (aeadParam == NULL) {
+        HKS_LOG_E("spec algParam is NULL!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    struct HksParam *tagParam = NULL;
+    int32_t ret = HksGetParam(runtimeParamSet, HKS_TAG_AE_TAG, &tagParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get aead tag failed!");
+        return ret;
+    }
+
+    aeadParam->tagDec = tagParam->blob;
     return HKS_SUCCESS;
 }
 

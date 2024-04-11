@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -316,13 +316,13 @@ napi_value HuksNapiUpdateSession(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    context->isUpdate = true;
     napi_value result = ParseUpdateParams(env, info, context);
     if (result == nullptr) {
         HKS_LOG_E("update: could not parse params");
         DeleteUpdateAsyncContext(env, context);
         return nullptr;
     }
-    context->isUpdate = true;
 
     result = UpdateFinishAsyncWork(env, context);
     if (result == nullptr) {
@@ -341,13 +341,13 @@ napi_value HuksNapiFinishSession(napi_env env, napi_callback_info info)
         return nullptr;
     }
 
+    context->isUpdate = false;
     napi_value result = ParseUpdateParams(env, info, context);
     if (result == nullptr) {
         HKS_LOG_E("finish: could not parse params");
         DeleteUpdateAsyncContext(env, context);
         return nullptr;
     }
-    context->isUpdate = false;
 
     result = UpdateFinishAsyncWork(env, context);
     if (result == nullptr) {

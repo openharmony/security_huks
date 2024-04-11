@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -356,6 +356,29 @@ static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, bool hasCalcHash, voi
     }
 }
 
+static int32_t SetAesCcmModeTag(struct HksParamSet *paramSet, const uint32_t alg, const uint32_t pur, bool *tag)
+{
+    if (alg != HKS_ALG_AES) {
+        *tag = false;
+        return HKS_SUCCESS;
+    }
+
+    if (pur != HKS_KEY_PURPOSE_ENCRYPT && pur != HKS_KEY_PURPOSE_DECRYPT) {
+        *tag = false;
+        return HKS_SUCCESS;
+    }
+
+    struct HksParam *modParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("aes get block mode tag fail");
+        return HKS_ERROR_UNKNOWN_ERROR;
+    }
+
+    *tag = (modParam->uint32Param == HKS_MODE_CCM);
+    return HKS_SUCCESS;
+}
+
 static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
 {
     if ((paramSet == NULL) || (*paramSet == NULL)) {
@@ -374,14 +397,9 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
     if (ctxParam->uint64Param != 0) {
         void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
         struct HksParam *param1 = NULL;
-        ret = HksGetParam(*paramSet, HKS_TAG_PURPOSE, &param1);
-        if (ret != HKS_SUCCESS) {
-            HksFreeParamSet(paramSet);
-            return;
-        }
         struct HksParam *param2 = NULL;
-        ret = HksGetParam(*paramSet, HKS_TAG_ALGORITHM, &param2);
-        if (ret != HKS_SUCCESS) {
+        if (HksGetParam(*paramSet, HKS_TAG_PURPOSE, &param1) != HKS_SUCCESS ||
+            HksGetParam(*paramSet, HKS_TAG_ALGORITHM, &param2) != HKS_SUCCESS) {
             HksFreeParamSet(paramSet);
             return;
         }
@@ -399,7 +417,21 @@ static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
             hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
         }
         hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519);
-        KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, hasCalcHash, &ctx);
+
+        bool isAesCcm = false;
+        ret = SetAesCcmModeTag(*paramSet, param2->uint32Param, param1->uint32Param, &isAesCcm);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+
+        if (isAesCcm) {
+            HKS_LOG_D("FreeRuntimeParamSet fee ccm cache data!");
+            FreeCachedData(&ctx);
+        } else {
+            KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, hasCalcHash, &ctx);
+        }
+
         ctxParam->uint64Param = 0; /* clear ctx to NULL */
     }
     HksFreeParamSet(paramSet);

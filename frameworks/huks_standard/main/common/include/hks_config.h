@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,6 +35,7 @@
 #define HKS_SUPPORT_AES_CBC_NOPADDING
 #define HKS_SUPPORT_AES_CBC_PKCS7
 #define HKS_SUPPORT_AES_GCM
+#define HKS_SUPPORT_AES_CCM
 #define HKS_SUPPORT_AES_CTR_NOPADDING
 #define HKS_SUPPORT_AES_ECB_NOPADDING
 #define HKS_SUPPORT_AES_ECB_PKCS7PADDING
