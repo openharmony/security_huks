@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -408,6 +408,7 @@ enum HksErrorCode {
 
     HKS_ERROR_DEVICE_PASSWORD_UNSET = -139,
     HKS_ERROR_NOT_SYSTEM_APP = -140,
+	HKS_ERROR_EXCEED_LIMIT = -141,
 
     HKS_ERROR_INTERNAL_ERROR = -999,
     HKS_ERROR_UNKNOWN_ERROR = -1000,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -38,6 +38,9 @@ struct HksSuccessReturnResult {
 };
 
 #define DATA_SIZE_64KB  (1024 * 64)
+
+// The Maximum length of AES-CCM data is 100K bytes. The extra 32 bytes is reserved for Nonce and Aead
+#define FINISH_DATA_SIZE_200KB  (1024 * 100 + 32)
 
 const std::string HKS_OPTIONS_PROPERTY_PROPERTIES = "properties";
 const std::string HKS_OPTIONS_PROPERTY_INDATA = "inData";
