@@ -224,6 +224,7 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *keyAlias, enum HksStorageType storageType,
     struct HksStoreMaterial *outMaterial)
 {
+    (void)paramSet;
     uint32_t storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
     uint32_t storeUserId = processInfo->userIdInt;
     int32_t ret;
