@@ -101,7 +101,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest001, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest001 build paramset failed.";
 
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     ASSERT_EQ(HKS_SUCCESS, InitStorageMaterial(&processInfo001, paramSet, &alias, HKS_STORAGE_TYPE_KEY, &material));
 
     ASSERT_EQ(strlen((char *)alias.data), strlen(material.keyAliasPath));
@@ -153,7 +153,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest002, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest002 build paramset failed.";
 
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     ASSERT_EQ(HKS_SUCCESS, InitStorageMaterial(&processInfo002, paramSet, &alias, HKS_STORAGE_TYPE_KEY, &material));
 
     ASSERT_EQ(strlen((char *)alias.data), strlen(material.keyAliasPath));
@@ -204,7 +204,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest003, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest003 build paramset failed.";
 
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     ASSERT_EQ(HKS_SUCCESS, InitStorageMaterial(&processInfo003, paramSet, &alias, HKS_STORAGE_TYPE_KEY, &material));
 
     ASSERT_EQ(strlen((char *)alias.data), strlen(material.keyAliasPath));
@@ -256,7 +256,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest004, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest004 build paramset failed.";
 
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     ASSERT_EQ(HKS_SUCCESS, InitStorageMaterial(&processInfo004, paramSet, &alias, HKS_STORAGE_TYPE_KEY, &material));
 
     ASSERT_EQ(strlen((char *)alias.data), strlen(material.keyAliasPath));
@@ -307,7 +307,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest005, TestSize.Level0)
     ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest005 build paramset failed.";
 
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     ASSERT_EQ(HKS_SUCCESS, InitStorageMaterial(&processInfo005, paramSet, &alias, HKS_STORAGE_TYPE_KEY, &material));
 
     ASSERT_EQ(strlen((char *)alias.data), strlen(material.keyAliasPath));

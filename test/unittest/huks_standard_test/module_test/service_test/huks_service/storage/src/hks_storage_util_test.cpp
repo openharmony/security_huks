@@ -74,7 +74,7 @@ void HksStorageUtilTest::TearDown()
 HWTEST_F(HksStorageUtilTest, HksStorageUtilTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksStorageUtilTest001");
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     material.keyAliasPath = const_cast<char *>("alias");
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("123");
@@ -99,7 +99,7 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest001, TestSize.Level0)
 HWTEST_F(HksStorageUtilTest, HksStorageUtilTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksStorageUtilTest002");
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     material.keyAliasPath = const_cast<char *>("alias");
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("222");

@@ -232,7 +232,7 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
 
     bool isPlainPath = GetIsPlainPath(storageLevel);
 
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     do {
         ret = GetPathType(processInfo, storageType, storageLevel, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get path type failed.")
@@ -274,7 +274,7 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
     const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, enum HksStorageType storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
@@ -299,7 +299,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
     const struct HksBlob *keyAlias, enum HksStorageType storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
@@ -324,7 +324,7 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
     const struct HksBlob *keyAlias, enum HksStorageType storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
@@ -349,7 +349,7 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
     const struct HksBlob *keyAlias, struct HksBlob *keyBlob, enum HksStorageType storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
@@ -374,7 +374,7 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
     const struct HksBlob *keyAlias, uint32_t *keyBlobSize, enum HksStorageType storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
@@ -400,7 +400,7 @@ int32_t HksManageGetKeyAliasByProcessName(const struct HksProcessInfo *processIn
     struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
@@ -422,7 +422,7 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
     uint32_t *fileCount)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
-    struct HksStoreMaterial material = { DE_PATH, 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
         ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);

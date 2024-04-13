@@ -777,7 +777,8 @@ void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId)
         userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
 
-        ret = ConstructPlainName(userId, userData, HKS_MAX_FILE_NAME_LEN);
+        // construct non-plain name for de path
+        ret = ConstructName(userId, userData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
 
         char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
@@ -814,8 +815,11 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
         userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
 
-        ret = ConstructPlainName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
-        HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
+        // construct non-plain name for de path, and skip user path for user 0
+        if (processInfo->userIdInt != 0) {
+            ret = ConstructName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
+            HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
+        }
 
         uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         if (uidData == NULL) {
@@ -824,7 +828,7 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
             break;
         }
 
-        ret = ConstructPlainName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
+        ret = ConstructName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct uid name failed, ret = %" LOG_PUBLIC "d", ret)
 
         char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
