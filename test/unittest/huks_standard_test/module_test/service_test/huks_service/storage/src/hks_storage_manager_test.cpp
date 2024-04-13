@@ -110,7 +110,6 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest001, TestSize.Level0)
     ASSERT_EQ(strlen(HKS_KEY_STORE_KEY_PATH), strlen(material.storageTypePath));
     ASSERT_EQ(EOK, HksMemCmp(HKS_KEY_STORE_KEY_PATH, material.storageTypePath, strlen(material.storageTypePath)));
 
-    // todo : 上库前与代码保持一致，可能是混淆的
     ASSERT_EQ(strlen("+1+0+0+0"), strlen(material.uidPath)) << "uid path is " << material.uidPath;
     ASSERT_EQ(EOK, HksMemCmp("+1+0+0+0", material.uidPath, strlen(material.uidPath)))
         << "uid path is " << material.uidPath;
