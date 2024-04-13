@@ -273,18 +273,21 @@ static int32_t HksConstructStoreFileInfo(const struct HksProcessInfo *processInf
 int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, enum HksStorageType storageType)
 {
+    (void)processInfo;
+    (void)paramSet;
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
+#ifdef _STORAGE_LITE_
+        ret = HksStoreKeyBlob(NULL, keyAlias, storageType, keyBlob);
+#else
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
-#ifdef _STORAGE_LITE_
-        ret = HksStoreKeyBlob(&fileInfo, keyAlias, storageType, keyBlob);
-#else
+
         ret = HksStoreKeyBlob(&fileInfo, keyBlob);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks store key blob failed, ret = %" LOG_PUBLIC "d.", ret)
@@ -298,18 +301,21 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
 int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *keyAlias, enum HksStorageType storageType)
 {
+    (void)processInfo;
+    (void)paramSet;
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
+#ifdef _STORAGE_LITE_
+        ret = HksStoreDeleteKeyBlob(NULL, keyAlias, storageType);
+#else
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
-#ifdef _STORAGE_LITE_
-        ret = HksStoreDeleteKeyBlob(&fileInfo, keyAlias, storageType);
-#else
+
         ret = HksStoreDeleteKeyBlob(&fileInfo);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
@@ -323,18 +329,21 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *keyAlias, enum HksStorageType storageType)
 {
+    (void)processInfo;
+    (void)paramSet;
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
+#ifdef _STORAGE_LITE_
+        ret = HksStoreIsKeyBlobExist(NULL, keyAlias, storageType);
+#else
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
-#ifdef _STORAGE_LITE_
-        ret = HksStoreIsKeyBlobExist(&fileInfo, keyAlias, storageType);
-#else
+
         ret = HksStoreIsKeyBlobExist(&fileInfo);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks key blob in old de not exist, ret = %" LOG_PUBLIC "d.", ret)
@@ -348,18 +357,21 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *keyAlias, struct HksBlob *keyBlob, enum HksStorageType storageType)
 {
+    (void)processInfo;
+    (void)paramSet;
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
+#ifdef _STORAGE_LITE_
+        ret = HksStoreGetKeyBlob(NULL, keyAlias, storageType, keyBlob);
+#else
         ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
-#ifdef _STORAGE_LITE_
-        ret = HksStoreGetKeyBlob(&fileInfo, keyAlias, storageType, keyBlob);
-#else
+
         ret = HksStoreGetKeyBlob(&fileInfo, keyBlob);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
@@ -373,21 +385,23 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
 int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     const struct HksBlob *keyAlias, uint32_t *keyBlobSize, enum HksStorageType storageType)
 {
+    (void)processInfo;
+    (void)paramSet;
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
-        ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
-
 #ifdef _STORAGE_LITE_
         ret = HksStoreGetKeyBlobSize(NULL, keyAlias, storageType, keyBlobSize);
 #else
+        ret = InitStorageMaterial(processInfo, paramSet, keyAlias, storageType, &material);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
+
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
+
         ret = HksStoreGetKeyBlobSize(&fileInfo, keyBlobSize);
 #endif
-
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
@@ -421,18 +435,21 @@ int32_t HksManageGetKeyAliasByProcessName(const struct HksProcessInfo *processIn
 int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     uint32_t *fileCount)
 {
+    (void)processInfo;
+    (void)paramSet;
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
-        ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
+#ifdef _STORAGE_LITE_
+        ret = HksGetKeyCountByProcessName(NULL, fileCount);
+#else
+    ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
-#ifdef _STORAGE_LITE_
-        ret = HksGetKeyCountByProcessName(NULL, fileCount);
-#else
+
         ret = HksGetKeyCountByProcessName(&fileInfo, fileCount);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key count by processname failed, ret = %" LOG_PUBLIC "d.", ret)
