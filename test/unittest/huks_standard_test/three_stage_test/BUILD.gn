@@ -82,6 +82,13 @@ ohos_unittest("huks_UT_test") {
     "src/hks_import_rsa_test.cpp",
   ]
 
+  if (huks_security_level == "trusted_environment") {
+    sources += [
+      "src/hks_hkdf_derive_x25519_part1_test.cpp",
+      "src/hks_hkdf_derive_x25519_part2_test.cpp"
+    ]
+  }
+
   defines = [ "ENABLE_NETWORK" ]
   defines += [ "TEMP_ISOLATION" ]
   if (huks_security_level == "software") {
