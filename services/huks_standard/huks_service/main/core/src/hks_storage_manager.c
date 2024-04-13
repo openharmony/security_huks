@@ -35,6 +35,7 @@
 #include "hks_template.h"
 #include "hks_type_inner.h"
 
+#ifdef L2_STANDARD
 static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* processInfo,
     const struct HksParamSet *paramSet, uint32_t *storageLevel, uint32_t *storeUserId)
 {
@@ -56,6 +57,7 @@ static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* p
 
     return ret;
 }
+#endif
 
 #ifdef HKS_ENABLE_LITE_HAP
 #define HKS_LITE_NATIVE_PROCESS_NAME "hks_client"
@@ -222,14 +224,16 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, const struct HksBlob *keyAlias, enum HksStorageType storageType,
     struct HksStoreMaterial *outMaterial)
 {
-    uint32_t storageLevel;
-    uint32_t storeUserId;
-    int32_t ret = GetStorageLevelAndStoreUserIdParam(processInfo, paramSet, &storageLevel, &storeUserId);
+    uint32_t storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
+    uint32_t storeUserId = processInfo->userIdInt;
+    int32_t ret;
+#ifdef L2_STANDARD
+    ret = GetStorageLevelAndStoreUserIdParam(processInfo, paramSet, &storageLevel, &storeUserId);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get storage level and user id from param set failed.");
         return ret;
     }
-
+#endif
     bool isPlainPath = GetIsPlainPath(storageLevel);
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };

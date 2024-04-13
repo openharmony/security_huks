@@ -42,8 +42,12 @@ if (os_level == "standard") {
       "src/hks_storage_utils.c",
     ]
 
+    defines = [
+      "HKS_ENABLE_CLEAN_FILE",
+    ]
+
     if (huks_security_level == "software") {
-      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+      defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
     }
 
     if (huks_security_level == "trusted_environment") {
