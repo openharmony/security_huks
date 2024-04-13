@@ -274,6 +274,7 @@ void FileInfoFree(struct HksStoreFileInfo *fileInfo)
  */
 int32_t RecordKeyOperation(uint32_t operation, const char *path, const char *keyAlias)
 {
+    (void)path;
     uint32_t bufSize = strlen(keyAlias) + 1;
     char *outKeyAlias = (char *)HksMalloc(bufSize);
     HKS_IF_NULL_RETURN(outKeyAlias, HKS_ERROR_MALLOC_FAIL)

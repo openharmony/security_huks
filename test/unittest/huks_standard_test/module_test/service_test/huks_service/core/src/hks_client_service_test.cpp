@@ -121,7 +121,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     const struct HksBlob keyAlias = { strlen(alias), (uint8_t *)alias };
     struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
     int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
-    ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 TestGenerateKey failed, ret = " << ret;
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 TestGenerateKey failed, ret = " << ret;
     ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
