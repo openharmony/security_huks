@@ -123,9 +123,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
     ]
-    defines = [
-      "HKS_ENABLE_CLEAN_FILE",
-    ]
+    defines = [ "HKS_ENABLE_CLEAN_FILE" ]
 
     sources = [
       "src/hks_client_check.c",

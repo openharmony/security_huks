@@ -155,7 +155,6 @@ static int32_t CheckHapInfo(int32_t tokenId)
     //Lite device no need check
     HKS_LOG_I("ACCESS_TOKEN no support!");
     (void)tokenId;
-    (void)userId;
     (void)g_trustListHap;
     return HKS_SUCCESS;
 #endif
