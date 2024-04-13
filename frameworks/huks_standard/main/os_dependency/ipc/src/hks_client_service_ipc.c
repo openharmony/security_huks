@@ -41,9 +41,6 @@
 #ifdef HKS_L1_SMALL
 #include "hks_samgr_client.h"
 #include <unistd.h>
-
-#define HKS_MAX_RETRY_TIME 5
-#define HKS_SLEEP_TIME_FOR_RETRY 1
 #endif
 
 int32_t HksClientInitialize(void)
@@ -54,7 +51,7 @@ int32_t HksClientInitialize(void)
         if (iUnknown != NULL) {
             return HKS_SUCCESS;
         }
-        sleep(HKS_SLEEP_TIME_FOR_RETRY);
+        usleep(HKS_SLEEP_TIME_FOR_RETRY);
     }
     HKS_LOG_E("HUKS service is not ready!");
     return HKS_ERROR_BAD_STATE;

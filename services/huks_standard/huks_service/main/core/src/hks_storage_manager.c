@@ -86,9 +86,6 @@ static int32_t GetUserIdPath(uint32_t userId, bool isPlain, struct HksStoreMater
     HKS_IF_NULL_LOGE_RETURN(outMaterial->userIdPath, HKS_ERROR_MALLOC_FAIL, "malloc userIdPath failed.")
     struct HksBlob userIdBlob = { .data = (uint8_t *)&userId, .size = sizeof(userId) };
 
-    // todo : delete
-    HKS_LOG_E("user id is %" LOG_PUBLIC "d.", userId);
-
     int32_t ret;
     if (isPlain) {
         ret = ConstructPlainName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_FILE_NAME_LEN);
@@ -100,8 +97,6 @@ static int32_t GetUserIdPath(uint32_t userId, bool isPlain, struct HksStoreMater
         ret = ConstructName(&userIdBlob, outMaterial->userIdPath, HKS_MAX_FILE_NAME_LEN);
     }
 
-    // todo : delete
-    HKS_LOG_E("user id str is %" LOG_PUBLIC "s.", outMaterial->userIdPath);
     return ret;
 }
 
@@ -125,9 +120,6 @@ static int32_t GetUidPath(bool isPlain, const struct HksBlob *processName,
     } else {
         ret = ConstructName(processName, outMaterial->uidPath, HKS_MAX_DIRENT_FILE_LEN);
     }
-
-    // todo delete
-    HKS_LOG_E("uidPath is %" LOG_PUBLIC "s.", outMaterial->uidPath);
 
     return ret;
 }
