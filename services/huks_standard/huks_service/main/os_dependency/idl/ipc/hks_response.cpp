@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "hks_at_api_wrap.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
@@ -92,7 +93,7 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     (void)memcpy_s(name, sizeof(callingUid), &callingUid, sizeof(callingUid));
     processInfo->processName.size = sizeof(callingUid);
     processInfo->processName.data = name;
-
+    processInfo->uidInt = callingUid;
     int userId = 0;
 #ifdef HAS_OS_ACCOUNT_PART
     OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
@@ -135,13 +136,12 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
     return HKS_SUCCESS;
 }
 
-
-static int32_t CheckHapInfo(int32_t tokenId, int32_t userId)
+static int32_t CheckHapInfo(int32_t tokenId)
 {
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
     HKS_LOG_I("SUPPORT GET_BUNDLE_INFO!");
     char hapName[HAP_NAME_LEN_MAX] = { 0 };
-    int32_t ret = HksGetHapName(tokenId, userId, hapName, HAP_NAME_LEN_MAX);
+    int32_t ret = HksGetHapNameFromAccessToken(tokenId, hapName, HAP_NAME_LEN_MAX);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksGetHapName fail when check name list.")
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_trustListHap); i++) {
         if (strcmp(hapName, g_trustListHap[i]) == 0) {
@@ -190,20 +190,7 @@ int32_t CheckNameList(void)
         OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(tokenId);
     switch (tokenType) {
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP: {
-            auto callingUid = OHOS::IPCSkeleton::GetCallingUid();
-            int userId = 0;
-
-#ifdef HAS_OS_ACCOUNT_PART
-            OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-            HKS_LOG_I("HksGetProcessInfoForIPC callingUid = %"
-                LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
-#else // HAS_OS_ACCOUNT_PART
-            GetOsAccountIdFromUid(callingUid, userId);
-            HKS_LOG_I("HksGetProcessInfoForIPC, no os account part, callingUid = %"
-                LOG_PUBLIC "d, userId = %" LOG_PUBLIC "d", callingUid, userId);
-#endif // HAS_OS_ACCOUNT_PART
-            HKS_LOG_I("CheckHapInfo...");
-            return CheckHapInfo(tokenId, userId);
+            return CheckHapInfo(tokenId);
         }
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_NATIVE:
         case OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_SHELL:

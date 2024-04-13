@@ -23,7 +23,6 @@
 
 enum HksStorageType {
     HKS_STORAGE_TYPE_KEY = 0,
-    HKS_STORAGE_TYPE_CERTCHAIN,
     HKS_STORAGE_TYPE_ROOT_KEY,
 };
 
@@ -35,7 +34,6 @@ extern "C" {
 #define HKS_STORAGE_BAK_FLAG_FLASE    0
 
 struct HksStoreInfo {
-    char *processPath; /* file path include process */
     char *path; /* file path include process/key(or certchain) */
     char *fileName; /* file name that can be recognized by the file system */
     uint32_t size;
@@ -48,10 +46,35 @@ struct HksStoreFileInfo {
 #endif
 };
 
+enum HksPathType {
+    DE_PATH,
+#ifdef L2_STANDARD
+    CE_PATH,
+    ECE_PATH,
+
+    #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    TMP_PATH,
+    #endif
+
+    #ifdef HKS_USE_RKC_IN_STANDARD
+    RKC_IN_STANDARD_PATH,
+    #endif
+#endif
+#ifdef HKS_ENABLE_LITE_HAP
+    LITE_HAP_PATH,
+#endif
+};
+
 struct HksStoreMaterial {
-    const struct HksParamSet *paramSet;
-    const struct HksBlob *keyAlias;
-    uint32_t storageType;
+    enum HksPathType pathType;
+    char *userIdPath;
+    char *uidPath;
+    /**
+     * Storage type, including key and root key materials
+     */
+    char *storageTypePath;
+
+    char *keyAliasPath;
 };
 
 struct HksFileEntry {
@@ -73,11 +96,7 @@ int32_t ConstructBlob(const char *src, struct HksBlob *blob);
 
 int32_t GetPath(const char *path, const char *name, char *targetPath, uint32_t pathLen, uint32_t bakFlag);
 
-int32_t GetStoreRootPath(enum HksStoragePathType type, char **path);
-
-int32_t MakeDirIfNotExist(const char *path);
-
-int32_t FileInfoInit(struct HksStoreFileInfo *fileInfo);
+int32_t HksFileInfoInit(struct HksStoreFileInfo *fileInfo);
 
 void FileInfoFree(struct HksStoreFileInfo *fileInfo);
 
@@ -87,17 +106,12 @@ void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCount);
 
 int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t keyCount);
 
-int32_t ConstructUserIdPath(const char *userId, char *userIdPath, uint32_t pathLen);
+int32_t HksMakeFullDir(const char *path);
 
-int32_t ConstructUidPath(const char *userId, const char *uid, char *uidPath, uint32_t pathLen);
-
-bool HksIsUserIdRoot(const struct HksProcessInfo *processInfo);
+int32_t HksGetFileInfo(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo);
 
 int32_t CheckSpecificUserIdAndStorageLevel(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet);
-
-int32_t GetFileInfo(const struct HksProcessInfo *processInfo, const struct HksStoreMaterial *material,
-    struct HksStoreFileInfo *fileInfo, bool supportRootKey);
 
 #ifdef __cplusplus
 }

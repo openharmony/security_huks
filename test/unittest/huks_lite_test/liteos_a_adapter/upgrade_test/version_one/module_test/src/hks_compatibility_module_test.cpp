@@ -166,6 +166,7 @@ static int32_t TestDoServiceEncryptWithOtherUid(const struct HksBlob *keyAlias, 
         { strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
         0,
+        0,
         0
     };
 
@@ -194,6 +195,7 @@ static int32_t TestDoServiceDecryptWithOtherUid(const struct HksBlob *keyAlias, 
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
+        0,
         0,
         0
     };
@@ -229,6 +231,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
         { strlen(userId), (uint8_t *)userId },
         { strlen(processName1), (uint8_t *)processName1 },
         0,
+        0,
         0
     };
 
@@ -242,6 +245,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
     struct HksProcessInfo processInfo2 = {
         { strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName2 },
+        0,
         0,
         0
     };
@@ -388,6 +392,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
         { strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
         0,
+        0,
         0
     };
 
@@ -424,6 +429,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Lev
     struct HksProcessInfo processInfo = {
         { strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
+        0,
         0,
         0
     };
