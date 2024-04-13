@@ -79,7 +79,6 @@ const uint32_t MAX_MALLOC_LEN = 1 * 1024 * 1024; /* max malloc size 1 MB */
 #define HUKS_IPC_THREAD_NUM 2
 #ifdef SUPPORT_COMMON_EVENT
 const uint32_t MAX_DELAY_TIMES = 100;
-const uint32_t DELAY_INTERVAL = 200000; /* delay 200ms waiting for system event */
 #endif
 
 #ifdef SUPPORT_COMMON_EVENT
@@ -92,7 +91,7 @@ static void SubscribEvent()
             return;
         } else {
             HKS_LOG_E("subscribe system event failed %" LOG_PUBLIC "u times", i);
-            usleep(DELAY_INTERVAL);
+            usleep(HKS_SLEEP_TIME_FOR_RETRY);
         }
     }
     HKS_LOG_E("subscribe system event failed");

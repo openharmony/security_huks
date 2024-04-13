@@ -83,10 +83,14 @@ enum HksInnerTag {
 
 #define HKS_PARAM_BUFFER_NULL_INTERVAL ((HKS_TAG_PARAM0_NULL) - (HKS_TAG_PARAM0_BUFFER))
 
+#define HKS_MAX_RETRY_TIME 30
+#define HKS_SLEEP_TIME_FOR_RETRY 300000
+
 struct HksProcessInfo {
     struct HksBlob userId;
     struct HksBlob processName;
     int32_t userIdInt;
+    uint32_t uidInt;
     uint64_t accessTokenId;
 };
 
