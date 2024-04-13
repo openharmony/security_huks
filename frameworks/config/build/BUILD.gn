@@ -80,7 +80,6 @@ config("l1_small_common_config") {
   defines = [
     "_HUKS_LOG_ENABLE_",
     "HKS_L1_SMALL",
-    "HKS_ENABLE_CLEAN_FILE",
   ]
   if (huks_enable_upgrade_key) {
     defines += [ "HKS_ENABLE_UPGRADE_KEY" ]
