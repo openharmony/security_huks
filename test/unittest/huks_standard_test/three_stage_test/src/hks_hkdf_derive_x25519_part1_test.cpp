@@ -26,7 +26,7 @@
 
 using namespace testing::ext;
 namespace Unittest::HkdfDerive {
-class HksHkdfX25519DerivePart1Test : public testing::Test {
+class HksHkdfDeriveX25519Part1Test : public testing::Test {
 public:
     static void SetUpTestCase(void);
 
@@ -37,20 +37,20 @@ public:
     void TearDown();
 };
 
-void HksHkdfX25519DerivePart1Test::SetUpTestCase(void)
+void HksHkdfDeriveX25519Part1Test::SetUpTestCase(void)
 {
 }
 
-void HksHkdfX25519DerivePart1Test::TearDownTestCase(void)
+void HksHkdfDeriveX25519Part1Test::TearDownTestCase(void)
 {
 }
 
-void HksHkdfX25519DerivePart1Test::SetUp()
+void HksHkdfDeriveX25519Part1Test::SetUp()
 {
     EXPECT_EQ(HksInitialize(), 0);
 }
 
-void HksHkdfX25519DerivePart1Test::TearDown()
+void HksHkdfDeriveX25519Part1Test::TearDown()
 {
 }
 
@@ -337,13 +337,14 @@ static struct HksParam g_hkdfFinishParams005[] = {
 };
 
 /**
- * @tc.name: HksHkdfX25519DerivePart1Test.HksHKDFX25519Derive001
+ * @tc.name: HksHkdfDeriveX25519Part1Test.HksHKDFX25519Derive001
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
  * @tc.type: FUNC
  */
-HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive001, TestSize.Level0)
+HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive001, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest001"), (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest001" };
+    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest001"),
+        (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest001" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -376,13 +377,14 @@ HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive001, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksHkdfX25519DerivePart1Test.HksHKDFX25519Derive002
+ * @tc.name: HksHkdfDeriveX25519Part1Test.HksHKDFX25519Derive002
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
  * @tc.type: FUNC
  */
-HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive002, TestSize.Level0)
+HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive002, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest002"), (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest002" };
+    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest002"),
+        (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest002" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -415,13 +417,14 @@ HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive002, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksHkdfX25519DerivePart1Test.HksHKDFX25519Derive003
+ * @tc.name: HksHkdfDeriveX25519Part1Test.HksHKDFX25519Derive003
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
  * @tc.type: FUNC
  */
-HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive003, TestSize.Level0)
+HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive003, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest003"), (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest003" };
+    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest003"),
+        (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest003" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -454,13 +457,14 @@ HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive003, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksHkdfX25519DerivePart1Test.HksHKDFX25519Derive004
+ * @tc.name: HksHkdfDeriveX25519Part1Test.HksHKDFX25519Derive004
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
  * @tc.type: FUNC
  */
-HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive004, TestSize.Level0)
+HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive004, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest004"), (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest004" };
+    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest004"),
+        (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest004" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -493,13 +497,14 @@ HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive004, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksHkdfX25519DerivePart1Test.HksHKDFX25519Derive005
+ * @tc.name: HksHkdfDeriveX25519Part1Test.HksHKDFX25519Derive005
  * @tc.desc: alg-HKDF pur-Derive dig-SHA256 KEY_SIZE-128
  * @tc.type: FUNC
  */
-HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive005, TestSize.Level0)
+HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive005, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest005"), (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest005" };
+    struct HksBlob keyAlias = { strlen("HksHKDFX25519DeriveKeyAliasTest005"),
+        (uint8_t *)"HksHKDFX25519DeriveKeyAliasTest005" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -521,10 +526,6 @@ HWTEST_F(HksHkdfX25519DerivePart1Test, HksHKDFX25519Derive005, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFX25519DeriveKeyAliasFinalTest005"),
-        .data = (uint8_t *)"HksHKDFX25519DeriveKeyAliasFinalTest005"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hkdfParamSet);
