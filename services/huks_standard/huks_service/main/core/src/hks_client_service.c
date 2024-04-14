@@ -1695,7 +1695,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     bool isNeedStorage = false;
     uint32_t outSize = outData->size;
     int32_t ret = HksCheckKeyNeedStored(paramSet, &isNeedStorage);
-    if (ret == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS && isNeedStorage) {
         outSize = MAX_KEY_SIZE;
     }
     struct HksBlob output = { outSize, NULL };
