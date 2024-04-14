@@ -456,7 +456,7 @@ HWTEST_F(HksHkdfDeriveX25519Part2Test, HksHKDFX25519Derive034, TestSize.Level0)
     ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams034, sizeof(g_hkdfFinishParams034) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     ret = HksFinish(&handle, hkdfFinishParamSet, &inData, &outFinishDerive);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
+    EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     // Init encrypt
     struct HksBlob deriveKeyAlias = { .size = strlen("HksHKDFX25519DeriveKeyAliasFinalTest034"),
