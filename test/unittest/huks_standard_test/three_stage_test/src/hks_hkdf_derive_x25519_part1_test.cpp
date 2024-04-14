@@ -254,10 +254,10 @@ static struct HksParam g_hkdfParams004[] = {
     }, {
         .tag =  HKS_TAG_DERIVE_KEY_SIZE,
         .uint32Param = DERIVE_KEY_SIZE_32
-    } , {
+    }, {
         .tag = HKS_TAG_INFO,
         .blob = g_infoBlob
-    } , {
+    }, {
         .tag = HKS_TAG_SALT,
         .blob = g_saltBlob
     }
