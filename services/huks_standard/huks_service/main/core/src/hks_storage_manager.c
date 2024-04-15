@@ -449,7 +449,7 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 #ifdef _STORAGE_LITE_
         ret = HksGetKeyCountByProcessName(NULL, fileCount);
 #else
-    ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
+        ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
