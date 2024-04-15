@@ -415,6 +415,10 @@ int32_t HksMakeFullDir(const char *path)
 {
     uint32_t pathLen = strlen(path);
     char *curPath = (char *)HksMalloc(pathLen + 1);
+    if (curPath == NULL) {
+        HKS_LOG_E("cur path malloc failed.");
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     int32_t ret = HKS_SUCCESS;
     do {
         for (uint32_t i = 1; i < pathLen; ++i) {
@@ -468,8 +472,7 @@ static int32_t CheckUserPathExist(enum HksPathType pathType, const char *userIdP
     int32_t offset = sprintf_s(userPath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s",
         pathType == CE_PATH ? HKS_CE_ROOT_PATH : HKS_ECE_ROOT_PATH, userIdPath);
     if (offset <= 0) {
-        HKS_LOG_E("get user path failed, path type is %" LOG_PUBLIC "d, user id path is %" LOG_PUBLIC "s.",
-            pathType, userIdPath);
+        HKS_LOG_E("get user path failed, path type is %" LOG_PUBLIC "d.", pathType);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
@@ -484,41 +487,41 @@ static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksSt
     switch (material->pathType) {
         case DE_PATH:
             offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
-            HKS_KEY_STORE_PATH, material->userIdPath,  material->uidPath, material->storageTypePath);
+                HKS_KEY_STORE_PATH, material->userIdPath,  material->uidPath, material->storageTypePath);
             break;
 #ifdef L2_STANDARD
         case CE_PATH:
             ret = CheckUserPathExist(CE_PATH, material->userIdPath);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
             offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
-            HKS_CE_ROOT_PATH, material->userIdPath,  HKS_STORE_SERVICE_PATH, material->uidPath,
-            material->storageTypePath);
+                HKS_CE_ROOT_PATH, material->userIdPath,  HKS_STORE_SERVICE_PATH, material->uidPath,
+                material->storageTypePath);
             break;
         case ECE_PATH:
             ret = CheckUserPathExist(ECE_PATH, material->userIdPath);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
             offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
-            HKS_ECE_ROOT_PATH, material->userIdPath,  HKS_STORE_SERVICE_PATH, material->uidPath,
-            material->storageTypePath);
+                HKS_ECE_ROOT_PATH, material->userIdPath,  HKS_STORE_SERVICE_PATH, material->uidPath,
+                material->storageTypePath);
             break;
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
         case TMP_PATH:
             offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
-            HKS_KEY_STORE_TMP_PATH, material->userIdPath,  material->uidPath, material->storageTypePath);
+                HKS_KEY_STORE_TMP_PATH, material->userIdPath,  material->uidPath, material->storageTypePath);
             break;
 #endif
 #ifdef HKS_USE_RKC_IN_STANDARD
         case RKC_IN_STANDARD_PATH:
             // there is no user id path in rkc of standard
             offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
-            HKS_KEY_RKC_PATH,  material->uidPath, material->storageTypePath);
+                HKS_KEY_RKC_PATH,  material->uidPath, material->storageTypePath);
             break;
 #endif
 #endif
 #ifdef HKS_ENABLE_LITE_HAP
         case LITE_HAP_PATH:
             offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
-            HKS_KEY_STORE_LITE_HAP, material->userIdPath,  material->uidPath, material->storageTypePath);
+                HKS_KEY_STORE_LITE_HAP, material->userIdPath,  material->uidPath, material->storageTypePath);
             break;
 #endif
     }

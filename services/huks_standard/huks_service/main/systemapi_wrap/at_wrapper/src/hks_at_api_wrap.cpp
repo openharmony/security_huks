@@ -15,6 +15,8 @@
 
 #include "hks_at_api_wrap.h"
 
+#include <unistd.h>
+
 #include "accesstoken_kit.h"
 #include "hks_log.h"
 #include "hks_template.h"
@@ -27,8 +29,6 @@
 #else
 #include "hks_config.h"
 #endif
-
-#include <unistd.h>
 
 #define ACCESS_TOKEN_SA_ID 3503
 
@@ -69,7 +69,7 @@ int32_t HksGetAtType(uint64_t accessTokenId, enum HksAtType *atType)
         return HKS_ERROR_BAD_STATE;
     }
 
-    ATokenTypeEnum type = AccessTokenKit::GetTokenType((uint32_t)accessTokenId);
+    ATokenTypeEnum type = AccessTokenKit::GetTokenTypeFlag((uint32_t)accessTokenId);
     switch (type) {
         case ATokenTypeEnum::TOKEN_HAP:
             *atType = HKS_TOKEN_HAP;
