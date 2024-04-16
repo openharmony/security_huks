@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@
 #include "hks_mem.h"
 #include "hks_message_handler.h"
 #include "hks_param.h"
+#include "hks_plugin_adapter.h"
 #include "hks_report.h"
 #include "hks_response.h"
 #include "hks_template.h"
@@ -300,9 +301,15 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     g_sessionId++;
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
-    // check that the code is valid
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        int ret = HksCreatePluginProxy();
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_I("create plugin proxy failed, ret = %" LOG_PUBLIC "d", ret);
+        }
+        if (HksGetPluginProxy() == nullptr) {
+            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        }
+        return HksGetPluginProxy()->HksPluginOnRemoteRequest(code, &data, &reply, &option);
     }
 
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());

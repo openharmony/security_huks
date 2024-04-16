@@ -25,7 +25,7 @@ extern "C" {
 #ifndef _CUT_AUTHENTICATE_
 #ifdef _STORAGE_LITE_
 int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyAlias,
-    enum HksStorageType storageType, const struct HksBlob *keyBlob);
+    uint32_t storageType, const struct HksBlob *keyBlob);
 
 int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType);

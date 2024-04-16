@@ -594,7 +594,7 @@ static int32_t GetRootMaterial(const struct HksBlob *name, struct HksBlob *buffe
 }
 
 int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyAlias,
-    enum HksStorageType storageType, const struct HksBlob *keyBlob)
+    uint32_t storageType, const struct HksBlob *keyBlob)
 {
     (void)fileInfo;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {

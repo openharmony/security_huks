@@ -181,6 +181,7 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_service/main/core/src/hks_hitrace.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_report.c",
       "../../../services/huks_standard/huks_service/main/core/src/hks_session_manager.c",
+      "../../../services/huks_standard/huks_service/main/plugin_proxy/src/hks_plugin_adapter_mock.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
       "../../../services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_static_hal.c",
       "../../../utils/crypto_adapter/hks_client_service_adapter_common.c",
@@ -215,6 +216,7 @@ if (ohos_kernel_type == "liteos_m") {
       "//base/security/huks/frameworks/huks_standard/main/common/include",
       "//base/security/huks/services/huks_standard/huks_engine/main/core/include",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
+      "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
     ]
 
     defines = [
