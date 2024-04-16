@@ -18,37 +18,39 @@ config("huks_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_static_library("libhuks_utils_hisysevent_wrapper_static") {
-  sanitize = {
-    integer_overflow = true
-    cfi = true
-    debug = false
-    cfi_cross_dso = true
-    boundary_sanitize = true
-    ubsan = true
-  }
-  branch_protector_ret = "pac_ret"
+if (os_level == "standard") {
+  ohos_static_library("libhuks_utils_hisysevent_wrapper_static") {
+    sanitize = {
+      integer_overflow = true
+      cfi = true
+      debug = false
+      cfi_cross_dso = true
+      boundary_sanitize = true
+      ubsan = true
+    }
+    branch_protector_ret = "pac_ret"
 
-  subsystem_name = "security"
-  part_name = "huks"
-  public_configs = [ ":huks_config" ]
-  include_dirs = [
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-  ]
-  defines = [ "_HUKS_LOG_ENABLE_" ]
-  sources = [
-    "src/hisysevent_wrapper.cpp",
-    "src/hks_report_wrapper.c",
-  ]
-  cflags = [
-    "-Wall",
-    "-Werror",
-  ]
-  external_deps = [
-    "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "openssl:libcrypto_shared",
-  ]
-  complete_static_lib = true
+    subsystem_name = "security"
+    part_name = "huks"
+    public_configs = [ ":huks_config" ]
+    include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+    ]
+    defines = [ "_HUKS_LOG_ENABLE_" ]
+    sources = [
+      "src/hisysevent_wrapper.cpp",
+      "src/hks_report_wrapper.c",
+    ]
+    cflags = [
+      "-Wall",
+      "-Werror",
+    ]
+    external_deps = [
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
+      "openssl:libcrypto_shared",
+    ]
+    complete_static_lib = true
+  }
 }
