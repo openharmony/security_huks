@@ -48,6 +48,7 @@ ohos_static_library("libhuks_utils_hisysevent_wrapper_static") {
   external_deps = [
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "openssl:libcrypto_shared",
   ]
   complete_static_lib = true
 }

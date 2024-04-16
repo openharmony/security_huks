@@ -21,6 +21,10 @@
 #include "hks_type.h"
 #include "hks_type_inner.h"
 
+#include <openssl/bio.h>
+#include <openssl/err.h>
+#include <openssl/pem.h>
+ 
 #define EXTRA_DATA_SIZE 512
 
 #define STRING_TAG_KEY_SIZE "keySize"
@@ -31,6 +35,7 @@
 #define STRING_TAG_PURPOSE "purpose"
 #define STRING_TAG_ATTESTATION_MODE "attestationMode"
 #define STRING_TAG_PACKAGE_NAME "packageName"
+#define STRING_TAG_KEY_ALIAS "keyAlias"
 
 static const struct HksBlob g_tagKeySize = {sizeof(STRING_TAG_KEY_SIZE) - 1, (uint8_t *)STRING_TAG_KEY_SIZE};
 static const struct HksBlob g_tagDigest = {sizeof(STRING_TAG_DIGEST) - 1, (uint8_t *)STRING_TAG_DIGEST};
@@ -43,10 +48,86 @@ static const struct HksBlob g_tagAttestationMode = {
     sizeof(STRING_TAG_ATTESTATION_MODE) - 1, (uint8_t *)STRING_TAG_ATTESTATION_MODE};
 static const struct HksBlob g_tagPackageName = {
     sizeof(STRING_TAG_PACKAGE_NAME) - 1, (uint8_t *)STRING_TAG_PACKAGE_NAME};
+static const struct HksBlob g_tagKeyAlias = {
+    sizeof(STRING_TAG_KEY_ALIAS) - 1, (uint8_t *)STRING_TAG_KEY_ALIAS};
+
+// You need to BIO_free_all the return value after usage.
+static BIO *ConstructOpensslBase64BioChain(void)
+{
+    BIO *b64 = BIO_new(BIO_f_base64());
+    HKS_IF_NULL_LOGE_RETURN(b64, NULL, "BIO_new(BIO_f_base64()) fail")
+    BIO_set_flags(b64, BIO_FLAGS_BASE64_NO_NL);
+    BIO *bio = BIO_new(BIO_s_mem());
+    if (bio == NULL) {
+        HKS_LOG_E("BIO_new(BIO_s_mem()) fail");
+        BIO_free_all(b64);
+        return NULL;
+    }
+    BIO *chain = BIO_push(b64, bio);
+    if (bio == NULL) {
+        HKS_LOG_E("BIO_push(b64, bio) fail");
+        BIO_free_all(b64);
+        BIO_free_all(bio);
+        return NULL;
+    }
+    return chain;
+}
+
+// You need to free out->data after usage.
+static int OpensslBase64Encode(const struct HksBlob *in, struct HksBlob *out)
+{
+    if (CheckBlob(in) != HKS_SUCCESS || out == NULL) {
+        HKS_LOG_E("invalid in blob or out blob");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    BIO *chain = ConstructOpensslBase64BioChain();
+    HKS_IF_NULL_LOGE_RETURN(chain, HKS_ERROR_INSUFFICIENT_MEMORY, "ConstructOpensslBase64BioChain fail")
+    int ret = HKS_ERROR_INVALID_ARGUMENT;
+    do {
+        int writeLength = BIO_write(chain, in->data, in->size);
+        if (writeLength <= 0) {
+            HKS_LOG_E("BIO_write fail %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                writeLength, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+        enum {
+            HKS_OPENSSL_SUCCESS = 1,
+        };
+        int osslRet = BIO_flush(chain);
+        if (osslRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("BIO_flush fail %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osslRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+        BUF_MEM *bptr = NULL;
+        osslRet = BIO_get_mem_ptr(chain, &bptr);
+        if (osslRet != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("BIO_get_mem_ptr fail %" LOG_PUBLIC "d %" LOG_PUBLIC "s",
+                osslRet, ERR_reason_error_string(ERR_get_error()));
+            break;
+        }
+        if (bptr->length >= EXTRA_DATA_SIZE) {
+            HKS_LOG_E("too long key alias base64 data %" LOG_PUBLIC "zu", bptr->length);
+            break;
+        }
+        out->size = bptr->length + 1;
+        out->data = HksMalloc(out->size);
+        HKS_IF_NULL_LOGE_BREAK(out->data, "HksMalloc alias base64 data fail")
+        errno_t memRet = memcpy_s(out->data, out->size, bptr->data, bptr->length);
+        if (memRet != EOK) {
+            HKS_LOG_E("memcpy_s key alias base64 fail %" LOG_PUBLIC "d", memRet);
+            break;
+        }
+        out->data[bptr->length] = '\0';
+        ret = HKS_SUCCESS;
+    } while (false);
+    BIO_free_all(chain);
+    return ret;
+}
 
 static int32_t AppendParamToExtra(const struct HksParam *paramIn, char *extraOut, uint32_t *index)
 {
-    if (paramIn->tag == HKS_TAG_PACKAGE_NAME) {
+    if (paramIn->tag == HKS_TAG_PACKAGE_NAME || paramIn->tag == HKS_TAG_KEY_ALIAS) {
         int32_t num = snprintf_s(extraOut + *index, EXTRA_DATA_SIZE - *index, EXTRA_DATA_SIZE - *index - 1, "%s",
             paramIn->blob.data);
         if (num < 0) {
@@ -136,6 +217,29 @@ static void AppendIfExist(uint32_t tag, const struct HksParamSet *paramSetIn, co
     }
 }
 
+static void AppendKeyAliasBase64IfExist(const struct HksParamSet *paramSetIn, const struct HksBlob *tagString,
+    char *extraOut, uint32_t *index)
+{
+    struct HksParam *temp = NULL;
+    int32_t ret = HksGetParam(paramSetIn, HKS_TAG_KEY_ALIAS, &temp);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_D("Tag not exist.");
+        return;
+    }
+    struct HksParam aliasBase64 = {
+        .tag = HKS_TAG_KEY_ALIAS,
+        .blob = { .size = 0, .data = NULL },
+    };
+    ret = OpensslBase64Encode(&temp->blob, &aliasBase64.blob);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("OpensslBase64Encode fail %" LOG_PUBLIC "d", ret);
+        return;
+    }
+    ret = AppendToExtra(tagString, &aliasBase64, extraOut, index);
+    HKS_IF_NOT_SUCC_LOGE(ret, "Append extra data failed!")
+    HKS_FREE_BLOB(aliasBase64.blob);
+}
+
 static void GetAlgorithmTag(const struct HksParamSet *paramSetIn, uint32_t *algorithm)
 {
     struct HksParam *algorithmParam = NULL;
@@ -158,6 +262,7 @@ static void PackExtra(const struct HksParamSet *paramSetIn, char *extraOut)
     AppendIfExist(HKS_TAG_ITERATION, paramSetIn, &g_tagIteration, extraOut, &index);
     AppendIfExist(HKS_TAG_ATTESTATION_MODE, paramSetIn, &g_tagAttestationMode, extraOut, &index);
     AppendIfExist(HKS_TAG_PACKAGE_NAME, paramSetIn, &g_tagPackageName, extraOut, &index);
+    AppendKeyAliasBase64IfExist(paramSetIn, &g_tagKeyAlias, extraOut, &index);
 }
 
 int32_t ReportFaultEvent(const char *funcName, const struct HksProcessInfo *processInfo,
