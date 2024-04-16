@@ -75,6 +75,7 @@ huks_sources = [
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_helper.c",
   "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_upgrade_key_accesser.c",
+  "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/src/hks_plugin_adapter_mock.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
   "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa/hks_event_observer.cpp",
   "//base/security/huks/services/huks_standard/huks_service/main/systemapi_mock/src/hks_useridm_api_mock.cpp",
@@ -157,6 +158,7 @@ ohos_static_library("libhukssdk_static") {
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms/include",
     "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
+    "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
   deps = []
 
