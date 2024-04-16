@@ -24,6 +24,7 @@
 
 #include "hks_type.h"
 #include "securec.h"
+#include "hks_plugin_def.h"
 
 #define HANDLE_SIZE              8
 #define DEFAULT_AUTH_TIMEOUT     5

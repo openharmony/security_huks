@@ -104,7 +104,7 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet,
     struct HksParamSet **outParamSet, int frontUserId);
 
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 
 int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
