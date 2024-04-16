@@ -54,9 +54,7 @@ if (os_level == "standard") {
       include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa" ]  # hks_dcm_callback_handler.h
     }
 
-    sources += [
-      "../plugin_proxy/src/hks_plugin_adapter.cpp",
-    ]
+    sources += [ "../plugin_proxy/src/hks_plugin_adapter.cpp" ]
 
     sources += [
       "src/hks_upgrade_helper.c",
@@ -153,9 +151,7 @@ if (os_level == "standard") {
       "src/hks_upgrade_key_accesser.c",
     ]
 
-    sources += [
-      "../plugin_proxy/src/hks_plugin_adapter_mock.c",
-    ]
+    sources += [ "../plugin_proxy/src/hks_plugin_adapter_mock.c" ]
 
     if (huks_use_lite_storage == true) {
       sources += [
