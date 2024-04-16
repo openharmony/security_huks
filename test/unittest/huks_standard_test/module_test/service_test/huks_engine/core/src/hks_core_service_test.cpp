@@ -29,7 +29,6 @@
 #include "hks_client_service.h"
 #include "hks_storage_manager.h"
 
-#include "base/security/huks/services/huks_service/main/core/proxy/src/hks_plugin_adapter.cpp"
 #include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c"
 
 using namespace testing::ext;

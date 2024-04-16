@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,13 +26,13 @@
 #include "hks_template.h"
 #include "hks_type.h"
 
-typedef struct HksPluginProxy *(HksGetPluginProxyFunc)();
+typedef struct HksPluginProxy *(*HksGetPluginProxyFunc)();
 
 static void *g_pluginHandler = nullptr;
 static HksMutex *g_pluginMutex = NULL;
 static struct HksPluginProxy *g_pluginProxy = nullptr;
 
-struct HksBasicInterface g_interfaceInst = {
+static struct HksBasicInterface g_interfaceInst = {
     .HksManageStoreKeyBlob = HksManageStoreKeyBlob,
     .HksManageStoreDeleteKeyBlob = HksManageStoreDeleteKeyBlob,
     .HksManageStoreIsKeyBlobExist = HksManageStoreIsKeyBlobExist,
@@ -40,7 +40,7 @@ struct HksBasicInterface g_interfaceInst = {
     .HksManageStoreGetKeyBlobSize = HksManageStoreGetKeyBlobSize,
     .HksManageGetKeyCountByProcessName = HksManageGetKeyCountByProcessName,
 
-    .HksGetProcessInfoForIPC = HksGetProcessInfoForIPC
+    .HksGetProcessInfoForIPC = HksGetProcessInfoForIPC,
 
     .AppendStorageParamsForGen = AppendNewInfoForGenKeyInService,
     .AppendStorageParamsForUse = AppendNewInfoForUseKeyInService,
@@ -52,13 +52,14 @@ void HksInitPluginProxyMutex()
     g_pluginMutex = HksMutexCreate();
 }
 
-int32_t HksCreatePluginProxy()
+/* It is invoked when service initialize */
+ENABLE_CFI(int32_t HksCreatePluginProxy())
 {
     if (HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
         HKS_LOG_E("lock mutex for plugin proxy failed");
         return HKS_ERROR_BAD_STATE;
     }
-    int32_t ret = HKS_NULL_POINTER;
+    int32_t ret = HKS_ERROR_NULL_POINTER;
     struct HksPluginProxy *pluginProxy = nullptr;
     do {
         if (g_pluginProxy != nullptr) {
@@ -69,16 +70,16 @@ int32_t HksCreatePluginProxy()
         g_pluginHandler = dlopen("libhuks_ext.z.so", RTLD_NOW);
         HKS_IF_NULL_LOGE_BREAK(g_pluginHandler, "dlopen for plugin proxy failed")
 
-        HksGetPluginProxyFunc func = dlsym(g_pluginHandler, "HksGetPluginProxy");
+        HksGetPluginProxyFunc func = (HksGetPluginProxyFunc)dlsym(g_pluginHandler, "HksGetPluginProxy");
         HKS_IF_NULL_LOGE_BREAK(func, "dlsym for plugin proxy failed")
 
         pluginProxy = func();
-        HKS_IF_NULL_LOGE_BREAK(g_pluginHandler, "HksGetPluginProxy result is null")
+        HKS_IF_NULL_LOGE_BREAK(pluginProxy, "HksGetPluginProxy result is null")
 
         ret = pluginProxy->HksPluginInit(&g_interfaceInst);
-        HKS_IF_NULL_LOGE_BREAK(g_pluginHandler, "init plugin failed, ret = %" LOG_PUBLIC "d", ret)
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init plugin failed, ret = %" LOG_PUBLIC "d", ret)
 
-        g_pluginHandler = pluginProxy;
+        g_pluginProxy = pluginProxy;
     } while (0);
 
     (void)HksMutexUnlock(g_pluginMutex);

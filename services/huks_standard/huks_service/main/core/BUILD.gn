@@ -18,7 +18,7 @@ import("//build/ohos.gni")
 config("huks_config") {
   include_dirs = [
     "include",
-    "//base/security/huks/services/huks_service/main/core/proxy/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
 }
 

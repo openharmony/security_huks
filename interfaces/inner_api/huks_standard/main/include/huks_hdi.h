@@ -578,7 +578,7 @@ struct HuksHdi {
         const struct HksParamSet *paramSet, struct HksBlob *wrappedKey);
 
     /**
-     * @brief Wrap key operation
+     * @brief Unwrap key operation
      * @param keyAlias key alias
      * @param paramSet required parameter set
      * @param wrappedKey wrapped key
