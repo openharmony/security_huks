@@ -128,7 +128,7 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest003, TestSize.Level0)
     material.keyAliasPath = const_cast<char *>("alias");
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("333");
-    material.userIdPath = const_cast<char *>("333");
+    material.userIdPath = const_cast<char *>("100");
     struct HksStoreFileInfo fileInfo = { 0 };
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
@@ -136,7 +136,7 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest003, TestSize.Level0)
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath)));
 
     const char *expectPath =
-        HKS_CE_ROOT_PATH "/333/" HKS_STORE_SERVICE_PATH "/333/key";
+        HKS_CE_ROOT_PATH "/100/" HKS_STORE_SERVICE_PATH "/333/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
 }
@@ -153,7 +153,7 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest004, TestSize.Level0)
     material.keyAliasPath = const_cast<char *>("alias");
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("444");
-    material.userIdPath = const_cast<char *>("444");
+    material.userIdPath = const_cast<char *>("100");
     struct HksStoreFileInfo fileInfo = { 0 };
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
@@ -161,7 +161,7 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest004, TestSize.Level0)
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath)));
 
     const char *expectPath =
-        HKS_ECE_ROOT_PATH "/444/" HKS_STORE_SERVICE_PATH "/444/key";
+        HKS_ECE_ROOT_PATH "/100/" HKS_STORE_SERVICE_PATH "/444/key";
     ASSERT_EQ(strlen(fileInfo.mainPath.path), strlen(expectPath)) << fileInfo.mainPath.path;
     ASSERT_EQ(EOK, HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath)));
 }
