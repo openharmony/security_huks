@@ -47,13 +47,13 @@ static struct HksBasicInterface g_interfaceInst = {
     .AppendStorageParamsForQuery = AppendStorageLevelIfNotExist,
 };
 
-void HksInitPluginProxyMutex()
+void HksInitPluginProxyMutex(void)
 {
     g_pluginMutex = HksMutexCreate();
 }
 
 /* It is invoked when service initialize */
-ENABLE_CFI(int32_t HksCreatePluginProxy())
+ENABLE_CFI(int32_t HksCreatePluginProxy(void))
 {
     if (HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
         HKS_LOG_E("lock mutex for plugin proxy failed");
@@ -89,7 +89,7 @@ ENABLE_CFI(int32_t HksCreatePluginProxy())
     return ret;
 }
 
-void HksDestoryPluginProxy()
+void HksDestoryPluginProxy(void)
 {
     if (g_pluginMutex == NULL || HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
         HKS_LOG_E("lock mutex for plugin proxy failed");
@@ -111,7 +111,7 @@ void HksDestoryPluginProxy()
     g_pluginMutex = NULL;
 }
 
-struct HksPluginProxy *HksGetPluginProxy()
+struct HksPluginProxy *HksGetPluginProxy(void)
 {
     if (g_pluginProxy == nullptr) {
         HKS_LOG_I("g_pluginProxy is null");
