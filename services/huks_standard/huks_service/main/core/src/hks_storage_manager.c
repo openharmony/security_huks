@@ -48,7 +48,7 @@ static int32_t HksConstructStoreFileInfo(const struct HksProcessInfo *processInf
 }
 
 int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, uint32_t storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { .paramSet = paramSet, .keyAlias = keyAlias, .storageType = storageType };
@@ -71,7 +71,7 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
 }
 
 int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, uint32_t storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { .paramSet = paramSet, .keyAlias = keyAlias, .storageType = storageType };
@@ -94,7 +94,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 }
 
 int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, uint32_t storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { .paramSet = paramSet, .keyAlias = keyAlias, .storageType = storageType };
@@ -117,7 +117,7 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 }
 
 int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, struct HksBlob *keyBlob, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, struct HksBlob *keyBlob, uint32_t storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { .paramSet = paramSet, .keyAlias = keyAlias, .storageType = storageType };
@@ -140,7 +140,7 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
 }
 
 int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, uint32_t *keyBlobSize, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, uint32_t *keyBlobSize, uint32_t storageType)
 {
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { .paramSet = paramSet, .keyAlias = keyAlias, .storageType = storageType };

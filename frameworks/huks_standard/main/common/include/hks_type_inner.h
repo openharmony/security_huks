@@ -24,6 +24,7 @@
 
 #include "hks_type.h"
 #include "securec.h"
+#include "hks_plugin_def.h"
 
 #define HANDLE_SIZE              8
 #define DEFAULT_AUTH_TIMEOUT     5
@@ -82,13 +83,6 @@ enum HksInnerTag {
 };
 
 #define HKS_PARAM_BUFFER_NULL_INTERVAL ((HKS_TAG_PARAM0_NULL) - (HKS_TAG_PARAM0_BUFFER))
-
-struct HksProcessInfo {
-    struct HksBlob userId;
-    struct HksBlob processName;
-    int32_t userIdInt;
-    uint64_t accessTokenId;
-};
 
 struct HksParamOut {
     uint32_t tag;
