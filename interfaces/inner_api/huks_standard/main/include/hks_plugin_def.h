@@ -72,7 +72,7 @@ struct HksBasicInterface {
  */
 struct HksPluginProxy {
     int32_t (*HksPluginInit)(struct HksBasicInterface *interfaceInst);
-    void (*HksPluginDestory)();
+    void (*HksPluginDestory)(void);
     int32_t (*HksPluginOnRemoteRequest)(uint32_t code, void *data, void *reply, void *option);
     void (*HksPluginOnReceiveEvent)(void *eventData);
 };

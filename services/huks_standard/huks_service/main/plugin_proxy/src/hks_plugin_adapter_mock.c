@@ -17,23 +17,23 @@
 #include "hks_log.h"
 #include "hks_type.h"
 
-void HksInitPluginProxyMutex()
+void HksInitPluginProxyMutex(void)
 {
     HKS_LOG_I("Unsupport extension plugin!");
 }
 
-int32_t HksCreatePluginProxy()
+int32_t HksCreatePluginProxy(void)
 {
     HKS_LOG_I("Unsupport extension plugin!");
     return HKS_SUCCESS;
 }
 
-void HksDestoryPluginProxy()
+void HksDestoryPluginProxy(void)
 {
     HKS_LOG_I("Unsupport extension plugin!");
 }
 
-struct HksPluginProxy *HksGetPluginProxy()
+struct HksPluginProxy *HksGetPluginProxy(void)
 {
     HKS_LOG_I("Unsupport extension plugin!");
     return NULL;

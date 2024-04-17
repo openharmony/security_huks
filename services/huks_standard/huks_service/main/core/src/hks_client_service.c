@@ -645,15 +645,21 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
+    const struct HksParamSet *inParamSet = paramSet;
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = AddAppInfoToParamSet(processInfo, paramSet, &newParamSet, HKS_TAG_OWNER_ID, HKS_TAG_OWNER_TYPE);
+    int32_t ret;
+
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+    ret = AddAppInfoToParamSet(processInfo, paramSet, &newParamSet, HKS_TAG_OWNER_ID, HKS_TAG_OWNER_TYPE);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret);
         HksFreeParamSet(&newParamSet);
         return ret;
     }
+    inParamSet = newParamSet;
+#endif
 
-    ret = AppendProcessInfoAndDefaultStrategy(newParamSet, processInfo, NULL, outParamSet);
+    ret = AppendProcessInfoAndDefaultStrategy(inParamSet, processInfo, NULL, outParamSet);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("AppendProcessInfoAndDefaultStrategy failed, ret = %" LOG_PUBLIC "d.", ret);
     }

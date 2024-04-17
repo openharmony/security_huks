@@ -28,10 +28,10 @@
 extern "C" {
 #endif
 
-void HksInitPluginProxyMutex();
-int32_t HksCreatePluginProxy();
-void HksDestoryPluginProxy();
-struct HksPluginProxy *HksGetPluginProxy();
+void HksInitPluginProxyMutex(void);
+int32_t HksCreatePluginProxy(void);
+void HksDestoryPluginProxy(void);
+struct HksPluginProxy *HksGetPluginProxy(void);
 
 #ifdef __cplusplus
 }
