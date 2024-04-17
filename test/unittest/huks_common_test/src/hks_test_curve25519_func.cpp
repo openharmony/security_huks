@@ -56,7 +56,7 @@ int32_t TestGenerateEd25519Key(struct HksBlob alias)
 
 int32_t TestSignEd25519(struct HksBlob alias)
 {
-    struct HksBlob msg = {strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
+    struct HksBlob msg = {(uint32_t)strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
 
     struct HksParamSet *paramSet = NULL;
     int32_t ret = HksInitParamSet(&paramSet);
@@ -94,7 +94,7 @@ int32_t TestSignEd25519(struct HksBlob alias)
 
 int32_t TestVerifyEd25519(struct HksBlob alias)
 {
-    struct HksBlob msg = {strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
+    struct HksBlob msg = {(uint32_t)strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
 
     HKS_TEST_LOG_I("TestVerifyEd25519!\n");
     struct HksParamSet *paramSet = NULL;
@@ -198,7 +198,7 @@ int32_t TestExportImportEd25519SignVerify(struct HksBlob alias)
     ret = HksDeleteKey(&alias, NULL);
     HKS_TEST_ASSERT(ret == 0);
 
-    struct HksBlob newAlias = { strlen("test_ed25519_2"), (uint8_t *)"test_ed25519_2" };
+    struct HksBlob newAlias = { (uint32_t)strlen("test_ed25519_2"), (uint8_t *)"test_ed25519_2" };
     ret = TestImportEd25519(newAlias, &pubKeyInfo);
     HKS_TEST_ASSERT(ret == 0);
     ret = TestVerifyEd25519(newAlias);
@@ -211,7 +211,7 @@ int32_t TestExportImportEd25519SignVerify(struct HksBlob alias)
 
 int32_t TestCurve25519All()
 {
-    struct HksBlob ed25519Alias = { strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
+    struct HksBlob ed25519Alias = { (uint32_t)strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
     int32_t ret = TestGenerateEd25519Key(ed25519Alias);
     HKS_TEST_ASSERT(ret == 0);
     ret = TestSignEd25519(ed25519Alias);
@@ -304,8 +304,8 @@ int32_t TestEd25519SignTeeVerifyLocal()
 {
     HKS_TEST_LOG_D("TestEd25519SignTeeVerifyLocal enter!");
 
-    struct HksBlob ed25519Alias = { strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
-    struct HksBlob msg = {strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
+    struct HksBlob ed25519Alias = { (uint32_t)strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
+    struct HksBlob msg = {(uint32_t)strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
     struct HksBlob signature = { TEST_CURVE_256, g_buffer };
     struct HksParamSet *paramSetSign = NULL;
     struct HksParamSet *paramSetVerify = NULL;
@@ -341,7 +341,7 @@ int32_t TestEd25519SignTeeVerifyLocal()
 
 int32_t TestSignEd25519Wrong(struct HksBlob alias)
 {
-    struct HksBlob msg = {strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
+    struct HksBlob msg = {(uint32_t)strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
 
     struct HksParamSet *paramSet = NULL;
     int32_t ret = HksInitParamSet(&paramSet);
@@ -379,7 +379,7 @@ int32_t TestSignEd25519Wrong(struct HksBlob alias)
 
 int32_t TestCurve25519SignWrong()
 {
-    struct HksBlob ed25519Alias = { strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
+    struct HksBlob ed25519Alias = { (uint32_t)strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
     int32_t ret = TestGenerateEd25519Key(ed25519Alias);
     HKS_TEST_ASSERT(ret == 0);
     ret = TestSignEd25519Wrong(ed25519Alias);
@@ -394,7 +394,7 @@ int32_t TestCurve25519SignWrong()
 
 int32_t TestVerifyEd25519Wrong(struct HksBlob alias)
 {
-    struct HksBlob msg = {strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
+    struct HksBlob msg = {(uint32_t)strlen(TEST_PLAIN_TEST_ED25519), (uint8_t *)TEST_PLAIN_TEST_ED25519};
 
     HKS_TEST_LOG_I("TestVerifyEd25519!\n");
     struct HksParamSet *paramSet = NULL;
@@ -437,7 +437,7 @@ int32_t TestVerifyEd25519Wrong(struct HksBlob alias)
 
 int32_t TestCurve25519verifyWrong()
 {
-    struct HksBlob ed25519Alias = { strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
+    struct HksBlob ed25519Alias = { (uint32_t)strlen(TEST_ALIAS_ED25519), (uint8_t *)TEST_ALIAS_ED25519 };
     int32_t ret = TestGenerateEd25519Key(ed25519Alias);
     HKS_TEST_ASSERT(ret == 0);
     ret = TestSignEd25519(ed25519Alias);

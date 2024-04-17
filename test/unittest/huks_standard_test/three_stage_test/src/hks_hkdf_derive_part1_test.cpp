@@ -197,7 +197,7 @@ static struct HksParam g_hkdfFinishParams004[] = {
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
         .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest004"),
+            (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest004"),
             (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest004"
         }
     }, {
@@ -303,7 +303,7 @@ static struct HksParam g_hkdfFinishParams007[] = {
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
         .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest007"),
+            (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest007"),
             (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest007"
         }
     }, {
@@ -355,7 +355,7 @@ static struct HksParam g_hkdfFinishParams009[] = {
     }, {
         .tag =  HKS_TAG_KEY_ALIAS,
         .blob = {
-            strlen("HksHKDFDeriveKeyAliasFinalTest009"),
+            (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest009"),
             (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest009"
         }
     }, {
@@ -378,7 +378,7 @@ static struct HksParam g_hkdfFinishParams009[] = {
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest001"), (uint8_t *)"HksHKDFDeriveKeyAliasTest001" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest001"), (uint8_t *)"HksHKDFDeriveKeyAliasTest001" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -400,7 +400,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest001"),
+    struct HksBlob deleteKeyAlias = { .size = (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest001"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest001"};
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
@@ -417,7 +417,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest003"), (uint8_t *)"HksHKDFDeriveKeyAliasTest003" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest003"), (uint8_t *)"HksHKDFDeriveKeyAliasTest003" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -439,7 +439,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest003"),
+    struct HksBlob deleteKeyAlias = { .size = (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest003"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest003"};
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
@@ -457,7 +457,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest004"), (uint8_t *)"HksHKDFDeriveKeyAliasTest004" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest004"), (uint8_t *)"HksHKDFDeriveKeyAliasTest004" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -479,7 +479,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest004"),
+    struct HksBlob deleteKeyAlias = { .size = (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest004"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest004"};
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
@@ -497,7 +497,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest006"), (uint8_t *)"HksHKDFDeriveKeyAliasTest006" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest006"), (uint8_t *)"HksHKDFDeriveKeyAliasTest006" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -519,7 +519,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest006"),
+    struct HksBlob deleteKeyAlias = { .size = (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest006"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest006"};
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
@@ -537,7 +537,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest007"), (uint8_t *)"HksHKDFDeriveKeyAliasTest007" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest007"), (uint8_t *)"HksHKDFDeriveKeyAliasTest007" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -559,7 +559,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest007"),
+    struct HksBlob deleteKeyAlias = { .size = (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest007"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest007"};
 
     ret = TestDerivedKeyUse(&deleteKeyAlias);
@@ -580,7 +580,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive009, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { strlen("HksHKDFDeriveKeyAliasTest009"), (uint8_t *)"HksHKDFDeriveKeyAliasTest009" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest009"), (uint8_t *)"HksHKDFDeriveKeyAliasTest009" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -602,7 +602,7 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive009, TestSize.Level0)
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFDeriveKeyAliasFinalTest009"),
+    struct HksBlob deleteKeyAlias = { .size = (uint32_t)strlen("HksHKDFDeriveKeyAliasFinalTest009"),
         .data = (uint8_t *)"HksHKDFDeriveKeyAliasFinalTest009"};
     ret = HksDeleteKey(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";

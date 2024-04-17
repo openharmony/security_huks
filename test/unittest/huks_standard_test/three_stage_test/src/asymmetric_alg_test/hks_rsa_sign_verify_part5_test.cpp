@@ -623,7 +623,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test041, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -659,7 +659,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test042, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -695,7 +695,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test043, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -732,7 +732,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test044, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -768,7 +768,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test045, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -805,7 +805,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test046, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -841,7 +841,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test047, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -877,7 +877,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test048, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -914,7 +914,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test049, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -952,7 +952,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test050, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);

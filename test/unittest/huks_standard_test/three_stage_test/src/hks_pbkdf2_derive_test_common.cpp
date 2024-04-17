@@ -23,7 +23,7 @@ int32_t HksPbkdf2DeriveTestNormalCase(const struct HksBlob keyAlias,
     const struct HksParamSet *genParamSet, struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet)
 {
     struct HksBlob inData = {
-        g_inData.length(),
+        (uint32_t)g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
     int32_t ret = HKS_FAILURE;
