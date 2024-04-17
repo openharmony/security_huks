@@ -23,7 +23,7 @@ namespace Unittest::Ed25519 {
 static const std::string tmpInData = "Hks_ED25519_Sign_Verify_Test_000000000000000000000000000000000000000000000000000"
                                      "00000000000000000000000000000000000000000000000000000000000000000000000000000000"
                                      "0000000000000000000000000000000000000000000000000000000000000000000000000_string";
-static const struct HksBlob g_inData = { tmpInData.length(), (uint8_t *)tmpInData.c_str() };
+static const struct HksBlob g_inData = { (uint32_t)tmpInData.length(), (uint8_t *)tmpInData.c_str() };
 
 static const uint32_t ED25519_COMMON_SIZE = 1024;
 

@@ -308,7 +308,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test071, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -344,7 +344,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test072, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* Generate Key */
-    struct HksBlob keyAlias = {strlen(keyAliasString), (uint8_t *)keyAliasString};
+    struct HksBlob keyAlias = {(uint32_t)strlen(keyAliasString), (uint8_t *)keyAliasString};
 
     if ((genParamSet != nullptr) || (signParamSet != nullptr) || (verifyParamSet != nullptr)) {
         ret = HksRsaSignVerifyTestNormalCase(keyAlias, genParamSet, signParamSet, verifyParamSet);
@@ -366,9 +366,9 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test072, TestSize.Level
  */
 HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level1)
 {
-    struct HksBlob keyAlias = { strlen("HksRSASignVerifyKeyAliasTest073"),
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksRSASignVerifyKeyAliasTest073"),
         (uint8_t *)"HksRSASignVerifyKeyAliasTest073" };
-    struct HksBlob inData = { Unittest::RsaSignVerify::g_inData.length(),
+    struct HksBlob inData = { (uint32_t)Unittest::RsaSignVerify::g_inData.length(),
                               (uint8_t *)Unittest::RsaSignVerify::g_inData.c_str() };
 
     /* 1. Generate Key */
@@ -409,7 +409,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     /* Import Key */
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey };
     ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
     // Init
@@ -442,9 +442,9 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
  */
 HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test074, TestSize.Level1)
 {
-    struct HksBlob keyAlias = { strlen("HksRSASignVerifyKeyAliasTest074"),
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksRSASignVerifyKeyAliasTest074"),
         (uint8_t *)"HksRSASignVerifyKeyAliasTest074" };
-    struct HksBlob inData = { Unittest::RsaSignVerify::g_inData.length(),
+    struct HksBlob inData = { (uint32_t)Unittest::RsaSignVerify::g_inData.length(),
                               (uint8_t *)Unittest::RsaSignVerify::g_inData.c_str() };
     int32_t ret = HKS_FAILURE;
 
@@ -487,7 +487,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test074, TestSize.Level
  */
 HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test075, TestSize.Level1)
 {
-    struct HksBlob keyAlias = { strlen("HksRSASignVerifyKeyAliasTest075"),
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksRSASignVerifyKeyAliasTest075"),
         (uint8_t *)"HksRSASignVerifyKeyAliasTest075" };
     int32_t ret = HKS_FAILURE;
 

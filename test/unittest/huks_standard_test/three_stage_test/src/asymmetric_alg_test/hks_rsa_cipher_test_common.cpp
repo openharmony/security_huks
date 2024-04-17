@@ -123,7 +123,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestCase(const struct HksBlob *keyAlias
 
     /* 3. Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = reinterpret_cast<uint8_t *>(tmpKey) };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(tmpKey), .data = reinterpret_cast<uint8_t *>(tmpKey) };
     ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
 
     /* 4. Encrypt Three Stage */
@@ -159,7 +159,7 @@ int32_t Unittest::RsaCipher::HksRsaCipherTestCaseAbnormal(const struct HksBlob *
 
     /* 3. Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
-    struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = reinterpret_cast<uint8_t *>(tmpKey) };
+    struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(tmpKey), .data = reinterpret_cast<uint8_t *>(tmpKey) };
     ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
 
     /* 4. Encrypt Three Stage */
