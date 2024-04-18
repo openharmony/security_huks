@@ -659,9 +659,18 @@ static int32_t HksAesCcmCipherTestDecrypt(const struct HksBlob *keyAlias,
         return ret;
     }
 
-    if (HksMemCmp(inData->data, cipherText->data, inData->size) != HKS_SUCCESS) {
+    if (inData->size >= CCM_MIN_AEAD_SIZE) {
+        HKS_LOG_D("Original data: 0x%" LOG_PUBLIC "02x 0x%" LOG_PUBLIC "02x 0x%" LOG_PUBLIC "02x 0x%" LOG_PUBLIC "02x",
+            inData->data[0], inData->data[0], inData->data[0], inData->data[0]);
+    }
+    if (plainText->size >= CCM_MIN_AEAD_SIZE) {
+        HKS_LOG_D("Decrypt data: 0x%" LOG_PUBLIC "02x 0x%" LOG_PUBLIC "02x 0x%" LOG_PUBLIC "02x 0x%" LOG_PUBLIC "02x",
+            plainText->data[0], plainText->data[0], plainText->data[0], plainText->data[0]);
+    }
+
+    if (HksMemCmp(inData->data, plainText->data, inData->size) != HKS_SUCCESS) {
         HKS_LOG_E("HksAesCcmCipherTestDecrypt data and encrypt data is not same");
-        return ret;
+        return HKS_FAILURE;
     }
 
     return HKS_SUCCESS;
@@ -698,7 +707,7 @@ static int32_t HksAesCmcCipherTestCaseRun(const struct HksBlob *keyAlias, struct
     (void)memset_s(plain, dataLen, 0, dataLen);
     struct HksBlob plainText = { dataLen, plain };
 
-    // enc set nonce-none£¬fill decrypt nonce
+    // enc set nonce-none, fill decrypt nonce
     bool isNonceNoExist = false;
     HksParam *nonceParam = NULL;
     ret = HksGetParam(encParamSet, HKS_TAG_NONCE, &nonceParam);
@@ -1100,7 +1109,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest009, TestSize.Level0)
 
 /**
  * @tc.name: HksAesCipherCcmTest.HksAesCipherCcmTest010
- * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-ccm pad-NONE aad-16 nonce-12 size-128. datalen¡¶MAX_UPDATE_SIZE
+ * @tc.desc: alg-AES pur-ENCRYPT&DECRYPT mod-ccm pad-NONE aad-16 nonce-12 size-128. datalen < MAX_UPDATE_SIZE
  * @tc.type: FUNC
  */
 HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest010, TestSize.Level0)
@@ -1184,7 +1193,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest012, TestSize.Level0)
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
-    // set nonce len 13£¬ data len max = 2^16
+    // set nonce len 13, data len max = 2^16
     int32_t ret = HksAesSetNonceLen(g_encCcmParams, sizeof(g_encCcmParams) / sizeof(HksParam),
         CCM_MAX_NONCE_SIZE, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set enc nonce len failed.";
@@ -1299,7 +1308,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest014, TestSize.Level0)
     char tmpKeyAlias[] = "HksAESCipherKeyAliasTest001";
     struct HksBlob keyAlias = { strlen(tmpKeyAlias), (uint8_t *)tmpKeyAlias };
 
-    // set nonce len 13£¬ data len max = 2^16 - 1
+    // set nonce len 13, data len max = 2^16 - 1
     int32_t ret = HksAesSetNonceLen(g_encCcmParams, sizeof(g_encCcmParams) / sizeof(HksParam),
         CCM_MIN_NONCE_SIZE, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set enc nonce len failed.";
@@ -1367,7 +1376,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest015, TestSize.Level0)
     ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
-    // set nonce len 7£¬ data len max = 2^64 - 1
+    // set nonce len 7, data len max = 2^64 - 1
     ret = HksAesSetNonceLen(g_encCcmParams, sizeof(g_encCcmParams) / sizeof(HksParam),
         CCM_MIN_NONCE_SIZE, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "set enc nonce len failed.";
