@@ -379,7 +379,8 @@ static struct HksParam g_hkdfFinishParams009[] = {
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest001"), (uint8_t *)"HksHKDFDeriveKeyAliasTest001" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest001"),
+        (uint8_t *)"HksHKDFDeriveKeyAliasTest001" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -418,7 +419,8 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive001, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest003"), (uint8_t *)"HksHKDFDeriveKeyAliasTest003" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest003"),
+        (uint8_t *)"HksHKDFDeriveKeyAliasTest003" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -458,7 +460,8 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive003, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest004"), (uint8_t *)"HksHKDFDeriveKeyAliasTest004" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest004"),
+        (uint8_t *)"HksHKDFDeriveKeyAliasTest004" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -498,7 +501,8 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive004, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest006"), (uint8_t *)"HksHKDFDeriveKeyAliasTest006" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest006"),
+        (uint8_t *)"HksHKDFDeriveKeyAliasTest006" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -538,7 +542,8 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive006, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest007"), (uint8_t *)"HksHKDFDeriveKeyAliasTest007" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest007"),
+        (uint8_t *)"HksHKDFDeriveKeyAliasTest007" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -581,7 +586,8 @@ HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive007, TestSize.Level0)
  */
 HWTEST_F(HksHkdfDerivePart1Test, HksHKDFDerive009, TestSize.Level0)
 {
-    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest009"), (uint8_t *)"HksHKDFDeriveKeyAliasTest009" };
+    struct HksBlob keyAlias = { (uint32_t)strlen("HksHKDFDeriveKeyAliasTest009"),
+        (uint8_t *)"HksHKDFDeriveKeyAliasTest009" };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
