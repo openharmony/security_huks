@@ -32,6 +32,7 @@
 #include "hks_plugin_adapter.h"
 #include "hks_report.h"
 #include "hks_response.h"
+#include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_util.h"
@@ -58,6 +59,7 @@ constexpr static int UID_TRANSFORM_DIVISOR = 200000;
 #include "hks_event_observer.h"
 #endif
 
+#include <array>
 #include <cinttypes>
 #include <filesystem>
 #include <string>
@@ -205,7 +207,42 @@ static void HksInitMemPolicy(void)
 #endif
 }
 
-static void ReportIfHapCallHuksBeforeUnlock(void)
+#ifdef SUPPORT_COMMON_EVENT
+static void AppendKeyAliasParamBase64IfExist(uint32_t code, const struct HksBlob &srcData, HksParamSet *ps)
+{
+    // srcData in the following codes starts with keyAlias
+    constexpr std::array validCodes = {
+        HKS_MSG_GEN_KEY,
+        HKS_MSG_IMPORT_KEY,
+        HKS_MSG_EXPORT_PUBLIC_KEY,
+        HKS_MSG_IMPORT_WRAPPED_KEY,
+        HKS_MSG_DELETE_KEY,
+        HKS_MSG_GET_KEY_PARAMSET,
+        HKS_MSG_KEY_EXIST,
+        HKS_MSG_SIGN,
+        HKS_MSG_VERIFY,
+        HKS_MSG_ENCRYPT,
+        HKS_MSG_DECRYPT,
+        HKS_MSG_MAC,
+        HKS_MSG_ATTEST_KEY,
+    };
+    if (std::find(validCodes.begin(), validCodes.end(), code) == validCodes.end()) {
+        HKS_LOG_W("cmd id %" LOG_PUBLIC "u no key alias", code);
+        return;
+    }
+    HksParam aliasParam { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = 0, .data = NULL} };
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(&aliasParam.blob, &srcData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get keyAlias failed %" LOG_PUBLIC "d", ret);
+        return;
+    }
+    ret = HksAddParams(ps, &aliasParam, 1);
+    HKS_IF_NOT_SUCC_LOGE(ret, "HapCallHuksBeforeUnlock HksAddParams alias fail %" LOG_PUBLIC "d", ret);
+}
+#endif
+
+static void ReportIfHapCallHuksBeforeUnlock(uint32_t code, const struct HksBlob &srcData)
 #ifdef SUPPORT_COMMON_EVENT
 {
     if (SystemEventObserver::GetUserUnlocked()) [[likely]] {
@@ -248,6 +285,7 @@ static void ReportIfHapCallHuksBeforeUnlock(void)
     do {
         ret = HksAddParams(ps, &hapNameParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HapCallHuksBeforeUnlock HksAddParams fail %" LOG_PUBLIC "d", ret);
+        AppendKeyAliasParamBase64IfExist(code, srcData, ps);
         ret = HksBuildParamSet(&ps);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HapCallHuksBeforeUnlock HksBuildParamSet fail %" LOG_PUBLIC "d", ret);
         HksProcessInfo processInfo { .userIdInt = userId };
@@ -262,7 +300,7 @@ static void ReportIfHapCallHuksBeforeUnlock(void)
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
 {
-    ReportIfHapCallHuksBeforeUnlock();
+    ReportIfHapCallHuksBeforeUnlock(code, srcData);
 
     // Since we have wrote a HksStub instance in client side, we can now read it if it is anonymous attestation.
     if (code == HKS_MSG_ATTEST_KEY) {
