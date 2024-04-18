@@ -831,13 +831,15 @@ void HksIpcServiceUpdOrFin(const struct HksBlob *paramSetBlob, struct HksBlob *o
         if (isUpdate) {
             ret = HksServiceUpdate(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceUpdate fail, ret = %" LOG_PUBLIC "d", ret)
-        }
-        else {
+        } else {
             ret = HksServiceFinish(&handle, &processInfo, inParamSet, &inData, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceFinish fail, ret = %" LOG_PUBLIC "d", ret)
         }
-
-        HksSendResponse(context, ret, outData);
+        if (outData->size == 0) {
+            HksSendResponse(context, ret, NULL);
+        } else {
+            HksSendResponse(context, ret, outData);
+        }
     } while (0);
 
     if (ret != HKS_SUCCESS) {
