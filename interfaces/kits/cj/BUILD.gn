@@ -16,6 +16,15 @@ import("//build/ohos.gni")
 ohos_shared_library("cj_huks_ffi") {
   defines = []
 
+  sanitize = {
+    integer_overflow = true
+    cfi = true
+    debug = false
+    cfi_cross_dso = true
+    boundary_sanitize = true
+    ubsan = true
+  }
+
   include_dirs = [
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include",
