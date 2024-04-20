@@ -47,7 +47,7 @@ using GetKeyPropertiesAsyncContext = GetKeyPropertiesAsyncContextT *;
 static GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext()
 {
     GetKeyPropertiesAsyncContext context =
-        (GetKeyPropertiesAsyncContext)HksMalloc(sizeof(GetKeyPropertiesAsyncContextT));
+        static_cast<GetKeyPropertiesAsyncContext>(HksMalloc(sizeof(GetKeyPropertiesAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(GetKeyPropertiesAsyncContextT), 0, sizeof(GetKeyPropertiesAsyncContextT));
     }

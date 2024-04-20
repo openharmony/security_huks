@@ -130,7 +130,7 @@ int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *
     struct HksBlob appendedKeyData = { 0, NULL };
     int32_t ret = AppendKekAndFactor(mainKey, &deriveParam->info, &appendedKeyData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "append data failed!")
-    int hashSize = appendedKeyData.size + HKS_BYTE_PER_INT;
+    unsigned int hashSize = appendedKeyData.size + HKS_BYTE_PER_INT;
     struct HksBlob inputHashBlob = { 0, NULL };
     inputHashBlob.size = hashSize;
     inputHashBlob.data = (uint8_t *)HksMalloc(inputHashBlob.size);
@@ -141,13 +141,13 @@ int32_t HksOpensslSmKdf(const struct HksBlob *mainKey, const struct HksKeySpec *
     (void)memcpy_s(inputHashBlob.data, inputHashBlob.size, appendedKeyData.data, appendedKeyData.size);
 
     uint8_t digestDataArray[HKS_DIGEST_SM3_LEN] = { 0 };
-    int digestLength = HKS_DIGEST_SM3_LEN;
+    unsigned int digestLength = HKS_DIGEST_SM3_LEN;
     struct HksBlob cdgstBlob = {digestLength, digestDataArray};
-    int index = (derivedKey->size - 1) / HKS_DIGEST_SM3_LEN + 1; // round up
+    unsigned int index = (derivedKey->size - 1) / HKS_DIGEST_SM3_LEN + 1; // round up
     unsigned char counterBytes[HKS_BYTE_PER_INT] = { 0 };
     unsigned int counter = HKS_START_NUM;
-    for (int i = 0; i < index; i++) {
-        for (int j = HKS_START_NUM; j <= HKS_BYTE_PER_INT; j++) {
+    for (unsigned int i = 0; i < index; i++) {
+        for (unsigned int j = HKS_START_NUM; j <= HKS_BYTE_PER_INT; j++) {
             counterBytes[j - 1] = (counter >> (HKS_BITS_PER_INT - HKS_BITS_PER_BYTE * j)) & 0xFF;
         }
         (void)memcpy_s(inputHashBlob.data + appendedKeyData.size, HKS_BYTE_PER_INT,

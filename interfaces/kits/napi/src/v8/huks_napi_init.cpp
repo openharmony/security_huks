@@ -48,7 +48,7 @@ using InitAsyncCtxPtr = InitAsyncContext *;
 
 static InitAsyncCtxPtr CreateInitAsyncContext()
 {
-    InitAsyncCtxPtr context = (InitAsyncCtxPtr)HksMalloc(sizeof(InitAsyncContext));
+    InitAsyncCtxPtr context = static_cast<InitAsyncCtxPtr>(HksMalloc(sizeof(InitAsyncContext)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(InitAsyncContext), 0, sizeof(InitAsyncContext));
     }
