@@ -49,7 +49,7 @@ using UpdateAsyncContext = UpdateAsyncContextT *;
 
 static UpdateAsyncContext CreateUpdateAsyncContext()
 {
-    UpdateAsyncContext context = (UpdateAsyncContext)HksMalloc(sizeof(UpdateAsyncContextT));
+    UpdateAsyncContext context = static_cast<UpdateAsyncContext>(HksMalloc(sizeof(UpdateAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(UpdateAsyncContextT), 0, sizeof(UpdateAsyncContextT));
     }
