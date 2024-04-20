@@ -131,16 +131,17 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
         }
     }
 
+    if (outSize > MAX_MALLOC_LEN) {
+        HKS_LOG_E("outSize is invalid, size:%" LOG_PUBLIC "u", outSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
         if (code == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
             struct HksBlob outData = { 0, nullptr };
             if (outSize != 0) {
                 outData.size = outSize;
-                if (outData.size > MAX_MALLOC_LEN) {
-                    HKS_LOG_E("outData size is invalid, size:%" LOG_PUBLIC "u", outData.size);
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
                 HKS_IF_NULL_LOGE_RETURN(outData.data, HKS_ERROR_MALLOC_FAIL, "Malloc outData failed.")
             }

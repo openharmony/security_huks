@@ -44,7 +44,7 @@ using ExportKeyAsyncContext = ExportKeyAsyncContextT *;
 
 static ExportKeyAsyncContext CreateExportKeyAsyncContext()
 {
-    ExportKeyAsyncContext context = (ExportKeyAsyncContext)HksMalloc(sizeof(ExportKeyAsyncContextT));
+    ExportKeyAsyncContext context = static_cast<ExportKeyAsyncContext>(HksMalloc(sizeof(ExportKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(ExportKeyAsyncContextT), 0, sizeof(ExportKeyAsyncContextT));
     }
