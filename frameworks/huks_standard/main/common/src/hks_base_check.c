@@ -1719,7 +1719,7 @@ int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const str
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inputParams)
 {
-    uint32_t ret = HKS_SUCCESS;
+    int32_t ret = HKS_SUCCESS;
     switch (alg) {
 #ifdef HKS_SUPPORT_RSA_C
         case HKS_ALG_RSA:

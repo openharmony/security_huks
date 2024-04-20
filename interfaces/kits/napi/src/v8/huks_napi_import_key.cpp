@@ -44,7 +44,7 @@ using ImportKeyAsyncContext = ImportKeyAsyncContextT *;
 
 static ImportKeyAsyncContext CreateImportKeyAsyncContext()
 {
-    ImportKeyAsyncContext context = (ImportKeyAsyncContext)HksMalloc(sizeof(ImportKeyAsyncContextT));
+    ImportKeyAsyncContext context = static_cast<ImportKeyAsyncContext>(HksMalloc(sizeof(ImportKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(ImportKeyAsyncContextT), 0, sizeof(ImportKeyAsyncContextT));
     }

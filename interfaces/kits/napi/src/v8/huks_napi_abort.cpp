@@ -43,7 +43,7 @@ using AbortAsyncContext = AbortAsyncContextT *;
 
 static AbortAsyncContext CreateAbortAsyncContext()
 {
-    AbortAsyncContext context = (AbortAsyncContext)HksMalloc(sizeof(AbortAsyncContextT));
+    AbortAsyncContext context = static_cast<AbortAsyncContext>(HksMalloc(sizeof(AbortAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(AbortAsyncContextT), 0, sizeof(AbortAsyncContextT));
     }
