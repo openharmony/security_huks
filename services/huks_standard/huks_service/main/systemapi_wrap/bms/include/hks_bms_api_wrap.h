@@ -26,11 +26,9 @@ extern "C" {
 
 int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo);
 
-int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapPkgName);
-
 int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo);
 
-int32_t HksGetSaProcessName(const struct HksProcessInfo *processInfo, struct HksBlob *saProcessName);
+int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo);
 
 enum HksCallerType HksGetCallerType(void);
 

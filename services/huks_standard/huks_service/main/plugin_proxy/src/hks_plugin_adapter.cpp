@@ -33,18 +33,18 @@ static HksMutex *g_pluginMutex = NULL;
 static struct HksPluginProxy *g_pluginProxy = nullptr;
 
 static struct HksBasicInterface g_interfaceInst = {
-    .HksManageStoreKeyBlob = HksManageStoreKeyBlob,
-    .HksManageStoreDeleteKeyBlob = HksManageStoreDeleteKeyBlob,
-    .HksManageStoreIsKeyBlobExist = HksManageStoreIsKeyBlobExist,
-    .HksManageStoreGetKeyBlob = HksManageStoreGetKeyBlob,
-    .HksManageStoreGetKeyBlobSize = HksManageStoreGetKeyBlobSize,
-    .HksManageGetKeyCountByProcessName = HksManageGetKeyCountByProcessName,
+    .hksManageStoreKeyBlob = HksManageStoreKeyBlob,
+    .hksManageStoreDeleteKeyBlob = HksManageStoreDeleteKeyBlob,
+    .hksManageStoreIsKeyBlobExist = HksManageStoreIsKeyBlobExist,
+    .hksManageStoreGetKeyBlob = HksManageStoreGetKeyBlob,
+    .hksManageStoreGetKeyBlobSize = HksManageStoreGetKeyBlobSize,
+    .hksManageGetKeyCountByProcessName = HksManageGetKeyCountByProcessName,
 
-    .HksGetProcessInfoForIPC = HksGetProcessInfoForIPC,
+    .hksGetProcessInfoForIPC = HksGetProcessInfoForIPC,
 
-    .AppendStorageParamsForGen = AppendNewInfoForGenKeyInService,
-    .AppendStorageParamsForUse = AppendNewInfoForUseKeyInService,
-    .AppendStorageParamsForQuery = AppendStorageLevelIfNotExist,
+    .appendStorageParamsForGen = AppendNewInfoForGenKeyInService,
+    .appendStorageParamsForUse = AppendNewInfoForUseKeyInService,
+    .appendStorageParamsForQuery = AppendStorageLevelIfNotExist,
 };
 
 void HksInitPluginProxyMutex(void)
