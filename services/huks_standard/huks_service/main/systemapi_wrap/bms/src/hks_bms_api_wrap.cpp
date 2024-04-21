@@ -172,7 +172,7 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     return HKS_SUCCESS;
 }
 
-int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapPkgName)
+static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapPkgName)
 {
     HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
     HKS_IF_NULL_LOGE_RETURN(hapPkgName, HKS_ERROR_NULL_POINTER, "hapPkgName is nullptr.")
@@ -230,7 +230,7 @@ int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *s
     return HKS_SUCCESS;
 }
 
-int32_t HksGetSaProcessName(const struct HksProcessInfo *processInfo, struct HksBlob *saProcessName)
+static int32_t HksGetSaProcessName(const struct HksProcessInfo *processInfo, struct HksBlob *saProcessName)
 {
     HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
     HKS_IF_NULL_LOGE_RETURN(saProcessName, HKS_ERROR_NULL_POINTER, "saProcessName is nullptr.")
@@ -256,4 +256,21 @@ int32_t HksGetSaProcessName(const struct HksProcessInfo *processInfo, struct Hks
     saProcessName->size = size;
     saProcessName->data = processName;
     return HKS_SUCCESS;
+}
+
+int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo)
+{
+    int32_t ret;
+    enum HksCallerType appidType = HksGetCallerType();
+    if (appidType == HKS_HAP_TYPE) {
+        ret = HksGetHapPkgName(processInfo, appInfo);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksGetHapPkgName failed")
+    } else if (appidType == HKS_SA_TYPE) {
+        ret = HksGetSaProcessName(processInfo, appInfo);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksGetSaProcessName failed")
+    } else {
+        HKS_LOG_E("invalid appidType!");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return ret;
 }

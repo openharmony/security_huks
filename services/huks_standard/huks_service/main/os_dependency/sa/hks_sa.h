@@ -65,6 +65,7 @@ private:
     ServiceRunningState runningState_;
     static std::mutex instanceLock;
     static sptr<HksService> instance;
+    int OnRemotePluginRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);
 };
 } // namespace Hks
 } // namespace Security

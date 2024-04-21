@@ -206,16 +206,8 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
             break;
         }
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-        enum HksCallerType appidType = HksGetCallerType();
-        if (appidType == HKS_HAP_TYPE) {
-            ret = HksGetHapPkgName(processInfo, &appInfo);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetHapPkgName failed")
-        } else if (appidType == HKS_SA_TYPE) {
-            ret = HksGetSaProcessName(processInfo, &appInfo);
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetSaProcessName failed")
-        } else {
-            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "invalid appidType!")
-        }
+        ret = GetCallerName(processInfo, &appInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetCallerName failed")
 #endif
 
         struct HksParam paramArr[] = {
@@ -226,7 +218,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
 #endif
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
             { .tag = HKS_TAG_OWNER_ID, .blob = appInfo },
-            { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = appidType },
+            { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = HksGetCallerType() },
 #endif
         };
 
