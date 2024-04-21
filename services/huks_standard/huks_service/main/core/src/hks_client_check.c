@@ -255,6 +255,7 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 #endif
 }
 
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
 static int32_t HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
 {
     struct HksParam *isAllowedWrap = NULL;
@@ -265,6 +266,7 @@ static int32_t HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
     }
     return isAllowedWrap->boolParam ? HKS_SUCCESS : HKS_ERROR_INVALID_ARGUMENT;
 }
+#endif
 
 int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
 {
