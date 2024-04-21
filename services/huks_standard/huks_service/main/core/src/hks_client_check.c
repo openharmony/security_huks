@@ -256,15 +256,14 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 }
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-static int32_t HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
+static bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
 {
     struct HksParam *isAllowedWrap = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ALLOWED_WRAP, &isAllowedWrap);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get is allowed wrap param failed");
-        return ret;
+    if (ret == HKS_SUCCESS) {
+        return isAllowedWrap->boolParam;
     }
-    return isAllowedWrap->boolParam ? HKS_SUCCESS : HKS_ERROR_INVALID_ARGUMENT;
+    return false;
 }
 #endif
 
@@ -274,12 +273,14 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
 
     // step 1. Judge whether the allowed wrap param is true.
-    int32_t ret = HksCheckIsAllowedWrap(paramSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "key with access control isn't allowed wrap!")
+    if (HksCheckIsAllowedWrap(paramSet)) {
+        HKS_LOG_E("key with access control isn't allowed wrap!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     // step 2. Judge whether the user auth key purpose is set.
     struct HksParam *userAuthKeyPurposeParam = NULL;
-    ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_PURPOSE, &userAuthKeyPurposeParam);
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_PURPOSE, &userAuthKeyPurposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not set key auth purpose: default need user auth access control!")
 
     // step 3. Judge whether the user auth key purpose is within the range of alogrithm key purpose.
