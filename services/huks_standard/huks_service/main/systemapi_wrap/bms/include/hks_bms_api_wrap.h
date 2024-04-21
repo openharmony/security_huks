@@ -28,6 +28,8 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
 
 int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo);
 
+int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo);
+
 enum HksCallerType HksGetCallerType(void);
 
 int32_t HksGetHapName(int32_t tokenId, int32_t userId, char *hapName, int32_t hapNameSize);

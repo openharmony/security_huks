@@ -44,27 +44,27 @@ struct HksProcessInfo {
  * @brief hks base ability interface
  */
 struct HksBasicInterface {
-    int32_t (*HksManageStoreKeyBlob)(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    int32_t (*hksManageStoreKeyBlob)(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
         const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, uint32_t storageType);
-    int32_t (*HksManageStoreDeleteKeyBlob)(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    int32_t (*hksManageStoreDeleteKeyBlob)(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
         const struct HksBlob *keyAlias, uint32_t storageType);
-    int32_t (*HksManageStoreIsKeyBlobExist)(const struct HksProcessInfo *processInfo,
+    int32_t (*hksManageStoreIsKeyBlobExist)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, const struct HksBlob *keyAlias, uint32_t storageType);
-    int32_t (*HksManageStoreGetKeyBlob)(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    int32_t (*hksManageStoreGetKeyBlob)(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
         const struct HksBlob *keyAlias, struct HksBlob *keyBlob, uint32_t storageType);
-    int32_t (*HksManageStoreGetKeyBlobSize)(const struct HksProcessInfo *processInfo,
+    int32_t (*hksManageStoreGetKeyBlobSize)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, const struct HksBlob *keyAlias,
         uint32_t *keyBlobSize, uint32_t storageType);
-    int32_t (*HksManageGetKeyCountByProcessName)(const struct HksProcessInfo *processInfo,
+    int32_t (*hksManageGetKeyCountByProcessName)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, uint32_t *fileCount);
 
-    int32_t (*HksGetProcessInfoForIPC)(const uint8_t *context, struct HksProcessInfo *processInfo);
+    int32_t (*hksGetProcessInfoForIPC)(const uint8_t *context, struct HksProcessInfo *processInfo);
 
-    int32_t (*AppendStorageParamsForGen)(const struct HksProcessInfo *processInfo,
+    int32_t (*appendStorageParamsForGen)(const struct HksProcessInfo *processInfo,
         const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
-    int32_t (*AppendStorageParamsForUse)(const struct HksParamSet *paramSet,
+    int32_t (*appendStorageParamsForUse)(const struct HksParamSet *paramSet,
         const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet);
-    int32_t (*AppendStorageParamsForQuery)(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
+    int32_t (*appendStorageParamsForQuery)(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet);
 };
 
 /**
