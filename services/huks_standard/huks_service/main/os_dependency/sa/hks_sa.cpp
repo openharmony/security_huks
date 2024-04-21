@@ -323,8 +323,19 @@ static int32_t ProcessAttestOrNormalMessage(
     }
 }
 
-int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
-    MessageParcel &reply, MessageOption &option)
+int HksService::OnRemotePluginRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int ret = HksCreatePluginProxy();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("create plugin proxy failed, ret = %" LOG_PUBLIC "d", ret);
+    }
+    if (HksGetPluginProxy() == nullptr) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    return HksGetPluginProxy()->HksPluginOnRemoteRequest(code, &data, &reply, &option);
+}
+
+int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HksInitMemPolicy();
     // this is the temporary version which comments the descriptor check
@@ -341,14 +352,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
-        int ret = HksCreatePluginProxy();
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_I("create plugin proxy failed, ret = %" LOG_PUBLIC "d", ret);
-        }
-        if (HksGetPluginProxy() == nullptr) {
-            return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-        }
-        return HksGetPluginProxy()->HksPluginOnRemoteRequest(code, &data, &reply, &option);
+        return OnRemotePluginRequest(code, data, reply, option);
     }
 
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());

@@ -189,6 +189,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
     int32_t ret;
     (void)operation;
     struct HksParamSet *newParamSet = NULL;
+    struct HksBlob appInfo = { 0, NULL };
 
     do {
         if (paramSet != NULL) {
@@ -204,12 +205,20 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
             ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = GetCallerName(processInfo, &appInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetCallerName failed")
+#endif
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
             { .tag = HKS_TAG_USER_ID, .uint32Param = processInfo->userIdInt },
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
             { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
+#endif
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+            { .tag = HKS_TAG_OWNER_ID, .blob = appInfo },
+            { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = HksGetCallerType() },
 #endif
         };
 
@@ -227,6 +236,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
     } while (0);
 
     HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(appInfo);
     return ret;
 }
 
@@ -645,26 +655,7 @@ int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo
 int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
-    const struct HksParamSet *inParamSet = paramSet;
-    struct HksParamSet *newParamSet = NULL;
-    int32_t ret;
-
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-    ret = AddAppInfoToParamSet(processInfo, paramSet, &newParamSet, HKS_TAG_OWNER_ID, HKS_TAG_OWNER_TYPE);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret);
-        HksFreeParamSet(&newParamSet);
-        return ret;
-    }
-    inParamSet = newParamSet;
-#endif
-
-    ret = AppendProcessInfoAndDefaultStrategy(inParamSet, processInfo, NULL, outParamSet);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("AppendProcessInfoAndDefaultStrategy failed, ret = %" LOG_PUBLIC "d.", ret);
-    }
-    HksFreeParamSet(&newParamSet);
-    return ret;
+    return AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, outParamSet);
 }
 #endif
 
@@ -1462,7 +1453,7 @@ int32_t HksServiceRefreshKeyInfo(const struct HksBlob *processName)
 
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, struct HksParamSet *paramSet,
-    struct HksParamSet **outParamSet, uint32_t idTag, uint32_t typeTag)
+    struct HksParamSet **outParamSet)
 {
     int32_t ret;
     struct HksBlob appInfo = {0, NULL};
@@ -1486,8 +1477,8 @@ static int32_t AddAppInfoToParamSet(const struct HksProcessInfo *processInfo, st
         ret = CheckBlob(&appInfo);
         if (ret == HKS_SUCCESS) {
             struct HksParam params[] = {
-                {.tag = idTag, .blob = appInfo},
-                {.tag = typeTag, .uint32Param = appidType}
+                {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID, .blob = appInfo},
+                {.tag = HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE, .uint32Param = appidType}
             };
             ret = HksAddParams(newParamSet, params, sizeof(params) / sizeof(params[0]));
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add appInfo failed")
@@ -1526,8 +1517,7 @@ int32_t HksServiceAttestKey(const struct HksProcessInfo *processInfo, const stru
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &processInfoParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetKeyAndNewParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = AddAppInfoToParamSet(processInfo, processInfoParamSet, &newParamSet,
-            HKS_TAG_ATTESTATION_APPLICATION_ID, HKS_TAG_ATTESTATION_APPLICATION_ID_TYPE);
+        ret = AddAppInfoToParamSet(processInfo, processInfoParamSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddAppInfoToParamSet failed, ret = %" LOG_PUBLIC "d.", ret)
 #else
         ret = GetKeyAndNewParamSet(processInfo, keyAlias, paramSet, &keyFromFile, &newParamSet);
@@ -1724,7 +1714,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     bool isNeedStorage = false;
     uint32_t outSize = outData->size;
     int32_t ret = HksCheckKeyNeedStored(paramSet, &isNeedStorage);
-    if (ret == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS && isNeedStorage) {
         outSize = MAX_KEY_SIZE;
     }
     struct HksBlob output = { outSize, NULL };
