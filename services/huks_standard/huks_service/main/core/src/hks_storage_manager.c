@@ -148,8 +148,6 @@ static int32_t GetStorageTypePath(uint32_t storageType, struct HksStoreMaterial 
         default:
             return HKS_ERROR_BAD_STATE;
     }
-
-    return HKS_SUCCESS;
 }
 
 static bool GetIsPlainPath(uint32_t storageLevel)
