@@ -37,6 +37,7 @@ struct HksProcessInfo {
     struct HksBlob userId;
     struct HksBlob processName;
     int32_t userIdInt;
+    uint32_t uidInt;
     uint64_t accessTokenId;
 };
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,26 +13,28 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_KEY_TEST_H
-#define HKS_UPGRADE_KEY_TEST_H
+#ifndef HKS_AT_API_WRAP_H
+#define HKS_AT_API_WRAP_H
 
-namespace Unittest::HksUpgradeKeyTest {
-int HksUpgradeKeyTest001(void);
+#include "hks_type_inner.h"
 
-int HksUpgradeKeyTest002(void);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-int HksUpgradeKeyTest003(void);
+enum HksAtType {
+    HKS_TOKEN_HAP,
+    HKS_TOKEN_NATIVE,
+    HKS_TOKEN_SHELL
+};
 
-int HksUpgradeKeyTest004(void);
+int32_t HksGetAtType(uint64_t accessTokenId, enum HksAtType *atType);
 
-int HksUpgradeKeyTest005(void);
+#define HAP_NAME_LEN_MAX 128
+int32_t HksGetHapNameFromAccessToken(int32_t tokenId, char *hapName, int32_t hapNameSize);
 
-int HksUpgradeKeyTest006(void);
-
-int HksUpgradeKeyTest007(void);
-
-int HksUpgradeKeyTest008(void);
-
-int HksUpgradeKeyTest009(void);
+#ifdef __cplusplus
 }
 #endif
+
+#endif // HKS_AT_API_WRAP_H

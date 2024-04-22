@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "hks_upgrade_key_test.h"
-
 #include <gtest/gtest.h>
 
 #include "file_ex.h"

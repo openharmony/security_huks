@@ -16,6 +16,8 @@
 #ifndef HKS_TEMPLATE_H
 #define HKS_TEMPLATE_H
 
+#include "hks_log.h"
+
 #undef HKS_NULL_POINTER
 
 #ifdef __cplusplus

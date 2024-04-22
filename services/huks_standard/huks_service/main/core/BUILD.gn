@@ -45,8 +45,10 @@ if (os_level == "standard") {
       "src/hks_storage_utils.c",
     ]
 
+    defines = [ "HKS_ENABLE_CLEAN_FILE" ]
+
     if (huks_security_level == "software") {
-      defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
+      defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]
     }
 
     if (huks_security_level == "trusted_environment") {
@@ -81,7 +83,6 @@ if (os_level == "standard") {
     } else {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/useridm:libhuks_service_systemapi_wrap_static" ]
     }
-    cflags = [ "-DHKS_ENABLE_CLEAN_FILE" ]
 
     complete_static_lib = true
 
@@ -129,7 +130,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
     ]
-    defines = []
+    defines = [ "HKS_ENABLE_CLEAN_FILE" ]
 
     sources = [
       "src/hks_client_check.c",
@@ -178,8 +179,6 @@ if (os_level == "standard") {
         cflags += [ "-D_DEFAULT_SOURCE" ]
       }
     }
-
-    cflags += [ "-DHKS_ENABLE_CLEAN_FILE" ]
 
     deps = [
       "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_small_static",

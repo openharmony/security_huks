@@ -1082,13 +1082,6 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
         HKS_LOG_E("service delete main key failed, ret = %" LOG_PUBLIC "d", ret);
     }
 
-#ifdef HKS_SUPPORT_API_ATTEST_KEY
-    int32_t deleteCertRet = HksManageStoreDeleteKeyBlob(processInfo, newParamSet, keyAlias, HKS_STORAGE_TYPE_CERTCHAIN);
-    if ((deleteCertRet != HKS_SUCCESS) && (deleteCertRet != HKS_ERROR_NOT_EXIST)) {
-        HKS_LOG_E("service delete cert chain failed, ret = %" LOG_PUBLIC "d", ret);
-        ret = deleteCertRet;
-    }
-#endif
 #ifdef L2_STANDARD
     HksFreeParamSet(&newParamSet);
 #endif

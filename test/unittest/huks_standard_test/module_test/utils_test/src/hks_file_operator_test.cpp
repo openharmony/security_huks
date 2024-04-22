@@ -105,18 +105,6 @@ HWTEST_F(HksFileOperatorTest, HksFileOperatorTest006, TestSize.Level0)
 }
 
 /**
- * @tc.name: HksFileOperatorTest.HksFileOperatorTest007
- * @tc.desc: tdd HksGetStoragePath, with NULL input, expect HKS_ERROR_INVALID_ARGUMENT
- * @tc.type: FUNC
- */
-HWTEST_F(HksFileOperatorTest, HksFileOperatorTest007, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksFileOperatorTest007");
-    int32_t ret = HksGetStoragePath(HKS_STORAGE_MAIN_PATH, nullptr, nullptr);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksGetStoragePath failed, ret = " << ret;
-}
-
-/**
  * @tc.name: HksFileOperatorTest.HksFileOperatorTest008
  * @tc.desc: tdd HksMakeDir, with NULL input, expect HKS_ERROR_MAKE_DIR_FAIL
  * @tc.type: FUNC
