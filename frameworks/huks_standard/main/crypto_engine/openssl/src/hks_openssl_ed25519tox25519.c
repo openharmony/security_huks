@@ -351,17 +351,27 @@ int32_t ConvertPubkeyX25519FromED25519(const struct HksBlob *keyIn, struct HksBl
     BN_CTX *ctx = BN_CTX_new();
     HKS_IF_NULL_RETURN(ctx, HKS_ERROR_CRYPTO_ENGINE_ERROR)
 
+    int32_t ret = 0;
     struct Curve25519Var var = { NULL, NULL, NULL };
-    int32_t ret = Curve25519LocalVar(&var);
-    if (ret != HKS_SUCCESS) {
-        BN_CTX_free(ctx);
-        return ret;
-    }
     BIGNUM *numberOne = BN_new();
-    ret = BnOperationOfPubKeyConversion(keyIn, &outPubKey, &var, numberOne, ctx);
+    do {
+        if (numberOne == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        ret = Curve25519LocalVar(&var);
+        if (ret != HKS_SUCCESS) {
+            break;
+        }
+        ret = BnOperationOfPubKeyConversion(keyIn, &outPubKey, &var, numberOne, ctx);
+    } while (0);
 
-    BN_CTX_free(ctx);
-    BN_free(numberOne);
+    if (ctx != NULL) {
+        BN_CTX_free(ctx);
+    }
+    if (numberOne != NULL) {
+        BN_free(numberOne);
+    }
     FreeLocalBigVar(&var);
     return ret;
 }

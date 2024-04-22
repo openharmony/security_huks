@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,25 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef HKS_BMS_API_WRAP_H
-#define HKS_BMS_API_WRAP_H
+#ifndef HKS_HKDF_DERIVE_X25519_PART2_TEST_H
+#define HKS_HKDF_DERIVE_X25519_PART2_TEST_H
+namespace Unittest::HkdfDerive {
+int HksHKDFX25519Derive031(void);
 
-#include "hks_type_inner.h"
+int HksHKDFX25519Derive032(void);
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+int HksHKDFX25519Derive033(void);
 
-int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *hapInfo);
-
-int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo);
-
-int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo);
-
-enum HksCallerType HksGetCallerType(void);
-
-#ifdef __cplusplus
+int HksHKDFX25519Derive034(void);
 }
-#endif
-
-#endif // HKS_BMS_API_WRAP_H
+#endif // HKS_HKDF_DERIVE_X25519_PART2_TEST_H

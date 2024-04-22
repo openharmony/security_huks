@@ -126,7 +126,7 @@ static int32_t GetUidPath(bool isPlain, const struct HksBlob *processName,
     return ret;
 }
 
-static int32_t GetStorageTypePath(enum HksStorageType storageType, struct HksStoreMaterial *outMaterial)
+static int32_t GetStorageTypePath(uint32_t storageType, struct HksStoreMaterial *outMaterial)
 {
     switch (storageType) {
         case HKS_STORAGE_TYPE_KEY:
@@ -172,7 +172,7 @@ static bool GetIsPlainPath(uint32_t storageLevel)
     return false;
 }
 
-static int32_t GetPathType(const struct HksProcessInfo *processInfo, enum HksStorageType storageType,
+static int32_t GetPathType(const struct HksProcessInfo *processInfo, uint32_t storageType,
     int32_t storageLevel, struct HksStoreMaterial *outMaterial)
 {
     (void)processInfo;
@@ -221,7 +221,7 @@ static void FreeStorageMaterial(struct HksStoreMaterial *material)
 }
 
 static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
-    const struct HksParamSet *paramSet, const struct HksBlob *keyAlias, enum HksStorageType storageType,
+    const struct HksParamSet *paramSet, const struct HksBlob *keyAlias, uint32_t storageType,
     struct HksStoreMaterial *outMaterial)
 {
     (void)paramSet;
@@ -276,7 +276,7 @@ static int32_t HksConstructStoreFileInfo(const struct HksProcessInfo *processInf
 }
 
 int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, const struct HksBlob *keyBlob, uint32_t storageType)
 {
     (void)processInfo;
     (void)paramSet;
@@ -304,7 +304,7 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
 }
 
 int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, uint32_t storageType)
 {
     (void)processInfo;
     (void)paramSet;
@@ -332,7 +332,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 }
 
 int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, uint32_t storageType)
 {
     (void)processInfo;
     (void)paramSet;
@@ -360,7 +360,7 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 }
 
 int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, struct HksBlob *keyBlob, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, struct HksBlob *keyBlob, uint32_t storageType)
 {
     (void)processInfo;
     (void)paramSet;
@@ -388,7 +388,7 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
 }
 
 int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
-    const struct HksBlob *keyAlias, uint32_t *keyBlobSize, enum HksStorageType storageType)
+    const struct HksBlob *keyAlias, uint32_t *keyBlobSize, uint32_t storageType)
 {
     (void)processInfo;
     (void)paramSet;

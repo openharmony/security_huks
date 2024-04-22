@@ -56,12 +56,9 @@ int32_t SensitivePermissionCheck(const char *permission)
     }
 }
 
-int32_t SystemApiPermissionCheck(int callerUserId)
+namespace {
+static int32_t CheckTokenType(void)
 {
-    if (callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND) {
-        HKS_LOG_E("invalid callerUserId %" LOG_PUBLIC "d", callerUserId);
-        return HKS_ERROR_NO_PERMISSION;
-    }
     auto accessTokenIDEx = IPCSkeleton::GetCallingFullTokenID();
     auto tokenType = OHOS::Security::AccessToken::AccessTokenKit::GetTokenTypeFlag(
         static_cast<OHOS::Security::AccessToken::AccessTokenID>(accessTokenIDEx));
@@ -81,6 +78,18 @@ int32_t SystemApiPermissionCheck(int callerUserId)
             HKS_LOG_E("unknown tokenid, accessTokenIDEx %" LOG_PUBLIC PRIu64, accessTokenIDEx);
             return HKS_ERROR_INVALID_ACCESS_TYPE;
     }
+}
+}
+
+int32_t SystemApiPermissionCheck(int callerUserId)
+{
+    int32_t ret = CheckTokenType();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "CheckTokenType fail %" LOG_PUBLIC "d", ret)
+    if (callerUserId < 0 || callerUserId >= HKS_ROOT_USER_UPPERBOUND) {
+        HKS_LOG_E("invalid callerUserId %" LOG_PUBLIC "d", callerUserId);
+        return HKS_ERROR_NO_PERMISSION;
+    }
+    return HKS_SUCCESS;
 }
 
 int32_t HksCheckAcrossAccountsPermission(const struct HksParamSet *paramSet, int32_t callerUserId)

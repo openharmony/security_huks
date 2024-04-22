@@ -24,6 +24,7 @@
 
 #include "hks_type.h"
 #include "securec.h"
+#include "hks_plugin_def.h"
 
 #define HANDLE_SIZE              8
 #define DEFAULT_AUTH_TIMEOUT     5
@@ -85,14 +86,6 @@ enum HksInnerTag {
 
 #define HKS_MAX_RETRY_TIME 30
 #define HKS_SLEEP_TIME_FOR_RETRY 300000
-
-struct HksProcessInfo {
-    struct HksBlob userId;
-    struct HksBlob processName;
-    int32_t userIdInt;
-    uint32_t uidInt;
-    uint64_t accessTokenId;
-};
 
 struct HksParamOut {
     uint32_t tag;

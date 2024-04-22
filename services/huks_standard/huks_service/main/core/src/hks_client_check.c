@@ -255,17 +255,35 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 #endif
 }
 
+#ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
+static bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
+{
+    struct HksParam *isAllowedWrap = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ALLOWED_WRAP, &isAllowedWrap);
+    if (ret == HKS_SUCCESS) {
+        return isAllowedWrap->boolParam;
+    }
+    return false;
+}
+#endif
+
 int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
 {
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
 
-    // step 1. Judge whether the user auth key purpose is set.
+    // step 1. Judge whether the allowed wrap param is true.
+    if (HksCheckIsAllowedWrap(paramSet)) {
+        HKS_LOG_E("key with access control isn't allowed wrap!");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    // step 2. Judge whether the user auth key purpose is set.
     struct HksParam *userAuthKeyPurposeParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_KEY_AUTH_PURPOSE, &userAuthKeyPurposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_SUCCESS, "not set key auth purpose: default need user auth access control!")
 
-    // step 2. Judge whether the user auth key purpose is within the range of alogrithm key purpose.
+    // step 3. Judge whether the user auth key purpose is within the range of alogrithm key purpose.
     struct HksParam *keyPurposeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_PURPOSE, &keyPurposeParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get key purpose param failed!")
@@ -277,7 +295,7 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
         return HKS_ERROR_INVALID_PURPOSE;
     }
 
-    // step 3. Judge the validify of symmetric and asymmetric algorithm settings for purpose.
+    // step 4. Judge the validify of symmetric and asymmetric algorithm settings for purpose.
     ret = HksCheckUserAuthKeyInfoValidity(paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckUserAuthKeyInfoValidity failed!")
 

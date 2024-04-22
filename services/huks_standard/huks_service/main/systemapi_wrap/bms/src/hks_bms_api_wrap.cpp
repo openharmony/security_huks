@@ -141,6 +141,35 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     return HKS_SUCCESS;
 }
 
+static int32_t HksGetHapPkgName(const struct HksProcessInfo *processInfo, struct HksBlob *hapPkgName)
+{
+    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
+    HKS_IF_NULL_LOGE_RETURN(hapPkgName, HKS_ERROR_NULL_POINTER, "hapPkgName is nullptr.")
+
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    if (AccessTokenKit::GetTokenType(callingTokenId) != ATokenTypeEnum::TOKEN_HAP) {
+        HKS_LOG_E("caller is not from hap, not support to get hap info.");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    HapTokenInfo hapTokenInfo;
+    int32_t callingResult = AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
+    if (callingResult != HKS_SUCCESS) {
+        HKS_LOG_E("Get hap info failed from access token kit.");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    uint32_t size = strlen(hapTokenInfo.bundleName.c_str());
+    uint8_t *pkgName = (uint8_t *)HksMalloc(size);
+    HKS_IF_NULL_LOGE_RETURN(pkgName, HKS_ERROR_MALLOC_FAIL, "malloc for pkgName failed.")
+
+    (void)memcpy_s(pkgName, size, hapTokenInfo.bundleName.c_str(), size);
+
+    hapPkgName->size = size;
+    hapPkgName->data = pkgName;
+    return HKS_SUCCESS;
+}
+
 int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *saInfo)
 {
     HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
@@ -168,4 +197,49 @@ int32_t HksGetSaInfo(const struct HksProcessInfo *processInfo, struct HksBlob *s
     }
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConvertSaInfoToJson failed.")
     return HKS_SUCCESS;
+}
+
+static int32_t HksGetSaProcessName(const struct HksProcessInfo *processInfo, struct HksBlob *saProcessName)
+{
+    HKS_IF_NULL_LOGE_RETURN(processInfo, HKS_ERROR_NULL_POINTER, "processInfo is nullptr.")
+    HKS_IF_NULL_LOGE_RETURN(saProcessName, HKS_ERROR_NULL_POINTER, "saProcessName is nullptr.")
+
+    auto callingTokenId = IPCSkeleton::GetCallingTokenID();
+    if (AccessTokenKit::GetTokenType(callingTokenId) == ATokenTypeEnum::TOKEN_HAP) {
+        HKS_LOG_E("Error caller Type, cannot get SaInfo");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    NativeTokenInfo saTokenInfo;
+    int32_t ret = AccessTokenKit::GetNativeTokenInfo(callingTokenId, saTokenInfo);
+    if (ret != AccessTokenKitRet::RET_SUCCESS) {
+        HKS_LOG_E("Get sa info failed from access token kit.");
+        return HKS_ERROR_BAD_STATE;
+    }
+
+    uint32_t size = strlen(saTokenInfo.processName.c_str());
+    uint8_t *processName = (uint8_t *)HksMalloc(size);
+    HKS_IF_NULL_LOGE_RETURN(processName, HKS_ERROR_MALLOC_FAIL, "malloc for processName failed.")
+
+    (void)memcpy_s(processName, size, saTokenInfo.processName.c_str(), size);
+
+    saProcessName->size = size;
+    saProcessName->data = processName;
+    return HKS_SUCCESS;
+}
+
+int32_t GetCallerName(const struct HksProcessInfo *processInfo, struct HksBlob *appInfo)
+{
+    int32_t ret;
+    enum HksCallerType appidType = HksGetCallerType();
+    if (appidType == HKS_HAP_TYPE) {
+        ret = HksGetHapPkgName(processInfo, appInfo);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksGetHapPkgName failed")
+    } else if (appidType == HKS_SA_TYPE) {
+        ret = HksGetSaProcessName(processInfo, appInfo);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksGetSaProcessName failed")
+    } else {
+        HKS_LOG_E("invalid appidType!");
+        return HKS_ERROR_BAD_STATE;
+    }
+    return ret;
 }

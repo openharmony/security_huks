@@ -43,7 +43,7 @@ using DeleteKeyAsyncContext = DeleteKeyAsyncContextT *;
 
 static DeleteKeyAsyncContext CreateDeleteKeyAsyncContext()
 {
-    DeleteKeyAsyncContext context = (DeleteKeyAsyncContext)HksMalloc(sizeof(DeleteKeyAsyncContextT));
+    DeleteKeyAsyncContext context = static_cast<DeleteKeyAsyncContext>(HksMalloc(sizeof(DeleteKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(DeleteKeyAsyncContextT), 0, sizeof(DeleteKeyAsyncContextT));
     }

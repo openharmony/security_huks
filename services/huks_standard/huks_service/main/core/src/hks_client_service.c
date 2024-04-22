@@ -35,6 +35,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_permission_check.h"
+#include "hks_plugin_adapter.h"
 #include "hks_report.h"
 #include "hks_session_manager.h"
 #include "hks_storage.h"
@@ -144,7 +145,7 @@ static int32_t AppendStorageLevelAndSpecificUserIdToParamSet(const struct HksOpe
     return HKS_SUCCESS;
 }
 
-static int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -188,6 +189,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
     int32_t ret;
     (void)operation;
     struct HksParamSet *newParamSet = NULL;
+    struct HksBlob appInfo = { 0, NULL };
 
     do {
         if (paramSet != NULL) {
@@ -203,12 +205,20 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
             ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = GetCallerName(processInfo, &appInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetCallerName failed")
+#endif
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
             { .tag = HKS_TAG_USER_ID, .uint32Param = processInfo->userIdInt },
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
             { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
+#endif
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+            { .tag = HKS_TAG_OWNER_ID, .blob = appInfo },
+            { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = HksGetCallerType() },
 #endif
         };
 
@@ -226,7 +236,14 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
     } while (0);
 
     HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(appInfo);
     return ret;
+}
+
+int32_t AppendNewInfoForUseKeyInService(const struct HksParamSet *paramSet,
+    const struct HksProcessInfo *processInfo, struct HksParamSet **outParamSet)
+{
+    return AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, outParamSet);
 }
 
 #ifndef _CUT_AUTHENTICATE_
@@ -585,7 +602,7 @@ static int32_t CheckIfUserIamSupportCurType(int32_t userId, uint32_t userAuthTyp
     return HKS_SUCCESS;
 }
 
-static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
+int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     uint32_t userAuthType = 0;
@@ -635,7 +652,7 @@ static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *proc
     return ret;
 }
 #else
-static int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
+int32_t AppendNewInfoForGenKeyInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     return AppendProcessInfoAndDefaultStrategy(paramSet, processInfo, NULL, outParamSet);
@@ -1379,6 +1396,8 @@ int32_t HksServiceInitialize(void)
         ret = HuksAccessModuleInit();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks core service initialize failed! ret = %" LOG_PUBLIC "d", ret)
 
+        HksInitPluginProxyMutex();
+
 #ifdef _STORAGE_LITE_
         ret = HksLoadFileToBuffer();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "load file to buffer failed, ret = %" LOG_PUBLIC "d", ret)
@@ -1688,7 +1707,7 @@ int32_t HksServiceFinish(const struct HksBlob *handle, const struct HksProcessIn
     bool isNeedStorage = false;
     uint32_t outSize = outData->size;
     int32_t ret = HksCheckKeyNeedStored(paramSet, &isNeedStorage);
-    if (ret == HKS_SUCCESS) {
+    if (ret == HKS_SUCCESS && isNeedStorage) {
         outSize = MAX_KEY_SIZE;
     }
     struct HksBlob output = { outSize, NULL };

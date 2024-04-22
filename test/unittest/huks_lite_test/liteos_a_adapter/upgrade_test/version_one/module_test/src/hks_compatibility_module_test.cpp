@@ -103,8 +103,8 @@ static struct HksParam g_decryptParams001[] = {
 #define OLD_PROCESS_NAME "hks_client"
 #define USER_ID "0"
 static const struct HksProcessInfo OLD_PROCESS_INFO = {
-    { strlen(USER_ID), (uint8_t *)USER_ID },
-    { strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
+    { (uint32_t)strlen(USER_ID), (uint8_t *)USER_ID },
+    { (uint32_t)strlen(OLD_PROCESS_NAME), (uint8_t *)OLD_PROCESS_NAME },
     0,
     0
 };
@@ -163,7 +163,7 @@ static int32_t TestDoServiceEncryptWithOtherUid(const struct HksBlob *keyAlias, 
     EXPECT_TRUE(processName != nullptr);
     (void)memcpy_s(processName, sizeof(uid), &uid, sizeof(uid));
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
         0,
         0,
@@ -193,7 +193,7 @@ static int32_t TestDoServiceDecryptWithOtherUid(const struct HksBlob *keyAlias, 
     EXPECT_TRUE(processName != nullptr);
     (void)memcpy_s(processName, sizeof(uid), &uid, sizeof(uid));
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
         0,
         0,
@@ -213,7 +213,7 @@ static int32_t TestDoServiceDecryptWithOtherUid(const struct HksBlob *keyAlias, 
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest001");
-    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    struct HksBlob keyAlias = { .size = (uint32_t)strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
@@ -228,8 +228,8 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
     const char *userId = "0";
     const char *processName1 = "123456";
     struct HksProcessInfo processInfo1 = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName1), (uint8_t *)processName1 },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(processName1), (uint8_t *)processName1 },
         0,
         0,
         0
@@ -243,7 +243,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
     ASSERT_TRUE(processName2 != nullptr);
     (void)memcpy_s(processName2, sizeof(uid), &uid, sizeof(uid));
     struct HksProcessInfo processInfo2 = {
-        { strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName2 },
         0,
         0,
@@ -264,7 +264,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest001, TestSize.Lev
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest002");
-    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    struct HksBlob keyAlias = { .size = (uint32_t)strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
@@ -302,7 +302,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest002, TestSize.Lev
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest003");
-    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    struct HksBlob keyAlias = { .size = (uint32_t)strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
     (void)HksDeleteKey(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
@@ -314,8 +314,8 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest003, TestSize.Lev
     const char *userId = "0";
     const char *processName = "123456";
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
-        { strlen(processName), (uint8_t *)processName },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(processName), (uint8_t *)processName },
         0,
         0
     };
@@ -376,7 +376,7 @@ static int32_t BuildKeyInfoList(struct HksKeyInfo **outKeyInfoList, uint32_t lis
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest004");
-    struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    struct HksBlob keyAlias = { .size = (uint32_t)strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
 
     int32_t ret = TestGenerateOldkey(&keyAlias, g_genParams001, sizeof(g_genParams001) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
@@ -389,7 +389,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
     ASSERT_TRUE(processName != nullptr);
     (void)memcpy_s(processName, sizeof(uid), &uid, sizeof(uid));
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
         0,
         0,
@@ -416,10 +416,10 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest004, TestSize.Lev
 HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityModuleTest005");
-    struct HksBlob keyAlias1 = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
+    struct HksBlob keyAlias1 = { .size = (uint32_t)strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
 
     const char *aliasName2 = "alias2_for_compatibily_test";
-    struct HksBlob keyAlias2 = { .size = strlen(aliasName2), .data = (uint8_t *)aliasName2};
+    struct HksBlob keyAlias2 = { .size = (uint32_t)strlen(aliasName2), .data = (uint8_t *)aliasName2};
 
     const char *userId = "0";
     uint32_t uid = 555;
@@ -427,7 +427,7 @@ HWTEST_F(HksCompatibilityModuleTest, HksCompatibilityModuleTest005, TestSize.Lev
     ASSERT_TRUE(processName != nullptr);
     (void)memcpy_s(processName, sizeof(uid), &uid, sizeof(uid));
     struct HksProcessInfo processInfo = {
-        { strlen(userId), (uint8_t *)userId },
+        { (uint32_t)strlen(userId), (uint8_t *)userId },
         { sizeof(uid), (uint8_t *)processName },
         0,
         0,
