@@ -293,7 +293,7 @@ static int32_t CheckRsaCtx(const mbedtls_rsa_context *rsaCtx)
 {
     uint32_t maxKeyByteLen = HKS_RSA_KEY_SIZE_4096 / HKS_BITS_PER_BYTE;
     if (rsaCtx->MBEDTLS_PRIVATE(len) > maxKeyByteLen) {
-        HKS_LOG_E("Invalid mbedtls rsa context's len! len = 0x%" LOG_PUBLIC "X", rsaCtx->MBEDTLS_PRIVATE(len));
+        HKS_LOG_E("Invalid mbedtls rsa context's len! len = 0x%" LOG_PUBLIC "zu", rsaCtx->MBEDTLS_PRIVATE(len));
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -370,7 +370,7 @@ static int32_t X509PublicKeyToEcc(mbedtls_ecp_keypair *pubKey, struct HksBlob *e
 
     if (mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)) > UINT32_MAX / HKS_BITS_PER_BYTE) {
         HKS_FREE(keyBuffer);
-        HKS_LOG_E("invalid param, the size is :%" LOG_PUBLIC "u", mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)));
+        HKS_LOG_E("invalid param, the size is :%" LOG_PUBLIC "zu", mbedtls_mpi_size(&(pubKey->MBEDTLS_PRIVATE(grp).P)));
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 

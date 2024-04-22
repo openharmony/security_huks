@@ -138,6 +138,9 @@ static uint32_t g_validTags[] = {
     HKS_TAG_ACCESS_TOKEN_ID,
     HKS_TAG_BUNDLE_NAME,
     HKS_TAG_IS_DEVICE_PASSWORD_SET,
+    HKS_TAG_ACCOUNT_ID,
+    HKS_TAG_OWNER_ID,
+    HKS_TAG_OWNER_TYPE,
 };
 
 HKS_API_EXPORT enum HksTagType GetTagType(enum HksTag tag)

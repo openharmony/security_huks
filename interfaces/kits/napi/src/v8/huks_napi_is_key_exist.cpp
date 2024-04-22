@@ -43,7 +43,7 @@ using IsKeyExistAsyncContext = IsKeyExistAsyncContextT *;
 
 static IsKeyExistAsyncContext CreateIsKeyExistAsyncContext()
 {
-    IsKeyExistAsyncContext context = (IsKeyExistAsyncContext)HksMalloc(sizeof(IsKeyExistAsyncContextT));
+    IsKeyExistAsyncContext context = static_cast<IsKeyExistAsyncContext>(HksMalloc(sizeof(IsKeyExistAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(IsKeyExistAsyncContextT), 0, sizeof(IsKeyExistAsyncContextT));
     }

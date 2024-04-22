@@ -500,7 +500,7 @@ int32_t HksAesDecryptForBatch(const struct HksBlob *keyAlias, struct HksParamSet
         struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
     struct HksBlob inData = {
-        g_inData.length(),
+        (uint32_t)g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 
@@ -571,7 +571,7 @@ int32_t HksAesCipherTestCaseGcm1(const struct HksBlob *keyAlias, struct HksParam
     struct HksParamSet *encryptParamSet, struct HksParamSet *decryptParamSet)
 {
     struct HksBlob inData = {
-        g_inData.length(),
+        (uint32_t)g_inData.length(),
         const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_inData.c_str()))
     };
 

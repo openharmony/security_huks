@@ -53,19 +53,19 @@ void HksX25519AgreeTest::TearDown()
 }
 
 static struct HksBlob g_keyAlias01001 = {
-    strlen("HksX25519AgreeKeyAliasTest001_1"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest001_1"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest001_1"
 };
 static struct HksBlob g_keyAlias02001 = {
-    strlen("HksX25519AgreeKeyAliasTest001_2"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest001_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest001_2"
 };
 static struct HksBlob g_keyAliasFinal1001 = {
-    strlen("HksX25519AgreeKeyAliasTest001_final"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest001_final"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest001_final"
 };
 static struct HksBlob g_keyAliasFinal2001 = {
-    strlen("HksX25519AgreeKeyAliasTest002_final"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest002_final"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_final"
 };
 
@@ -143,11 +143,11 @@ static struct HksParam g_agreeParams02Finish001[] = {
 };
 
 static struct HksBlob g_keyAlias01002 = {
-    strlen("HksX25519AgreeKeyAliasTest002_1"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest002_1"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_1"
 };
 static struct HksBlob g_keyAlias02002 = {
-    strlen("HksX25519AgreeKeyAliasTest002_2"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest002_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest002_2"
 };
 
@@ -201,11 +201,11 @@ static struct HksParam g_agreeParams02Finish002[] = {
 };
 
 static struct HksBlob g_keyAlias01003 = {
-    strlen("HksX25519AgreeKeyAliasTest003_1"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest003_1"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest003_1"
 };
 static struct HksBlob g_keyAlias02003 = {
-    strlen("HksX25519AgreeKeyAliasTest003_2"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest003_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest003_2"
 };
 static struct HksParam g_genParams003[] = {
@@ -246,11 +246,11 @@ static struct HksParam g_agreeParams02Init003[] = {
 };
 
 static struct HksBlob g_keyAlias01004 = {
-    strlen("HksX25519AgreeKeyAliasTest004_1"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest004_1"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest004_1"
 };
 static struct HksBlob g_keyAlias02004 = {
-    strlen("HksX25519AgreeKeyAliasTest004_2"),
+    (uint32_t)strlen("HksX25519AgreeKeyAliasTest004_2"),
     (uint8_t *)"HksX25519AgreeKeyAliasTest004_2"
 };
 
@@ -295,7 +295,7 @@ int32_t HksX25519AgreeFinish(const struct HksBlob *keyAlias, const struct HksBlo
     const struct HksParamSet *initParamSet, const struct HksParamSet *finishParamSet, struct HksBlob *outData)
 {
     struct HksBlob inData = {
-        g_inData.length(),
+        (uint32_t)g_inData.length(),
         (uint8_t *)g_inData.c_str()
     };
 

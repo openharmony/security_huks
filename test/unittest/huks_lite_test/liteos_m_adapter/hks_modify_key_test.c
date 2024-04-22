@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (C) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -122,9 +122,9 @@ enum HksStorageType {
 };
 
 extern int32_t HksStoreKeyBlob(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    enum HksStorageType storageType, const struct HksBlob *keyBlob);
+    uint32_t storageType, const struct HksBlob *keyBlob);
 int32_t __attribute__((weak)) HksStoreKeyBlob(const struct HksBlob *processName, const struct HksBlob *keyAlias,
-    enum HksStorageType storageType, const struct HksBlob *keyBlob)
+    uint32_t storageType, const struct HksBlob *keyBlob)
 {
     (void)processName;
     (void)keyAlias;

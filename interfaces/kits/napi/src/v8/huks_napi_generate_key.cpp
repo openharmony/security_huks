@@ -44,7 +44,7 @@ using GenerateKeyAsyncContext = GenerateKeyAsyncContextT *;
 
 static GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
 {
-    GenerateKeyAsyncContext context = (GenerateKeyAsyncContext)HksMalloc(sizeof(GenerateKeyAsyncContextT));
+    GenerateKeyAsyncContext context = static_cast<GenerateKeyAsyncContext>(HksMalloc(sizeof(GenerateKeyAsyncContextT)));
     if (context != nullptr) {
         (void)memset_s(context, sizeof(GenerateKeyAsyncContextT), 0, sizeof(GenerateKeyAsyncContextT));
     }

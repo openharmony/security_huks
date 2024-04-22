@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,8 +29,10 @@
 #include "hks_mem.h"
 #include "hks_message_handler.h"
 #include "hks_param.h"
+#include "hks_plugin_adapter.h"
 #include "hks_report.h"
 #include "hks_response.h"
+#include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
 #include "hks_type.h"
 #include "hks_util.h"
@@ -57,6 +59,7 @@ constexpr static int UID_TRANSFORM_DIVISOR = 200000;
 #include "hks_event_observer.h"
 #endif
 
+#include <array>
 #include <cinttypes>
 #include <filesystem>
 #include <string>
@@ -127,16 +130,17 @@ static int32_t ProcessMessage(uint32_t code, uint32_t outSize, const struct HksB
         }
     }
 
+    if (outSize > MAX_MALLOC_LEN) {
+        HKS_LOG_E("outSize is invalid, size:%" LOG_PUBLIC "u", outSize);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     size = sizeof(HKS_IPC_THREE_STAGE_HANDLER) / sizeof(HKS_IPC_THREE_STAGE_HANDLER[0]);
     for (uint32_t i = 0; i < size; ++i) {
         if (code == HKS_IPC_THREE_STAGE_HANDLER[i].msgId) {
             struct HksBlob outData = { 0, nullptr };
             if (outSize != 0) {
                 outData.size = outSize;
-                if (outData.size > MAX_MALLOC_LEN) {
-                    HKS_LOG_E("outData size is invalid, size:%" LOG_PUBLIC "u", outData.size);
-                    return HKS_ERROR_INVALID_ARGUMENT;
-                }
                 outData.data = static_cast<uint8_t *>(HksMalloc(outData.size));
                 HKS_IF_NULL_LOGE_RETURN(outData.data, HKS_ERROR_MALLOC_FAIL, "Malloc outData failed.")
             }
@@ -203,7 +207,42 @@ static void HksInitMemPolicy(void)
 #endif
 }
 
-static void ReportIfHapCallHuksBeforeUnlock(void)
+#ifdef SUPPORT_COMMON_EVENT
+static void AppendKeyAliasParamBase64IfExist(uint32_t code, const struct HksBlob &srcData, HksParamSet *ps)
+{
+    // srcData in the following codes starts with keyAlias
+    constexpr std::array validCodes = {
+        HKS_MSG_GEN_KEY,
+        HKS_MSG_IMPORT_KEY,
+        HKS_MSG_EXPORT_PUBLIC_KEY,
+        HKS_MSG_IMPORT_WRAPPED_KEY,
+        HKS_MSG_DELETE_KEY,
+        HKS_MSG_GET_KEY_PARAMSET,
+        HKS_MSG_KEY_EXIST,
+        HKS_MSG_SIGN,
+        HKS_MSG_VERIFY,
+        HKS_MSG_ENCRYPT,
+        HKS_MSG_DECRYPT,
+        HKS_MSG_MAC,
+        HKS_MSG_ATTEST_KEY,
+    };
+    if (std::find(validCodes.begin(), validCodes.end(), code) == validCodes.end()) {
+        HKS_LOG_W("cmd id %" LOG_PUBLIC "u no key alias", code);
+        return;
+    }
+    HksParam aliasParam { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = 0, .data = NULL} };
+    uint32_t offset = 0;
+    int32_t ret = GetBlobFromBuffer(&aliasParam.blob, &srcData, &offset);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get keyAlias failed %" LOG_PUBLIC "d", ret);
+        return;
+    }
+    ret = HksAddParams(ps, &aliasParam, 1);
+    HKS_IF_NOT_SUCC_LOGE(ret, "HapCallHuksBeforeUnlock HksAddParams alias fail %" LOG_PUBLIC "d", ret);
+}
+#endif
+
+static void ReportIfHapCallHuksBeforeUnlock(uint32_t code, const struct HksBlob &srcData)
 #ifdef SUPPORT_COMMON_EVENT
 {
     if (SystemEventObserver::GetUserUnlocked()) [[likely]] {
@@ -246,6 +285,7 @@ static void ReportIfHapCallHuksBeforeUnlock(void)
     do {
         ret = HksAddParams(ps, &hapNameParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HapCallHuksBeforeUnlock HksAddParams fail %" LOG_PUBLIC "d", ret);
+        AppendKeyAliasParamBase64IfExist(code, srcData, ps);
         ret = HksBuildParamSet(&ps);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HapCallHuksBeforeUnlock HksBuildParamSet fail %" LOG_PUBLIC "d", ret);
         HksProcessInfo processInfo { .userIdInt = userId };
@@ -260,7 +300,7 @@ static void ReportIfHapCallHuksBeforeUnlock(void)
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
 {
-    ReportIfHapCallHuksBeforeUnlock();
+    ReportIfHapCallHuksBeforeUnlock(code, srcData);
 
     // Since we have wrote a HksStub instance in client side, we can now read it if it is anonymous attestation.
     if (code == HKS_MSG_ATTEST_KEY) {
@@ -282,8 +322,19 @@ static int32_t ProcessAttestOrNormalMessage(
     }
 }
 
-int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
-    MessageParcel &reply, MessageOption &option)
+int HksService::OnRemotePluginRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    int ret = HksCreatePluginProxy();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_I("create plugin proxy failed, ret = %" LOG_PUBLIC "d", ret);
+    }
+    if (HksGetPluginProxy() == nullptr) {
+        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+    }
+    return HksGetPluginProxy()->HksPluginOnRemoteRequest(code, &data, &reply, &option);
+}
+
+int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HksInitMemPolicy();
     // this is the temporary version which comments the descriptor check
@@ -299,9 +350,8 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data,
     g_sessionId++;
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
-    // check that the code is valid
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
+        return OnRemotePluginRequest(code, data, reply, option);
     }
 
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
