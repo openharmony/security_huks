@@ -178,7 +178,7 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
             break;
         }
 
-        ret = MakeDirIfNotExist(destPath);
+        ret = HksMakeFullDir(destPath);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "makdir destPath failed, ret = %" LOG_PUBLIC "d.", ret)
 
         ret = HksStorageWriteFile(destPath, destFileName, 0, buffer, size);
@@ -200,15 +200,9 @@ static int32_t CopyKeyBlob(const struct HksStoreFileInfo *fileInfo,
 
     int32_t ret = HKS_SUCCESS;
     if (isMainFileExist != HKS_SUCCESS) {
-        ret = MakeDirIfNotExist(fileInfo->mainPath.processPath);
-        HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
         ret = CopyKeyBlobFromSrc(fileInfo->bakPath.path, fileInfo->bakPath.fileName,
             fileInfo->mainPath.path, fileInfo->mainPath.fileName);
     } else if (isBakFileExist != HKS_SUCCESS) {
-        ret = MakeDirIfNotExist(fileInfo->bakPath.processPath);
-        HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
         ret = CopyKeyBlobFromSrc(fileInfo->mainPath.path, fileInfo->mainPath.fileName,
             fileInfo->bakPath.path, fileInfo->bakPath.fileName);
     }
@@ -239,18 +233,6 @@ static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct
     }
     keyBlob->size = size;
     return HKS_SUCCESS;
-}
-
-static int32_t SaveKeyBlob(const char *processPath, const char *path, const char *fileName,
-    const struct HksBlob *keyBlob)
-{
-    int32_t ret = MakeDirIfNotExist(processPath);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "makedir processPath failed, ret = %" LOG_PUBLIC "d.", ret)
-
-    ret = MakeDirIfNotExist(path);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "makedir path failed, ret = %" LOG_PUBLIC "d.", ret)
-
-    return HksStorageWriteFile(path, fileName, 0, keyBlob->data, keyBlob->size);
 }
 
 static int32_t DeleteKeyBlob(const struct HksStoreFileInfo *fileInfo)
@@ -373,13 +355,14 @@ int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct Hk
         ret = RecordKeyOperation(KEY_OPERATION_SAVE, fileInfo->mainPath.path, fileInfo->mainPath.fileName);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
-        ret = SaveKeyBlob(fileInfo->mainPath.processPath, fileInfo->mainPath.path, fileInfo->mainPath.fileName,
-            keyBlob);
+        ret = HksStorageWriteFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName, 0,
+            keyBlob->data, keyBlob->size);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks save key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
 #ifdef SUPPORT_STORAGE_BACKUP
-        ret = SaveKeyBlob(fileInfo->bakPath.processPath, fileInfo->bakPath.path, fileInfo->bakPath.fileName, keyBlob);
-        HKS_IF_NOT_SUCC_LOGE(ret, "hks save bak key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        ret = HksStorageWriteFile(fileInfo->bakPath.path, fileInfo->bakPath.fileName, 0,
+            keyBlob->data, keyBlob->size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks save key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 #endif
     } while (0);
 
@@ -598,21 +581,17 @@ static int32_t DestroyType(const char *storePath, const char *typePath, uint32_t
 
 static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
 {
-    int32_t ret;
     char *rootPath = NULL;
     if (bakFlag == HKS_STORAGE_BAK_FLAG_TRUE) {
-        ret = GetStoreRootPath(HKS_STORAGE_BACKUP_PATH, &rootPath);
+        rootPath = HKS_KEY_STORE_BAK_PATH;
     } else {
-        ret = GetStoreRootPath(HKS_STORAGE_MAIN_PATH, &rootPath);
+        rootPath = HKS_KEY_STORE_PATH;
     }
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get root path failed")
 
     char *storePath = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_RETURN(storePath, HKS_ERROR_MALLOC_FAIL)
 
-    (void)memset_s(storePath, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
-
-    ret = GetPath(rootPath, processNameEncoded, storePath, HKS_MAX_FILE_NAME_LEN, bakFlag);
+    int32_t ret = GetPath(rootPath, processNameEncoded, storePath, HKS_MAX_FILE_NAME_LEN, bakFlag);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Get Path failed! ret = 0x%" LOG_PUBLIC "X", ret);
         HKS_FREE(storePath);
@@ -629,11 +608,6 @@ static int32_t StoreDestroy(const char *processNameEncoded, uint32_t bakFlag)
         HKS_LOG_I("Destroy key dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
     }
 
-    ret = DestroyType(storePath, HKS_KEY_STORE_CERTCHAIN_PATH, bakFlag);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("Destroy certchain dir failed! ret = 0x%" LOG_PUBLIC "X", ret); /* continue delete */
-    }
-
     HKS_FREE(storePath);
     return HKS_SUCCESS;
 }
@@ -642,8 +616,6 @@ int32_t HksStoreDestroy(const struct HksBlob *processName)
 {
     char *name = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_RETURN(name, HKS_ERROR_MALLOC_FAIL)
-
-    (void)memset_s(name, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
     do {
@@ -676,7 +648,6 @@ static int32_t DeleteServiceEceOrCeUserIdPath(const struct HksBlob *userId, cons
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
-    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
     do {
@@ -702,7 +673,6 @@ static int32_t DeleteServiceDeUserIdPath(const struct HksBlob *userId)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
-    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
     do {
@@ -728,7 +698,6 @@ static int32_t DeleteServiceEceOrCeUidPath(const struct HksProcessInfo *processI
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
-    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
     char *uidData = NULL;
@@ -739,7 +708,6 @@ static int32_t DeleteServiceEceOrCeUidPath(const struct HksProcessInfo *processI
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-        (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
         ret = ConstructPlainName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
@@ -767,7 +735,6 @@ static int32_t DeleteServiceDeUidPath(const struct HksProcessInfo *processInfo)
 {
     char *userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
     HKS_IF_NULL_LOGE_RETURN(userData, HKS_ERROR_MALLOC_FAIL, "malloc user data failed")
-    (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
     int32_t ret;
     char *uidData = NULL;
@@ -778,7 +745,6 @@ static int32_t DeleteServiceDeUidPath(const struct HksProcessInfo *processInfo)
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-        (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
         ret = ConstructPlainName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
@@ -811,13 +777,17 @@ void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId)
         userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
 
-        (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
+        // construct non-plain name for de path
         ret = ConstructName(userId, userData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
 
         char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-        ret = ConstructUserIdPath(userData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
-        HKS_IF_NOT_SUCC_BREAK(ret, "concatenate UserIdPath failed, ret = %" LOG_PUBLIC "d", ret)
+        int32_t offset = sprintf_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "%s/%s", HKS_KEY_STORE_PATH, userData);
+        if (offset < 0) {
+            HKS_LOG_E("concatenate UserIdPath failed.");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
 
         // ignore these results for ensure to clear data as most as possible
         ret = HksDeleteDir(userProcess);
@@ -844,27 +814,32 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
     do {
         userData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NULL_LOGE_BREAK(userData, "malloc user data failed")
-        (void)memset_s(userData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
-        if (!HksIsUserIdRoot(processInfo)) {
+        // construct non-plain name for de path, and skip user path for user 0
+        if (processInfo->userIdInt != 0) {
             ret = ConstructName(&processInfo->userId, userData, HKS_MAX_FILE_NAME_LEN);
             HKS_IF_NOT_SUCC_BREAK(ret, "construct user id name failed, ret = %" LOG_PUBLIC "d", ret)
         }
 
-        char *uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
+        uidData = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         if (uidData == NULL) {
             HKS_LOG_E("malloc user data failed");
             ret = HKS_ERROR_MALLOC_FAIL;
             break;
         }
-        (void)memset_s(uidData, HKS_MAX_FILE_NAME_LEN, 0, HKS_MAX_FILE_NAME_LEN);
 
         ret = ConstructName(&processInfo->processName, uidData, HKS_MAX_FILE_NAME_LEN);
         HKS_IF_NOT_SUCC_BREAK(ret, "construct uid name failed, ret = %" LOG_PUBLIC "d", ret)
 
         char userProcess[HKS_MAX_DIRENT_FILE_LEN] = "";
-        ret = ConstructUidPath(userData, uidData, userProcess, HKS_MAX_DIRENT_FILE_LEN);
-        HKS_IF_NOT_SUCC_BREAK(ret, "concatenate uidPath failed")
+        int32_t offset = sprintf_s(userProcess, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
+            HKS_KEY_STORE_PATH, userData, uidData);
+        if (offset < 0) {
+            HKS_LOG_E("concatenate uidPath failed.");
+            ret = HKS_ERROR_BUFFER_TOO_SMALL;
+            break;
+        }
+
         HKS_LOG_I("delete path : %" LOG_PUBLIC "s", userProcess);
 
         // ignore these results for ensure to clear data as most as possible

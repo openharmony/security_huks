@@ -118,7 +118,6 @@ int32_t BaseTestCipherProcess(const struct HksBlob *keyAlias, uint32_t index)
 
 enum HksStorageType {
     HKS_STORAGE_TYPE_KEY = 0,
-    HKS_STORAGE_TYPE_CERTCHAIN,
     HKS_STORAGE_TYPE_ROOT_KEY,
 };
 
