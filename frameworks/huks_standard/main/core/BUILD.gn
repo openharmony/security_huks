@@ -49,6 +49,7 @@ if (os_level == "standard") {
     }
     sources += [ "./src/hks_verifier.c" ]
     external_deps = [
+      "c_utils:utils",
       "hilog:libhilog",
       "openssl:libcrypto_shared",
     ]

@@ -40,8 +40,10 @@ ohos_static_library("libhuks_at_systemapi_wrap_static") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "samgr:samgr_proxy",
   ]
 
   complete_static_lib = true

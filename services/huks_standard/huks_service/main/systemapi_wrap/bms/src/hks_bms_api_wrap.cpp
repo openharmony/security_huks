@@ -25,7 +25,8 @@
 #include "iservice_registry.h"
 #include "system_ability_definition.h"
 #include "hap_token_info.h"
-#include "bundle_mgr_proxy.h"
+#include "bundle_mgr_client.h"
+#include "bundle_info.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
@@ -42,18 +43,6 @@
 
 using namespace OHOS;
 using namespace Security::AccessToken;
-
-static sptr<AppExecFwk::IBundleMgr> GetBundleMgrProxy()
-{
-    sptr<ISystemAbilityManager> systemAbilityManager =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    HKS_IF_NULL_LOGE_RETURN(systemAbilityManager, nullptr, "fail to get system ability mgr.")
-
-    sptr<IRemoteObject> remoteObject = systemAbilityManager->GetSystemAbility(BUNDLE_MGR_SERVICE_SYS_ABILITY_ID);
-    HKS_IF_NULL_LOGE_RETURN(remoteObject, nullptr,
-            "system ability %" LOG_PUBLIC "d is nullptr", BUNDLE_MGR_SERVICE_SYS_ABILITY_ID)
-    return iface_cast<AppExecFwk::IBundleMgr>(remoteObject);
-}
 
 static int32_t ConvertCallerInfoToJson(const std::string &idStr, const std::string &extendStr, HksBlob *outInfo,
     bool isHap)
@@ -122,12 +111,9 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
         return HKS_ERROR_BAD_STATE;
     }
 
-    sptr<AppExecFwk::IBundleMgr> bundleMgrProxy = GetBundleMgrProxy();
-    HKS_IF_NULL_LOGE_RETURN(bundleMgrProxy, HKS_ERROR_NULL_POINTER, "bundle mgr proxy is nullptr.")
-
     AppExecFwk::BundleInfo bundleInfo;
-    const std::string bundleNameStr = hapTokenInfo.bundleName;
-    bool isGetInfoSuccess = bundleMgrProxy->GetBundleInfo(bundleNameStr,
+    AppExecFwk::BundleMgrClient client;
+    bool isGetInfoSuccess = client.GetBundleInfo(hapTokenInfo.bundleName,
         AppExecFwk::BundleFlag::GET_BUNDLE_WITH_HASH_VALUE, bundleInfo, processInfo->userIdInt);
     if (!isGetInfoSuccess) {
         HKS_LOG_E("GetBundleInfo failed.");
@@ -135,7 +121,7 @@ int32_t HksGetHapInfo(const struct HksProcessInfo *processInfo, struct HksBlob *
     }
 
     // The appid is concatenated from the bundle name and the developer's public key certificate.
-    int32_t ret = ConvertCallerInfoToJson(bundleInfo.appId, bundleNameStr, hapInfo, true);
+    int32_t ret = ConvertCallerInfoToJson(bundleInfo.appId, hapTokenInfo.bundleName, hapInfo, true);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "ConvertHapInfoToJson failed.")
 
     return HKS_SUCCESS;
