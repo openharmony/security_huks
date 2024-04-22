@@ -86,7 +86,10 @@ if (os_level == "standard") {
     configs = [
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
   }
 } else {
   ohos_shared_library("huks_engine_core_standard") {

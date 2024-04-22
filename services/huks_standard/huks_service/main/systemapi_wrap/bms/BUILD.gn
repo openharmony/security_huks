@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import("//base/security/huks/build/config.gni")
 import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
@@ -44,9 +45,16 @@ ohos_static_library("libhuks_bms_systemapi_wrap_static") {
     "bundle_framework:appexecfwk_base",
     "bundle_framework:appexecfwk_core",
     "cJSON:cjson",
+    "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
+    "json:nlohmann_json_static",
+    "samgr:samgr_proxy",
   ]
+
+  if (!huks_qemu_enabled) {
+    external_deps += [ "ability_base:want" ]
+  }
 
   public_external_deps = [ "bounds_checking_function:libsec_shared" ]
 

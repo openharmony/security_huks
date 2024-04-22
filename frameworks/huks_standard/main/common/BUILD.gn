@@ -59,7 +59,10 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
     sources += [ "src/hks_errcode_adapter.c" ]
-    external_deps = [ "hilog:libhilog" ]
+    external_deps = [
+      "c_utils:utils",
+      "hilog:libhilog",
+    ]
   }
 } else {
   ohos_static_library("libhuks_common_small_static") {
