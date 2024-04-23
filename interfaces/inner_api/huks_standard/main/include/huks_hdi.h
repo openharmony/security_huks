@@ -567,28 +567,6 @@ struct HuksHdi {
         struct HksBlob *newKey);
 
     /**
-     * @brief Wrap key operation
-     * @param keyAlias key alias
-     * @param key key
-     * @param paramSet required parameter set
-     * @param wrappedKey wrapped key
-     * @return error code, see hks_type.h
-     */
-    int32_t (*HuksHdiWrapKey)(const struct HksBlob *keyAlias, const struct HksBlob *key,
-        const struct HksParamSet *paramSet, struct HksBlob *wrappedKey);
-
-    /**
-     * @brief Unwrap key operation
-     * @param keyAlias key alias
-     * @param paramSet required parameter set
-     * @param wrappedKey wrapped key
-     * @param keyOut unwrapped key
-     * @return error code, see hks_type.h
-     */
-    int32_t (*HuksHdiUnwrapKey)(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
-        const struct HksBlob *wrappedKey, struct HksBlob *keyOut);
-
-    /**
      * @brief Export chipset platform publicKey
      * @param salt salt value
      * @param scene scene
