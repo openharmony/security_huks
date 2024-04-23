@@ -337,13 +337,6 @@ int HksService::OnRemotePluginRequest(uint32_t code, MessageParcel &data, Messag
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HksInitMemPolicy();
-    // this is the temporary version which comments the descriptor check
-    std::u16string descriptor = HksService::GetDescriptor();
-    std::u16string remoteDescriptor = data.ReadInterfaceToken();
-    if (descriptor != remoteDescriptor) {
-        HKS_LOG_E("descriptor is diff.");
-        return HW_SYSTEM_ERROR;
-    }
 
     uint64_t enterTime = 0;
     (void)HksElapsedRealTime(&enterTime);
@@ -352,6 +345,13 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         return OnRemotePluginRequest(code, data, reply, option);
+    }
+    // this is the temporary version which comments the descriptor check
+    std::u16string descriptor = HksService::GetDescriptor();
+    std::u16string remoteDescriptor = data.ReadInterfaceToken();
+    if (descriptor != remoteDescriptor) {
+        HKS_LOG_E("descriptor is diff.");
+        return HW_SYSTEM_ERROR;
     }
 
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
