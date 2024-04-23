@@ -47,6 +47,7 @@ if (os_level == "standard") {
       "-Werror",
     ]
     external_deps = [
+      "c_utils:utils",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
       "openssl:libcrypto_shared",
