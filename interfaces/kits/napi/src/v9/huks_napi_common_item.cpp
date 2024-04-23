@@ -589,7 +589,7 @@ static napi_value ParseGetHksParamSetAsUser(napi_env env, int userId, napi_value
     }
 
     napi_value result = ParseHksParamSetAndAddParam(env, property, paramSet,
-        {{.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = userId}});
+        {{.tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = userId}});
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;

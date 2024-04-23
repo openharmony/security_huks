@@ -63,7 +63,7 @@ static napi_value AttestKeyAsUserParseParams(napi_env env, napi_callback_info in
     }
     result = ParseHksParamSetAndAddParam(env, property, context->paramSet,
         {{ .tag = HKS_TAG_ATTESTATION_BASE64, .boolParam = true },
-        {.tag = HKS_TAG_SPECIFIC_USER_ID, .uint32Param = userId}});
+        {.tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = userId}});
     if (result == nullptr) {
         HKS_LOG_E("could not get paramset");
         return nullptr;
