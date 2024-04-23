@@ -75,4 +75,7 @@ declare_args() {
 
   # config rkc store path in standard system
   huks_use_rkc_in_standard_path = "data/data/huks_service"
+
+  # config is qemu risc-v mini system
+  huks_qemu_enabled = false
 }
