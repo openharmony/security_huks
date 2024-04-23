@@ -432,7 +432,7 @@ static int32_t HdiProxyExportChipsetPlatformPublicKey(const struct HuksBlob *sal
 {
     HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->GenerateRandom, HKS_ERROR_NULL_POINTER,
+    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ExportChipsetPlatformPublicKey, HKS_ERROR_NULL_POINTER,
         "ExportChipsetPlatformPublicKey function is null pointer")
     return g_hksHdiProxyInstance->ExportChipsetPlatformPublicKey(g_hksHdiProxyInstance, salt, scene, publicKey);
 }
