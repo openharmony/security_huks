@@ -26,16 +26,14 @@ ohos_shared_library("cj_huks_ffi") {
   }
 
   include_dirs = [
-    "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
-    "//base/security/huks/frameworks/huks_standard/main/common/include",
+    "../../inner_api/huks_standard/main/include",
+    "../../../frameworks/huks_standard/main/common/include",
     "include",
   ]
 
   sources = [ "src/cj_huks_ffi.c" ]
 
-  deps = [
-    "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-  ]
+  deps = [ "../../inner_api/huks_standard/main:libhukssdk" ]
 
   cflags = [
     "-Wall",
