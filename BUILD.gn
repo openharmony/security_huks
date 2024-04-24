@@ -58,6 +58,7 @@ group("cipher_napi") {
 group("fwk_group") {
   if (os_level == "standard") {
     deps = [
+      ":huks_cjapi",
       "//base/security/huks:cipher_napi",
       "//base/security/huks:huks_capi",
       "//base/security/huks:huks_napi",
