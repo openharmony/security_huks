@@ -451,13 +451,14 @@ void MoveMineOldFile(const char *oldDir, const char *newDir)
         if (errCode.value() != 0) {
             HKS_LOG_E("copy %" LOG_PUBLIC "s to %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s",
                 curPath, newPath, errCode.message().c_str());
-            return;
+            break;
         }
         std::filesystem::remove_all(curPath, errCode);
         if (errCode.value() != 0) {
             HKS_LOG_E("remove_all %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", curPath, errCode.message().c_str());
         }
     }
+    closedir(dir);
 }
 #endif
 
