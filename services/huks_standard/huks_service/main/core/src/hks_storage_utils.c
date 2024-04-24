@@ -37,10 +37,6 @@
 #include "hks_param.h"
 #include "securec.h"
 
-#ifdef L2_STANDARD
-#include "hks_response.h"
-#endif
-
 #define HKS_ENCODE_OFFSET_LEN         6
 #define HKS_ENCODE_KEY_SALT_VALUE     0x3f
 #define KEY_ALIAS_ANONYMOUS_LEN       4
