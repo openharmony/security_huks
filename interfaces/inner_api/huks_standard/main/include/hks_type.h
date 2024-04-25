@@ -67,6 +67,7 @@ extern "C" {
 #define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
 
 #define TOKEN_CHALLENGE_LEN 32
+#define UDID_LEN 64
 #define SHA256_SIGN_LEN 32
 #define TOKEN_SIZE 32
 #define MAX_AUTH_TIMEOUT_SECOND 60
@@ -463,6 +464,7 @@ enum HksSendType {
 
 /**
  * @brief hks user auth type
+ * @see `enum AuthType` in `drivers/interface/user_auth/v2_0/UserAuthTypes.idl`
  */
 enum HksUserAuthType {
     HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
@@ -785,6 +787,7 @@ struct HksKeyMaterial25519 {
 
 /**
  * @brief hks user auth token plaintext data
+ * @see `TokenDataPlain` in `drivers/peripheral/user_auth/hdi_service/user_auth/inc/user_sign_centre.h`
  */
 typedef struct HksPlaintextData {
     uint8_t challenge[TOKEN_SIZE];
@@ -793,20 +796,28 @@ typedef struct HksPlaintextData {
     uint32_t authType;
     uint32_t authMode;
     uint32_t securityLevel;
+    /**
+     * @see `enum TokenType` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
+     */
+    uint32_t tokenType;
 } __attribute__((__packed__)) HksPlaintextData;
 
 /**
  * @brief hks user auth token ciphertext data
+ * @see `TokenDataToEncrypt` in `drivers/peripheral/user_auth/hdi_service/user_auth/inc/user_sign_centre.h`
  */
 typedef struct HksCiphertextData {
     int32_t userId;
     uint64_t secureUid;
     uint64_t enrolledId;
     uint64_t credentialId;
+    uint8_t collectorUdid[UDID_LEN];
+    uint8_t verifierUdid[UDID_LEN];
 } __attribute__((__packed__)) HksCiphertextData;
 
 /**
  * @brief hks user auth token
+ * @see `UserAuthTokenHal` in `drivers/peripheral/user_auth/hdi_service/user_auth/inc/user_sign_centre.h`
  */
 typedef struct __attribute__((__packed__)) HksUserAuthToken {
     uint32_t version;
