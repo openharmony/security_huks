@@ -429,6 +429,7 @@ int32_t HksMakeFullDir(const char *path)
                     HKS_LOG_E("mkdir %" LOG_PUBLIC "s failed.", curPath);
                     break;
                 }
+                ret = HKS_SUCCESS;
             }
         }
         if (ret != HKS_SUCCESS) {
