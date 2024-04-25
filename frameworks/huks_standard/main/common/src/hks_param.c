@@ -290,6 +290,24 @@ HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet)
     HKS_FREE(*paramSet);
 }
 
+HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet)
+{
+    if (aliasSet == NULL) {
+        return;
+    }
+
+    if (aliasSet->aliasesCnt > 0 && aliasSet->aliases != NULL) {
+        for (uint32_t i = 0; i < aliasSet->aliasesCnt; i++) {
+            HKS_FREE_BLOB(aliasSet->aliases[i]);
+        }
+    }
+    aliasSet->aliasesCnt = 0;
+
+    HKS_FREE(aliasSet->aliases);
+    HKS_FREE(aliasSet);
+    aliasSet = NULL;
+}
+
 static int32_t FreshParamSet(struct HksParamSet *paramSet, bool isCopy)
 {
     uint32_t size = paramSet->paramSetSize;

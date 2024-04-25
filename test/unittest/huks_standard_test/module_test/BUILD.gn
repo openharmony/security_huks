@@ -1,4 +1,4 @@
-# Copyright (C) 2022-2024 Huawei Device Co., Ltd.
+# Copyright (C) 2022-2023 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -164,6 +164,7 @@ ohos_unittest("huks_module_test") {
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_api_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_list_aliases_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
@@ -221,6 +222,10 @@ ohos_unittest("huks_module_test") {
       "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_rsa_test.cpp",
       "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/crypto_engine_test/src/hks_openssl_sm4_test.cpp",
     ]
+  }
+
+  if (enable_interact_across_local_accounts) {
+    defines += [ "HKS_INTERACT_ABILITY" ]
   }
 
   include_dirs += [ "//test/xts/acts/security_lite/huks/common/include" ]

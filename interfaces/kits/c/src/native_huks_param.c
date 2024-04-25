@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -86,4 +86,9 @@ struct OH_Huks_Result OH_Huks_CheckParamMatch(const struct OH_Huks_Param *basePa
 {
     int32_t result = HksCheckParamMatch((const struct HksParam *) baseParam, (const struct HksParam *) param);
     return ConvertParamResult(result);
+}
+
+void OH_Huks_FreeKeyAliasSet(struct OH_Huks_KeyAliasSet *keyAliasSet)
+{
+    HksFreeKeyAliasSet((struct HksKeyAliasSet *) keyAliasSet);
 }

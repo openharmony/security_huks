@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -538,4 +538,44 @@ int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamO
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param failed, ret = %" LOG_PUBLIC "d", ret)
     }
     return HKS_SUCCESS;
+}
+
+int32_t HksListAliasesUnpack(const struct HksBlob *srcData, struct HksParamSet **paramSet)
+{
+    uint32_t offset = 0;
+    int32_t ret = GetParamSetFromBuffer(paramSet, srcData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get paramSet failed")
+    return ret;
+}
+
+static int32_t HksCopyBlobsAndCntToBlob(const struct HksBlob *srcBlob, uint32_t cnt, struct HksBlob *destBlob)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyUint32ToBuffer(cnt, destBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy CopyUint32ToBuffer failed, ret = %" LOG_PUBLIC "d", ret)
+
+    for (uint32_t i = 0; i < cnt; ++i) {
+        ret = CopyBlobToBuffer(&srcBlob[i], destBlob, &offset);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy CopyBlobToBuffer failed")
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, struct HksBlob *destData)
+{
+    if (destData == NULL || destData->size != 0) {
+        HKS_LOG_E("HksListAliasesPackFromService invalid param");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if (aliasSet == NULL || aliasSet->aliasesCnt == 0) {
+        return HKS_SUCCESS;
+    }
+
+    destData->size = sizeof(aliasSet->aliasesCnt);
+    for (uint32_t i = 0; i < aliasSet->aliasesCnt; ++i) {
+        destData->size += sizeof(aliasSet->aliases[i].size) + ALIGN_SIZE(aliasSet->aliases[i].size);
+    }
+    destData->data = (uint8_t *)HksMalloc(destData->size);
+
+    return HksCopyBlobsAndCntToBlob(aliasSet->aliases, aliasSet->aliasesCnt, destData);
 }

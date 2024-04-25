@@ -83,6 +83,8 @@ extern "C" {
 #define HKS_KEY_BLOB_AT_KEY_SIZE 256
 #define HKS_KEY_BLOB_AT_KEY_BYTES 32
 
+#define HKS_MAX_KEY_ALIAS_COUNT 2048
+
 /**
  * @brief hks key type
  */
@@ -848,6 +850,15 @@ struct SecInfoWrap {
     uint32_t enrolledInfoLen;
     struct EnrolledInfoWrap *enrolledInfo;
 };
+
+/**
+ * @brief hks alias set
+ */
+struct HksKeyAliasSet {
+    uint32_t aliasesCnt;
+    struct HksBlob *aliases;
+};
+
 
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64

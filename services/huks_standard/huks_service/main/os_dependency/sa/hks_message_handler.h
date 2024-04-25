@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -45,6 +45,7 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_DERIVE_KEY, HksIpcServiceDeriveKey },
     { HKS_MSG_MAC, HksIpcServiceMac },
     { HKS_MSG_GET_KEY_INFO_LIST, HksIpcServiceGetKeyInfoList },
+    { HKS_MSG_LIST_ALIASES, HksIpcServiceListAliases },
 };
 
 typedef void (*HksIpcThreeStageHandlerFuncProc)(const struct HksBlob *msg, struct HksBlob *outData,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -747,4 +747,15 @@ HKS_API_EXPORT int32_t HksExportChipsetPlatformPublicKey(const struct HksBlob *s
     (void)(publicKey);
     return HKS_ERROR_API_NOT_SUPPORTED;
 #endif
+}
+
+HKS_API_EXPORT int32_t HksListAliases(const struct HksParamSet *paramSet, struct HksKeyAliasSet **outData)
+{
+    HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
+    if (paramSet == NULL || outData == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientListAliases(paramSet, outData);
+    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    return ret;
 }

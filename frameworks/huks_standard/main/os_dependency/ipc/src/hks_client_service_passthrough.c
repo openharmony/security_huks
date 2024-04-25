@@ -444,3 +444,20 @@ int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     return HksServiceExportChipsetPlatformPublicKey(salt, scene, publicKey);
 }
 #endif
+
+int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAliasSet **outData)
+{
+    char *tempProcessName = NULL;
+    char *tempUserId = NULL;
+    HKS_IF_NOT_SUCC_LOGE_RETURN(GetProcessInfo(NULL, &tempProcessName, &tempUserId), HKS_ERROR_INTERNAL_ERROR,
+        "get process info failed")
+
+    struct HksProcessInfo processInfo = {
+        { strlen(tempUserId), (uint8_t *)tempUserId },
+        { strlen(tempProcessName), (uint8_t *)tempProcessName },
+        0,
+        0,
+        0
+    };
+    return HksServiceListAliases(&processInfo, paramSet, outData);
+}

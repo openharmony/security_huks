@@ -37,6 +37,10 @@ struct HksSuccessReturnResult {
     struct HksCertChain *certChain;
 };
 
+struct HksSuccessListAliasesResult {
+    struct HksKeyAliasSet *aliasSet;
+};
+
 #define DATA_SIZE_64KB  (1024 * 64)
 
 // The Maximum length of AES-CCM data is 100K bytes. The extra 32 bytes is reserved for Nonce and Aead
@@ -52,6 +56,8 @@ const std::string HKS_RESULT_PROPERTY_ERRORCODE = "errorCode";
 const std::string HKS_RESULT_PROPERTY_OUTDATA = "outData";
 const std::string HKS_RESULT_PRPPERTY_PROPERTIES = "properties";
 const std::string HKS_RESULT_PRPPERTY_CERTCHAINS = "certChains";
+
+const std::string HKS_RESULT_PRPPERTY_ALIASES = "keyAliases";
 
 const std::string BUSINESS_ERROR_PROPERTY_CODE = "code";
 const std::string BUSINESS_ERROR_PROPERTY_MESSAGE = "message";
@@ -112,6 +118,8 @@ napi_value GetUserIdValue(napi_env env, napi_value object, int &userId);
 
 void FreeHksCertChain(HksCertChain *&certChain, uint32_t certChainCapacity);
 
+void FreeHksKeyAliasSet(HksKeyAliasSet *&keyAliasSet, uint32_t cnt);
+
 void DeleteCommonAsyncContext(napi_env env, napi_async_work &asyncWork, napi_ref &callback,
     struct HksBlob *&blob, struct HksParamSet *&paramSet);
 
@@ -121,17 +129,24 @@ napi_value ParseKeyAliasAndHksParamSet(napi_env env, napi_value *argv, size_t &i
 napi_value ParseKeyAliasAndHksParamSetAsUser(napi_env env, int userId, napi_value *argv, size_t &index,
     std::pair<HksBlob *&, HksParamSet *&> out);
 
+napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSet *&paramSet);
+
 napi_value ParseKeyData(napi_env env, napi_value value, HksBlob *&keyDataBlob);
 
 napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::string propertyStr);
 
 void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData);
 
+void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData);
+
 void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
 
 void HksReturnKeyExistResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData);
+
+void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
+    const struct HksSuccessListAliasesResult resultData);
 
 napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg);
 
