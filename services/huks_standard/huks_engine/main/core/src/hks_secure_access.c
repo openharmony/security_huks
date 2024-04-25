@@ -871,6 +871,27 @@ int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct 
     return HKS_SUCCESS;
 }
 
+static int32_t HksCheckIsLocalAuth(const struct HksUserAuthToken *authToken)
+{
+    enum {
+        // see `enum ScheduleMode` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
+        SCHEDULE_MODE_AUTH = 1,
+    };
+    if (authToken->plaintextData.authMode != SCHEDULE_MODE_AUTH) {
+        HKS_LOG_E("not SCHEDULE_MODE_AUTH, invalid authMode %" LOG_PUBLIC "u", authToken->plaintextData.authMode);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    enum {
+        // see `enum TokenType` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
+        TOKEN_TYPE_LOCAL_AUTH = 0,
+    };
+    if (authToken->plaintextData.tokenType != TOKEN_TYPE_LOCAL_AUTH) {
+        HKS_LOG_E("not TOKEN_TYPE_LOCAL_AUTH, invalid tokenType %" LOG_PUBLIC "u", authToken->plaintextData.tokenType);
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
+}
+
 int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
     if (keyNode == NULL || paramSet == NULL) {
@@ -896,19 +917,22 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
     struct HksUserAuthToken *authToken = NULL;
     do {
         ret = GetAuthToken(paramSet, &authToken);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get auth token failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get auth token failed! %" LOG_PUBLIC "d", ret)
 
         ret = HksVerifyAuthTokenSign(authToken);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify the auth token sign failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify the auth token sign failed! %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckIsLocalAuth(authToken);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsLocalAuth failed! %" LOG_PUBLIC "d", ret)
 
         ret = HksDecryptAuthToken(authToken);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt auth token failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt auth token failed! %" LOG_PUBLIC "d", ret)
 
         ret = VerifyChallengeOrTimeStamp(keyNode, authToken);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify challenge failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify challenge failed! %" LOG_PUBLIC "d", ret)
 
         ret = VerifyAuthTokenInfo(keyNode, authToken);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify auth token info failed!")
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify auth token info failed! %" LOG_PUBLIC "d", ret)
     } while (0);
 
     return AssignVerifyResultAndFree(ret, authResult, keyNode, authToken);

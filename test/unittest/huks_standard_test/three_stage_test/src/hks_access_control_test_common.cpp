@@ -151,6 +151,8 @@ static int32_t AssignAuthToken(struct HksBlob *cipherTextOutData, struct HksBlob
     (void)memcpy_s(authTokenHal->iv, HKS_AE_NONCE_LEN, NONCE, HKS_AE_NONCE_LEN);
     authTokenHal->plaintextData.time = curTime + testIDMParams.time;
     authTokenHal->plaintextData.authType = testIDMParams.authType;
+    authTokenHal->plaintextData.authMode = testIDMParams.authMode;
+    authTokenHal->plaintextData.tokenType = testIDMParams.tokenType;
 
     if (memcpy_s(authTokenHal->plaintextData.challenge, TOKEN_CHALLENGE_LEN, challenge->data, challenge->size) != EOK) {
         HKS_LOG_E("memcpy_s failed");
