@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -905,6 +905,19 @@ struct OH_Huks_KeyMaterial25519 {
     uint32_t priKeySize;
     /** Reserved. */
     uint32_t reserved;
+};
+
+/**
+ * @brief Defines the structure of the alias set.
+ *
+ * @since 12
+ * @version 1.0
+ */
+struct OH_Huks_KeyAliasSet {
+    /** Number of aliases. */
+    uint32_t aliasesCnt;
+    /** Aliases array. */
+    struct OH_Huks_Blob *aliases;
 };
 
 #ifdef __cplusplus

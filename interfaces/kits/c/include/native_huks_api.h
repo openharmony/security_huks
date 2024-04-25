@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -272,6 +272,20 @@ struct OH_Huks_Result OH_Huks_FinishSession(const struct OH_Huks_Blob *handle,
  */
 struct OH_Huks_Result OH_Huks_AbortSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet);
+
+/**
+ * @brief Get key alias list.
+ *
+ * @param paramSet Indicates the pointer to the parameters required for getting key alias list.
+ *     By default, this parameter is a null pointer.
+ * @param outData Indicates the pointer to the output data.
+ * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful;
+ *     returns an error code otherwise.
+ * @since 12
+ * @version 1.0
+ */
+struct OH_Huks_Result OH_Huks_ListAliases(const struct OH_Huks_ParamSet *paramSet,
+    struct OH_Huks_KeyAliasSet **outData);
 
 #ifdef __cplusplus
 }

@@ -1861,3 +1861,24 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
     }
     return ret;
 }
+int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    struct HksKeyAliasSet **outData)
+{
+    struct HksParamSet *newParamSet = NULL;
+    int32_t ret = AppendStorageLevelIfNotExist(paramSet, &newParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
+
+    do {
+        ret = HksCheckListAliasesParam(&(processInfo->processName));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check list aliases param failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksManageListAliasesByProcessName(processInfo, newParamSet, outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "list aliases by process name failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    HksFreeParamSet(&newParamSet);
+
+    HksReport(__func__, processInfo, NULL, ret);
+
+    return ret;
+}

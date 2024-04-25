@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -48,6 +48,7 @@
 #include "huks_napi_init_session.h"
 #include "huks_napi_is_key_exist.h"
 #include "huks_napi_is_key_item_exist.h"
+#include "huks_napi_list_aliases.h"
 #include "huks_napi_update_finish.h"
 #include "huks_napi_update_finish_session.h"
 
@@ -700,6 +701,7 @@ napi_property_descriptor NAPI_FUNC_DESC[] = {
     DECLARE_NAPI_FUNCTION("updateSession", HuksNapiUpdateSession),
     DECLARE_NAPI_FUNCTION("finishSession", HuksNapiFinishSession),
     DECLARE_NAPI_FUNCTION("abortSession", HuksNapiAbortSession),
+    DECLARE_NAPI_FUNCTION("listAliases", HuksNapiListAliases),
 };
 
 static napi_value HuksNapiRegister(napi_env env, napi_value exports)

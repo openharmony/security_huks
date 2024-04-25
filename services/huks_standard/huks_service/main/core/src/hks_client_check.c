@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -304,4 +304,15 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
     (void)paramSet;
     return HKS_SUCCESS;
 #endif
+}
+
+int32_t HksCheckListAliasesParam(const struct HksBlob *processName)
+{
+    HKS_IF_NOT_SUCC_LOGE_RETURN(CheckBlob(processName), HKS_ERROR_INVALID_ARGUMENT, "invalid processName");
+
+    if (processName->size > HKS_MAX_PROCESS_NAME_LEN) {
+        HKS_LOG_E("processName size too long, size %" LOG_PUBLIC "u", processName->size);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
 }

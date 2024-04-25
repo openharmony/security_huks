@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -450,6 +450,22 @@ void FreeHksCertChain(HksCertChain *&certChain, uint32_t certChainCapacity)
     certChain = nullptr;
 }
 
+void FreeHksKeyAliasSet(HksKeyAliasSet *&keyAliasSet, uint32_t cnt)
+{
+    if (keyAliasSet == nullptr) {
+        return;
+    }
+
+    if (cnt > 0 && keyAliasSet->aliases != nullptr) {
+        for (uint32_t i = 0; i < cnt; i++) {
+            HKS_FREE_BLOB(keyAliasSet->aliases[i]);
+        }
+    }
+    HKS_FREE(keyAliasSet->aliases);
+    HKS_FREE(keyAliasSet);
+    keyAliasSet = nullptr;
+}
+
 napi_value GetHandleValue(napi_env env, napi_value object, struct HksBlob *&handleBlob)
 {
     if (handleBlob != nullptr) {
@@ -565,7 +581,7 @@ napi_value GetPropertyFromOptions(napi_env env, napi_value value, const std::str
     return property;
 }
 
-static napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSet *&paramSet)
+napi_value ParseGetHksParamSet(napi_env env, napi_value value, HksParamSet *&paramSet)
 {
     napi_value property = GetPropertyFromOptions(env, value, HKS_OPTIONS_PROPERTY_PROPERTIES);
     if (property == nullptr) {
@@ -893,6 +909,11 @@ void SuccessReturnResultInit(struct HksSuccessReturnResult &resultData)
     resultData.certChain = nullptr;
 }
 
+void SuccessListAliasesReturnResultInit(struct HksSuccessListAliasesResult &resultData)
+{
+    resultData.aliasSet = nullptr;
+}
+
 void HksReturnNapiResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
     const struct HksSuccessReturnResult resultData)
 {
@@ -940,5 +961,51 @@ napi_value CreateJsError(napi_env env, int32_t errCode, const char *errorMsg)
     napi_value result = nullptr;
     NAPI_CALL(env, napi_create_error(env, code, message, &result));
     return result;
+}
+
+static napi_value GenerateListAliasesResult(napi_env env, const struct HksSuccessListAliasesResult resultData)
+{
+    napi_value result = nullptr;
+
+    if (napi_create_object(env, &result) != napi_ok) {
+        return GetNull(env);
+    }
+    // add aliases
+    if ((resultData.aliasSet != nullptr) && (resultData.aliasSet->aliases != nullptr) &&
+        (resultData.aliasSet->aliasesCnt != 0)) {
+        napi_value keyAliasesJs = GenerateStringArray(env, resultData.aliasSet->aliases,
+            resultData.aliasSet->aliasesCnt);
+        if (keyAliasesJs == nullptr) {
+            HKS_LOG_E("add keyAliases failed");
+            return GetNull(env);
+        }
+        NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PRPPERTY_ALIASES.c_str(), keyAliasesJs));
+    } else {
+        napi_value array = nullptr;
+        NAPI_CALL(env, napi_create_array(env, &array));
+        NAPI_CALL(env, napi_set_named_property(env, result, HKS_RESULT_PRPPERTY_ALIASES.c_str(), array));
+    }
+    return result;
+}
+
+static void PromiseListAliasesResultSuccess(napi_env env, napi_deferred deferred,
+    const struct HksSuccessListAliasesResult resultData)
+{
+    napi_value result = nullptr;
+    result = GenerateListAliasesResult(env, resultData);
+    napi_resolve_deferred(env, deferred, result);
+}
+
+void HksReturnListAliasesResult(napi_env env, napi_ref callback, napi_deferred deferred, int32_t errorCode,
+    const struct HksSuccessListAliasesResult resultData)
+{
+    // now not support callback
+    if (callback == nullptr) {
+        if (errorCode == HKS_SUCCESS) {
+            PromiseListAliasesResultSuccess(env, deferred, resultData);
+        } else {
+            PromiseResultFailure(env, deferred, errorCode);
+        }
+    }
 }
 }  // namespace HuksNapiItem

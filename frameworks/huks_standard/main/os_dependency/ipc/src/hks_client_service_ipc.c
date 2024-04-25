@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -41,6 +41,9 @@
 #ifdef HKS_L1_SMALL
 #include "hks_samgr_client.h"
 #include <unistd.h>
+
+#define HKS_MAX_RETRY_TIME 5
+#define HKS_SLEEP_TIME_FOR_RETRY 1
 #endif
 
 int32_t HksClientInitialize(void)
@@ -854,3 +857,43 @@ int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
     return ret;
 }
 #endif
+
+static int32_t ListAliasesInitBlob(const struct HksParamSet *paramSet,
+    struct HksBlob *inBlob, struct HksBlob *outBlob)
+{
+    inBlob->size = ALIGN_SIZE(paramSet->paramSetSize);
+    inBlob->data = (uint8_t *)HksMalloc(inBlob->size);
+    HKS_IF_NULL_RETURN(inBlob->data, HKS_ERROR_MALLOC_FAIL)
+
+    outBlob->size = sizeof(HKS_MAX_KEY_ALIAS_COUNT) + (HKS_MAX_KEY_ALIAS_COUNT * HKS_MAX_KEY_ALIAS_LEN);
+    outBlob->data = (uint8_t *)HksMalloc(outBlob->size);
+    HKS_IF_NULL_RETURN(outBlob->data, HKS_ERROR_MALLOC_FAIL)
+    return HKS_SUCCESS;
+}
+
+int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAliasSet **outData)
+{
+    int32_t ret;
+    struct HksBlob inBlob = { 0, NULL };
+    struct HksBlob outBlob = { 0, NULL };
+    do {
+        ret = HksCheckIpcListAliases(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcListAliases fail")
+
+        ret = ListAliasesInitBlob(paramSet, &inBlob, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ListAliasesInitBlob fail")
+
+        ret = HksListAliasesPack(paramSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesPack fail")
+
+        ret = HksSendRequest(HKS_MSG_LIST_ALIASES, &inBlob, &outBlob, paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksSendRequest fail")
+
+        ret = HksListAliasesUnpackFromService(&outBlob, outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpackFromService fail")
+    } while (0);
+
+    HKS_FREE_BLOB(inBlob);
+    HKS_FREE_BLOB(outBlob);
+    return ret;
+}

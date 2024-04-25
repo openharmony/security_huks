@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -67,6 +67,13 @@ HKS_API_EXPORT int32_t HksBuildParamSet(struct HksParamSet **paramSet);
  * @return error code, see hks_type.h
  */
 HKS_API_EXPORT void HksFreeParamSet(struct HksParamSet **paramSet);
+
+/**
+ * @brief Free alias set
+ * @param aliasSet required alias set
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT void HksFreeKeyAliasSet(struct HksKeyAliasSet *aliasSet);
 
 /**
  * @brief Get parameter set
