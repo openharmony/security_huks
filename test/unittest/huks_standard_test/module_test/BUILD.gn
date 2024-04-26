@@ -162,10 +162,8 @@ ohos_unittest("huks_module_test") {
 
   # interface test
   sources += [
-    "//base/security/huks/test/unittest/huks_common_test/src/huks_test_param_util.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_api_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_get_key_info_list_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_list_aliases_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/src/hks_refresh_key_info_test.cpp",
   ]
 
