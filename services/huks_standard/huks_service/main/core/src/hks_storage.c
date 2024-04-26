@@ -890,7 +890,7 @@ static int32_t getHksKeyAliasSet(const struct HksFileEntry *fileNameList, const 
                 break;
             }
 
-            ret = ConstructBlob(fileNameList[i].fileName, &((*outData)->aliases[i]));
+            ret = ConstructBlob(fileNameList[i].fileName, &(tempAliasSet->aliases[i]));
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct blob failed, ret = %" LOG_PUBLIC "d", ret)
         }
     } while (0);

@@ -41,9 +41,6 @@
 #ifdef HKS_L1_SMALL
 #include "hks_samgr_client.h"
 #include <unistd.h>
-
-#define HKS_MAX_RETRY_TIME 5
-#define HKS_SLEEP_TIME_FOR_RETRY 1
 #endif
 
 int32_t HksClientInitialize(void)
@@ -867,7 +864,11 @@ static int32_t ListAliasesInitBlob(const struct HksParamSet *paramSet,
 
     outBlob->size = sizeof(HKS_MAX_KEY_ALIAS_COUNT) + (HKS_MAX_KEY_ALIAS_COUNT * HKS_MAX_KEY_ALIAS_LEN);
     outBlob->data = (uint8_t *)HksMalloc(outBlob->size);
-    HKS_IF_NULL_RETURN(outBlob->data, HKS_ERROR_MALLOC_FAIL)
+    if (outBlob->data == NULL) {
+        HKS_LOG_E("HksMalloc outBlob fail");
+        HKS_FREE_BLOB(*inBlob);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     return HKS_SUCCESS;
 }
 
