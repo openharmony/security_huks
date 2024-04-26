@@ -466,6 +466,7 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData)
 {
+#ifdef L2_STANDARD
     struct HksStoreFileInfo fileInfo = { 0 };
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
@@ -483,6 +484,12 @@ int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processIn
     FileInfoFree(&fileInfo);
     FreeStorageMaterial(&material);
     return ret;
+#else
+    (void)processInfo;
+    (void)paramSet;
+    (void)outData;
+    return HKS_SUCCESS;
+#endif
 }
 
 #endif

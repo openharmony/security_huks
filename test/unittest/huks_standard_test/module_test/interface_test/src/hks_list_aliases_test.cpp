@@ -25,6 +25,8 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "huks_test_param_util.h"
+
 #include "hks_type.h"
 #include "hks_template.h"
 
@@ -47,8 +49,10 @@ public:
 };
 
 static const char *g_alias = "testAlias";
-
 const struct HksBlob testKeyAlias = { sizeof(g_alias), (uint8_t *)g_alias };
+
+static const char *g_invisableAlias = "#test(";
+const struct HksBlob testInvisableKeyAlias = { sizeof(g_invisableAlias), (uint8_t *)g_invisableAlias };
 
 static const uint32_t g_expect_min_num = 1;
 
@@ -83,10 +87,6 @@ static const struct HksParam g_initCommonParams[] = {
     { .tag = HKS_TAG_BLOCK_MODE, .uint32Param = HKS_MODE_CBC },
 };
 
-static const uint32_t g_token_acls_num = 1;
-static const uint32_t g_dcaps_num = 0;
-static const uint32_t g_token_perms_num = 2;
-
 #ifdef HKS_INTERACT_ABILITY
 static int32_t SetIdsToken()
 {
@@ -99,72 +99,19 @@ static int32_t SetIdsToken()
         "ohos.permission.INTERACT_ACROSS_LOCAL_ACCOUNTS",
     };
     NativeTokenInfoParams infoInstance = {
-        .dcapsNum = g_dcaps_num,
-        .permsNum = g_token_perms_num,
+        .dcapsNum = 0,
+        .permsNum = 2,
         .dcaps = nullptr,
         .perms = perms,
         .aplStr = "system_basic",
     };
     infoInstance.acls = acls;
-    infoInstance.aclsNum = g_token_acls_num;
+    infoInstance.aclsNum = 1;
     infoInstance.processName = "test_list_aliases";
     tokenId = GetAccessTokenId(&infoInstance);
     return SetSelfTokenID(tokenId);
 }
 #endif
-
-static int32_t BuildInitParamSet(const struct HksParam *param, const std::vector<HksParam> &tagParam,
-    uint32_t paramCnt, struct HksParamSet **paramSetOut)
-{
-    int32_t ret;
-    struct HksParamSet *paramSet = nullptr;
-    do {
-        ret = HksInitParamSet(&paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        if (param != nullptr && paramCnt > 0) {
-            ret = HksAddParams(paramSet, param, paramCnt);
-            HKS_IF_NOT_SUCC_BREAK(ret)
-        }
-
-        for (std::size_t i = 0; i < tagParam.size(); i++) {
-            ret = HksAddParams(paramSet, &tagParam[i], 1);
-            HKS_IF_NOT_SUCC_BREAK(ret)
-        }
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        ret = HksBuildParamSet(&paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-    } while (0);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&paramSet);
-    }
-    *paramSetOut = paramSet;
-    return HKS_SUCCESS;
-}
-
-static int32_t BuildParamSet(const struct HksParam *params, const uint32_t paramCnt, struct HksParamSet **paramSetOut)
-{
-    int32_t ret;
-    struct HksParamSet *paramSet = nullptr;
-    do {
-        ret = HksInitParamSet(&paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        ret = HksAddParams(paramSet, params, paramCnt);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        ret = HksBuildParamSet(&paramSet);
-        HKS_IF_NOT_SUCC_BREAK(ret)
-    } while (0);
-
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(&paramSet);
-        return ret;
-    }
-    *paramSetOut = paramSet;
-    return HKS_SUCCESS;
-}
 
 void HksListAliasesTest::SetUpTestCase(void)
 {
@@ -176,7 +123,7 @@ void HksListAliasesTest::SetUpTestCase(void)
 
     struct HksParamSet *paramSet = nullptr;
     for (std::size_t i = 0; i < g_initAddParam.size(); i++) {
-        ret = BuildInitParamSet(g_initCommonParams, g_initAddParam[i], HKS_ARRAY_SIZE(g_initCommonParams), &paramSet);
+        ret = HuksTest::TestBuildInitParamSet(g_initCommonParams, g_initAddParam[i], HKS_ARRAY_SIZE(g_initCommonParams), &paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         ret = HksGenerateKey(&testKeyAlias, paramSet, nullptr);
@@ -260,8 +207,8 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest004, TestSize.Level0)
     struct HksParam addParams[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE }
     };
-    int32_t ret = BuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSet failed, ret = " << ret;
+    int32_t ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
     struct HksKeyAliasSet *outData = nullptr;
     ret = HksListAliases(queryParamSet, &outData);
@@ -290,8 +237,8 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest005, TestSize.Level0)
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_valid_ce_specific_user_id },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE }
     };
-    ret = BuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSet failed, ret = " << ret;
+    ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
     struct HksKeyAliasSet *outData = nullptr;
     ret = HksListAliases(queryParamSet, &outData);
@@ -326,8 +273,8 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest006, TestSize.Level0)
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_valid_ce_specific_user_id },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE }
     };
-    ret = BuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSet failed, ret = " << ret;
+    ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
     struct HksKeyAliasSet *outData = nullptr;
     ret = HksListAliases(queryParamSet, &outData);
@@ -364,8 +311,8 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest007, TestSize.Level0)
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE }
     };
 
-    ret = BuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSet failed, ret = " << ret;
+    ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
     struct HksKeyAliasSet *outData = nullptr;
     ret = HksListAliases(queryParamSet, &outData);
@@ -400,8 +347,8 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest008, TestSize.Level0)
         { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_invalid_de_specific_user_id },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE }
     };
-    ret = BuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSet failed, ret = " << ret;
+    ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
     struct HksKeyAliasSet *outData = nullptr;
     ret = HksListAliases(queryParamSet, &outData);
@@ -429,8 +376,8 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest009, TestSize.Level0)
     struct HksParam addParams[] = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE }
     };
-    int32_t ret = BuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "BuildParamSet failed, ret = " << ret;
+    int32_t ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
     queryParamSet->paramsCnt = g_error_size;
 
@@ -439,6 +386,53 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest009, TestSize.Level0)
 
     HksFreeParamSet(&queryParamSet);
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksListAliases failed, ret = " << ret;
+    HksFreeKeyAliasSet(outData);
+}
+
+static bool IsMatch(const HksKeyAliasSet *aliasSet) {
+    bool ret = false;
+    if (aliasSet->aliasesCnt > 0 && aliasSet->aliases != NULL) {
+        for (uint32_t i = 0; i < aliasSet->aliasesCnt; i++) {
+            if (HksMemCmp(aliasSet->aliases[i].data, testInvisableKeyAlias.data, testInvisableKeyAlias.size)) {
+                return true;
+            }
+        }
+    }
+    return ret;
+}
+
+/**
+ * @tc.name: HksListAliasesTest.HksListAliasesTest010
+ * @tc.desc: tdd HksListAliasesTest, case: invisable key alias, expecting true
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksListAliasesTest, HksListAliasesTest010, TestSize.Level0)
+{
+    // invisable key init
+    struct HksParamSet *initParamSet = nullptr;
+
+    const std::vector<HksParam> param = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+    };
+    int32_t ret = HuksTest::TestBuildInitParamSet(g_initCommonParams, param, HKS_ARRAY_SIZE(g_initCommonParams), &initParamSet);
+    ret = HksGenerateKey(&testInvisableKeyAlias, initParamSet, nullptr);
+    ASSERT_EQ(ret, HKS_SUCCESS);
+    HksFreeParamSet(&initParamSet);
+
+    struct HksParamSet *queryParamSet = nullptr;
+    struct HksParam addParams[] = {
+        { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE }
+    };
+    ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
+    EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
+
+    struct HksKeyAliasSet *outData = nullptr;
+    ret = HksListAliases(queryParamSet, &outData);
+
+    bool compareRes = IsMatch(outData);
+
+    HksFreeParamSet(&queryParamSet);
+    EXPECT_EQ(compareRes, true) << "HksListAliases failed, ret = " << ret;
     HksFreeKeyAliasSet(outData);
 }
 

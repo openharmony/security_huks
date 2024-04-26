@@ -1864,6 +1864,7 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
 int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData)
 {
+#ifdef L2_STANDARD
     struct HksParamSet *newParamSet = NULL;
     int32_t ret = AppendStorageLevelIfNotExist(paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
@@ -1879,6 +1880,11 @@ int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const st
     HksFreeParamSet(&newParamSet);
 
     HksReport(__func__, processInfo, NULL, ret);
-
     return ret;
+#else
+    (void)processInfo;
+    (void)paramSet;
+    (void)outData;
+    return HKS_SUCCESS;
+#endif
 }
