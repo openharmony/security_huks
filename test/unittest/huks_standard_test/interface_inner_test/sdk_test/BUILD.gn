@@ -95,7 +95,4 @@ ohos_unittest("hukssdk_test") {
       "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     ]
   }
-  if (enable_interact_across_local_accounts) {
-    defines += [ "HKS_INTERACT_ABILITY" ]
-  }
 }
