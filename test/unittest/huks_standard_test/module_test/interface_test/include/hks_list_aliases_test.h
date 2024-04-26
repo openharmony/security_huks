@@ -26,5 +26,6 @@ int HksListAliasesTest006(void);
 int HksListAliasesTest007(void);
 int HksListAliasesTest008(void);
 int HksListAliasesTest009(void);
+int HksListAliasesTest010(void);
 }
 #endif
