@@ -53,20 +53,6 @@ void HksHmacDerivePart2Test::TearDown()
 
 #ifdef L2_STANDARD
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
-static struct HksParam g_hkdfStorageParams[] = {
-    {
-        .tag =  HKS_TAG_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_TEMP
-    }
-};
-
-static struct HksParam g_hkdfFinishStorageParams[] = {
-    {
-        .tag =  HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
-        .uint32Param = HKS_STORAGE_ALLOW_KEY_EXPORTED
-    }
-};
-
 static struct HksParam g_genParams010[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
@@ -82,7 +68,7 @@ static struct HksParam g_genParams010[] = {
 static struct HksParam g_hkdfParams010[] = {
     {
         .tag =  HKS_TAG_ALGORITHM,
-        .uint32Param = HKS_ALG_HKDF
+        .uint32Param = HKS_ALG_HMAC
     }, {
         .tag =  HKS_TAG_PURPOSE,
         .uint32Param = HKS_KEY_PURPOSE_DERIVE
@@ -98,6 +84,18 @@ static struct HksParam g_hkdfParams010[] = {
             .size = g_deriveInfo.length(),
             .data = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(g_deriveInfo.c_str()))
         }
+    }
+};
+static struct HksParam g_hkdfFinishParams010[] = {
+    {
+        .tag =  HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_TEMP
+    }, {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_AES
+    }, {
+        .tag =  HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_256
     }
 };
 
@@ -137,6 +135,18 @@ static struct HksParam g_hkdfParams011[] = {
         }
     }
 };
+static struct HksParam g_hkdfFinishParams011[] = {
+    {
+        .tag =  HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ALLOW_KEY_EXPORTED
+    }, {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HMAC
+    }, {
+        .tag =  HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_ECC_KEY_SIZE_384
+    }
+};
 
 static struct HksParam g_genParams012[] = {
     {
@@ -174,6 +184,18 @@ static struct HksParam g_hkdfParams012[] = {
         }
     }
 };
+static struct HksParam g_hkdfFinishParams012[] = {
+    {
+        .tag =  HKS_TAG_DERIVE_AGREE_KEY_STORAGE_FLAG,
+        .uint32Param = HKS_STORAGE_ALLOW_KEY_EXPORTED
+    }, {
+        .tag =  HKS_TAG_ALGORITHM,
+        .uint32Param = HKS_ALG_HMAC
+    }, {
+        .tag =  HKS_TAG_KEY_SIZE,
+        .uint32Param = HKS_AES_KEY_SIZE_512
+    }
+};
 
 /**
  * @tc.name: HksHmacDerivePart2Test.HksHMACDerive010
@@ -196,7 +218,7 @@ HWTEST_F(HksHmacDerivePart2Test, HksHMACDerive010, TestSize.Level0)
     ret = InitParamSet(&hkdfParamSet, g_hkdfParams010, sizeof(g_hkdfParams010) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfStorageParams, sizeof(g_hkdfStorageParams) / sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams010, sizeof(g_hkdfFinishParams010) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -232,8 +254,7 @@ HWTEST_F(HksHmacDerivePart2Test, HksHMACDerive011, TestSize.Level0)
     ret = InitParamSet(&hkdfParamSet, g_hkdfParams011, sizeof(g_hkdfParams011) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishStorageParams,
-        sizeof(g_hkdfFinishStorageParams) / sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams011, sizeof(g_hkdfFinishParams011) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
@@ -269,8 +290,7 @@ HWTEST_F(HksHmacDerivePart2Test, HksHMACDerive012, TestSize.Level0)
     ret = InitParamSet(&hkdfParamSet, g_hkdfParams012, sizeof(g_hkdfParams012) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // finish paramset
-    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishStorageParams,
-        sizeof(g_hkdfFinishStorageParams) / sizeof(HksParam));
+    ret = InitParamSet(&hkdfFinishParamSet, g_hkdfFinishParams012, sizeof(g_hkdfFinishParams012) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final

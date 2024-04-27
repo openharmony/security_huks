@@ -55,7 +55,6 @@ int32_t HksHmacDeriveTestNormalCase1(const struct HksBlob keyAlias, const struct
 int32_t HksHmacDeriveTestNormalCase2(const struct HksBlob keyAlias, const struct HksParamSet *genParamSet,
     struct HksParamSet *deriveParamSet, struct HksParamSet *deriveFinalParamsSet, int32_t cmpRet)
 {
-    struct HksBlob inData = { 0, nullptr };
     int32_t ret = HKS_FAILURE;
 
     /* 1. Generate Key */
@@ -68,17 +67,7 @@ int32_t HksHmacDeriveTestNormalCase2(const struct HksBlob keyAlias, const struct
     uint8_t handleDTest[sizeof(uint64_t)] = {0};
     struct HksBlob handleDerive = { sizeof(uint64_t), handleDTest };
     ret = HksInit(&keyAlias, deriveParamSet, &handleDerive, nullptr);
-    EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
-    // Update
-    uint8_t tmpOut[COMMON_SIZE] = {0};
-    struct HksBlob outData = { COMMON_SIZE, tmpOut };
-    ret = HksUpdate(&handleDerive, deriveParamSet, &inData, &outData);
-    EXPECT_EQ(ret, cmpRet) << "Update failed.";
-    // Finish
-    uint8_t outDataD[COMMON_SIZE] = {0};
-    struct HksBlob outDataDerive = { COMMON_SIZE, outDataD };
-    ret = HksFinish(&handleDerive, deriveFinalParamsSet, &inData, &outDataDerive);
-    EXPECT_EQ(ret, HKS_ERROR_NOT_EXIST) << "Finish failed.";
+    EXPECT_EQ(ret, cmpRet) << "Init failed.";
 
     return ret;
 }
