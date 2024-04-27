@@ -601,7 +601,7 @@ HWTEST_F(HksHmacDerivePart1Test, HksHMACDerive005, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
-    HksHmacDeriveTestNormalCase2(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_ERROR_INVALID_ARGUMENT);
+    HksHmacDeriveTestNormalCase2(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_ERROR_INVALID_KEY_SIZE);
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
@@ -640,7 +640,7 @@ HWTEST_F(HksHmacDerivePart1Test, HksHMACDerive006, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
-    HksHmacDeriveTestNormalCase2(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_ERROR_INVALID_ARGUMENT);
+    HksHmacDeriveTestNormalCase2(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_ERROR_INVALID_KEY_SIZE);
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
@@ -679,8 +679,7 @@ HWTEST_F(HksHmacDerivePart1Test, HksHMACDerive007, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     // Init-Update-final
-    HksHmacDeriveTestNormalCase2(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet,
-        HKS_ERROR_CHECK_GET_DIGEST_FAIL);
+    HksHmacDeriveTestNormalCase2(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_ERROR_INVALID_KEY_SIZE);
     /* 3. Delete Key */
     ret = HksDeleteKey(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
