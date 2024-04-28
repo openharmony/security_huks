@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -72,6 +72,10 @@ int32_t HksCertificateChainUnpack(const struct HksBlob *srcData, struct HksBlob 
     struct HksParamSet **paramSet, struct HksBlob *certChainBlob);
 
 int32_t HksParamSetToParams(const struct HksParamSet *paramSet, struct HksParamOut *outParams, uint32_t cnt);
+
+int32_t HksListAliasesUnpack(const struct HksBlob *srcData, struct HksParamSet **paramSet);
+
+int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, struct HksBlob *destData);
 
 #ifdef __cplusplus
 }

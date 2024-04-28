@@ -859,5 +859,103 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
     HKS_FREE(userData);
     HKS_FREE(uidData);
 }
+
+static int32_t getHksKeyAliasSet(const struct HksFileEntry *fileNameList, const uint32_t fileCount,
+    struct HksKeyAliasSet **outData)
+{
+    if (fileCount == 0) {
+        return HKS_SUCCESS;
+    }
+
+    int32_t ret;
+    struct HksKeyAliasSet *tempAliasSet = (struct HksKeyAliasSet *)(HksMalloc(sizeof(struct HksKeyAliasSet)));
+    HKS_IF_NULL_LOGE_RETURN(tempAliasSet, HKS_ERROR_MALLOC_FAIL, "malloc key alias set failed")
+    tempAliasSet->aliasesCnt = fileCount;
+
+    do {
+        tempAliasSet->aliases = (struct HksBlob *)HksMalloc(fileCount * sizeof(struct HksBlob));
+        if (tempAliasSet->aliases == NULL) {
+            HKS_LOG_E("malloc aliases fail");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+
+        for (uint32_t i = 0; i < fileCount; i++) {
+            uint32_t size = strlen(fileNameList[i].fileName);
+            tempAliasSet->aliases[i].size = size;
+            tempAliasSet->aliases[i].data = (uint8_t *)HksMalloc(size);
+            if (tempAliasSet->aliases[i].data == NULL) {
+                HKS_LOG_E("malloc alias %" LOG_PUBLIC "d fail", i);
+                ret = HKS_ERROR_MALLOC_FAIL;
+                break;
+            }
+
+            ret = ConstructBlob(fileNameList[i].fileName, &(tempAliasSet->aliases[i]));
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "construct blob failed, ret = %" LOG_PUBLIC "d", ret)
+        }
+    } while (0);
+
+    if (ret != HKS_SUCCESS) {
+        HksFreeKeyAliasSet(tempAliasSet);
+        return ret;
+    }
+
+    *outData = tempAliasSet;
+    return ret;
+}
+
+static int32_t getHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList)
+{
+    uint32_t fileCount;
+    int32_t ret = GetFileCount(fileInfo->mainPath.path, &fileCount);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get storage file count, ret = %" LOG_PUBLIC "d.", ret)
+    if (fileCount == 0) {
+        return HKS_SUCCESS;
+    }
+    if (fileCount > HKS_MAX_KEY_ALIAS_COUNT) {
+        HKS_LOG_E("file count too long, count = %" LOG_PUBLIC "u.", fileCount);
+        return HKS_ERROR_BUFFER_TOO_SMALL;
+    }
+
+    struct HksFileEntry *tempFileNameList = NULL;
+    do {
+        ret = FileNameListInit(&tempFileNameList, fileCount);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init file name list failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetFileNameList(fileInfo->mainPath.path, tempFileNameList, &fileCount);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file name list failed, ret = %" LOG_PUBLIC "d", ret)
+    } while (0);
+
+    if (ret != HKS_SUCCESS) {
+        FileNameListFree(&tempFileNameList, fileCount);
+        return ret;
+    }
+
+    tempFileNameList->fileNameLen = fileCount;
+    *fileNameList = tempFileNameList;
+    return ret;
+}
+
+int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, struct HksKeyAliasSet **outData)
+{
+    int32_t ret;
+    struct HksFileEntry *fileNameList = NULL;
+    do {
+        ret = getHksFileEntry(fileInfo, &fileNameList);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file entry failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        // case success and has data
+        if (fileNameList != NULL) {
+            ret = getHksKeyAliasSet(fileNameList, fileNameList->fileNameLen, outData);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias set failed, ret = %" LOG_PUBLIC "d.", ret)
+        }
+    } while (0);
+
+    if (fileNameList != NULL) {
+        FileNameListFree(&fileNameList, fileNameList->fileNameLen);
+    }
+    return ret;
+}
+
 #endif
 #endif /* _CUT_AUTHENTICATE_ */

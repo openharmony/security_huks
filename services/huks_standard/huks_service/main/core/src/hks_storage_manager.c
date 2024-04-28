@@ -463,4 +463,33 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
     return ret;
 }
 
+int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
+    struct HksKeyAliasSet **outData)
+{
+#ifdef L2_STANDARD
+    struct HksStoreFileInfo fileInfo = { 0 };
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    int32_t ret;
+    do {
+        ret = InitStorageMaterial(processInfo, paramSet, NULL, HKS_STORAGE_TYPE_KEY, &material);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init storage material failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        ret = HksListAliasesByProcessName(&fileInfo, outData);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks list aliases by processname failed, ret = %" LOG_PUBLIC "d.", ret)
+    } while (0);
+
+    FileInfoFree(&fileInfo);
+    FreeStorageMaterial(&material);
+    return ret;
+#else
+    (void)processInfo;
+    (void)paramSet;
+    (void)outData;
+    return HKS_SUCCESS;
+#endif
+}
+
 #endif

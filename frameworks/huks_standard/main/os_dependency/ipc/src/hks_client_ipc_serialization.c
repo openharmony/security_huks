@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -512,5 +512,64 @@ int32_t HksParamsToParamSet(struct HksParam *params, uint32_t cnt, struct HksPar
 
     *outParamSet = newParamSet;
 
+    return ret;
+}
+
+int32_t HksListAliasesPack(const struct HksParamSet *srcParamSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret = CopyParamSetToBuffer(srcParamSet, destData, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "copy paramSet failed")
+    return HKS_SUCCESS;
+}
+
+int32_t HksListAliasesUnpackFromService(const struct HksBlob *srcBlob, struct HksKeyAliasSet **destData)
+{
+    if (srcBlob->size == 0) {
+        return HKS_SUCCESS;
+    }
+    int32_t ret = 0;
+    uint32_t offset = 0;
+    uint32_t cntFromBuffer;
+
+    ret = GetUint32FromBuffer(&cntFromBuffer, srcBlob, &offset);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get cnt failed")
+    HKS_IF_NOT_TRUE_LOGE_RETURN((cntFromBuffer <= HKS_MAX_KEY_ALIAS_COUNT), HKS_ERROR_BUFFER_TOO_SMALL);
+
+    struct HksKeyAliasSet *tempAliasSet = (struct HksKeyAliasSet *)(HksMalloc(sizeof(struct HksKeyAliasSet)));
+    HKS_IF_NULL_LOGE_RETURN(tempAliasSet, HKS_ERROR_MALLOC_FAIL, "malloc HksKeyAliasSet fail")
+
+    tempAliasSet->aliasesCnt = cntFromBuffer;
+    struct HksBlob tmpBlob = { 0, NULL };
+    do {
+        tempAliasSet->aliases = (struct HksBlob *)(HksMalloc(cntFromBuffer * sizeof(struct HksBlob)));
+        if (tempAliasSet->aliases == NULL) {
+            HKS_LOG_E("malloc HksKeyAliasSet aliases fail");
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        for (uint32_t i = 0; i < cntFromBuffer; ++i) {
+            ret = GetBlobFromBuffer(&tmpBlob, srcBlob, &offset);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get aliases %" LOG_PUBLIC "d fail", i)
+
+            tempAliasSet->aliases[i].size = tmpBlob.size;
+            tempAliasSet->aliases[i].data = (uint8_t *)HksMalloc(tempAliasSet->aliases[i].size);
+            if (tempAliasSet->aliases[i].data == NULL) {
+                HKS_LOG_E("malloc alias %" LOG_PUBLIC "d fail", i);
+                ret = HKS_ERROR_MALLOC_FAIL;
+                break;
+            }
+            if (memcpy_s(tempAliasSet->aliases[i].data, tempAliasSet->aliases[i].size, tmpBlob.data, tmpBlob.size)) {
+                HKS_LOG_E("copy blob %" LOG_PUBLIC "d fail", i);
+                ret = HKS_ERROR_BUFFER_TOO_SMALL;
+                break;
+            }
+        }
+    } while (0);
+    if (ret != HKS_SUCCESS) {
+        HksFreeKeyAliasSet(tempAliasSet);
+        return ret;
+    }
+    *destData = tempAliasSet;
     return ret;
 }
