@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -54,6 +54,8 @@ int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, const st
 
 int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct HksParamSet *paramSet,
     const struct HksCertChain *certChain);
+
+int32_t HksCheckIpcListAliases(const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }

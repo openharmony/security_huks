@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -129,5 +129,12 @@ struct OH_Huks_Result OH_Huks_AbortSession(const struct OH_Huks_Blob *handle,
     const struct OH_Huks_ParamSet *paramSet)
 {
     int32_t result = HksAbort((const struct HksBlob *) handle, (const struct HksParamSet *) paramSet);
+    return ConvertApiResult(result);
+}
+
+struct OH_Huks_Result OH_Huks_ListAliases(const struct OH_Huks_ParamSet *paramSet,
+    struct OH_Huks_KeyAliasSet **outData)
+{
+    int32_t result = HksListAliases((const struct HksParamSet *) paramSet, (struct HksKeyAliasSet **) outData);
     return ConvertApiResult(result);
 }

@@ -946,3 +946,41 @@ void HksIpcServiceExportChipsetPlatformPublicKey(
     HksFreeParamSet(&paramSet);
 }
 #endif
+
+void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *context)
+{
+    struct HksParamSet *paramSet = NULL;
+    struct HksKeyAliasSet *keyAliasSet = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    struct HksBlob outBlob = { 0, NULL };
+    int32_t ret;
+
+    do {
+        ret = HksListAliasesUnpack(srcData, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpack fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceListAliases(&processInfo, paramSet, &keyAliasSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksServiceListAliases fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksListAliasesPackFromService(keyAliasSet, &outBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesPackFromService fail")
+    } while (0);
+
+    // query success and key size is not 0
+    if (ret == HKS_SUCCESS && outBlob.size != 0) {
+        HksSendResponse(context, ret, &outBlob);
+    } else {
+        HksSendResponse(context, ret, NULL);
+    }
+
+    HksFreeKeyAliasSet(keyAliasSet);
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+    HKS_FREE_BLOB(outBlob);
+}
