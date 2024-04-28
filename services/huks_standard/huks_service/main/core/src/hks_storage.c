@@ -944,8 +944,11 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
         ret = getHksFileEntry(fileInfo, &fileNameList);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file entry failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = getHksKeyAliasSet(fileNameList, fileNameList->fileNameLen, outData);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias set failed, ret = %" LOG_PUBLIC "d.", ret)
+        // case success and has data
+        if (fileNameList != NULL) {
+            ret = getHksKeyAliasSet(fileNameList, fileNameList->fileNameLen, outData);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias set failed, ret = %" LOG_PUBLIC "d.", ret)
+        }
     } while (0);
 
     if (fileNameList != NULL) {
