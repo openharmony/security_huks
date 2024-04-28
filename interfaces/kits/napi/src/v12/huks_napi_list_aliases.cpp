@@ -65,7 +65,9 @@ static void DeleteListAliasesAsyncContext(napi_env env, ListAliasesAsyncContext 
     if (context->paramSet != nullptr) {
         HksFreeParamSet(&context->paramSet);
     }
-    FreeHksKeyAliasSet(context->outSet, context->outSet->aliasesCnt);
+    if (context->outSet !=  nullptr) {
+        FreeHksKeyAliasSet(context->outSet, context->outSet->aliasesCnt);
+    }
 
     HKS_FREE(context);
     context = nullptr;
