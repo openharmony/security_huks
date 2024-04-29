@@ -99,7 +99,7 @@ static int32_t RetryLoadPlugin(void)
 {
     if (HksCreatePluginProxy() != HKS_SUCCESS) {
         HKS_LOG_E("Failed to create the plugin again.");
-        return HKS_ERROR_LOAD_PLUGIN_FAILED;
+        return HKS_ERROR_LOAD_PLUGIN_FAIL;
     }
     return HKS_SUCCESS;
 }
@@ -135,7 +135,7 @@ int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *o
 
 int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply)
 {
-    HKS_IF_NOT_SUCC_RETURN(RetryLoadPlugin(), HKS_ERROR_LOAD_PLUGIN_FAILED);
+    HKS_IF_NOT_SUCC_RETURN(RetryLoadPlugin(), HKS_ERROR_LOAD_PLUGIN_FAIL);
     return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
 }
 
