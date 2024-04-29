@@ -28,10 +28,11 @@
 extern "C" {
 #endif
 
-void HksInitPluginProxyMutex(void);
-int32_t HksCreatePluginProxy(void);
-void HksDestoryPluginProxy(void);
-struct HksPluginProxy *HksGetPluginProxy(void);
+int32_t HksInitPluginProxy(void);
+
+int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *option);
+int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply);
+void HksPluginOnReceiveEvent(const void *data);
 
 #ifdef __cplusplus
 }
