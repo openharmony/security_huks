@@ -26,10 +26,10 @@
 #include "hks_template.h"
 #include "hks_type.h"
 
-typedef struct HksPluginProxy *(*HksGetPluginProxyFunc)();
+using HksGetPluginProxyFunc = struct HksPluginProxy *(*)();
 
 static void *g_pluginHandler = nullptr;
-static HksMutex *g_pluginMutex = NULL;
+static HksMutex *g_pluginMutex = nullptr;
 static struct HksPluginProxy *g_pluginProxy = nullptr;
 
 static struct HksBasicInterface g_interfaceInst = {
@@ -47,20 +47,35 @@ static struct HksBasicInterface g_interfaceInst = {
     .appendStorageParamsForQuery = AppendStorageLevelIfNotExist,
 };
 
-void HksInitPluginProxyMutex(void)
+static void HksDestoryPluginProxy(void)
 {
-    g_pluginMutex = HksMutexCreate();
+    if (HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
+        HKS_LOG_E("lock mutex for plugin proxy failed.");
+        return;
+    }
+
+    if (g_pluginProxy != nullptr) {
+        g_pluginProxy->hksPluginDestory();
+        g_pluginProxy = nullptr;
+    }
+
+    if (g_pluginHandler != nullptr) {
+        dlclose(g_pluginHandler);
+        g_pluginHandler = nullptr;
+    }
+
+    (void)HksMutexClose(g_pluginMutex);
 }
 
 /* It is invoked when service initialize */
-ENABLE_CFI(int32_t HksCreatePluginProxy(void))
+ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
 {
     if (HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
         HKS_LOG_E("lock mutex for plugin proxy failed");
         return HKS_ERROR_BAD_STATE;
     }
+
     int32_t ret = HKS_ERROR_NULL_POINTER;
-    struct HksPluginProxy *pluginProxy = nullptr;
     do {
         if (g_pluginProxy != nullptr) {
             ret = HKS_SUCCESS;
@@ -73,13 +88,11 @@ ENABLE_CFI(int32_t HksCreatePluginProxy(void))
         HksGetPluginProxyFunc func = (HksGetPluginProxyFunc)dlsym(g_pluginHandler, "HksGetPluginProxy");
         HKS_IF_NULL_LOGE_BREAK(func, "dlsym for plugin proxy failed")
 
-        pluginProxy = func();
-        HKS_IF_NULL_LOGE_BREAK(pluginProxy, "HksGetPluginProxy result is null")
+        g_pluginProxy = func();
+        HKS_IF_NULL_LOGE_BREAK(g_pluginProxy, "HksGetPluginProxy result is null")
 
-        ret = pluginProxy->HksPluginInit(&g_interfaceInst);
+        ret = g_pluginProxy->hksPluginInit(&g_interfaceInst);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init plugin failed, ret = %" LOG_PUBLIC "d", ret)
-
-        g_pluginProxy = pluginProxy;
     } while (0);
 
     (void)HksMutexUnlock(g_pluginMutex);
@@ -89,32 +102,53 @@ ENABLE_CFI(int32_t HksCreatePluginProxy(void))
     return ret;
 }
 
-void HksDestoryPluginProxy(void)
+static int32_t RetryLoadPlugin(void)
 {
-    if (g_pluginMutex == NULL || HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
-        HKS_LOG_E("lock mutex for plugin proxy failed");
-        return;
+    if (HksCreatePluginProxy() != HKS_SUCCESS) {
+        HKS_LOG_E("Failed to create the plugin again.");
+        return HKS_ERROR_LOAD_PLUGIN_FAILED;
     }
-
-    if (g_pluginProxy != nullptr) {
-        g_pluginProxy->HksPluginDestory();
-        g_pluginProxy = nullptr;
-    }
-
-    if (g_pluginHandler != nullptr) {
-        dlclose(g_pluginHandler);
-        g_pluginHandler = nullptr;
-    }
-
-    (void)HksMutexUnlock(g_pluginMutex);
-    HksMutexClose(g_pluginMutex);
-    g_pluginMutex = NULL;
+    return HKS_SUCCESS;
 }
 
-struct HksPluginProxy *HksGetPluginProxy(void)
+int32_t HksInitPluginProxy(void)
 {
-    if (g_pluginProxy == nullptr) {
-        HKS_LOG_I("g_pluginProxy is null");
+    if (g_pluginMutex == nullptr) {
+        g_pluginMutex = HksMutexCreate();
     }
-    return g_pluginProxy;
+
+    if (g_pluginMutex == nullptr) {
+        HKS_LOG_E("Hks plugin mutex init failed, null pointer!");
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    int32_t ret = HksCreatePluginProxy();
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_W("Create plugin proxy failed, ret = %" LOG_PUBLIC "d", ret);
+    }
+    return HKS_SUCCESS; // Try to load the plugin again while the plugin is in use.
+}
+
+int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *option)
+{
+    int32_t ret = RetryLoadPlugin();
+    if (ret != HKS_SUCCESS) {
+        HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
+        return HKS_SUCCESS; // send error code by IPC.
+    }
+
+    return g_pluginProxy->hksPluginOnRemoteRequest(code, data, reply, option);
+}
+
+int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply)
+{
+    HKS_IF_NOT_SUCC_RETURN(RetryLoadPlugin(), HKS_ERROR_LOAD_PLUGIN_FAILED);
+    return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
+}
+
+void HksPluginOnReceiveEvent(const void *data)
+{
+    if (RetryLoadPlugin() == HKS_SUCCESS) {
+        g_pluginProxy->hksPluginOnReceiveEvent(data);
+    }
 }

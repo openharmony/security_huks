@@ -41,6 +41,10 @@ struct HksProcessInfo {
     uint64_t accessTokenId;
 };
 
+enum LocalRequestCode {
+    CODE_UPGRADE = 1,
+};
+
 /**
  * @brief hks base ability interface
  */
@@ -72,10 +76,11 @@ struct HksBasicInterface {
  * @brief hks plugin proxy
  */
 struct HksPluginProxy {
-    int32_t (*HksPluginInit)(struct HksBasicInterface *interfaceInst);
-    void (*HksPluginDestory)(void);
-    int32_t (*HksPluginOnRemoteRequest)(uint32_t code, void *data, void *reply, void *option);
-    void (*HksPluginOnReceiveEvent)(void *eventData);
+    int32_t (*hksPluginInit)(struct HksBasicInterface *interfaceInst);
+    void (*hksPluginDestory)(void);
+    int32_t (*hksPluginOnRemoteRequest)(uint32_t code, void *data, void *reply, void *option);
+    int32_t (*hksPluginOnLocalRequest)(uint32_t code, const void *data, void *reply);
+    void (*hksPluginOnReceiveEvent)(const void *eventData);
 };
 
 #ifdef __cplusplus

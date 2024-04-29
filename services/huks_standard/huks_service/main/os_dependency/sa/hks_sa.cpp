@@ -322,18 +322,6 @@ static int32_t ProcessAttestOrNormalMessage(
     }
 }
 
-int HksService::OnRemotePluginRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
-{
-    int ret = HksCreatePluginProxy();
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_I("create plugin proxy failed, ret = %" LOG_PUBLIC "d", ret);
-    }
-    if (HksGetPluginProxy() == nullptr) {
-        return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
-    }
-    return HksGetPluginProxy()->HksPluginOnRemoteRequest(code, &data, &reply, &option);
-}
-
 int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
 {
     HksInitMemPolicy();
@@ -344,12 +332,10 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
-        return OnRemotePluginRequest(code, data, reply, option);
+        return HksPluginOnRemoteRequest(code, &data, &reply, &option);
     }
     // this is the temporary version which comments the descriptor check
-    std::u16string descriptor = HksService::GetDescriptor();
-    std::u16string remoteDescriptor = data.ReadInterfaceToken();
-    if (descriptor != remoteDescriptor) {
+    if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
         HKS_LOG_E("descriptor is diff.");
         return HW_SYSTEM_ERROR;
     }
@@ -358,6 +344,9 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     struct HksBlob srcData = { 0, nullptr };
     int32_t ret = HKS_SUCCESS;
     do {
+        ret = HksPluginOnLocalRequest(CODE_UPGRADE, NULL, NULL);
+        HKS_IF_NOT_SUCC_BREAK(ret, "Failed to handle local request. ret = %" LOG_PUBLIC "d", ret);
+
         srcData.size = static_cast<uint32_t>(data.ReadUint32());
         if (IsInvalidLength(srcData.size)) {
             HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
