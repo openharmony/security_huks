@@ -48,11 +48,11 @@ public:
     void TearDown();
 };
 
-static const char *ALIAS = "testAlias";
-static const struct HksBlob TEST_KEY_ALIAS = { sizeof(ALIAS), (uint8_t *)ALIAS };
+static const char ALIAS[] = "testAlias";
+static const struct HksBlob TEST_KEY_ALIAS = { strlen(ALIAS), (uint8_t *)ALIAS };
 
-static const char *INVISABLE_ALIAS = "#test(";
-static const struct HksBlob TEST_INVISABLE_KEY_ALIAS = { sizeof(INVISABLE_ALIAS), (uint8_t *)INVISABLE_ALIAS };
+static const char INVISABLE_ALIAS[] = "#test(";
+static const struct HksBlob TEST_INVISABLE_KEY_ALIAS = { strlen(INVISABLE_ALIAS), (uint8_t *)INVISABLE_ALIAS };
 
 static const uint32_t EXPECT_MIN_NUM = 1;
 
