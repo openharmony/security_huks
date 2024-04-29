@@ -17,24 +17,30 @@
 #include "hks_log.h"
 #include "hks_type.h"
 
-void HksInitPluginProxyMutex(void)
-{
-    HKS_LOG_I("Unsupport extension plugin!");
-}
-
-int32_t HksCreatePluginProxy(void)
+int32_t HksInitPluginProxy(void)
 {
     HKS_LOG_I("Unsupport extension plugin!");
     return HKS_SUCCESS;
 }
 
-void HksDestoryPluginProxy(void)
+int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *option)
 {
-    HKS_LOG_I("Unsupport extension plugin!");
+    (void)(code);
+    (void)(data);
+    (void)(reply);
+    (void)(option);
+    return HKS_SUCCESS;
 }
 
-struct HksPluginProxy *HksGetPluginProxy(void)
+int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply)
 {
-    HKS_LOG_I("Unsupport extension plugin!");
-    return NULL;
+    (void)(code);
+    (void)(data);
+    (void)(reply);
+    return HKS_SUCCESS;
+}
+
+void HksPluginOnReceiveEvent(const void *data)
+{
+    (void)(data);
 }

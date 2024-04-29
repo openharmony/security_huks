@@ -1396,7 +1396,8 @@ int32_t HksServiceInitialize(void)
         ret = HuksAccessModuleInit();
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks core service initialize failed! ret = %" LOG_PUBLIC "d", ret)
 
-        HksInitPluginProxyMutex();
+        ret = HksInitPluginProxy();
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init plugin failed, ret=%" LOG_PUBLIC "d", ret);
 
 #ifdef _STORAGE_LITE_
         ret = HksLoadFileToBuffer();
