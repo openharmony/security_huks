@@ -49,11 +49,6 @@ static struct HksBasicInterface g_interfaceInst = {
 
 static void HksDestoryPluginProxy(void)
 {
-    if (HksMutexLock(g_pluginMutex) != HKS_SUCCESS) {
-        HKS_LOG_E("lock mutex for plugin proxy failed.");
-        return;
-    }
-
     if (g_pluginProxy != nullptr) {
         g_pluginProxy->hksPluginDestory();
         g_pluginProxy = nullptr;
@@ -63,8 +58,6 @@ static void HksDestoryPluginProxy(void)
         dlclose(g_pluginHandler);
         g_pluginHandler = nullptr;
     }
-
-    (void)HksMutexClose(g_pluginMutex);
 }
 
 /* It is invoked when service initialize */
@@ -95,10 +88,10 @@ ENABLE_CFI(static int32_t HksCreatePluginProxy(void))
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init plugin failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    (void)HksMutexUnlock(g_pluginMutex);
     if (ret != HKS_SUCCESS) {
         HksDestoryPluginProxy();
     }
+    (void)HksMutexUnlock(g_pluginMutex);
     return ret;
 }
 
