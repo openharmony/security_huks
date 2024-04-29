@@ -1968,10 +1968,12 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
 }
 
 #ifdef HKS_SUPPORT_USER_AUTH_ACCESS_CONTROL
-static int32_t HasValidAuthAccessType(const struct ExpectParams allowAuthAccessTypes, uint32_t authAccessType)
+static int32_t HasValidAuthAccessType(const struct ExpectParams allowAuthAccessTypes,
+    uint32_t authAccessType, uint32_t *matchType)
 {
     for (uint32_t i = 0; i < allowAuthAccessTypes.valueCnt; i++) {
         if ((authAccessType & allowAuthAccessTypes.values[i]) != 0) {
+            *matchType = allowAuthAccessTypes.values[i];
             return HKS_SUCCESS;
         }
     }
@@ -1981,15 +1983,25 @@ static int32_t HasValidAuthAccessType(const struct ExpectParams allowAuthAccessT
 static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint32_t authAccessType)
 {
     uint32_t valuesCnt = HKS_ARRAY_SIZE(g_expectAuthAccessParams);
+    uint32_t validAuthAccessType = 0;
+    uint32_t tempType = 0;
     for (uint32_t i = 0; i < valuesCnt; i++) {
         struct AuthAccessTypeChecker checker = g_expectAuthAccessParams[i];
         if ((checker.userAuthType & userAuthType) != 0 &&
-            HasValidAuthAccessType(checker.allowAuthAccessTypes, authAccessType) != HKS_SUCCESS) {
-            HKS_LOG_E("check access type valid failed");
-            return HKS_ERROR_INVALID_ARGUMENT;
+            HasValidAuthAccessType(checker.allowAuthAccessTypes, authAccessType, &tempType) == HKS_SUCCESS) {
+            validAuthAccessType |= tempType;
         }
     }
-    return HKS_SUCCESS;
+    if ((authAccessType != 0) && (authAccessType == validAuthAccessType)) {
+        if ((authAccessType & HKS_AUTH_ACCESS_ALWAYS_VALID) != 0
+            && (authAccessType &(~HKS_AUTH_ACCESS_ALWAYS_VALID)) != 0) {
+            HKS_LOG_E("auth access type is invalid: ALWAYS_VALID cannot coexist with other type");
+            return HKS_ERROR_INVALID_ACCESS_TYPE;
+        }
+        return HKS_SUCCESS;
+    }
+    HKS_LOG_E("authAccessType %" LOG_PUBLIC "u is not equal to validAuthAccessType %" LOG_PUBLIC "u or is 0");
+    return HKS_ERROR_INVALID_ACCESS_TYPE;
 }
 #endif
 
