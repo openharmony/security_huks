@@ -48,29 +48,28 @@ public:
     void TearDown();
 };
 
-static const char *g_alias = "testAlias";
-const struct HksBlob testKeyAlias = { sizeof(g_alias), (uint8_t *)g_alias };
+static const char ALIAS[] = "testAlias";
+static const struct HksBlob TEST_KEY_ALIAS = { strlen(ALIAS), (uint8_t *)ALIAS };
 
-static const char *g_invisableAlias = "#test(";
-const struct HksBlob testInvisableKeyAlias = { sizeof(g_invisableAlias), (uint8_t *)g_invisableAlias };
+static const char INVISABLE_ALIAS[] = "#test(";
+static const struct HksBlob TEST_INVISABLE_KEY_ALIAS = { strlen(INVISABLE_ALIAS), (uint8_t *)INVISABLE_ALIAS };
 
-static const uint32_t g_expect_min_num = 1;
+static const uint32_t EXPECT_MIN_NUM = 1;
 
-static const uint32_t g_invalid_de_specific_user_id = -1;
-static const uint32_t g_invalid_ce_specific_user_id = 99;
+static const uint32_t INVALID_DE_SPECIFIC_USER_ID = -1;
+static const uint32_t INVALID_CE_SPECIFIC_USER_ID = 99;
 
-static const uint32_t g_valid_ce_specific_user_id = 100;
+static const uint32_t VALID_CE_SPECIFIC_USER_ID = 100;
 
-static const uint32_t g_error_size = 2;
+static const uint32_t ERROR_SIZE = 2;
 
-
-static const std::vector<std::vector<HksParam>> g_initAddParam = {
+static const std::vector<std::vector<HksParam>> INIT_ADD_PARAMS = {
 #ifdef HKS_INTERACT_ABILITY
     {
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_valid_ce_specific_user_id },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = VALID_CE_SPECIFIC_USER_ID },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE },
     }, {
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_valid_ce_specific_user_id },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = VALID_CE_SPECIFIC_USER_ID },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE },
     },
 #endif
@@ -79,7 +78,7 @@ static const std::vector<std::vector<HksParam>> g_initAddParam = {
     }
 };
 
-static const struct HksParam g_initCommonParams[] = {
+static const struct HksParam INIT_COMMON_PARAMS[] = {
     { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_AES },
     { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT },
     { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_AES_KEY_SIZE_128 },
@@ -122,11 +121,12 @@ void HksListAliasesTest::SetUpTestCase(void)
 #endif
 
     struct HksParamSet *paramSet = nullptr;
-    for (std::size_t i = 0; i < g_initAddParam.size(); i++) {
-        ret = HuksTest::TestBuildInitParamSet(g_initCommonParams, g_initAddParam[i], HKS_ARRAY_SIZE(g_initCommonParams), &paramSet);
+    for (std::size_t i = 0; i < INIT_ADD_PARAMS.size(); i++) {
+        ret = HuksTest::TestBuildInitParamSet(INIT_COMMON_PARAMS, INIT_ADD_PARAMS[i],
+            HKS_ARRAY_SIZE(INIT_COMMON_PARAMS), &paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGenerateKey(&testKeyAlias, paramSet, nullptr);
+        ret = HksGenerateKey(&TEST_KEY_ALIAS, paramSet, nullptr);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSet);
@@ -192,7 +192,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest003, TestSize.Level0)
 
     HksFreeParamSet(&queryParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksListAliases failed, ret = " << ret;
-    EXPECT_EQ(outData->aliasesCnt >= g_expect_min_num, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
+    EXPECT_EQ(outData->aliasesCnt >= EXPECT_MIN_NUM, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
     HksFreeKeyAliasSet(outData);
 }
 
@@ -215,7 +215,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest004, TestSize.Level0)
 
     HksFreeParamSet(&queryParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksListAliases failed, ret = " << ret;
-    EXPECT_EQ(outData->aliasesCnt >= g_expect_min_num, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
+    EXPECT_EQ(outData->aliasesCnt >= EXPECT_MIN_NUM, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
     HksFreeKeyAliasSet(outData);
 }
 
@@ -234,7 +234,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest005, TestSize.Level0)
 
     struct HksParamSet *queryParamSet = nullptr;
     struct HksParam addParams[] = {
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_valid_ce_specific_user_id },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = VALID_CE_SPECIFIC_USER_ID },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE }
     };
     ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
@@ -247,7 +247,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest005, TestSize.Level0)
 
 #ifdef HKS_INTERACT_ABILITY
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksListAliases failed, ret = " << ret;
-    EXPECT_EQ(outData->aliasesCnt >= g_expect_min_num, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
+    EXPECT_EQ(outData->aliasesCnt >= EXPECT_MIN_NUM, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
 #else
     EXPECT_EQ(ret, HKS_ERROR_NO_PERMISSION) << "HksListAliases failed, ret = " << ret;
 #endif
@@ -270,7 +270,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest006, TestSize.Level0)
 
     struct HksParamSet *queryParamSet = nullptr;
     struct HksParam addParams[] = {
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_valid_ce_specific_user_id },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = VALID_CE_SPECIFIC_USER_ID },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE }
     };
     ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
@@ -283,7 +283,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest006, TestSize.Level0)
 
 #ifdef HKS_INTERACT_ABILITY
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksListAliases failed, ret = " << ret;
-    EXPECT_EQ(outData->aliasesCnt >= g_expect_min_num, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
+    EXPECT_EQ(outData->aliasesCnt >= EXPECT_MIN_NUM, true) << "HksListAliases failed, cnt = " << outData->aliasesCnt;
 #else
     EXPECT_EQ(ret, HKS_ERROR_NO_PERMISSION) << "HksListAliases failed, ret = " << ret;
 #endif
@@ -307,7 +307,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest007, TestSize.Level0)
 
     struct HksParamSet *queryParamSet = nullptr;
     struct HksParam addParams[] = {
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_invalid_ce_specific_user_id },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = INVALID_CE_SPECIFIC_USER_ID },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE }
     };
 
@@ -344,7 +344,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest008, TestSize.Level0)
 
     struct HksParamSet *queryParamSet = nullptr;
     struct HksParam addParams[] = {
-        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = g_invalid_de_specific_user_id },
+        { .tag = HKS_TAG_SPECIFIC_USER_ID, .int32Param = INVALID_DE_SPECIFIC_USER_ID },
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE }
     };
     ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
@@ -379,7 +379,7 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest009, TestSize.Level0)
     int32_t ret = HuksTest::TestBuildParamSet(addParams, sizeof(addParams) / sizeof(addParams[0]), &queryParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HuksTest::TestBuildParamSet failed, ret = " << ret;
 
-    queryParamSet->paramsCnt = g_error_size;
+    queryParamSet->paramsCnt = ERROR_SIZE;
 
     struct HksKeyAliasSet *outData = nullptr;
     ret = HksListAliases(queryParamSet, &outData);
@@ -389,11 +389,12 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest009, TestSize.Level0)
     HksFreeKeyAliasSet(outData);
 }
 
-static bool IsMatch(const HksKeyAliasSet *aliasSet) {
+static bool IsMatch(const HksKeyAliasSet *aliasSet)
+{
     bool ret = false;
     if (aliasSet->aliasesCnt > 0 && aliasSet->aliases != NULL) {
         for (uint32_t i = 0; i < aliasSet->aliasesCnt; i++) {
-            if (HksMemCmp(aliasSet->aliases[i].data, testInvisableKeyAlias.data, testInvisableKeyAlias.size)) {
+            if (HksMemCmp(aliasSet->aliases[i].data, TEST_INVISABLE_KEY_ALIAS.data, TEST_INVISABLE_KEY_ALIAS.size)) {
                 return true;
             }
         }
@@ -414,8 +415,9 @@ HWTEST_F(HksListAliasesTest, HksListAliasesTest010, TestSize.Level0)
     const std::vector<HksParam> param = {
         { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
     };
-    int32_t ret = HuksTest::TestBuildInitParamSet(g_initCommonParams, param, HKS_ARRAY_SIZE(g_initCommonParams), &initParamSet);
-    ret = HksGenerateKey(&testInvisableKeyAlias, initParamSet, nullptr);
+    int32_t ret = HuksTest::TestBuildInitParamSet(INIT_COMMON_PARAMS, param, HKS_ARRAY_SIZE(INIT_COMMON_PARAMS),
+        &initParamSet);
+    ret = HksGenerateKey(&TEST_INVISABLE_KEY_ALIAS, initParamSet, nullptr);
     ASSERT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&initParamSet);
 

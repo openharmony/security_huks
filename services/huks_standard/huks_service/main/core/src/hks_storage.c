@@ -860,7 +860,7 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
     HKS_FREE(uidData);
 }
 
-static int32_t getHksKeyAliasSet(const struct HksFileEntry *fileNameList, const uint32_t fileCount,
+static int32_t GetHksKeyAliasSet(const struct HksFileEntry *fileNameList, const uint32_t fileCount,
     struct HksKeyAliasSet **outData)
 {
     if (fileCount == 0) {
@@ -904,7 +904,7 @@ static int32_t getHksKeyAliasSet(const struct HksFileEntry *fileNameList, const 
     return ret;
 }
 
-static int32_t getHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList)
+static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList)
 {
     uint32_t fileCount;
     int32_t ret = GetFileCount(fileInfo->mainPath.path, &fileCount);
@@ -941,12 +941,12 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
     int32_t ret;
     struct HksFileEntry *fileNameList = NULL;
     do {
-        ret = getHksFileEntry(fileInfo, &fileNameList);
+        ret = GetHksFileEntry(fileInfo, &fileNameList);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file entry failed, ret = %" LOG_PUBLIC "d.", ret)
 
         // case success and has data
         if (fileNameList != NULL) {
-            ret = getHksKeyAliasSet(fileNameList, fileNameList->fileNameLen, outData);
+            ret = GetHksKeyAliasSet(fileNameList, fileNameList->fileNameLen, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias set failed, ret = %" LOG_PUBLIC "d.", ret)
         }
     } while (0);
