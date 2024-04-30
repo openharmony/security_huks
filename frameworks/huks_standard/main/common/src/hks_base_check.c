@@ -2000,7 +2000,8 @@ static int32_t HksCheckAuthAccessTypeByUserAuthType(uint32_t userAuthType, uint3
         }
         return HKS_SUCCESS;
     }
-    HKS_LOG_E("authAccessType %" LOG_PUBLIC "u is not equal to validAuthAccessType %" LOG_PUBLIC "u or is 0");
+    HKS_LOG_E("authAccessType %" LOG_PUBLIC "u is not equal to validAuthAccessType %" LOG_PUBLIC "u or is 0",
+        authAccessType, validAuthAccessType);
     return HKS_ERROR_INVALID_ACCESS_TYPE;
 }
 #endif
