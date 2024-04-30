@@ -51,7 +51,7 @@ static ListAliasesAsyncContext CreateListAliasesAsyncContext()
 
 static void DeleteListAliasesAsyncContext(napi_env env, ListAliasesAsyncContext &context)
 {
-    if (context== nullptr) {
+    if (context == nullptr) {
         return;
     }
     if (context->asyncWork != nullptr) {
