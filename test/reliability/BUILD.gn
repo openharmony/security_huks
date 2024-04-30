@@ -45,10 +45,12 @@ ohos_reliabilitytest("huks_stability_test") {
 
   deps = [
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
   ]
+  if (os_level == "standard") {
+    external_deps += [ "googletest:gtest" ]
+  }
 }

@@ -57,7 +57,8 @@
           "openssl",
           "bounds_checking_function",
           "mbedtls",
-          "cJSON"
+          "cJSON",
+          "googletest"
         ]
       },
       "build": {

@@ -77,7 +77,6 @@ ohos_unittest("crypto_engine_unit_test") {
   }
 
   configs = [
-    "//commonlibrary/c_utils/base:utils_config",
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
 
@@ -85,12 +84,15 @@ ohos_unittest("crypto_engine_unit_test") {
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_util_standard_static",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  if (os_level == "standard") {
+    external_deps += [ "googletest:gtest" ]
+  }
 
   cflags = [
     "-Wall",
