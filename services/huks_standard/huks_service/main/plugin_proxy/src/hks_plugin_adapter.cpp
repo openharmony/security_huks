@@ -135,7 +135,9 @@ int32_t HksPluginOnRemoteRequest(uint32_t code, void *data, void *reply, void *o
 
 int32_t HksPluginOnLocalRequest(uint32_t code, const void *data, void *reply)
 {
-    HKS_IF_NOT_SUCC_RETURN(RetryLoadPlugin(), HKS_ERROR_LOAD_PLUGIN_FAIL);
+    if (g_pluginProxy == nullptr) {
+        return HKS_SUCCESS;
+    }
     return g_pluginProxy->hksPluginOnLocalRequest(code, data, reply);
 }
 
