@@ -61,6 +61,9 @@
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
 #include "hks_bms_api_wrap.h"
 #endif
+#ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#include "hks_config_parser.h"
+#endif
 
 static int32_t AppendToNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
@@ -110,42 +113,54 @@ static int32_t AddSpecificUserIdToParamSet(const struct HksOperation *operation,
     return ret;
 }
 
-static int32_t AddStorageLevelToParamSet(struct HksParamSet *paramSet)
+#ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+static int32_t GetStorageLevelForSkipUpgradeApp(const struct HksProcessInfo *processInfo, struct HksParam *storageLevel)
+{
+    if (processInfo == NULL) {
+        return HKS_SUCCESS;
+    }
+    struct HksUpgradeFileTransferInfo info = { 0 };
+    int32_t ret = HksMatchConfig(processInfo->uidInt, processInfo->userIdInt, processInfo->accessTokenId, &info);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "match skip upgarde config failed.")
+    if (info.skipTransfer) {
+        storageLevel->uint32Param = HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP;
+    }
+    return HKS_SUCCESS;
+}
+#endif
+
+static int32_t AddStorageLevelToParamSet(const struct HksProcessInfo *processInfo, struct HksParamSet *paramSet)
 {
     struct HksParam *storageLevel = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_AUTH_STORAGE_LEVEL, &storageLevel);
     if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-        struct HksParam *specificUserId = NULL;
-        ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserId);
         struct HksParam storageLevelParam;
-        if (ret == HKS_SUCCESS) {
-            storageLevelParam.tag = HKS_TAG_AUTH_STORAGE_LEVEL;
-            storageLevelParam.uint32Param = HKS_AUTH_STORAGE_LEVEL_CE;
-        } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
-            storageLevelParam.tag = HKS_TAG_AUTH_STORAGE_LEVEL;
-            storageLevelParam.uint32Param = HKS_AUTH_STORAGE_LEVEL_DE;
-            ret = HKS_SUCCESS;
-        } else {
-            return ret;
-        }
+        storageLevelParam.tag = HKS_TAG_AUTH_STORAGE_LEVEL;
+        storageLevelParam.uint32Param = HKS_AUTH_STORAGE_LEVEL_CE;
+
+#ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+        ret = GetStorageLevelForSkipUpgradeApp(processInfo, &storageLevelParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get default storage level for skip upgrade app failed.")
+#endif
         ret = HksAddParams(paramSet, &storageLevelParam, 1);
     }
     return ret;
 }
 
-static int32_t AppendStorageLevelAndSpecificUserIdToParamSet(const struct HksOperation *operation,
-    struct HksParamSet *paramSet)
+static int32_t AppendStorageLevelAndSpecificUserIdToParamSet(const struct HksProcessInfo *processInfo,
+    const struct HksOperation *operation, struct HksParamSet *paramSet)
 {
     int32_t ret = AddSpecificUserIdToParamSet(operation, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add specific userid tag failed")
 
-    ret = AddStorageLevelToParamSet(paramSet);
+    ret = AddStorageLevelToParamSet(processInfo, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "add storage level tag failed")
 
     return HKS_SUCCESS;
 }
 
-int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+static int32_t AppendStorageLevelIfNotExistInner(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
     int32_t ret;
     struct HksParamSet *newParamSet = NULL;
@@ -158,7 +173,7 @@ int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct 
 
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append tag to new paramset failed")
 
-        ret = AppendStorageLevelAndSpecificUserIdToParamSet(NULL, newParamSet);
+        ret = AppendStorageLevelAndSpecificUserIdToParamSet(processInfo, NULL, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add default strategy failed")
 
         ret = HksBuildParamSet(&newParamSet);
@@ -170,6 +185,11 @@ int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct 
     }
     *outParamSet = newParamSet;
     return ret;
+}
+
+int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    return AppendStorageLevelIfNotExistInner(NULL, paramSet, outParamSet);
 }
 #endif
 
@@ -225,7 +245,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
         ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add processInfo failed")
 #ifdef L2_STANDARD
-        ret = AppendStorageLevelAndSpecificUserIdToParamSet(operation, newParamSet);
+        ret = AppendStorageLevelAndSpecificUserIdToParamSet(processInfo, operation, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add default strategy failed")
 #endif
         ret = HksBuildParamSet(&newParamSet);
@@ -394,7 +414,7 @@ int32_t HksServiceGetKeyInfoList(const struct HksProcessInfo *processInfo, const
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check params failed, ret = %" LOG_PUBLIC "d", ret)
 
 #ifdef L2_STANDARD
-        ret = AppendStorageLevelIfNotExist(paramSet, &newParamSet);
+        ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append storage level failed")
 #else
         const struct HksParamSet *newParamSet = paramSet;
@@ -1068,7 +1088,7 @@ int32_t HksServiceDeleteKey(const struct HksProcessInfo *processInfo, const stru
 
 #ifdef L2_STANDARD
     struct HksParamSet *newParamSet = NULL;
-    ret = AppendStorageLevelIfNotExist(paramSet, &newParamSet);
+    ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
 #else
     const struct HksParamSet *newParamSet = paramSet;
@@ -1109,7 +1129,7 @@ int32_t HksServiceKeyExist(const struct HksProcessInfo *processInfo, const struc
 
 #ifdef L2_STANDARD
     struct HksParamSet *newParamSet = NULL;
-    ret = AppendStorageLevelIfNotExist(paramSet, &newParamSet);
+    ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
 #else
     const struct HksParamSet *newParamSet = paramSet;
@@ -1862,12 +1882,13 @@ int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksP
     }
     return ret;
 }
+
 int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData)
 {
 #ifdef L2_STANDARD
     struct HksParamSet *newParamSet = NULL;
-    int32_t ret = AppendStorageLevelIfNotExist(paramSet, &newParamSet);
+    int32_t ret = AppendStorageLevelIfNotExistInner(processInfo, paramSet, &newParamSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append storage level failed")
 
     do {
