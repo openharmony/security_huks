@@ -114,6 +114,7 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
     external_deps = [
+      "bounds_checking_function:libsec_shared",
       "hilog:libhilog",
       "hitrace:libhitracechain",
     ]
