@@ -481,7 +481,7 @@ HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest005, TestSize.Level0)
 HWTEST_F(HksCheckAuthPartTest, HksCheckAuthTest006, TestSize.Level0)
 {
     HKS_LOG_I("Enter HksCheckAuthTest006");
-    EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_006_PARAMS), HKS_ERROR_INVALID_ARGUMENT);
+    EXPECT_EQ(CheckImportAuthTest(HKS_AUTH_TEST_006_PARAMS), HKS_ERROR_INVALID_ACCESS_TYPE);
 }
 
 /**
