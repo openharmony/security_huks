@@ -15,16 +15,18 @@
 
 #include "hks_config_parser.h"
 
+#include <inttypes.h>
+#include <stdint.h>
+#include <string.h>
+#include <unistd.h>
+
 #include "hks_at_api_wrap.h"
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
-#include <inttypes.h>
-#include <stdint.h>
-#include <string.h>
-#include <unistd.h>
+
 
 static const struct HksFileTransferSystemAbilityConfig SA_UPGRADE_CFG_LIST[] = HUKS_SA_UPGRADE_CONFIG;
 static const struct HksFileTransferHapConfig HAP_UPGRADE_CFG_LIST[] = HUKS_HAP_UPGRADE_CONFIG;
