@@ -124,7 +124,7 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
 
         ret = HksIsFileExist(newPath, alias);
         if (ret == HKS_SUCCESS) {
-            HKS_LOG_E("file %" LOG_PUBLIC "s/%" LOG_PUBLIC "s already exists.", newPath, alias);
+            HKS_LOG_E("file in %" LOG_PUBLIC "s already exists.", newPath);
             // try remove old key file, it is ok if fails.
             (void)HksFileRemove(oldPath, alias);
             break;
@@ -168,9 +168,6 @@ static int32_t SplitPath(const char *fpath, const struct FTW *ftwbuf, char **pat
         return HKS_ERROR_MALLOC_FAIL;
     }
     (void)memcpy_s(*alias, strlen(fpath) - ftwbuf->base, fpath + ftwbuf->base, strlen(fpath) - ftwbuf->base);
-
-    // todo delete : 密钥别名不可打印
-    HKS_LOG_I("alias is %" LOG_PUBLIC "s.", *alias);
 
     *path = (char *)HksMalloc(ftwbuf->base + 1);
     if (*path == NULL) {

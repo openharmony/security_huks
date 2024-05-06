@@ -29,7 +29,7 @@ ohos_static_library("libhuks_upgrade_file_transfer_static") {
     "src/hks_file_transfer.c",
   ]
 
-  include_dirs = [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
+  include_dirs = [ "../../core/include" ]
 
   deps = [
     "../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static",
@@ -50,8 +50,7 @@ ohos_static_library("libhuks_upgrade_file_transfer_static") {
     boundary_sanitize = true
     ubsan = true
   }
-  configs = [
-    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-  ]
+  configs =
+      [ "../../../../../../frameworks/config/build:l2_standard_common_config" ]
   external_deps = [ "hilog:libhilog" ]
 }

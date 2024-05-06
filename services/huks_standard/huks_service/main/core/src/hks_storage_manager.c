@@ -156,7 +156,7 @@ static bool GetIsPlainPath(uint32_t storageLevel)
 #ifdef L2_STANDARD
     switch (storageLevel) {
         case HKS_AUTH_STORAGE_LEVEL_DE:
-            return false;
+            return true;
         case HKS_AUTH_STORAGE_LEVEL_CE:
             return true;
         case HKS_AUTH_STORAGE_LEVEL_ECE:

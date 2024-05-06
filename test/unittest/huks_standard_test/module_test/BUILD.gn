@@ -269,7 +269,7 @@ ohos_unittest("huks_module_test") {
     defines += [ "HKS_USE_RKC_IN_STANDARD" ]
   }
   cflags +=
-    [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
+      [ "-DHKS_CONFIG_KEY_STORE_PATH=\"${huks_key_store_standard_path}\"" ]
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/src/hks_attest_key_test_common.cpp",
     "//base/security/huks/utils/condition/hks_condition.c",

@@ -23,12 +23,9 @@ ohos_unittest("huks_file_transfer_config_parser_test") {
 
   sources = [
     "src/hks_config_parser_test.cpp",
-    # "src/hks_file_transfer_test.cpp",  // todo
   ]
 
-  configs = [
-    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-  ]
+  configs = [ "../../../../../../../../../frameworks/config/build:l2_standard_common_config" ]
 
   include_dirs = [
     "include",
