@@ -34,7 +34,9 @@
 #include "hks_response.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
+#include "hks_upgrade.h"
+#include "hks_upgrade_lock.h"
 #include "hks_util.h"
 #include "huks_service_ipc_interface_code.h"
 
@@ -340,6 +342,12 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         return HW_SYSTEM_ERROR;
     }
 
+    // judge whether is upgrading, wait for upgrade finished
+    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
+        HKS_LOG_E("wait on upgrading failed.");
+        return HW_SYSTEM_ERROR;
+    }
+
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
     struct HksBlob srcData = { 0, nullptr };
     int32_t ret = HKS_SUCCESS;
@@ -491,6 +499,20 @@ void HksService::OnStart()
         return;
     }
 
+    if (HksUpgradeLockCreate() != HKS_SUCCESS) {
+        HKS_LOG_E("create upgrade lock on init failed.");
+        return;
+    }
+    if (HksProcessConditionCreate() != HKS_SUCCESS) {
+        HKS_LOG_E("create process condition on init failed.");
+        return;
+    }
+
+    // lock before huks init, for the upgrading will be thread safe.
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksUpgradeLock();
+#endif
+
     if (!Init()) {
         HKS_LOG_E("Failed to init HksService");
         return;
@@ -499,6 +521,9 @@ void HksService::OnStart()
 #ifdef SUPPORT_COMMON_EVENT
     (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #endif
+
+    // this should be excuted after huks published and listener added.
+    HksUpgradeOnPowerOn();
 
     runningState_ = STATE_RUNNING;
     IPCSkeleton::SetMaxWorkThreadNum(HUKS_IPC_THREAD_NUM);

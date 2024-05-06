@@ -33,6 +33,7 @@ config("l2_standard_common_config") {
   defines = [
     "_HUKS_LOG_ENABLE_",
     "L2_STANDARD",
+    "HKS_ENABLE_CLEAN_FILE",
   ]
   if (!huks_use_rkc_in_standard) {
     defines += [ "_HARDWARE_ROOT_KEY_" ]
@@ -55,6 +56,18 @@ config("l2_standard_common_config") {
     cflags +=
         [ "-DHKS_CONFIG_RKC_STORE_PATH=\"${huks_use_rkc_in_standard_path}\"" ]
     defines += [ "HKS_USE_RKC_IN_STANDARD" ]
+  }
+  if (huks_enable_upgrade_key_storage_secure_level) {
+    defines += [ "HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL" ]
+    cflags += [
+      "-DHUKS_SA_UPGRADE_CONFIG=${huks_sa_upgrade_config}",
+      "-DHUKS_HAP_UPGRADE_CONFIG=${huks_hap_upgrade_config}",
+      "-DHUKS_SA_SKIP_UPGRADE_CONFIG=${huks_sa_skip_upgrade_config}",
+      "-DHUKS_HAP_SKIP_UPGRADE_CONFIG=${huks_hap_skip_upgrade_config}",
+    ]
+    if (huks_enable_skip_upgrade_key_storage_secure_level) {
+      defines += [ "HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL" ]
+    }
   }
 }
 
