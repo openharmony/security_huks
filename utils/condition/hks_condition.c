@@ -70,6 +70,26 @@ int32_t HksConditionNotify(HksCondition *condition)
     return ret;
 }
 
+int32_t HksConditionNotifyAll(HksCondition *condition)
+{
+    HKS_IF_NULL_RETURN(condition, -1)
+
+    int32_t ret = pthread_mutex_lock(&condition->mutex);
+    if (ret != 0) {
+        HKS_LOG_E("condition mutex lock failed.");
+        return ret;
+    }
+
+    if (!condition->waited) {
+        condition->notified = true;
+    } else {
+        condition->notified = false;
+    }
+    ret = pthread_cond_broadcast(&condition->cond);
+    pthread_mutex_unlock(&condition->mutex);
+    return ret;
+}
+
 HksCondition *HksConditionCreate(void)
 {
     HksCondition *condition = (HksCondition *)HksMalloc(sizeof(HksCondition));

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,29 +13,38 @@
  * limitations under the License.
  */
 
-#ifndef HKS_CONDITION_H
-#define HKS_CONDITION_H
+#ifndef HKS_ITERATIVE_READER_H
+#define HKS_ITERATIVE_READER_H
 
-#include "pthread.h"
 #include "hks_type.h"
-
-typedef struct HksCondition HksCondition;
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-HksCondition *HksConditionCreate(void);
+struct HksReadFileInfo {
+    char *path;
+    char *fileName;
+};
 
-int32_t HksConditionWait(HksCondition *condition);
+struct HksReadFileInfoList {
+    struct HksReadFileInfo *infos;
+    uint32_t occu;
+    uint32_t cap;
+};
 
-int32_t HksConditionNotify(HksCondition *condition);
+struct HksIterativeReader {
+    struct HksReadFileInfoList *fileLists;
+    uint32_t curIndex;
+};
 
-int32_t HksConditionNotifyAll(HksCondition *condition);
+int32_t HksInitFileIterativeReader(struct HksIterativeReader *reader, char *path);
 
-void HksConditionDestroy(HksCondition* condition);
+int32_t HksReadFileWithIterativeReader(struct HksIterativeReader *reader, struct HksBlob *fileContent,
+    struct HksBlob *alias, struct HksBlob *path);
 
 #ifdef __cplusplus
 }
 #endif
-#endif
+
+#endif // HKS_ITERATIVE_READER_H

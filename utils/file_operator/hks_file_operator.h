@@ -29,6 +29,9 @@
 #ifdef L2_STANDARD
     #define HKS_KEY_STORE_PATH            HKS_CONFIG_KEY_STORE_PATH "/maindata"
     #define HKS_KEY_STORE_BAK_PATH        HKS_CONFIG_KEY_STORE_PATH "/bakdata"
+    #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+        #define HKS_KEY_STORE_TMP_PATH        HKS_CONFIG_KEY_STORE_PATH "/tmp"
+    #endif
     #define HKS_CE_ROOT_PATH              "/data/service/el2"
     #define HKS_ECE_ROOT_PATH             "/data/service/el4"
     #define HKS_STORE_SERVICE_PATH        "huks_service/maindata"
@@ -57,24 +60,12 @@
     #endif
 #endif
 #define HKS_KEY_STORE_KEY_PATH        "key"
-#define HKS_KEY_STORE_CERTCHAIN_PATH  "certchain"
 #define HKS_KEY_STORE_ROOT_KEY_PATH   "info"
 
 #define HKS_PROCESS_INFO_LEN    128
 #define HKS_MAX_DIRENT_FILE_LEN 128
 struct HksFileDirentInfo {
     char fileName[HKS_MAX_DIRENT_FILE_LEN]; /* point to dirent->d_name */
-};
-
-enum HksStoragePathType {
-    HKS_STORAGE_MAIN_PATH,
-    HKS_STORAGE_BACKUP_PATH,
-#ifdef HKS_USE_RKC_IN_STANDARD
-    HKS_STORAGE_RKC_PATH,
-#endif
-#ifdef HKS_ENABLE_LITE_HAP
-    HKS_STORAGE_LITE_HAP_PATH,
-#endif
 };
 
 #ifdef __cplusplus
@@ -104,19 +95,6 @@ int32_t HksGetDirFile(void *dirp, struct HksFileDirentInfo *direntInfo);
 int32_t HksRemoveDir(const char *dirPath);
 
 int32_t HksDeleteDir(const char *path);
-
-/* return < 0 error; > 0 realFileSize; == 0 no data */
-int32_t HksOldVersionFileRead(const char *fileName, uint32_t offset, uint8_t *buf, uint32_t len);
-
-int32_t HksOldVersionFileRemove(const char *fileName);
-
-/* return < 0 error; >= 0 realFileSize */
-int32_t HksOldVersionFileSize(const char *fileName);
-
-/* return true, exist; false not exist */
-bool HksOldVersionIsFileExist(const char *fileName);
-
-int32_t HksGetStoragePath(enum HksStoragePathType pathType, char *path, uint32_t *len);
 
 int32_t HksGetFileName(const char *path, const char *fileName, char *fullFileName, uint32_t fullFileNameLen);
 

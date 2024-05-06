@@ -78,4 +78,23 @@ declare_args() {
 
   # config is qemu risc-v mini system
   huks_qemu_enabled = false
+
+  # whether enable upgrade key storage secure level
+  huks_enable_upgrade_key_storage_secure_level = true
+
+  # sa upgrade config, organized as {uid, needDe, needFrontUser}
+  huks_sa_upgrade_config = "{ { 0, true, true }, { 1, false, false } }"
+
+  # hap upgrade config, organized as {hapName, needDe, needFrontUser}
+  huks_hap_upgrade_config = "{ { \"com.example.myapplication\", false, true }, { \"com.example.demo2\", false, false } }"
+
+  # whether enable skip upgrade key storage secure level
+  huks_enable_skip_upgrade_key_storage_secure_level = true
+
+  # sa temporary skip upgrade config
+  huks_sa_skip_upgrade_config = "{ 3511, 3512 }"
+
+  # hap temporary skip upgrade config
+  huks_hap_skip_upgrade_config =
+      "{ \"com.example.demo1\", \"com.example.demo2\" }"
 }
