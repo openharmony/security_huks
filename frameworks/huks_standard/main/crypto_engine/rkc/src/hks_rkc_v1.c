@@ -20,6 +20,7 @@
 #include "hks_get_udid.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
 #include "hks_rkc.h"
 #include "hks_storage_manager.h"
 #include "hks_template.h"
@@ -227,17 +228,23 @@ static int32_t RkcDeleteAllKsfV1(void)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INTERNAL_ERROR, "get process info failed")
 
     struct HksBlob fileNameBlob1 = { strlen("info1.data"), (uint8_t *)"info1.data" };
-    ret = HksManageStoreDeleteKeyBlob(&processInfo, NULL, &fileNameBlob1, HKS_STORAGE_TYPE_ROOT_KEY);
+
+    struct HksParamSet *paramSet = NULL;
+    ret = HksRkcBuildParamSet(&paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "rkc build paramset failed")
+
+    ret = HksManageStoreDeleteKeyBlob(&processInfo, paramSet, &fileNameBlob1, HKS_STORAGE_TYPE_ROOT_KEY);
     if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
         HKS_LOG_E("delete rkc keystore file failed, ret = %" LOG_PUBLIC "d", ret);
     }
 
     struct HksBlob fileNameBlob2 = { strlen("info2.data"), (uint8_t *)"info2.data" };
-    ret = HksManageStoreDeleteKeyBlob(&processInfo, NULL, &fileNameBlob2, HKS_STORAGE_TYPE_ROOT_KEY);
+    ret = HksManageStoreDeleteKeyBlob(&processInfo, paramSet, &fileNameBlob2, HKS_STORAGE_TYPE_ROOT_KEY);
     if ((ret != HKS_SUCCESS) && (ret != HKS_ERROR_NOT_EXIST)) {
         HKS_LOG_E("delete rkc keystore file failed, ret = %" LOG_PUBLIC "d", ret);
     }
 
+    HksFreeParamSet(&paramSet);
     return ret;
 }
 
