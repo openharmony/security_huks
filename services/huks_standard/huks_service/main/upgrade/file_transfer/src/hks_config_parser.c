@@ -81,7 +81,6 @@ static int32_t ParseOwnerIdFromFileContent(const struct HksBlob *fileContent, ui
 
 static void InitDefaultStrategy(struct HksUpgradeFileTransferInfo *info)
 {
-    // todo : 改回默认ce
     info->skipTransfer = false;
     info->needDe = false;
     info->needFrontUser = true;

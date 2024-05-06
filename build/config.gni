@@ -92,7 +92,7 @@ declare_args() {
   huks_enable_skip_upgrade_key_storage_secure_level = true
 
   # sa temporary skip upgrade config
-  huks_sa_skip_upgrade_config = "{ 3511, 3512 }"
+  huks_sa_skip_upgrade_config = "{ 0, 3511, 3512 }"
 
   # hap temporary skip upgrade config
   huks_hap_skip_upgrade_config =

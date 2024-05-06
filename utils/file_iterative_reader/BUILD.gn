@@ -44,8 +44,6 @@ ohos_static_library("libhuks_file_iterative_reader_static") {
     boundary_sanitize = true
     ubsan = true
   }
-  configs = [
-    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-  ]
+  configs = [ "../../frameworks/config/build:l2_standard_common_config" ]
   external_deps = [ "hilog:libhilog" ]
 }

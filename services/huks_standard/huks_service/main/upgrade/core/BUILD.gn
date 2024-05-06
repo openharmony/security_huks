@@ -48,8 +48,7 @@ ohos_static_library("libhuks_upgrade_core_static") {
     ubsan = true
   }
 
-  configs = [
-    "//base/security/huks/frameworks/config/build:l2_standard_common_config",
-  ]
+  configs =
+      [ "../../../../../../frameworks/config/build:l2_standard_common_config" ]
   external_deps = [ "hilog:libhilog" ]
 }
