@@ -37,7 +37,7 @@
 #include "base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer/src/hks_config_parser.c"
 
 enum HksAtType g_accessTokenType = HKS_TOKEN_HAP;
-const char *g_hapName = NULL;
+char *g_hapName = NULL;
 
 int32_t HksGetAtType(uint64_t accessTokenId, enum HksAtType *atType)
 {
@@ -88,7 +88,7 @@ void HksServiceUpgradeConfigParserTest::TearDown()
 HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest001");
-    g_hapName = "com.example.demo1";
+    g_hapName = const_cast<char *>("com.example.demo1");
     g_accessTokenType = HKS_TOKEN_HAP;
     struct HksParamSet *paramSet001 = NULL;
     (void)HksInitParamSet(&paramSet001);
@@ -131,7 +131,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest001
 HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest002");
-    g_hapName = "com.example.demo2";
+    g_hapName = const_cast<char *>("com.example.demo2");
     g_accessTokenType = HKS_TOKEN_HAP;
     struct HksParamSet *paramSet002 = NULL;
     (void)HksInitParamSet(&paramSet002);
@@ -174,7 +174,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest002
 HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest003");
-    g_hapName = "com.example.demo3";
+    g_hapName = const_cast<char *>("com.example.demo3");
     g_accessTokenType = HKS_TOKEN_HAP;
     struct HksParamSet *paramSet003 = NULL;
     (void)HksInitParamSet(&paramSet003);
@@ -217,7 +217,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest003
 HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest004");
-    g_hapName = "com.example.demo4";
+    g_hapName = const_cast<char *>("com.example.demo4");
     g_accessTokenType = HKS_TOKEN_HAP;
     struct HksParamSet *paramSet004 = NULL;
     (void)HksInitParamSet(&paramSet004);
@@ -260,7 +260,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest004
 HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest005");
-    g_hapName = "com.example.skip1";
+    g_hapName = const_cast<char *>("com.example.skip1");
     g_accessTokenType = HKS_TOKEN_HAP;
     struct HksParamSet *paramSet005 = NULL;
     (void)HksInitParamSet(&paramSet005);

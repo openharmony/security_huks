@@ -324,30 +324,8 @@ static int32_t ProcessAttestOrNormalMessage(
     }
 }
 
-int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
 {
-    HksInitMemPolicy();
-
-    uint64_t enterTime = 0;
-    (void)HksElapsedRealTime(&enterTime);
-    g_sessionId++;
-    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
-
-    if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
-        return HksPluginOnRemoteRequest(code, &data, &reply, &option);
-    }
-    // this is the temporary version which comments the descriptor check
-    if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
-        HKS_LOG_E("descriptor is diff.");
-        return HW_SYSTEM_ERROR;
-    }
-
-    // judge whether is upgrading, wait for upgrade finished
-    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
-        HKS_LOG_E("wait on upgrading failed.");
-        return HW_SYSTEM_ERROR;
-    }
-
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
     struct HksBlob srcData = { 0, nullptr };
     int32_t ret = HKS_SUCCESS;
@@ -384,6 +362,33 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         HKS_LOG_E("handle ipc msg failed!");
         HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
     }
+}
+
+int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    HksInitMemPolicy();
+
+    uint64_t enterTime = 0;
+    (void)HksElapsedRealTime(&enterTime);
+    g_sessionId++;
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
+
+    if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
+        return HksPluginOnRemoteRequest(code, &data, &reply, &option);
+    }
+    // this is the temporary version which comments the descriptor check
+    if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
+        HKS_LOG_E("descriptor is diff.");
+        return HW_SYSTEM_ERROR;
+    }
+
+    // judge whether is upgrading, wait for upgrade finished
+    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
+        HKS_LOG_E("wait on upgrading failed.");
+        return HW_SYSTEM_ERROR;
+    }
+
+    ProcessRemoteRequest(code, data, reply);
 
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
