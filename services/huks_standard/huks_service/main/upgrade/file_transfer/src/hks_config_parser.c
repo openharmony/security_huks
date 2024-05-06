@@ -33,49 +33,56 @@ static const struct HksFileTransferHapConfig HAP_UPGRADE_CFG_LIST[] = HUKS_HAP_U
 static const uint32_t SA_SKIP_UPGRADE_CFG_LIST[] = HUKS_SA_SKIP_UPGRADE_CONFIG;
 static const char *HAP_SKIP_UPGRADE_CFG_LIST[] = HUKS_HAP_SKIP_UPGRADE_CONFIG;
 
+static int32_t ParseOwnerIdFromParamSet(const struct HksParamSet *paramSet, uint32_t *uid, uint64_t *accessTokenId,
+    uint32_t *userId)
+{
+    bool getUid = false;
+    bool getAccessToken = false;
+    bool getUserId = false;
+    int32_t ret;
+    for (uint32_t i = 0; i < paramSet->paramsCnt; ++i) {
+        if (paramSet->params[i].tag == HKS_TAG_PROCESS_NAME) {
+            // the uid data should be uint32_t
+            if (paramSet->params[i].blob.size != sizeof(uint32_t)) {
+                HKS_LOG_E("process name blob data is over the size of uint32_t.");
+                ret = HKS_ERROR_INVALID_KEY_FILE;
+                break;
+            }
+            *uid = *(uint32_t *)paramSet->params[i].blob.data;
+            getUid = true;
+            continue;
+        }
+        if (paramSet->params[i].tag == HKS_TAG_ACCESS_TOKEN_ID) {
+            *accessTokenId = paramSet->params[i].uint64Param;
+            getAccessToken = true;
+            continue;
+        }
+        if (paramSet->params[i].tag == HKS_TAG_SPECIFIC_USER_ID) {
+            *userId = paramSet->params[i].uint32Param;
+            getUserId = true;
+            continue;
+        }
+        if (paramSet->params[i].tag == HKS_TAG_USER_ID && !getUserId) {
+            *userId = paramSet->params[i].uint32Param;
+            getUserId = true;
+            continue;
+        }
+        if (getUid && getAccessToken && getUserId) {
+            break;
+        }
+    }
+    ret = getUid && getAccessToken && getUserId ? HKS_SUCCESS : HKS_ERROR_INVALID_KEY_FILE;
+    return ret;
+}
+
 static int32_t ParseOwnerIdFromFileContent(const struct HksBlob *fileContent, uint32_t *uid, uint64_t *accessTokenId,
     uint32_t *userId)
 {
     struct HksParamSet *tmpParamSet = NULL;
-    int32_t ret;
-    do {
-        ret = HksGetParamSet((const struct HksParamSet *)fileContent->data, fileContent->size, &tmpParamSet);
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("fresh paramset failed.");
-            break;
-        }
-        bool getUid = false;
-        bool getAccessToken = false;
-        bool getUserId = false;
-        for (uint32_t i = 0; i < tmpParamSet->paramsCnt; ++i) {
-            if (tmpParamSet->params[i].tag == HKS_TAG_PROCESS_NAME) {
-                // the uid data should be uint32_t
-                if (tmpParamSet->params[i].blob.size != sizeof(uint32_t)) {
-                        HKS_LOG_E("process name blob data is over the size of uint32_t.");
-                        ret = HKS_ERROR_INVALID_KEY_FILE;
-                        break;
-                }
-                *uid = *(uint32_t *)tmpParamSet->params[i].blob.data;
-                getUid = true;
-            }
-            if (tmpParamSet->params[i].tag == HKS_TAG_ACCESS_TOKEN_ID) {
-                *accessTokenId = tmpParamSet->params[i].uint64Param;
-                getAccessToken = true;
-            }
-            if (tmpParamSet->params[i].tag == HKS_TAG_SPECIFIC_USER_ID) {
-                *userId = tmpParamSet->params[i].uint32Param;
-                getUserId = true;
-            }
-            if (tmpParamSet->params[i].tag == HKS_TAG_USER_ID && !getUserId) {
-                *userId = tmpParamSet->params[i].uint32Param;
-                getUserId = true;
-            }
-            if (getUid && getAccessToken && getUserId) {
-                break;
-            }
-        }
-        ret = getUid && getAccessToken && getUserId ? HKS_SUCCESS : HKS_ERROR_INVALID_KEY_FILE;
-    } while (false);
+    int32_t ret = HksGetParamSet((const struct HksParamSet *)fileContent->data, fileContent->size, &tmpParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fresh paramset failed.")
+
+    ret = ParseOwnerIdFromParamSet(tmpParamSet, uid, accessTokenId, userId);
     HKS_FREE(tmpParamSet);
     return ret;
 }
