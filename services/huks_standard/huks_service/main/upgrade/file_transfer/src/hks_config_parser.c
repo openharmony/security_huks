@@ -91,7 +91,7 @@ static void InitDefaultStrategy(struct HksUpgradeFileTransferInfo *info)
 {
     info->skipTransfer = false;
     info->needDe = false;
-    info->needFrontUser = true;
+    info->needFrontUser = false;
 }
 
 static int32_t MatchSaConfig(uint32_t uid, uint32_t userId, struct HksUpgradeFileTransferInfo *info)
