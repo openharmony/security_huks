@@ -35,7 +35,6 @@ ohos_static_library("libhuks_upgrade_file_transfer_static") {
     "../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "../../../../../../utils/file_operator:libhuks_utils_file_operator_static",
     "../../systemapi_wrap/at_wrapper:libhuks_at_systemapi_wrap_static",
-    "../../systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static",
   ]
 
   complete_static_lib = true
