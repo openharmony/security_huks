@@ -97,7 +97,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest001
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&userId001,
+                .data = reinterpret_cast<uint8_t *>(&userId001),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -110,7 +110,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest001
     };
     (void)HksAddParams(paramSet001, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet001);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet001, .size = paramSet001->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet001),
+        .size = paramSet001->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(true, info.needDe);
@@ -139,7 +140,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest002
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&userId002,
+                .data = reinterpret_cast<uint8_t *>(&userId002),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -152,7 +153,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest002
     };
     (void)HksAddParams(paramSet002, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet002);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet002, .size = paramSet002->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet002),
+        .size = paramSet002->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(true, info.needDe);
@@ -181,7 +183,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest003
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&userId003,
+                .data = reinterpret_cast<uint8_t *>(&userId003),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -194,7 +196,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest003
     };
     (void)HksAddParams(paramSet003, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet003);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet003, .size = paramSet003->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet003),
+        .size = paramSet003->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(false, info.needDe);
@@ -223,7 +226,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest004
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&userId004,
+                .data = reinterpret_cast<uint8_t *>(&userId004),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -236,7 +239,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest004
     };
     (void)HksAddParams(paramSet004, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet004);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet004, .size = paramSet004->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet004),
+        .size = paramSet004->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(false, info.needDe);
@@ -265,7 +269,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest005
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&userId005,
+                .data = reinterpret_cast<uint8_t *>(&userId005),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -278,7 +282,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest005
     };
     (void)HksAddParams(paramSet005, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet005);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet005, .size = paramSet005->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet005),
+        .size = paramSet005->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(true, info.skipTransfer);
@@ -302,7 +307,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest006
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&uid006,
+                .data = reinterpret_cast<uint8_t *>(&uid006),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -315,7 +320,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest006
     };
     (void)HksAddParams(paramSet006, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet006);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet006, .size = paramSet006->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet006),
+        .size = paramSet006->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(false, info.needDe);
@@ -344,7 +350,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest007
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&uid007,
+                .data = reinterpret_cast<uint8_t *>(&uid007),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -357,7 +363,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest007
     };
     (void)HksAddParams(paramSet007, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet007);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet007, .size = paramSet007->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet007),
+        .size = paramSet007->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(false, info.needDe);
@@ -386,7 +393,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest008
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&uid008,
+                .data = reinterpret_cast<uint8_t *>(&uid008),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -399,7 +406,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest008
     };
     (void)HksAddParams(paramSet008, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet008);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet008, .size = paramSet008->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet008),
+        .size = paramSet008->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(true, info.needDe);
@@ -428,7 +436,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest009
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&uid009,
+                .data = reinterpret_cast<uint8_t *>(&uid009),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -441,7 +449,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest009
     };
     (void)HksAddParams(paramSet009, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet009);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet009, .size = paramSet009->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet009),
+        .size = paramSet009->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(true, info.needDe);
@@ -470,7 +479,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest010
         {
             .tag = HKS_TAG_PROCESS_NAME,
             .blob = {
-                .data = (uint8_t *)&uid010,
+                .data = reinterpret_cast<uint8_t *>(&uid010),
                 .size = sizeof(uint32_t)
             }
         }, {
@@ -483,7 +492,8 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest010
     };
     (void)HksAddParams(paramSet010, params, HKS_ARRAY_SIZE(params));
     (void)HksBuildParamSet(&paramSet010);
-    struct HksBlob fileContent = { .data = (uint8_t *)paramSet010, .size = paramSet010->paramSetSize };
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet010),
+        .size = paramSet010->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
     EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
     EXPECT_EQ(true, info.skipTransfer);
