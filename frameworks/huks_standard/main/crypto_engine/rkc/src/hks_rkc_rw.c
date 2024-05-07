@@ -20,6 +20,7 @@
 #include "hks_get_process_info.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
 #include "hks_rkc.h"
 #include "hks_storage_manager.h"
 #include "hks_template.h"
@@ -63,6 +64,7 @@ int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
     (void)memset_s(tmpKsf->data, tmpKsf->size, 0, tmpKsf->size);
 
     int32_t ret;
+    struct HksParamSet *paramSet = NULL;
     do {
         struct HksProcessInfo processInfo = { {0, NULL}, {0, NULL}, 0, 0, 0 };
         ret = GetProcessInfo(&processInfo);
@@ -70,15 +72,20 @@ int32_t GetKeyBlobKsf(const char *ksfName, struct HksBlob *tmpKsf)
 
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
 
-        ret = HksManageStoreGetKeyBlob(&processInfo, NULL, &fileNameBlob, tmpKsf, HKS_STORAGE_TYPE_ROOT_KEY);
+        ret = HksRkcBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "rkc build paramset failed")
+
+        ret = HksManageStoreGetKeyBlob(&processInfo, paramSet, &fileNameBlob, tmpKsf, HKS_STORAGE_TYPE_ROOT_KEY);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Get ksf file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
+        HksFreeParamSet(&paramSet);
         return HKS_SUCCESS;
     } while (0);
 
     /* the data of root or main key should be cleared after use */
     (void)memset_s(tmpKsf->data, tmpKsf->size, 0, tmpKsf->size);
     HKS_FREE_BLOB(*tmpKsf);
+    HksFreeParamSet(&paramSet);
     return ret;
 }
 
@@ -520,6 +527,7 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
 
     int32_t ret;
+    struct HksParamSet *paramSet = NULL;
     do {
         /* Fill data into buffer */
         ret = FillKsfBufRkc(ksfDataRkc, &ksfBuf);
@@ -531,12 +539,17 @@ int32_t HksWriteKsfRkc(const char *ksfName, const struct HksKsfDataRkcWithVer *k
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-        ret = HksManageStoreKeyBlob(&processInfo, NULL, &fileNameBlob, &ksfBuf, HKS_STORAGE_TYPE_ROOT_KEY);
+
+        ret = HksRkcBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "rkc build paramset failed")
+
+        ret = HksManageStoreKeyBlob(&processInfo, paramSet, &fileNameBlob, &ksfBuf, HKS_STORAGE_TYPE_ROOT_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "Store rkc ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
     HKS_FREE_BLOB(ksfBuf);
+    HksFreeParamSet(&paramSet);
     return ret;
 }
 
@@ -550,6 +563,7 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
 
     int32_t ret;
+    struct HksParamSet *paramSet = NULL;
     do {
         /* Fill data into buffer */
         ret = FillKsfBufMk(ksfDataMk, &ksfBuf);
@@ -561,12 +575,17 @@ int32_t HksWriteKsfMk(const char *ksfName, const struct HksKsfDataMkWithVer *ksf
 
         /* write buffer data into keystore file */
         const struct HksBlob fileNameBlob = { strlen(ksfName), (uint8_t *)ksfName };
-        ret = HksManageStoreKeyBlob(&processInfo, NULL, &fileNameBlob, &ksfBuf, HKS_STORAGE_TYPE_ROOT_KEY);
+
+        ret = HksRkcBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "rkc build paramset failed")
+
+        ret = HksManageStoreKeyBlob(&processInfo, paramSet, &fileNameBlob, &ksfBuf, HKS_STORAGE_TYPE_ROOT_KEY);
         HKS_IF_NOT_SUCC_LOGE(ret, "Store mk ksf failed! ret = 0x%" LOG_PUBLIC "X", ret)
     } while (0);
 
     (void)memset_s(ksfBuf.data, ksfBuf.size, 0, ksfBuf.size);
     HKS_FREE_BLOB(ksfBuf);
+    HksFreeParamSet(&paramSet);
     return ret;
 }
 
@@ -583,15 +602,21 @@ bool KsfExist(uint8_t ksfType)
         ksfFileName = GetGlobalKsfAttrMk();
     }
 
+    struct HksParamSet *paramSet = NULL;
+    ret = HksRkcBuildParamSet(&paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "rkc build paramset failed")
+
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
         if (ksfFileName->name[i] == NULL) {
             continue;
         }
         struct HksBlob fileNameBlob = { strlen(ksfFileName->name[i]), (uint8_t *)(ksfFileName->name[i]) };
-        if (HksManageStoreIsKeyBlobExist(&processInfo, NULL, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY) == HKS_SUCCESS) {
+        if (HksManageStoreIsKeyBlobExist(&processInfo, paramSet, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY) == HKS_SUCCESS) {
+            HksFreeParamSet(&paramSet);
             return true;
         }
     }
+    HksFreeParamSet(&paramSet);
     return false;
 }
 #endif /* _CUT_AUTHENTICATE_ */

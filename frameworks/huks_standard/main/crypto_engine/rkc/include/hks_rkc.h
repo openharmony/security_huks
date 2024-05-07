@@ -94,6 +94,8 @@ void HksMkClearMem(void);
 
 int32_t HksRkcGetMainKey(struct HksBlob *mainKey);
 
+int32_t HksRkcBuildParamSet(struct HksParamSet **paramSetOut);
+
 #ifdef __cplusplus
 }
 #endif
