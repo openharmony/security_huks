@@ -21,6 +21,7 @@
 #include "hks_get_udid.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_param.h"
 #include "hks_template.h"
 
 #ifdef HKS_ENABLE_UPGRADE_RKC_DERIVE_ALG
@@ -621,5 +622,28 @@ int32_t HksRkcGetMainKey(struct HksBlob *mainKey)
     }
 
     return HKS_SUCCESS;
+}
+
+int32_t HksRkcBuildParamSet(struct HksParamSet **paramSetOut)
+{
+    int32_t ret;
+    struct HksParamSet *paramSet = NULL;
+    do {
+        ret = HksInitParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksInitParamSet failed")
+
+        struct HksParam storageLevelParam;
+        storageLevelParam.tag = HKS_TAG_AUTH_STORAGE_LEVEL;
+        storageLevelParam.uint32Param = HKS_AUTH_STORAGE_LEVEL_DE;
+        ret = HksAddParams(paramSet, &storageLevelParam, 1);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksAddParams failed")
+
+        ret = HksBuildParamSet(&paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksBuildParamSet failed")
+        *paramSetOut = paramSet;
+        return HKS_SUCCESS;
+    } while (0);
+    HksFreeParamSet(&paramSet);
+    return ret;
 }
 #endif /* _CUT_AUTHENTICATE_ */
