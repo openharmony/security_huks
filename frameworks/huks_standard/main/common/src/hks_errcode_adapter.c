@@ -573,7 +573,7 @@ static struct HksError g_errCodeTable[] = {
         .innerErrCode = HKS_ERROR_DEVICE_PASSWORD_UNSET,
         .hksResult = {
             .errorCode = HUKS_ERR_CODE_DEVICE_PASSWORD_UNSET,
-            .errorMsg = "Device password is required but not set.",
+            .errorMsg = "A device password is required but not set.",
             .data = NULL
         }
     },
