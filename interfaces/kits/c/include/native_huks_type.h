@@ -404,7 +404,7 @@ enum  OH_Huks_ErrCode {
     /** Failed to call service. */
     OH_HUKS_ERR_CODE_CALL_SERVICE_FAILED = 12000015,
     /**
-     * Device password is required but not set.
+     * A device password is required but not set.
      *
      * @since 11
      */
