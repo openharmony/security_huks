@@ -611,7 +611,8 @@ bool KsfExist(uint8_t ksfType)
             continue;
         }
         struct HksBlob fileNameBlob = { strlen(ksfFileName->name[i]), (uint8_t *)(ksfFileName->name[i]) };
-        if (HksManageStoreIsKeyBlobExist(&processInfo, paramSet, &fileNameBlob, HKS_STORAGE_TYPE_ROOT_KEY) == HKS_SUCCESS) {
+        if (HksManageStoreIsKeyBlobExist(&processInfo, paramSet, &fileNameBlob,
+            HKS_STORAGE_TYPE_ROOT_KEY) == HKS_SUCCESS) {
             HksFreeParamSet(&paramSet);
             return true;
         }
