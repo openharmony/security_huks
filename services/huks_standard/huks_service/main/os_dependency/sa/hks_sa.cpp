@@ -275,6 +275,7 @@ static void ReportIfHapCallHuksBeforeUnlock(uint32_t code, const struct HksBlob 
         hapTokenInfo.bundleName.c_str(), userId);
 
     std::vector<uint8_t> hapNameBuffer(hapTokenInfo.bundleName.begin(), hapTokenInfo.bundleName.end());
+    hapNameBuffer.emplace_back('\0');
     HksParam hapNameParam { .tag = HKS_TAG_PACKAGE_NAME, .blob = {hapNameBuffer.size(), hapNameBuffer.data()} };
     HksParamSet *ps{};
     int ret = HksInitParamSet(&ps);
