@@ -477,7 +477,7 @@ static int32_t CheckUserPathExist(enum HksPathType pathType, const char *userIdP
 }
 #endif
 
-static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo)
+static int32_t ConstructPath(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo)
 {
     int32_t ret = HKS_SUCCESS;
     int32_t offset = 0;
@@ -526,9 +526,28 @@ static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksSt
         HKS_LOG_E("get main path failed, path type is %" LOG_PUBLIC "d.", material->pathType);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
+    return ret;
+}
+
+static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo)
+{
+    int32_t ret = HKS_SUCCESS;
+#ifdef L2_STANDARD
+    bool isUserPath = material->pathType == CE_PATH || material->pathType == ECE_PATH;
+#else
+    bool isUserPath = false;
+#endif
+
+    ret = ConstructPath(material, fileInfo);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct path failed")
+
     StandardizePath(fileInfo->mainPath.path);
     ret = HksMakeFullDir(fileInfo->mainPath.path);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full de dir failed.")
+    if (isUserPath) {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NO_PERMISSION, "make full dir failed.")
+    } else {
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full dir failed.")
+    }
     if (material->keyAliasPath != NULL) {
         if (memcpy_s(fileInfo->mainPath.fileName, HKS_MAX_FILE_NAME_LEN,
             material->keyAliasPath, strlen(material->keyAliasPath)) != EOK) {
