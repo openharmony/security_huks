@@ -40,6 +40,7 @@ ohos_shared_library("cj_huks_ffi") {
     "-Werror",
   ]
 
+  innerapi_tags = [ "platformsdk" ]
   subsystem_name = "security"
   part_name = "huks"
 }
