@@ -41,6 +41,12 @@ group("huks_napi") {
   }
 }
 
+group("huks_cjapi") {
+  if (os_level == "standard") {
+    deps = [ "//base/security/huks/interfaces/kits/cj:cj_huks_ffi" ]
+  }
+}
+
 group("cipher_napi") {
   if (os_level == "standard") {
     if (support_jsapi) {
@@ -53,6 +59,7 @@ group("cipher_napi") {
 group("fwk_group") {
   if (os_level == "standard") {
     deps = [
+      ":huks_cjapi",
       "//base/security/huks:cipher_napi",
       "//base/security/huks:huks_capi",
       "//base/security/huks:huks_napi",
