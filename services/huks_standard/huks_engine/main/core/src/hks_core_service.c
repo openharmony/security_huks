@@ -287,7 +287,7 @@ int32_t HksCoreGenerateKey(const struct HksBlob *keyAlias, const struct HksParam
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     HKS_IF_NOT_SUCC_LOGE_RETURN(CheckIfNeedIsDevicePasswordSet(paramSet), HKS_ERROR_DEVICE_PASSWORD_UNSET,
-        "device password is required but not set yet!")
+        "a device password is required but not set yet!")
 
     struct HksBlob key = { 0, NULL };
     switch (genType) {
