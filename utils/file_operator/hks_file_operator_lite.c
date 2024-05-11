@@ -254,36 +254,6 @@ int32_t HksGetDirFile(void *dirp, struct HksFileDirentInfo *direntInfo)
     return HKS_ERROR_NOT_EXIST;
 }
 
-int32_t HksGetStoragePath(enum HksStoragePathType pathType, char *path, uint32_t *len)
-{
-    if ((path == NULL) || (len == NULL) || (*len <= 1)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    errno_t ret;
-    uint32_t pathLen;
-    if (pathType == HKS_STORAGE_MAIN_PATH) {
-        pathLen = strlen(HKS_KEY_STORE_PATH);
-        ret = memcpy_s(path, *len - 1, HKS_KEY_STORE_PATH, pathLen);
-    } else if (pathType == HKS_STORAGE_BACKUP_PATH) {
-        pathLen = strlen(HKS_KEY_STORE_BAK_PATH);
-        ret = memcpy_s(path, *len - 1, HKS_KEY_STORE_BAK_PATH, pathLen);
-#ifdef HKS_ENABLE_LITE_HAP
-    } else if (pathType == HKS_STORAGE_LITE_HAP_PATH) {
-        pathLen = strlen(HKS_KEY_STORE_LITE_HAP);
-        ret = memcpy_s(path, *len - 1, HKS_KEY_STORE_LITE_HAP, pathLen);
-#endif
-    } else {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    if (ret != EOK) {
-        HKS_LOG_E("memcpy failed");
-        return HKS_ERROR_INSUFFICIENT_MEMORY;
-    }
-    path[pathLen] = '\0';
-    *len = pathLen + 1;
-    return HKS_SUCCESS;
-}
-
 int32_t HksRemoveDir(const char *dirPath)
 {
     struct stat fileStat;

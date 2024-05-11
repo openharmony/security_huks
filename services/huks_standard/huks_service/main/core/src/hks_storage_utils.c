@@ -372,6 +372,9 @@ static int32_t CheckIfOnlyStorageLevelTagExist(const struct HksProcessInfo *proc
     const struct HksParam *storageLevel)
 {
     if (storageLevel->uint32Param != HKS_AUTH_STORAGE_LEVEL_DE &&
+#ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+        storageLevel->uint32Param != HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP &&
+#endif
         processInfo->userIdInt < HKS_ROOT_USER_UPPERBOUND) {
         HKS_LOG_E("invalid userId when tag storage level is CE or ECE, userId is %" LOG_PUBLIC "d",
             processInfo->userIdInt);
