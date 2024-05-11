@@ -82,7 +82,7 @@ static int32_t ConvertCallerInfoToJson(const std::string &idStr, const std::stri
 enum HksCallerType HksGetCallerType(void)
 {
     auto callingTokenId = IPCSkeleton::GetCallingTokenID();
-    switch (AccessTokenKit::GetTokenType(callingTokenId)) {
+    switch (AccessTokenKit::GetTokenTypeFlag(callingTokenId)) {
         case ATokenTypeEnum::TOKEN_HAP:
             return HKS_HAP_TYPE;
         case ATokenTypeEnum::TOKEN_NATIVE:
