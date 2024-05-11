@@ -106,6 +106,10 @@ if (os_level == "standard") {
       "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/hitrace_meter_wrapper:libhuks_utils_hitrace_meter_wrapper_static",
     ]
 
+    if (huks_enable_upgrade_key_storage_secure_level) {
+      deps += [ "//base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static" ]
+    }
+
     if (enable_bundle_framework) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/bms:libhuks_bms_systemapi_wrap_static" ]
     }

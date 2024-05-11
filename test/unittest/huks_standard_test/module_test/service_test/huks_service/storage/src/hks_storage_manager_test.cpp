@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 
+#undef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#define HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+
 #undef HKS_ENABLE_LITE_HAP
 
 #undef HKS_USE_RKC_IN_STANDARD
@@ -110,12 +113,11 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest001, TestSize.Level0)
     ASSERT_EQ(strlen(HKS_KEY_STORE_KEY_PATH), strlen(material.storageTypePath));
     ASSERT_EQ(EOK, HksMemCmp(HKS_KEY_STORE_KEY_PATH, material.storageTypePath, strlen(material.storageTypePath)));
 
-    ASSERT_EQ(strlen("+1+0+0+0"), strlen(material.uidPath)) << "uid path is " << material.uidPath;
-    ASSERT_EQ(EOK, HksMemCmp("+1+0+0+0", material.uidPath, strlen(material.uidPath)))
-        << "uid path is " << material.uidPath;
+    ASSERT_EQ(strlen("1"), strlen(material.uidPath)) << "uid path is " << material.uidPath;
+    ASSERT_EQ(EOK, HksMemCmp("1", material.uidPath, strlen(material.uidPath))) << "uid path is " << material.uidPath;
 
-    ASSERT_EQ(strlen("+1+0+0+0"), strlen(material.userIdPath)) << "userId path is " << material.userIdPath;
-    ASSERT_EQ(EOK, HksMemCmp("+1+0+0+0", material.userIdPath, strlen(material.userIdPath)));
+    ASSERT_EQ(strlen("1"), strlen(material.userIdPath)) << "userId path is " << material.userIdPath;
+    ASSERT_EQ(EOK, HksMemCmp("1", material.userIdPath, strlen(material.userIdPath)));
 
     FreeStorageMaterial(&material);
     HksFreeParamSet(&paramSet);
@@ -369,11 +371,11 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest006, TestSize.Level0)
     ASSERT_EQ(strlen(HKS_KEY_STORE_ROOT_KEY_PATH), strlen(material.storageTypePath));
     ASSERT_EQ(EOK, HksMemCmp(HKS_KEY_STORE_ROOT_KEY_PATH, material.storageTypePath, strlen(material.storageTypePath)));
 
-    ASSERT_EQ(strlen("+6+0+0+0"), strlen(material.uidPath)) << "uid path is " << material.uidPath;
-    ASSERT_EQ(EOK, HksMemCmp("+6+0+0+0", material.uidPath, strlen(material.uidPath)));
+    ASSERT_EQ(strlen("6"), strlen(material.uidPath)) << "uid path is " << material.uidPath;
+    ASSERT_EQ(EOK, HksMemCmp("6", material.uidPath, strlen(material.uidPath)));
 
-    ASSERT_EQ(strlen("+6+0+0+0"), strlen(material.userIdPath)) << "userId path is " << material.userIdPath;
-    ASSERT_EQ(EOK, HksMemCmp("+6+0+0+0", material.userIdPath, strlen(material.userIdPath)));
+    ASSERT_EQ(strlen("6"), strlen(material.userIdPath)) << "userId path is " << material.userIdPath;
+    ASSERT_EQ(EOK, HksMemCmp("6", material.userIdPath, strlen(material.userIdPath)));
 
     FreeStorageMaterial(&material);
     HksFreeParamSet(&paramSet);

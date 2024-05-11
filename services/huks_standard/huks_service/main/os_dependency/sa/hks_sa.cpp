@@ -34,7 +34,9 @@
 #include "hks_response.h"
 #include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
-#include "hks_type.h"
+#include "hks_type_inner.h"
+#include "hks_upgrade.h"
+#include "hks_upgrade_lock.h"
 #include "hks_util.h"
 #include "huks_service_ipc_interface_code.h"
 
@@ -323,24 +325,8 @@ static int32_t ProcessAttestOrNormalMessage(
     }
 }
 
-int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
 {
-    HksInitMemPolicy();
-
-    uint64_t enterTime = 0;
-    (void)HksElapsedRealTime(&enterTime);
-    g_sessionId++;
-    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
-
-    if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
-        return HksPluginOnRemoteRequest(code, &data, &reply, &option);
-    }
-    // this is the temporary version which comments the descriptor check
-    if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
-        HKS_LOG_E("descriptor is diff.");
-        return HW_SYSTEM_ERROR;
-    }
-
     uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
     struct HksBlob srcData = { 0, nullptr };
     int32_t ret = HKS_SUCCESS;
@@ -377,6 +363,33 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         HKS_LOG_E("handle ipc msg failed!");
         HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
     }
+}
+
+int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option)
+{
+    HksInitMemPolicy();
+
+    uint64_t enterTime = 0;
+    (void)HksElapsedRealTime(&enterTime);
+    g_sessionId++;
+    HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
+
+    if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
+        return HksPluginOnRemoteRequest(code, &data, &reply, &option);
+    }
+    // this is the temporary version which comments the descriptor check
+    if (HksService::GetDescriptor() != data.ReadInterfaceToken()) {
+        HKS_LOG_E("descriptor is diff.");
+        return HW_SYSTEM_ERROR;
+    }
+
+    // judge whether is upgrading, wait for upgrade finished
+    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
+        HKS_LOG_E("wait on upgrading failed.");
+        return HW_SYSTEM_ERROR;
+    }
+
+    ProcessRemoteRequest(code, data, reply);
 
     uint64_t leaveTime = 0;
     (void)HksElapsedRealTime(&leaveTime);
@@ -492,6 +505,20 @@ void HksService::OnStart()
         return;
     }
 
+    if (HksUpgradeLockCreate() != HKS_SUCCESS) {
+        HKS_LOG_E("create upgrade lock on init failed.");
+        return;
+    }
+    if (HksProcessConditionCreate() != HKS_SUCCESS) {
+        HKS_LOG_E("create process condition on init failed.");
+        return;
+    }
+
+    // lock before huks init, for the upgrading will be thread safe.
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksUpgradeLock();
+#endif
+
     if (!Init()) {
         HKS_LOG_E("Failed to init HksService");
         return;
@@ -500,6 +527,9 @@ void HksService::OnStart()
 #ifdef SUPPORT_COMMON_EVENT
     (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
 #endif
+
+    // this should be excuted after huks published and listener added.
+    HksUpgradeOnPowerOn();
 
     runningState_ = STATE_RUNNING;
     IPCSkeleton::SetMaxWorkThreadNum(HUKS_IPC_THREAD_NUM);

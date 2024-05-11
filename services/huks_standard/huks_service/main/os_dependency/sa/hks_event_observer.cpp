@@ -25,6 +25,9 @@
 #include "hks_plugin_adapter.h"
 #include "hks_type_inner.h"
 #include "hks_template.h"
+#include "hks_upgrade.h"
+#include "hks_upgrade_lock.h"
+
 #include "securec.h"
 
 #define USER_ID_ROOT                  "0"
@@ -96,6 +99,13 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
     auto want = data.GetWant();
     constexpr const char* UID = "uid";
     std::string action = want.GetAction();
+
+    // judge whether is upgrading, wait for upgrade finished
+    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
+        HKS_LOG_E("wait on upgrading failed.");
+        return;
+    }
+
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
         action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED) {
         int uid = want.GetIntParam(UID, -1);
@@ -118,6 +128,9 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
         HKS_LOG_I("the credential-encrypted storage has become unlocked");
         userUnlocked_ = true;
+        int userId = data.GetCode();
+        HKS_LOG_I("user %" LOG_PUBLIC "d unlocked.", userId);
+        HksUpgradeOnUserUnlock(userId);
     }
 
     HKS_FREE_BLOB(processInfo.userId);
