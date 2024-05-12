@@ -235,6 +235,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
 {
     int32_t ret;
     (void)operation;
+    struct HksParamSet *newParamSet = NULL;
 
     do {
         if (paramSet != NULL) {
