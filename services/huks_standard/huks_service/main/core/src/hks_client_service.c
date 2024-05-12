@@ -203,13 +203,51 @@ static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
     return false;
 }
 
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+bool HksCheckIsAcrossDevices(const struct HksParamSet *paramSet)
+{
+    if (HksCheckIsAllowedWrap(paramSet)) {
+        return true;
+    }
+    struct HksParam *wrapTypeParam = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_KEY_WRAP_TYPE, &wrapTypeParam) == HKS_SUCCESS) {
+        return true;
+    }
+    return false;
+}
+
+static int32_t AppendOwnerInfoForAcrossDevicesIfNeed(const struct HksProcessInfo *processInfo,
+    struct HksParamSet *newParamSet)
+{
+    if (!HksCheckIsAcrossDevices(newParamSet)) {
+        return HKS_SUCCESS;
+    }
+
+    struct HksBlob appInfo = { 0, NULL };
+    int32_t ret;
+    do {
+        ret = GetCallerName(processInfo, &appInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetCallerName failed")
+
+        struct HksParam paramArr[] = {
+            { .tag = HKS_TAG_OWNER_ID, .blob = appInfo },
+            { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = HksGetCallerType() },
+        };
+
+        ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
+    } while (0);
+
+    HKS_FREE_BLOB(appInfo);
+    return ret;
+}
+#endif
+
 static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *paramSet,
     const struct HksProcessInfo *processInfo, const struct HksOperation *operation, struct HksParamSet **outParamSet)
 {
     int32_t ret;
     (void)operation;
     struct HksParamSet *newParamSet = NULL;
-    struct HksBlob appInfo = { 0, NULL };
 
     do {
         if (paramSet != NULL) {
@@ -225,10 +263,6 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
             ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
         }
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-        ret = GetCallerName(processInfo, &appInfo);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetCallerName failed")
-#endif
 
         struct HksParam paramArr[] = {
             { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
@@ -236,14 +270,16 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
 #ifdef HKS_SUPPORT_ACCESS_TOKEN
             { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
 #endif
-#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-            { .tag = HKS_TAG_OWNER_ID, .blob = appInfo },
-            { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = HksGetCallerType() },
-#endif
         };
 
         ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add processInfo failed")
+
+#ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+        ret = AppendOwnerInfoForAcrossDevicesIfNeed(processInfo, newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add ownerInfo failed")
+#endif
+
 #ifdef L2_STANDARD
         ret = AppendStorageLevelAndSpecificUserIdToParamSet(processInfo, operation, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add default strategy failed")
@@ -256,7 +292,6 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
     } while (0);
 
     HksFreeParamSet(&newParamSet);
-    HKS_FREE_BLOB(appInfo);
     return ret;
 }
 
