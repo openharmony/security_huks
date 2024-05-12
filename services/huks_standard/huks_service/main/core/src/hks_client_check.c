@@ -255,8 +255,10 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 #endif
 }
 
-static bool IsAllowedWrap(const struct HksParamSet *paramSet)
+bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
 {
+    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
+
     struct HksParam *isAllowedWrap = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ALLOWED_WRAP, &isAllowedWrap);
     if (ret == HKS_SUCCESS) {
@@ -271,7 +273,7 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet)
     HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
 
     // step 1. Judge whether the allowed wrap param is true.
-    if (IsAllowedWrap(paramSet)) {
+    if (HksCheckIsAllowedWrap(paramSet)) {
         HKS_LOG_E("key with access control isn't allowed wrap!");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
@@ -313,16 +315,4 @@ int32_t HksCheckListAliasesParam(const struct HksBlob *processName)
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
-}
-
-bool HksCheckIsAcrossDevices(const struct HksParamSet *paramSet)
-{
-    if (IsAllowedWrap(paramSet)) {
-        return true;
-    }
-    struct HksParam *wrapTypeParam = NULL;
-    if (HksGetParam(paramSet, HKS_TAG_KEY_WRAP_TYPE, &wrapTypeParam) == HKS_SUCCESS) {
-        return true;
-    }
-    return false;
 }

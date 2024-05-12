@@ -70,7 +70,7 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet);
 
 int32_t HksCheckListAliasesParam(const struct HksBlob *processName);
 
-bool HksCheckIsAcrossDevices(const struct HksParamSet *paramSet);
+bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }

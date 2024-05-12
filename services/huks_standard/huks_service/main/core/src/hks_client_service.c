@@ -204,6 +204,18 @@ static bool CheckProcessNameTagExist(const struct HksParamSet *paramSet)
 }
 
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
+bool HksCheckIsAcrossDevices(const struct HksParamSet *paramSet)
+{
+    if (HksCheckIsAllowedWrap(paramSet)) {
+        return true;
+    }
+    struct HksParam *wrapTypeParam = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_KEY_WRAP_TYPE, &wrapTypeParam) == HKS_SUCCESS) {
+        return true;
+    }
+    return false;
+}
+
 static int32_t AppendOwnerInfoForAcrossDevicesIfNeed(const struct HksProcessInfo *processInfo,
     struct HksParamSet *newParamSet)
 {
