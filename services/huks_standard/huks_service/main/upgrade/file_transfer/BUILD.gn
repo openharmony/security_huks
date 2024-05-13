@@ -51,5 +51,8 @@ ohos_static_library("libhuks_upgrade_file_transfer_static") {
   }
   configs =
       [ "../../../../../../frameworks/config/build:l2_standard_common_config" ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }
