@@ -57,8 +57,8 @@ int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
     int err = ERR_INVALID_DATA;
     do {
         uint32_t sz = data.ReadUint32();
-        if (sz == 0) {
-            HKS_LOG_E("sz is 0");
+        if (sz == 0 || sz > MAX_OUT_BLOB_SIZE) {
+            HKS_LOG_E("invalid sz %" LOG_PUBLIC "u", sz);
             break;
         }
         const uint8_t *ptr = data.ReadBuffer(sz);
