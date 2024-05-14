@@ -93,7 +93,7 @@ declare_args() {
 
   # sa temporary skip upgrade config
   huks_sa_skip_upgrade_config =
-      "{ 0, 3553, 3333, 3046, 3520, 6226, 7008, 1027, 1024 }"
+      "{ 0, 3553, 3333, 3046, 3520, 7008, 1027, 1024 }"
 
   # hap temporary skip upgrade config
   huks_hap_skip_upgrade_config = "{}"
