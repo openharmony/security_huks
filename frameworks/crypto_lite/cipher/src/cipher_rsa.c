@@ -336,15 +336,15 @@ static int32_t RsaEncrypt(RsaKeyData *key, const RsaData *plain, RsaData *cipher
         return ERROR_CODE_GENERAL;
     }
 
-    int32_t rsaLen = mbedtls_rsa_get_len(rsa);
-    int32_t rsaContentLen = rsaLen - RSA_KEY_BYTE;
+    size_t rsaLen = mbedtls_rsa_get_len(rsa);
+    size_t rsaContentLen = rsaLen - RSA_KEY_BYTE;
     if (rsaContentLen <= 0) {
         mbedtls_pk_free(&pk);
         return ERROR_CODE_GENERAL;
     }
 
-    int32_t count = plain->length / rsaContentLen;
-    int32_t remain = plain->length % rsaContentLen;
+    size_t count = plain->length / rsaContentLen;
+    size_t remain = plain->length % rsaContentLen;
     if (cipher->data == NULL) {
         cipher->length = rsaLen * count + (remain ? rsaLen : 0);
         cipher->length = (cipher->length / NUM_THREE + 1) * NUM_FOUR + 1;
@@ -383,7 +383,7 @@ static int32_t CheckParamAndMallocBuf(size_t rsaLen, const RsaData *cipher, unsi
 static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData *cipher, RsaData *plain)
 {
     size_t plainLen = 0;
-    int32_t totalPlainLen = 0;
+    size_t totalPlainLen = 0;
 
     unsigned char *buf = NULL;
     unsigned char *tembuf = NULL;
@@ -404,9 +404,9 @@ static int32_t RsaPkcs1Decrypt(mbedtls_rsa_context *rsa, size_t rsaLen, RsaData 
             cipher->length)) {
             break;
         }
-        int32_t count = dataLen / rsaLen;
+        size_t count = dataLen / rsaLen;
         bool isBreak = false;
-        for (int32_t i = 0; i < count; i++) {
+        for (size_t i = 0; i < count; i++) {
             (void)memset_s(buf, rsaLen, 0, rsaLen);
             if (mbedtls_rsa_pkcs1_decrypt(rsa, mbedtls_ctr_drbg_random, &ctrDrbg,
                 &plainLen, tembuf + i * rsaLen, buf, rsaLen)) {
