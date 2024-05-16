@@ -40,7 +40,7 @@ static int32_t PaddingPkcs5(char *data, size_t inSize)
     return needLen;
 }
 
-static int32_t UnpaddingPkcs5(char *data, size_t dataLen)
+static int32_t UnpaddingPkcs5(char *data, int32_t dataLen)
 {
     int32_t padLen = data[dataLen - 1];
 
@@ -231,18 +231,18 @@ static int32_t InitAesData(const char *action, const char *key, const char *text
     }
     size_t keyLen = (size_t)data->keyLen;
     data->key = MallocDecodeData(key, &keyLen);
-    data->keyLen = (uint32_t)keyLen;
     if (data->key == NULL) {
         goto ERROR;
     }
-    if (data->keyLen != KEY_LEN) {
+    if (keyLen != KEY_LEN) {
         CIPHER_LOG_E("key length:%d error, need be %d Bytes.",
-            data->keyLen, KEY_LEN);
-        (void)memset_s(data->key, data->keyLen, 0, data->keyLen);
+            keyLen, KEY_LEN);
+        (void)memset_s(data->key, keyLen, 0, keyLen);
         free(data->key);
         data->key = NULL;
         goto ERROR;
     }
+    data->keyLen = KEY_LEN;
     return ERROR_SUCCESS;
 
 ERROR:
