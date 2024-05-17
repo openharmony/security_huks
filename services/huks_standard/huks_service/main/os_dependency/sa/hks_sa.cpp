@@ -315,6 +315,7 @@ static int32_t ProcessAttestOrNormalMessage(
         if (ptr == nullptr) {
             // ReadRemoteObject will fail if huks_service has no selinux permission to call the client side.
             HKS_LOG_E("ReadRemoteObject ptr failed");
+            return HKS_ERROR_IPC_INIT_FAIL;
         }
 
         HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),
@@ -448,6 +449,7 @@ void MoveMineOldFile(const char *oldDir, const char *newDir)
         std::filesystem::create_directory(newDir, errCode);
         if (errCode.value() != 0) {
             HKS_LOG_E("create_directory %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", newPath, errCode.message().c_str());
+            break;
         }
         std::filesystem::copy(curPath, newPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
