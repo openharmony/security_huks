@@ -446,7 +446,6 @@ void MoveMineOldFile(const char *oldDir, const char *newDir)
         std::filesystem::create_directory(newDir, errCode);
         if (errCode.value() != 0) {
             HKS_LOG_E("create_directory %" LOG_PUBLIC "s failed %" LOG_PUBLIC "s", newPath, errCode.message().c_str());
-            break;
         }
         std::filesystem::copy(curPath, newPath,
             std::filesystem::copy_options::recursive | std::filesystem::copy_options::overwrite_existing, errCode);
