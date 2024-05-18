@@ -415,10 +415,7 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
 void MoveMineOldFile(const char *oldDir, const char *newDir)
 {
     auto dir = opendir(oldDir);
-    if (dir == NULL) {
-        HKS_LOG_E("open old dir failed!");
-        return;
-    }
+    HKS_IF_NULL_LOGE_RETURN_VOID(dir, "open old dir failed!")
     struct dirent *ptr;
     while ((ptr = readdir(dir)) != NULL) {
         // move dir expect hks_client, for it is the rkc root key and should be in same position
