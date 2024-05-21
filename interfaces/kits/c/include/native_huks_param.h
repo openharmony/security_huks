@@ -102,7 +102,8 @@ void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet);
  * @param fromParamSetSize Indicates the memory size occupied by the source parameter set.
  * @param paramSet Indicates the double pointer to the new parameter set generated.
  * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
- *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If fromParamSet or fromParamSetSize or paramSet is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If fromParamSet or fromParamSetSize
+ *         or paramSet is invalid.
  *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
  * @since 9
  * @version 1.0
@@ -117,7 +118,8 @@ struct OH_Huks_Result OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromPa
  * @param tag Indicates the value of the parameter to be obtained.
  * @param param Indicates the double pointer to the parameter obtained.
  * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful,
- *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet or param is invalid, or if the param doesn't exist in the pararmset.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet or param is invalid,
+ *         or if the param doesn't exist in the pararmset.
  * @since 9
  * @version 1.0
  */
@@ -144,7 +146,8 @@ struct OH_Huks_Result OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, b
  *
  * @param paramSet Indicates the pointer to the parameter set to check.
  * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the parameters in the parameter set are valid.
- *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet is invalid or the parameter set has invalid, duplicate, or incorrect tags.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet is invalid or
+ *         the parameter set has invalid, duplicate, or incorrect tags.
  * @since 9
  * @version 1.0
  */
@@ -168,7 +171,8 @@ struct OH_Huks_Result OH_Huks_IsParamSetValid(const struct OH_Huks_ParamSet *par
  * @param baseParam Indicates the pointer to the first parameter.
  * @param param Indicates the pointer to the second parameter.
  * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the two parameters are the same.
- *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If one of the paramSet is invalid, or if the params don't match, or if the tag inside is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If one of the paramSet is invalid,
+ *         or if the params don't match, or if the tag inside is invalid.
  * @since 9
  * @version 1.0
  */
