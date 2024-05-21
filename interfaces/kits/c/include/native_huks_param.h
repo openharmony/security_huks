@@ -52,8 +52,9 @@ extern "C" {
  * @brief Initializes a parameter set.
  *
  * @param paramSet Indicates the double pointer to the parameter set to initialize.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the initialization is successful;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the initialization is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If the paramset is null.
  * @since 9
  * @version 1.0
  */
@@ -65,8 +66,8 @@ struct OH_Huks_Result OH_Huks_InitParamSet(struct OH_Huks_ParamSet **paramSet);
  * @param paramSet Indicates the pointer to the parameter set to which parameters are to be added.
  * @param params Indicates the pointer to the array of parameters to add.
  * @param paramCnt Indicates the number of parameters to add.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If params is null or paramSet is invalid.
  * @since 9
  * @version 1.0
  */
@@ -77,8 +78,9 @@ struct OH_Huks_Result OH_Huks_AddParams(struct OH_Huks_ParamSet *paramSet,
  * @brief Constructs a parameter set.
  *
  * @param paramSet Indicates the double pointer to the parameter set to construct.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
  * @since 9
  * @version 1.0
  */
@@ -99,8 +101,10 @@ void OH_Huks_FreeParamSet(struct OH_Huks_ParamSet **paramSet);
  * @param fromParamSet Indicates the pointer to the parameter set to copy.
  * @param fromParamSetSize Indicates the memory size occupied by the source parameter set.
  * @param paramSet Indicates the double pointer to the new parameter set generated.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If fromParamSet or fromParamSetSize
+ *         or paramSet is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
  * @since 9
  * @version 1.0
  */
@@ -113,8 +117,9 @@ struct OH_Huks_Result OH_Huks_CopyParamSet(const struct OH_Huks_ParamSet *fromPa
  * @param paramSet Indicates the pointer to the target parameter set.
  * @param tag Indicates the value of the parameter to be obtained.
  * @param param Indicates the double pointer to the parameter obtained.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the operation is successful,
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the operation is successful,
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet or param is invalid,
+ *         or if the param doesn't exist in the pararmset.
  * @since 9
  * @version 1.0
  */
@@ -128,8 +133,9 @@ struct OH_Huks_Result OH_Huks_GetParam(const struct OH_Huks_ParamSet *paramSet, 
  * @param isCopy Specifies whether to copy the data of the <b>Blob</b> type to the parameter set.
  *    If yes, the data of the <b>Blob</b> type will be copied to the parameter set.
  *    Otherwise, only the address of the <b>Blob</b> data will be refreshed.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if operation is successful;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If operation is successful.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet is invalid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_INSUFFICIENT_MEMORY} 12000014 - If the memory is insufficient.
  * @since 9
  * @version 1.0
  */
@@ -139,8 +145,9 @@ struct OH_Huks_Result OH_Huks_FreshParamSet(struct OH_Huks_ParamSet *paramSet, b
  * @brief Checks whether the parameters in a parameter set are valid.
  *
  * @param paramSet Indicates the pointer to the parameter set to check.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the parameters in the parameter set are valid;
- *    returns other values if the parameter set has invalid, duplicate, or incorrect parameters.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the parameters in the parameter set are valid.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet is invalid or
+ *         the parameter set has invalid, duplicate, or incorrect tags.
  * @since 9
  * @version 1.0
  */
@@ -151,8 +158,8 @@ struct OH_Huks_Result OH_Huks_IsParamSetTagValid(const struct OH_Huks_ParamSet *
  *
  * @param paramSet Indicates the pointer to the parameter set to check.
  * @param size Indicates the memory size occupied by the parameter set.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the parameter set is of the valid size;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the parameter set is of the valid size.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If paramSet is invalid.
  * @since 9
  * @version 1.0
  */
@@ -163,8 +170,9 @@ struct OH_Huks_Result OH_Huks_IsParamSetValid(const struct OH_Huks_ParamSet *par
  *
  * @param baseParam Indicates the pointer to the first parameter.
  * @param param Indicates the pointer to the second parameter.
- * @return Returns {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} if the two parameters are the same;
- *    returns an error code otherwise.
+ * @return {@link OH_Huks_ErrCode#OH_HUKS_SUCCESS} 0 - If the two parameters are the same.
+ *         {@link OH_Huks_ErrCode#OH_HUKS_ERR_CODE_ILLEGAL_ARGUMENT} 401 - If one of the paramSet is invalid,
+ *         or if the params don't match, or if the tag inside is invalid.
  * @since 9
  * @version 1.0
  */
