@@ -231,7 +231,7 @@ static int ProcessFileUpgrade(const char *fpath, const struct stat *sb, int type
     return 0;
 }
 
-ENABLE_CFI(static int32_t UpgradeFileTransfer())
+ENABLE_CFI(static int32_t UpgradeFileTransfer(void))
 {
     // depth first and ignore soft link
     int nftwRet = nftw(HKS_KEY_STORE_TMP_PATH, ProcessFileUpgrade, OPEN_FDS, FTW_DEPTH | FTW_PHYS);
@@ -240,7 +240,7 @@ ENABLE_CFI(static int32_t UpgradeFileTransfer())
     return HKS_SUCCESS;
 }
 
-static int32_t CopyDeToTmpPathIfNeed()
+static int32_t CopyDeToTmpPathIfNeed(void)
 {
     if (HksIsDirExist(HKS_KEY_STORE_TMP_PATH) == HKS_SUCCESS) {
         return HKS_SUCCESS;
@@ -259,7 +259,7 @@ static int32_t CopyDeToTmpPathIfNeed()
     return HKS_SUCCESS;
 }
 
-int32_t HksUpgradeFileTransferOnPowerOn()
+int32_t HksUpgradeFileTransferOnPowerOn(void)
 {
     CopyDeToTmpPathIfNeed();
     return UpgradeFileTransfer();

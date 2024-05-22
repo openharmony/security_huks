@@ -31,7 +31,7 @@
 static const struct HksFileTransferSystemAbilityConfig SA_UPGRADE_CFG_LIST[] = HUKS_SA_UPGRADE_CONFIG;
 static const struct HksFileTransferHapConfig HAP_UPGRADE_CFG_LIST[] = HUKS_HAP_UPGRADE_CONFIG;
 static const uint32_t SA_SKIP_UPGRADE_CFG_LIST[] = HUKS_SA_SKIP_UPGRADE_CONFIG;
-static const char *HAP_SKIP_UPGRADE_CFG_LIST[] = HUKS_HAP_SKIP_UPGRADE_CONFIG;
+static const char * const HAP_SKIP_UPGRADE_CFG_LIST[] = HUKS_HAP_SKIP_UPGRADE_CONFIG;
 
 static int32_t ParseOwnerIdFromParamSet(const struct HksParamSet *paramSet, uint32_t *uid, uint64_t *accessTokenId,
     uint32_t *userId)
