@@ -24,7 +24,7 @@ volatile bool g_upgrading = false;
 
 HksCondition *g_processCondition = NULL;
 
-int32_t HksProcessConditionCreate()
+int32_t HksProcessConditionCreate(void)
 {
     g_processCondition = HksConditionCreate();
     if (g_processCondition == NULL) {
@@ -34,17 +34,17 @@ int32_t HksProcessConditionCreate()
     return HKS_SUCCESS;
 }
 
-static int32_t HksProcessConditionWait()
+static int32_t HksProcessConditionWait(void)
 {
     return HksConditionWait(g_processCondition);
 }
 
-static int32_t HksProcessConditionNotifyAll()
+static int32_t HksProcessConditionNotifyAll(void)
 {
     return HksConditionNotifyAll(g_processCondition);
 }
 
-int32_t HksWaitIfUpgrading()
+int32_t HksWaitIfUpgrading(void)
 {
     if (g_upgrading) {
         HKS_LOG_I("upgrading, wait...");
@@ -53,7 +53,7 @@ int32_t HksWaitIfUpgrading()
     return HKS_SUCCESS;
 }
 
-int32_t HksUpgradeLockCreate()
+int32_t HksUpgradeLockCreate(void)
 {
     g_upgradeMutex = HksMutexCreate();
     if (g_upgradeMutex == NULL) {
@@ -63,7 +63,7 @@ int32_t HksUpgradeLockCreate()
     return HKS_SUCCESS;
 }
 
-void HksUpgradeLock()
+void HksUpgradeLock(void)
 {
     HKS_LOG_I("get upgrade lock");
     if (HksMutexLock(g_upgradeMutex) != 0) {
@@ -73,7 +73,7 @@ void HksUpgradeLock()
     g_upgrading = true;
 }
 
-void HksUpgradeUnlock()
+void HksUpgradeUnlock(void)
 {
     HKS_LOG_I("release upgrade lock");
     if (HksMutexUnlock(g_upgradeMutex) != 0) {
