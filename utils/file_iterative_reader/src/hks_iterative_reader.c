@@ -54,7 +54,7 @@ static void HksFreeFileInfoList(struct HksReadFileInfoList **infos)
     HKS_FREE(*infos);
 }
 
-static struct HksReadFileInfoList *HksInitFileInfoList()
+static struct HksReadFileInfoList *HksInitFileInfoList(void)
 {
     struct HksReadFileInfoList *infos;
     do {
