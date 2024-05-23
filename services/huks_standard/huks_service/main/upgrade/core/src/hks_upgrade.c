@@ -22,7 +22,7 @@
 #include "hks_file_transfer.h"
 #endif
 
-void HksUpgradeOnPowerOn()
+void HksUpgradeOnPowerOn(void)
 {
     HKS_LOG_I("enter HksUpgradeOnPowerOn.");
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
