@@ -1279,14 +1279,14 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest013, TestSize.Level0)
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
 #else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "not HKS_ERROR_INVALID_ARGUMENT error code.";
 #endif
     inData.size = CCM_MAX_DATA_LEN_FOR_MAX_NONCE + AEAD_SIZE + 1;
     ret = HksAesCcmCipherTestDecrypt(&keyAlias, decParamSet, &inData, &cipherText, &inData, AEAD_SIZE);
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
     EXPECT_EQ(ret, HKS_ERROR_CRYPTO_ENGINE_ERROR) << "not HKS_ERROR_CRYPTO_ENGINE_ERROR error code.";
 #else
-    EXPECT_EQ(ret, HKS_FAILURE) << "not HKS_FAILURE error code.";
+    EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "not HKS_ERROR_INVALID_ARGUMENT error code.";
 #endif
     
     EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
