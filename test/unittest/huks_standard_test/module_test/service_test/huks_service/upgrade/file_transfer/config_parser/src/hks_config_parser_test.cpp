@@ -113,7 +113,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest001
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet001),
         .size = paramSet001->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(true, info.needDe);
     EXPECT_EQ(true, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -156,7 +156,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest002
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet002),
         .size = paramSet002->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(true, info.needDe);
     EXPECT_EQ(false, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -199,7 +199,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest003
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet003),
         .size = paramSet003->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(false, info.needDe);
     EXPECT_EQ(true, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -242,7 +242,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest004
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet004),
         .size = paramSet004->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(false, info.needDe);
     EXPECT_EQ(false, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -285,7 +285,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest005
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet005),
         .size = paramSet005->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(true, info.skipTransfer);
     HksFreeParamSet(&paramSet005);
 }
@@ -323,7 +323,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest006
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet006),
         .size = paramSet006->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(false, info.needDe);
     EXPECT_EQ(false, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -366,7 +366,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest007
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet007),
         .size = paramSet007->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(false, info.needDe);
     EXPECT_EQ(true, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -409,7 +409,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest008
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet008),
         .size = paramSet008->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(true, info.needDe);
     EXPECT_EQ(false, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -452,7 +452,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest009
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet009),
         .size = paramSet009->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(true, info.needDe);
     EXPECT_EQ(true, info.needFrontUser);
     EXPECT_EQ(false, info.skipTransfer);
@@ -495,7 +495,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest010
     struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet010),
         .size = paramSet010->paramSetSize };
     struct HksUpgradeFileTransferInfo info = { 0 };
-    EXPECT_EQ(HKS_SUCCESS, HksParseConfig(&fileContent, &info));
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("", &fileContent, &info));
     EXPECT_EQ(true, info.skipTransfer);
 
     HksFreeParamSet(&paramSet010);
