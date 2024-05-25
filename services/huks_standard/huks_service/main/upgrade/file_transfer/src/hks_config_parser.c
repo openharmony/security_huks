@@ -33,17 +33,17 @@ static const uint32_t SA_SKIP_UPGRADE_CFG_LIST[] = HUKS_SA_SKIP_UPGRADE_CONFIG;
 static const char * const HAP_SKIP_UPGRADE_CFG_LIST[] = HUKS_HAP_SKIP_UPGRADE_CONFIG;
 
 static const char * const RDB_DE_PREFIX = "DistributedDataRdb";
-static const char * const RDB_ROOT_DE_PREFIX = "distributeddb_client_root_key";
+static const char * const RDB_ROOT_DE = "distributeddb_client_root_key";
 
 static bool IsRdbDeKey(const char *alias)
 {
     uint32_t rdbDePrefixLen = strlen(RDB_DE_PREFIX);
-    uint32_t rdbRootDePrefixLen = strlen(RDB_ROOT_DE_PREFIX);
+    uint32_t rdbRootDeLen = strlen(RDB_ROOT_DE);
     uint32_t aliasSize = strlen(alias);
     if (aliasSize >= rdbDePrefixLen && HksMemCmp(alias, RDB_DE_PREFIX, aliasSize) == EOK) {
         return true;
     }
-    if (aliasSize >= rdbRootDePrefixLen && HksMemCmp(alias, RDB_ROOT_DE_PREFIX, aliasSize) == EOK) {
+    if (aliasSize == rdbRootDeLen && HksMemCmp(alias, RDB_ROOT_DE, aliasSize) == EOK) {
         return true;
     }
     return false;

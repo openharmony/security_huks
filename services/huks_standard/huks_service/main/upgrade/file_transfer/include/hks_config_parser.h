@@ -61,7 +61,8 @@ struct HksUpgradeFileTransferInfo {
 // match HksFileTransferHapConfig and HksFileTransferSystemAbilityConfig into HksUpgradeFileTransferInfo
 int32_t HksParseConfig(const char *alias, const struct HksBlob *fileContent, struct HksUpgradeFileTransferInfo *info);
 
-int32_t HksMatchConfig(uint32_t uid, uint32_t userId, uint64_t accessTokenId, struct HksUpgradeFileTransferInfo *info);
+int32_t HksMatchConfig(const char *alias, uint32_t uid, uint32_t userId, uint64_t accessTokenId,
+    struct HksUpgradeFileTransferInfo *info);
 
 #ifdef __cplusplus
 }
