@@ -27,11 +27,27 @@
 #include "hks_template.h"
 #include "hks_type_inner.h"
 
-
 static const struct HksFileTransferSystemAbilityConfig SA_UPGRADE_CFG_LIST[] = HUKS_SA_UPGRADE_CONFIG;
 static const struct HksFileTransferHapConfig HAP_UPGRADE_CFG_LIST[] = HUKS_HAP_UPGRADE_CONFIG;
 static const uint32_t SA_SKIP_UPGRADE_CFG_LIST[] = HUKS_SA_SKIP_UPGRADE_CONFIG;
 static const char * const HAP_SKIP_UPGRADE_CFG_LIST[] = HUKS_HAP_SKIP_UPGRADE_CONFIG;
+
+static const char * const RDB_DE_PREFIX = "DistributedDataRdb";
+static const char * const RDB_ROOT_DE_PREFIX = "distributeddb_client_root_key";
+
+static bool IsRdbDeKey(const char *alias)
+{
+    uint32_t rdbDePrefixLen = strlen(RDB_DE_PREFIX);
+    uint32_t rdbRootDePrefixLen = strlen(RDB_ROOT_DE_PREFIX);
+    uint32_t aliasSize = strlen(alias);
+    if (aliasSize >= rdbDePrefixLen && HksMemCmp(alias, RDB_DE_PREFIX, aliasSize) == EOK) {
+        return true;
+    }
+    if (aliasSize >= rdbRootDePrefixLen && HksMemCmp(alias, RDB_ROOT_DE_PREFIX, aliasSize) == EOK) {
+        return true;
+    }
+    return false;
+}
 
 static int32_t ParseOwnerIdFromParamSet(const struct HksParamSet *paramSet, uint32_t *uid, uint64_t *accessTokenId,
     uint32_t *userId)
@@ -87,16 +103,19 @@ static int32_t ParseOwnerIdFromFileContent(const struct HksBlob *fileContent, ui
     return ret;
 }
 
-static void InitDefaultStrategy(struct HksUpgradeFileTransferInfo *info)
+static void InitDefaultStrategy(const char *alias, struct HksUpgradeFileTransferInfo *info)
 {
     info->skipTransfer = false;
     info->needDe = false;
     info->needFrontUser = false;
+    if (IsRdbDeKey(alias)) {
+        info->needDe = true;
+    }
 }
 
-static int32_t MatchSaConfig(uint32_t uid, uint32_t userId, struct HksUpgradeFileTransferInfo *info)
+static int32_t MatchSaConfig(const char *alias, uint32_t uid, uint32_t userId, struct HksUpgradeFileTransferInfo *info)
 {
-    InitDefaultStrategy(info);
+    InitDefaultStrategy(alias, info);
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(SA_SKIP_UPGRADE_CFG_LIST); ++i) {
         if (uid == SA_SKIP_UPGRADE_CFG_LIST[i]) {
             HKS_LOG_I("%" LOG_PUBLIC "u needs skip transfer upgrade.", uid);
@@ -119,7 +138,7 @@ static int32_t MatchSaConfig(uint32_t uid, uint32_t userId, struct HksUpgradeFil
     return HKS_SUCCESS;
 }
 
-static int32_t MatchHapConfig(uint32_t uid, uint32_t userId, uint64_t accessTokenId,
+static int32_t MatchHapConfig(const char *alias, uint32_t uid, uint32_t userId, uint64_t accessTokenId,
     struct HksUpgradeFileTransferInfo *info)
 {
     char hapName[HAP_NAME_LEN_MAX] = { 0 };
@@ -127,7 +146,7 @@ static int32_t MatchHapConfig(uint32_t uid, uint32_t userId, uint64_t accessToke
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret,
         "get hap name from accessTokenId failed, accessTokenId is %" LOG_PUBLIC PRIu64, accessTokenId)
 
-    InitDefaultStrategy(info);
+    InitDefaultStrategy(alias, info);
     for (uint32_t i = 0; i < HKS_ARRAY_SIZE(HAP_SKIP_UPGRADE_CFG_LIST); ++i) {
         if (strlen(HAP_SKIP_UPGRADE_CFG_LIST[i]) != strlen(hapName)) {
             continue;
@@ -155,24 +174,25 @@ static int32_t MatchHapConfig(uint32_t uid, uint32_t userId, uint64_t accessToke
     return HKS_SUCCESS;
 }
 
-int32_t HksMatchConfig(uint32_t uid, uint32_t userId, uint64_t accessTokenId, struct HksUpgradeFileTransferInfo *info)
+int32_t HksMatchConfig(const char *alias, uint32_t uid, uint32_t userId, uint64_t accessTokenId,
+    struct HksUpgradeFileTransferInfo *info)
 {
     enum HksAtType type;
     int32_t ret = HksGetAtType(accessTokenId, &type);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get access token type failed.")
     if (type == HKS_TOKEN_HAP) {
-        return MatchHapConfig(uid, userId, accessTokenId, info);
+        return MatchHapConfig(alias, uid, userId, accessTokenId, info);
     }
-    return MatchSaConfig(uid, userId, info);
+    return MatchSaConfig(alias, uid, userId, info);
 }
 
 // get transfer config info of a key file, which contains the owner info
-int32_t HksParseConfig(const struct HksBlob *fileContent, struct HksUpgradeFileTransferInfo *info)
+int32_t HksParseConfig(const char *alias, const struct HksBlob *fileContent, struct HksUpgradeFileTransferInfo *info)
 {
     uint32_t uid = 0;
     uint64_t accessTokenId = 0;
     uint32_t userId = 0;
     int32_t ret = ParseOwnerIdFromFileContent(fileContent, &uid, &accessTokenId, &userId);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "parse file failed.")
-    return HksMatchConfig(uid, userId, accessTokenId, info);
+    return HksMatchConfig(alias, uid, userId, accessTokenId, info);
 }
