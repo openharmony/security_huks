@@ -212,7 +212,7 @@ static int ProcessFileUpgrade(const char *fpath, const struct stat *sb, int type
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file content failed.")
 
         struct HksUpgradeFileTransferInfo info = { 0 };
-        ret = HksParseConfig(&fileContent, &info);
+        ret = HksParseConfig(alias, &fileContent, &info);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", fpath);
             break;
