@@ -120,7 +120,7 @@ static int32_t GetStorageLevelForSkipUpgradeApp(const struct HksProcessInfo *pro
         return HKS_SUCCESS;
     }
     struct HksUpgradeFileTransferInfo info = { 0 };
-    int32_t ret = HksMatchConfig(processInfo->uidInt, processInfo->userIdInt, processInfo->accessTokenId, &info);
+    int32_t ret = HksMatchConfig("", processInfo->uidInt, processInfo->userIdInt, processInfo->accessTokenId, &info);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "match skip upgarde config failed.")
     if (info.skipTransfer) {
         storageLevel->uint32Param = HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP;
