@@ -268,12 +268,6 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     return HKS_SUCCESS;
 }
 
-int32_t HksUpgradeFileTransferOnPowerOn(void)
-{
-    CopyDeToTmpPathIfNeed();
-    return UpgradeFileTransfer();
-}
-
 static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
     (void)ftwbuf;
@@ -281,6 +275,7 @@ static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int
         HKS_LOG_D("%" LOG_PUBLIC "s not a file", fpath);
         return 0;
     }
+
     char *alias = NULL;
     char *path = NULL;
     struct HksBlob fileContent = { 0 };
@@ -319,7 +314,7 @@ static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int
     return 0;
 }
 
-const char * const HUKS_CE_ROOT_PATH = "/data/service/el2/";
+const char * const HUKS_CE_ROOT_PATH = "/data/service/el2";
 const char * const HUKS_SERVICE_SUB_PATH = "huks_service";
 
 // Copy the rdb key in ce into DE.
@@ -341,13 +336,19 @@ ENABLE_CFI(static int32_t CopyRdbCeToDePathIfNeed(void))
     return HKS_SUCCESS;
 }
 
+int32_t HksUpgradeFileTransferOnPowerOn(void)
+{
+    CopyDeToTmpPathIfNeed();
+    int32_t ret = CopyRdbCeToDePathIfNeed();
+    // If the ret is fail, continue to upgrade next step instead of return.
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("CopyRdbCeToDePathIfNeed failed, ret is %" LOG_PUBLIC "d.", ret);
+    }
+    return UpgradeFileTransfer();
+}
+
 int32_t HksUpgradeFileTransferOnUserUnlock(uint32_t userId)
 {
     g_frontUserId = userId;
-    int32_t ret = HksUpgradeFileTransferOnPowerOn();
-    // If the ret is fail, continue to upgrade next step instead of return.
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksUpgradeFileTransferOnPowerOn failed, ret is %" LOG_PUBLIC "d.", ret);
-    }
-    return CopyRdbCeToDePathIfNeed();
+    return HksUpgradeFileTransferOnPowerOn();
 }

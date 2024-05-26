@@ -37,7 +37,7 @@
 #include "base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer/src/hks_config_parser.c"
 
 enum HksAtType g_accessTokenType = HKS_TOKEN_HAP;
-char *g_hapName = NULL;
+char *g_hapName = nullptr;
 
 int32_t HksGetAtType(uint64_t accessTokenId, enum HksAtType *atType)
 {
@@ -90,7 +90,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest001
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest001");
     g_hapName = const_cast<char *>("com.example.demo1");
     g_accessTokenType = HKS_TOKEN_HAP;
-    struct HksParamSet *paramSet001 = NULL;
+    struct HksParamSet *paramSet001 = nullptr;
     (void)HksInitParamSet(&paramSet001);
     uint32_t userId001 = 0;
     struct HksParam params[] = {
@@ -133,7 +133,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest002
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest002");
     g_hapName = const_cast<char *>("com.example.demo2");
     g_accessTokenType = HKS_TOKEN_HAP;
-    struct HksParamSet *paramSet002 = NULL;
+    struct HksParamSet *paramSet002 = nullptr;
     (void)HksInitParamSet(&paramSet002);
     uint32_t userId002 = 100;
     struct HksParam params[] = {
@@ -176,7 +176,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest003
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest003");
     g_hapName = const_cast<char *>("com.example.demo3");
     g_accessTokenType = HKS_TOKEN_HAP;
-    struct HksParamSet *paramSet003 = NULL;
+    struct HksParamSet *paramSet003 = nullptr;
     (void)HksInitParamSet(&paramSet003);
     uint32_t userId003 = 100;
     struct HksParam params[] = {
@@ -219,7 +219,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest004
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest004");
     g_hapName = const_cast<char *>("com.example.demo4");
     g_accessTokenType = HKS_TOKEN_HAP;
-    struct HksParamSet *paramSet004 = NULL;
+    struct HksParamSet *paramSet004 = nullptr;
     (void)HksInitParamSet(&paramSet004);
     uint32_t userId004 = 100;
     struct HksParam params[] = {
@@ -262,7 +262,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest005
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest005");
     g_hapName = const_cast<char *>("com.example.skip1");
     g_accessTokenType = HKS_TOKEN_HAP;
-    struct HksParamSet *paramSet005 = NULL;
+    struct HksParamSet *paramSet005 = nullptr;
     (void)HksInitParamSet(&paramSet005);
     uint32_t userId005 = 100;
     struct HksParam params[] = {
@@ -299,7 +299,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest006
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest006");
     g_accessTokenType = HKS_TOKEN_NATIVE;
-    struct HksParamSet *paramSet006 = NULL;
+    struct HksParamSet *paramSet006 = nullptr;
     (void)HksInitParamSet(&paramSet006);
     uint32_t userId006 = 0;
     uint32_t uid006 = 6;
@@ -342,7 +342,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest007
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest007");
     g_accessTokenType = HKS_TOKEN_NATIVE;
-    struct HksParamSet *paramSet007 = NULL;
+    struct HksParamSet *paramSet007 = nullptr;
     (void)HksInitParamSet(&paramSet007);
     uint32_t userId007 = 0;
     uint32_t uid007 = 7;
@@ -385,7 +385,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest008
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest008");
     g_accessTokenType = HKS_TOKEN_NATIVE;
-    struct HksParamSet *paramSet008 = NULL;
+    struct HksParamSet *paramSet008 = nullptr;
     (void)HksInitParamSet(&paramSet008);
     uint32_t userId008 = 0;
     uint32_t uid008 = 8;
@@ -428,7 +428,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest009
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest009");
     g_accessTokenType = HKS_TOKEN_NATIVE;
-    struct HksParamSet *paramSet009 = NULL;
+    struct HksParamSet *paramSet009 = nullptr;
     (void)HksInitParamSet(&paramSet009);
     uint32_t userId009 = 0;
     uint32_t uid009 = 9;
@@ -471,7 +471,7 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest010
 {
     HKS_LOG_I("enter HksServiceUpgradeConfigParserTest010");
     g_accessTokenType = HKS_TOKEN_NATIVE;
-    struct HksParamSet *paramSet010 = NULL;
+    struct HksParamSet *paramSet010 = nullptr;
     (void)HksInitParamSet(&paramSet010);
     uint32_t userId010 = 0;
     uint32_t uid010 = 10;
@@ -499,5 +499,134 @@ HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest010
     EXPECT_EQ(true, info.skipTransfer);
 
     HksFreeParamSet(&paramSet010);
+}
+
+/**
+ * @tc.name: HksServiceUpgradeConfigParserTest.HksServiceUpgradeConfigParserTest011
+ * @tc.desc: test HksParseConfig with DistributedDataRdb prefix, de and self-user
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest011, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksServiceUpgradeConfigParserTest011");
+    g_accessTokenType = HKS_TOKEN_NATIVE;
+    struct HksParamSet *paramSet011 = nullptr;
+    (void)HksInitParamSet(&paramSet011);
+    uint32_t userId011 = 0;
+    uint32_t uid011 = 11;
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PROCESS_NAME,
+            .blob = {
+                .data = reinterpret_cast<uint8_t *>(&uid011),
+                .size = sizeof(uint32_t)
+            }
+        }, {
+            .tag = HKS_TAG_USER_ID,
+            .uint32Param = userId011
+        }, {
+            .tag = HKS_TAG_ACCESS_TOKEN_ID,
+            .uint64Param = 0
+        }
+    };
+    (void)HksAddParams(paramSet011, params, HKS_ARRAY_SIZE(params));
+    (void)HksBuildParamSet(&paramSet011);
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet011),
+        .size = paramSet011->paramSetSize };
+    struct HksUpgradeFileTransferInfo info = { 0 };
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("DistributedDataRdb_test", &fileContent, &info));
+    EXPECT_EQ(true, info.needDe);
+    EXPECT_EQ(false, info.needFrontUser);
+    EXPECT_EQ(false, info.skipTransfer);
+    EXPECT_EQ(uid011, info.uid);
+    EXPECT_EQ(userId011, info.userId);
+
+    HksFreeParamSet(&paramSet011);
+}
+
+/**
+ * @tc.name: HksServiceUpgradeConfigParserTest.HksServiceUpgradeConfigParserTest012
+ * @tc.desc: test HksParseConfig with distributeddb_client_root_key, de and self-user
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest012, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksServiceUpgradeConfigParserTest012");
+    g_accessTokenType = HKS_TOKEN_NATIVE;
+    struct HksParamSet *paramSet012 = nullptr;
+    (void)HksInitParamSet(&paramSet012);
+    uint32_t userId012 = 0;
+    uint32_t uid012 = 11;
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PROCESS_NAME,
+            .blob = {
+                .data = reinterpret_cast<uint8_t *>(&uid012),
+                .size = sizeof(uint32_t)
+            }
+        }, {
+            .tag = HKS_TAG_USER_ID,
+            .uint32Param = userId012
+        }, {
+            .tag = HKS_TAG_ACCESS_TOKEN_ID,
+            .uint64Param = 0
+        }
+    };
+    (void)HksAddParams(paramSet012, params, HKS_ARRAY_SIZE(params));
+    (void)HksBuildParamSet(&paramSet012);
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet012),
+        .size = paramSet012->paramSetSize };
+    struct HksUpgradeFileTransferInfo info = { 0 };
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("distributeddb_client_root_key", &fileContent, &info));
+    EXPECT_EQ(true, info.needDe);
+    EXPECT_EQ(false, info.needFrontUser);
+    EXPECT_EQ(false, info.skipTransfer);
+    EXPECT_EQ(uid012, info.uid);
+    EXPECT_EQ(userId012, info.userId);
+
+    HksFreeParamSet(&paramSet012);
+}
+
+/**
+ * @tc.name: HksServiceUpgradeConfigParserTest.HksServiceUpgradeConfigParserTest013
+ * @tc.desc: test HksParseConfig with distributeddb_client_root_key with ectra suffix, ce and self-user as default
+ * @tc.type: FUNC
+ */
+HWTEST_F(HksServiceUpgradeConfigParserTest, HksServiceUpgradeConfigParserTest013, TestSize.Level0)
+{
+    HKS_LOG_I("enter HksServiceUpgradeConfigParserTest013");
+    g_accessTokenType = HKS_TOKEN_NATIVE;
+    struct HksParamSet *paramSet013 = nullptr;
+    (void)HksInitParamSet(&paramSet013);
+    uint32_t userId013 = 0;
+    uint32_t uid013 = 11;
+    struct HksParam params[] = {
+        {
+            .tag = HKS_TAG_PROCESS_NAME,
+            .blob = {
+                .data = reinterpret_cast<uint8_t *>(&uid013),
+                .size = sizeof(uint32_t)
+            }
+        }, {
+            .tag = HKS_TAG_USER_ID,
+            .uint32Param = userId013
+        }, {
+            .tag = HKS_TAG_ACCESS_TOKEN_ID,
+            .uint64Param = 0
+        }
+    };
+    (void)HksAddParams(paramSet013, params, HKS_ARRAY_SIZE(params));
+    (void)HksBuildParamSet(&paramSet013);
+    struct HksBlob fileContent = { .data = reinterpret_cast<uint8_t *>(paramSet013),
+        .size = paramSet013->paramSetSize };
+    struct HksUpgradeFileTransferInfo info = { 0 };
+    EXPECT_EQ(HKS_SUCCESS, HksParseConfig("distributeddb_client_root_key_etc", &fileContent, &info));
+    EXPECT_EQ(false, info.needDe);
+    EXPECT_EQ(false, info.needFrontUser);
+    EXPECT_EQ(false, info.skipTransfer);
+    EXPECT_EQ(uid013, info.uid);
+    EXPECT_EQ(userId013, info.userId);
+
+    HksFreeParamSet(&paramSet013);
 }
 }
