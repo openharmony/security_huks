@@ -274,32 +274,11 @@ int32_t HksUpgradeFileTransferOnPowerOn(void)
     return UpgradeFileTransfer();
 }
 
-// The length of HUKS_CE_ROOT_PATH is same for different user 100 ~ 999, which is enough for this upgrade.
-const char * const HUKS_CE_ROOT_PATH = "/data/service/el2/100/";
-
-const char * const HUKS_SERVICE_SUB_PATH = "huks_service";
-
-static bool CheckIsHksPath(const char *fpath)
-{
-    uint32_t fpathLen = strlen(fpath);
-    uint32_t ceRootPathLen = strlen(HUKS_CE_ROOT_PATH);
-    uint32_t huksServiceLen = strlen(HUKS_CE_ROOT_PATH);
-    if (fpathLen <= ceRootPathLen + huksServiceLen) {
-        return false;
-    }
-
-    return HksMemCmp(HUKS_SERVICE_SUB_PATH, fpath + ceRootPathLen, huksServiceLen) == EOK;
-}
-
 static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
 {
     (void)ftwbuf;
     if (typeflag != FTW_F) {
         HKS_LOG_D("%" LOG_PUBLIC "s not a file", fpath);
-        return 0;
-    }
-    // If fpath is not of huks_service，skip and continue.
-    if (!CheckIsHksPath(fpath)) {
         return 0;
     }
     char *alias = NULL;
@@ -340,11 +319,23 @@ static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int
     return 0;
 }
 
+const char * const HUKS_CE_ROOT_PATH = "/data/service/el2/";
+const char * const HUKS_SERVICE_SUB_PATH = "huks_service";
+
 // Copy the rdb key in ce into DE.
 ENABLE_CFI(static int32_t CopyRdbCeToDePathIfNeed(void))
 {
+    char huksCePath[HKS_MAX_DIRENT_FILE_LEN] = { 0 };
+    int32_t offset = sprintf_s(huksCePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%d/%s", HUKS_CE_ROOT_PATH, g_frontUserId,
+        HUKS_SERVICE_SUB_PATH);
+    if (offset <= 0) {
+        HKS_LOG_E("get huks ce path failed.");
+        // The mem buffer if absolutely enough so the sprintf_s will success.
+        return HKS_ERROR_BAD_STATE;
+    }
+
     // depth first and ignore soft link
-    int nftwRet = nftw(HKS_CE_ROOT_PATH, ProcessRdbCeToDeUpgrade, OPEN_FDS, FTW_DEPTH | FTW_PHYS);
+    int nftwRet = nftw(huksCePath, ProcessRdbCeToDeUpgrade, OPEN_FDS, FTW_DEPTH | FTW_PHYS);
     HKS_LOG_I("call nftw result is %" LOG_PUBLIC "d.", nftwRet);
 
     return HKS_SUCCESS;
