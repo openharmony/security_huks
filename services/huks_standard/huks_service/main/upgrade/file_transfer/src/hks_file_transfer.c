@@ -122,12 +122,21 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
             break;
         }
 
-        ret = HksIsFileExist(newPath, alias);
-        if (ret == HKS_SUCCESS) {
-            HKS_LOG_E("file in %" LOG_PUBLIC "s already exists.", newPath);
-            // try remove old key file, it is ok if fails.
-            (void)HksFileRemove(oldPath, alias);
-            break;
+        // Check if the alias is of rdb key file. If it is, skip the checking of duplicate to overwrite key file.
+        if (HksIsRdbDeKey(alias) && info->needDe) {
+            ret = HksFileRemove(newPath, alias);
+            if (ret != HKS_SUCCESS) {
+                HKS_LOG_E("remove DE rdb file in %" LOG_PUBLIC "s write failed.", newPath);
+                break;
+            }
+        } else {
+            ret = HksIsFileExist(newPath, alias);
+            if (ret == HKS_SUCCESS) {
+                HKS_LOG_E("file in %" LOG_PUBLIC "s already exists.", newPath);
+                // try remove old key file, it is ok if fails.
+                (void)HksFileRemove(oldPath, alias);
+                break;
+            }
         }
 
         ret = HksMakeFullDir(newPath);
@@ -141,16 +150,16 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
 
         ret = HksFileWrite(newPath, alias, 0, fileContent->data, fileContent->size);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("file %" LOG_PUBLIC "s/%" LOG_PUBLIC "s write failed.", newPath, alias);
+            HKS_LOG_E("file %" LOG_PUBLIC "s write failed.", newPath);
             break;
         }
 
         ret = HksFileRemove(oldPath, alias);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("file %" LOG_PUBLIC "s/%" LOG_PUBLIC "s remove failed.", oldPath, alias);
+            HKS_LOG_E("file in %" LOG_PUBLIC "s remove failed.", oldPath);
             // remove new file in case of old file removing fails, for avoiding double backup problem
             if (HksFileRemove(newPath, alias) != HKS_SUCCESS) {
-                HKS_LOG_E("try remove new file %" LOG_PUBLIC "s/%" LOG_PUBLIC "s failed.", newPath, alias);
+                HKS_LOG_E("try remove new file in %" LOG_PUBLIC "s failed.", newPath);
             } else {
                 HKS_LOG_I("remove new file success.");
             }
@@ -265,8 +274,89 @@ int32_t HksUpgradeFileTransferOnPowerOn(void)
     return UpgradeFileTransfer();
 }
 
+// The length of HUKS_CE_ROOT_PATH is same for different user 100 ~ 999, which is enough for this upgrade.
+const char * const HUKS_CE_ROOT_PATH = "/data/service/el2/100/";
+
+const char * const HUKS_SERVICE_SUB_PATH = "huks_service";
+
+static bool CheckIsHksPath(const char *fpath)
+{
+    uint32_t fpathLen = strlen(fpath);
+    uint32_t ceRootPathLen = strlen(HUKS_CE_ROOT_PATH);
+    uint32_t huksServiceLen = strlen(HUKS_CE_ROOT_PATH);
+    if (fpathLen <= ceRootPathLen + huksServiceLen) {
+        return false;
+    }
+
+    return HksMemCmp(HUKS_SERVICE_SUB_PATH, fpath + ceRootPathLen, huksServiceLen) == EOK;
+}
+
+static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+{
+    (void)ftwbuf;
+    if (typeflag != FTW_F) {
+        HKS_LOG_D("%" LOG_PUBLIC "s not a file", fpath);
+        return 0;
+    }
+    // If fpath is not of huks_service，skip and continue.
+    if (!CheckIsHksPath(fpath)) {
+        return 0;
+    }
+    char *alias = NULL;
+    char *path = NULL;
+    struct HksBlob fileContent = { 0 };
+    int32_t ret;
+    do {
+        ret = SplitPath(fpath, ftwbuf, &path, &alias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split fpath failed.")
+
+        if (!HksIsRdbDeKey(alias)) {
+            // Not rdb key file, break and do nothing.
+            break;
+        }
+
+        HKS_LOG_I("Find rdb key file in %" LOG_PUBLIC "s.", path);
+
+        ret = GetFileContent(path, alias, &fileContent);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file content failed.")
+
+        struct HksUpgradeFileTransferInfo info = { 0 };
+        ret = HksParseConfig(alias, &fileContent, &info);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", fpath);
+            break;
+        }
+        if (info.skipTransfer) {
+            HKS_LOG_I("file %" LOG_PUBLIC "s should skip transfer.", fpath);
+            break;
+        }
+        HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, path, &fileContent, &info), "TransferFile failed!")
+    } while (false);
+    HKS_FREE(path);
+    HKS_FREE(alias);
+    HKS_FREE_BLOB(fileContent);
+
+    // Continue to traverse files.
+    return 0;
+}
+
+// Copy the rdb key in ce into DE.
+ENABLE_CFI(static int32_t CopyRdbCeToDePathIfNeed(void))
+{
+    // depth first and ignore soft link
+    int nftwRet = nftw(HKS_CE_ROOT_PATH, ProcessRdbCeToDeUpgrade, OPEN_FDS, FTW_DEPTH | FTW_PHYS);
+    HKS_LOG_I("call nftw result is %" LOG_PUBLIC "d.", nftwRet);
+
+    return HKS_SUCCESS;
+}
+
 int32_t HksUpgradeFileTransferOnUserUnlock(uint32_t userId)
 {
     g_frontUserId = userId;
-    return HksUpgradeFileTransferOnPowerOn();
+    int32_t ret = HksUpgradeFileTransferOnPowerOn();
+    // If the ret is fail, continue to upgrade next step instead of return.
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksUpgradeFileTransferOnPowerOn failed, ret is %" LOG_PUBLIC "d.", ret);
+    }
+    return CopyRdbCeToDePathIfNeed();
 }

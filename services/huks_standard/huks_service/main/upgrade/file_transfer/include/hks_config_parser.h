@@ -64,6 +64,8 @@ int32_t HksParseConfig(const char *alias, const struct HksBlob *fileContent, str
 int32_t HksMatchConfig(const char *alias, uint32_t uid, uint32_t userId, uint64_t accessTokenId,
     struct HksUpgradeFileTransferInfo *info);
 
+bool HksIsRdbDeKey(const char *alias);
+
 #ifdef __cplusplus
 }
 #endif
