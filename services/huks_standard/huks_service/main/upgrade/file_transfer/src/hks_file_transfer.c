@@ -171,19 +171,19 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
     return ret;
 }
 
-static int32_t SplitPath(const char *fpath, const struct FTW *ftwbuf, char **path, char **alias)
+static int32_t SplitPath(const char *filePath, const struct FTW *ftw, char **path, char **alias)
 {
-    *alias = (char *)HksMalloc(strlen(fpath) + 1 - ftwbuf->base);
+    *alias = (char *)HksMalloc(strlen(filePath) + 1 - ftw->base);
     if (*alias == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memcpy_s(*alias, strlen(fpath) - ftwbuf->base, fpath + ftwbuf->base, strlen(fpath) - ftwbuf->base);
+    (void)memcpy_s(*alias, strlen(filePath) - ftw->base, filePath + ftw->base, strlen(filePath) - ftw->base);
 
-    *path = (char *)HksMalloc(ftwbuf->base + 1);
+    *path = (char *)HksMalloc(ftw->base + 1);
     if (*path == NULL) {
         return HKS_ERROR_MALLOC_FAIL;
     }
-    (void)memcpy_s(*path, ftwbuf->base, fpath, ftwbuf->base);
+    (void)memcpy_s(*path, ftw->base, filePath, ftw->base);
 
     HKS_LOG_I("path is %" LOG_PUBLIC "s.", *path);
 
@@ -203,11 +203,11 @@ static int32_t GetFileContent(const char *path, const char *alias, struct HksBlo
     return HksFileRead(path, alias, 0, fileContent, &fileContent->size);
 }
 
-static int ProcessFileUpgrade(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int typeFlag, struct FTW *ftw)
 {
-    (void)ftwbuf;
-    if (typeflag != FTW_F) {
-        HKS_LOG_D("%" LOG_PUBLIC "s not a file", fpath);
+    (void)st;
+    if (typeFlag != FTW_F) {
+        HKS_LOG_D("%" LOG_PUBLIC "s not a file", filePath);
         return 0;
     }
     char *alias = NULL;
@@ -215,8 +215,8 @@ static int ProcessFileUpgrade(const char *fpath, const struct stat *sb, int type
     struct HksBlob fileContent = { 0 };
     int32_t ret;
     do {
-        ret = SplitPath(fpath, ftwbuf, &path, &alias);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split fpath failed.")
+        ret = SplitPath(filePath, ftw, &path, &alias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split filePath failed.")
 
         ret = GetFileContent(path, alias, &fileContent);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file content failed.")
@@ -224,11 +224,11 @@ static int ProcessFileUpgrade(const char *fpath, const struct stat *sb, int type
         struct HksUpgradeFileTransferInfo info = { 0 };
         ret = HksParseConfig(alias, &fileContent, &info);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", fpath);
+            HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", filePath);
             break;
         }
         if (info.skipTransfer) {
-            HKS_LOG_I("file %" LOG_PUBLIC "s should skip transfer.", fpath);
+            HKS_LOG_I("file %" LOG_PUBLIC "s should skip transfer.", filePath);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, path, &fileContent, &info), "TransferFile failed!")
@@ -269,11 +269,11 @@ static int32_t CopyDeToTmpPathIfNeed(void)
     return HKS_SUCCESS;
 }
 
-static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int typeflag, struct FTW *ftwbuf)
+static int ProcessRdbCeToDeUpgrade(const char *filePath, const struct stat *st, int typeFlag, struct FTW *ftw)
 {
-    (void)ftwbuf;
-    if (typeflag != FTW_F) {
-        HKS_LOG_D("%" LOG_PUBLIC "s not a file", fpath);
+    (void)st;
+    if (typeFlag != FTW_F) {
+        HKS_LOG_D("%" LOG_PUBLIC "s not a file", filePath);
         return 0;
     }
 
@@ -282,8 +282,8 @@ static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int
     struct HksBlob fileContent = { 0 };
     int32_t ret;
     do {
-        ret = SplitPath(fpath, ftwbuf, &path, &alias);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split fpath failed.")
+        ret = SplitPath(filePath, ftw, &path, &alias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "split filePath failed.")
 
         if (!HksIsRdbDeKey(alias)) {
             // Not rdb key file, break and do nothing.
@@ -298,11 +298,11 @@ static int ProcessRdbCeToDeUpgrade(const char *fpath, const struct stat *sb, int
         struct HksUpgradeFileTransferInfo info = { 0 };
         ret = HksParseConfig(alias, &fileContent, &info);
         if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", fpath);
+            HKS_LOG_E("HksParseConfig failed, path is %" LOG_PUBLIC "s", filePath);
             break;
         }
         if (info.skipTransfer) {
-            HKS_LOG_I("file %" LOG_PUBLIC "s should skip transfer.", fpath);
+            HKS_LOG_I("file %" LOG_PUBLIC "s should skip transfer.", filePath);
             break;
         }
         HKS_IF_NOT_SUCC_LOGE(TransferFile(alias, path, &fileContent, &info), "TransferFile failed!")
