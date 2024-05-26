@@ -124,6 +124,7 @@ static int32_t TransferFile(const char *alias, const char *oldPath, const struct
 
         // Check if the alias is of rdb key file. If it is, skip the checking of duplicate to overwrite key file.
         if (HksIsRdbDeKey(alias) && info->needDe) {
+            HKS_LOG_I("Remove rbd key file in de path, to accept the old file.");
             ret = HksFileRemove(newPath, alias);
             if (ret != HKS_SUCCESS) {
                 HKS_LOG_E("remove DE rdb file in %" LOG_PUBLIC "s write failed.", newPath);
