@@ -35,15 +35,15 @@ static const char * const HAP_SKIP_UPGRADE_CFG_LIST[] = HUKS_HAP_SKIP_UPGRADE_CO
 static const char * const RDB_DE_PREFIX = "DistributedDataRdb";
 static const char * const RDB_ROOT_DE = "distributeddb_client_root_key";
 
-static bool IsRdbDeKey(const char *alias)
+bool HksIsRdbDeKey(const char *alias)
 {
     uint32_t rdbDePrefixLen = strlen(RDB_DE_PREFIX);
     uint32_t rdbRootDeLen = strlen(RDB_ROOT_DE);
     uint32_t aliasSize = strlen(alias);
-    if (aliasSize >= rdbDePrefixLen && HksMemCmp(alias, RDB_DE_PREFIX, aliasSize) == EOK) {
+    if (aliasSize >= rdbDePrefixLen && HksMemCmp(alias, RDB_DE_PREFIX, rdbDePrefixLen) == EOK) {
         return true;
     }
-    if (aliasSize == rdbRootDeLen && HksMemCmp(alias, RDB_ROOT_DE, aliasSize) == EOK) {
+    if (aliasSize == rdbRootDeLen && HksMemCmp(alias, RDB_ROOT_DE, rdbRootDeLen) == EOK) {
         return true;
     }
     return false;
@@ -108,7 +108,9 @@ static void InitDefaultStrategy(const char *alias, struct HksUpgradeFileTransfer
     info->skipTransfer = false;
     info->needDe = false;
     info->needFrontUser = false;
-    if (IsRdbDeKey(alias)) {
+    if (HksIsRdbDeKey(alias)) {
+        HKS_LOG_I("Find rdb key file, set default as DE.");
+        // Add default DE for rdb key file.
         info->needDe = true;
     }
 }
