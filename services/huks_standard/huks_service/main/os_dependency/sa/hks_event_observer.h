@@ -26,8 +26,8 @@ namespace Security {
 namespace Hks {
 class SystemEventSubscriber : public OHOS::EventFwk::CommonEventSubscriber {
 public:
-    inline explicit SystemEventSubscriber(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo) :
-        OHOS::EventFwk::CommonEventSubscriber(subscriberInfo)
+    inline explicit SystemEventSubscriber(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo)
+        : OHOS::EventFwk::CommonEventSubscriber(subscriberInfo)
     {}
     ~SystemEventSubscriber() = default;
     void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data) override;
