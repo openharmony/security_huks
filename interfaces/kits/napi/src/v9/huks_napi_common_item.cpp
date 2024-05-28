@@ -836,7 +836,7 @@ static napi_value GenerateBusinessError(napi_env env, int32_t errorCode)
     napi_value msg = GetNull(env);
     if (errInfo.errorMsg != nullptr) {
 #ifdef HUKS_NAPI_ERRORCODE_WITH_MESSAGE
-        uint32_t errorMsgLen = strlen(errInfo.errorMsg);
+        uint32_t errorMsgLen = strlen(errInfo.errorMsg) + 1;
         uint8_t errorMsgBuf[errorMsgLen];
         (void)memcpy_s(errorMsgBuf, errorMsgLen, errInfo.errorMsg, errorMsgLen);
         struct HksBlob msgBlob = { errorMsgLen, errorMsgBuf };
