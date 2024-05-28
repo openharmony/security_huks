@@ -406,7 +406,7 @@ napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, const u
     napi_value array = nullptr;
     NAPI_CALL(env, napi_create_array(env, &array));
     for (uint32_t i = 0; i < blobCount; i++) {
-       if (blob[i].size > MAX_OUT_BLOB_SIZE) {
+        if (blob[i].size > MAX_OUT_BLOB_SIZE) {
             HKS_LOG_E("invalid buff size!");
             continue;
         }
