@@ -322,7 +322,7 @@ const char * const HUKS_SERVICE_SUB_PATH = "huks_service";
 ENABLE_CFI(static int32_t CopyRdbCeToDePathIfNeed(void))
 {
     char huksCePath[HKS_MAX_DIRENT_FILE_LEN] = { 0 };
-    int32_t offset = sprintf_s(huksCePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%d/%s", HUKS_CE_ROOT_PATH, g_frontUserId,
+    int32_t offset = sprintf_s(huksCePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%u/%s", HUKS_CE_ROOT_PATH, g_frontUserId,
         HUKS_SERVICE_SUB_PATH);
     if (offset <= 0) {
         HKS_LOG_E("get huks ce path failed.");
