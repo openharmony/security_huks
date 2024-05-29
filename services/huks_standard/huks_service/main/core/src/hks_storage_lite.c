@@ -672,10 +672,10 @@ int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo,
     return GetKeyOffsetByKeyAlias(keyAlias, &offset);
 }
 
-int32_t HksStoreGetKeyBlob(const struct HksStoreFileInfo *fileInfo,
+int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob)
 {
-    (void)fileInfo;
+    (void)fileInfoPath;
     if (storageType == HKS_STORAGE_TYPE_ROOT_KEY) {
         return GetRootMaterial(keyAlias, keyBlob);
     }

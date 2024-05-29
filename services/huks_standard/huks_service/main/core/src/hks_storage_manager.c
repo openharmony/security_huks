@@ -130,6 +130,7 @@ static int32_t GetStorageTypePath(uint32_t storageType, struct HksStoreMaterial 
 {
     switch (storageType) {
         case HKS_STORAGE_TYPE_KEY:
+        case HKS_STORAGE_TYPE_BAK_KEY:
             outMaterial->storageTypePath = (char *)HksMalloc(sizeof(HKS_KEY_STORE_KEY_PATH) + 1);
             if (outMaterial->storageTypePath == NULL) {
                 return HKS_ERROR_MALLOC_FAIL;
@@ -375,7 +376,20 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = HksStoreGetKeyBlob(&fileInfo, keyBlob);
+        if (storageType != HKS_STORAGE_TYPE_BAK_KEY) {
+            ret = HksStoreGetKeyBlob(&fileInfo.mainPath, keyBlob);
+        }
+#ifdef SUPPORT_STORAGE_BACKUP
+        else {
+            ret = HksStoreGetKeyBlob(&fileInfo.bakPath, keyBlob);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+
+            if (HksStorageWriteFile(fileInfo.mainPath.path, fileInfo.mainPath.fileName, 0,
+                keyBlob->data, keyBlob->size) != HKS_SUCCESS) {
+                    HKS_LOG_E("hks copy bak key to main key failed");
+                }
+        }
+#endif
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
@@ -403,7 +417,14 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = HksStoreGetKeyBlobSize(&fileInfo, keyBlobSize);
+        if (storageType != HKS_STORAGE_TYPE_BAK_KEY) {
+            ret = HksStoreGetKeyBlobSize(&fileInfo.mainPath, keyBlobSize);
+        }
+#ifdef SUPPORT_STORAGE_BACKUP
+        else {
+            ret = HksStoreGetKeyBlobSize(&fileInfo.bakPath, keyBlobSize);
+        }
+#endif
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
