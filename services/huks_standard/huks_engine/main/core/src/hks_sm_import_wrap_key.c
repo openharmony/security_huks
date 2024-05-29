@@ -581,7 +581,7 @@ int32_t HksSmImportWrappedKey(const struct HksBlob *keyAlias, const struct HksPa
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_ARGUMENT, "check failed.");
 
     struct HksKeyNode *wrappingKeyNode = HksGenerateKeyNode(wrappingKey);
-    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_BAD_STATE, "generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_CORRUPT_FILE, "generate keynode failed")
 
     if (algSuit == HKS_UNWRAP_SUITE_SM2_SM4_128_CBC_PKCS7_WITH_VERIFY_DIG_SM3) {
         ret = HksSmImportWrappedKeyWithVerify(keyAlias, paramSet, wrappingKeyNode, wrappedKeyData, keyOut);

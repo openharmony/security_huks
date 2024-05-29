@@ -23,7 +23,8 @@
 
 enum HksStorageType {
     HKS_STORAGE_TYPE_KEY = 0,
-    HKS_STORAGE_TYPE_ROOT_KEY,
+    HKS_STORAGE_TYPE_ROOT_KEY = 1,
+    HKS_STORAGE_TYPE_BAK_KEY = 2,
 };
 
 #ifdef __cplusplus

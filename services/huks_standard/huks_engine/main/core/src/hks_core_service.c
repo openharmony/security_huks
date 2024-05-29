@@ -178,7 +178,7 @@ static int32_t GetAgreeBaseKey(const bool isPubKey, const bool isPlainPubKey, co
     struct HksKeyNode *keyNode = HksGenerateKeyNode(&tempKey);
     (void)memset_s(buffer, size, 0, size);
     HKS_FREE(buffer);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generating keynode with agree key failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "generating keynode with agree key failed")
 
     bool isSupportUserAuth = false;
     int32_t ret = HksCheckKeybBlobIsSupportUserAuth(keyNode->paramSet, &isSupportUserAuth);
@@ -415,7 +415,7 @@ static int32_t SignVerify(uint32_t cmdId, const struct HksBlob *key, const struc
         "hks failed to check signature or verify params, cmdId:%" LOG_PUBLIC "x, ret:%" LOG_PUBLIC "x!\n", cmdId, ret)
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "SignVerify generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "SignVerify generate keynode failed")
 
     bool needFree = true;
     struct HksBlob message = { 0, NULL };
@@ -480,7 +480,7 @@ static int32_t Cipher(uint32_t cmdId, const struct HksBlob *key, const struct Hk
         "hks core check cipher params failed, cmdId:%" LOG_PUBLIC "x, ret:%" LOG_PUBLIC "x!\n", cmdId, ret)
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "Cipher generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "Cipher generate keynode failed")
 
     do {
         ret = CipherPreCheck(keyNode, paramSet);
@@ -616,7 +616,7 @@ static int32_t BuildDecryptUsageSpecOfUnwrap(const struct HksBlob *aad, const st
 static int32_t CheckWrappingKeyIsUsedForUnwrap(const struct HksBlob *wrappingKey)
 {
     struct HksKeyNode *wrappingKeyNode = HksGenerateKeyNode(wrappingKey);
-    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_BAD_STATE,
+    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_CORRUPT_FILE,
         "check agree params: generate wrapping keynode failed!")
 
     struct HksParam *purposeParamWrappingKey = NULL;
@@ -647,7 +647,7 @@ static int32_t GetPublicKeyInnerFormat(const struct HksBlob *wrappingKey, const 
 
     /* peer public key format should be same as wrapping key */
     struct HksKeyNode *wrappingKeyNode = HksGenerateKeyNode(wrappingKey);
-    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_BAD_STATE, "generate wrapping key keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(wrappingKeyNode, HKS_ERROR_CORRUPT_FILE, "generate wrapping key keynode failed")
 
     ret = GetHksPubKeyInnerFormat(wrappingKeyNode->paramSet, &peerPubKeyPart, outPublicKey);
     HksFreeKeyNode(&wrappingKeyNode);
@@ -900,7 +900,7 @@ int32_t HksCoreDecrypt(const struct HksBlob *key, const struct HksParamSet *para
 static int32_t HksCheckKeyValidity(const struct HksParamSet *paramSet, const struct HksBlob *key)
 {
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "check key legality failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "check key legality failed")
 
     int32_t ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
 
@@ -1079,7 +1079,7 @@ int32_t HksCoreExportPublicKey(const struct HksBlob *key,
     }
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "SignVerify generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "SignVerify generate keynode failed")
 
     int32_t ret;
     do {
@@ -1106,7 +1106,7 @@ int32_t HksCoreAgreeKey(const struct HksParamSet *paramSet, const struct HksBlob
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check agreeKey params failed")
 
     struct HksKeyNode *privateKeyNode = HksGenerateKeyNode(privateKey);
-    HKS_IF_NULL_LOGE_RETURN(privateKeyNode, HKS_ERROR_BAD_STATE, "agree key generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(privateKeyNode, HKS_ERROR_CORRUPT_FILE, "agree key generate keynode failed")
 
     do {
         ret = HksProcessIdentityVerify(privateKeyNode->paramSet, paramSet);
@@ -1144,7 +1144,7 @@ int32_t HksCoreDeriveKey(const struct HksParamSet *paramSet, const struct HksBlo
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check deriveKey params failed")
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(mainKey);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "SignVerify generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "SignVerify generate keynode failed")
 
     do {
         ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
@@ -1178,7 +1178,7 @@ int32_t HksCoreMac(const struct HksBlob *key, const struct HksParamSet *paramSet
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check mac params failed")
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "mac generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "mac generate keynode failed")
 
     do {
         ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
@@ -1878,7 +1878,7 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
-    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate keynode failed")
+    HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_CORRUPT_FILE, "generate keynode failed")
 
     ret = HksProcessIdentityVerify(keyNode->paramSet, paramSet);
     if (ret != HKS_SUCCESS) {
