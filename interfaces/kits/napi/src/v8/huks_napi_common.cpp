@@ -406,22 +406,9 @@ napi_value GenerateStringArray(napi_env env, const struct HksBlob *blob, const u
     napi_value array = nullptr;
     NAPI_CALL(env, napi_create_array(env, &array));
     for (uint32_t i = 0; i < blobCount; i++) {
-        if (blob[i].size > MAX_OUT_BLOB_SIZE) {
-            HKS_LOG_E("invalid buff size!");
-            continue;
-        }
-        uint8_t *newBlobData = (uint8_t *)HksMalloc(blob[i].size + 1);
-        if (newBlobData == nullptr) {
-            HKS_LOG_E("HksMalloc failed!");
-            continue;
-        }
-
-        (void)memcpy_s(newBlobData, blob[i].size, blob[i].data, blob[i].size);
-        struct HksBlob newBlob = {blob[i].size + 1, newBlobData};
         napi_value element = nullptr;
-        napi_create_string_latin1(env, reinterpret_cast<const char *>(newBlobData), newBlob.size, &element);
+        napi_create_string_latin1(env, reinterpret_cast<const char *>(blob[i].data), blob[i].size, &element);
         napi_set_element(env, array, i, element);
-        HKS_FREE(newBlobData);
     }
     return array;
 }
