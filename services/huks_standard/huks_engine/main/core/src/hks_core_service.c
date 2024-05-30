@@ -1877,6 +1877,16 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
     int32_t ret = CheckAttestKeyParams(key, paramSet, certChain);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
+    struct HksParam *certTypeParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ATTESTATION_CERT_TYPE, &certTypeParam);
+    if (ret == HKS_SUCCESS) {
+        HKS_LOG_E("not support compatible rsa attest");
+        return HKS_ERROR_NOT_SUPPORTED;
+    } else if (ret != HKS_ERROR_PARAM_NOT_EXIST){
+        HKS_LOG_E("get attest cert type failed");
+        return ret;
+    }
+
     struct HksKeyNode *keyNode = HksGenerateKeyNode(key);
     HKS_IF_NULL_LOGE_RETURN(keyNode, HKS_ERROR_BAD_STATE, "generate keynode failed")
 
