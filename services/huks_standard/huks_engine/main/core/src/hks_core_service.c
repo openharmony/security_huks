@@ -1882,7 +1882,7 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
     if (ret == HKS_SUCCESS) {
         HKS_LOG_E("not support compatible rsa attest");
         return HKS_ERROR_NOT_SUPPORTED;
-    } else if (ret != HKS_ERROR_PARAM_NOT_EXIST){
+    } else if (ret != HKS_ERROR_PARAM_NOT_EXIST) {
         HKS_LOG_E("get attest cert type failed");
         return ret;
     }
