@@ -480,59 +480,62 @@ static int32_t CheckUserPathExist(enum HksPathType pathType, const char *userIdP
 }
 #endif
 
-static int32_t ConstructPath(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo)
+static int32_t ConstructPath(const struct HksStoreMaterial *material, const char *deDataPath,
+    const char *ceOrEceDataPath, struct HksStoreInfo *fileInfoPath)
 {
+    (void)ceOrEceDataPath;
     int32_t ret = HKS_SUCCESS;
     int32_t offset = 0;
     switch (material->pathType) {
         case DE_PATH:
-            offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
-                HKS_KEY_STORE_PATH, material->userIdPath,  material->uidPath, material->storageTypePath);
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
+                deDataPath, material->userIdPath, material->uidPath, material->storageTypePath);
             break;
 #ifdef L2_STANDARD
         case CE_PATH:
             ret = CheckUserPathExist(CE_PATH, material->userIdPath);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
-            offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
-                HKS_CE_ROOT_PATH, material->userIdPath,  HKS_STORE_SERVICE_PATH, material->uidPath,
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
+                HKS_CE_ROOT_PATH, material->userIdPath, ceOrEceDataPath, material->uidPath,
                 material->storageTypePath);
             break;
         case ECE_PATH:
             ret = CheckUserPathExist(ECE_PATH, material->userIdPath);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
-            offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
-                HKS_ECE_ROOT_PATH, material->userIdPath,  HKS_STORE_SERVICE_PATH, material->uidPath,
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
+                HKS_ECE_ROOT_PATH, material->userIdPath, ceOrEceDataPath, material->uidPath,
                 material->storageTypePath);
             break;
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
         case TMP_PATH:
-            offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
-                HKS_KEY_STORE_TMP_PATH, material->userIdPath,  material->uidPath, material->storageTypePath);
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
+                HKS_KEY_STORE_TMP_PATH, material->userIdPath, material->uidPath, material->storageTypePath);
             break;
 #endif
 #ifdef HKS_USE_RKC_IN_STANDARD
         case RKC_IN_STANDARD_PATH:
             // there is no user id path in rkc of standard
-            offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
-                HKS_KEY_RKC_PATH,  material->uidPath, material->storageTypePath);
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
+                HKS_KEY_RKC_PATH, material->uidPath, material->storageTypePath);
             break;
 #endif
 #endif
 #ifdef HKS_ENABLE_LITE_HAP
         case LITE_HAP_PATH:
-            offset = sprintf_s(fileInfo->mainPath.path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
                 HKS_KEY_STORE_LITE_HAP, material->userIdPath,  material->uidPath, material->storageTypePath);
             break;
 #endif
     }
     if (offset <= 0) {
-        HKS_LOG_E("get main path failed, path type is %" LOG_PUBLIC "d.", material->pathType);
+        HKS_LOG_E("get path failed, path type is %" LOG_PUBLIC "d.", material->pathType);
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
     return ret;
 }
 
-static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo)
+static int32_t GetPathInfo(const struct HksStoreMaterial *material, const char *deDataPath,
+    const char *ceOrEceDataPath, struct HksStoreInfo *fileInfoPath)
 {
     int32_t ret = HKS_SUCCESS;
 #ifdef L2_STANDARD
@@ -541,18 +544,18 @@ static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksSt
     bool isUserPath = false;
 #endif
 
-    ret = ConstructPath(material, fileInfo);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct path failed")
+    ret = ConstructPath(material, deDataPath, ceOrEceDataPath, fileInfoPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "construct main path failed")
 
-    StandardizePath(fileInfo->mainPath.path);
-    ret = HksMakeFullDir(fileInfo->mainPath.path);
+    StandardizePath(fileInfoPath->path);
+    ret = HksMakeFullDir(fileInfoPath->path);
     if (isUserPath) {
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_NO_PERMISSION, "make full dir failed.")
     } else {
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full dir failed.")
     }
     if (material->keyAliasPath != NULL) {
-        if (memcpy_s(fileInfo->mainPath.fileName, HKS_MAX_FILE_NAME_LEN,
+        if (memcpy_s(fileInfoPath->fileName, HKS_MAX_FILE_NAME_LEN,
             material->keyAliasPath, strlen(material->keyAliasPath)) != EOK) {
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
         }
@@ -560,12 +563,23 @@ static int32_t GetMainPath(const struct HksStoreMaterial *material, struct HksSt
     return ret;
 }
 
-// for now only construct for mainPath, bakPath is not on the table
 int32_t HksGetFileInfo(const struct HksStoreMaterial *material, struct HksStoreFileInfo *fileInfo)
 {
     int32_t ret = FileInfoInit(fileInfo);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hks file info init failed, ret = %" LOG_PUBLIC "d.", ret)
 
-    return GetMainPath(material, fileInfo);
+#ifdef L2_STANDARD
+    ret = GetPathInfo(material, HKS_KEY_STORE_PATH, HKS_STORE_SERVICE_PATH, &fileInfo->mainPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hks get main path info failed, ret = %" LOG_PUBLIC "d.", ret)
+#else
+    ret = GetPathInfo(material, HKS_KEY_STORE_PATH, NULL, &fileInfo->mainPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hks get main path info failed, ret = %" LOG_PUBLIC "d.", ret)
+#endif
+
+#ifdef SUPPORT_STORAGE_BACKUP
+    ret = GetPathInfo(material, HKS_KEY_STORE_BAK_PATH, HKS_STORE_SERVICE_BAK_PATH, &fileInfo->bakPath);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hks get bak path info failed, ret = %" LOG_PUBLIC "d.", ret)
+#endif
+    return HKS_SUCCESS;
 }
 #endif /* _CUT_AUTHENTICATE_ */

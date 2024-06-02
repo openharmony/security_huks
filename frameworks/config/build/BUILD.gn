@@ -34,6 +34,7 @@ config("l2_standard_common_config") {
     "_HUKS_LOG_ENABLE_",
     "L2_STANDARD",
     "HKS_ENABLE_CLEAN_FILE",
+    "SUPPORT_STORAGE_BACKUP",
   ]
   if (!huks_use_rkc_in_standard) {
     defines += [ "_HARDWARE_ROOT_KEY_" ]

@@ -35,6 +35,7 @@
     #define HKS_CE_ROOT_PATH              "/data/service/el2"
     #define HKS_ECE_ROOT_PATH             "/data/service/el4"
     #define HKS_STORE_SERVICE_PATH        "huks_service/maindata"
+    #define HKS_STORE_SERVICE_BAK_PATH    "huks_service/bakdata"
     #ifdef HKS_USE_RKC_IN_STANDARD
         #define HKS_KEY_RKC_PATH HKS_CONFIG_RKC_STORE_PATH "/maindata"
     #endif

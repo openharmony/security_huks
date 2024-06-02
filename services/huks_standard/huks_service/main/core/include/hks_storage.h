@@ -33,7 +33,7 @@ int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo,
 int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo,
     const struct HksBlob *keyAlias, uint32_t storageType);
 
-int32_t HksStoreGetKeyBlob(const struct HksStoreFileInfo *fileInfo,
+int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath,
     const struct HksBlob *keyAlias, uint32_t storageType, struct HksBlob *keyBlob);
 
 int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName,
@@ -48,11 +48,15 @@ int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo);
 
 int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo);
 
-int32_t HksStoreGetKeyBlob(const struct HksStoreFileInfo *fileInfo, struct HksBlob *keyBlob);
+int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, struct HksBlob *keyBlob);
 
-int32_t HksStoreGetKeyBlobSize(const struct HksStoreFileInfo *fileInfo, uint32_t *keyBlobSize);
+int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, uint32_t *keyBlobSize);
 
 int32_t HksGetKeyCountByProcessName(const struct HksStoreFileInfo *fileInfo, uint32_t *fileCount);
+
+int32_t HksStorageWriteFile(
+    const char *path, const char *fileName, uint32_t offset, const uint8_t *buf, uint32_t len);
+
 #endif // _STORAGE_LITE_
 #endif // _CUT_AUTHENTICATE_
 
