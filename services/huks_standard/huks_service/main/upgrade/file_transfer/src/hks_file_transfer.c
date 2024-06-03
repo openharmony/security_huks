@@ -81,7 +81,11 @@ static int32_t ConstructNewFilePath(const char *alias, const struct HksUpgradeFi
     char **newPath)
 {
     int32_t ret;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial storeMaterial = { DE_PATH, 0 };
     struct HksBlob aliasBlob = { .data = (uint8_t *)alias, .size = strlen(alias) };
     do {

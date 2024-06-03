@@ -495,16 +495,14 @@ static int32_t ConstructPath(const struct HksStoreMaterial *material, const char
         case CE_PATH:
             ret = CheckUserPathExist(CE_PATH, material->userIdPath);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
-            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
-                HKS_CE_ROOT_PATH, material->userIdPath, ceOrEceDataPath, material->uidPath,
-                material->storageTypePath);
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s", HKS_CE_ROOT_PATH,
+                material->userIdPath, ceOrEceDataPath, material->uidPath, material->storageTypePath);
             break;
         case ECE_PATH:
             ret = CheckUserPathExist(ECE_PATH, material->userIdPath);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check user path exist failed.")
-            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s",
-                HKS_ECE_ROOT_PATH, material->userIdPath, ceOrEceDataPath, material->uidPath,
-                material->storageTypePath);
+            offset = sprintf_s(fileInfoPath->path, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s/%s", HKS_ECE_ROOT_PATH,
+                material->userIdPath, ceOrEceDataPath, material->uidPath, material->storageTypePath);
             break;
 #ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
         case TMP_PATH:
