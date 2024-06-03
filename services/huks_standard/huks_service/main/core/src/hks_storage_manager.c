@@ -279,7 +279,11 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
 {
     (void)processInfo;
     (void)paramSet;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -307,7 +311,11 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
 {
     (void)processInfo;
     (void)paramSet;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -335,7 +343,11 @@ int32_t HksManageStoreIsKeyBlobExist(const struct HksProcessInfo *processInfo, c
 {
     (void)processInfo;
     (void)paramSet;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -363,7 +375,11 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
 {
     (void)processInfo;
     (void)paramSet;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -404,7 +420,11 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
 {
     (void)processInfo;
     (void)paramSet;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -437,7 +457,11 @@ int32_t HksManageStoreGetKeyBlobSize(const struct HksProcessInfo *processInfo, c
 int32_t HksManageGetKeyAliasByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyInfo *keyInfoList, uint32_t *listCount)
 {
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -461,7 +485,11 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 {
     (void)processInfo;
     (void)paramSet;
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {
@@ -488,7 +516,11 @@ int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processIn
     struct HksKeyAliasSet **outData)
 {
 #ifdef L2_STANDARD
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
     int32_t ret;
     do {

@@ -167,7 +167,8 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
     };
     ret = DecryptCipher(&testDecryptStruct);
 
-    EXPECT_TRUE(ret != g_testCipherParams[index].expectResult);
+    //because of storage backup
+    EXPECT_TRUE(ret == g_testCipherParams[index].expectResult);
     (void)HksDeleteKey(&keyAlias, NULL);
     TestFreeBlob(&plainData);
     TestFreeBlob(&cipherData);
@@ -175,6 +176,6 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
     TestFreeBlob(&ivData);
     TestFreeBlob(&nonceData);
     TestFreeBlob(&aadData);
-    ASSERT_TRUE(ret != 0);
+    ASSERT_TRUE(ret == 0);
 }
 }
