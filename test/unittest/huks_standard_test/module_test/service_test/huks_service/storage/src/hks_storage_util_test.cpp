@@ -82,7 +82,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest001, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("123");
     material.userIdPath = const_cast<char *>("999");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
@@ -107,7 +111,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest002, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("222");
     material.userIdPath = const_cast<char *>("");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
@@ -132,7 +140,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest003, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("333");
     material.userIdPath = const_cast<char *>("100");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
@@ -157,7 +169,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest004, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("444");
     material.userIdPath = const_cast<char *>("100");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
@@ -183,7 +199,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest005, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("555");
     material.userIdPath = const_cast<char *>("555");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
@@ -209,7 +229,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest006, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("hks_client");
     material.userIdPath = const_cast<char *>("");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
@@ -234,7 +258,11 @@ HWTEST_F(HksStorageUtilTest, HksStorageUtilTest007, TestSize.Level0)
     material.storageTypePath = const_cast<char *>("key");
     material.uidPath = const_cast<char *>("hks_client");
     material.userIdPath = const_cast<char *>("0");
-    struct HksStoreFileInfo fileInfo = { 0 };
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
     int32_t ret = HksGetFileInfo(&material, &fileInfo);
     ASSERT_EQ(HKS_SUCCESS, ret);
     ASSERT_EQ(strlen(fileInfo.mainPath.fileName), strlen(material.keyAliasPath));
