@@ -90,7 +90,6 @@ namespace Security {
 namespace Hks {
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::systemEventSubscriber_ = nullptr;
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::backUpEventSubscriber_ = nullptr;
-bool SystemEventObserver::userUnlocked_ = false;
 const static std::string RESTORE_EVENT_NAME = "COMMON_EVENT_RESTORE_START";
 const int32_t BACKUP_UID = 1089;
 
@@ -129,7 +128,6 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
         HksServiceDeleteProcessInfo(&processInfo);
     } else if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
         HKS_LOG_I("the credential-encrypted storage has become unlocked");
-        userUnlocked_ = true;
         int userId = data.GetCode();
         HKS_LOG_I("user %" LOG_PUBLIC "d unlocked.", userId);
         HksUpgradeOnUserUnlock(userId);
@@ -153,7 +151,7 @@ bool SystemEventObserver::SubscribeSystemEvent()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
-    systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo, userUnlocked_);
+    systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo);
 
     HKS_IF_NULL_LOGE_RETURN(systemEventSubscriber_, false, "huks system subscriber nullptr")
 

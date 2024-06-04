@@ -26,14 +26,11 @@ namespace Security {
 namespace Hks {
 class SystemEventSubscriber : public OHOS::EventFwk::CommonEventSubscriber {
 public:
-    inline explicit SystemEventSubscriber(
-        const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo,
-        bool &userUnlocked) : OHOS::EventFwk::CommonEventSubscriber(subscriberInfo), userUnlocked_(userUnlocked)
+    inline explicit SystemEventSubscriber(const OHOS::EventFwk::CommonEventSubscribeInfo &subscriberInfo) :
+        OHOS::EventFwk::CommonEventSubscriber(subscriberInfo)
     {}
     ~SystemEventSubscriber() = default;
     void OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data) override;
-private:
-    bool &userUnlocked_;
 };
 
 class SystemEventObserver {
@@ -42,15 +39,10 @@ public:
     ~SystemEventObserver();
     static bool SubscribeEvent();
     static bool UnSubscribeEvent();
-    static inline bool GetUserUnlocked()
-    {
-        return userUnlocked_;
-    }
 
 private:
     static std::shared_ptr<SystemEventSubscriber> systemEventSubscriber_;
     static std::shared_ptr<SystemEventSubscriber> backUpEventSubscriber_;
-    static bool userUnlocked_;
     static bool SubscribeSystemEvent();
     static bool SubscribeBackUpEvent();
     static bool DoUnSubscribe(std::shared_ptr<SystemEventSubscriber> subscriber);

@@ -15,8 +15,6 @@
 
 #include "hks_sa.h"
 
-#include <accesstoken_kit.h>
-#include <hap_token_info.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
 #include <string_ex.h>
@@ -28,27 +26,14 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_message_handler.h"
-#include "hks_param.h"
 #include "hks_plugin_adapter.h"
-#include "hks_report.h"
 #include "hks_response.h"
-#include "hks_service_ipc_serialization.h"
 #include "hks_template.h"
 #include "hks_type_inner.h"
 #include "hks_upgrade.h"
 #include "hks_upgrade_lock.h"
 #include "hks_util.h"
 #include "huks_service_ipc_interface_code.h"
-
-#ifdef HAS_OS_ACCOUNT_PART
-#include "os_account_manager.h"
-#else // HAS_OS_ACCOUNT_PART
-constexpr static int UID_TRANSFORM_DIVISOR = 200000;
-[[maybe_unused]] static void GetOsAccountIdFromUid(int uid, int &osAccountId)
-{
-    osAccountId = uid / UID_TRANSFORM_DIVISOR;
-}
-#endif // HAS_OS_ACCOUNT_PART
 
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
 #include "malloc.h"
@@ -209,102 +194,9 @@ static void HksInitMemPolicy(void)
 #endif
 }
 
-#ifdef SUPPORT_COMMON_EVENT
-static void AppendKeyAliasParamBase64IfExist(uint32_t code, const struct HksBlob &srcData, HksParamSet *ps)
-{
-    // srcData in the following codes starts with keyAlias
-    constexpr std::array validCodes = {
-        HKS_MSG_GEN_KEY,
-        HKS_MSG_IMPORT_KEY,
-        HKS_MSG_EXPORT_PUBLIC_KEY,
-        HKS_MSG_IMPORT_WRAPPED_KEY,
-        HKS_MSG_DELETE_KEY,
-        HKS_MSG_GET_KEY_PARAMSET,
-        HKS_MSG_KEY_EXIST,
-        HKS_MSG_SIGN,
-        HKS_MSG_VERIFY,
-        HKS_MSG_ENCRYPT,
-        HKS_MSG_DECRYPT,
-        HKS_MSG_MAC,
-        HKS_MSG_ATTEST_KEY,
-    };
-    if (std::find(validCodes.begin(), validCodes.end(), code) == validCodes.end()) {
-        HKS_LOG_W("cmd id %" LOG_PUBLIC "u no key alias", code);
-        return;
-    }
-    HksParam aliasParam { .tag = HKS_TAG_KEY_ALIAS, .blob = {.size = 0, .data = NULL} };
-    uint32_t offset = 0;
-    int32_t ret = GetBlobFromBuffer(&aliasParam.blob, &srcData, &offset);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get keyAlias failed %" LOG_PUBLIC "d", ret);
-        return;
-    }
-    ret = HksAddParams(ps, &aliasParam, 1);
-    HKS_IF_NOT_SUCC_LOGE(ret, "HapCallHuksBeforeUnlock HksAddParams alias fail %" LOG_PUBLIC "d", ret);
-}
-#endif
-
-static void ReportIfHapCallHuksBeforeUnlock(uint32_t code, const struct HksBlob &srcData)
-#ifdef SUPPORT_COMMON_EVENT
-{
-    if (SystemEventObserver::GetUserUnlocked()) [[likely]] {
-        return;
-    }
-    auto callingTokenId = OHOS::IPCSkeleton::GetCallingTokenID();
-    if (OHOS::Security::AccessToken::AccessTokenKit::GetTokenType(callingTokenId) !=
-        OHOS::Security::AccessToken::ATokenTypeEnum::TOKEN_HAP) {
-        return;
-    }
-    OHOS::Security::AccessToken::HapTokenInfo hapTokenInfo;
-    int32_t callingResult = OHOS::Security::AccessToken::AccessTokenKit::GetHapTokenInfo(callingTokenId, hapTokenInfo);
-    if (callingResult != ERR_OK) {
-        HKS_LOG_E("GetHapTokenInfo failed, callingTokenId :%" LOG_PUBLIC "d", callingTokenId);
-        return;
-    }
-
-    auto callingUid = OHOS::IPCSkeleton::GetCallingUid();
-    int userId = 0;
-#ifdef HAS_OS_ACCOUNT_PART
-    OHOS::ErrCode errCode = OHOS::AccountSA::OsAccountManager::GetOsAccountLocalIdFromUid(callingUid, userId);
-    if (errCode != ERR_OK) {
-        HKS_LOG_E("GetOsAccountLocalIdFromUid failed, callingUid :%" LOG_PUBLIC "d", callingUid);
-        return;
-    }
-#else // HAS_OS_ACCOUNT_PART
-    GetOsAccountIdFromUid(callingUid, userId);
-#endif // HAS_OS_ACCOUNT_PART
-    HKS_LOG_E("HapCallHuksBeforeUnlock %" LOG_PUBLIC "s userId %" LOG_PUBLIC "d",
-        hapTokenInfo.bundleName.c_str(), userId);
-
-    std::vector<uint8_t> hapNameBuffer(hapTokenInfo.bundleName.begin(), hapTokenInfo.bundleName.end());
-    hapNameBuffer.emplace_back('\0');
-    HksParam hapNameParam { .tag = HKS_TAG_PACKAGE_NAME, .blob = {hapNameBuffer.size(), hapNameBuffer.data()} };
-    HksParamSet *ps{};
-    int ret = HksInitParamSet(&ps);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HapCallHuksBeforeUnlock HksInitParamSet fail %" LOG_PUBLIC "d", ret);
-        return;
-    }
-    do {
-        ret = HksAddParams(ps, &hapNameParam, 1);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HapCallHuksBeforeUnlock HksAddParams fail %" LOG_PUBLIC "d", ret);
-        AppendKeyAliasParamBase64IfExist(code, srcData, ps);
-        ret = HksBuildParamSet(&ps);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HapCallHuksBeforeUnlock HksBuildParamSet fail %" LOG_PUBLIC "d", ret);
-        HksProcessInfo processInfo { .userIdInt = userId };
-        HksReport("HapCallHuksBeforeUnlock", &processInfo, ps, HKS_ERROR_UNKNOWN_ERROR - 1);
-    } while (false);
-    HksFreeParamSet(&ps);
-}
-#else
-{}
-#endif
-
 static int32_t ProcessAttestOrNormalMessage(
     uint32_t code, MessageParcel &data, uint32_t outSize, const struct HksBlob &srcData, MessageParcel &reply)
 {
-    ReportIfHapCallHuksBeforeUnlock(code, srcData);
-
     // Since we have wrote a HksStub instance in client side, we can now read it if it is anonymous attestation.
     if (code == HKS_MSG_ATTEST_KEY) {
         HksIpcServiceAttestKey(reinterpret_cast<const HksBlob *>(&srcData),

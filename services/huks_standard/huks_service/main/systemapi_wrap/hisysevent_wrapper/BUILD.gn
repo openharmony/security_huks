@@ -50,7 +50,6 @@ if (os_level == "standard") {
       "c_utils:utils",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
-      "openssl:libcrypto_shared",
     ]
     complete_static_lib = true
   }
