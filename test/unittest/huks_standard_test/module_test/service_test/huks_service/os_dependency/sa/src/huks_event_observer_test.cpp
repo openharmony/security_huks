@@ -77,8 +77,7 @@ HWTEST_F(HksEventObserverTest, HksEventObserverTest001, TestSize.Level0)
     data.SetWant(want);
 
     CommonEventSubscribeInfo subscribeInfo;
-    bool userUnlocked = false;
-    SystemEventSubscriber eventSubscriber(subscribeInfo, userUnlocked);
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
     eventSubscriber.OnReceiveEvent(data);
     int32_t ret = HksInitialize();
     ASSERT_TRUE(ret == HKS_SUCCESS);
@@ -99,8 +98,7 @@ HWTEST_F(HksEventObserverTest, HksEventObserverTest002, TestSize.Level0)
     data.SetWant(want);
 
     CommonEventSubscribeInfo subscribeInfo;
-    bool userUnlocked = false;
-    SystemEventSubscriber eventSubscriber(subscribeInfo, userUnlocked);
+    SystemEventSubscriber eventSubscriber(subscribeInfo);
     eventSubscriber.OnReceiveEvent(data);
     int32_t ret = HksInitialize();
     ASSERT_TRUE(ret == HKS_SUCCESS);
