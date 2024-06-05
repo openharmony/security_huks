@@ -34,10 +34,6 @@
 #define HKS_AES_COMMON_SIZE 1024U
 
 enum {
-    // see `enum ScheduleMode` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
-    SCHEDULE_MODE_AUTH = 1,
-};
-enum {
     // see `enum TokenType` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
     TOKEN_TYPE_LOCAL_AUTH = 0,
 };
@@ -49,7 +45,7 @@ struct IDMParams {
     uint64_t enrolledId;
     uint64_t time;
     uint32_t authType;
-    uint32_t authMode = SCHEDULE_MODE_AUTH;
+    uint32_t authMode;
     uint32_t tokenType = TOKEN_TYPE_LOCAL_AUTH;
 };
 

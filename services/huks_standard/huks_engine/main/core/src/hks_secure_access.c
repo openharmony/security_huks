@@ -874,14 +874,6 @@ int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct 
 static int32_t HksCheckIsLocalAuth(const struct HksUserAuthToken *authToken)
 {
     enum {
-        // see `enum ScheduleMode` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
-        SCHEDULE_MODE_AUTH = 1,
-    };
-    if (authToken->plaintextData.authMode != SCHEDULE_MODE_AUTH) {
-        HKS_LOG_E("not SCHEDULE_MODE_AUTH, invalid authMode %" LOG_PUBLIC "u", authToken->plaintextData.authMode);
-        return HKS_ERROR_NOT_SUPPORTED;
-    }
-    enum {
         // see `enum TokenType` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
         TOKEN_TYPE_LOCAL_AUTH = 0,
     };
