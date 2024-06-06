@@ -82,12 +82,16 @@ ohos_unittest("hukssdk_test") {
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//base/security/huks/interfaces/kits/c:huks_ndk",
     "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  if (os_level == "standard") {
+    external_deps += [ "googletest:gtest" ]
+  }
+
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]

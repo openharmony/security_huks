@@ -64,10 +64,13 @@ ohos_unittest("huks_multithread_test") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
-    "//third_party/googletest:gtest_main",
   ]
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  if (os_level == "standard") {
+    external_deps += [ "googletest:gtest" ]
+  }
 }
