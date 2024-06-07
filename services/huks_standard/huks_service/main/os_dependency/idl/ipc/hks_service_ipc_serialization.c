@@ -576,6 +576,7 @@ int32_t HksListAliasesPackFromService(const struct HksKeyAliasSet *aliasSet, str
         destData->size += sizeof(aliasSet->aliases[i].size) + ALIGN_SIZE(aliasSet->aliases[i].size);
     }
     destData->data = (uint8_t *)HksMalloc(destData->size);
+    HKS_IF_NULL_RETURN(destData->data, HKS_ERROR_MALLOC_FAIL)
 
     return HksCopyBlobsAndCntToBlob(aliasSet->aliases, aliasSet->aliasesCnt, destData);
 }
