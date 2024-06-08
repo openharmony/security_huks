@@ -62,5 +62,6 @@
     GetTagType;
     HksConvertErrCode;
     HksMalloc;
+    HksFreeKeyAliasSet;
   local: *;
 };
