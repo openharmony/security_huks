@@ -41,6 +41,12 @@ ohos_shared_library("cipher_napi") {
     "-Werror",
   ]
 
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+  }
+
   relative_install_dir = "module"
   subsystem_name = "security"
   part_name = "huks"
