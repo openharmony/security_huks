@@ -28,8 +28,6 @@ int32_t HksGetProcessInfoForIPC(const uint8_t *context, struct HksProcessInfo *p
 
 int32_t HksGetFrontUserId(int32_t *outId);
 
-int32_t CheckNameList(void);
-
 #ifdef __cplusplus
 }
 #endif

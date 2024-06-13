@@ -659,11 +659,6 @@ int32_t HksAttestAccessControl(struct HksParamSet *paramSet)
         return HKS_SUCCESS;
     }
 
-    // check permisson for attest key
-    if (CheckNameList() == HKS_SUCCESS) {
-        HKS_LOG_I("callers in the checkList no need check permisson!");
-        return HKS_SUCCESS;
-    }
     return SensitivePermissionCheck("ohos.permission.ATTEST_KEY");
 #endif
     (void)paramSet;
