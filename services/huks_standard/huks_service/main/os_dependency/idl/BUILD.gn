@@ -36,7 +36,7 @@ if (os_level == "standard") {
       "ipc/hks_service_ipc_serialization.c",
     ]
 
-    if (huks_security_level == "software" && has_huks_hdi_driver) {
+    if (has_huks_hdi_driver) {
       sources += [ "passthrough/huks_hdi_access.c" ]
     } else {
       sources += [
@@ -96,7 +96,7 @@ if (os_level == "standard") {
     ]
     external_deps += [ "hilog:libhilog" ]
 
-    if (huks_security_level == "software" && has_huks_hdi_driver) {
+    if (has_huks_hdi_driver) {
       external_deps += [ "drivers_interface_huks:libhuks_proxy_1.0" ]
     }
   }
