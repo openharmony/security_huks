@@ -18,6 +18,12 @@ ohos_shared_library("cipher_shared") {
   if (os_level == "standard") {
     subsystem_name = "security"
     part_name = "huks"
+
+    sanitize = {
+      cfi = true
+      cfi_cross_dso = true
+      debug = false
+    }
   }
 
   innerapi_tags = [ "platformsdk" ]
