@@ -39,7 +39,8 @@ if (!defined(global_parts_info.useriam_user_auth_framework)) {
   enable_user_auth_framework = false
 }
 
-if (!defined(global_parts_info.hdf_drivers_peripheral_huks)) {
+if (!defined(global_parts_info.hdf_drivers_peripheral_huks) &&
+    !defined(global_parts_info.hdf_drivers_peripheral_huks_override)) {
   has_huks_hdi_driver = false
 }
 
