@@ -54,8 +54,7 @@ ohos_static_library("libhuks_core_hal_api_static") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-  if (huks_security_level == "software" && has_huks_hdi_driver &&
-      !enable_hks_mock) {
+  if (has_huks_hdi_driver && !enable_hks_mock) {
     defines = [ "HKS_CORE_ENABLE_HDI_DRIVER" ]
     external_deps += [ "drivers_interface_user_auth:libuser_auth_proxy_2.0" ]
   } else {
