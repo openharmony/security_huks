@@ -148,6 +148,45 @@ static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
     return ret;
 }
 
+#ifdef SUPPORT_STORAGE_BACKUP
+static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
+    const char *destPath, const char *destFileName)
+{
+    uint32_t size = HksFileSize(srcPath, srcFileName);
+    if (size == 0) {
+        HKS_LOG_E("get file size failed, ret = %" LOG_PUBLIC "u.", size);
+        return HKS_ERROR_FILE_SIZE_FAIL;
+    }
+
+    uint8_t *buffer = (uint8_t *)HksMalloc(size);
+    HKS_IF_NULL_RETURN(buffer, HKS_ERROR_MALLOC_FAIL)
+
+    (void)memset_s(buffer, size, 0, size);
+
+    struct HksBlob blob = { .size = size, .data = buffer };
+
+    int32_t ret;
+    do {
+        ret = HksStorageReadFile(srcPath, srcFileName, 0, &blob, &size);
+        if (ret != HKS_SUCCESS) {
+            if (ret == HKS_ERROR_NO_PERMISSION) {
+                HKS_LOG_E("Check Permission failed, ret = %" LOG_PUBLIC "d.", ret);
+                break;
+            }
+            HKS_LOG_E("read file failed, ret = %" LOG_PUBLIC "d.", ret);
+            ret = HKS_ERROR_READ_FILE_FAIL;
+            break;
+        }
+
+        ret = HksStorageWriteFile(destPath, destFileName, 0, buffer, size);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "file write destPath failed, ret = %" LOG_PUBLIC "d.", ret)
+    } while (0);
+
+    HKS_FREE(buffer);
+    return ret;
+}
+#endif
+
 static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct HksBlob *keyBlob)
 {
     uint32_t size = HksFileSize(path, fileName);
@@ -228,6 +267,11 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
     if (isMainFileExist != HKS_SUCCESS) {
         int32_t isBakFileExist = HksIsFileExist(fileInfo->bakPath.path, fileInfo->bakPath.fileName);
         HKS_IF_NOT_SUCC_LOGE_RETURN(isBakFileExist, HKS_ERROR_NOT_EXIST, "hks mainkey and backupkey not exist")
+
+        if (CopyKeyBlobFromSrc(fileInfo->bakPath.path, fileInfo->bakPath.fileName,
+            fileInfo->mainPath.path, fileInfo->mainPath.fileName) != HKS_SUCCESS) {
+                HKS_LOG_E("hks copy bak key to main key failed");
+            }
     }
 #endif
     return HKS_SUCCESS;

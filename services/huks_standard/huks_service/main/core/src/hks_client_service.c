@@ -354,7 +354,7 @@ static int32_t CheckAndUpgradeKeyIfNeed(const struct HksProcessInfo *processInfo
      // check version and upgrade key if need
     struct HksParam *keyVersion = NULL;
     int32_t ret = HksGetParam((const struct HksParamSet *)key->data, HKS_TAG_KEY_VERSION, &keyVersion);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get param key version failed!")
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CORRUPT_FILE, "get param key version failed!")
     if (keyVersion->uint32Param == HKS_KEY_VERSION) {
         return ret;
     }
