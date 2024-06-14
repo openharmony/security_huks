@@ -46,6 +46,7 @@ ohos_unittest("huks_UT_test") {
     "src/hks_agree_test_common.cpp",
     "src/hks_attest_key_nonids_test.cpp",
     "src/hks_attest_key_test_common.cpp",
+    "src/hks_backup_test.cpp",
     "src/hks_batch_test.cpp",
 
     # "src/hks_ce_update_test.cpp",
@@ -144,6 +145,7 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/interfaces/kits/c/include",
     "//base/security/huks/test/unittest/src/common/include",
     "//base/security/huks/utils/crypto_adapter",
+    "//base/security/huks/utils/file_operator",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/test/unittest/huks_common_test/include",
   ]
