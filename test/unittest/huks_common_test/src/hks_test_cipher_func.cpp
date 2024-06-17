@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_cipher_c.h"
 
 int32_t ConstructDataToBlobTest(struct HksBlob **inData, struct HksBlob **outData,
@@ -237,7 +238,7 @@ int32_t BaseTestCipher(uint32_t times, uint32_t index, uint32_t performTimes)
     HKS_TEST_ASSERT(memcmp(plainData->data, decryptedData->data, plainData->size) == 0);
     if (!((g_testCipherParams[index].genKeyParamSetParams.setKeyStorageFlag) &&
         g_testCipherParams[index].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
+        HKS_TEST_ASSERT(HksDeleteKeyForDe(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     TestFreeBlob(&plainData);
@@ -290,7 +291,7 @@ int32_t BaseTestEncrypt(uint32_t times, uint32_t index, uint32_t performTimes)
 
     /* 4. delete key */
     if (g_testEncryptParams[index].keyAliasParams.blobExist) {
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
+        HKS_TEST_ASSERT(HksDeleteKeyForDe(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     TestFreeBlob(&plainData);
@@ -342,7 +343,7 @@ int32_t BaseTestDecrypt(uint32_t times, uint32_t index, uint32_t performTimes)
 
     /* 4. delete key */
     if (g_testDecryptParams[index].keyAliasParams.blobExist) {
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
+        HKS_TEST_ASSERT(HksDeleteKeyForDe(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     TestFreeBlob(&decryptedData);

@@ -19,6 +19,7 @@
 #include "hks_test_log.h"
 #include "hks_type.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 
 #include "hks_import_wrapped_test_common.h"
@@ -110,7 +111,7 @@ namespace Unittest::ImportWrappedKey {
     {
         HKS_TEST_LOG_I("-------------1. Test_GenerateHuks[%s]Key1\n",
             reinterpret_cast<char *>(params->agreeKeyAlgName->data));
-        int32_t ret = HksGenerateKey(params->wrappingKeyAlias, params->genWrappingKeyParamSet, nullptr);
+        int32_t ret = HksGenerateKeyForDe(params->wrappingKeyAlias, params->genWrappingKeyParamSet, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Generate huks key failed.";
 
         HKS_TEST_LOG_I("-------------2. Test_ExportHuks[%s]Key1\n",
@@ -119,7 +120,7 @@ namespace Unittest::ImportWrappedKey {
 
         EXPECT_EQ(MallocAndCheckBlobData(huksPublicKey, huksPublicKey->size),
             HKS_SUCCESS) << "Malloc pub key failed.";
-        ret = HksExportPublicKey(params->wrappingKeyAlias, nullptr, huksPublicKey);
+        ret = HksExportPublicKeyForDe(params->wrappingKeyAlias, nullptr, huksPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Export huks public key failed.";
     }
 
@@ -128,13 +129,13 @@ namespace Unittest::ImportWrappedKey {
     {
         HKS_TEST_LOG_I("-------------3. Test_GenerateCallerSelf[%s]Key!\n",
             reinterpret_cast<char *>(params->agreeKeyAlgName->data));
-        int32_t ret = HksGenerateKey(params->callerKeyAlias, params->genCallerKeyParamSet, nullptr);
+        int32_t ret = HksGenerateKeyForDe(params->callerKeyAlias, params->genCallerKeyParamSet, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Generate caller key failed.";
 
         callerSelfPublicKey->size = params->publicKeySize;
         EXPECT_EQ(MallocAndCheckBlobData(callerSelfPublicKey,
             callerSelfPublicKey->size), HKS_SUCCESS) << "malloc fail";
-        ret = HksExportPublicKey(params->callerKeyAlias, params->genWrappingKeyParamSet, callerSelfPublicKey);
+        ret = HksExportPublicKeyForDe(params->callerKeyAlias, params->genWrappingKeyParamSet, callerSelfPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Export caller public key failed.";
     }
 
@@ -142,14 +143,14 @@ namespace Unittest::ImportWrappedKey {
         const struct HksBlob *huksPublicKey, struct HksBlob *outSharedKey)
     {
         HKS_TEST_LOG_I("-------------4. Test_ImportCallerSelfKek!\n");
-        int32_t ret = HksImportKey(params->callerKekAlias, params->importCallerKekParamSet, params->callerKek);
+        int32_t ret = HksImportKeyForDe(params->callerKekAlias, params->importCallerKekParamSet, params->callerKek);
         EXPECT_EQ(ret, HKS_SUCCESS) << "ImportCallerSelfKek failed.";
 
         HKS_TEST_LOG_I("-------------5. Test_CallerAgree[%s]Key and Import To Huks!\n",
                        reinterpret_cast<char *>(params->agreeKeyAlgName->data));
         EXPECT_EQ(MallocAndCheckBlobData(outSharedKey, outSharedKey->size), HKS_SUCCESS) << "Malloc sharedKey failed.";
 
-        ret = HksAgreeKey(params->agreeParamSet, params->callerKeyAlias, huksPublicKey, outSharedKey);
+        ret = HksAgreeKeyForDe(params->agreeParamSet, params->callerKeyAlias, huksPublicKey, outSharedKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey with huks public key and caller private key failed.";
 
         struct HksParamSet *importAgreeKeyParams = nullptr;
@@ -157,7 +158,7 @@ namespace Unittest::ImportWrappedKey {
                            sizeof(g_importAgreeKeyParams) / sizeof(HksParam));
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(importAgreeKey) failed.";
 
-        ret = HksImportKey(params->callerAgreeKeyAlias, importAgreeKeyParams, outSharedKey);
+        ret = HksImportKeyForDe(params->callerAgreeKeyAlias, importAgreeKeyParams, outSharedKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import agree shared key failed.";
         HksFreeParamSet(&importAgreeKeyParams);
     }
@@ -170,11 +171,11 @@ namespace Unittest::ImportWrappedKey {
         int32_t ret = InitParamSet(&encryptParamSet, g_aesKekEncryptParams,
                                    sizeof(g_aesKekEncryptParams) / sizeof(HksParam));
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(aesKekEnc) failed.";
-        ret = HksEncrypt(params->callerKekAlias, encryptParamSet, params->importedPlainKey, plainCipherText);
+        ret = HksEncryptForDe(params->callerKekAlias, encryptParamSet, params->importedPlainKey, plainCipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt plain key to be imported failed.";
 
         HKS_TEST_LOG_I("-------------7. Test_CallerEncryptKekUseAgreeKey!\n");
-        ret = HksEncrypt(params->callerAgreeKeyAlias, encryptParamSet, params->callerKek, kekCipherText);
+        ret = HksEncryptForDe(params->callerAgreeKeyAlias, encryptParamSet, params->callerKek, kekCipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Kek encrypt failed.";
         HksFreeParamSet(&encryptParamSet);
     }
@@ -215,8 +216,8 @@ namespace Unittest::ImportWrappedKey {
         ret = HksGetParam(params->importWrappedKeyParamSet, HKS_TAG_PURPOSE, &purpose);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Get wrapped purpose param failed.";
 
-        ret = HksImportWrappedKey(params->importedKeyAlias, params->wrappingKeyAlias,
-                                  params->importWrappedKeyParamSet, wrappedKeyData);
+        ret = HksImportWrappedKeyForDe(params->importedKeyAlias, params->wrappingKeyAlias,
+            params->importWrappedKeyParamSet, wrappedKeyData);
 
         if (purpose->uint32Param == (uint32_t)HKS_KEY_PURPOSE_UNWRAP) {
             EXPECT_EQ(ret, HKS_ERROR_INVALID_PURPOSE) << "Import unwrap purpose wrapped key shouldn't be success.";
@@ -261,10 +262,10 @@ namespace Unittest::ImportWrappedKey {
         if (ret != HKS_SUCCESS) {
             return;
         }
-        (void)HksDeleteKey(params->wrappingKeyAlias, nullptr);
-        (void)HksDeleteKey(params->callerKeyAlias, nullptr);
-        (void)HksDeleteKey(params->callerKekAlias, nullptr);
-        (void)HksDeleteKey(params->callerAgreeKeyAlias, nullptr);
-        (void)HksDeleteKey(params->importedKeyAlias, nullptr);
+        (void)HksDeleteKeyForDe(params->wrappingKeyAlias, nullptr);
+        (void)HksDeleteKeyForDe(params->callerKeyAlias, nullptr);
+        (void)HksDeleteKeyForDe(params->callerKekAlias, nullptr);
+        (void)HksDeleteKeyForDe(params->callerAgreeKeyAlias, nullptr);
+        (void)HksDeleteKeyForDe(params->importedKeyAlias, nullptr);
     }
 }

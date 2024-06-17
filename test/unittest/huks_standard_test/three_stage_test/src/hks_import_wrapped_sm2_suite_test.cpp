@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "hks_import_wrapped_test_common.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 #include "hks_mem.h"
 #include "hks_test_log.h"
@@ -403,14 +404,14 @@ namespace Unittest::ImportWrappedKey {
     static void GenerateAndExportHuksPublicKey(struct HksBlob *wrappingKeyAlias,
         struct HksParamSet *genWrappingKeyParamSet, struct HksBlob *huksPublicKey)
     {
-        int32_t ret = HksGenerateKey(wrappingKeyAlias, genWrappingKeyParamSet, nullptr);
+        int32_t ret = HksGenerateKeyForDe(wrappingKeyAlias, genWrappingKeyParamSet, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Generate huks key failed.";
 
         huksPublicKey->size = HKS_SM2_KEY_SIZE_256;
 
         EXPECT_EQ(MallocAndCheckBlobData(huksPublicKey, huksPublicKey->size), HKS_SUCCESS)
             << "Malloc pub key failed.";
-        ret = HksExportPublicKey(wrappingKeyAlias, nullptr, huksPublicKey);
+        ret = HksExportPublicKeyForDe(wrappingKeyAlias, nullptr, huksPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "Export huks public key failed.";
     }
 
@@ -426,7 +427,7 @@ namespace Unittest::ImportWrappedKey {
         EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
 
         do {
-            ret = HksInit(keyAlias, paramSet, &handle, nullptr);
+            ret = HksInitForDe(keyAlias, paramSet, &handle, nullptr);
             if (ret != HKS_SUCCESS) {
                 break;
             }
@@ -451,7 +452,7 @@ namespace Unittest::ImportWrappedKey {
     static int32_t HksTestEncrypt(const struct HksBlob *keyAlias,
         const struct HksParamSet *encryptParamSet, const struct HksBlob *inData, struct HksBlob *cipherText)
     {
-        int32_t ret = HksEncrypt(keyAlias, encryptParamSet, inData, cipherText);
+        int32_t ret = HksEncryptForDe(keyAlias, encryptParamSet, inData, cipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
         return ret;
     }
@@ -522,9 +523,9 @@ namespace Unittest::ImportWrappedKey {
 
     static void DeriveKeyBySmKdf(struct HksSmTestParams *params, struct HksBlob *deriveKey1, struct HksBlob *deriveKey2)
     {
-        int32_t ret = HksDeriveKey(params->deriveKey1Param, params->importKekAlias, deriveKey1);
+        int32_t ret = HksDeriveKeyForDe(params->deriveKey1Param, params->importKekAlias, deriveKey1);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeriveKey1 failed.";
-        ret = HksDeriveKey(params->deriveKey2Param, params->importKekAlias, deriveKey2);
+        ret = HksDeriveKeyForDe(params->deriveKey2Param, params->importKekAlias, deriveKey2);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksDeriveKey2 failed.";
     }
 
@@ -537,7 +538,7 @@ namespace Unittest::ImportWrappedKey {
         HKS_LOG_I("start GenerateWrapKeyAndCallerKey");
         GenerateWrapKeyAndCallerKey(params, &huksPublicKey, &callerSelfPublicKey);
         int32_t ret = HKS_SUCCESS;
-        ret = HksImportKey(&g_importPublicKeyToEncryptData, params->sm2EncryptParam, &huksPublicKey);
+        ret = HksImportKeyForDe(&g_importPublicKeyToEncryptData, params->sm2EncryptParam, &huksPublicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import public key failed.";
 
         if (isSigned) {
@@ -556,7 +557,7 @@ namespace Unittest::ImportWrappedKey {
         HKS_FREE_BLOB(kekAndSignDataBlob);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksTestEncrypt sm2 failed.";
 
-        ret = HksImportKey(params->importKekAlias, params->importKekParam, kekData);
+        ret = HksImportKeyForDe(params->importKekAlias, params->importKekParam, kekData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import kek failed.";
         uint8_t deriveKey1[HKS_SM4_DERIVE_KEY_SIZE] = { 0 };
         struct HksBlob deriveKey1Blob = {HKS_SM4_DERIVE_KEY_SIZE, deriveKey1};
@@ -564,9 +565,9 @@ namespace Unittest::ImportWrappedKey {
         struct HksBlob deriveKey2Blob = {HKS_SM4_DERIVE_KEY_SIZE, deriveKey2};
         HKS_LOG_I("start DeriveKeyBySmKdf");
         DeriveKeyBySmKdf(params, &deriveKey1Blob, &deriveKey2Blob);
-        ret = HksImportKey(params->importderiveKey1Alias, params->importderiveKey1Param, &deriveKey1Blob);
+        ret = HksImportKeyForDe(params->importderiveKey1Alias, params->importderiveKey1Param, &deriveKey1Blob);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import deriveKey1 failed.";
-        ret = HksImportKey(params->importderiveKey2Alias, params->importderiveKey2Param, &deriveKey2Blob);
+        ret = HksImportKeyForDe(params->importderiveKey2Alias, params->importderiveKey2Param, &deriveKey2Blob);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import kek failed.";
 
         uint8_t sm4Cipher[HKS_SM4_CIPHER_SIZE] = { 0 };
@@ -577,7 +578,7 @@ namespace Unittest::ImportWrappedKey {
         EXPECT_EQ(ret, HKS_SUCCESS) << "encrypt sm4 failed.";
         uint8_t tmpMac[HKS_COMMON_MAC_SIZE] = { 0 };
         struct HksBlob mac = {HKS_COMMON_MAC_SIZE, tmpMac};
-        ret = HksMac(params->importderiveKey2Alias, params->importderiveKey2Param, &sm4CipherText, &mac);
+        ret = HksMacForDe(params->importderiveKey2Alias, params->importderiveKey2Param, &sm4CipherText, &mac);
         EXPECT_EQ(ret, HKS_SUCCESS) << "hmac failed.";
 
         struct HksBlob keysignlLen = {.size = sizeof(uint32_t), .data = (uint8_t *)&outDataSign.size};
@@ -597,7 +598,7 @@ namespace Unittest::ImportWrappedKey {
 
         EXPECT_EQ(ret, HKS_SUCCESS) << "BuildWrappedKeyData failed.";
         HKS_LOG_I("start HksImportWrappedKey");
-        ret = HksImportWrappedKey(params->importKeyAlias, params->wrappingKeyAlias,
+        ret = HksImportWrappedKeyForDe(params->importKeyAlias, params->wrappingKeyAlias,
             params->importKeyParam, &wrappedKeyData);
         HKS_FREE_BLOB(huksPublicKey);
         HKS_FREE_BLOB(callerSelfPublicKey);
@@ -679,7 +680,7 @@ namespace Unittest::ImportWrappedKey {
         HksFreeParamSet(&macParamSet1);
         HksFreeParamSet(&hmacParamSet);
         HksFreeParamSet(&importKeyPara);
-        (void)HksDeleteKey(&g_importPublicKeyToEncryptData, nullptr);
+        (void)HksDeleteKeyForDe(&g_importPublicKeyToEncryptData, nullptr);
         return ret;
     }
 
@@ -801,11 +802,11 @@ namespace Unittest::ImportWrappedKey {
             g_importWrappedSm4ParamsWithVerify,
             sizeof(g_importWrappedSm4ParamsWithVerify) / sizeof(struct HksParam), true);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import key failed.";
-        (void)HksDeleteKey(&g_callerKeyAlias_02, nullptr);
-        (void)HksDeleteKey(&g_wrappingKeyAlias_02, nullptr);
-        (void)HksDeleteKey(&g_importKekAlias_02, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey1Alias_02, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey2Alias_02, nullptr);
+        (void)HksDeleteKeyForDe(&g_callerKeyAlias_02, nullptr);
+        (void)HksDeleteKeyForDe(&g_wrappingKeyAlias_02, nullptr);
+        (void)HksDeleteKeyForDe(&g_importKekAlias_02, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey1Alias_02, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey2Alias_02, nullptr);
     }
 
     /**
@@ -829,11 +830,11 @@ namespace Unittest::ImportWrappedKey {
         int32_t ret = InitCommonParamSetTestParams(&smTestParams, &g_importedSm4KekPlainKey, g_importWrappedSm4Params,
             sizeof(g_importWrappedSm4Params) / sizeof(struct HksParam), false);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import key failed.";
-        (void)HksDeleteKey(&g_callerKeyAlias_03, nullptr);
-        (void)HksDeleteKey(&g_wrappingKeyAlias_03, nullptr);
-        (void)HksDeleteKey(&g_importKekAlias_03, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey1Alias_03, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey2Alias_03, nullptr);
+        (void)HksDeleteKeyForDe(&g_callerKeyAlias_03, nullptr);
+        (void)HksDeleteKeyForDe(&g_wrappingKeyAlias_03, nullptr);
+        (void)HksDeleteKeyForDe(&g_importKekAlias_03, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey1Alias_03, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey2Alias_03, nullptr);
     }
 
     /**
@@ -856,11 +857,11 @@ namespace Unittest::ImportWrappedKey {
         int32_t ret = InitCommonParamSetTestParams(&smTestParams, &g_importedSm4KekPlainKey, g_importWrappedAesParams,
             sizeof(g_importWrappedAesParams) / sizeof(struct HksParam), false);
         EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "alg is invalid.";
-        (void)HksDeleteKey(&g_callerKeyAlias_04, nullptr);
-        (void)HksDeleteKey(&g_wrappingKeyAlias_04, nullptr);
-        (void)HksDeleteKey(&g_importKekAlias_04, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey1Alias_04, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey2Alias_04, nullptr);
+        (void)HksDeleteKeyForDe(&g_callerKeyAlias_04, nullptr);
+        (void)HksDeleteKeyForDe(&g_wrappingKeyAlias_04, nullptr);
+        (void)HksDeleteKeyForDe(&g_importKekAlias_04, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey1Alias_04, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey2Alias_04, nullptr);
     }
 
     /**
@@ -887,7 +888,7 @@ namespace Unittest::ImportWrappedKey {
         .size = strlen("test_derive_key1_alias_03"),
         .data = (uint8_t *)"test_derive_key1_alias_03"};
 
-        ret = HksImportKey(&importKeyAlias, encryptSm4ParamSet, &g_importedSm4KeyPlainKey);
+        ret = HksImportKeyForDe(&importKeyAlias, encryptSm4ParamSet, &g_importedSm4KeyPlainKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import key failed!";
 
         uint8_t sm4Cipher1[HKS_SM4_CIPHER_SIZE] = { 0 };
@@ -898,7 +899,7 @@ namespace Unittest::ImportWrappedKey {
         ret = memcmp(sm4CipherText1.data, sm4CipherText.data, sm4CipherText.size);
         EXPECT_EQ(ret, HKS_SUCCESS) << "compare failed .";
 
-        (void)HksDeleteKey(&importKeyAlias, nullptr);
+        (void)HksDeleteKeyForDe(&importKeyAlias, nullptr);
     }
 
 #ifdef HKS_UNTRUSTED_RUNNING_ENV
@@ -932,11 +933,11 @@ namespace Unittest::ImportWrappedKey {
             sizeof(g_importWrappedSm2Params) / sizeof(struct HksParam), true);
         HKS_FREE_BLOB(key);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import key failed.";
-        (void)HksDeleteKey(&g_callerKeyAlias_05, nullptr);
-        (void)HksDeleteKey(&g_wrappingKeyAlias_05, nullptr);
-        (void)HksDeleteKey(&g_importKekAlias_05, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey1Alias_05, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey2Alias_05, nullptr);
+        (void)HksDeleteKeyForDe(&g_callerKeyAlias_05, nullptr);
+        (void)HksDeleteKeyForDe(&g_wrappingKeyAlias_05, nullptr);
+        (void)HksDeleteKeyForDe(&g_importKekAlias_05, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey1Alias_05, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey2Alias_05, nullptr);
     }
 #endif
 
@@ -969,11 +970,11 @@ namespace Unittest::ImportWrappedKey {
             sizeof(g_importWrappedSm2Params) / sizeof(struct HksParam), false);
         HKS_FREE_BLOB(key);
         EXPECT_EQ(ret, HKS_ERROR_INVALID_KEY_INFO) << "import key failed.";
-        (void)HksDeleteKey(&g_callerKeyAlias_06, nullptr);
-        (void)HksDeleteKey(&g_wrappingKeyAlias_06, nullptr);
-        (void)HksDeleteKey(&g_importKekAlias_06, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey1Alias_06, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey2Alias_06, nullptr);
+        (void)HksDeleteKeyForDe(&g_callerKeyAlias_06, nullptr);
+        (void)HksDeleteKeyForDe(&g_wrappingKeyAlias_06, nullptr);
+        (void)HksDeleteKeyForDe(&g_importKekAlias_06, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey1Alias_06, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey2Alias_06, nullptr);
     }
 
     /**
@@ -1005,11 +1006,11 @@ namespace Unittest::ImportWrappedKey {
             sizeof(g_importWrappedSm2Params) / sizeof(struct HksParam), false);
         HKS_FREE_BLOB(key);
         EXPECT_EQ(ret, HKS_SUCCESS) << "import key failed.";
-        (void)HksDeleteKey(&g_callerKeyAlias_07, nullptr);
-        (void)HksDeleteKey(&g_wrappingKeyAlias_07, nullptr);
-        (void)HksDeleteKey(&g_importKekAlias_07, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey1Alias_07, nullptr);
-        (void)HksDeleteKey(&g_importderiveKey2Alias_07, nullptr);
+        (void)HksDeleteKeyForDe(&g_callerKeyAlias_07, nullptr);
+        (void)HksDeleteKeyForDe(&g_wrappingKeyAlias_07, nullptr);
+        (void)HksDeleteKeyForDe(&g_importKekAlias_07, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey1Alias_07, nullptr);
+        (void)HksDeleteKeyForDe(&g_importderiveKey2Alias_07, nullptr);
     }
 
     /**
@@ -1020,14 +1021,14 @@ namespace Unittest::ImportWrappedKey {
     HWTEST_F(HksImportWrappedSm2SuiteTest, HksImportWrappedKeyTestSm2Suite008, TestSize.Level0)
     {
         HKS_LOG_I("HksImportWrappedKeyTestSm2Suite008");
-        (void)HksDeleteKey(&g_importkeyAlias_02, nullptr);
-        (void)HksDeleteKey(&g_importkeyAlias_03, nullptr);
-        (void)HksDeleteKey(&g_importkeyAlias_04, nullptr);
+        (void)HksDeleteKeyForDe(&g_importkeyAlias_02, nullptr);
+        (void)HksDeleteKeyForDe(&g_importkeyAlias_03, nullptr);
+        (void)HksDeleteKeyForDe(&g_importkeyAlias_04, nullptr);
         #ifdef HKS_UNTRUSTED_RUNNING_ENV
-        (void)HksDeleteKey(&g_importkeyAlias_05, nullptr);
+        (void)HksDeleteKeyForDe(&g_importkeyAlias_05, nullptr);
         #endif
-        (void)HksDeleteKey(&g_importkeyAlias_06, nullptr);
-        (void)HksDeleteKey(&g_importkeyAlias_07, nullptr);
+        (void)HksDeleteKeyForDe(&g_importkeyAlias_06, nullptr);
+        (void)HksDeleteKeyForDe(&g_importkeyAlias_07, nullptr);
         int32_t ret = HksInitialize();
         ASSERT_TRUE(ret == HKS_SUCCESS);
     }

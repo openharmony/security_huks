@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -131,9 +132,9 @@ HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level0)
         (g_testAgreeParams[0].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) &&
         ((g_testAgreeParams[0].keyAlias1Params.blobExist) &&
         (g_testAgreeParams[0].keyAlias2Params.blobExist))) {
-        ret = HksDeleteKey(privateKey, NULL);
+        ret = HksDeleteKeyForDe(privateKey, NULL);
         ASSERT_TRUE(ret == 0);
-        ret = HksDeleteKey(peerPubKeyAlias, NULL);
+        ret = HksDeleteKeyForDe(peerPubKeyAlias, NULL);
         ASSERT_TRUE(ret == 0);
     }
     TestFreeBlob(&privateKey);
@@ -192,8 +193,8 @@ HWTEST_F(HksAgreementTest, HksAgreementTest002, TestSize.Level0)
     if (!(g_testAgreeParams[0].genKeyParamSetParams.setKeyStorageFlag && \
         (g_testAgreeParams[0].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) && \
         ((g_testAgreeParams[0].keyAlias1Params.blobExist) && (g_testAgreeParams[0].keyAlias2Params.blobExist))) {
-        ASSERT_TRUE(HksDeleteKey(privateKey, NULL) == 0);
-        ASSERT_TRUE(HksDeleteKey(peerPubKeyAlias, NULL) == 0);
+        ASSERT_TRUE(HksDeleteKeyForDe(privateKey, NULL) == 0);
+        ASSERT_TRUE(HksDeleteKeyForDe(peerPubKeyAlias, NULL) == 0);
     }
     TestFreeBlob(&privateKey);
     TestFreeBlob(&peerPubKeyAlias);

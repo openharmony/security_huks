@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "hks_derive_test_c.h"
+#include "hks_test_adapt_for_de.h"
 
 #include "file_ex.h"
 
@@ -123,7 +124,7 @@ static int32_t BaseTestDerive(uint32_t index)
     if (!(g_testDeriveParams[index].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testDeriveParams[index].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) &&
         (g_testDeriveParams[index].keyAliasParams.blobExist)) {
-        EXPECT_TRUE(HksDeleteKey(keyAliasTest, NULL) == 0);
+        EXPECT_TRUE(HksDeleteKeyForDe(keyAliasTest, NULL) == 0);
     }
     TestFreeBlob(&keyAliasTest);
     TestFreeBlob(&derivedKey);

@@ -14,6 +14,7 @@
  */
 
 #include "hks_cross_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #ifdef L2_STANDARD
@@ -80,7 +81,7 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
     uint8_t plain[CROSS_COMMON_SIZE] = {0};
     struct HksBlob plainText = { CROSS_COMMON_SIZE, plain };
 
-    ret = HksEncrypt(&keyAlias, encryptParamSet, &inData, &cipherText);
+    ret = HksEncryptForDe(&keyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
     EXPECT_NE(HksMemCmp(inData.data, cipherText.data, cipherText.size), HKS_SUCCESS) << "inData equals cipherText.";
 
@@ -88,7 +89,7 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAesDecrypt failed.";
     EXPECT_EQ(HksMemCmp(inData.data, plainText.data, plainText.size), HKS_SUCCESS) << "inData not equals plainText.";
 
-    HksDeleteKey(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSetTest);
@@ -127,11 +128,11 @@ HWTEST_F(HksCrossTest, HksCrossTestAesCipher002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAesEncrypt failed.";
     EXPECT_NE(HksMemCmp(inData.data, cipherText.data, cipherText.size), HKS_SUCCESS) << "inData equals cipherText.";
 
-    ret = HksDecrypt(&keyAlias, decryptParamSet, &cipherText, &plainText);
+    ret = HksDecryptForDe(&keyAlias, decryptParamSet, &cipherText, &plainText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDecrypt failed.";
     EXPECT_EQ(HksMemCmp(inData.data, plainText.data, plainText.size), HKS_SUCCESS) << "inData not equals plainText.";
 
-    HksDeleteKey(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
@@ -170,7 +171,7 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher001, TestSize.Level0)
     uint8_t plain[CROSS_COMMON_SIZE] = {0};
     struct HksBlob plainText = { CROSS_COMMON_SIZE, plain };
 
-    ret = HksEncrypt(&newKeyAlias, encryptParamSet, &inData, &cipherText);
+    ret = HksEncryptForDe(&newKeyAlias, encryptParamSet, &inData, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
     EXPECT_NE(HksMemCmp(inData.data, cipherText.data, cipherText.size), HKS_SUCCESS) << "inData equals cipherText.";
 
@@ -178,8 +179,8 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher001, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestRsaDecrypt failed.";
     EXPECT_EQ(HksMemCmp(inData.data, plainText.data, plainText.size), HKS_SUCCESS) << "inData not equals plainText.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
@@ -222,12 +223,12 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaCipher002, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestRsaEncrypt failed.";
     EXPECT_NE(HksMemCmp(inData.data, cipherText.data, cipherText.size), HKS_SUCCESS) << "inData equals cipherText.";
 
-    ret = HksDecrypt(&keyAlias, decryptParamSet, &cipherText, &plainText);
+    ret = HksDecryptForDe(&keyAlias, decryptParamSet, &cipherText, &plainText);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksDecrypt failed.";
     EXPECT_EQ(HksMemCmp(inData.data, plainText.data, plainText.size), HKS_SUCCESS) << "inData not equals plainText.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encryptParamSet);
     HksFreeParamSet(&decryptParamSet);
@@ -266,14 +267,14 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify001, TestSize.Level0)
     uint8_t sign[CROSS_COMMON_SIZE] = {0};
     struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
-    ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
+    ret = HksSignForDe(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
 
     ret = HksCrossTestSignVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(V) failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -313,11 +314,11 @@ HWTEST_F(HksCrossTest, HksCrossTestDsaSignVerify002, TestSize.Level0)
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
 
-    ret = HksVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
+    ret = HksVerifyForDe(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -357,14 +358,14 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify001, TestSize.Level0)
     uint8_t sign[CROSS_COMMON_SIZE] = {0};
     struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
-    ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
+    ret = HksSignForDe(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
 
     ret = HksCrossTestSignVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(V) failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -405,11 +406,11 @@ HWTEST_F(HksCrossTest, HksCrossTestEccSignVerify002, TestSize.Level0)
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
 
-    ret = HksVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
+    ret = HksVerifyForDe(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -446,14 +447,14 @@ HWTEST_F(HksCrossTest, HksCrossTestEd25519SignVerify001, TestSize.Level0)
     uint8_t sign[CROSS_COMMON_SIZE] = {0};
     struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
-    ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
+    ret = HksSignForDe(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
 
     ret = HksCrossTestSignVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(V) failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -493,11 +494,11 @@ HWTEST_F(HksCrossTest, HksCrossTestEd25519SignVerify002, TestSize.Level0)
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
 
-    ret = HksVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
+    ret = HksVerifyForDe(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -534,14 +535,14 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaSignVerify001, TestSize.Level0)
     uint8_t sign[CROSS_COMMON_SIZE] = {0};
     struct HksBlob signedData = { CROSS_COMMON_SIZE, sign };
 
-    ret = HksSign(&keyAlias, signParamSet, &inData, &signedData);
+    ret = HksSignForDe(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
 
     ret = HksCrossTestSignVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(V) failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -581,11 +582,11 @@ HWTEST_F(HksCrossTest, HksCrossTestRsaSignVerify002, TestSize.Level0)
     ret = HksCrossTestSignVerify(&keyAlias, signParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestSignVerify(S) failed.";
 
-    ret = HksVerify(&newKeyAlias, verifyParamSet, &inData, &signedData);
+    ret = HksVerifyForDe(&newKeyAlias, verifyParamSet, &inData, &signedData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&newKeyAlias, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&newKeyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&signParamSet);
     HksFreeParamSet(&verifyParamSet);
@@ -629,7 +630,7 @@ HWTEST_F(HksCrossTest, HksCrossTestDhAgree001, TestSize.Level0)
     struct HksBlob outData02 = { CROSS_COMMON_SIZE, tmpOut02 };
     ret = HksCrossTestAgree(&g_dhKeyAlias01, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgree01 failed.";
-    ret = HksAgreeKey(initParamSet02, &g_dhKeyAlias02, &publicKey01, &outData02);
+    ret = HksAgreeKeyForDe(initParamSet02, &g_dhKeyAlias02, &publicKey01, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
 
     ret = TestCmpKeyAliasHash(&outData01, &outData02);
@@ -677,7 +678,7 @@ HWTEST_F(HksCrossTest, HksCrossTestEcdhAgree001, TestSize.Level0)
     struct HksBlob outData02 = { CROSS_COMMON_SIZE, tmpOut02 };
     ret = HksCrossTestAgree(&g_ecdhKeyAlias01, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgree01 failed.";
-    ret = HksAgreeKey(initParamSet02, &g_ecdhKeyAlias02, &publicKey01, &outData02);
+    ret = HksAgreeKeyForDe(initParamSet02, &g_ecdhKeyAlias02, &publicKey01, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
 
     ret = TestCmpKeyAliasHash(&outData01, &outData02);
@@ -725,7 +726,7 @@ HWTEST_F(HksCrossTest, HksCrossTestX25519Agree001, TestSize.Level0)
     struct HksBlob outData02 = { CROSS_COMMON_SIZE, tmpOut02 };
     ret = HksCrossTestAgree(&g_x25519KeyAlias01, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestAgree01 failed.";
-    ret = HksAgreeKey(initParamSet02, &g_x25519KeyAlias02, &publicKey01, &outData02);
+    ret = HksAgreeKeyForDe(initParamSet02, &g_x25519KeyAlias02, &publicKey01, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
 
     ret = TestCmpKeyAliasHash(&outData01, &outData02);
@@ -757,8 +758,8 @@ HWTEST_F(HksCrossTest, HksCrossTestHkdfDerive001, TestSize.Level0)
     ret = HksCrossTestDerive(&keyAlias, genParamSet, initParamSet, finishParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestDerive failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&g_hkdfKeyAliasFinal, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&g_hkdfKeyAliasFinal, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&initParamSet);
     HksFreeParamSet(&finishParamSet);
@@ -791,8 +792,8 @@ HWTEST_F(HksCrossTest, HksCrossTestPbkdf2Derive001, TestSize.Level0)
     ret = HksCrossTestDerive(&keyAlias, genParamSet, initParamSet, finishParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestDerive failed.";
 
-    HksDeleteKey(&keyAlias, nullptr);
-    HksDeleteKey(&g_pbkdf2KeyAliasFinal, nullptr);
+    HksDeleteKeyForDe(&keyAlias, nullptr);
+    HksDeleteKeyForDe(&g_pbkdf2KeyAliasFinal, nullptr);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&initParamSet);
     HksFreeParamSet(&finishParamSet);
@@ -820,7 +821,7 @@ HWTEST_F(HksCrossTest, HksCrossTestHmac001, TestSize.Level0)
     ret = HksCrossTestHmac(&keyAlias, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksCrossTestHmac failed.";
 
-    HksDeleteKey(&keyAlias, genParamSet);
+    HksDeleteKeyForDe(&keyAlias, genParamSet);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&hmacParamSet);
 }

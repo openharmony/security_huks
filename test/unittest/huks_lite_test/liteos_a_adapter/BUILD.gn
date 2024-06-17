@@ -29,6 +29,7 @@ unittest("huks_3.0_test") {
 
   sources = [
     "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_adapt_for_de.c",
     "hks_aes_test.cpp",
     "hks_agreement_test.cpp",
     "hks_bn_exp_mod_test.cpp",

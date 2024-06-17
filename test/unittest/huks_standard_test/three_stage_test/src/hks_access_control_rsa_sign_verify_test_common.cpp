@@ -19,6 +19,7 @@
 #include <vector>
 
 #include "hks_access_control_rsa_sign_verify_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include "hks_mem.h"
 
@@ -141,7 +142,7 @@ static int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct Hks
     struct HksBlob handle = { sizeof(uint64_t), handleS };
     uint8_t challenge[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob = { TOKEN_CHALLENGE_LEN, challenge };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle, &challengeBlob);
+    int32_t ret = HksInitForDe(keyAlias, paramSet, &handle, &challengeBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // sleep 1 sec for time out test
@@ -171,7 +172,7 @@ static int32_t HksAcRsaThreeStageNormalCase(struct HksBlob *keyAlias, struct Hks
     }
 
     // Finish
-    ret = HksFinish(&handle, newParamSet, inDataSign, outDataSign);
+    ret = HksFinishForDe(&handle, newParamSet, inDataSign, outDataSign);
     HksFreeParamSet(&newParamSet);
     return ret;
 }
@@ -194,7 +195,7 @@ static int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct H
     struct HksBlob handle = { sizeof(uint64_t), handleS };
     uint8_t challenge[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob = { TOKEN_CHALLENGE_LEN, challenge };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle, &challengeBlob);
+    int32_t ret = HksInitForDe(keyAlias, paramSet, &handle, &challengeBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     sleep(SLEEP_TWO_SECOND); // Waiting for time out
@@ -224,7 +225,7 @@ static int32_t HksAcRsaThreeStageAbnormalCase(struct HksBlob *keyAlias, struct H
     }
 
     // Finish
-    ret = HksFinish(&handle, newParamSet, inDataSign, outDataSign);
+    ret = HksFinishForDe(&handle, newParamSet, inDataSign, outDataSign);
     HksFreeParamSet(&newParamSet);
     return ret;
 }
@@ -293,13 +294,13 @@ static int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struc
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob1 = { TOKEN_CHALLENGE_LEN, challenge1 };
-    int32_t ret = HksInit(keyAlias1, paramSet1, &handle1, &challengeBlob1);
+    int32_t ret = HksInitForDe(keyAlias1, paramSet1, &handle1, &challengeBlob1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     struct HksBlob handle2 = { sizeof(uint64_t), handleS2 };
     uint8_t challenge2[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob2 = { TOKEN_CHALLENGE_LEN, challenge2 };
-    ret = HksInit(keyAlias2, paramSet2, &handle2, &challengeBlob2);
+    ret = HksInitForDe(keyAlias2, paramSet2, &handle2, &challengeBlob2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update loop
@@ -323,12 +324,12 @@ static int32_t HksAcRsaThreeStageSignCustomCase(struct HksBlob *keyAlias1, struc
 
     // Finish
     struct HksBlob finishInData1 = { 0, tmpIn1 };
-    ret = HksFinish(&handle1, paramSet1, &finishInData1, &outData1);
+    ret = HksFinishForDe(&handle1, paramSet1, &finishInData1, &outData1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     uint8_t tmpIn2[] = "tempIn";
     struct HksBlob finishInData2 = { 0, tmpIn2 };
-    ret = HksFinish(&handle2, paramSet2, &finishInData2, &outData2);
+    ret = HksFinishForDe(&handle2, paramSet2, &finishInData2, &outData2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
     HksFreeParamSet(&newParamSet1);
     HksFreeParamSet(&newParamSet2);
@@ -352,14 +353,14 @@ static int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, str
     struct HksBlob handle1 = { sizeof(uint64_t), handleS1 };
     uint8_t challenge1[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob1 = { TOKEN_CHALLENGE_LEN, challenge1 };
-    int32_t ret = HksInit(keyAlias1, paramSet1, &handle1, &challengeBlob1);
+    int32_t ret = HksInitForDe(keyAlias1, paramSet1, &handle1, &challengeBlob1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     uint8_t handleS2[sizeof(uint64_t)] = {0};
     struct HksBlob handle2 = { sizeof(uint64_t), handleS2 };
     uint8_t challenge2[TOKEN_CHALLENGE_LEN] = {0};
     struct HksBlob challengeBlob2 = { TOKEN_CHALLENGE_LEN, challenge2 };
-    ret = HksInit(keyAlias2, paramSet2, &handle2, &challengeBlob2);
+    ret = HksInitForDe(keyAlias2, paramSet2, &handle2, &challengeBlob2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update loop
@@ -382,12 +383,12 @@ static int32_t HksAcRsaThreeStageVerifyCustomCase(struct HksBlob *keyAlias1, str
     // Finish
     uint8_t tmpIn1[] = "tempIn";
     struct HksBlob finishOutData1 = { 0, tmpIn1 };
-    ret = HksFinish(&handle1, paramSet1, &outData1, &finishOutData1);
+    ret = HksFinishForDe(&handle1, paramSet1, &outData1, &finishOutData1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     uint8_t tmpIn2[] = "tempIn";
     struct HksBlob finishOutData2 = { 0, tmpIn2 };
-    ret = HksFinish(&handle2, paramSet2, &outData2, &finishOutData2);
+    ret = HksFinishForDe(&handle2, paramSet2, &outData2, &finishOutData2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
     HksFreeParamSet(&newParamSet1);
     HksFreeParamSet(&newParamSet2);
@@ -404,7 +405,7 @@ static int32_t AcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &test
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitgenParamSet failed.";
     uint8_t alias[] = "AcRSASignVerify";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RSA generate key failed.";
 
     uint8_t tmpIn[] = "tempIn";
@@ -420,7 +421,7 @@ static int32_t AcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &test
     /* 3. Export Public Key */
     uint8_t pubKey[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     /* 4. Import Key */
@@ -430,7 +431,7 @@ static int32_t AcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &test
 
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
     struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
-    ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
     uint8_t temp[] = "out";
@@ -439,10 +440,10 @@ static int32_t AcRsaSignVerifyTestNormalCase(const TestAccessCaseRSAParams &test
     EXPECT_EQ(ret, HKS_SUCCESS) << "Three stage failed.";
 
     /* 6. Delete New Key */
-    int32_t deleteRet = HksDeleteKey(&newKeyAlias, verifyParamSet);
+    int32_t deleteRet = HksDeleteKeyForDe(&newKeyAlias, verifyParamSet);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -492,7 +493,7 @@ static int32_t AcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &te
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitgenParamSet failed.";
     uint8_t alias[] = "AcRSASignVerify";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RSA generate key failed.";
 
     uint8_t tmpIn[] = "tempIn";
@@ -508,7 +509,7 @@ static int32_t AcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &te
     /* 3. Export Public Key */
     uint8_t pubKey[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     /* 4. Import Key */
@@ -518,7 +519,7 @@ static int32_t AcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &te
 
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
     struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
-    ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
     uint8_t temp[] = "out";
@@ -527,10 +528,10 @@ static int32_t AcRsaSignVerifyTestAbnormalCase(const TestAccessCaseRSAParams &te
     EXPECT_NE(ret, HKS_SUCCESS) << "Three stage failed.";
 
     /* 6. Delete New Key */
-    int32_t deleteRet = HksDeleteKey(&newKeyAlias, verifyParamSet);
+    int32_t deleteRet = HksDeleteKeyForDe(&newKeyAlias, verifyParamSet);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -581,7 +582,7 @@ static int32_t HksAcRsaVerifyTestCustomCase(const TestAccessCaseRSAParams &testC
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
     char newKey1[] = "RSA_Sign_Verify_Import_KeyAlia1";
     struct HksBlob newKeyAlias1 = { .size = strlen(newKey1), .data = reinterpret_cast<uint8_t *>(newKey1) };
-    ret = HksImportKey(&newKeyAlias1, verifyParamSet1, publicKey1);
+    ret = HksImportKeyForDe(&newKeyAlias1, verifyParamSet1, publicKey1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
     struct HksParamSet *verifyParamSet2 = nullptr;
@@ -589,16 +590,16 @@ static int32_t HksAcRsaVerifyTestCustomCase(const TestAccessCaseRSAParams &testC
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitverifyParamSet failed.";
     char newKey2[] = "RSA_Sign_Verify_Import_KeyAlia2";
     struct HksBlob newKeyAlias2 = { .size = strlen(newKey2), .data = reinterpret_cast<uint8_t *>(newKey2) };
-    ret = HksImportKey(&newKeyAlias2, verifyParamSet2, publicKey2);
+    ret = HksImportKeyForDe(&newKeyAlias2, verifyParamSet2, publicKey2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
     ret = HksAcRsaThreeStageVerifyCustomCase(&newKeyAlias1, verifyParamSet1, &newKeyAlias2, verifyParamSet2, param);
     EXPECT_EQ(ret, HKS_SUCCESS) << "verify custom case failed.";
 
     /* 6. Delete New Key */
-    int32_t deleteRet = HksDeleteKey(&newKeyAlias1, verifyParamSet1);
+    int32_t deleteRet = HksDeleteKeyForDe(&newKeyAlias1, verifyParamSet1);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
-    deleteRet = HksDeleteKey(&newKeyAlias2, verifyParamSet2);
+    deleteRet = HksDeleteKeyForDe(&newKeyAlias2, verifyParamSet2);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     HksFreeParamSet(&verifyParamSet1);
@@ -617,7 +618,7 @@ static int32_t AcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCasePa
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitgenParamSet failed.";
     uint8_t alias1[] = "Ac_RSA_Sign_Verify1";
     struct HksBlob keyAlias1 = { sizeof(alias1), alias1 };
-    ret = HksGenerateKey(&keyAlias1, genParamSet1, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias1, genParamSet1, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RSA generate key failed.";
 
     struct HksParamSet *genParamSet2 = nullptr;
@@ -625,7 +626,7 @@ static int32_t AcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCasePa
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitgenParamSet failed.";
     uint8_t alias2[] = "Ac_RSA_Sign_Verify2";
     struct HksBlob keyAlias2 = { sizeof(alias2), alias2 };
-    ret = HksGenerateKey(&keyAlias2, genParamSet2, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias2, genParamSet2, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RSA generate key failed.";
 
     struct HksParamSet *signParamSet1 = nullptr;
@@ -643,20 +644,20 @@ static int32_t AcRsaSignTestCustomCase(const TestAccessCaseRSAParams &testCasePa
     /* 3. Export Public Key */
     uint8_t pubKey1[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey1 = { HKS_RSA_KEY_SIZE_1024, pubKey1 };
-    ret = HksExportPublicKey(&keyAlias1, genParamSet1, &publicKey1);
+    ret = HksExportPublicKeyForDe(&keyAlias1, genParamSet1, &publicKey1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     uint8_t pubKey2[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey2 = { HKS_RSA_KEY_SIZE_1024, pubKey2 };
-    ret = HksExportPublicKey(&keyAlias2, genParamSet2, &publicKey2);
+    ret = HksExportPublicKeyForDe(&keyAlias2, genParamSet2, &publicKey2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     ret = HksAcRsaVerifyTestCustomCase(testCaseParams1, testCaseParams2, &publicKey1, &publicKey2, param);
     EXPECT_EQ(ret, HKS_SUCCESS) << "RSA Verify failed.";
 
-    ret = HksDeleteKey(&keyAlias1, genParamSet1);
+    ret = HksDeleteKeyForDe(&keyAlias1, genParamSet1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    ret = HksDeleteKey(&keyAlias2, genParamSet2);
+    ret = HksDeleteKeyForDe(&keyAlias2, genParamSet2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet1);

@@ -14,6 +14,7 @@
  */
 
 #include "hks_agree_test_common.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 
 #include "hks_api.h"
@@ -81,13 +82,13 @@ static int32_t TestAgreedKeyEncryptDecrypt(const struct HksBlob *keyAlias1, cons
     uint8_t cipherBuffer[cipherMaxSize] = { 0 };
     struct HksBlob cipherData = { .size = cipherMaxSize, .data = (uint8_t *)cipherBuffer };
 
-    int32_t ret = HksEncrypt(keyAlias1, encryptParamSet, &plaindata, &cipherData);
+    int32_t ret = HksEncryptForDe(keyAlias1, encryptParamSet, &plaindata, &cipherData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksEncrypt failed.")
 
     uint8_t decrypedBuffer[cipherMaxSize] = { 0 };
     struct HksBlob decrypedData = { .size = cipherMaxSize, .data = (uint8_t *)decrypedBuffer };
 
-    ret = HksDecrypt(keyAlias2, decryptParamSet, &cipherData, &decrypedData);
+    ret = HksDecryptForDe(keyAlias2, decryptParamSet, &cipherData, &decrypedData);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksDecrypt failed.")
 
     if (decrypedData.size != plaindata.size ||

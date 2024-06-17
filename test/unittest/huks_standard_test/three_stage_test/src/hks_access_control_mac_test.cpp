@@ -16,6 +16,7 @@
 #include "hks_access_control_mac_test.h"
 #include "hks_access_control_test_common.h"
 #include "hks_api.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -225,7 +226,7 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest005, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     (void)HksFreeParamSet(&genParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
@@ -243,9 +244,9 @@ HWTEST_F(HksAccessControlMacTest, HksAccessMacPartTest005, TestSize.Level0)
 
     uint8_t out[256] = {0};
     struct HksBlob outBlob = { sizeof(out), out };
-    ret = HksMac(&keyAlias, macParamSet, &outBlob, &outBlob);
+    ret = HksMacForDe(&keyAlias, macParamSet, &outBlob, &outBlob);
     (void)HksFreeParamSet(&macParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

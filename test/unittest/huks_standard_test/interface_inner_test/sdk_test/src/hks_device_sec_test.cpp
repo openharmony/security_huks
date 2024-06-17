@@ -20,6 +20,7 @@
 #include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -252,7 +253,7 @@ static int32_t TestGenerateKey(const struct HksBlob *keyAlias)
         return ret;
     }
 
-    ret = HksGenerateKey(keyAlias, paramSet, NULL);
+    ret = HksGenerateKeyForDe(keyAlias, paramSet, NULL);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_E("HksGenerateKey failed");
     }
@@ -300,7 +301,7 @@ static int32_t TestKeyAttest1(struct HksCertChain *certChain)
         return ret;
     }
 
-    ret = HksAttestKey(&keyAlias, paramSet, certChain);
+    ret = HksAttestKeyForDe(&keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_E("HksAttestKey failed");
     }
@@ -345,7 +346,8 @@ static int32_t TestKeyAttest2(struct HksCertChain *certChain, bool isAnon)
         HksFreeParamSet(&paramSet);
         return ret;
     }
-    ret = isAnon ? HksAnonAttestKey(&keyAlias, paramSet, certChain) : HksAttestKey(&keyAlias, paramSet, certChain);
+    ret = isAnon ? HksAnonAttestKeyForDe(&keyAlias, paramSet, certChain) :
+        HksAttestKeyForDe(&keyAlias, paramSet, certChain);
     if (ret != HKS_SUCCESS) {
         HKS_TEST_LOG_E("HksAnonAttestKey/HksAttestKey failed");
     }

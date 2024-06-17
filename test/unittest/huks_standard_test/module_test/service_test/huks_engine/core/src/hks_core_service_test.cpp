@@ -61,6 +61,224 @@ void HksCoreServiceTest::TearDown()
 {
 }
 
+static int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
+{
+    int32_t ret = HksInitParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    if (tmpParams != NULL) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
+    }
+
+    ret = HksBuildParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t ConstructNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
+{
+    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check paramSet fail");
+        return ret;
+    }
+    ret = HksInitParamSet(newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("init paramSet fail");
+        return ret;
+    }
+    do {
+        ret = HksAddParams(*newParamSet, paramSet->params, paramSet->paramsCnt);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("copy params fail");
+            break;
+        }
+        struct HksParam storageLevel = {
+            .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+            .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
+        };
+        ret = HksAddParams(*newParamSet, &storageLevel, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add param attestMode fail");
+            break;
+        }
+        ret = HksBuildParamSet(newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("build paramSet fail");
+            break;
+        }
+        return HKS_SUCCESS;
+    } while (false);
+    HksFreeParamSet(newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceGenerateKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceGenerateKey(processInfo, keyAlias, newParamSet, keyOut);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceDeleteKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceDeleteKey(processInfo, keyAlias, newParamSet);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksCoreInitForDe(const struct  HksBlob *key, const struct HksParamSet *paramSet, struct HksBlob *handle,
+    struct HksBlob *token)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksCoreInit(key, newParamSet, handle, token);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksCoreUpdateForDe(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksCoreUpdate(handle, newParamSet, inData, outData);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksCoreFinishForDe(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksCoreFinish(handle, newParamSet, inData, outData);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksCoreAttestKeyForDe(const struct HksBlob *key, const  struct HksParamSet *paramSet,
+    struct HksBlob *certChain)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksCoreAttestKey(key, newParamSet, certChain);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksCoreExportPublicKeyForDe(const struct HksBlob *key, const struct HksParamSet *paramSet,
+    struct HksBlob *keyOut)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksCoreExportPublicKey(key, newParamSet, keyOut);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 /**
  * @tc.name: HksCoreServiceTest.HksCoreServiceTest001
  * @tc.desc: tdd HksCoreAbort, expect ret == HKS_ERROR_NULL_POINTER
@@ -100,7 +318,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest002, TestSize.Level0)
 HWTEST_F(HksCoreServiceTest, HksCoreServiceTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest003");
-    int32_t ret = HksCoreFinish(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksCoreFinishForDe(nullptr, nullptr, nullptr, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -119,7 +337,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest004, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksBlob inData = { 0 };
-    ret = HksCoreFinish(&handle, paramSet, &inData, nullptr);
+    ret = HksCoreFinishForDe(&handle, paramSet, &inData, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_INSUFFICIENT_MEMORY);
     HksFreeParamSet(&paramSet);
 }
@@ -140,7 +358,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest005, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksBlob inData = { 0 };
-    ret = HksCoreFinish(&handle, paramSet, &inData, nullptr);
+    ret = HksCoreFinishForDe(&handle, paramSet, &inData, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_BAD_STATE);
     HksFreeParamSet(&paramSet);
 }
@@ -153,7 +371,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest005, TestSize.Level0)
 HWTEST_F(HksCoreServiceTest, HksCoreServiceTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest006");
-    int32_t ret = HksCoreUpdate(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksCoreUpdateForDe(nullptr, nullptr, nullptr, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -173,7 +391,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest007, TestSize.Level0)
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
     struct HksBlob inData = { 0 };
-    ret = HksCoreUpdate(&handle, paramSet, &inData, nullptr);
+    ret = HksCoreUpdateForDe(&handle, paramSet, &inData, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_INSUFFICIENT_MEMORY);
     HksFreeParamSet(&paramSet);
 }
@@ -186,7 +404,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest007, TestSize.Level0)
 HWTEST_F(HksCoreServiceTest, HksCoreServiceTest008, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest008");
-    int32_t ret = HksCoreInit(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksCoreInitForDe(nullptr, nullptr, nullptr, nullptr);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -207,7 +425,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest009, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_SUCCESS);
     ret = HksBuildParamSet(&paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksCoreInit(&key, paramSet, &handle, &token);
+    ret = HksCoreInitForDe(&key, paramSet, &handle, &token);
     ASSERT_TRUE(ret == HKS_ERROR_INSUFFICIENT_MEMORY);
     HksFreeParamSet(&paramSet);
 }
@@ -245,7 +463,7 @@ static int32_t TestGenerateKey(const struct HksBlob *keyAlias, const struct HksP
         return ret;
     }
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
+    ret = HksServiceGenerateKeyForDe(processInfo, keyAlias, paramSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("hks_core_service_test HksGenerateKey failed");
     }
@@ -305,10 +523,10 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest010, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
 
-    ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, &keyOutBlob);
+    ret = HksCoreExportPublicKeyForDe(&keyBlob, runtimeParamSet, &keyOutBlob);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
 
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    (void)HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
     HKS_FREE(keyOutBlob.data);
     HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
@@ -373,8 +591,8 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest014, TestSize.Level0)
     int32_t ret = BuildParamSetWithParam(&runtimeParamSet, &accessTokenIdRuntime);
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
-    ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, nullptr);
-    ret = HksCoreExportPublicKey(nullptr, runtimeParamSet, &keyOutBlob);
+    ret = HksCoreExportPublicKeyForDe(&keyBlob, runtimeParamSet, nullptr);
+    ret = HksCoreExportPublicKeyForDe(nullptr, runtimeParamSet, &keyOutBlob);
     ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
     HKS_FREE(keyOutBlob.data);
     HKS_FREE(keyBlob.data);
@@ -447,13 +665,13 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest016, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     struct HksBlob keyOutBlob = { .size = KEY_BLOB_DEFAULT_SIZE, .data = (uint8_t *)HksMalloc(KEY_BLOB_DEFAULT_SIZE) };
 
-    ret = HksCoreExportPublicKey(&keyBlob, runtimeParamSet, &keyOutBlob);
+    ret = HksCoreExportPublicKeyForDe(&keyBlob, runtimeParamSet, &keyOutBlob);
     ASSERT_EQ(ret, HKS_ERROR_BAD_STATE);
 
     HKS_FREE(keyOutBlob.data);
     HKS_FREE(keyBlob.data);
     HksFreeParamSet(&runtimeParamSet);
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    (void)HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
 }
 
 /**
@@ -467,7 +685,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest017, TestSize.Level0)
     // invalid certchain size
     uint8_t buffer[HKS_ATTEST_CERT_SIZE - 1] = {0};
     struct HksBlob blob = { HKS_ATTEST_CERT_SIZE - 1, buffer };
-    int32_t ret = HksCoreAttestKey(&blob, nullptr, &blob);
+    int32_t ret = HksCoreAttestKeyForDe(&blob, nullptr, &blob);
     ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey success" << ret;
 }
 
@@ -479,7 +697,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest017, TestSize.Level0)
 HWTEST_F(HksCoreServiceTest, HksCoreServiceTest018, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCoreServiceTest018");
-    int32_t ret = HksCoreAttestKey(nullptr, nullptr, nullptr);
+    int32_t ret = HksCoreAttestKeyForDe(nullptr, nullptr, nullptr);
     ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey success" << ret;
 }
 
@@ -494,7 +712,7 @@ HWTEST_F(HksCoreServiceTest, HksCoreServiceTest019, TestSize.Level0)
     // invalid paramSet
     uint8_t buffer[HKS_ATTEST_CERT_SIZE] = {0};
     struct HksBlob blob = {HKS_ATTEST_CERT_SIZE, buffer};
-    int32_t ret = HksCoreAttestKey(&blob, nullptr, &blob);
+    int32_t ret = HksCoreAttestKeyForDe(&blob, nullptr, &blob);
     ASSERT_NE(ret, HKS_SUCCESS) << "HksCoreAttestKey not null pointer" << ret;
 }
 }

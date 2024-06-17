@@ -78,6 +78,7 @@ ohos_unittest("huks_UT_test") {
   ]
 
   sources += [
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_adapt_for_de.c",
     "src/hks_import_agree_test.cpp",
     "src/hks_import_key_test.cpp",
     "src/hks_import_rsa_test.cpp",

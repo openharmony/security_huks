@@ -18,6 +18,7 @@
 #endif
 #include "hks_rsa_sign_verify_part8_test.h"
 #include "hks_rsa_sign_verify_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -315,7 +316,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test071, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -351,7 +352,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test072, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -376,7 +377,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
     int32_t ret = InitParamSet(&genParamSet, g_genParamsTest073, sizeof(g_genParamsTest073) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
@@ -386,7 +387,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
-    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    ret = HksInitForDe(&keyAlias, signParamSet, &handleSign, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleSign, signParamSet, &inData);
@@ -394,13 +395,13 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
     // Finish
     uint8_t outDataS[Unittest::RsaSignVerify::RSA_COMMON_SIZE] = {0};
     struct HksBlob outDataSign = { Unittest::RsaSignVerify::RSA_COMMON_SIZE, outDataS };
-    ret = HksFinish(&handleSign, signParamSet, &inData, &outDataSign);
+    ret = HksFinishForDe(&handleSign, signParamSet, &inData, &outDataSign);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
 
     /* 3. Export Public Key */
     uint8_t pubKey[HKS_RSA_KEY_SIZE_4096] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, pubKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     /* 4. Verify Three Stage (Abort) */
@@ -410,12 +411,12 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
     /* Import Key */
     char newKey[] = "RSA_Sign_Verify_Import_KeyAlias";
     struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(newKey), .data = (uint8_t *)newKey };
-    ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
     // Init
     uint8_t handleV[sizeof(uint64_t)] = {0};
     struct HksBlob handleVerify = { sizeof(uint64_t), handleV };
-    ret = HksInit(&newKeyAlias, verifyParamSet, &handleVerify, nullptr);
+    ret = HksInitForDe(&newKeyAlias, verifyParamSet, &handleVerify, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleVerify, verifyParamSet, &inData);
@@ -425,9 +426,9 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test073, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    ret = HksDeleteKey(&newKeyAlias, verifyParamSet);
+    ret = HksDeleteKeyForDe(&newKeyAlias, verifyParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -453,7 +454,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test074, TestSize.Level
     ret = InitParamSet(&genParamSet, g_genParamsTest074, sizeof(g_genParamsTest074) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
@@ -463,7 +464,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test074, TestSize.Level
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
-    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    ret = HksInitForDe(&keyAlias, signParamSet, &handleSign, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleSign, signParamSet, &inData);
@@ -473,7 +474,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test074, TestSize.Level
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -496,7 +497,7 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test075, TestSize.Level
     ret = InitParamSet(&genParamSet, g_genParamsTest075, sizeof(g_genParamsTest075) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
@@ -506,11 +507,11 @@ HWTEST_F(HksRsaSignVerifyPart8Test, HksRsaSignVerifyPart8Test075, TestSize.Level
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
-    ret = HksInit(NULL, signParamSet, &handleSign, nullptr);
+    ret = HksInitForDe(NULL, signParamSet, &handleSign, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

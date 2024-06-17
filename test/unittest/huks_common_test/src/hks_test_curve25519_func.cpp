@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_curve25519_c.h"
 
 int32_t TestGenerateEd25519Key(struct HksBlob alias)
@@ -48,7 +49,7 @@ int32_t TestGenerateEd25519Key(struct HksBlob alias)
     HKS_TEST_ASSERT(ret == 0);
     ret = HksBuildParamSet(&paramSet);
     HKS_TEST_ASSERT(ret == 0);
-    ret = HksGenerateKey(&alias, paramSet, NULL);
+    ret = HksGenerateKeyForDe(&alias, paramSet, NULL);
     HKS_TEST_ASSERT(ret == 0);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -84,7 +85,7 @@ int32_t TestSignEd25519(struct HksBlob alias)
     ret = HksBuildParamSet(&paramSet);
     HKS_TEST_ASSERT(ret == 0);
     struct HksBlob signature = { TEST_CURVE_256, g_buffer };
-    ret = HksSign(&alias, paramSet, &msg, &signature);
+    ret = HksSignForDe(&alias, paramSet, &msg, &signature);
     HKS_TEST_ASSERT(ret == 0);
     g_bufferSize = signature.size;
     HKS_TEST_LOG_I("TestSignEd25519 signature size is %u", signature.size);
@@ -129,7 +130,7 @@ int32_t TestVerifyEd25519(struct HksBlob alias)
     HKS_TEST_ASSERT(ret == 0);
 
     struct HksBlob signature = { g_bufferSize, g_buffer };
-    ret = HksVerify(&alias, paramSet, &msg, &signature);
+    ret = HksVerifyForDe(&alias, paramSet, &msg, &signature);
     HKS_TEST_ASSERT(ret == 0);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -175,7 +176,7 @@ int32_t TestImportEd25519(struct HksBlob alias, struct HksBlob *pubKeyInfo)
     ret = HksBuildParamSet(&paramSet);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksImportKey(&alias, paramSet, pubKeyInfo);
+    ret = HksImportKeyForDe(&alias, paramSet, pubKeyInfo);
     HKS_TEST_ASSERT(ret == 0);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -189,13 +190,13 @@ int32_t TestExportImportEd25519SignVerify(struct HksBlob alias)
     int32_t ret = TestGenerateEd25519Key(alias);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksExportPublicKey(&alias, NULL, &pubKeyInfo);
+    ret = HksExportPublicKeyForDe(&alias, NULL, &pubKeyInfo);
     HKS_TEST_ASSERT(ret == 0);
 
     ret = TestSignEd25519(alias);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksDeleteKey(&alias, NULL);
+    ret = HksDeleteKeyForDe(&alias, NULL);
     HKS_TEST_ASSERT(ret == 0);
 
     struct HksBlob newAlias = { (uint32_t)strlen("test_ed25519_2"), (uint8_t *)"test_ed25519_2" };
@@ -204,7 +205,7 @@ int32_t TestExportImportEd25519SignVerify(struct HksBlob alias)
     ret = TestVerifyEd25519(newAlias);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksDeleteKey(&newAlias, NULL);
+    ret = HksDeleteKeyForDe(&newAlias, NULL);
     HKS_TEST_ASSERT(ret == 0);
     return ret;
 }
@@ -218,7 +219,7 @@ int32_t TestCurve25519All()
     HKS_TEST_ASSERT(ret == 0);
     ret = TestVerifyEd25519(ed25519Alias);
     HKS_TEST_ASSERT(ret == 0);
-    ret = HksDeleteKey(&ed25519Alias, NULL);
+    ret = HksDeleteKeyForDe(&ed25519Alias, NULL);
     HKS_TEST_ASSERT(ret == 0);
 
     ret = TestExportImportEd25519SignVerify(ed25519Alias);
@@ -314,23 +315,23 @@ int32_t TestEd25519SignTeeVerifyLocal()
     int32_t ret = TestGenerateEd25519Key(ed25519Alias);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksExportPublicKey(&ed25519Alias, NULL, &pubKeyInfo);
+    ret = HksExportPublicKeyForDe(&ed25519Alias, NULL, &pubKeyInfo);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("HksExportPublicKey puKey size is %u", pubKeyInfo.size);
 
     ret = BuildTeeSignParamSet(&paramSetSign);
     HKS_TEST_ASSERT(ret == 0);
-    ret = HksSign(&ed25519Alias, paramSetSign, &msg, &signature);
+    ret = HksSignForDe(&ed25519Alias, paramSetSign, &msg, &signature);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("Test_Ed25519_Sign_TEE signature size is %u", signature.size);
 
     ret = BuildLocalVerifyParamSet(&paramSetVerify);
     HKS_TEST_ASSERT(ret == 0);
-    ret = HksVerify(&pubKeyInfo, paramSetVerify, &msg, &signature);
+    ret = HksVerifyForDe(&pubKeyInfo, paramSetVerify, &msg, &signature);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("Test_Ed25519_Verify_Local Success");
 
-    ret = HksDeleteKey(&ed25519Alias, NULL);
+    ret = HksDeleteKeyForDe(&ed25519Alias, NULL);
     HKS_TEST_ASSERT(ret == 0);
 
     HksFreeParamSet(&paramSetSign);
@@ -369,7 +370,7 @@ int32_t TestSignEd25519Wrong(struct HksBlob alias)
     ret = HksBuildParamSet(&paramSet);
     HKS_TEST_ASSERT(ret == 0);
     struct HksBlob signature = { TEST_CURVE_256, g_buffer };
-    ret = HksSign(&alias, paramSet, &msg, &signature);
+    ret = HksSignForDe(&alias, paramSet, &msg, &signature);
     HKS_TEST_ASSERT(ret != 0);
     g_bufferSize = signature.size;
     HKS_TEST_LOG_I("TestSignEd25519 signature size is %u", signature.size);
@@ -384,7 +385,7 @@ int32_t TestCurve25519SignWrong()
     HKS_TEST_ASSERT(ret == 0);
     ret = TestSignEd25519Wrong(ed25519Alias);
     HKS_TEST_ASSERT(ret != 0);
-    int32_t retTwo = HksDeleteKey(&ed25519Alias, NULL);
+    int32_t retTwo = HksDeleteKeyForDe(&ed25519Alias, NULL);
     HKS_TEST_ASSERT(retTwo == 0);
     if ((ret != 0) && (retTwo == 0)) {
         return 0;
@@ -429,7 +430,7 @@ int32_t TestVerifyEd25519Wrong(struct HksBlob alias)
     HKS_TEST_ASSERT(ret == 0);
 
     struct HksBlob signature = { g_bufferSize, g_buffer };
-    ret = HksVerify(&alias, paramSet, &msg, &signature);
+    ret = HksVerifyForDe(&alias, paramSet, &msg, &signature);
     HKS_TEST_ASSERT(ret != 0);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -444,7 +445,7 @@ int32_t TestCurve25519verifyWrong()
     HKS_TEST_ASSERT(ret == 0);
     ret = TestVerifyEd25519Wrong(ed25519Alias);
     HKS_TEST_ASSERT(ret != 0);
-    int32_t retTwo = HksDeleteKey(&ed25519Alias, NULL);
+    int32_t retTwo = HksDeleteKeyForDe(&ed25519Alias, NULL);
     HKS_TEST_ASSERT(retTwo == 0);
     if ((ret != 0) && (retTwo == 0)) {
         return 0;

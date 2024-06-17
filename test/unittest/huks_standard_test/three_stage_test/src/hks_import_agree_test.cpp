@@ -14,6 +14,7 @@
  */
 
 #include "hks_import_agree_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -962,7 +963,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, uint32_t id,
         return ret;
     }
 
-    ret = HksImportKey(keyAlias, paramSet, &key);
+    ret = HksImportKeyForDe(keyAlias, paramSet, &key);
     HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -1058,20 +1059,20 @@ static int32_t TestAgree(const struct HksBlob *keyAlias, const struct HksBlob *p
     do {
         uint64_t handleValue = 0;
         struct HksBlob handle = { sizeof(uint64_t), (uint8_t *)&handleValue };
-        ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
+        ret = HksInitForDe(keyAlias, initParamSet, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
         struct HksBlob tmpBlob = { 0, nullptr };
-        ret = HksUpdate(&handle, updateParamSet, peerPubKey, &tmpBlob);
+        ret = HksUpdateForDe(&handle, updateParamSet, peerPubKey, &tmpBlob);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
         uint8_t tempIn[LENGTH_MAX] = {0};
         struct HksBlob tmpInBlob = { 0, tempIn };
-        ret = HksFinish(&handle, finishParamSet, &tmpInBlob, agreeKey);
+        ret = HksFinishForDe(&handle, finishParamSet, &tmpInBlob, agreeKey);
     } while (0);
 
     HksFreeParamSet(&initParamSet);
@@ -1139,8 +1140,8 @@ static void TestImportKey(uint32_t alg, uint32_t keySize, uint32_t importType)
         EXPECT_EQ(ret, HKS_SUCCESS) << "agree test failed:" << importType;
     }
 
-    (void)HksDeleteKey(&keyAlias1, nullptr);
-    (void)HksDeleteKey(&keyAlias2, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias1, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
 }
 
 static void ImportAgreeTest(uint32_t alg, uint32_t keySize)

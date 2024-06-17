@@ -14,6 +14,7 @@
  */
 
 #include "hks_ecc_sign_verify_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -24,7 +25,7 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, paramSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -46,10 +47,10 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     if (isSign) {
         uint8_t tmpOut[ECC_COMMON_SIZE] = {0};
         struct HksBlob outData1 = { ECC_COMMON_SIZE, tmpOut };
-        ret = HksSign(keyAlias, paramSet, inData, &outData1);
+        ret = HksSignForDe(keyAlias, paramSet, inData, &outData1);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
     } else {
-        ret = HksVerify(keyAlias, paramSet, inData, outData);
+        ret = HksVerifyForDe(keyAlias, paramSet, inData, outData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
     }
 
@@ -75,7 +76,7 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
 
     /* 1. Generate Key */
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
@@ -87,13 +88,13 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
     /* 3. Export Public Key */
     uint8_t pubKey[HKS_ECC_KEY_SIZE_521] = {0};
     struct HksBlob publicKey = { HKS_ECC_KEY_SIZE_521, pubKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     /* 4. Import Key */
     char newKey[] = "ECC_Sign_Verify_Import_KeyAlias";
     struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = reinterpret_cast<uint8_t *>(newKey) };
-    ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
     /* 5. Verify Three Stage */
@@ -101,7 +102,7 @@ int32_t HksEccSignVerifyTestNormalCase(struct HksBlob keyAlias, struct HksParamS
     EXPECT_EQ(ret, HKS_SUCCESS) << "Verify failed.";
 
     /* 6. Delete New Key */
-    int32_t deleteRet = HksDeleteKey(&newKeyAlias, verifyParamSet);
+    int32_t deleteRet = HksDeleteKeyForDe(&newKeyAlias, verifyParamSet);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     return ret;
@@ -111,12 +112,12 @@ int32_t HksTestSignVerifyParamAbsent(struct HksBlob keyAlias, struct HksParamSet
     struct HksParamSet *signParamSet)
 {
     /* 1. Generate Key */
-    uint32_t ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    uint32_t ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    ret = HksInit(&keyAlias, signParamSet, &handle, nullptr);
+    ret = HksInitForDe(&keyAlias, signParamSet, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
     return ret;
 }
