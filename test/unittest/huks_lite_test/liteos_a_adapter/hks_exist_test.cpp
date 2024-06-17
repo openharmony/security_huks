@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -73,7 +74,7 @@ HWTEST_F(HksExistTest, HksExistTest001, TestSize.Level0)
         HKS_TEST_ASSERT(TestGenDefaultKeyAndGetAlias(&keyAlias) == 0);
         ret = HksKeyExistRun(keyAlias, 1);
         HKS_TEST_ASSERT(ret == g_testKeyExistParams[0].expectResult);
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == HKS_SUCCESS);
+        HKS_TEST_ASSERT(HksDeleteKeyForDe(keyAlias, NULL) == HKS_SUCCESS);
     } else {
         ret = TestConstuctBlob(&keyAlias,
                                g_testKeyExistParams[0].keyAliasParams.blobExist,

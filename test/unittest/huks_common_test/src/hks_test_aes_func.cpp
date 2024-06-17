@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_aes_c.h"
 
 #define HKS_AES_256 \
@@ -168,8 +169,8 @@ void GenerateBaseKey(const struct HksBlob *alias)
 
     HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
     HKS_TEST_ASSERT(HksBuildParamSet(&paramSet) == 0);
-    HKS_TEST_ASSERT(HksGenerateKey(alias, paramSet, NULL) == 0);
 
+    HKS_TEST_ASSERT(HksGenerateKeyForDe(alias, paramSet, NULL) == 0);
     HksFreeParamSet(&paramSet);
 }
 
@@ -244,14 +245,14 @@ void GenerateAesAgreeKey(const struct HksBlob *alias, const struct HksBlob *base
         }
     }
     HKS_TEST_ASSERT(HksBuildParamSet(&paramSet) == 0);
-    HKS_TEST_ASSERT(HksGenerateKey(alias, paramSet, NULL) == 0);
+    HKS_TEST_ASSERT(HksGenerateKeyForDe(alias, paramSet, NULL) == 0);
 
     HksFreeParamSet(&paramSet);
 }
 
 void ExportPubKey(const struct HksBlob *alias, struct HksBlob *pubKey)
 {
-    HKS_TEST_ASSERT(HksExportPublicKey(alias, NULL, pubKey) == 0);
+    HKS_TEST_ASSERT(HksExportPublicKeyForDe(alias, NULL, pubKey) == 0);
 }
 
 void ImportPubKey(const struct HksBlob *alias, const struct HksBlob *pubKey)
@@ -281,7 +282,7 @@ void ImportPubKey(const struct HksBlob *alias, const struct HksBlob *pubKey)
 
     HKS_TEST_ASSERT(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
     HKS_TEST_ASSERT(HksBuildParamSet(&paramSet) == 0);
-    HKS_TEST_ASSERT(HksImportKey(alias, paramSet, pubKey) == 0);
+    HKS_TEST_ASSERT(HksImportKeyForDe(alias, paramSet, pubKey) == 0);
 
     HksFreeParamSet(&paramSet);
 }
@@ -329,7 +330,7 @@ int32_t TestAes256ByAgree()
     struct HksBlob plainText1 = { (uint32_t)strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    HKS_TEST_ASSERT(HksEncrypt(&aesKeyAlias1, paramSetTest, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncryptForDe(&aesKeyAlias1, paramSetTest, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSetTest);
@@ -340,17 +341,17 @@ int32_t TestAes256ByAgree()
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
-    ret = HksDecrypt(&aesKeyAlias2, paramSetTest, &cipherText, &plainText);
+    ret = HksDecryptForDe(&aesKeyAlias2, paramSetTest, &cipherText, &plainText);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("ConstructParamSetEncryptDecryptAes plainText: %s", plainText.data);
     HksFreeParamSet(&paramSetTest);
 
-    HksDeleteKey(&baseKeyAlias1, NULL);
-    HksDeleteKey(&baseKeyAlias2, NULL);
-    HksDeleteKey(&pubKeyAlias1, NULL);
-    HksDeleteKey(&pubKeyAlias2, NULL);
-    HksDeleteKey(&aesKeyAlias1, NULL);
-    HksDeleteKey(&aesKeyAlias2, NULL);
+    HksDeleteKeyForDe(&baseKeyAlias1, NULL);
+    HksDeleteKeyForDe(&baseKeyAlias2, NULL);
+    HksDeleteKeyForDe(&pubKeyAlias1, NULL);
+    HksDeleteKeyForDe(&pubKeyAlias2, NULL);
+    HksDeleteKeyForDe(&aesKeyAlias1, NULL);
+    HksDeleteKeyForDe(&aesKeyAlias2, NULL);
     HKS_TEST_LOG_I("end");
     return ret;
 }
@@ -395,7 +396,7 @@ int32_t TestAes256ByAgree1()
     struct HksBlob plainText1 = { (uint32_t)strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    HKS_TEST_ASSERT(HksEncrypt(&aesKeyAlias1, paramSetTest01, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncryptForDe(&aesKeyAlias1, paramSetTest01, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSetTest01);
@@ -406,17 +407,17 @@ int32_t TestAes256ByAgree1()
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
-    ret = HksDecrypt(&aesKeyAlias2, paramSetTest01, &cipherText, &plainText);
+    ret = HksDecryptForDe(&aesKeyAlias2, paramSetTest01, &cipherText, &plainText);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("ConstructParamSetEncryptDecryptAes plainText: %s", plainText.data);
     HksFreeParamSet(&paramSetTest01);
 
-    HksDeleteKey(&baseKeyAlias1, NULL);
-    HksDeleteKey(&baseKeyAlias2, NULL);
-    HksDeleteKey(&pubKeyAlias1, NULL);
-    HksDeleteKey(&pubKeyAlias2, NULL);
-    HksDeleteKey(&aesKeyAlias1, NULL);
-    HksDeleteKey(&aesKeyAlias2, NULL);
+    HksDeleteKeyForDe(&baseKeyAlias1, NULL);
+    HksDeleteKeyForDe(&baseKeyAlias2, NULL);
+    HksDeleteKeyForDe(&pubKeyAlias1, NULL);
+    HksDeleteKeyForDe(&pubKeyAlias2, NULL);
+    HksDeleteKeyForDe(&aesKeyAlias1, NULL);
+    HksDeleteKeyForDe(&aesKeyAlias2, NULL);
     HKS_TEST_LOG_I("end");
     return ret;
 }
@@ -453,7 +454,7 @@ int32_t TestAes256ByAgree2()
     struct HksBlob plainText1 = { (uint32_t)strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    HKS_TEST_ASSERT(HksEncrypt(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncryptForDe(&aesKeyAlias1, paramSet, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSet);
@@ -464,15 +465,15 @@ int32_t TestAes256ByAgree2()
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
-    ret = HksDecrypt(&aesKeyAlias2, paramSet, &cipherText, &plainText);
+    ret = HksDecryptForDe(&aesKeyAlias2, paramSet, &cipherText, &plainText);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_LOG_I("ConstructParamSetEncryptDecryptAes plainText: %s", plainText.data);
     HksFreeParamSet(&paramSet);
 
-    HksDeleteKey(&baseKeyAlias1, NULL);
-    HksDeleteKey(&baseKeyAlias2, NULL);
-    HksDeleteKey(&aesKeyAlias1, NULL);
-    HksDeleteKey(&aesKeyAlias2, NULL);
+    HksDeleteKeyForDe(&baseKeyAlias1, NULL);
+    HksDeleteKeyForDe(&baseKeyAlias2, NULL);
+    HksDeleteKeyForDe(&aesKeyAlias1, NULL);
+    HksDeleteKeyForDe(&aesKeyAlias2, NULL);
     HKS_TEST_LOG_I("end");
     return ret;
 }

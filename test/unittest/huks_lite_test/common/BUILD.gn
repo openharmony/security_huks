@@ -34,6 +34,7 @@ config("huks_test_common") {
 
 ohos_static_library("huks_3.0_test_common") {
   sources = [
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_adapt_for_de.c",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_test_aes_func.cpp",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_test_cipher_func.cpp",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_test_common_func.cpp",
@@ -48,6 +49,9 @@ ohos_static_library("huks_3.0_test_common") {
     "hks_test_log.c",
     "hks_test_mem.c",
   ]
+
+  include_dirs =
+      [ "//base/security/huks/frameworks/huks_standard/main/common/include" ]
 
   deps = []
 

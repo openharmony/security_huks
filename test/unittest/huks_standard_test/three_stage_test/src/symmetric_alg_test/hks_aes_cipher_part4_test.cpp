@@ -17,6 +17,7 @@
 #include "hks_aes_cipher_test_common.h"
 #include "hks_aes_cipher_part_test_c.h"
 #include "hks_access_control_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #ifdef L2_STANDARD
@@ -444,7 +445,7 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test030, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(decrypt) failed.";
 
     /* 1. Generate Key */
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Encrypt Three Stage */
@@ -452,7 +453,7 @@ HWTEST_F(HksAesCipherPart4Test, HksAesCipherPart4Test030, TestSize.Level0)
     uint8_t challenge[32] = {0};
     struct HksBlob challengeBlob = { 32, challenge };
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&keyAlias, encryptParamSet, &handleEncrypt, &challengeBlob);
+    ret = HksInitForDe(&keyAlias, encryptParamSet, &handleEncrypt, &challengeBlob);
     EXPECT_EQ(ret, HKS_ERROR_NOT_SUPPORTED) << "Init failed.";
 
     HksFreeParamSet(&genParamSet);

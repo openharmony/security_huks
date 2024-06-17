@@ -18,6 +18,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "hks_template.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
@@ -381,7 +382,7 @@ static void EncryptOnThreeStage(const struct HksParamSet *encryptParamSet, const
 {
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    int32_t ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     if (expectSuccess) {
         ASSERT_EQ(ret, HKS_SUCCESS);
     } else {
@@ -401,7 +402,7 @@ static void DecryptOnThreeStage(const struct HksParamSet *decryptParamSet, const
 {
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    int32_t ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     if (expectSuccess) {
         ASSERT_EQ(ret, HKS_SUCCESS);
     } else {
@@ -431,10 +432,10 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest001, TestSize.Level0)
         ret = BuildParamSet(g_genParams, g_validParam[i], HKS_ARRAY_SIZE(g_genParams), &paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGenerateKey(&g_validKeyAlias[i], paramSet, nullptr);
+        ret = HksGenerateKeyForDe(&g_validKeyAlias[i], paramSet, nullptr);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_validKeyAlias[i], paramSet);
+        ret = HksKeyExistForDe(&g_validKeyAlias[i], paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSet);
@@ -445,10 +446,10 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest001, TestSize.Level0)
         ret = BuildParamSet(g_exportParams, g_validParam[i], HKS_ARRAY_SIZE(g_exportParams), &paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGenerateKey(&g_validKeyAliasEcc[i], paramSetEcc, nullptr);
+        ret = HksGenerateKeyForDe(&g_validKeyAliasEcc[i], paramSetEcc, nullptr);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_validKeyAliasEcc[i], paramSetEcc);
+        ret = HksKeyExistForDe(&g_validKeyAliasEcc[i], paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSetEcc);
@@ -470,10 +471,10 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest002, TestSize.Level0)
         ret = BuildParamSet(g_genParams, g_invalidParam[i], HKS_ARRAY_SIZE(g_genParams), &paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGenerateKey(&g_invalidKeyAlias[i], paramSet, nullptr);
+        ret = HksGenerateKeyForDe(&g_invalidKeyAlias[i], paramSet, nullptr);
         ASSERT_NE(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_invalidKeyAlias[i], paramSet);
+        ret = HksKeyExistForDe(&g_invalidKeyAlias[i], paramSet);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSet);
@@ -484,10 +485,10 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest002, TestSize.Level0)
         ret = BuildParamSet(g_exportParams, g_invalidParam[i], HKS_ARRAY_SIZE(g_exportParams), &paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGenerateKey(&g_invalidKeyAliasEcc[i], paramSetEcc, nullptr);
+        ret = HksGenerateKeyForDe(&g_invalidKeyAliasEcc[i], paramSetEcc, nullptr);
         ASSERT_NE(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_invalidKeyAliasEcc[i], paramSetEcc);
+        ret = HksKeyExistForDe(&g_invalidKeyAliasEcc[i], paramSetEcc);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSetEcc);
@@ -514,7 +515,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest003, TestSize.Level0)
         uint8_t cipherText[1024] = { 0 };
         struct HksBlob plainBlob = { .size = HKS_ARRAY_SIZE(plainText), .data = plainText};
         struct HksBlob cipherBlob = { .size = HKS_ARRAY_SIZE(cipherText), .data = cipherText};
-        ret = HksEncrypt(&g_validKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlob);
+        ret = HksEncryptForDe(&g_validKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlob);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         ret = BuildParamSet(g_decryptParams, g_validParam[i], HKS_ARRAY_SIZE(g_decryptParams), &decryptParamSet);
@@ -522,7 +523,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest003, TestSize.Level0)
 
         uint8_t decryptedText[HKS_ARRAY_SIZE(plainText) + 1] = { 0 };
         struct HksBlob decryptedBlob = { .size = HKS_ARRAY_SIZE(decryptedText), .data = decryptedText};
-        ret = HksDecrypt(&g_validKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlob);
+        ret = HksDecryptForDe(&g_validKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlob);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         ret = HksMemCmp(decryptedText, plainText, HKS_ARRAY_SIZE(plainText));
@@ -554,7 +555,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest004, TestSize.Level0)
         uint8_t cipherText[1024] = { 0 };
         struct HksBlob plainBlob = { .size = HKS_ARRAY_SIZE(plainText), .data = plainText};
         struct HksBlob cipherBlob = { .size = HKS_ARRAY_SIZE(cipherText), .data = cipherText};
-        ret = HksEncrypt(&g_invalidKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlob);
+        ret = HksEncryptForDe(&g_invalidKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlob);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         ret = BuildParamSet(g_decryptParams, g_invalidParam[i], HKS_ARRAY_SIZE(g_decryptParams), &decryptParamSet);
@@ -562,7 +563,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest004, TestSize.Level0)
 
         uint8_t decryptedText[HKS_ARRAY_SIZE(plainText) + 1] = { 0 };
         struct HksBlob decryptedBlob = { .size = HKS_ARRAY_SIZE(decryptedText), .data = decryptedText};
-        ret = HksDecrypt(&g_invalidKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlob);
+        ret = HksDecryptForDe(&g_invalidKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlob);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&encryptParamSet);
@@ -595,7 +596,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest005, TestSize.Level0)
 
         uint8_t cipherTextOneStage[1024] = { 0 };
         struct HksBlob cipherBlobOneStage = { .size = HKS_ARRAY_SIZE(cipherTextOneStage), .data = cipherTextOneStage};
-        ret = HksEncrypt(&g_validKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlobOneStage);
+        ret = HksEncryptForDe(&g_validKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlobOneStage);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         ret = HksMemCmp(cipherTextOneStage, cipherText, HKS_ARRAY_SIZE(cipherTextOneStage));
@@ -613,7 +614,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest005, TestSize.Level0)
         uint8_t decryptedTextOneStage[HKS_ARRAY_SIZE(plainText) + 1] = { 0 };
         struct HksBlob decryptedBlobOneStage = { .size = HKS_ARRAY_SIZE(decryptedTextOneStage),
             .data = decryptedTextOneStage};
-        ret = HksDecrypt(&g_validKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlobOneStage);
+        ret = HksDecryptForDe(&g_validKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlobOneStage);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         ret = HksMemCmp(decryptedText, decryptedTextOneStage, HKS_ARRAY_SIZE(decryptedText));
@@ -649,7 +650,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest006, TestSize.Level0)
 
         uint8_t cipherTextOneStage[1024] = { 0 };
         struct HksBlob cipherBlobOneStage = { .size = HKS_ARRAY_SIZE(cipherTextOneStage), .data = cipherTextOneStage};
-        ret = HksEncrypt(&g_invalidKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlobOneStage);
+        ret = HksEncryptForDe(&g_invalidKeyAlias[i], encryptParamSet, &plainBlob, &cipherBlobOneStage);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         /* Decrypt */
@@ -664,7 +665,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest006, TestSize.Level0)
         uint8_t decryptedTextOneStage[HKS_ARRAY_SIZE(plainText) + 1] = { 0 };
         struct HksBlob decryptedBlobOneStage = { .size = HKS_ARRAY_SIZE(decryptedTextOneStage),
             .data = decryptedTextOneStage};
-        ret = HksDecrypt(&g_invalidKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlobOneStage);
+        ret = HksDecryptForDe(&g_invalidKeyAlias[i], decryptParamSet, &cipherBlob, &decryptedBlobOneStage);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&encryptParamSet);
@@ -693,7 +694,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest007, TestSize.Level0)
         ret = BuildKeyInfoList(&keyInfoList, g_initKeyInfoListNum);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGetKeyInfoList(infoListParamSet, keyInfoList, &listCount);
+        ret = HksGetKeyInfoListForDe(infoListParamSet, keyInfoList, &listCount);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         for (uint32_t i = 0; i < listCount; ++i) {
@@ -726,7 +727,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest008, TestSize.Level0)
         ret = BuildKeyInfoList(&keyInfoList, g_initKeyInfoListNum);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGetKeyInfoList(paramSet, keyInfoList, &listCount);
+        ret = HksGetKeyInfoListForDe(paramSet, keyInfoList, &listCount);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSet);
@@ -750,7 +751,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest009, TestSize.Level0)
         ret = BuildParamSet(nullptr, g_validParam[i], 0, &exportParamSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksExportPublicKey(&g_validKeyAliasEcc[i], exportParamSet, &publicKey);
+        ret = HksExportPublicKeyForDe(&g_validKeyAliasEcc[i], exportParamSet, &publicKey);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         HKS_FREE(publicKey.data);
@@ -774,7 +775,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest010, TestSize.Level0)
         ret = BuildParamSet(nullptr, g_invalidParam[i], 0, &exportParamSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksExportPublicKey(&g_invalidKeyAliasEcc[i], exportParamSet, &publicKey);
+        ret = HksExportPublicKeyForDe(&g_invalidKeyAliasEcc[i], exportParamSet, &publicKey);
         ASSERT_NE(ret, HKS_SUCCESS);
         HKS_FREE(publicKey.data);
         HksFreeParamSet(&exportParamSet);
@@ -811,7 +812,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest011, TestSize.Level0)
         ret = HksBuildParamSet(&paramSetOut);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGetKeyParamSet(&g_validKeyAliasEcc[i], paramSetIn, paramSetOut);
+        ret = HksGetKeyParamSetForDe(&g_validKeyAliasEcc[i], paramSetIn, paramSetOut);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         struct HksParam *keySizeParam = nullptr;
@@ -859,7 +860,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest012, TestSize.Level0)
         ret = HksBuildParamSet(&paramSetOut);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksGetKeyParamSet(&g_invalidKeyAliasEcc[i], paramSetIn, paramSetOut);
+        ret = HksGetKeyParamSetForDe(&g_invalidKeyAliasEcc[i], paramSetIn, paramSetOut);
         ASSERT_NE(ret, HKS_SUCCESS);
 
         HKS_FREE(getParam.blob.data);
@@ -883,7 +884,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest013, TestSize.Level0)
         ret = BuildParamSet(g_genParams, g_validParam[i], HKS_ARRAY_SIZE(g_genParams), &paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_validKeyAlias[i], paramSet);
+        ret = HksKeyExistForDe(&g_validKeyAlias[i], paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSet);
@@ -894,7 +895,7 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest013, TestSize.Level0)
         ret = BuildParamSet(g_exportParams, g_validParam[i], HKS_ARRAY_SIZE(g_exportParams), &paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_validKeyAliasEcc[i], paramSetEcc);
+        ret = HksKeyExistForDe(&g_validKeyAliasEcc[i], paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
         HksFreeParamSet(&paramSetEcc);
@@ -916,10 +917,10 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest014, TestSize.Level0)
         ret = BuildParamSet(g_genParams, g_validParam[i], HKS_ARRAY_SIZE(g_genParams), &paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksDeleteKey(&g_validKeyAlias[i], paramSet);
+        ret = HksDeleteKeyForDe(&g_validKeyAlias[i], paramSet);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_validKeyAlias[i], paramSet);
+        ret = HksKeyExistForDe(&g_validKeyAlias[i], paramSet);
         ASSERT_NE(ret, HKS_SUCCESS);
         HksFreeParamSet(&paramSet);
     }
@@ -929,10 +930,10 @@ HWTEST_F(HksCeUpdateTest, HksCeUpdatePartTest014, TestSize.Level0)
         ret = BuildParamSet(g_exportParams, g_validParam[i], HKS_ARRAY_SIZE(g_exportParams), &paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksDeleteKey(&g_validKeyAliasEcc[i], paramSetEcc);
+        ret = HksDeleteKeyForDe(&g_validKeyAliasEcc[i], paramSetEcc);
         ASSERT_EQ(ret, HKS_SUCCESS);
 
-        ret = HksKeyExist(&g_validKeyAliasEcc[i], paramSetEcc);
+        ret = HksKeyExistForDe(&g_validKeyAliasEcc[i], paramSetEcc);
         ASSERT_NE(ret, HKS_SUCCESS);
         HksFreeParamSet(&paramSetEcc);
     }

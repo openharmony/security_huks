@@ -16,6 +16,7 @@
 #include "hks_access_control_cipher_test.h"
 #include "hks_access_control_test_common.h"
 #include "hks_api.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -540,7 +541,7 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest014, TestSize.Level0
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     (void)HksFreeParamSet(&genParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
@@ -567,7 +568,7 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest014, TestSize.Level0
     struct HksBlob plainDataBlob = { .size = sizeof(plainData), .data = plainData };
     uint8_t outData[256] = {0};
     struct HksBlob outDataBlob = { .size = sizeof(outData), .data = outData };
-    ret = HksEncrypt(&keyAlias, cipherParamSet, &plainDataBlob, &outDataBlob);
+    ret = HksEncryptForDe(&keyAlias, cipherParamSet, &plainDataBlob, &outDataBlob);
     (void)HksFreeParamSet(&cipherParamSet);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 
@@ -584,9 +585,9 @@ HWTEST_F(HksAccessControlCipherTest, HksAccessCipherPartTest014, TestSize.Level0
     struct HksParamSet *cipherParamSet2 = nullptr;
     ret = InitParamSet(&cipherParamSet2, cipherParams2, sizeof(cipherParams2) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksDecrypt(&keyAlias, cipherParamSet2, &plainDataBlob, &outDataBlob);
+    ret = HksDecryptForDe(&keyAlias, cipherParamSet2, &plainDataBlob, &outDataBlob);
     (void)HksFreeParamSet(&cipherParamSet2);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

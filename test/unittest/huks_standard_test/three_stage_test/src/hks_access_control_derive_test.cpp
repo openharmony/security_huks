@@ -16,6 +16,7 @@
 #include "hks_access_control_derive_test.h"
 #include "hks_access_control_test_common.h"
 #include "hks_api.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #include <vector>
@@ -179,7 +180,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest001, TestSize.Level0
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish001, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinish001, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -206,7 +207,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest002, TestSize.Level0
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessDeriveTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish002, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinish002, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -237,7 +238,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest003, TestSize.Level0
     );
     ASSERT_EQ(CheckAccessDeriveTest(testAccessCaseParams, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish001, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinish001, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -268,7 +269,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest004, TestSize.Level0
     );
     ASSERT_EQ(CheckAccessDeriveTest(testAccessCaseParams, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinish002, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinish002, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -290,7 +291,7 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest005, TestSize.Level0
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     (void)HksFreeParamSet(&genParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
@@ -308,9 +309,9 @@ HWTEST_F(HksAccessControlDeriveTest, HksAccessDerivePartTest005, TestSize.Level0
 
     uint8_t out[256] = {0};
     struct HksBlob outBlob = { sizeof(out), out };
-    ret = HksDeriveKey(deriveParamSet, &keyAlias, &outBlob);
+    ret = HksDeriveKeyForDe(deriveParamSet, &keyAlias, &outBlob);
     (void)HksFreeParamSet(&deriveParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

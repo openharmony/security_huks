@@ -22,6 +22,7 @@
 #include "hks_param.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_modify_old_key.h"
 #include "hks_type_inner.h"
 #include "hks_compatibility_test_c.h"
@@ -108,6 +109,164 @@ static const struct HksProcessInfo OLD_PROCESS_INFO = {
     0,
     0
 };
+
+static int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
+{
+    int32_t ret = HksInitParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    if (tmpParams != nullptr) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
+    }
+
+    ret = HksBuildParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t HksServiceGenerateKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceGenerateKey(processInfo, keyAlias, newParamSet, keyOut);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceDeleteKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceDeleteKey(processInfo, keyAlias, newParamSet);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceKeyExistForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceKeyExist(processInfo, keyAlias, newParamSet);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceEncryptForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *plainText, struct HksBlob *cipherText)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceEncrypt(processInfo, keyAlias, newParamSet, plainText, cipherText);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceDecryptForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *cipherText, struct HksBlob *plainText)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceDecrypt(processInfo, keyAlias, newParamSet, cipherText, plainText);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceGetKeyInfoListForDe(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksKeyInfo *keyInfoList, uint32_t *listCount)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceGetKeyInfoList(processInfo, newParamSet, keyInfoList, listCount);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
 
 static int32_t TestGenerateOldkey(const struct HksBlob *keyAlias, const struct HksParam *genParams,
     uint32_t genParamsCnt)

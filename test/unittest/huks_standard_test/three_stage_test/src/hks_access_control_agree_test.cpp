@@ -15,6 +15,7 @@
 
 #include "hks_access_control_agree_test.h"
 #include "hks_access_control_test_common.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_api.h"
 #include "hks_struct_macro_def.h"
 
@@ -205,7 +206,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest001, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_001_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal001, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinal001, nullptr), HKS_SUCCESS);
 }
 
 /**
@@ -231,7 +232,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest002, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_002_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal002, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinal002, nullptr), HKS_SUCCESS);
 }
 
 /**
@@ -257,7 +258,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest003, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     ASSERT_EQ(CheckAccessAgreeTest(HKS_ACCESS_TEST_003_PARAMS, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal003, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinal003, nullptr), HKS_SUCCESS);
 }
 
 /**
@@ -287,7 +288,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest004, TestSize.Level0)
     );
     ASSERT_EQ(CheckAccessAgreeTest(testAccessCaseParams, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal001, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinal001, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -318,7 +319,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest005, TestSize.Level0)
     );
     ASSERT_EQ(CheckAccessAgreeTest(testAccessCaseParams, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal002, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinal002, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -349,7 +350,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest006, TestSize.Level0)
     );
     ASSERT_EQ(CheckAccessAgreeTest(testAccessCaseParams, finishParamSet,
         testIDMParams), HKS_SUCCESS);
-    ASSERT_EQ(HksDeleteKey(&g_keyAliasFinal003, nullptr), HKS_SUCCESS);
+    ASSERT_EQ(HksDeleteKeyForDe(&g_keyAliasFinal003, nullptr), HKS_SUCCESS);
     HksFreeParamSet(&finishParamSet);
 }
 
@@ -373,8 +374,8 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest007, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_001_PARAMS.genParams.size());
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
-    ret = HksGenerateKey(&keyAlias2, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias2, genParamSet, nullptr);
     (void)HksFreeParamSet(&genParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
@@ -389,14 +390,14 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest007, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     uint8_t eccPubData256[256] = {0};
     struct HksBlob publicKey = { sizeof(eccPubData256), eccPubData256 };
-    ret = HksExportPublicKey(&keyAlias2, nullptr, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias2, nullptr, &publicKey);
     ASSERT_EQ(ret, HKS_SUCCESS);
     uint8_t outData[256] = {0};
     struct HksBlob outDataBlob = { sizeof(outData), outData };
-    ret = HksAgreeKey(agreeParamSet, &keyAlias, &publicKey, &outDataBlob);
+    ret = HksAgreeKeyForDe(agreeParamSet, &keyAlias, &publicKey, &outDataBlob);
     (void)HksFreeParamSet(&agreeParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
-    (void)HksDeleteKey(&keyAlias2, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 
@@ -424,7 +425,7 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest008, TestSize.Level0)
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = InitParamSet(&genParamSet, genX25519Params, sizeof(genX25519Params) / sizeof(struct HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     (void)HksFreeParamSet(&genParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
@@ -453,9 +454,9 @@ HWTEST_F(HksAccessControlAgreeTest, HksAccessAgreePartTest008, TestSize.Level0)
     ASSERT_EQ(ret, HKS_SUCCESS);
     uint8_t agreeKeyAlias[] = "agree_abormal_key";
     struct HksBlob agreekeyAliasBlob = { sizeof(agreeKeyAlias), agreeKeyAlias };
-    ret = HksGenerateKey(&agreekeyAliasBlob, agreeParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&agreekeyAliasBlob, agreeParamSet, nullptr);
     (void)HksFreeParamSet(&agreeParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

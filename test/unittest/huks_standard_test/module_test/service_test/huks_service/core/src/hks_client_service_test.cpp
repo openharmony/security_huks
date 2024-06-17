@@ -64,6 +64,224 @@ void HksClientServiceTest::TearDown()
 {
 }
 
+static int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
+{
+    int32_t ret = HksInitParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    if (tmpParams != NULL) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
+    }
+
+    ret = HksBuildParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t ConstructNewParamSet(const struct HksParamSet *paramSet, struct HksParamSet **newParamSet)
+{
+    int32_t ret = HksCheckParamSet(paramSet, paramSet->paramSetSize);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("check paramSet fail");
+        return ret;
+    }
+    ret = HksInitParamSet(newParamSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("init paramSet fail");
+        return ret;
+    }
+    do {
+        ret = HksAddParams(*newParamSet, paramSet->params, paramSet->paramsCnt);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("copy params fail");
+            break;
+        }
+        struct HksParam storageLevel = {
+            .tag = HKS_TAG_AUTH_STORAGE_LEVEL,
+            .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
+        };
+        ret = HksAddParams(*newParamSet, &storageLevel, 1);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("add param attestMode fail");
+            break;
+        }
+        ret = HksBuildParamSet(newParamSet);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("build paramSet fail");
+            break;
+        }
+        return HKS_SUCCESS;
+    } while (false);
+    HksFreeParamSet(newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceGenerateKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceGenerateKey(processInfo, keyAlias, newParamSet, keyOut);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceDeleteKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceDeleteKey(processInfo, keyAlias, newParamSet);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceKeyExistForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceKeyExist(processInfo, keyAlias, newParamSet);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceAttestKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *certChain, const uint8_t *remoteObject)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceAttestKey(processInfo, keyAlias, newParamSet, certChain, remoteObject);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceGetKeyParamSetForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksParamSet *paramSetOut)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceGetKeyParamSet(processInfo, keyAlias, newParamSet, paramSetOut);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceInitForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *key,
+    const struct HksParamSet *paramSet, struct HksBlob *handle, struct HksBlob *token)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceInit(processInfo, key, newParamSet, handle, token);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceUpdateForDe(const struct HksBlob *handle, const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, const struct HksBlob *inData, struct HksBlob *outData)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    if (paramSet != NULL) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceUpdate(handle, processInfo, newParamSet, inData, outData);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 static int32_t TestGenerateKeyWithProcessInfo(const struct HksBlob *keyAlias, const struct HksProcessInfo *processInfo)
 {
     struct HksParam tmpParams[] = {
@@ -97,7 +315,7 @@ static int32_t TestGenerateKeyWithProcessInfo(const struct HksBlob *keyAlias, co
         return ret;
     }
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
+    ret = HksServiceGenerateKeyForDe(processInfo, keyAlias, paramSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksServiceDeleteProcessInfo HksGenerateKey failed");
     }
@@ -123,13 +341,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest001, TestSize.Level0)
     struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
     int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 TestGenerateKey failed, ret = " << ret;
-    ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
     CreateOperation(&processInfo, NULL, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo);
-    ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest001 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
 
@@ -148,13 +366,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest009, TestSize.Level0)
     struct HksProcessInfo processInfo = { userRootId, g_processName, 0, 0, 0 };
     int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 TestGenerateKey failed, ret = " << ret;
-    ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
     uint64_t handle = 111;
     struct HksBlob operationHandle = { .size = sizeof(uint64_t), .data = (uint8_t *)&handle };
     CreateOperation(&processInfo, NULL, &operationHandle, true);
     HksServiceDeleteProcessInfo(&processInfo);
-    ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest009 HksServiceDeleteProcessInfo failed, ret = " << ret;
 }
 
@@ -173,13 +391,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest002, TestSize.Level0)
     struct HksProcessInfo processInfo = { g_userId, g_processName, g_userIdInt, 0, 0 };
     int32_t ret = TestGenerateKeyWithProcessInfo(&keyAlias, &processInfo);
     ASSERT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest002 TestGenerateKey failed, ret = " << ret;
-    ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
 
     struct HksBlob processName2 = { 0, nullptr };
     struct HksProcessInfo processInfo2 = { g_userId, processName2, g_userIdInt, 0, 0 };
     HksServiceDeleteProcessInfo(&processInfo2);
-    ret = HksServiceKeyExist(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceKeyExistForDe(&processInfo, &keyAlias, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksClientServiceTest002 HksServiceDeleteProcessInfo failed, ret = " << ret;
     HksChangeOldKeyOwner(HKS_CONFIG_KEY_STORE_PATH "/maindata", HUKS_UID);
 }
@@ -266,13 +484,13 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest003, TestSize.Level0)
     struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ConstructCertChainBlob failed, ret = " << ret;
-    ret = HksServiceAttestKey(&processInfo, &keyAliasBlob, paramSet, certChain, nullptr);
+    ret = HksServiceAttestKeyForDe(&processInfo, &keyAliasBlob, paramSet, certChain, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksServiceAttestKey failed!");
     }
     FreeCertChainBlob(certChain);
     HksFreeParamSet(&paramSet);
-    ret = HksServiceDeleteKey(&processInfo, &keyAliasBlob, nullptr);
+    ret = HksServiceDeleteKeyForDe(&processInfo, &keyAliasBlob, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
@@ -289,7 +507,7 @@ static int32_t GenerateX25519(const struct HksBlob *keyAlias, const struct HksPr
         sizeof(g_generateX25519Params[0]));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateParamSet failed, ret = " << ret;
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
+    ret = HksServiceGenerateKeyForDe(processInfo, keyAlias, paramSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed, ret = " << ret;
     return ret;
 }
@@ -321,7 +539,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest004, TestSize.Level0)
     struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ConstructCertChainBlob failed, ret = " << ret;
-    ret = HksServiceAttestKey(&processInfo, &keyAlias, paramSet, certChain, nullptr);
+    ret = HksServiceAttestKeyForDe(&processInfo, &keyAlias, paramSet, certChain, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksServiceAttestKey failed!");
     }
@@ -329,7 +547,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest004, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 
-    ret = HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
@@ -348,7 +566,7 @@ static int32_t GenerateECC(const struct HksBlob *keyAlias, const struct HksProce
         sizeof(g_generateECCParams[0]));
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateParamSet failed, ret = " << ret;
 
-    ret = HksServiceGenerateKey(processInfo, keyAlias, paramSet, nullptr);
+    ret = HksServiceGenerateKeyForDe(processInfo, keyAlias, paramSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed, ret = " << ret;
     return ret;
 }
@@ -381,7 +599,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest005, TestSize.Level0)
     struct HksBlob *certChain = nullptr;
     ret = ConstructCertChainBlob(&certChain);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "HksClientServiceTest005 ConstructCertChainBlob failed, ret = " << ret;
-    ret = HksServiceAttestKey(&processInfo, &keyAlias, paramSet, certChain, nullptr);
+    ret = HksServiceAttestKeyForDe(&processInfo, &keyAlias, paramSet, certChain, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("HksServiceAttestKey failed!");
     }
@@ -389,7 +607,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest005, TestSize.Level0)
 
     HksFreeParamSet(&paramSet);
 
-    ret = HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    ret = HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 }
 
@@ -414,11 +632,11 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest006, TestSize.Level0)
 
     struct HksProcessInfo processInfo2 = { g_userId, g_processName, g_userIdInt, 0, 1 };
 
-    ret = HksServiceGetKeyParamSet(&processInfo2, &keyAlias, nullptr, paramSet);
+    ret = HksServiceGetKeyParamSetForDe(&processInfo2, &keyAlias, nullptr, paramSet);
     ASSERT_TRUE(ret == HKS_ERROR_BAD_STATE);
 
     HksFreeParamSet(&paramSet);
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    (void)HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
 }
 
 static uint32_t g_paramSetDefaultSize = 4096;
@@ -444,7 +662,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest007, TestSize.Level0)
 
     paramSet->paramSetSize = g_paramSetDefaultSize;
 
-    ret = HksServiceGetKeyParamSet(&processInfo, &keyAlias, nullptr, paramSet);
+    ret = HksServiceGetKeyParamSetForDe(&processInfo, &keyAlias, nullptr, paramSet);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
     struct HksParam *accessTokenId = nullptr;
@@ -452,7 +670,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest007, TestSize.Level0)
     ASSERT_TRUE(ret == HKS_ERROR_PARAM_NOT_EXIST);
 
     HksFreeParamSet(&paramSet);
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    (void)HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
 }
 
 static struct HksParam g_aesGenParams[] = {
@@ -520,7 +738,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
     struct HksParamSet *genParamSet = nullptr;
     int32_t ret = GenerateParamSet(&genParamSet, g_aesGenParams, sizeof(g_aesGenParams) / sizeof(g_aesGenParams[0]));
     ASSERT_TRUE(ret == HKS_SUCCESS);
-    ret = HksServiceGenerateKey(&processInfo, &keyAlias, genParamSet, nullptr);
+    ret = HksServiceGenerateKeyForDe(&processInfo, &keyAlias, genParamSet, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
     struct HksParamSet *encParamSet = nullptr;
@@ -531,7 +749,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
     struct HksBlob handle = { .size = sizeof(uint64_t), .data = (uint8_t *)HksMalloc(sizeof(uint64_t)) };
     struct HksBlob token = { 0 };
 
-    ret = HksServiceInit(&processInfo, &keyAlias, encParamSet, &handle, &token);
+    ret = HksServiceInitForDe(&processInfo, &keyAlias, encParamSet, &handle, &token);
     ASSERT_TRUE(ret == HKS_SUCCESS);
 
     struct HksProcessInfo processInfo2 = { g_userId, g_processName, g_userIdInt, 0, 1 };
@@ -539,7 +757,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
     struct HksBlob inDataBlob = { 0 };
     struct HksBlob outDataBlob = { 0 };
 
-    ret = HksServiceUpdate(&handle, &processInfo2, encParamSet, &inDataBlob, &outDataBlob);
+    ret = HksServiceUpdateForDe(&handle, &processInfo2, encParamSet, &inDataBlob, &outDataBlob);
     ASSERT_TRUE(ret == HKS_ERROR_BAD_STATE);
 
     (void)HksServiceAbort(&handle, &processInfo, encParamSet);
@@ -547,7 +765,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest008, TestSize.Level0)
     HKS_FREE_BLOB(handle);
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encParamSet);
-    (void)HksServiceDeleteKey(&processInfo, &keyAlias, nullptr);
+    (void)HksServiceDeleteKeyForDe(&processInfo, &keyAlias, nullptr);
 }
 
 #ifdef HKS_ENABLE_UPGRADE_KEY
@@ -561,7 +779,7 @@ HWTEST_F(HksClientServiceTest, HksClientServiceTest013, TestSize.Level0)
     HKS_LOG_I("enter HksClientServiceTest013");
     struct HksBlob key = { .size = 0, .data = nullptr };
     int32_t ret = CheckAndUpgradeKeyIfNeed(nullptr, nullptr, nullptr, &key);
-    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT);
+    ASSERT_EQ(ret, HKS_ERROR_CORRUPT_FILE);
 }
 
 /**

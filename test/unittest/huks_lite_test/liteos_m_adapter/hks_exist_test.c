@@ -21,6 +21,7 @@
 #include "hi_watchdog.h"
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -76,7 +77,7 @@ LITE_TEST_CASE(HksExistTest, HksExistTest001, Level1)
         TEST_ASSERT_TRUE(TestGenDefaultKeyAndGetAlias(&keyAlias) == 0);
         ret = HksKeyExistRun(keyAlias, 1);
         TEST_ASSERT_TRUE(ret == g_testKeyExistParams[0].expectResult);
-        TEST_ASSERT_TRUE(HksDeleteKey(keyAlias, NULL) == HKS_SUCCESS);
+        TEST_ASSERT_TRUE(HksDeleteKeyForDe(keyAlias, NULL) == HKS_SUCCESS);
     } else {
         ret = TestConstuctBlob(&keyAlias,
                                g_testKeyExistParams[0].keyAliasParams.blobExist,

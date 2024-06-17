@@ -14,6 +14,7 @@
  */
 
 #include "hks_import_key_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #ifdef L2_STANDARD
@@ -688,12 +689,12 @@ static int32_t ImportTest(const ImportKeyCaseParams &testCaseParams)
 
     uint8_t alias[] = "test_import_key";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksImportKey(&keyAlias, importParamSet, &key);
+    ret = HksImportKeyForDe(&keyAlias, importParamSet, &key);
     HksFreeParamSet(&importParamSet);
     HKS_FREE(key.data);
     EXPECT_EQ(ret, testCaseParams.importKeyResult);
     if (ret == HKS_SUCCESS) {
-        (void)HksDeleteKey(&keyAlias, nullptr);
+        (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     }
 
     return (ret == testCaseParams.importKeyResult) ? HKS_SUCCESS : HKS_FAILURE;

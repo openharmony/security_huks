@@ -22,6 +22,7 @@
 #include "hks_param.h"
 #include "hks_log.h"
 #include "hks_mem.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_modify_old_key.h"
 #include "hks_type_inner.h"
 #include "hks_compatibility_test_c.h"
@@ -110,6 +111,76 @@ static const struct HksProcessInfo OLD_PROCESS_INFO = {
     0
 };
 
+static int32_t GenerateParamSet(struct HksParamSet **paramSet, const struct HksParam tmpParams[], uint32_t paramCount)
+{
+    int32_t ret = HksInitParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksInitParamSet failed");
+        return ret;
+    }
+
+    if (tmpParams != nullptr) {
+        ret = HksAddParams(*paramSet, tmpParams, paramCount);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksAddParams failed");
+            HksFreeParamSet(paramSet);
+            return ret;
+        }
+    }
+
+    ret = HksBuildParamSet(paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksBuildParamSet failed");
+        HksFreeParamSet(paramSet);
+        return ret;
+    }
+    return ret;
+}
+
+static int32_t HksServiceGenerateKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *keyOut)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceGenerateKey(processInfo, keyAlias, newParamSet, keyOut);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+static int32_t HksServiceDeleteKeyForDe(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = nullptr;
+    if (paramSet != nullptr) {
+        ret = ConstructNewParamSet(paramSet, &newParamSet);
+    } else {
+        struct HksParam tmpParams[] = {
+            { .tag = HKS_TAG_AUTH_STORAGE_LEVEL, .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE },
+        };
+        ret = GenerateParamSet(&newParamSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0]));
+    }
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("construct new paramSet fail");
+        return ret;
+    }
+    ret = HksServiceDeleteKey(processInfo, keyAlias, newParamSet);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
 /**
  * @tc.name: HksCompatibilityTest.HksCompatibilityTest001
  * @tc.desc: test failed to get key to encrypt, and no key in old path
@@ -119,7 +190,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest001");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
 
     struct HksParamSet *paramSet = nullptr;
     int32_t ret = HksInitParamSet(&paramSet);
@@ -133,7 +204,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest001, TestSize.Level0)
     uint8_t cipherText[1024] = { 0 };
     struct HksBlob plainBlob = { .size = HKS_ARRAY_SIZE(plainText), .data = plainText};
     struct HksBlob cipherBlob = { .size = HKS_ARRAY_SIZE(cipherText), .data = cipherText};
-    ret = HksEncrypt(&keyAlias, paramSet, &plainBlob, &cipherBlob);
+    ret = HksEncryptForDe(&keyAlias, paramSet, &plainBlob, &cipherBlob);
     ASSERT_TRUE(ret == HKS_ERROR_NOT_EXIST);
     HksFreeParamSet(&paramSet);
 }
@@ -167,7 +238,7 @@ static int32_t TestGenerateNewkey(const struct HksBlob *keyAlias, const struct H
     ret = HksBuildParamSet(&genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "build new key paramset failed!";
 
-    ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&genParamSet);
 
@@ -185,7 +256,7 @@ static int32_t TestDoEncrypt(const struct HksBlob *keyAlias, const struct HksPar
     ret = HksBuildParamSet(&encryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksEncrypt(keyAlias, encryptParamSet, plainBlob, cipherBlob);
+    ret = HksEncryptForDe(keyAlias, encryptParamSet, plainBlob, cipherBlob);
 
     HksFreeParamSet(&encryptParamSet);
     return ret;
@@ -202,7 +273,7 @@ static int32_t TestDoDecrypt(const struct HksBlob *keyAlias, const struct HksPar
     ret = HksBuildParamSet(&decryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksDecrypt(keyAlias, decryptParamSet, cipherBlob, decryptedBlob);
+    ret = HksDecryptForDe(keyAlias, decryptParamSet, cipherBlob, decryptedBlob);
 
     HksFreeParamSet(&decryptParamSet);
     return ret;
@@ -217,7 +288,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest002");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
 
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
@@ -248,7 +319,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest002, TestSize.Level0)
 
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
 }
 
 /**
@@ -260,7 +331,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest003");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
     int32_t ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -268,7 +339,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest003, TestSize.Level0)
 
     HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
-    ret = HksDeleteKey(&keyAlias, nullptr);
+    ret = HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 }
 
@@ -281,10 +352,10 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest004");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
-    int32_t ret = HksKeyExist(&keyAlias, nullptr);
+    int32_t ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -292,13 +363,13 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest004, TestSize.Level0)
 
     HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
-    ret = HksKeyExist(&keyAlias, nullptr);
+    ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    ret = HksDeleteKey(&keyAlias, nullptr);
+    ret = HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    ret = HksKeyExist(&keyAlias, nullptr);
+    ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 }
 
@@ -313,7 +384,7 @@ static int32_t TestGenerateNewKeyInOldPath(const struct HksBlob *keyAlias, const
     ret = HksBuildParamSet(&genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksServiceGenerateKey(&OLD_PROCESS_INFO, keyAlias, genParamSet, nullptr);
+    ret = HksServiceGenerateKeyForDe(&OLD_PROCESS_INFO, keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS);
     HksFreeParamSet(&genParamSet);
 
@@ -322,7 +393,7 @@ static int32_t TestGenerateNewKeyInOldPath(const struct HksBlob *keyAlias, const
 
 static int32_t HksTestDeleteNewKeyInOldPath(const struct HksBlob *keyAlias)
 {
-    return HksServiceDeleteKey(&OLD_PROCESS_INFO, keyAlias, nullptr);
+    return HksServiceDeleteKeyForDe(&OLD_PROCESS_INFO, keyAlias, nullptr);
 }
 
 /**
@@ -334,11 +405,11 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest005, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest005");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
     (void)HksTestDeleteNewKeyInOldPath(&keyAlias);
 
-    int32_t ret = HksKeyExist(&keyAlias, nullptr);
+    int32_t ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     ret = TestGenerateNewKeyInOldPath(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -346,7 +417,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest005, TestSize.Level0)
 
     HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
-    ret = HksKeyExist(&keyAlias, nullptr);
+    ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     ret = HksTestDeleteNewKeyInOldPath(&keyAlias);
@@ -362,10 +433,10 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest006");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
-    int32_t ret = HksKeyExist(&keyAlias, nullptr);
+    int32_t ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     ret = TestGenerateNewKeyInOldPath(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -396,11 +467,11 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest007, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest007");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
     (void)HksTestDeleteNewKeyInOldPath(&keyAlias);
 
-    int32_t ret = HksKeyExist(&keyAlias, nullptr);
+    int32_t ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     ret = TestGenerateNewKeyInOldPath(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -408,7 +479,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest007, TestSize.Level0)
 
     HksChangeOldKeyOwner("/storage/data/service/el1/public/huks_service/maindata", HUKS_UID);
 
-    ret = HksDeleteKey(&keyAlias, nullptr);
+    ret = HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     (void)HksTestDeleteNewKeyInOldPath(&keyAlias);
@@ -424,7 +495,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest008, TestSize.Level0)
     HKS_LOG_I("enter HksCompatibilityTest008");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
 
-    int32_t ret = HksDeleteKey(&keyAlias, nullptr);
+    int32_t ret = HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 }
 
@@ -498,7 +569,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
+    ret = HksGetKeyInfoListForDe(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
     ASSERT_EQ(keyInfoListSize, 2) << "keyInfoListSize is " << keyInfoListSize;
 
@@ -514,7 +585,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest009, TestSize.Level0)
     }
     ASSERT_EQ(hitCnt, 2) << "hit cnt is " << hitCnt;
     (void)HksTestDeleteOldKey(&keyAlias1, &OLD_PROCESS_INFO);
-    (void)HksDeleteKey(&keyAlias2, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
     FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
 
@@ -540,7 +611,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest010, TestSize.Level0)
     struct HksKeyInfo *keyInfoList = nullptr;
     ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-    ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
+    ret = HksGetKeyInfoListForDe(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
     ASSERT_EQ(keyInfoListSize, 1) << "keyInfoListSize is " << keyInfoListSize;
 
@@ -580,7 +651,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest011, TestSize.Level0)
     struct HksKeyInfo *keyInfoList = nullptr;
     ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
-    ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
+    ret = HksGetKeyInfoListForDe(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
     ASSERT_EQ(keyInfoListSize, 0) << "keyInfoListSize is " << keyInfoListSize;
 
@@ -635,12 +706,12 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest012, TestSize.Level0)
     ret = BuildKeyInfoList(&keyInfoList, keyInfoListSize);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    ret = HksGetKeyInfoList(nullptr, keyInfoList, &keyInfoListSize);
+    ret = HksGetKeyInfoListForDe(nullptr, keyInfoList, &keyInfoListSize);
     ASSERT_EQ(ret, HKS_ERROR_BUFFER_TOO_SMALL);
 
     (void)HksTestDeleteOldKey(&keyAlias1, &OLD_PROCESS_INFO);
-    (void)HksDeleteKey(&keyAlias2, nullptr);
-    (void)HksDeleteKey(&keyAlias3, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias2, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias3, nullptr);
     FreeKeyInfoList(&keyInfoList, keyInfoListMaxSize);
 }
 
@@ -653,7 +724,7 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest013, TestSize.Level0)
 {
     HKS_LOG_I("enter HksCompatibilityTest013");
     struct HksBlob keyAlias = { .size = strlen(KEY_ALIAS), .data = (uint8_t *)KEY_ALIAS };
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     (void)HksTestDeleteOldKey(&keyAlias, &OLD_PROCESS_INFO);
 
     int32_t ret = TestGenerateOldkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
@@ -664,10 +735,10 @@ HWTEST_F(HksCompatibilityTest, HksCompatibilityTest013, TestSize.Level0)
     ret = TestGenerateNewkey(&keyAlias, GEN_AES_PARAMS, sizeof(GEN_AES_PARAMS) / sizeof(HksParam));
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    ret = HksDeleteKey(&keyAlias, nullptr);
+    ret = HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_TRUE(ret == HKS_SUCCESS) << "ret is " << ret;
 
-    ret = HksKeyExist(&keyAlias, nullptr);
+    ret = HksKeyExistForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_EXIST);
 
     ret = HksTestOldKeyExist(&keyAlias);

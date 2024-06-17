@@ -17,6 +17,7 @@
 #include "hi_watchdog.h"
 
 #include "hks_derive_test_c.h"
+#include "hks_test_adapt_for_de.h"
 
 /*
  * @tc.register: register a test suit named "CalcMultiTest"
@@ -125,7 +126,7 @@ static int32_t BaseTestDerive(uint32_t index)
     if (!(g_testDeriveParams[index].genKeyParamSetParams.setKeyStorageFlag &&
         (g_testDeriveParams[index].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) &&
         (g_testDeriveParams[index].keyAliasParams.blobExist)) {
-        TEST_ASSERT_TRUE(HksDeleteKey(keyAlias, NULL) == 0);
+        TEST_ASSERT_TRUE(HksDeleteKeyForDe(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     TestFreeBlob(&derivedKey);

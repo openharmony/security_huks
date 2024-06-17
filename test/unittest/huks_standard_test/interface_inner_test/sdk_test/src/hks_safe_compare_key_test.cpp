@@ -21,6 +21,7 @@
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_file_operator.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_file_operator.h"
@@ -161,7 +162,7 @@ HWTEST_F(HksSafeCompareKeyTest, HksSafeCompareKeyTest001, TestSize.Level0)
     ret = CompareKeyData(&keyAliasOne, &keyAliasTwo);
     HKS_TEST_ASSERT(ret != 0);
     ASSERT_TRUE(ret != 0);
-    (void)HksDeleteKey(&keyAliasOne, nullptr);
-    (void)HksDeleteKey(&keyAliasTwo, nullptr);
+    (void)HksDeleteKeyForDe(&keyAliasOne, nullptr);
+    (void)HksDeleteKeyForDe(&keyAliasTwo, nullptr);
 }
 }

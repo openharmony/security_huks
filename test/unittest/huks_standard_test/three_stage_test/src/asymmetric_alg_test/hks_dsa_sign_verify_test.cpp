@@ -14,6 +14,7 @@
  */
 
 #include "hks_dsa_sign_verify_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -427,7 +428,7 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
 {
     uint8_t tmpHandle[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), tmpHandle };
-    int32_t ret = HksInit(keyAlias, paramSet, &handle, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, paramSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -449,10 +450,10 @@ int32_t HksTestSignVerify(struct HksBlob *keyAlias, struct HksParamSet *paramSet
     if (isSign) {
         uint8_t tmpOut[DSA_COMMON_SIZE] = {0};
         struct HksBlob outData1 = { DSA_COMMON_SIZE, tmpOut };
-        ret = HksSign(keyAlias, paramSet, inData, &outData1);
+        ret = HksSignForDe(keyAlias, paramSet, inData, &outData1);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksSign failed.";
     } else {
-        ret = HksVerify(keyAlias, paramSet, inData, outData);
+        ret = HksVerifyForDe(keyAlias, paramSet, inData, outData);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksVerify failed.";
     }
 
@@ -478,7 +479,7 @@ static int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct Hk
 
     /* 1. Generate Key */
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
@@ -490,13 +491,13 @@ static int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct Hk
     /* 3. Export Public Key */
     uint8_t pubKey[DSA_COMMON_SIZE] = {0};
     struct HksBlob publicKey = { DSA_COMMON_SIZE, pubKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     /* 4. Import Key */
     char newKey[] = "DSA_Sign_Verify_Import_KeyAlias";
     struct HksBlob newKeyAlias = { .size = strlen(newKey), .data = (uint8_t *)newKey };
-    ret = HksImportKey(&newKeyAlias, verifyParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, verifyParamSet, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ImportKey failed";
 
     /* 5. Verify Three Stage */
@@ -504,7 +505,7 @@ static int32_t HksDsaSignVerifyTestNormalCase(struct HksBlob keyAlias, struct Hk
     EXPECT_EQ(ret, HKS_SUCCESS) << "Verify failed.";
 
     /* 6. Delete New Key */
-    int32_t deleteRet = HksDeleteKey(&newKeyAlias, verifyParamSet);
+    int32_t deleteRet = HksDeleteKeyForDe(&newKeyAlias, verifyParamSet);
     EXPECT_EQ(deleteRet, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     return ret;
@@ -536,7 +537,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest001, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -570,7 +571,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest002, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -604,7 +605,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest003, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -638,7 +639,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest004, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -672,7 +673,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest005, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -706,7 +707,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest006, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -732,7 +733,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest007, TestSize.Level0)
     ret = InitParamSet(&genParamSet, g_genParamsTest007, sizeof(g_genParamsTest007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage (Abort) */
@@ -744,7 +745,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest007, TestSize.Level0)
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
 
-    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    ret = HksInitForDe(&keyAlias, signParamSet, &handleSign, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update loop
@@ -756,7 +757,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest007, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -779,7 +780,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest008, TestSize.Level0)
     ret = InitParamSet(&genParamSet, g_genParamsTest008, sizeof(g_genParamsTest008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage */
@@ -790,11 +791,11 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest008, TestSize.Level0)
     // Init
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
-    ret = HksInit(NULL, signParamSet, &handleSign, nullptr);
+    ret = HksInitForDe(NULL, signParamSet, &handleSign, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init should failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -831,7 +832,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest009, TestSize.Level0)
     }
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -857,7 +858,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest010, TestSize.Level0)
     ret = InitParamSet(&genParamSet, g_genParamsTest010, sizeof(g_genParamsTest010) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Sign Three Stage  */
@@ -869,7 +870,7 @@ HWTEST_F(HksDsaSignVerifyTest, HksDsaSignVerifyTest010, TestSize.Level0)
     uint8_t handleS[sizeof(uint64_t)] = {0};
     struct HksBlob handleSign = { sizeof(uint64_t), handleS };
 
-    ret = HksInit(&keyAlias, signParamSet, &handleSign, nullptr);
+    ret = HksInitForDe(&keyAlias, signParamSet, &handleSign, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
 } // namespace Unittest::DsaSignVerify
 }

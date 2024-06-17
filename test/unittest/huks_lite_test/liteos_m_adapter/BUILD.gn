@@ -21,6 +21,7 @@ hctest_suite("huks_3.0_test") {
   sources = [
     "//base/security/huks/test/unittest/huks_common_test/src/hks_bn_exp_mod_test_func.cpp",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_adapt_for_de.c",
     "hks_aes_test.c",
     "hks_agreement_test.c",
     "hks_bn_exp_mod_test.c",
@@ -36,6 +37,7 @@ hctest_suite("huks_3.0_test") {
     "hks_others_test.c",
   ]
   include_dirs = [
+    "//base/security/huks/frameworks/huks_standard/main/common/include",
     "//base/security/huks/interfaces/inner_api/huks_lite",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "../common/include",
