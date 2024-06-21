@@ -874,15 +874,14 @@ int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct 
 static int32_t GetAuthMode(const struct HksParamSet *paramSet, uint32_t *type)
 {
     struct HksParam *typeParam = NULL;
-    if(HksGetParam(paramSet, HKS_TAG_USER_AUTH_MODE, &typeParam) == HKS_SUCCESS && typeParam->uint32Param == HKS_USER_AUTH_MODE_COAUTH){
-        *type = HKS_USER_AUTH_MODE_COAUTH;        
+    if (HksGetParam(paramSet, HKS_TAG_USER_AUTH_MODE, &typeParam) == HKS_SUCCESS &&
+        typeParam->uint32Param == HKS_USER_AUTH_MODE_COAUTH) {
+        *type = HKS_USER_AUTH_MODE_COAUTH;
         return HKS_SUCCESS;
     }
 
     *type = HKS_USER_AUTH_MODE_LOCAL;
-
     return HKS_SUCCESS;
-
 }
 
 static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUserAuthToken *authToken)
@@ -896,15 +895,14 @@ static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUse
         TOKEN_TYPE_LOCAL_AUTH = 0,
         TOKEN_TYPE_LOCAL_RESIGN = 1,
         TOKEN_TYPE_COAUTH = 2,
-    
     };
-    switch (authToken->plaintextData.tokenType){
+    switch (authToken->plaintextData.tokenType) {
         case TOKEN_TYPE_LOCAL_AUTH:
             break;
         case TOKEN_TYPE_LOCAL_RESIGN:
             break;
         case TOKEN_TYPE_COAUTH:
-            if (blobAuthMode != HKS_USER_AUTH_MODE_COAUTH){
+            if (blobAuthMode != HKS_USER_AUTH_MODE_COAUTH) {
                 HKS_LOG_E("not COAUTH_MODE_AUTH %" LOG_PUBLIC "u", blobAuthMode);
                 return HKS_ERROR_NOT_SUPPORTED;
             }

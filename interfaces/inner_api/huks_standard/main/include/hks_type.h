@@ -495,7 +495,7 @@ enum HksChallengeType {
 };
 
 /**
- * @brief hks auth mode 
+ * @brief hks auth mode
  */
 enum HksUserAuthMode {
     HKS_USER_AUTH_MODE_LOCAL = 0,
