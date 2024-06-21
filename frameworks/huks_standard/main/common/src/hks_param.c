@@ -25,6 +25,7 @@
 #include "securec.h"
 
 static uint32_t g_validTags[] = {
+    HKS_TAG_USER_AUTH_MODE,
     HKS_TAG_ALGORITHM,
     HKS_TAG_PURPOSE,
     HKS_TAG_KEY_SIZE,
