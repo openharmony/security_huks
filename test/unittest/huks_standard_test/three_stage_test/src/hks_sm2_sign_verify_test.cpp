@@ -17,6 +17,7 @@
 #include "file_ex.h"
 #endif
 #include "hks_sm2_sign_verify_test.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_type.h"
 
 #include <cstdint>
@@ -347,7 +348,7 @@ static int32_t HksTestSignVerify(const struct HksBlob *keyAlias, const struct Hk
     EXPECT_EQ(ret, HKS_SUCCESS) << "GetParam failed.";
 
     do {
-        ret = HksInit(keyAlias, paramSet, &handle, nullptr);
+        ret = HksInitForDe(keyAlias, paramSet, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -395,8 +396,8 @@ static int CreateImportKeyAlias(struct HksBlob *importKeyAlias, const struct Hks
 void static FreeBuffAndDeleteKey(struct HksParamSet **paramSet1, struct HksParamSet **paramSet2,
     struct HksParamSet **paramSet3, const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2)
 {
-    (void)HksDeleteKey(keyAlias1, *paramSet1);
-    (void)HksDeleteKey(keyAlias2, *paramSet1);
+    (void)HksDeleteKeyForDe(keyAlias1, *paramSet1);
+    (void)HksDeleteKeyForDe(keyAlias2, *paramSet1);
     HksFreeParamSet(paramSet1);
     HksFreeParamSet(paramSet2);
     HksFreeParamSet(paramSet3);
@@ -428,7 +429,7 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const Gen
         /* 1. Generate Key */
         ret = InitParamSet(&genParamSet, param.gen.params.data(), param.gen.params.size());
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitGenParamSet failed.";
-        ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+        ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
         if (ret != HKS_SUCCESS) {
             ret = ((ret == param.gen.result) ? HKS_SUCCESS : ret);
             break;
@@ -444,12 +445,12 @@ static int32_t HksSm2SignVerifyTestRun(const struct HksBlob *keyAlias, const Gen
         }
 
         /* 3. Export Public Key */
-        EXPECT_EQ(HksExportPublicKey(keyAlias, genParamSet, &publicKey), HKS_SUCCESS) << "ExportPublicKey failed.";
+        EXPECT_EQ(HksExportPublicKeyForDe(keyAlias, genParamSet, &publicKey), HKS_SUCCESS) << "ExportPublicKey failed.";
 
         /* 4. Import Key */
         ret = InitParamSet(&verifyParamSet, param.verify.params.data(), param.verify.params.size());
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitVerifyParamSet failed.";
-        ret = HksImportKey(&importKeyAlias, verifyParamSet, &publicKey);
+        ret = HksImportKeyForDe(&importKeyAlias, verifyParamSet, &publicKey);
         if (ret != HKS_SUCCESS) {
             ret = ((ret == param.verify.result) ? HKS_SUCCESS : ret);
             break;

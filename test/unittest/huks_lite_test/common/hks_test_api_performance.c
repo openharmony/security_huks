@@ -15,6 +15,7 @@
 
 #include <assert.h>
 
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 
 #include "securec.h"
@@ -30,7 +31,7 @@ int32_t HksGenerateKeyRun(const struct HksBlob *keyAlias, const struct HksParamS
 {
     /* if keyAlias exist, the key will be generated and refreshed */
     for (uint32_t i = 0; i < performTimes; ++i) {
-        int32_t ret = HksGenerateKey(keyAlias, paramSetIn, paramSetOut);
+        int32_t ret = HksGenerateKeyForDe(keyAlias, paramSetIn, paramSetOut);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -52,7 +53,7 @@ int32_t HksEncryptRun(const struct HksBlob *key, const struct HksParamSet *param
             cipherText->size = oriCipherTestSize;
         }
 
-        int32_t ret = HksEncrypt(key, paramSet, plainText, cipherText);
+        int32_t ret = HksEncryptForDe(key, paramSet, plainText, cipherText);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -73,7 +74,7 @@ int32_t HksDecryptRun(const struct HksBlob *key, const struct HksParamSet *param
             (void)memset_s(plainText->data, oriPlainTextSize, 0, oriPlainTextSize);
             plainText->size = oriPlainTextSize;
         }
-        int32_t ret = HksDecrypt(key, paramSet, cipherText, plainText);
+        int32_t ret = HksDecryptForDe(key, paramSet, cipherText, plainText);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -94,7 +95,7 @@ int32_t HksMacRun(const struct HksBlob *key, const struct HksParamSet *paramSet,
             (void)memset_s(mac->data, oriMacSize, 0, oriMacSize);
             mac->size = oriMacSize;
         }
-        int32_t ret = HksMac(key, paramSet, srcData, mac);
+        int32_t ret = HksMacForDe(key, paramSet, srcData, mac);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -115,7 +116,7 @@ int32_t HksDeriveKeyRun(const struct HksParamSet *paramSet, const struct HksBlob
             (void)memset_s(derivedKey->data, oriDerivedKeySize, 0, oriDerivedKeySize);
             derivedKey->size = oriDerivedKeySize;
         }
-        int32_t ret = HksDeriveKey(paramSet, masterKey, derivedKey);
+        int32_t ret = HksDeriveKeyForDe(paramSet, masterKey, derivedKey);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -126,13 +127,13 @@ int32_t HksDeriveKeyRun(const struct HksParamSet *paramSet, const struct HksBlob
 int32_t HksDeleteKeyRun(const struct HksBlob *keyAlias, uint32_t performTimes)
 {
     (void)performTimes;
-    return HksDeleteKey(keyAlias, NULL);
+    return HksDeleteKeyForDe(keyAlias, NULL);
 }
 
 int32_t HksKeyExistRun(const struct HksBlob *keyAlias, uint32_t performTimes)
 {
     for (uint32_t i = 0; i < performTimes; ++i) {
-        int32_t ret = HksKeyExist(keyAlias, NULL);
+        int32_t ret = HksKeyExistForDe(keyAlias, NULL);
         if (ret != HKS_SUCCESS) {
             return ret;
         }
@@ -173,7 +174,7 @@ int32_t HksAgreeKeyRun(const struct HksParamSet *paramSet, const struct HksBlob 
             (void)memset_s(agreedKey->data, oriAgreedKeySize, 0, oriAgreedKeySize);
             agreedKey->size = oriAgreedKeySize;
         }
-        int32_t ret = HksAgreeKey(paramSet, privateKey, peerPublicKey, agreedKey);
+        int32_t ret = HksAgreeKeyForDe(paramSet, privateKey, peerPublicKey, agreedKey);
         if (ret != HKS_SUCCESS) {
             return ret;
         }

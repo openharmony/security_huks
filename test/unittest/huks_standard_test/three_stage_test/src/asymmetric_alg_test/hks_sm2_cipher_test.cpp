@@ -17,6 +17,7 @@
 #include "file_ex.h"
 #endif
 #include "hks_sm2_cipher_test.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_type.h"
 #include "hks_log.h"
 
@@ -360,7 +361,7 @@ static int32_t HksSm2CipherTestEncrypt(const struct HksBlob *keyAlias,
 {
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    int32_t ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSm2CipherTestEncrypt ->Init failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -374,7 +375,7 @@ static int32_t HksSm2CipherTestEncrypt(const struct HksBlob *keyAlias,
 
     uint8_t tmpOut[SM2_COMMON_SIZE] = {0};
     struct HksBlob outData = { SM2_COMMON_SIZE, tmpOut };
-    ret = HksEncrypt(keyAlias, encryptParamSet, inData, &outData);
+    ret = HksEncryptForDe(keyAlias, encryptParamSet, inData, &outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEncrypt failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -388,7 +389,7 @@ static int32_t HksSm2CipherTestDecrypt(const struct HksBlob *keyAlias, const str
 {
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    int32_t ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -401,7 +402,7 @@ static int32_t HksSm2CipherTestDecrypt(const struct HksBlob *keyAlias, const str
 
     uint8_t tmpOut[SM2_COMMON_SIZE] = {0};
     struct HksBlob outData = { SM2_COMMON_SIZE, tmpOut };
-    ret = HksDecrypt(keyAlias, decryptParamSet, cipherText, &outData);
+    ret = HksDecryptForDe(keyAlias, decryptParamSet, cipherText, &outData);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -413,8 +414,8 @@ static int32_t HksSm2CipherTestDecrypt(const struct HksBlob *keyAlias, const str
 static void FreeBuffAndDeleteKey(struct HksParamSet **paramSet1, struct HksParamSet **paramSet2,
     struct HksParamSet **paramSet3, const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2)
 {
-    (void)HksDeleteKey(keyAlias1, *paramSet1);
-    (void)HksDeleteKey(keyAlias2, *paramSet1);
+    (void)HksDeleteKeyForDe(keyAlias1, *paramSet1);
+    (void)HksDeleteKeyForDe(keyAlias2, *paramSet1);
     HksFreeParamSet(paramSet1);
     HksFreeParamSet(paramSet2);
     HksFreeParamSet(paramSet3);
@@ -437,16 +438,16 @@ static int32_t HksSm2CipherTestRun(const struct HksBlob *keyAlias, const GenEncr
     struct HksBlob publicKey = { HKS_SM2_KEY_SIZE_256, pubKey };
 
     do {
-        ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+        ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
         if (ret != HKS_SUCCESS) {
             ret = ((ret == param.gen.result) ? HKS_SUCCESS : ret);
             EXPECT_EQ(ret, HKS_SUCCESS) << "Generate Key err code don't meet expectation.";
             break;
             }
-        ret = HksExportPublicKey(keyAlias, genParamSet, &publicKey);
+        ret = HksExportPublicKeyForDe(keyAlias, genParamSet, &publicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
-        ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
+        ret = HksImportKeyForDe(&newKeyAlias, encryptParamSet, &publicKey);
         if (ret != HKS_SUCCESS) {
             ret = ((ret == param.encrypt.result) ? HKS_SUCCESS : ret);
             EXPECT_EQ(ret, HKS_SUCCESS) << "Import Key failed.";

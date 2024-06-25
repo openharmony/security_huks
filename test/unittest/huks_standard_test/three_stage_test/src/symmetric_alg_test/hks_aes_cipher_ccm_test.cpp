@@ -15,6 +15,7 @@
 
 #include "hks_aes_cipher_test_common.h"
 #include "hks_aes_cipher_part_test_c.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #ifdef L2_STANDARD
@@ -525,7 +526,7 @@ static int32_t TestAesCcmAbort(const struct HksBlob *keyAlias, struct HksParamSe
     struct HksBlob cipherText = { AEAD_SIZE + dataLen + IV_SIZE, cipher };
     
     /* 1. Generate Key */
-    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    int32_t ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     /* 2. Encrypt or Decrypt */
@@ -537,11 +538,11 @@ static int32_t TestAesCcmAbort(const struct HksBlob *keyAlias, struct HksParamSe
     }
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleE };
-    ret = HksInit(keyAlias, paramSet, &handle, nullptr);
+    ret = HksInitForDe(keyAlias, paramSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksInit failed.";
 
     if (isUpdate) {
-        ret = HksUpdate(&handle, paramSet, &inData, &cipherText);
+        ret = HksUpdateForDe(&handle, paramSet, &inData, &cipherText);
         EXPECT_EQ(ret, HKS_SUCCESS) << "HksUpdate failed.";
     }
 
@@ -549,7 +550,7 @@ static int32_t TestAesCcmAbort(const struct HksBlob *keyAlias, struct HksParamSe
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAbort failed.";
 
     /* 3. Delete Key */
-    EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
 
     HKS_FREE(cipher);
     return ret;
@@ -575,7 +576,7 @@ static int32_t TestAesCcmUpdateLoopFinish(const struct HksBlob *handle, const st
             break;
         }
         HKS_LOG_D("TestAesCcmUpdateLoopFinish in loop update...");
-        ret = HksUpdate(handle, paramSet, &inDataSeg, &tempOutData);
+        ret = HksUpdateForDe(handle, paramSet, &inDataSeg, &tempOutData);
         if (ret != HKS_SUCCESS) {
             HKS_LOG_E("HksUpdate Failed.");
             return ret;
@@ -595,7 +596,7 @@ static int32_t TestAesCcmUpdateLoopFinish(const struct HksBlob *handle, const st
     }
 
     tempOutData = *outData;
-    ret = HksFinish(handle, paramSet, &inDataSeg, &tempOutData);
+    ret = HksFinishForDe(handle, paramSet, &inDataSeg, &tempOutData);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksFinish Failed.");
         return ret;
@@ -609,7 +610,7 @@ static int32_t HksAesCcmCipherTestEncrypt(const struct HksBlob *keyAlias,
 {
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    int32_t ret = HksInit(keyAlias, encParamSet, &handleEncrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, encParamSet, &handleEncrypt, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Init failed");
         return ret;
@@ -647,7 +648,7 @@ static int32_t HksAesCcmCipherTestDecrypt(const struct HksBlob *keyAlias,
     (void)memcpy_s(aeadParam->blob.data, aeadLen, cipherText->data + cipherText->size - aeadLen, aeadLen);
     cipherText->size -= aeadLen;
 
-    ret = HksInit(keyAlias, decParamSet, &handleDecrypt, nullptr);
+    ret = HksInitForDe(keyAlias, decParamSet, &handleDecrypt, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("Init failed");
         return ret;
@@ -691,7 +692,7 @@ static int32_t HksAesCmcCipherTestCaseRun(const struct HksBlob *keyAlias, struct
     struct HksBlob inData = {dataLen, tempData};
 
     /* 1. Generate Key */
-    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    int32_t ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     /* 2. Encrypt */
@@ -727,7 +728,7 @@ static int32_t HksAesCmcCipherTestCaseRun(const struct HksBlob *keyAlias, struct
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCipherTestDecrypt failed.";
 
     /* 3. Delete Key */
-    EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
 
     HKS_FREE(tempData);
     HKS_FREE(cipher);
@@ -948,7 +949,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest006, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -983,7 +984,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest006, TestSize.Level0)
 #endif
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
 }
@@ -1007,7 +1008,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest007, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -1042,7 +1043,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest007, TestSize.Level0)
 #endif
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
 }
@@ -1246,7 +1247,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest013, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -1289,7 +1290,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest013, TestSize.Level0)
     EXPECT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "not HKS_ERROR_INVALID_ARGUMENT error code.";
 #endif
     
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     g_TestSegSize = MAX_UPDATE_SIZE;
 
     HKS_FREE(tempData);
@@ -1373,7 +1374,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest015, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     // set nonce len 7, data len max = 2^64 - 1
@@ -1425,7 +1426,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest016, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -1473,7 +1474,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest017, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     // none aad
@@ -1509,7 +1510,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest017, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCcmCipherTestDecrypt failed";
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1533,7 +1534,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest018, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     // aead len 4
@@ -1567,7 +1568,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest018, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCcmCipherTestDecrypt failed";
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1591,7 +1592,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest019, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     struct HksParamSet *decParamSet = nullptr;
@@ -1636,7 +1637,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest019, TestSize.Level0)
 #endif
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1660,7 +1661,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest020, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     struct HksParamSet *decParamSet = nullptr;
@@ -1704,7 +1705,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest020, TestSize.Level0)
 #endif
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1728,7 +1729,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest021, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     struct HksParamSet *decParamSet = nullptr;
@@ -1766,7 +1767,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest021, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAesCcmCipherTestDecrypt failed";
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1790,7 +1791,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest022, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     struct HksParamSet *decParamSet = nullptr;
@@ -1835,7 +1836,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest022, TestSize.Level0)
 #endif
     HksFreeParamSet(&decParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1858,7 +1859,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest023, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParams, sizeof(g_genCcmParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksImportKey(&keyAlias, genParamSet, &keyBlob);
+    ret = HksImportKeyForDe(&keyAlias, genParamSet, &keyBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -1892,7 +1893,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest023, TestSize.Level0)
     EXPECT_EQ(HksMemCmp(cipherText.data, g_testDecCipherTextNonce8NoAad, cipherText.size), HKS_SUCCESS);
     HksFreeParamSet(&encParamSet);
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
 }
 
@@ -1910,7 +1911,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest024, TestSize.Level0)
     int32_t ret = InitParamSet(&genParamSet, g_genCcmParamsAuthPur, sizeof(g_genCcmParamsAuthPur) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
     
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -1927,21 +1928,21 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest024, TestSize.Level0)
     uint8_t tokenBase[TOKEN_SIZE + 1] = {0};
     uint8_t token[TOKEN_SIZE + 1] = {0};
     struct HksBlob tokenBlob = { TOKEN_SIZE + 1, token };
-    ret = HksInit(&keyAlias, encParamSet, &handleEncrypt, &tokenBlob);
+    ret = HksInitForDe(&keyAlias, encParamSet, &handleEncrypt, &tokenBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksInit failed.";
     EXPECT_EQ(tokenBlob.size, 0) << "Token len not set 0 with no auth ctrl.";
     ret = HksAbort(&handleEncrypt, encParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAbort failed.";
 
     tokenBlob.size = sizeof(token);
-    ret = HksInit(&keyAlias, decParamSet, &handleEncrypt, &tokenBlob);
+    ret = HksInitForDe(&keyAlias, decParamSet, &handleEncrypt, &tokenBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksInit failed.";
     EXPECT_EQ(tokenBlob.size, TOKEN_SIZE) << "Token len no set";
     EXPECT_NE(HksMemCmp(token, tokenBase, TOKEN_SIZE), HKS_SUCCESS) << "cipherText equals inData";
     ret = HksAbort(&handleEncrypt, decParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAbort failed.";
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encParamSet);
     HksFreeParamSet(&decParamSet);
@@ -1966,7 +1967,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest025, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetParam failed.";
     authPurParam->uint32Param = HKS_KEY_PURPOSE_ENCRYPT;
 
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey failed.";
 
     struct HksParamSet *encParamSet = nullptr;
@@ -1983,7 +1984,7 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest025, TestSize.Level0)
     uint8_t tokenBase[TOKEN_SIZE + 1] = {0};
     uint8_t token[TOKEN_SIZE + 1] = {0};
     struct HksBlob tokenBlob = {TOKEN_SIZE + 1, token };
-    ret = HksInit(&keyAlias, encParamSet, &handleEncrypt, &tokenBlob);
+    ret = HksInitForDe(&keyAlias, encParamSet, &handleEncrypt, &tokenBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksInit failed.";
     EXPECT_EQ(tokenBlob.size, TOKEN_SIZE) << "Token len no set";
     EXPECT_NE(HksMemCmp(token, tokenBase, TOKEN_SIZE), HKS_SUCCESS) << "cipherText equals inData";
@@ -1991,13 +1992,13 @@ HWTEST_F(HksAesCipherCcmTest, HksAesCipherCcmTest025, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAbort failed.";
 
     tokenBlob.size = sizeof(token);
-    ret = HksInit(&keyAlias, decParamSet, &handleEncrypt, &tokenBlob);
+    ret = HksInitForDe(&keyAlias, decParamSet, &handleEncrypt, &tokenBlob);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksInit failed.";
     EXPECT_EQ(tokenBlob.size, 0) << "Token len not set 0 with no auth ctrl.";
     ret = HksAbort(&handleEncrypt, decParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAbort failed.";
 
-    EXPECT_EQ(HksDeleteKey(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(&keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&encParamSet);
     HksFreeParamSet(&decParamSet);

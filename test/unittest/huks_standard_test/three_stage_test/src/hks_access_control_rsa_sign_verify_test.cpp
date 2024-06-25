@@ -16,6 +16,7 @@
 #include "hks_access_control_rsa_sign_verify_test.h"
 
 #include "hks_access_control_rsa_sign_verify_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -685,7 +686,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest012, TestSize.
     int32_t ret = InitParamSet(&genParamSet, HKS_ACCESS_TEST_RSA_SIGN_001_PARAMS.genParams.data(),
         HKS_ACCESS_TEST_RSA_SIGN_001_PARAMS.genParams.size());
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     (void)HksFreeParamSet(&genParamSet);
     ASSERT_EQ(ret, HKS_SUCCESS);
 
@@ -712,7 +713,7 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest012, TestSize.
     struct HksBlob plainDataBlob = { sizeof(plainData), plainData };
     uint8_t signature[256] = {0};
     struct HksBlob signatureBlob = { sizeof(signature), signature };
-    ret = HksSign(&keyAlias, signParamSet, &plainDataBlob, &signatureBlob);
+    ret = HksSignForDe(&keyAlias, signParamSet, &plainDataBlob, &signatureBlob);
     (void)HksFreeParamSet(&signParamSet);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 
@@ -728,9 +729,9 @@ HWTEST_F(HksAccessControlRsaSignVerifyTest, HksAcRsaSignVerifyTest012, TestSize.
     struct HksParamSet *verifyParamSet2 = nullptr;
     ret = InitParamSet(&verifyParamSet2, verifyParams2, sizeof(verifyParams2) / sizeof(HksParam));
     ASSERT_EQ(ret, HKS_SUCCESS);
-    ret = HksVerify(&keyAlias, verifyParamSet2, &plainDataBlob, &signatureBlob);
+    ret = HksVerifyForDe(&keyAlias, verifyParamSet2, &plainDataBlob, &signatureBlob);
     (void)HksFreeParamSet(&verifyParamSet2);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     ASSERT_EQ(ret, HKS_ERROR_NOT_SUPPORTED);
 }
 }

@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -170,7 +171,7 @@ static int32_t BaseTestMac(uint32_t index)
     /* 3. deletekey */
     if ((g_testMacParams[index].macType == HKS_TEST_MAC_TYPE_TEE) &&
             (g_testMacParams[index].keyAliasParams.blobExist)) {
-        ret = HksDeleteKey(key, NULL);
+        ret = HksDeleteKeyForDe(key, NULL);
         EXPECT_TRUE(ret == 0);
     }
     TestFreeBlob(&key);

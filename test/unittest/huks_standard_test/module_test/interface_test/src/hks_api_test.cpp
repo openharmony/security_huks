@@ -24,6 +24,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_type.h"
 
 #include "securec.h"
@@ -94,7 +95,7 @@ HWTEST_F(HksAPITest, HksAPITest002, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest003, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest003");
-    int32_t ret = HksFinish(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksFinishForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksFinish failed, ret = " << ret;
 }
 
@@ -106,7 +107,7 @@ HWTEST_F(HksAPITest, HksAPITest003, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest004, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest004");
-    int32_t ret = HksUpdate(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksUpdateForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksFinish failed, ret = " << ret;
 }
 
@@ -291,7 +292,7 @@ HWTEST_F(HksAPITest, HksAPITest008, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest009, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest009");
-    int32_t ret = HksMac(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksMacForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksMac failed, ret = " << ret;
 }
 
@@ -303,7 +304,7 @@ HWTEST_F(HksAPITest, HksAPITest009, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest010, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest010");
-    int32_t ret = HksDeriveKey(nullptr, nullptr, nullptr);
+    int32_t ret = HksDeriveKeyForDe(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksDeriveKey failed, ret = " << ret;
 }
 
@@ -315,7 +316,7 @@ HWTEST_F(HksAPITest, HksAPITest010, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest011, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest011");
-    int32_t ret = HksAgreeKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksAgreeKeyForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksAgreeKey failed, ret = " << ret;
 }
 
@@ -327,7 +328,7 @@ HWTEST_F(HksAPITest, HksAPITest011, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest012, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest012");
-    int32_t ret = HksDecrypt(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksDecryptForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksDecrypt failed, ret = " << ret;
 }
 
@@ -339,7 +340,7 @@ HWTEST_F(HksAPITest, HksAPITest012, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest013, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest013");
-    int32_t ret = HksEncrypt(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksEncryptForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksEncrypt failed, ret = " << ret;
 }
 
@@ -351,7 +352,7 @@ HWTEST_F(HksAPITest, HksAPITest013, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest014, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest014");
-    int32_t ret = HksVerify(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksVerifyForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksVerify failed, ret = " << ret;
 }
 
@@ -363,7 +364,7 @@ HWTEST_F(HksAPITest, HksAPITest014, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest015, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest015");
-    int32_t ret = HksSign(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksSignForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksSign failed, ret = " << ret;
 }
 
@@ -387,7 +388,7 @@ HWTEST_F(HksAPITest, HksAPITest016, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest017, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest017");
-    int32_t ret = HksKeyExist(nullptr, nullptr);
+    int32_t ret = HksKeyExistForDe(nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksKeyExist failed, ret = " << ret;
 }
 
@@ -399,7 +400,7 @@ HWTEST_F(HksAPITest, HksAPITest017, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest018, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest018");
-    int32_t ret = HksDeleteKey(nullptr, nullptr);
+    int32_t ret = HksDeleteKeyForDe(nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksDeleteKey failed, ret = " << ret;
 }
 
@@ -411,7 +412,7 @@ HWTEST_F(HksAPITest, HksAPITest018, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest019, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest019");
-    int32_t ret = HksImportWrappedKey(nullptr, nullptr, nullptr, nullptr);
+    int32_t ret = HksImportWrappedKeyForDe(nullptr, nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksImportWrappedKey failed, ret = " << ret;
 }
 
@@ -423,7 +424,7 @@ HWTEST_F(HksAPITest, HksAPITest019, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest020, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest020");
-    int32_t ret = HksImportKey(nullptr, nullptr, nullptr);
+    int32_t ret = HksImportKeyForDe(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksImportKey failed, ret = " << ret;
 }
 
@@ -435,7 +436,7 @@ HWTEST_F(HksAPITest, HksAPITest020, TestSize.Level0)
 HWTEST_F(HksAPITest, HksAPITest021, TestSize.Level0)
 {
     HKS_LOG_I("enter HksAPITest021");
-    int32_t ret = HksGenerateKey(nullptr, nullptr, nullptr);
+    int32_t ret = HksGenerateKeyForDe(nullptr, nullptr, nullptr);
     EXPECT_EQ(ret, HKS_ERROR_NULL_POINTER) << "HksGenerateKey failed, ret = " << ret;
 }
 

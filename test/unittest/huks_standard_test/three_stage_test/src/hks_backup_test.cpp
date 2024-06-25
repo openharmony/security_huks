@@ -18,6 +18,7 @@
 #include "hks_param.h"
 #include "hks_type.h"
 #include "hks_template.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 #include "nativetoken_kit.h"
 #include "token_setproc.h"

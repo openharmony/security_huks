@@ -16,6 +16,7 @@
 #include "hks_aes_cipher_part3_test.h"
 #include "hks_aes_cipher_test_common.h"
 #include "hks_aes_cipher_part_test_c.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -1033,7 +1034,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
 #endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Encrypt Three Stage */
@@ -1047,7 +1048,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(&keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update & Finish
     uint8_t cipher[AES_COMMON_SIZE] = {0};
@@ -1066,7 +1067,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    ret = HksInit(&keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    ret = HksInitForDe(&keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleDecrypt, decryptParamSet, &cipherText);
@@ -1076,7 +1077,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test022, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 4. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -1106,7 +1107,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test023, TestSize.Level0)
 #endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Encrypt Three Stage (Abort) */
@@ -1120,7 +1121,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test023, TestSize.Level0)
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(&keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleEncrypt, encryptParamSet, &inData);
@@ -1130,7 +1131,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test023, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -1157,7 +1158,7 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test024, TestSize.Level0)
 #endif
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Encrypt Three Stage */
@@ -1171,11 +1172,11 @@ HWTEST_F(HksAesCipherPart3Test, HksAesCipherPart3Test024, TestSize.Level0)
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(NULL, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(NULL, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init should failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

@@ -14,6 +14,7 @@
  */
 
 #include "hks_modify_key_test_c.h"
+#include "hks_test_adapt_for_de.h"
 
 int32_t ConstructDataToBlob(struct HksBlob **inData, struct HksBlob **outData,
     const struct HksTestBlobParams *inTextParams, const struct HksTestBlobParams *outTextParams)
@@ -135,7 +136,7 @@ int32_t GenerateKeyTwo(struct HksBlob *keyAlias, const struct HksTestBlobParams 
         HKS_TEST_ASSERT(ret == 0);
     }
 
-    ret = HksGenerateKey(keyAlias, paramSet, paramSetOut);
+    ret = HksGenerateKeyForDe(keyAlias, paramSet, paramSetOut);
     HKS_TEST_ASSERT(ret == 0);
 
     HksFreeParamSet(&paramSet);

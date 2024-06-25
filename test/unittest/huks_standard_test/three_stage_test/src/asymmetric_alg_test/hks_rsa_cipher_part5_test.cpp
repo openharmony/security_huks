@@ -18,6 +18,7 @@
 #endif
 #include "hks_rsa_cipher_part5_test.h"
 #include "hks_rsa_cipher_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #include "hks_log.h"
@@ -388,13 +389,13 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Export Public Key */
     uint8_t tmpPublicKeyTest01[HKS_RSA_KEY_SIZE_4096] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKeyTest01 };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
 
     /* 3. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
@@ -404,12 +405,12 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     /* Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
     struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(tmpKey), .data = (uint8_t *)tmpKey };
-    ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, encryptParamSet, &publicKey);
 
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(&newKeyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update & Finish
     uint8_t cipher[RSA_COMMON_SIZE] = {0};
@@ -424,7 +425,7 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    ret = HksInit(&keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    ret = HksInitForDe(&keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleDecrypt, decryptParamSet, &cipherText);
@@ -434,9 +435,9 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test043, TestSize.Level1)
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 5. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    ret = HksDeleteKey(&newKeyAlias, encryptParamSet);
+    ret = HksDeleteKeyForDe(&newKeyAlias, encryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -461,13 +462,13 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Export Public Key */
     uint8_t tmpPublicKeyTest02[HKS_RSA_KEY_SIZE_4096] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKeyTest02 };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
 
     /* 3. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
@@ -477,11 +478,11 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
     /* Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
     struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(tmpKey), .data = (uint8_t *)tmpKey };
-    ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, encryptParamSet, &publicKey);
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(&newKeyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(&newKeyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handleEncrypt, encryptParamSet, &inData);
@@ -491,9 +492,9 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test044, TestSize.Level1)
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 4. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    ret = HksDeleteKey(&newKeyAlias, encryptParamSet);
+    ret = HksDeleteKeyForDe(&newKeyAlias, encryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -515,13 +516,13 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
     struct HksParamSet *genParamSet = nullptr;
     ret = InitParamSet(&genParamSet, g_genParams042, sizeof(g_genParams042) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. Export Public Key */
     uint8_t tmpPublicKey[HKS_RSA_KEY_SIZE_4096] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_4096, (uint8_t *)tmpPublicKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
 
     /* 3. Encrypt Three Stage */
     struct HksParamSet *encryptParamSet = nullptr;
@@ -531,17 +532,17 @@ HWTEST_F(HksRsaCipherPart5Test, HksRsaCipherPart5Test045, TestSize.Level1)
     /* Import Key */
     char tmpKey[] = "RSA_Encrypt_Decrypt_KeyAlias";
     struct HksBlob newKeyAlias = { .size = (uint32_t)strlen(tmpKey), .data = (uint8_t *)tmpKey };
-    ret = HksImportKey(&newKeyAlias, encryptParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, encryptParamSet, &publicKey);
     // Init
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(NULL, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(NULL, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init should failed.";
 
     /* 4. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
-    ret = HksDeleteKey(&newKeyAlias, encryptParamSet);
+    ret = HksDeleteKeyForDe(&newKeyAlias, encryptParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete ImportKey failed.";
 
     HksFreeParamSet(&genParamSet);

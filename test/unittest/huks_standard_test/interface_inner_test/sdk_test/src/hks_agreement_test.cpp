@@ -20,6 +20,7 @@
 #include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -131,9 +132,9 @@ HWTEST_F(HksAgreementTest, HksAgreementTest001, TestSize.Level0)
         (g_testAgreeParams[0].genKeyParamSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) &&
         ((g_testAgreeParams[0].keyAlias1Params.blobExist) &&
         (g_testAgreeParams[0].keyAlias2Params.blobExist))) {
-        ret = HksDeleteKey(privateKey, NULL);
+        ret = HksDeleteKeyForDe(privateKey, NULL);
         EXPECT_TRUE(ret == 0);
-        ret = HksDeleteKey(peerPubKeyAliasTest, NULL);
+        ret = HksDeleteKeyForDe(peerPubKeyAliasTest, NULL);
         EXPECT_TRUE(ret == 0);
     }
     TestFreeBlob(&privateKey);

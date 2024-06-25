@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 
 #include "hks_modify_key_test_c.h"
+#include "hks_test_adapt_for_de.h"
 
 #include "file_ex.h"
 #include "hks_file_operator.h"
@@ -169,7 +170,7 @@ HWTEST_F(HksModifyKeyTest, HksModifyKeyTest001, TestSize.Level0)
 
     //because of storage backup
     EXPECT_TRUE(ret == g_testCipherParams[index].expectResult);
-    (void)HksDeleteKey(&keyAlias, NULL);
+    (void)HksDeleteKeyForDe(&keyAlias, NULL);
     TestFreeBlob(&plainData);
     TestFreeBlob(&cipherData);
     TestFreeBlob(&decryptedData);

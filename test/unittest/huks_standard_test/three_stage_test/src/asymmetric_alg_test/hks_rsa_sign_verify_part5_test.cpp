@@ -18,6 +18,7 @@
 #endif
 #include "hks_rsa_sign_verify_part5_test.h"
 #include "hks_rsa_sign_verify_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -630,7 +631,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test041, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -666,7 +667,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test042, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -702,7 +703,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test043, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -739,7 +740,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test044, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -775,7 +776,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test045, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -812,7 +813,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test046, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -848,7 +849,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test047, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -884,7 +885,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test048, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -921,7 +922,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test049, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -959,7 +960,7 @@ HWTEST_F(HksRsaSignVerifyPart5Test, HksRsaSignVerifyPart5Test050, TestSize.Level
     }
 
     /* Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

@@ -14,6 +14,7 @@
  */
 
 #include "hks_sm4_cipher_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 using namespace testing::ext;
@@ -25,7 +26,7 @@ static int32_t HksSm4CipherTestEncrypt(const struct HksBlob *keyAlias,
 {
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    int32_t ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -47,7 +48,7 @@ static int32_t HksSm4CipherTestDecrypt(const struct HksBlob *keyAlias,
 {
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    int32_t ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -79,7 +80,7 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     }
 
     /* 1. Generate Key */
-    ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("GenerateKey failed");
         return ret;
@@ -98,7 +99,7 @@ int32_t HksSm4CipherTestCaseOther(const struct HksBlob *keyAlias, struct HksPara
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksSm4CipherTestDecrypt failed.";
 
     /* 3. Delete Key */
-    EXPECT_EQ(HksDeleteKey(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
+    EXPECT_EQ(HksDeleteKeyForDe(keyAlias, genParamSet), HKS_SUCCESS) << "DeleteKey failed.";
     return ret;
 }
 
@@ -112,7 +113,7 @@ int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamS
     };
 
     /* 1. Generate Key */
-    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    int32_t ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
     if (ret != HKS_SUCCESS) {
         return ret;
@@ -123,7 +124,7 @@ int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamS
     uint8_t cipher[SM4_COMMON_SIZE] = {0};
     uint8_t handleE[sizeof(uint64_t)] = {0};
     struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-    ret = HksInit(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
+    ret = HksInitForDe(keyAlias, encryptParamSet, &handleEncrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update & Finish
@@ -132,7 +133,7 @@ int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamS
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
     EXPECT_NE(memcmp(inData.data, cipherText.data, inData.size), HKS_SUCCESS) << "cipherText equals inData";
     if (ret != HKS_SUCCESS) {
-        HksDeleteKey(keyAlias, genParamSet);
+        HksDeleteKeyForDe(keyAlias, genParamSet);
         return ret;
     }
 
@@ -152,7 +153,7 @@ int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamS
     // Init
     uint8_t handleD[sizeof(uint64_t)] = {0};
     struct HksBlob handleDecrypt = { sizeof(uint64_t), handleD };
-    ret = HksInit(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
+    ret = HksInitForDe(keyAlias, decryptParamSet, &handleDecrypt, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update & Finish
@@ -162,12 +163,12 @@ int32_t HksSm4CipherTestCaseGcm(const struct HksBlob *keyAlias, struct HksParamS
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
     EXPECT_EQ(memcmp(inData.data, plainText.data, inData.size), HKS_SUCCESS) << "plainText not equals inData";
     if (ret != HKS_SUCCESS) {
-        HksDeleteKey(keyAlias, genParamSet);
+        HksDeleteKeyForDe(keyAlias, genParamSet);
         return ret;
     }
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     return ret;
 }

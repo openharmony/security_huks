@@ -21,6 +21,7 @@
 #include "hks_api.h"
 #include "hks_param.h"
 #include "hks_file_operator.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_curve25519.h"
 #include "hks_test_file_operator.h"
@@ -96,9 +97,9 @@ HWTEST_F(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, TestSize.Level0)
     uint8_t pubKey[32] = {0};
     uint32_t pubKeyLen = 32;
     struct HksBlob pubKeyInfo = { pubKeyLen, pubKey };
-    ret = HksExportPublicKey(&ed25519Alias, NULL, &pubKeyInfo);
+    ret = HksExportPublicKeyForDe(&ed25519Alias, NULL, &pubKeyInfo);
     EXPECT_TRUE(ret == 0);
-    ret = HksDeleteKey(&ed25519Alias, NULL);
+    ret = HksDeleteKeyForDe(&ed25519Alias, NULL);
     EXPECT_TRUE(ret == 0);
 
     struct HksBlob newAliasOne = { strlen("test_ed25519_1"), (uint8_t *)"test_ed25519_1" };
@@ -113,10 +114,10 @@ HWTEST_F(HksSafeCipherKeyTest, HksSafeCipherKeyTest001, TestSize.Level0)
     EXPECT_TRUE(ret != 0);
     ASSERT_TRUE(ret != 0);
 
-    ret = HksDeleteKey(&newAliasOne, NULL);
+    ret = HksDeleteKeyForDe(&newAliasOne, NULL);
     EXPECT_TRUE(ret == 0);
     ASSERT_TRUE(ret == 0);
-    ret = HksDeleteKey(&newAliasTwo, NULL);
+    ret = HksDeleteKeyForDe(&newAliasTwo, NULL);
     EXPECT_TRUE(ret == 0);
     ASSERT_TRUE(ret == 0);
 }

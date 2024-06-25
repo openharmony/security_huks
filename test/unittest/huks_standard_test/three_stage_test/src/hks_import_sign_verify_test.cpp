@@ -14,6 +14,7 @@
  */
 
 #include "hks_import_sign_verify_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #ifdef L2_STANDARD
@@ -794,7 +795,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *
         return ret;
     }
 
-    ret = HksImportKey(keyAlias, paramSet, &key);
+    ret = HksImportKeyForDe(keyAlias, paramSet, &key);
     HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -836,14 +837,14 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
     do {
         uint64_t handleValue = 0;
         struct HksBlob handle = { sizeof(uint64_t), (uint8_t *)&handleValue };
-        ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
+        ret = HksInitForDe(keyAlias, initParamSet, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }
 
         uint8_t tempBuf[LENGTH_TO_BE_OPERATED] = {0};
         struct HksBlob tmpBlob = { LENGTH_TO_BE_OPERATED, tempBuf };
-        ret = HksUpdate(&handle, updateParamSet, inData, &tmpBlob);
+        ret = HksUpdateForDe(&handle, updateParamSet, inData, &tmpBlob);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -852,9 +853,9 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
 
         // The caller guarantees that the access will not cross the border
         if (initParams[TAG_PURPOSE_ID].uint32Param == HKS_KEY_PURPOSE_VERIFY) {
-            ret = HksFinish(&handle, finishParamSet, outData, &tmpBlob2);
+            ret = HksFinishForDe(&handle, finishParamSet, outData, &tmpBlob2);
         } else {
-            ret = HksFinish(&handle, finishParamSet, &tmpBlob2, outData);
+            ret = HksFinishForDe(&handle, finishParamSet, &tmpBlob2, outData);
         }
     } while (0);
 
@@ -943,9 +944,9 @@ static void ImportPlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest, 
     EXPECT_EQ(ret, HKS_SUCCESS) << "operation 2 failed";
 
     // delete keys
-    (void)HksDeleteKey(&priKeyAlias, nullptr);
-    (void)HksDeleteKey(&pairKeyAlias, nullptr);
-    (void)HksDeleteKey(&pubKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&priKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&pairKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&pubKeyAlias, nullptr);
 }
 
 static void ImportInvalidPurposePlainKeyTest(uint32_t alg, uint32_t keySize, uint32_t digest, uint32_t purpose,

@@ -18,6 +18,7 @@
 #include "file_ex.h"
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_log.h"
 #include "hks_type.h"
 
@@ -71,7 +72,7 @@ static void GenerateBaseKey(const struct HksBlob *alias)
 
     ASSERT_TRUE(HksAddParams(paramSet, tmpParams, sizeof(tmpParams) / sizeof(tmpParams[0])) == 0);
     ASSERT_TRUE(HksBuildParamSet(&paramSet) == 0);
-    ASSERT_TRUE(HksGenerateKey(alias, paramSet, NULL) == 0);
+    ASSERT_TRUE(HksGenerateKeyForDe(alias, paramSet, NULL) == 0);
 
     HksFreeParamSet(&paramSet);
 }
@@ -105,7 +106,7 @@ static void SessionMaxTest(const struct HksBlob *alias)
         ConstructInitParamSet(&paramSet);
         uint8_t tokenData[HMAC_OUTPUT_SIZE] = {0};
         struct HksBlob token = { sizeof(tokenData), tokenData };
-        EXPECT_EQ(HksInit(alias, paramSet, &handleBlob, &token), HKS_SUCCESS);
+        EXPECT_EQ(HksInitForDe(alias, paramSet, &handleBlob, &token), HKS_SUCCESS);
         HksFreeParamSet(&paramSet);
     }
 
@@ -120,11 +121,11 @@ static void SessionMaxTest(const struct HksBlob *alias)
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
 
         if (i == 0) {
-            EXPECT_EQ(HksUpdate(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
-            EXPECT_EQ(HksFinish(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+            EXPECT_EQ(HksUpdateForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+            EXPECT_EQ(HksFinishForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
         } else {
-            EXPECT_EQ(HksUpdate(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
-            EXPECT_EQ(HksFinish(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
+            EXPECT_EQ(HksUpdateForDe(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
+            EXPECT_EQ(HksFinishForDe(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
         }
 
         HksFreeParamSet(&paramSet);
@@ -152,7 +153,7 @@ HWTEST_F(HksSessionMaxTest, HksSessionMaxTest001, TestSize.Level0)
 
     SessionMaxTest(&aliasBlob);
 
-    EXPECT_EQ(HksDeleteKey(&aliasBlob, NULL), 0);
+    EXPECT_EQ(HksDeleteKeyForDe(&aliasBlob, NULL), 0);
 }
 
 /**
@@ -172,8 +173,8 @@ HWTEST_F(HksSessionMaxTest, HksSessionMaxTest002, TestSize.Level0)
     uint64_t temp = HMAC_OUTPUT_SIZE;
     struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&temp };
 
-    EXPECT_EQ(HksUpdate(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
-    EXPECT_EQ(HksFinish(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(HksUpdateForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(HksFinishForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
     EXPECT_EQ(HksAbort(&handleBlob, paramSet), HKS_SUCCESS);
 
     HksFreeParamSet(&paramSet);

@@ -15,6 +15,7 @@
 
 #include <gtest/gtest.h>
 #include "hks_import_wrapped_test_common.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 #include "hks_mem.h"
 #include "hks_test_log.h"
@@ -416,7 +417,7 @@ namespace Unittest::ImportWrappedKey {
         EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
         uint8_t handleE[sizeof(uint64_t)] = {0};
         struct HksBlob handleEncrypt = { sizeof(uint64_t), handleE };
-        ret = HksInit(importWrappedKeyTestParams002.importedKeyAlias, encParams, &handleEncrypt, nullptr);
+        ret = HksInitForDe(importWrappedKeyTestParams002.importedKeyAlias, encParams, &handleEncrypt, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "importted key init failed!";
         (void)HksAbort(&handleEncrypt, encParams);
         HksFreeParamSet(&encParams);

@@ -16,6 +16,7 @@
 
 #include "hks_ecdh_agree_part2_test.h"
 #include "hks_ecdh_agree_test_common.h"
+#include "hks_test_adapt_for_de.h"
 #include <gtest/gtest.h>
 
 #ifdef L2_STANDARD
@@ -331,9 +332,9 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree006, TestSize.Level0)
         sizeof(g_agreeParams02Finish006) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
-    ret = HksGenerateKey(&g_keyAlias01006, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias01006, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
-    ret = HksGenerateKey(&g_keyAlias02006, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias02006, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
 
     struct HksBlob publicKey01 = { .size = HKS_ECC_KEY_SIZE_256, .data = nullptr };
@@ -349,12 +350,12 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree006, TestSize.Level0)
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias01006, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish01 failed.";
-    ret = HksAgreeKey(initParamSet02, &g_keyAlias02006, &publicKey01, &outData02);
+    ret = HksAgreeKeyForDe(initParamSet02, &g_keyAlias02006, &publicKey01, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
     EXPECT_EQ(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "outData01 not equals outData02";
 
-    HksDeleteKey(&g_keyAlias01006, genParamSet);
-    HksDeleteKey(&g_keyAlias02006, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias01006, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias02006, genParamSet);
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
@@ -384,9 +385,9 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree007, TestSize.Level0)
         sizeof(g_agreeParams02Finish007) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
-    ret = HksGenerateKey(&g_keyAlias01007, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias01007, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
-    ret = HksGenerateKey(&g_keyAlias02007, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias02007, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
 
     struct HksBlob publicKey01 = { .size = HKS_ECC_KEY_SIZE_384, .data = nullptr };
@@ -402,12 +403,12 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree007, TestSize.Level0)
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias01007, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish01 failed.";
-    ret = HksAgreeKey(initParamSet02, &g_keyAlias02007, &publicKey01, &outData02);
+    ret = HksAgreeKeyForDe(initParamSet02, &g_keyAlias02007, &publicKey01, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
     EXPECT_EQ(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "outData01 not equals outData02";
 
-    HksDeleteKey(&g_keyAlias01007, genParamSet);
-    HksDeleteKey(&g_keyAlias02007, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias01007, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias02007, genParamSet);
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
@@ -437,9 +438,9 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree008, TestSize.Level0)
         sizeof(g_agreeParams02Finish008) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(finish)02 failed.";
 
-    ret = HksGenerateKey(&g_keyAlias01008, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias01008, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
-    ret = HksGenerateKey(&g_keyAlias02008, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias02008, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
 
     struct HksBlob publicKey01 = { .size = HKS_ECC_KEY_SIZE_521, .data = nullptr };
@@ -455,12 +456,12 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree008, TestSize.Level0)
     EXPECT_EQ(MallocAndCheckBlobData(&outData02, outData02.size), HKS_SUCCESS) << "Malloc outData02 failed.";
     ret = HksEcdhAgreeFinish(&g_keyAlias01008, &publicKey02, initParamSet01, finishParamSet01, &outData01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeFinish01 failed.";
-    ret = HksAgreeKey(initParamSet02, &g_keyAlias02008, &publicKey01, &outData02);
+    ret = HksAgreeKeyForDe(initParamSet02, &g_keyAlias02008, &publicKey01, &outData02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksAgreeKey02 failed.";
     EXPECT_EQ(TestCmpKeyAliasHash(&outData01, &outData02), HKS_SUCCESS) << "outData01 not equals outData02";
 
-    HksDeleteKey(&g_keyAlias01008, genParamSet);
-    HksDeleteKey(&g_keyAlias02008, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias01008, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias02008, genParamSet);
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, finishParamSet01, initParamSet02, finishParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02, &outData01, &outData02);
 }
@@ -482,9 +483,9 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree009, TestSize.Level0)
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init009, sizeof(g_agreeParams02Init009) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
 
-    ret = HksGenerateKey(&g_keyAlias01009, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias01009, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
-    ret = HksGenerateKey(&g_keyAlias02009, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias02009, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
 
     struct HksBlob publicKey01 = { .size = HKS_ECC_KEY_SIZE_521, .data = nullptr };
@@ -499,8 +500,8 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree009, TestSize.Level0)
     ret = HksEcdhAgreeAbort(&g_keyAlias02009, &publicKey01, initParamSet02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksEcdhAgreeAbort02 failed.";
 
-    HksDeleteKey(&g_keyAlias01009, genParamSet);
-    HksDeleteKey(&g_keyAlias02009, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias01009, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias02009, genParamSet);
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
     HksEcdhAgreeFreeBlob(&publicKey01, &publicKey02);
 }
@@ -522,20 +523,20 @@ HWTEST_F(HksEcdhAgreePart2Test, HksEcdhAgree0010, TestSize.Level0)
     ret = InitParamSet(&initParamSet02, g_agreeParams02Init010, sizeof(g_agreeParams02Init010) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(init & update)02 failed.";
 
-    ret = HksGenerateKey(&g_keyAlias01010, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias01010, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey01 failed.";
-    ret = HksGenerateKey(&g_keyAlias02010, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&g_keyAlias02010, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey02 failed.";
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, initParamSet01, &handle, nullptr);
+    ret = HksInitForDe(NULL, initParamSet01, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksInit01 should failed.";
-    ret = HksInit(NULL, initParamSet02, &handle, nullptr);
+    ret = HksInitForDe(NULL, initParamSet02, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "HksInit02 should failed.";
 
-    HksDeleteKey(&g_keyAlias01010, genParamSet);
-    HksDeleteKey(&g_keyAlias02010, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias01010, genParamSet);
+    HksDeleteKeyForDe(&g_keyAlias02010, genParamSet);
     HksEcdhAgreeFreeParamSet(genParamSet, initParamSet01, initParamSet02);
 }
 } // namespace Unittest::EcdhAgree

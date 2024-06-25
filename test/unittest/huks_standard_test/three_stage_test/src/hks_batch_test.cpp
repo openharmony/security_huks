@@ -16,6 +16,7 @@
 #include "hks_batch_test.h"
 #include "hks_aes_cipher_test_common.h"
 #include "hks_access_control_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #ifdef L2_STANDARD
@@ -875,7 +876,7 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
 
     /* 1. Generate Key */
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     static const std::string tmp_inData1 = "Hks_string1";
@@ -920,7 +921,7 @@ HWTEST_F(HksBatchTest, HksBatchTest003, TestSize.Level0)
         &inData2, &cipherText2, &plainTextBatch2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
 
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

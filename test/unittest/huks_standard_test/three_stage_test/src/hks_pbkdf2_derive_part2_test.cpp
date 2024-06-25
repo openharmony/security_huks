@@ -15,6 +15,7 @@
 
 #include "hks_pbkdf2_derive_part2_test.h"
 #include "hks_pbkdf2_derive_test_common.h"
+#include "hks_test_adapt_for_de.h"
 #ifdef L2_STANDARD
 #include "file_ex.h"
 #endif
@@ -365,7 +366,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0010, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSetTest01, pbkdf2ParamSet, pbkdf2FinishParamSet);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSetTest01);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSetTest01);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSetTest01);
@@ -409,7 +410,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0011, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSet);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&pbkdf2ParamSet);
@@ -451,7 +452,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0012, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSetTest01, pbkdf2FinishParamSet);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -496,7 +497,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0013, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSetTest01);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -539,7 +540,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0014, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSetTest02, pbkdf2ParamSet, pbkdf2FinishParamSet);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSetTest02);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSetTest02);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSetTest02);
@@ -583,7 +584,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0015, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSetTest02, pbkdf2FinishParamSet);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -628,7 +629,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0016, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSetTest02);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -671,7 +672,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0017, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSetTest03, pbkdf2FinishParamSet);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -716,7 +717,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0018, TestSize.Level0)
     HksPbkdf2DeriveTestNormalCase(keyAlias, genParamSet, pbkdf2ParamSet, pbkdf2FinishParamSetTest03);
 #endif
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -743,7 +744,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0019, TestSize.Level0)
     ret = InitParamSet(&genParamSet, g_genParams019, sizeof(g_genParams019) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. PBKDF2 Three Stage */
@@ -758,13 +759,13 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0019, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(&keyAlias, pbkdf2ParamSet, &handle, nullptr);
+    ret = HksInitForDe(&keyAlias, pbkdf2ParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
 
     // Update
     uint8_t outUpdateU[DERIVE_KEY_SIZE_64] = {0};
     struct HksBlob outUpdate = { DERIVE_KEY_SIZE_64, outUpdateU };
-    ret = HksUpdate(&handle, pbkdf2ParamSet, &inData, &outUpdate);
+    ret = HksUpdateForDe(&handle, pbkdf2ParamSet, &inData, &outUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
 
     // Abort
@@ -774,7 +775,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0019, TestSize.Level0)
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -807,7 +808,7 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0020, TestSize.Level0)
     ret = InitParamSet(&genParamSet, genParams, sizeof(genParams) / sizeof(HksParam));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet failed.";
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. PBKDF2 Three Stage */
@@ -832,11 +833,11 @@ HWTEST_F(HksPbkdf2DerivePart2Test, HksPbkdf2Derive0020, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, pbkdf2ParamSet, &handle, nullptr);
+    ret = HksInitForDe(NULL, pbkdf2ParamSet, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init failed.";
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

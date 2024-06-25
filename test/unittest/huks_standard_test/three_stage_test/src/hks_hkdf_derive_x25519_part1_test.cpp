@@ -17,6 +17,7 @@
 
 #include "hks_agree_test_common.h"
 #include "hks_hkdf_derive_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -364,11 +365,11 @@ HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive001, TestSize.Level0)
     // Init-Update-final
     HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFX25519DeriveKeyAliasFinalTest001"),
         .data = (uint8_t *)"HksHKDFX25519DeriveKeyAliasFinalTest001"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKeyForDe(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -404,11 +405,11 @@ HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive002, TestSize.Level0)
     // Init-Update-final
     HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFX25519DeriveKeyAliasFinalTest002"),
         .data = (uint8_t *)"HksHKDFX25519DeriveKeyAliasFinalTest002"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKeyForDe(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -444,11 +445,11 @@ HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive003, TestSize.Level0)
     // Init-Update-final
     HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFX25519DeriveKeyAliasFinalTest003"),
         .data = (uint8_t *)"HksHKDFX25519DeriveKeyAliasFinalTest003"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKeyForDe(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -484,11 +485,11 @@ HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive004, TestSize.Level0)
     // Init-Update-final
     HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     struct HksBlob deleteKeyAlias = { .size = strlen("HksHKDFX25519DeriveKeyAliasFinalTest004"),
         .data = (uint8_t *)"HksHKDFX25519DeriveKeyAliasFinalTest004"};
-    ret = HksDeleteKey(&deleteKeyAlias, NULL);
+    ret = HksDeleteKeyForDe(&deleteKeyAlias, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Delete Final Key failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -524,7 +525,7 @@ HWTEST_F(HksHkdfDeriveX25519Part1Test, HksHKDFX25519Derive005, TestSize.Level0)
     // Init-Update-final
     HksHkdfDeriveTestNormalCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

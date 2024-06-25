@@ -21,6 +21,7 @@
 #include "hi_watchdog.h"
 #include "hks_api.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_api_performance.h"
 #include "hks_test_common.h"
 #include "hks_test_log.h"
@@ -121,7 +122,7 @@ LITE_TEST_CASE(HksGenerateKeyTest, HksGenerateKeyTest001, Level1)
     if ((ret == HKS_SUCCESS) &&
         !(g_testGenKeyParams[index].paramSetParams.setKeyStorageFlag) &&
         (g_testGenKeyParams[index].paramSetParams.keyStorageFlag == HKS_STORAGE_TEMP)) {
-        HKS_TEST_ASSERT(HksDeleteKey(keyAlias, NULL) == 0);
+        HKS_TEST_ASSERT(HksDeleteKeyForDe(keyAlias, NULL) == 0);
     }
     TestFreeBlob(&keyAlias);
     HksFreeParamSet(&paramSet);

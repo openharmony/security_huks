@@ -32,6 +32,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_log.h"
 #include "hks_three_stage_test_common.h"
 #include "hks_type.h"
@@ -299,12 +300,12 @@ int32_t GenerateTmpKeyPairAndExportPublicKey(std::vector<uint8_t> &resTmpPk)
     int32_t ret = InitParamSet(&genParamSet.s, genParams, HKS_ARRAY_SIZE(genParams));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(gen) failed.";
 
-    HksGenerateKey(&g_tmpKeyPairAlias, genParamSet.s, nullptr);
+    HksGenerateKeyForDe(&g_tmpKeyPairAlias, genParamSet.s, nullptr);
 
     enum { TMP_PK_BUFFER_SIZE = 4096, };
     resTmpPk.resize(TMP_PK_BUFFER_SIZE);
     struct HksBlob tmpPk = { .size = TMP_PK_BUFFER_SIZE, .data = resTmpPk.data() };
-    ret = HksExportPublicKey(&g_tmpKeyPairAlias, nullptr, &tmpPk);
+    ret = HksExportPublicKeyForDe(&g_tmpKeyPairAlias, nullptr, &tmpPk);
     EXPECT_EQ(ret, HKS_SUCCESS) << "export tmp ecc pub key failed";
     // the exported key is in X.509 format, and the last part is the raw key.
     // we have verified that the length of public key will always be PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE bytes.
@@ -333,7 +334,7 @@ int32_t AgreeSharedKey(struct HksBlob &x509PubKey, struct HksBlob &sharedKey)
     int32_t ret = InitParamSet(&agreeParamSet.s, agreeParams, HKS_ARRAY_SIZE(agreeParams));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(agree) failed.";
 
-    ret = HksAgreeKey(agreeParamSet.s, &g_tmpKeyPairAlias, &x509PubKey, &sharedKey);
+    ret = HksAgreeKeyForDe(agreeParamSet.s, &g_tmpKeyPairAlias, &x509PubKey, &sharedKey);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     return ret;
@@ -355,7 +356,7 @@ int32_t HmacWrapKey(const struct HksBlob &sharedKey, const struct HksBlob &hmacM
     int32_t ret = InitParamSet(&importParamSet.s, importParams.data(), importParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksImportKey(&sharedKeyAlias, importParamSet.s, &sharedKey);
+    ret = HksImportKeyForDe(&sharedKeyAlias, importParamSet.s, &sharedKey);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // second, do hmac-sha256
@@ -378,10 +379,10 @@ int32_t HmacWrapKey(const struct HksBlob &sharedKey, const struct HksBlob &hmacM
     WrapParamSet hmacParamSet {};
     EXPECT_EQ(InitParamSet(&hmacParamSet.s, hmacParams, HKS_ARRAY_SIZE(hmacParams)), HKS_SUCCESS);
 
-    ret = HksMac(&sharedKeyAlias, hmacParamSet.s, &hmacMsg, &wrapKey);
+    ret = HksMacForDe(&sharedKeyAlias, hmacParamSet.s, &hmacMsg, &wrapKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "this case failed.";
 
-    static_cast<void>(HksDeleteKey(&sharedKeyAlias, nullptr));
+    static_cast<void>(HksDeleteKeyForDe(&sharedKeyAlias, nullptr));
     return ret;
 }
 
@@ -402,7 +403,7 @@ int32_t AesGcmEncrypt(const struct HksBlob &wrapKey, const struct HksBlob &plain
     int32_t ret = InitParamSet(&importParamSet.s, importParams.data(), importParams.size());
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    ret = HksImportKey(&wrapKeyAlias, importParamSet.s, &wrapKey);
+    ret = HksImportKeyForDe(&wrapKeyAlias, importParamSet.s, &wrapKey);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
     // second, generate random IV and aad
@@ -425,10 +426,10 @@ int32_t AesGcmEncrypt(const struct HksBlob &wrapKey, const struct HksBlob &plain
     ret = InitParamSet(&encryptParamSet.s, encryptParams, HKS_ARRAY_SIZE(encryptParams));
     EXPECT_EQ(ret, HKS_SUCCESS) << "InitParamSet(encrypt) failed.";
 
-    ret = HksEncrypt(&wrapKeyAlias, encryptParamSet.s, &plainText, &cipherText);
+    ret = HksEncryptForDe(&wrapKeyAlias, encryptParamSet.s, &plainText, &cipherText);
     EXPECT_EQ(ret, HKS_SUCCESS);
 
-    (void)HksDeleteKey(&wrapKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&wrapKeyAlias, nullptr);
     return ret;
 }
 
@@ -489,7 +490,7 @@ HksChipsetPlatformTestCase Encrypt(HksCipsetPlatformEncryptInput &input)
     res.mac = std::vector<uint8_t> { res.cipher.end() - PLATFORM_KEY_TAG_SIZE, res.cipher.end() };
     res.cipher = std::vector<uint8_t> { res.cipher.begin(), res.cipher.end() - PLATFORM_KEY_TAG_SIZE };
 
-    (void)HksDeleteKey(&g_tmpKeyPairAlias, nullptr);
+    (void)HksDeleteKeyForDe(&g_tmpKeyPairAlias, nullptr);
     return res;
 }
 
