@@ -26,6 +26,7 @@
 #include "hks_type.h"
 #include "hks_api.h"
 #include "hks_access_control_secure_sign_test.h"
+#include "hks_test_adapt_for_de.h"
 
 using namespace testing::ext;
 using namespace Unittest::HksAccessControlPartTest;
@@ -471,7 +472,7 @@ static int32_t CheckSignWithInfoTag(const struct HksBlob *alias, const struct Hk
     int32_t ret = GenParamSetAuthTest(&keyParamSet, paramSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenParamSetAuthTest failed.";
 
-    ret = HksGetKeyParamSet(alias, paramSet, keyParamSet);
+    ret = HksGetKeyParamSetForDe(alias, paramSet, keyParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGetKeyParamSet failed.";
 
     struct HksParam *secureParam = nullptr;
@@ -676,7 +677,7 @@ static void TestGenerateKeyWithSecureSignTag(struct HksTestSecureSignGenParams *
     /**
      * @tc.steps:step1. Generate a key with user_auth_type and sign_with_info tag
      */
-    ret = HksGenerateKey(params->keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(params->keyAlias, genParamSet, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksGenerateKey rsa key failed.";
 
     /**
@@ -688,7 +689,7 @@ static void TestGenerateKeyWithSecureSignTag(struct HksTestSecureSignGenParams *
     /**
      * @tc.steps:step3. Delete key and free paramSet
      */
-    HksDeleteKey(params->keyAlias, nullptr);
+    HksDeleteKeyForDe(params->keyAlias, nullptr);
     HksFreeParamSet(&genParamSet);
 }
 
@@ -701,7 +702,7 @@ int32_t TestImportKeyWithSecureSignTag(struct HksTestSecureSignImportParams *par
     /**
      * @tc.steps:step1. Import a key with user_auth_type and sign_with_info tag
      */
-    ret = HksImportKey(params->keyAlias, importParams, &params->importKey);
+    ret = HksImportKeyForDe(params->keyAlias, importParams, &params->importKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksImportKey key failed.";
 
     if (ifCheckTag) {
@@ -734,7 +735,7 @@ int32_t HksTestUpdateFinishSignAuthInfo(struct HksTestSecureSignVerifyUpdateFini
         return HKS_FAILURE;
     }
 
-    ret = HksInit(updateFinishParams->keyAlias, paramSet, &handle, &challenge);
+    ret = HksInitForDe(updateFinishParams->keyAlias, paramSet, &handle, &challenge);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
@@ -764,7 +765,7 @@ int32_t HksTestUpdateFinishSignAuthInfo(struct HksTestSecureSignVerifyUpdateFini
         ret = TestUpdateFinish(&handle, newParamSet, tmpParam->uint32Param, updateFinishParams->inData,
             updateFinishParams->outBuffer);
     } else {
-        ret = HksFinish(&handle, newParamSet, updateFinishParams->inData, updateFinishParams->outBuffer);
+        ret = HksFinishForDe(&handle, newParamSet, updateFinishParams->inData, updateFinishParams->outBuffer);
     }
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateFinish failed.";
     if (ret != HKS_SUCCESS) {
@@ -787,14 +788,14 @@ int32_t VerifyUpdateFinish(struct HksBlob *handle, struct HksParamSet *newParamS
             ret = TestUpdateFinish(handle, newParamSet, purposeParam->uint32Param, updateFinishParams->inData,
                 updateFinishParams->outBuffer);
         } else {
-            ret = HksFinish(handle, newParamSet, updateFinishParams->inData, updateFinishParams->outBuffer);
+            ret = HksFinishForDe(handle, newParamSet, updateFinishParams->inData, updateFinishParams->outBuffer);
         }
     } else {
         if (updateFinishParams->isThreeStageUse) {
             ret = TestUpdateFinish(handle, newParamSet, purposeParam->uint32Param, updateFinishParams->inData,
                 updateFinishParams->signature);
         } else {
-            ret = HksFinish(handle, newParamSet, updateFinishParams->inData, updateFinishParams->signature);
+            ret = HksFinishForDe(handle, newParamSet, updateFinishParams->inData, updateFinishParams->signature);
         }
     }
     return ret;
@@ -814,7 +815,7 @@ int32_t HksTestUpdateFinishVerifySignAuthInfo(struct HksTestSecureSignVerifyUpda
         return HKS_FAILURE;
     }
 
-    ret = HksInit(updateFinishParams->keyAlias, paramSet, &handle, &challenge);
+    ret = HksInitForDe(updateFinishParams->keyAlias, paramSet, &handle, &challenge);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&paramSet);
         return HKS_FAILURE;
@@ -952,8 +953,8 @@ static void TestImportKeyWithSignTagAndTestUseKeyCommonCase(uint32_t alg, bool i
 
     HKS_FREE_BLOB(importParams.importKey);
     HKS_FREE_BLOB(importParamsWithoutSignAuth.importKey);
-    HksDeleteKey(secureSignUpdateFinish.keyAlias, nullptr);
-    HksDeleteKey(secureSignUpdateFinish.keyAliasNoAuth, nullptr);
+    HksDeleteKeyForDe(secureSignUpdateFinish.keyAlias, nullptr);
+    HksDeleteKeyForDe(secureSignUpdateFinish.keyAliasNoAuth, nullptr);
 }
 
 /**

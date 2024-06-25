@@ -22,6 +22,7 @@
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 #include "hks_type.h"
 
@@ -47,7 +48,7 @@ public:
         if (paramInSet == nullptr) {
             return HKS_ERROR_MALLOC_FAIL;
         }
-        ret = HksGenerateKey(&authId, paramInSet, nullptr);
+        ret = HksGenerateKeyForDe(&authId, paramInSet, nullptr);
         EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
         HksFreeParamSet(&paramInSet);
 
@@ -87,9 +88,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt00100, TestSize.Level0)
     struct HksBlob testAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_SUCCESS);
+        EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, &publicKey), HKS_SUCCESS);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -102,9 +103,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0020, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKeyMt100Params), HKS_SUCCESS);
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(nullptr, nullptr, &publicKey), HKS_ERROR_NULL_POINTER);
+        EXPECT_EQ(HksExportPublicKeyForDe(nullptr, nullptr, &publicKey), HKS_ERROR_NULL_POINTER);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -116,8 +117,8 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0030, TestSize.Level0)
 {
     EXPECT_EQ(RunTestCase(g_huksExportKeyMt100Params), HKS_SUCCESS);
     struct HksBlob testAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
-    EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, nullptr), HKS_ERROR_NULL_POINTER);
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, nullptr), HKS_ERROR_NULL_POINTER);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
 }
 /**
  * @tc.number    : HksExportTestMt00400
@@ -130,9 +131,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0040, TestSize.Level0)
     struct HksBlob testAlias = { 0, (uint8_t *)keyAliasString };
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
+        EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -148,9 +149,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0050, TestSize.Level0)
     struct HksBlob testAlias = { SET_SIZE_4096, testAliasString };
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
+        EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -164,9 +165,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0060, TestSize.Level0)
     struct HksBlob testAlias = { strlen(keyAliasString), nullptr };
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
+        EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, &publicKey), HKS_ERROR_INVALID_ARGUMENT);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -179,9 +180,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0070, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKeyMt100Params), HKS_SUCCESS);
     HksBlob publicKey = { 0, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&authId, nullptr, &publicKey), HKS_ERROR_INSUFFICIENT_DATA);
+        EXPECT_EQ(HksExportPublicKeyForDe(&authId, nullptr, &publicKey), HKS_ERROR_INSUFFICIENT_DATA);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -194,9 +195,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0080, TestSize.Level0)
     EXPECT_EQ(RunTestCase(g_huksExportKeyMt100Params), HKS_SUCCESS);
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, nullptr };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&authId, nullptr, &publicKey), HKS_ERROR_BAD_STATE);
+        EXPECT_EQ(HksExportPublicKeyForDe(&authId, nullptr, &publicKey), HKS_ERROR_BAD_STATE);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_SUCCESS);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_SUCCESS);
     HKS_FREE(publicKey.data);
 }
 /**
@@ -209,9 +210,9 @@ HWTEST_F(HksExportTestMt, HksExportTestMt0090, TestSize.Level0)
     struct HksBlob testAlias = { strlen(keyAliasString), (uint8_t *)keyAliasString };
     HksBlob publicKey = { .size = HKS_ECC_KEY_SIZE_256, .data = (uint8_t *)HksMalloc(HKS_ECC_KEY_SIZE_256) };
     if (publicKey.data != nullptr) {
-        EXPECT_EQ(HksExportPublicKey(&testAlias, nullptr, &publicKey), HKS_ERROR_NOT_EXIST);
+        EXPECT_EQ(HksExportPublicKeyForDe(&testAlias, nullptr, &publicKey), HKS_ERROR_NOT_EXIST);
     }
-    EXPECT_EQ(HksDeleteKey(&authId, nullptr), HKS_ERROR_NOT_EXIST);
+    EXPECT_EQ(HksDeleteKeyForDe(&authId, nullptr), HKS_ERROR_NOT_EXIST);
     HKS_FREE(publicKey.data);
 }
 }

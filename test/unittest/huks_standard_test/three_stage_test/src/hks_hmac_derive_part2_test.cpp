@@ -14,6 +14,7 @@
  */
 
 #include "hks_hmac_derive_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -225,7 +226,7 @@ HWTEST_F(HksHmacDerivePart2Test, HksHMACDerive010, TestSize.Level0)
     HksHmacDeriveTestCmpCase(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet);
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -261,7 +262,7 @@ HWTEST_F(HksHmacDerivePart2Test, HksHMACDerive011, TestSize.Level0)
     HksHmacDeriveTestNormalCase1(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_SUCCESS);
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -297,7 +298,7 @@ HWTEST_F(HksHmacDerivePart2Test, HksHMACDerive012, TestSize.Level0)
     HksHmacDeriveTestNormalCase1(keyAlias, genParamSet, hkdfParamSet, hkdfFinishParamSet, HKS_ERROR_BAD_STATE);
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

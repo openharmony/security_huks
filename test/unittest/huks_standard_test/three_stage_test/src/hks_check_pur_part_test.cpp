@@ -14,6 +14,7 @@
  */
 
 #include "hks_check_pur_part_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -256,7 +257,7 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
 
     uint8_t alias[] = "testCheckPurpose";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
         HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
@@ -273,12 +274,12 @@ static int32_t CheckPurposeTest(const TestPurposeCaseParams &testCaseParams)
 
     uint64_t handle = 0;
     struct HksBlob handleBlob = { sizeof(handle), (uint8_t *)&handle };
-    ret = HksInit(&keyAlias, initParamSet, &handleBlob, nullptr);
+    ret = HksInitForDe(&keyAlias, initParamSet, &handleBlob, nullptr);
     EXPECT_EQ(ret, testCaseParams.initResult);
 
     HksFreeParamSet(&genParamSet);
     HksFreeParamSet(&initParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
 
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
 }

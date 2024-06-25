@@ -16,7 +16,7 @@ import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 config("huks_config") {
-  include_dirs = [ "include" ]
+  include_dirs = [ "." ]
 }
 
 if (os_level == "standard") {

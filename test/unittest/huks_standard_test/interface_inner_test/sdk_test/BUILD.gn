@@ -47,6 +47,7 @@ ohos_unittest("hukssdk_test") {
     "./src/hks_test_mem.c",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_bn_exp_mod_test_func.cpp",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_modify_key_test_func.cpp",
+    "//base/security/huks/test/unittest/huks_common_test/src/hks_test_adapt_for_de.c",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_test_aes_func.cpp",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_test_cipher_func.cpp",
     "//base/security/huks/test/unittest/huks_common_test/src/hks_test_common_func.cpp",

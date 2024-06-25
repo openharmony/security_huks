@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_common_c.h"
 
 int32_t TestConstuctBlob(struct HksBlob **blob, bool blobExist, uint32_t blobSize, bool blobDataExist,
@@ -563,7 +564,7 @@ int32_t GenerateKey(struct HksBlob **keyAlias, const struct HksTestBlobParams *k
         HKS_TEST_ASSERT(ret == 0);
     }
 
-    ret = HksGenerateKey(*keyAlias, paramSet, paramSetOut);
+    ret = HksGenerateKeyForDe(*keyAlias, paramSet, paramSetOut);
     HKS_TEST_ASSERT(ret == 0);
 
     HksFreeParamSet(&paramSet);
@@ -651,7 +652,7 @@ int32_t GenerateLocalX25519Key(struct HksBlob **privateKey, struct HksBlob **pub
     ret = TestConstructGenerateKeyParamSetOut(&paramSetOut, true, HKS_TEST_COMMON_128);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksGenerateKey(NULL, paramSet, paramSetOut);
+    ret = HksGenerateKeyForDe(NULL, paramSet, paramSetOut);
     HKS_TEST_ASSERT(ret == 0);
 
     if ((publicKey != NULL) && ((*publicKey) != NULL) && (localPublicKeyParams != NULL) &&
@@ -711,7 +712,7 @@ int32_t TestGenDefaultKeyAndGetAlias(struct HksBlob **keyAlias)
     ret = TestConstructGenerateKeyParamSet(&paramStruct);
     HKS_TEST_ASSERT(ret == 0);
 
-    ret = HksGenerateKey(*keyAlias, paramSet, NULL);
+    ret = HksGenerateKeyForDe(*keyAlias, paramSet, NULL);
     HKS_TEST_ASSERT(ret == 0);
 
     HksFreeParamSet(&paramSet);

@@ -16,6 +16,7 @@
 #include <gtest/gtest.h>
 
 #include "hks_others_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include "hks_api.h"
 #include "hks_param.h"
@@ -59,7 +60,7 @@ void HksOthersTest::TearDown()
  */
 HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level0)
 {
-    int32_t ret = HksGetKeyParamSet(NULL, NULL, NULL);
+    int32_t ret = HksGetKeyParamSetForDe(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -70,7 +71,7 @@ HWTEST_F(HksOthersTest, HksOthersTest001, TestSize.Level0)
  */
 HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level0)
 {
-    int32_t ret = HksGetKeyInfoList(NULL, NULL, NULL);
+    int32_t ret = HksGetKeyInfoListForDe(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -81,7 +82,7 @@ HWTEST_F(HksOthersTest, HksOthersTest002, TestSize.Level0)
  */
 HWTEST_F(HksOthersTest, HksOthersTest003, TestSize.Level0)
 {
-    int32_t ret = HksAttestKey(NULL, NULL, NULL);
+    int32_t ret = HksAttestKeyForDe(NULL, NULL, NULL);
     ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 

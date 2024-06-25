@@ -14,6 +14,7 @@
  */
 
 #include "hks_attest_key_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <cstdlib>
 #include <gtest/gtest.h>
@@ -93,7 +94,7 @@ int32_t TestGenerateKeyCommon(const struct HksBlob *keyAlias, const struct HksPa
 
     int32_t ret = GenerateParamSet(&paramSet, tmpParams, paramCount);
 
-    ret = HksGenerateKey(keyAlias, paramSet, nullptr);
+    ret = HksGenerateKeyForDe(keyAlias, paramSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("HksGenerateKey failed");
     }

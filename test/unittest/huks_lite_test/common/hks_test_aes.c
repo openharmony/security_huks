@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_test_adapt_for_de.h"
 #include "hks_test_aes_c.h"
 
 #define TEST_AES_32 32
@@ -52,7 +53,7 @@ int32_t TestAes256ByLocal()
     struct HksBlob plainText1 = { strlen(TEST_PLAIN_TEST) + 1, (uint8_t*)TEST_PLAIN_TEST };
     struct HksBlob cipherText1 = { TEST_AES_256, g_buffer };
     (void)memset_s(cipherText1.data, cipherText1.size, 0, cipherText1.size);
-    HKS_TEST_ASSERT(HksEncrypt(&keyBlob, paramSet, &plainText1, &cipherText1) == 0);
+    HKS_TEST_ASSERT(HksEncryptForDe(&keyBlob, paramSet, &plainText1, &cipherText1) == 0);
     g_bufferSize = cipherText1.size;
 
     HksFreeParamSet(&paramSet);
@@ -72,7 +73,7 @@ int32_t TestAes256ByLocal()
     struct HksBlob cipherText = { g_bufferSize, g_buffer };
     uint8_t tmp[TEST_AES_256] = {0};
     struct HksBlob plainText = { TEST_AES_256, tmp };
-    ret = HksDecrypt(&keyBlob, paramSet, &cipherText, &plainText);
+    ret = HksDecryptForDe(&keyBlob, paramSet, &cipherText, &plainText);
     HKS_TEST_ASSERT(ret == 0);
     HKS_TEST_ASSERT(plainText1.size == plainText.size);
     HKS_TEST_ASSERT(memcmp(plainText.data, plainText1.data, plainText.size) == 0);

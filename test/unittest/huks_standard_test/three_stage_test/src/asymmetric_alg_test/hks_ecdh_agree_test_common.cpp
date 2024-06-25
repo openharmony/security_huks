@@ -14,6 +14,7 @@
  */
 
 #include "hks_ecdh_agree_test_common.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -29,7 +30,7 @@ int32_t HksEcdhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob 
 
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, initParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -37,13 +38,13 @@ int32_t HksEcdhAgreeFinish(const struct HksBlob *keyAlias, const struct HksBlob 
 
     uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
     struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
-    ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
+    ret = HksUpdateForDe(&handle, initParamSet, publicKey, &outDataUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
 
-    ret = HksFinish(&handle, finishParamSet, &inData, outData);
+    ret = HksFinishForDe(&handle, finishParamSet, &inData, outData);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Finish failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -56,7 +57,7 @@ int32_t HksEcdhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *
 {
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    int32_t ret = HksInit(keyAlias, initParamSet, &handle, nullptr);
+    int32_t ret = HksInitForDe(keyAlias, initParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -64,7 +65,7 @@ int32_t HksEcdhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *
 
     uint8_t outDataU[ECDH_COMMON_SIZE] = {0};
     struct HksBlob outDataUpdate = { ECDH_COMMON_SIZE, outDataU };
-    ret = HksUpdate(&handle, initParamSet, publicKey, &outDataUpdate);
+    ret = HksUpdateForDe(&handle, initParamSet, publicKey, &outDataUpdate);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Update failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
@@ -81,12 +82,12 @@ int32_t HksEcdhAgreeAbort(const struct HksBlob *keyAlias, const struct HksBlob *
 int32_t HksEcdhAgreeExport(const struct HksBlob *keyAlias1, const struct HksBlob *keyAlias2,
     struct HksBlob *publicKey1, struct HksBlob *publicKey2, const struct HksParamSet *genParamSet)
 {
-    int32_t ret = HksExportPublicKey(keyAlias1, genParamSet, publicKey1);
+    int32_t ret = HksExportPublicKeyForDe(keyAlias1, genParamSet, publicKey1);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey01 failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;
     }
-    ret = HksExportPublicKey(keyAlias2, genParamSet, publicKey2);
+    ret = HksExportPublicKeyForDe(keyAlias2, genParamSet, publicKey2);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey02 failed.";
     if (ret != HKS_SUCCESS) {
         return HKS_FAILURE;

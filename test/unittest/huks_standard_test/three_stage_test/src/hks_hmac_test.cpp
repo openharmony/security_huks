@@ -14,6 +14,7 @@
  */
 
 #include "hks_hmac_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -344,7 +345,7 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     struct HksBlob inData = { (uint32_t)g_inData.length(), (uint8_t *)g_inData.c_str() };
 
     /* 1. Generate Key */
-    int32_t ret = HksGenerateKey(keyAlias, genParamSet, nullptr);
+    int32_t ret = HksGenerateKeyForDe(keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_I("GenerateKey failed");
         return ret;
@@ -353,10 +354,10 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     /* 2. HMAC One Stage */
     uint8_t tmpMac[Unittest::Hmac::COMMON_SIZE] = {0};
     struct HksBlob mac = { Unittest::Hmac::COMMON_SIZE, tmpMac };
-    ret = HksMac(keyAlias, hmacParamSet, &inData, &mac);
+    ret = HksMacForDe(keyAlias, hmacParamSet, &inData, &mac);
     EXPECT_EQ(ret, HKS_SUCCESS) << "HksMac failed.";
     if (ret != HKS_SUCCESS) {
-        HksDeleteKey(keyAlias, genParamSet);
+        HksDeleteKeyForDe(keyAlias, genParamSet);
         return ret;
     }
 
@@ -364,10 +365,10 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     // Init
     uint8_t handle[sizeof(uint64_t)] = {0};
     struct HksBlob handleHMAC = { sizeof(uint64_t), handle };
-    ret = HksInit(keyAlias, hmacParamSet, &handleHMAC, nullptr);
+    ret = HksInitForDe(keyAlias, hmacParamSet, &handleHMAC, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     if (ret != HKS_SUCCESS) {
-        HksDeleteKey(keyAlias, genParamSet);
+        HksDeleteKeyForDe(keyAlias, genParamSet);
         return ret;
     }
     // Update & Finish
@@ -375,13 +376,13 @@ static int32_t HksHmacTestCase(const struct HksBlob *keyAlias, struct HksParamSe
     struct HksBlob outData = { Unittest::Hmac::COMMON_SIZE, out };
     ret = TestUpdateFinish(&handleHMAC, hmacParamSet, HKS_KEY_PURPOSE_MAC, &inData, &outData);
     if (ret != HKS_SUCCESS) {
-        HksDeleteKey(keyAlias, genParamSet);
+        HksDeleteKeyForDe(keyAlias, genParamSet);
         return ret;
     }
     EXPECT_EQ(HksMemCmp(mac.data, outData.data, outData.size), HKS_SUCCESS);
 
     /* 3. Delete Key */
-    ret = HksDeleteKey(keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
     return ret;
 }
@@ -527,7 +528,7 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
 #endif
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, NULL);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. HMAC Three Stage(Abort) */
@@ -540,7 +541,7 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(&keyAlias, hmacParamSet, &handle, nullptr);
+    ret = HksInitForDe(&keyAlias, hmacParamSet, &handle, nullptr);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Init failed.";
     // Update loop
     ret = HksTestUpdate(&handle, hmacParamSet, &inData);
@@ -549,7 +550,7 @@ HWTEST_F(HksHmacTest, HksHmacTest006, TestSize.Level0)
     ret = HksAbort(&handle, hmacParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "Abort failed.";
 
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);
@@ -575,7 +576,7 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     ret = InitParamSet(&genParamSet, g_genParams003, sizeof(g_genParams003) / sizeof(HksParam));
 #endif
     // Generate Key
-    ret = HksGenerateKey(&keyAlias, genParamSet, NULL);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, NULL);
     EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
     /* 2. HMAC Three Stage(Abort) */
@@ -589,10 +590,10 @@ HWTEST_F(HksHmacTest, HksHmacTest007, TestSize.Level0)
     // Init
     uint8_t handleU[sizeof(uint64_t)] = {0};
     struct HksBlob handle = { sizeof(uint64_t), handleU };
-    ret = HksInit(NULL, hmacParamSet, &handle, nullptr);
+    ret = HksInitForDe(NULL, hmacParamSet, &handle, nullptr);
     EXPECT_NE(ret, HKS_SUCCESS) << "Init should failed.";
 
-    ret = HksDeleteKey(&keyAlias, genParamSet);
+    ret = HksDeleteKeyForDe(&keyAlias, genParamSet);
     EXPECT_EQ(ret, HKS_SUCCESS) << "DeleteKey failed.";
 
     HksFreeParamSet(&genParamSet);

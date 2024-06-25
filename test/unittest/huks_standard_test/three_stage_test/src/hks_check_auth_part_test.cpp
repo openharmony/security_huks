@@ -14,6 +14,7 @@
  */
 
 #include "hks_check_auth_part_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 
@@ -322,7 +323,7 @@ static int32_t CheckGenAuthTest(const TestAuthCaseParams &testCaseParams)
     }
     uint8_t alias[] = "testCheckAuth";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
         HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
@@ -332,7 +333,7 @@ static int32_t CheckGenAuthTest(const TestAuthCaseParams &testCaseParams)
     struct HksParamSet *paramOutSet = nullptr;
     getParamSetAuthTest(&paramOutSet, genParamSet);
 
-    ret = HksGetKeyParamSet(&keyAlias, genParamSet, paramOutSet);
+    ret = HksGetKeyParamSetForDe(&keyAlias, genParamSet, paramOutSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -347,7 +348,7 @@ static int32_t CheckGenAuthTest(const TestAuthCaseParams &testCaseParams)
 
     HksFreeParamSet(&paramOutSet);
     HksFreeParamSet(&genParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
 
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
 }
@@ -364,7 +365,7 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
 
     uint8_t alias[] = "testCheckAuth";
     struct HksBlob keyAlias = { sizeof(alias), alias };
-    ret = HksGenerateKey(&keyAlias, genParamSet, nullptr);
+    ret = HksGenerateKeyForDe(&keyAlias, genParamSet, nullptr);
     if (ret != HKS_SUCCESS) {
         HksFreeParamSet(&genParamSet);
         HKS_LOG_I("HksGenerateKey failed, ret : %" LOG_PUBLIC "d", ret);
@@ -382,10 +383,10 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
     struct HksBlob newKeyAlias = { .size = strlen(tmpKey), .data = (uint8_t *)tmpKey };
     uint8_t tmpPublicKey[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, (uint8_t *)tmpPublicKey };
-    ret = HksExportPublicKey(&keyAlias, genParamSet, &publicKey);
-    ret = HksImportKey(&newKeyAlias, initParamSet, &publicKey);
+    ret = HksExportPublicKeyForDe(&keyAlias, genParamSet, &publicKey);
+    ret = HksImportKeyForDe(&newKeyAlias, initParamSet, &publicKey);
 
-    ret = HksGetKeyParamSet(&newKeyAlias, initParamSet, paramOutSet);
+    ret = HksGetKeyParamSetForDe(&newKeyAlias, initParamSet, paramOutSet);
     if (ret != HKS_SUCCESS) {
         return ret;
     }
@@ -398,7 +399,7 @@ static int32_t CheckImportAuthTest(const TestAuthCaseParams &testCaseParams)
 
     HksFreeParamSet(&paramOutSet);
     HksFreeParamSet(&genParamSet);
-    (void)HksDeleteKey(&keyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&keyAlias, nullptr);
     return (ret == testCaseParams.initResult) ? HKS_SUCCESS : HKS_FAILURE;
 }
 

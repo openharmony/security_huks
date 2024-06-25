@@ -16,6 +16,7 @@
 #ifndef _CUT_AUTHENTICATE_
 
 #include "hks_others_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <hctest.h>
 #include "hi_watchdog.h"
@@ -61,7 +62,7 @@ static BOOL HksOthersTestTearDown()
  */
 LITE_TEST_CASE(HksOthersTest, HksOthersTest001, Level1)
 {
-    int32_t ret = HksGetKeyParamSet(NULL, NULL, NULL);
+    int32_t ret = HksGetKeyParamSetForDe(NULL, NULL, NULL);
     TEST_ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -72,7 +73,7 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest001, Level1)
  */
 LITE_TEST_CASE(HksOthersTest, HksOthersTest002, Level1)
 {
-    int32_t ret = HksGetKeyInfoList(NULL, NULL, NULL);
+    int32_t ret = HksGetKeyInfoListForDe(NULL, NULL, NULL);
     TEST_ASSERT_TRUE(ret == HKS_ERROR_NULL_POINTER);
 }
 
@@ -83,7 +84,7 @@ LITE_TEST_CASE(HksOthersTest, HksOthersTest002, Level1)
  */
 LITE_TEST_CASE(HksOthersTest, HksOthersTest003, Level1)
 {
-    int32_t ret = HksAttestKey(NULL, NULL, NULL);
+    int32_t ret = HksAttestKeyForDe(NULL, NULL, NULL);
     TEST_ASSERT_TRUE(ret == HKS_ERROR_API_NOT_SUPPORTED);
 }
 

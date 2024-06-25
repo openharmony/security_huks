@@ -14,6 +14,7 @@
  */
 
 #include "hks_import_rsa_test.h"
+#include "hks_test_adapt_for_de.h"
 
 #include <gtest/gtest.h>
 #include <hks_log.h>
@@ -527,7 +528,7 @@ static int32_t ImportKey(const struct HksBlob *keyAlias, const struct HksParam *
         HksFreeParamSet(&paramSet);
         return ret;
     }
-    ret = HksImportKey(keyAlias, paramSet, &key);
+    ret = HksImportKeyForDe(keyAlias, paramSet, &key);
     HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -549,7 +550,7 @@ static int32_t ImportKeyNew(const struct HksBlob *keyAlias, const struct HksPara
         HksFreeParamSet(&paramSet);
         return ret;
     }
-    ret = HksImportKey(keyAlias, paramSet, &key);
+    ret = HksImportKeyForDe(keyAlias, paramSet, &key);
     HKS_FREE(key.data);
     HksFreeParamSet(&paramSet);
     return ret;
@@ -627,7 +628,7 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
     do {
         uint64_t handleValue = 0;
         struct HksBlob handle = { sizeof(uint64_t), (uint8_t *)&handleValue };
-        ret = HksInit(keyAlias, initParamSetTest, &handle, nullptr);
+        ret = HksInitForDe(keyAlias, initParamSetTest, &handle, nullptr);
         if (ret != HKS_SUCCESS) {
             break;
         }
@@ -636,16 +637,16 @@ static int32_t DoOpDetail(const struct HksBlob *keyAlias, const struct HksParam 
         struct HksBlob tmpBlob = { LENGTH_TO_BE_OPERATED, tempBuf };
         struct HksBlob tmpBlob2 = { 0, nullptr };
 
-        ret = HksUpdate(&handle, updateParamSet, inData, &tmpBlob);
+        ret = HksUpdateForDe(&handle, updateParamSet, inData, &tmpBlob);
         if (ret != HKS_SUCCESS) {
             break;
         }
         
         // The caller guarantees that the access will not cross the border
         if (initParams[TAG_PURPOSE_ID].uint32Param == HKS_KEY_PURPOSE_VERIFY) {
-            ret = HksFinish(&handle, finishParamSet, outData, &tmpBlob2);
+            ret = HksFinishForDe(&handle, finishParamSet, outData, &tmpBlob2);
         } else {
-            ret = HksFinish(&handle, finishParamSet, &tmpBlob2, outData);
+            ret = HksFinishForDe(&handle, finishParamSet, &tmpBlob2, outData);
         }
     } while (0);
 
@@ -782,13 +783,13 @@ static void RsaImportPlainKeyAnotherTest(uint32_t purpose, uint32_t keySize, uin
     // export public key
     uint8_t pubKeyTest[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKeyTest };
-    ret = HksExportPublicKey(&pubKeyAlias, nullptr, &publicKey);
+    ret = HksExportPublicKeyForDe(&pubKeyAlias, nullptr, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     // delete keys
-    (void)HksDeleteKey(&priKeyAlias, nullptr);
-    (void)HksDeleteKey(&pairKeyAlias, nullptr);
-    (void)HksDeleteKey(&pubKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&priKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&pairKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&pubKeyAlias, nullptr);
 }
 
 static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)
@@ -837,13 +838,13 @@ static void RsaImportPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t p
     // export public key
     uint8_t pubKey[HKS_RSA_KEY_SIZE_1024] = {0};
     struct HksBlob publicKey = { HKS_RSA_KEY_SIZE_1024, pubKey };
-    ret = HksExportPublicKey(&pubKeyAlias, nullptr, &publicKey);
+    ret = HksExportPublicKeyForDe(&pubKeyAlias, nullptr, &publicKey);
     EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
     // delete keys
-    (void)HksDeleteKey(&priKeyAlias, nullptr);
-    (void)HksDeleteKey(&pairKeyAlias, nullptr);
-    (void)HksDeleteKey(&pubKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&priKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&pairKeyAlias, nullptr);
+    (void)HksDeleteKeyForDe(&pubKeyAlias, nullptr);
 }
 
 static void ImportRsaPlainKeyTest(uint32_t purpose, uint32_t keySize, uint32_t padding, uint32_t digest)

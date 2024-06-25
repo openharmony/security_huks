@@ -22,6 +22,7 @@
 #include "hks_api.h"
 #include "hks_mem.h"
 #include "hks_param.h"
+#include "hks_test_adapt_for_de.h"
 #include "hks_three_stage_test_common.h"
 #include "hks_type.h"
 
@@ -55,7 +56,7 @@ public:
             return ret;
         }
 
-        ret = HksGenerateKey(&authId, paramInSet, nullptr);
+        ret = HksGenerateKeyForDe(&authId, paramInSet, nullptr);
         HksFreeParamSet(&paramInSet);
         EXPECT_EQ(ret, HKS_SUCCESS) << "GenerateKey failed.";
 
@@ -64,11 +65,11 @@ public:
         if (publicKey.data == nullptr) {
             return HKS_ERROR_MALLOC_FAIL;
         }
-        ret = HksExportPublicKey(&authId, nullptr, &publicKey);
+        ret = HksExportPublicKeyForDe(&authId, nullptr, &publicKey);
         EXPECT_EQ(ret, HKS_SUCCESS) << "ExportPublicKey failed.";
 
         /* 3. Delete Key */
-        (void)HksDeleteKey(&authId, nullptr);
+        (void)HksDeleteKeyForDe(&authId, nullptr);
         HKS_FREE(publicKey.data);
 
         return ret;
