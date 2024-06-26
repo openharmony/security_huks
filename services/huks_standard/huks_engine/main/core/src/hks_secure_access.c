@@ -898,7 +898,6 @@ static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUse
     };
     switch (authToken->plaintextData.tokenType) {
         case TOKEN_TYPE_LOCAL_AUTH:
-            break;
         case TOKEN_TYPE_LOCAL_RESIGN:
             break;
         case TOKEN_TYPE_COAUTH:
