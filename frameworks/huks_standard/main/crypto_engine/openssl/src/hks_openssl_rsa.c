@@ -152,6 +152,35 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
     return rsa;
 }
 
+int32_t HksOpensslCheckRsaKey(const struct HksBlob *key)
+{
+    struct KeyMaterialRsa *pubKeyMaterial = (struct KeyMaterialRsa *)key->data;
+    BIGNUM *e = BN_new();
+    BIGNUM *eMin = BN_new();
+    uint8_t bnE[] = { 0x01, 0x00, 0x01 };
+    int32_t ret = HKS_SUCCESS;
+    do {
+        e = BN_bin2bn(key->data + sizeof(struct KeyMaterialRsa) + pubKeyMaterial->nSize, pubKeyMaterial->eSize, NULL);
+        if (e == NULL) {
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+        eMin = BN_bin2bn(bnE, sizeof(bnE), NULL);
+        if (eMin == NULL) {
+            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+            break;
+        }
+        if (BN_cmp(e, eMin) < 0) {
+            HKS_LOG_E("rsa public key is not secure");
+            ret = HKS_ERROR_INVALID_KEY_INFO;
+        }
+    } while (0);
+
+    BN_free(e);
+    BN_free(eMin);
+    return ret;
+}
+
 #ifdef HKS_SUPPORT_RSA_GENERATE_KEY
 static int32_t RsaSaveKeyMaterial(const RSA *rsa, const uint32_t keySize, struct HksBlob *key)
 {

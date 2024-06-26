@@ -671,6 +671,32 @@ const ImportKeyCaseParams HKS_IMPORT_TEST_044_PARAMS = {
     .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
 };
 
+/* 045: insecure rsa key */
+const ImportKeyCaseParams HKS_IMPORT_TEST_045_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_RSA },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_SIGN },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_RSA_KEY_SIZE_2048 },
+            { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR },
+        },
+    .keySize = HKS_RSA_KEY_SIZE_2048 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
+};
+
+/* 046: insecure dh key */
+const ImportKeyCaseParams HKS_IMPORT_TEST_046_PARAMS = {
+    .params =
+        {
+            { .tag = HKS_TAG_ALGORITHM, .uint32Param = HKS_ALG_DH },
+            { .tag = HKS_TAG_PURPOSE, .uint32Param = HKS_KEY_PURPOSE_AGREE },
+            { .tag = HKS_TAG_KEY_SIZE, .uint32Param = HKS_DH_KEY_SIZE_2048 },
+            { .tag = HKS_TAG_IMPORT_KEY_TYPE, .uint32Param = HKS_KEY_TYPE_KEY_PAIR },
+        },
+    .keySize = HKS_DH_KEY_SIZE_2048 / HKS_BITS_PER_BYTE,
+    .importKeyResult = HKS_ERROR_INVALID_KEY_INFO,
+};
+
 static int32_t ImportTest(const ImportKeyCaseParams &testCaseParams)
 {
     struct HksParamSet *importParamSet = nullptr;
@@ -692,6 +718,48 @@ static int32_t ImportTest(const ImportKeyCaseParams &testCaseParams)
     ret = HksImportKeyForDe(&keyAlias, importParamSet, &key);
     HksFreeParamSet(&importParamSet);
     HKS_FREE(key.data);
+    EXPECT_EQ(ret, testCaseParams.importKeyResult);
+    if (ret == HKS_SUCCESS) {
+        (void)HksDeleteKeyForDe(&keyAlias, nullptr);
+    }
+
+    return (ret == testCaseParams.importKeyResult) ? HKS_SUCCESS : HKS_FAILURE;
+}
+
+static int32_t ImportTestForRsa(const ImportKeyCaseParams &testCaseParams)
+{
+    struct HksParamSet *importParamSet = nullptr;
+    int32_t ret = InitParamSet(&importParamSet, testCaseParams.params.data(), testCaseParams.params.size());
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+    
+    struct HksBlob key = { sizeof(rsaKeyData), rsaKeyData };
+    uint8_t alias[] = "test_import_key_rsa";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    ret = HksImportKeyForDe(&keyAlias, importParamSet, &key);
+    HksFreeParamSet(&importParamSet);
+    EXPECT_EQ(ret, testCaseParams.importKeyResult);
+    if (ret == HKS_SUCCESS) {
+        (void)HksDeleteKeyForDe(&keyAlias, nullptr);
+    }
+
+    return (ret == testCaseParams.importKeyResult) ? HKS_SUCCESS : HKS_FAILURE;
+}
+
+static int32_t ImportTestForDh(const ImportKeyCaseParams &testCaseParams)
+{
+    struct HksParamSet *importParamSet = nullptr;
+    int32_t ret = InitParamSet(&importParamSet, testCaseParams.params.data(), testCaseParams.params.size());
+    if (ret != HKS_SUCCESS) {
+        return ret;
+    }
+
+    struct HksBlob key = { sizeof(dhKeyData), dhKeyData };
+    uint8_t alias[] = "test_import_key_dh";
+    struct HksBlob keyAlias = { sizeof(alias), alias };
+    ret = HksImportKeyForDe(&keyAlias, importParamSet, &key);
+    HksFreeParamSet(&importParamSet);
     EXPECT_EQ(ret, testCaseParams.importKeyResult);
     if (ret == HKS_SUCCESS) {
         (void)HksDeleteKeyForDe(&keyAlias, nullptr);
@@ -930,5 +998,15 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest042, TestSize.Level0)
 HWTEST_F(HksImportKeyTest, HksImportKeyTest044, TestSize.Level0)
 {
     EXPECT_EQ(ImportTest(HKS_IMPORT_TEST_044_PARAMS), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest045, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTestForRsa(HKS_IMPORT_TEST_045_PARAMS), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest046, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS), HKS_SUCCESS);
 }
 } // namespace Unittest::ImportKeyTest

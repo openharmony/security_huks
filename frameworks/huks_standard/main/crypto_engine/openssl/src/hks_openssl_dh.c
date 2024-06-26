@@ -54,7 +54,7 @@ static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
     }
 }
 
-static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponent)
+static DH *InitDhStruct(const struct HksBlob *key)
 {
     const struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)(key->data);
     if (key->size != sizeof(struct KeyMaterialDh) + keyMaterial->pubKeySize + keyMaterial->priKeySize) {
@@ -77,6 +77,32 @@ static DH *InitDhStruct(const struct HksBlob *key, const bool needPrivateExponen
     BIGNUM *privKey = BN_bin2bn(key->data + offset, keyMaterial->priKeySize, NULL);
 
     if (DH_set0_key(dh, pubKey, privKey) != HKS_OPENSSL_SUCCESS) {
+        HksLogOpensslError();
+        DH_free(dh);
+        return NULL;
+    }
+
+    return dh;
+}
+
+static DH *InitDhPubStruct(const struct HksBlob *key)
+{
+    const struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)(key->data);
+
+    int nid = 0;
+    int32_t ret = HksOpensslGetNid(keyMaterial->keySize, &nid);
+    HKS_IF_NOT_SUCC_RETURN(ret, NULL)
+
+    DH *dh = DH_new_by_nid(nid);
+    if (dh == NULL) {
+        HksLogOpensslError();
+        return NULL;
+    }
+
+    uint32_t offset = sizeof(struct KeyMaterialDh);
+    BIGNUM *pubKey = BN_bin2bn(key->data + offset, keyMaterial->pubKeySize, NULL);
+
+    if (DH_set0_key(dh, pubKey, NULL) != HKS_OPENSSL_SUCCESS) {
         HksLogOpensslError();
         DH_free(dh);
         return NULL;
@@ -163,6 +189,89 @@ int32_t HksOpensslGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
 #endif /* HKS_SUPPORT_DH_GET_PUBLIC_KEY */
 
 #ifdef HKS_SUPPORT_DH_AGREE_KEY
+static void HksFreeBigNum(BIGNUM *p, BIGNUM *one, BIGNUM *r, BIGNUM *pub)
+{
+    if (p != NULL) {
+        BN_free(p);
+    }
+    if (one != NULL) {
+        BN_free(one);
+    }
+    if (r != NULL) {
+        BN_free(r);
+    }
+    if (pub != NULL) {
+        BN_free(pub);
+    }
+}
+
+static int32_t HksOpensslDhCheckPubKey(const struct HksBlob *nativeKey, DH *dh)
+{
+    int32_t ret = HKS_ERROR_INVALID_KEY_INFO;
+    struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)nativeKey->data;
+    BIGNUM *pub = BN_bin2bn(nativeKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize, NULL);
+    BIGNUM *p = BN_new();
+    BIGNUM *one = BN_new();
+    BIGNUM *r = BN_new();
+    do {
+        if (p == NULL || one == NULL || r == NULL || pub == NULL) {
+            HKS_LOG_E("compute bignum fail");
+            break;
+        }
+        if (BN_is_zero(pub) == HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("pub is not secure, pub equals 0");
+            break;
+        }
+        if (BN_is_one(pub) == HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("pub is not secure, pub equals 1");
+            break;
+        }
+        DH_get0_pqg((const DH *)dh, (const BIGNUM **)&p, NULL, NULL);
+        if (BN_cmp(pub, p) == 0) {
+            HKS_LOG_E("pub is not secure, pub equals p");
+            break;
+        }
+
+        if (BN_one(one) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("set one fail");
+            break;
+        }
+        if (BN_sub(r, p, one) != HKS_OPENSSL_SUCCESS) {
+            HKS_LOG_E("compute p-1 fail");
+            break;
+        }
+        if (BN_cmp(pub, r) == 0) {
+            HKS_LOG_E("pub is not secure, pub equals p-1");
+            break;
+        }
+        ret = HKS_SUCCESS;
+    } while (0);
+
+    HksFreeBigNum(p, one, r, pub);
+    return ret;
+}
+
+int32_t HksOpensslCheckDhKey(const struct HksBlob *key, enum HksImportKeyType importKeyType)
+{
+    DH *dh = NULL;
+    if (importKeyType == HKS_KEY_TYPE_KEY_PAIR) {
+        dh = InitDhStruct(key);
+    } else if (importKeyType == HKS_KEY_TYPE_PUBLIC_KEY) {
+        dh = InitDhPubStruct(key);
+    }
+    if (dh == NULL) {
+        HKS_LOG_E("Init dh struct fail");
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+
+    int32_t ret = HksOpensslDhCheckPubKey(key, dh);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("dh public key is not secure");
+    }
+    DH_free(dh);
+    return ret;
+}
+
 int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey)
 {
@@ -175,12 +284,13 @@ int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBl
     BIGNUM *pub = BN_bin2bn(pubKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize, NULL);
     HKS_IF_NULL_RETURN(pub, HKS_ERROR_CRYPTO_ENGINE_ERROR)
 
-    DH *dh = InitDhStruct(nativeKey, true);
-    if (dh == NULL) {
+    ret = HksOpensslCheckDhKey(pubKey, HKS_KEY_TYPE_PUBLIC_KEY);
+    if (ret != HKS_SUCCESS) {
         BN_free(pub);
-        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+        return ret;
     }
 
+    DH *dh = InitDhStruct(nativeKey);
     uint8_t *computeKey = HksMalloc(DH_size(dh));
     if (computeKey == NULL) {
         BN_free(pub);

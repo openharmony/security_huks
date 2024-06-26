@@ -38,6 +38,8 @@ int32_t HksOpensslGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
 int32_t HksOpensslDhAgreeKey(const struct HksBlob *nativeKey, const struct HksBlob *pubKey,
     const struct HksKeySpec *spec, struct HksBlob *sharedKey);
 #endif /* HKS_SUPPORT_DH_AGREE_KEY */
+
+int32_t HksOpensslCheckDhKey(const struct HksBlob *key, enum HksImportKeyType importKeyType);
 #endif /* HKS_SUPPORT_DH_C */
 
 #ifdef __cplusplus

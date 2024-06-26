@@ -21,6 +21,11 @@
 
 #include "hks_check_paramset.h"
 
+#ifdef L2_STANDARD
+#include "hks_openssl_dh.h"
+#include "hks_openssl_rsa.h"
+#endif
+
 #include <stddef.h>
 
 #include "hks_base_check.h"
@@ -769,11 +774,26 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
 
     struct HksParam *importKeyTypeParam = NULL;
     ret = HksGetParam(paramSet, HKS_TAG_IMPORT_KEY_TYPE, &importKeyTypeParam);
-    if ((ret == HKS_SUCCESS) &&
-        ((importKeyTypeParam->uint32Param == HKS_KEY_TYPE_PRIVATE_KEY) ||
-        (importKeyTypeParam->uint32Param == HKS_KEY_TYPE_KEY_PAIR))) {
-        /* check private key or keypair key params */
-        return CheckImportKey(alg, importKeyTypeParam->uint32Param, &params, key);
+    bool needCheckLater = true;
+    if (ret == HKS_SUCCESS && importKeyTypeParam->uint32Param != HKS_KEY_TYPE_PUBLIC_KEY) {
+        needCheckLater = false;
+        ret = CheckImportKey(alg, importKeyTypeParam->uint32Param, &params, key);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check import key invalid")
+    }
+#ifdef L2_STANDARD
+    if (ret == HKS_SUCCESS) {
+        if (importKeyTypeParam->uint32Param != HKS_KEY_TYPE_PRIVATE_KEY) {
+            if (alg == HKS_ALG_DH) {
+                ret = HksOpensslCheckDhKey(key, (enum HksImportKeyType)importKeyTypeParam->uint32Param);
+            } else if (alg == HKS_ALG_RSA) {
+                ret = HksOpensslCheckRsaKey(key);
+            }
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "openssl check import key invalid")
+        }
+    }
+#endif
+    if (!needCheckLater) {
+        return ret;
     }
 
     /* check public key params: 1. check keySize */
