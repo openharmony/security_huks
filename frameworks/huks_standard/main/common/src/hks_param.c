@@ -25,7 +25,6 @@
 #include "securec.h"
 
 static uint32_t g_validTags[] = {
-    HKS_TAG_USER_AUTH_MODE,
     HKS_TAG_ALGORITHM,
     HKS_TAG_PURPOSE,
     HKS_TAG_KEY_SIZE,
@@ -116,6 +115,7 @@ static uint32_t g_validTags[] = {
     HKS_TAG_BATCH_PURPOSE,
     HKS_TAG_IS_BATCH_OPERATION,
     HKS_TAG_BATCH_OPERATION_TIMEOUT,
+    HKS_TAG_USER_AUTH_MODE,
 
     HKS_TAG_KEY_INIT_CHALLENGE,
     HKS_TAG_IS_USER_AUTH_ACCESS,
