@@ -871,15 +871,44 @@ int32_t HksCoreSecureAccessInitParams(struct HuksKeyNode *keyNode, const struct 
     return HKS_SUCCESS;
 }
 
-static int32_t HksCheckIsLocalAuth(const struct HksUserAuthToken *authToken)
+static int32_t GetAuthMode(const struct HksParamSet *paramSet, uint32_t *type)
 {
+    struct HksParam *typeParam = NULL;
+    if (HksGetParam(paramSet, HKS_TAG_USER_AUTH_MODE, &typeParam) == HKS_SUCCESS &&
+        typeParam->uint32Param == HKS_USER_AUTH_MODE_COAUTH) {
+        *type = HKS_USER_AUTH_MODE_COAUTH;
+        return HKS_SUCCESS;
+    }
+
+    *type = HKS_USER_AUTH_MODE_LOCAL;
+    return HKS_SUCCESS;
+}
+
+static int32_t HksCheckAuthType(struct HuksKeyNode *keyNode, const struct HksUserAuthToken *authToken)
+{
+    uint32_t blobAuthMode;
+    int32_t ret = GetAuthMode(keyNode->keyBlobParamSet, &blobAuthMode);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get auth mode failed")
+    
     enum {
         // see `enum TokenType` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
         TOKEN_TYPE_LOCAL_AUTH = 0,
+        TOKEN_TYPE_LOCAL_RESIGN = 1,
+        TOKEN_TYPE_COAUTH = 2,
     };
-    if (authToken->plaintextData.tokenType != TOKEN_TYPE_LOCAL_AUTH) {
-        HKS_LOG_E("not TOKEN_TYPE_LOCAL_AUTH, invalid tokenType %" LOG_PUBLIC "u", authToken->plaintextData.tokenType);
-        return HKS_ERROR_NOT_SUPPORTED;
+    switch (authToken->plaintextData.tokenType) {
+        case TOKEN_TYPE_LOCAL_AUTH:
+        case TOKEN_TYPE_LOCAL_RESIGN:
+            break;
+        case TOKEN_TYPE_COAUTH:
+            if (blobAuthMode != HKS_USER_AUTH_MODE_COAUTH) {
+                HKS_LOG_E("not COAUTH_MODE_AUTH %" LOG_PUBLIC "u", blobAuthMode);
+                return HKS_ERROR_NOT_SUPPORTED;
+            }
+            break;
+        default:
+            HKS_LOG_E("invalid authMode %" LOG_PUBLIC "u", blobAuthMode);
+            return HKS_ERROR_NOT_SUPPORTED;
     }
     return HKS_SUCCESS;
 }
@@ -914,8 +943,8 @@ int32_t HksCoreSecureAccessVerifyParams(struct HuksKeyNode *keyNode, const struc
         ret = HksVerifyAuthTokenSign(authToken);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "verify the auth token sign failed! %" LOG_PUBLIC "d", ret)
 
-        ret = HksCheckIsLocalAuth(authToken);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIsLocalAuth failed! %" LOG_PUBLIC "d", ret)
+        ret = HksCheckAuthType(keyNode, authToken);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAuthType failed! %" LOG_PUBLIC "d", ret)
 
         ret = HksDecryptAuthToken(authToken);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt auth token failed! %" LOG_PUBLIC "d", ret)
