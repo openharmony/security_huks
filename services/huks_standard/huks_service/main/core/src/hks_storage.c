@@ -811,7 +811,7 @@ static int32_t GetHksKeyAliasSet(const struct HksFileEntry *fileNameList, const 
     return ret;
 }
 
-static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList)
+static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList, uint32_t *fileCnt)
 {
     uint32_t fileCount;
     int32_t ret = GetFileCount(fileInfo->mainPath.path, &fileCount);
@@ -825,11 +825,12 @@ static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct H
     }
 
     struct HksFileEntry *tempFileNameList = NULL;
+    uint32_t realfileCount = fileCount;
     do {
         ret = FileNameListInit(&tempFileNameList, fileCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init file name list failed, ret = %" LOG_PUBLIC "d", ret)
-
-        ret = GetFileNameList(fileInfo->mainPath.path, tempFileNameList, &fileCount);
+ 
+        ret = GetFileNameList(fileInfo->mainPath.path, tempFileNameList, &realfileCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file name list failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
@@ -838,7 +839,7 @@ static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct H
         return ret;
     }
 
-    tempFileNameList->fileNameLen = fileCount;
+    *fileCnt = fileCount;
     *fileNameList = tempFileNameList;
     return ret;
 }
@@ -847,19 +848,20 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
 {
     int32_t ret;
     struct HksFileEntry *fileNameList = NULL;
+    uint32_t fileCnt;
     do {
-        ret = GetHksFileEntry(fileInfo, &fileNameList);
+        ret = GetHksFileEntry(fileInfo, &fileNameList, &fileCnt);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file entry failed, ret = %" LOG_PUBLIC "d.", ret)
 
         // case success and has data
         if (fileNameList != NULL) {
-            ret = GetHksKeyAliasSet(fileNameList, fileNameList->fileNameLen, outData);
+            ret = GetHksKeyAliasSet(fileNameList, fileCnt, outData);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key alias set failed, ret = %" LOG_PUBLIC "d.", ret)
         }
     } while (0);
 
     if (fileNameList != NULL) {
-        FileNameListFree(&fileNameList, fileNameList->fileNameLen);
+        FileNameListFree(&fileNameList, fileCnt);
     }
     return ret;
 }
