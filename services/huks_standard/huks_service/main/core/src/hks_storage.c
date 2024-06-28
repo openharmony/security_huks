@@ -811,7 +811,8 @@ static int32_t GetHksKeyAliasSet(const struct HksFileEntry *fileNameList, const 
     return ret;
 }
 
-static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList, uint32_t *fileCnt)
+static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct HksFileEntry **fileNameList,
+    uint32_t *fileCnt)
 {
     uint32_t fileCount;
     int32_t ret = GetFileCount(fileInfo->mainPath.path, &fileCount);
