@@ -894,6 +894,10 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksListAliasesUnpackFromService fail")
     } while (0);
 
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksClientListAliases fail, ret = %" LOG_PUBLIC "d", ret);
+    }
+
     HKS_FREE_BLOB(inBlob);
     HKS_FREE_BLOB(outBlob);
     return ret;

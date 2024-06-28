@@ -330,23 +330,17 @@ int32_t FileNameListInit(struct HksFileEntry **fileNameList, uint32_t keyCount)
     *fileNameList = (struct HksFileEntry *)HksMalloc(totalSize);
     HKS_IF_NULL_LOGE_RETURN(*fileNameList, HKS_ERROR_MALLOC_FAIL, "malloc file name list failed.")
 
-    (void)memset_s(*fileNameList, totalSize, 0, totalSize);
-    int32_t ret = HKS_SUCCESS;
-
     for (uint32_t i = 0; i < keyCount; ++i) {
         (*fileNameList)[i].fileNameLen = HKS_MAX_FILE_NAME_LEN;
         (*fileNameList)[i].fileName = (char *)HksMalloc(HKS_MAX_FILE_NAME_LEN);
         if ((*fileNameList)[i].fileName == NULL) {
             HKS_LOG_E("malloc failed.");
-            ret = HKS_ERROR_MALLOC_FAIL;
-            break;
+            FileNameListFree(fileNameList, keyCount);
+            return HKS_ERROR_MALLOC_FAIL;
         }
     }
 
-    if (ret != HKS_SUCCESS) {
-        FileNameListFree(fileNameList, keyCount);
-    }
-    return ret;
+    return HKS_SUCCESS;
 }
 
 #ifdef L2_STANDARD
