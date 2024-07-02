@@ -23,6 +23,7 @@ config("huks_config") {
 
 if (os_level == "standard") {
   ohos_static_library("libhuks_common_standard_static") {
+    defines = [ "L2_STANDARD" ]
     subsystem_name = "security"
     part_name = "huks"
 
@@ -30,6 +31,7 @@ if (os_level == "standard") {
         [ ":huks_config" ]  # Share include files for other gn when deps.
 
     include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/openssl/include",
       "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     ]
 

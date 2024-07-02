@@ -62,7 +62,7 @@ void HksBackupTest::TearDown()
 {
 }
 
-static const char *STORE_PATH = "data/service/el1/public/huks_service/maindata/0/0/key/";
+static const char *STORE_PATH = "/data/service/el1/public/huks_service/maindata/0/0/key/";
 static const char *KEY_ALIAS = "test_alias";
 static const char *DERIVE_INFO = "Hks_HMAC_Derive_Test_0000000000000000000000000000000000000000000000000000000"
                                 "0000000000000000000000000000000000000000000000000000000000000000000000000000"
