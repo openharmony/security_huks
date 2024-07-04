@@ -54,6 +54,19 @@ static int32_t HksOpensslGetNid(uint32_t keySize, int *nid)
     }
 }
 
+static void HksFreeBigNum(BIGNUM *numOne, BIGNUM *numTwo, BIGNUM *numThree)
+{
+    if (numOne != NULL) {
+        BN_free(numOne);
+    }
+    if (numTwo != NULL) {
+        BN_free(numTwo);
+    }
+    if (numThree != NULL) {
+        BN_free(numThree);
+    }
+}
+
 static DH *InitDhStruct(const struct HksBlob *key)
 {
     const struct KeyMaterialDh *keyMaterial = (struct KeyMaterialDh *)(key->data);
@@ -189,32 +202,16 @@ int32_t HksOpensslGetDhPubKey(const struct HksBlob *input, struct HksBlob *outpu
 #endif /* HKS_SUPPORT_DH_GET_PUBLIC_KEY */
 
 #ifdef HKS_SUPPORT_DH_AGREE_KEY
-static void HksFreeBigNum(BIGNUM *p, BIGNUM *one, BIGNUM *r, BIGNUM *pub)
-{
-    if (p != NULL) {
-        BN_free(p);
-    }
-    if (one != NULL) {
-        BN_free(one);
-    }
-    if (r != NULL) {
-        BN_free(r);
-    }
-    if (pub != NULL) {
-        BN_free(pub);
-    }
-}
-
 static int32_t HksOpensslDhCheckPubKey(const struct HksBlob *nativeKey, DH *dh)
 {
     int32_t ret = HKS_ERROR_INVALID_KEY_INFO;
     struct KeyMaterialDh *pubKeyMaterial = (struct KeyMaterialDh *)nativeKey->data;
     BIGNUM *pub = BN_bin2bn(nativeKey->data + sizeof(struct KeyMaterialDh), pubKeyMaterial->pubKeySize, NULL);
-    BIGNUM *p = BN_new();
+    const BIGNUM *p = NULL;
     BIGNUM *one = BN_new();
     BIGNUM *r = BN_new();
     do {
-        if (p == NULL || one == NULL || r == NULL || pub == NULL) {
+        if (one == NULL || r == NULL || pub == NULL) {
             HKS_LOG_E("compute bignum fail");
             break;
         }
@@ -226,7 +223,7 @@ static int32_t HksOpensslDhCheckPubKey(const struct HksBlob *nativeKey, DH *dh)
             HKS_LOG_E("pub is not secure, pub equals 1");
             break;
         }
-        DH_get0_pqg((const DH *)dh, (const BIGNUM **)&p, NULL, NULL);
+        DH_get0_pqg((const DH *)dh, &p, NULL, NULL);
         if (BN_cmp(pub, p) == 0) {
             HKS_LOG_E("pub is not secure, pub equals p");
             break;
@@ -247,7 +244,7 @@ static int32_t HksOpensslDhCheckPubKey(const struct HksBlob *nativeKey, DH *dh)
         ret = HKS_SUCCESS;
     } while (0);
 
-    HksFreeBigNum(p, one, r, pub);
+    HksFreeBigNum(one, r, pub);
     return ret;
 }
 
