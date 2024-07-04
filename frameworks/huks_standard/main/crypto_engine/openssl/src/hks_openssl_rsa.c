@@ -155,8 +155,8 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
 int32_t HksOpensslCheckRsaKey(const struct HksBlob *key)
 {
     struct KeyMaterialRsa *pubKeyMaterial = (struct KeyMaterialRsa *)key->data;
-    BIGNUM *e = BN_new();
-    BIGNUM *eMin = BN_new();
+    BIGNUM *e = NULL;
+    BIGNUM *eMin = NULL;
     uint8_t bnE[] = { 0x01, 0x00, 0x01 };
     int32_t ret = HKS_SUCCESS;
     do {
