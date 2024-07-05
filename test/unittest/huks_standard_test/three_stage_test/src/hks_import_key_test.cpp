@@ -747,7 +747,7 @@ static int32_t ImportTestForRsa(const ImportKeyCaseParams &testCaseParams)
     return (ret == testCaseParams.importKeyResult) ? HKS_SUCCESS : HKS_FAILURE;
 }
 
-static int32_t ImportTestForDh(const ImportKeyCaseParams &testCaseParams)
+static int32_t ImportTestForDh(const ImportKeyCaseParams &testCaseParams, uint8_t *dhKeyData)
 {
     struct HksParamSet *importParamSet = nullptr;
     int32_t ret = InitParamSet(&importParamSet, testCaseParams.params.data(), testCaseParams.params.size());
@@ -755,7 +755,7 @@ static int32_t ImportTestForDh(const ImportKeyCaseParams &testCaseParams)
         return ret;
     }
 
-    struct HksBlob key = { sizeof(dhKeyData), dhKeyData };
+    struct HksBlob key = { DH_KEY_DATA_SIZE, dhKeyData };
     uint8_t alias[] = "test_import_key_dh";
     struct HksBlob keyAlias = { sizeof(alias), alias };
     ret = HksImportKeyForDe(&keyAlias, importParamSet, &key);
@@ -1007,6 +1007,21 @@ HWTEST_F(HksImportKeyTest, HksImportKeyTest045, TestSize.Level0)
 
 HWTEST_F(HksImportKeyTest, HksImportKeyTest046, TestSize.Level0)
 {
-    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS), HKS_SUCCESS);
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataZero), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest047, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataOne), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest048, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataPMinusOne), HKS_SUCCESS);
+}
+
+HWTEST_F(HksImportKeyTest, HksImportKeyTest049, TestSize.Level0)
+{
+    EXPECT_EQ(ImportTestForDh(HKS_IMPORT_TEST_046_PARAMS, dhKeyDataP), HKS_SUCCESS);
 }
 } // namespace Unittest::ImportKeyTest

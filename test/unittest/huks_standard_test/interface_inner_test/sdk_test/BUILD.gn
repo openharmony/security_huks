@@ -65,7 +65,6 @@ ohos_unittest("hukssdk_test") {
   include_dirs = [
     "//third_party/bounds_checking_function/include",
     "./include",
-    "//base/security/access_token/interfaces/innerkits/token_setproc/include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/include",
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
@@ -91,15 +90,15 @@ ohos_unittest("hukssdk_test") {
 
   if (os_level == "standard") {
     external_deps += [ "googletest:gtest" ]
+    if (support_jsapi) {
+      external_deps += [
+        "access_token:libnativetoken_shared",
+        "access_token:libtokensetproc_shared",
+      ]
+    }
   }
 
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
-  if (support_jsapi) {
-    deps += [
-      "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-      "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
-    ]
-  }
 }
