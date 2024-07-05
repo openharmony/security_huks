@@ -154,8 +154,6 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
   deps = [
-    "//base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-    "//base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//base/security/huks/interfaces/kits/c:huks_ndk",
@@ -187,6 +185,14 @@ ohos_unittest("huks_UT_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
+
+  if (os_level == "standard") {
+    external_deps += [
+      "access_token:libnativetoken_shared",
+      "access_token:libtokensetproc_shared",
+    ]
+  }
+
   defines += [ "L2_STANDARD" ]
 
   if (enable_interact_across_local_accounts) {
