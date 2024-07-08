@@ -39,8 +39,6 @@
 
 #define HKS_ENCODE_OFFSET_LEN         6
 #define HKS_ENCODE_KEY_SALT_VALUE     0x3f
-#define KEY_ALIAS_ANONYMOUS_LEN       4
-#define KEY_ALIAS_SUFFIX_LEN          4
 #define HKS_ROOT_USER_UPPERBOUND      100
 
 #ifdef HKS_SUPPORT_POSIX
@@ -278,9 +276,12 @@ int32_t RecordKeyOperation(uint32_t operation, const char *path, const char *key
     (void)memset_s(outKeyAlias, bufSize, 0, bufSize);
 
     uint32_t keyAliasLen = strlen(keyAlias);
-    for (uint32_t i = 0; i < keyAliasLen; ++i) {
-        if ((keyAliasLen < (i + 1 + KEY_ALIAS_ANONYMOUS_LEN + KEY_ALIAS_SUFFIX_LEN)) &&
-            ((i + 1 + KEY_ALIAS_SUFFIX_LEN) <= keyAliasLen)) {
+    uint32_t anoyLen = (keyAliasLen + 1) / 2;
+    uint32_t suffixLen = anoyLen / 2;
+    outKeyAlias[0] = keyAlias[0]; // keyAliasLen > 0;
+    for (uint32_t i = 1; i < keyAliasLen; ++i) {
+        if ((keyAliasLen < (i + 1 + anoyLen + suffixLen)) &&
+            ((i + 1 + suffixLen) <= keyAliasLen)) {
             outKeyAlias[i] = '*';
         } else {
             outKeyAlias[i] = keyAlias[i];
