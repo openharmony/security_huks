@@ -36,6 +36,9 @@
 enum {
     // see `enum TokenType` in `drivers/peripheral/user_auth/hdi_service/common/inc/defines.h`
     TOKEN_TYPE_LOCAL_AUTH = 0,
+    TOKEN_TYPE_LOCAL_RESIGN = 1,
+    TOKEN_TYPE_COAUTH = 2,
+    
 };
 
 // see `HksUserAuthToken`, `HksPlaintextData`, `HksCiphertextData` in
