@@ -88,6 +88,10 @@ int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
 int HksStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
+    if (data.ReadInterfaceToken() != GetDescriptor()) {
+        HKS_LOG_E("failed to check interface token! code %" LOG_PUBLIC "d", code);
+        return ERR_INVALID_DATA;
+    }
     int result = ERR_NONE;
 
     switch (code) {
@@ -128,7 +132,12 @@ void HksProxy::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &cert
     }
     MessageParcel data, reply;
     MessageOption option = MessageOption::TF_ASYNC;
-    bool writeResult = data.WriteUint32(errCode);
+    bool writeResult = data.WriteInterfaceToken(GetDescriptor());
+    if (!writeResult) {
+        HKS_LOG_E("WriteInterfaceToken errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult);
+        return;
+    }
+    writeResult = data.WriteUint32(errCode);
     if (!writeResult) {
         HKS_LOG_E("WriteUint32 errCode %" LOG_PUBLIC "u failed %" LOG_PUBLIC "d", errCode, writeResult);
         return;
