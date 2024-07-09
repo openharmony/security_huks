@@ -20,6 +20,7 @@ module_output_path = "huks_standard/huks_module_test"
 
 ohos_unittest("huks_module_test") {
   module_out_path = module_output_path
+  defines = []
 
   include_dirs = [
     "//base/security/huks/test/unittest/huks_standard_test/three_stage_test/include",
@@ -69,7 +70,12 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_hash_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_mac_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_others_test.cpp",
-    "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_session_max_test.cpp",
+  ]
+
+  sources += [ "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_session_max_test.cpp" ]
+  defines += [ "HUKS_MODULE_TEST_HKS_SESSION_MAX_TEST_CPP" ]
+
+  sources += [
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_aes.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_api_performance.c",
     "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/src/hks_test_cipher.c",
@@ -203,7 +209,7 @@ ohos_unittest("huks_module_test") {
     ]
   }
 
-  defines = [
+  defines += [
     "UNAVAILABLE_FOR_SM4_GCM",
     "_HUKS_LOG_ENABLE_",
     "L2_STANDARD",
