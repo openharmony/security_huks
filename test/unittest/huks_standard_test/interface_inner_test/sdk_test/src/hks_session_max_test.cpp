@@ -24,7 +24,11 @@
 
 using namespace testing::ext;
 namespace {
-static const uint32_t MAX_SESSION_NUM_MORE_1 = 33;
+static const uint32_t MAX_SESSION_NUM_TEST = 40;
+static const uint32_t MAX_SESSION_NUM_SA = 32;
+#if !defined(HKS_UNTRUSTED_RUNNING_ENV) && !defined(HUKS_MODULE_TEST_HKS_SESSION_MAX_TEST_CPP)
+static const uint32_t MAX_SESSION_NUM_TA = 10;
+#endif
 static const uint32_t HMAC_OUTPUT_SIZE = 32;
 class HksSessionMaxTest : public testing::Test {
 public:
@@ -99,8 +103,8 @@ static void ConstructInitParamSet(struct HksParamSet **outParamSet)
 
 static void SessionMaxTest(const struct HksBlob *alias)
 {
-    uint64_t handle[MAX_SESSION_NUM_MORE_1];
-    for (uint32_t i = 0; i < MAX_SESSION_NUM_MORE_1; ++i) {
+    uint64_t handle[MAX_SESSION_NUM_TEST];
+    for (uint32_t i = 0; i < MAX_SESSION_NUM_TEST; ++i) {
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
         struct HksParamSet *paramSet = NULL;
         ConstructInitParamSet(&paramSet);
@@ -110,7 +114,7 @@ static void SessionMaxTest(const struct HksBlob *alias)
         HksFreeParamSet(&paramSet);
     }
 
-    for (uint32_t i = 0; i < MAX_SESSION_NUM_MORE_1; ++i) {
+    for (uint32_t i = 0; i < MAX_SESSION_NUM_TEST; ++i) {
         struct HksParamSet *paramSet = NULL;
         ConstructInitParamSet(&paramSet);
 
@@ -120,9 +124,14 @@ static void SessionMaxTest(const struct HksBlob *alias)
         struct HksBlob output = { sizeof(tmpOutput), tmpOutput };
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
 
-        if (i == 0) {
+        if (i <= MAX_SESSION_NUM_TEST - MAX_SESSION_NUM_SA - 1) {
             EXPECT_EQ(HksUpdateForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
             EXPECT_EQ(HksFinishForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+#if !defined(HKS_UNTRUSTED_RUNNING_ENV) && !defined(HUKS_MODULE_TEST_HKS_SESSION_MAX_TEST_CPP)
+        } else if (i <= MAX_SESSION_NUM_TEST - MAX_SESSION_NUM_TA - 1) {
+            EXPECT_EQ(HksUpdateForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_KEY_NODE_NOT_FOUND);
+            EXPECT_EQ(HksFinishForDe(&handleBlob, paramSet, &input, &output), HKS_ERROR_NOT_EXIST);
+#endif
         } else {
             EXPECT_EQ(HksUpdateForDe(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
             EXPECT_EQ(HksFinishForDe(&handleBlob, paramSet, &input, &output), HKS_SUCCESS) << "i:" << i;
@@ -131,7 +140,7 @@ static void SessionMaxTest(const struct HksBlob *alias)
         HksFreeParamSet(&paramSet);
     }
 
-    for (uint32_t i = 0; i < MAX_SESSION_NUM_MORE_1; ++i) {
+    for (uint32_t i = 0; i < MAX_SESSION_NUM_TEST; ++i) {
         struct HksBlob handleBlob = { sizeof(uint64_t), (uint8_t *)&handle[i] };
         struct HksParamSet *paramSet = NULL;
         ConstructInitParamSet(&paramSet);
