@@ -53,6 +53,7 @@ private:
     static bool userUnlocked_;
     static bool SubscribeSystemEvent();
     static bool SubscribeBackUpEvent();
+    static bool DoUnSubscribe(std::shared_ptr<SystemEventSubscriber> subscriber);
 };
 } // namespace Hks
 } // namespace Security
