@@ -178,13 +178,15 @@ bool SystemEventObserver::SubscribeEvent()
     return SubscribeSystemEvent() && SubscribeBackUpEvent();
 }
 
+bool SystemEventObserver::DoUnSubscribe(std::shared_ptr<SystemEventSubscriber> subscriber)
+{
+    HKS_IF_NULL_LOGE_RETURN(subscriber, false, "huks system subscriber nullptr");
+    return OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(subscriber);
+}
+
 bool SystemEventObserver::UnSubscribeEvent()
 {
-    HKS_IF_NULL_LOGE_RETURN(systemEventSubscriber_, false, "huks system subscriber nullptr")
-    HKS_IF_NULL_LOGE_RETURN(backUpEventSubscriber_, false, "huks backup subscriber nullptr")
-
-    return OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(systemEventSubscriber_) &&
-        OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(backUpEventSubscriber_);
+    return DoUnSubscribe(systemEventSubscriber_) && DoUnSubscribe(backUpEventSubscriber_);
 }
 } // namespace Hks
 } // namespace Security
