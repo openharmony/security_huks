@@ -90,7 +90,7 @@ const uint32_t MAX_DELAY_TIMES = 100;
 static void SubscribEvent()
 {
     for (uint32_t i = 0; i < MAX_DELAY_TIMES; ++i) {
-        if (SystemEventObserver::SubscribeSystemEvent()) {
+        if (SystemEventObserver::SubscribeEvent()) {
             HKS_LOG_I("subscribe system event success, i = %" LOG_PUBLIC "u", i);
             pthread_detach(pthread_self());
             return;
@@ -104,7 +104,7 @@ static void SubscribEvent()
     return;
 }
 
-static void HksSubscribeSystemEvent()
+static void HksSubscribeEvent()
 {
     pthread_t subscribeThread;
     if ((pthread_create(&subscribeThread, nullptr, (void *(*)(void *))SubscribEvent, nullptr)) == -1) {
@@ -538,7 +538,7 @@ void HksService::OnAddSystemAbility(int32_t systemAbilityId, const std::string &
 {
     HKS_LOG_I("systemAbilityId is %" LOG_PUBLIC "d!", systemAbilityId);
 #ifdef SUPPORT_COMMON_EVENT
-    HksSubscribeSystemEvent();
+    HksSubscribeEvent();
 #endif
 }
 
