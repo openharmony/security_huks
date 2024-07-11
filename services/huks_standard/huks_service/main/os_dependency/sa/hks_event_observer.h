@@ -40,8 +40,8 @@ class SystemEventObserver {
 public:
     SystemEventObserver() = default;
     ~SystemEventObserver();
-    static bool SubscribeSystemEvent();
-    static bool UnSubscribeSystemEvent();
+    static bool SubscribeEvent();
+    static bool UnSubscribeEvent();
     static inline bool GetUserUnlocked()
     {
         return userUnlocked_;
@@ -49,7 +49,10 @@ public:
 
 private:
     static std::shared_ptr<SystemEventSubscriber> systemEventSubscriber_;
+    static std::shared_ptr<SystemEventSubscriber> backUpEventSubscriber_;
     static bool userUnlocked_;
+    static bool SubscribeSystemEvent();
+    static bool SubscribeBackUpEvent();
 };
 } // namespace Hks
 } // namespace Security
