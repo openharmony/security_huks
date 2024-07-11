@@ -64,7 +64,9 @@ static int32_t CopyParamSetToBuffer(const struct HksParamSet *paramSet,
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, paramSet, paramSet->paramSetSize);
+    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, paramSet, paramSet->paramSetSize) != EOK) {
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     *destOffset += ALIGN_SIZE(paramSet->paramSetSize);
 
     return HKS_SUCCESS;
