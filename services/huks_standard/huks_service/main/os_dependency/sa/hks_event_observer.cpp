@@ -165,6 +165,7 @@ bool SystemEventObserver::SubscribeBackUpEvent()
     OHOS::EventFwk::MatchingSkills matchingSkills;
     matchingSkills.AddEvent(RESTORE_EVENT_NAME);
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    subscriberInfo.SetPublisherUid(BACKUP_UID);
     backUpEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo, userUnlocked_);
 
     HKS_IF_NULL_LOGE_RETURN(backUpEventSubscriber_, false, "huks Backup subscriber nullptr")
