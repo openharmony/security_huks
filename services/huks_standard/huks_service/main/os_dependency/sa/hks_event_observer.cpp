@@ -89,8 +89,10 @@ namespace OHOS {
 namespace Security {
 namespace Hks {
 std::shared_ptr<SystemEventSubscriber> SystemEventObserver::systemEventSubscriber_ = nullptr;
+std::shared_ptr<SystemEventSubscriber> SystemEventObserver::backUpEventSubscriber_ = nullptr;
 bool SystemEventObserver::userUnlocked_ = false;
 const static std::string RESTORE_EVENT_NAME = "COMMON_EVENT_RESTORE_START";
+const int32_t BACKUP_UID = 1089;
 
 void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData &data)
 {
@@ -140,9 +142,7 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
 
 SystemEventObserver::~SystemEventObserver()
 {
-    if (systemEventSubscriber_ != nullptr) {
-        UnSubscribeSystemEvent();
-    }
+    UnSubscribeEvent();
 }
 
 bool SystemEventObserver::SubscribeSystemEvent()
@@ -152,7 +152,6 @@ bool SystemEventObserver::SubscribeSystemEvent()
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_REMOVED);
     matchingSkills.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
-    matchingSkills.AddEvent(RESTORE_EVENT_NAME);
     OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
     systemEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo, userUnlocked_);
 
@@ -161,11 +160,30 @@ bool SystemEventObserver::SubscribeSystemEvent()
     return OHOS::EventFwk::CommonEventManager::SubscribeCommonEvent(systemEventSubscriber_);
 }
 
-bool SystemEventObserver::UnSubscribeSystemEvent()
+bool SystemEventObserver::SubscribeBackUpEvent()
+{
+    OHOS::EventFwk::MatchingSkills matchingSkills;
+    matchingSkills.AddEvent(RESTORE_EVENT_NAME);
+    OHOS::EventFwk::CommonEventSubscribeInfo subscriberInfo(matchingSkills);
+    backUpEventSubscriber_ = std::make_shared<SystemEventSubscriber>(subscriberInfo, userUnlocked_);
+
+    HKS_IF_NULL_LOGE_RETURN(backUpEventSubscriber_, false, "huks Backup subscriber nullptr")
+
+    return OHOS::EventFwk::CommonEventManager::SubscribeCommonEvent(backUpEventSubscriber_);
+}
+
+bool SystemEventObserver::SubscribeEvent()
+{
+    return SubscribeSystemEvent() && SubscribeBackUpEvent();
+}
+
+bool SystemEventObserver::UnSubscribeEvent()
 {
     HKS_IF_NULL_LOGE_RETURN(systemEventSubscriber_, false, "huks system subscriber nullptr")
+    HKS_IF_NULL_LOGE_RETURN(backUpEventSubscriber_, false, "huks backup subscriber nullptr")
 
-    return OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(systemEventSubscriber_);
+    return OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(systemEventSubscriber_) &&
+        OHOS::EventFwk::CommonEventManager::UnSubscribeCommonEvent(backUpEventSubscriber_);
 }
 } // namespace Hks
 } // namespace Security
