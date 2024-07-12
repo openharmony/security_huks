@@ -31,6 +31,7 @@
 #include "hks_util.h"
 
 #define S_TO_MS 1000
+#define MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME 10
 #ifdef _SUPPORT_HKS_TEE_
 #define MAX_KEYNODE_COUNT 64
 #else
@@ -87,6 +88,18 @@ static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct
     return HKS_SUCCESS;
 }
 
+static int32_t HksCheckUniqueHandle(uint64_t handle)
+{
+    struct HuksKeyNode *keyNode = NULL;
+    HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        if ((keyNode != NULL) && (keyNode->handle == handle)) {
+            HKS_LOG_E("The handle already exists!");
+            return HKS_FAILURE;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
 static int32_t GenerateKeyNodeHandle(uint64_t *handle)
 {
     uint32_t handleData = 0;
@@ -95,11 +108,20 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
         .data = (uint8_t *)&handleData
     };
 
-    int32_t ret = HksCryptoHalFillRandom(&opHandle);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "fill keyNode handle failed")
-
-    *handle = handleData; /* Temporarily only use 32 bit handle */
-    return HKS_SUCCESS;
+    int32_t ret = HKS_FAILURE;
+    for (uint32_t i = 0; i < MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME; i++) {
+        ret = HksCryptoHalFillRandom(&opHandle);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("fill keyNode handle failed");
+            return ret;
+        }
+        ret = HksCheckUniqueHandle(handleData);
+        if (ret == HKS_SUCCESS) {
+            *handle = handleData; /* Temporarily only use 32 bit handle */
+            return ret;
+        }
+    }
+    return ret;
 }
 
 static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
