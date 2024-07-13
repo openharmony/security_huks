@@ -356,8 +356,6 @@ struct Hks25519KeyPair {
     uint32_t privateBufferSize;
 };
 
-
-
 #ifdef __cplusplus
 }
 #endif
