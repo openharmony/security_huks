@@ -16,7 +16,7 @@
 /**
  * @file hks_struct.h
  *
- * @brief Declares huks struct and enum.
+ * @brief Declares huks struct.
  *
  * @since 8
  */
@@ -50,7 +50,7 @@ extern "C" {
 #define HKS_KEY_BYTES(keySize) (((keySize) + HKS_BITS_PER_BYTE - 1) / HKS_BITS_PER_BYTE)
 #define HKS_SIGNATURE_MIN_SIZE 64
 #define HKS_ARRAY_SIZE(arr) ((sizeof(arr)) / (sizeof((arr)[0])))
-
+#define MAX_OUT_BLOB_SIZE (5 * 1024 * 1024)
 #define HKS_WRAPPED_FORMAT_MAX_SIZE (1024 * 1024)
 #define HKS_IMPORT_WRAPPED_KEY_TOTAL_BLOBS 10
 
