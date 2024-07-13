@@ -159,8 +159,6 @@ enum HksKeySize {
     HKS_SM4_KEY_SIZE_128 = 128,
 };
 
-
-
 /**
  * @brief hks algorithm suite
  */
