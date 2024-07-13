@@ -16,7 +16,7 @@
 /**
  * @file hks_type.h
  *
- * @brief Declares huks struct and enum.
+ * @brief Declares huks enum.
  *
  * @since 8
  */
@@ -45,9 +45,6 @@ extern "C" {
 #endif
 
 #define HKS_SDK_VERSION "2.0.0.4"
-
-
-#define MAX_OUT_BLOB_SIZE (5 * 1024 * 1024)
 
 /**
  * @brief hks key type
