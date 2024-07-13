@@ -306,7 +306,6 @@ struct HksKeyAliasSet {
     struct HksBlob *aliases;
 };
 
-
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
 #define HKS_DEFAULT_RANDOM_LEN 16
