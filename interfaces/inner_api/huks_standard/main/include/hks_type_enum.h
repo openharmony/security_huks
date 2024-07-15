@@ -33,40 +33,6 @@ extern "C" {
 #endif
 
 /**
- * @brief hks key algorithm
- */
-enum HksKeyAlg {
-    HKS_ALG_RSA = 1,
-    HKS_ALG_ECC = 2,
-    HKS_ALG_DSA = 3,
-
-    HKS_ALG_AES = 20,
-    HKS_ALG_HMAC = 50,
-    HKS_ALG_HKDF = 51,
-    HKS_ALG_PBKDF2 = 52,
-    HKS_ALG_GMKDF = 53,
-
-    HKS_ALG_ECDH = 100,
-    HKS_ALG_X25519 = 101,
-    HKS_ALG_ED25519 = 102,
-    HKS_ALG_DH = 103,
-
-    HKS_ALG_SM2 = 150,
-    HKS_ALG_SM3 = 151,
-    HKS_ALG_SM4 = 152,
-};
-
-/**
- * @brief hks user auth type
- * @see `enum AuthType` in `drivers/interface/user_auth/v2_0/UserAuthTypes.idl`
- */
-enum HksUserAuthType {
-    HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
-    HKS_USER_AUTH_TYPE_FACE = 1 << 1,
-    HKS_USER_AUTH_TYPE_PIN = 1 << 2,
-};
-
-/**
  * @brief hks key type
  */
 enum HksKeyType {
@@ -177,6 +143,30 @@ enum HksKeySize {
 
     HKS_SM2_KEY_SIZE_256 = 256,
     HKS_SM4_KEY_SIZE_128 = 128,
+};
+
+/**
+ * @brief hks key algorithm
+ */
+enum HksKeyAlg {
+    HKS_ALG_RSA = 1,
+    HKS_ALG_ECC = 2,
+    HKS_ALG_DSA = 3,
+
+    HKS_ALG_AES = 20,
+    HKS_ALG_HMAC = 50,
+    HKS_ALG_HKDF = 51,
+    HKS_ALG_PBKDF2 = 52,
+    HKS_ALG_GMKDF = 53,
+
+    HKS_ALG_ECDH = 100,
+    HKS_ALG_X25519 = 101,
+    HKS_ALG_ED25519 = 102,
+    HKS_ALG_DH = 103,
+
+    HKS_ALG_SM2 = 150,
+    HKS_ALG_SM3 = 151,
+    HKS_ALG_SM4 = 152,
 };
 
 /**
@@ -425,6 +415,16 @@ enum HksSendType {
 };
 
 /**
+ * @brief hks user auth type
+ * @see `enum AuthType` in `drivers/interface/user_auth/v2_0/UserAuthTypes.idl`
+ */
+enum HksUserAuthType {
+    HKS_USER_AUTH_TYPE_FINGERPRINT = 1 << 0,
+    HKS_USER_AUTH_TYPE_FACE = 1 << 1,
+    HKS_USER_AUTH_TYPE_PIN = 1 << 2,
+};
+
+/**
  * @brief hks auth access type
  */
 enum HksAuthAccessType {
@@ -643,6 +643,10 @@ enum HksTag {
     HKS_ASSIGN_PARAM_FILE_ENUM
 };
 
+enum HksUserIamType {
+    HKS_AUTH_TYPE = 0,
+};
+
 /**
  * @brief hks chipset platform decrypt scene
  */
@@ -657,10 +661,6 @@ enum HksAuthStorageLevel {
     HKS_AUTH_STORAGE_LEVEL_DE = 0,
     HKS_AUTH_STORAGE_LEVEL_CE = 1,
     HKS_AUTH_STORAGE_LEVEL_ECE = 2,
-};
-
-enum HksUserIamType {
-    HKS_AUTH_TYPE = 0,
 };
 
 #ifdef __cplusplus
