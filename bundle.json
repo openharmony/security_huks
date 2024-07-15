@@ -23,7 +23,35 @@
           "SystemCapability.Security.Huks.Core",
           "SystemCapability.Security.Cipher"
           ],
-      "features": [],
+      "features": [
+        "huks_enabled",
+        "huks_use_mbedtls",
+        "huks_use_lite_storage",
+        "huks_use_hardware_root_key",
+        "huks_config_file",
+        "huks_key_store_path",
+        "huks_key_store_standard_path",
+        "huks_enable_log",
+        "huks_dependency_mbedtls_path",
+        "huks_dependency_openssl_path",
+        "huks_uid_trust_list_define",
+        "huks_enable_upgrade_key",
+        "huks_enable_upgrade_small_to_service",
+        "huks_enable_upgrade_rkc_v1tov2",
+        "huks_enable_upgrade_derive_key_alg",
+        "huks_security_level",
+        "huks_test_suite_running_environment",
+        "huks_lite_hap_store_path",
+        "huks_use_rkc_in_standard",
+        "huks_use_rkc_in_standard_path",
+        "huks_qemu_enabled",
+        "huks_enable_upgrade_key_storage_secure_level",
+        "huks_sa_upgrade_config",
+        "huks_hap_upgrade_config",
+        "huks_enable_skip_upgrade_key_storage_secure_level",
+        "huks_sa_skip_upgrade_config",
+        "huks_hap_skip_upgrade_config"
+      ],
       "adapted_system_type": [
           "standard",
           "small",
@@ -90,4 +118,4 @@
         ]
       }
     }
-  }
+}
