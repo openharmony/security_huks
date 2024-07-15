@@ -24,11 +24,11 @@
 #ifndef HKS_TYPE_H
 #define HKS_TYPE_H
 
+#include "hks_type_enum.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-#include "hks_type_enum.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -87,24 +87,6 @@ extern "C" {
 #define HKS_KEY_BLOB_AT_KEY_BYTES 32
 
 #define HKS_MAX_KEY_ALIAS_COUNT 2048
-
-static inline bool IsAdditionOverflow(uint32_t a, uint32_t b)
-{
-    return (UINT32_MAX - a) < b;
-}
-
-static inline bool IsInvalidLength(uint32_t length)
-{
-    return (length == 0) || (length > MAX_OUT_BLOB_SIZE);
-}
-
-static inline int32_t CheckBlob(const struct HksBlob *blob)
-{
-    if ((blob == NULL) || (blob->data == NULL) || (blob->size == 0)) {
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
-    return HKS_SUCCESS;
-}
 
 /**
  * @brief hks blob
@@ -300,6 +282,7 @@ struct HksKeyAliasSet {
     struct HksBlob *aliases;
 };
 
+
 #define HKS_DERIVE_DEFAULT_SALT_LEN 16
 #define HKS_HMAC_DIGEST_SHA512_LEN 64
 #define HKS_DEFAULT_RANDOM_LEN 16
@@ -348,6 +331,24 @@ struct Hks25519KeyPair {
     uint32_t publicBufferSize;
     uint32_t privateBufferSize;
 };
+
+static inline bool IsAdditionOverflow(uint32_t a, uint32_t b)
+{
+    return (UINT32_MAX - a) < b;
+}
+
+static inline bool IsInvalidLength(uint32_t length)
+{
+    return (length == 0) || (length > MAX_OUT_BLOB_SIZE);
+}
+
+static inline int32_t CheckBlob(const struct HksBlob *blob)
+{
+    if ((blob == NULL) || (blob->data == NULL) || (blob->size == 0)) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
