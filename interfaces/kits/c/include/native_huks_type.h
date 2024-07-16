@@ -60,7 +60,7 @@ extern "C" {
 #define TOKEN_CHALLENGE_LEN 32
 #define SHA256_SIGN_LEN 32
 #define TOKEN_SIZE 32
-#define MAX_AUTH_TIMEOUT_SECOND 60
+#define MAX_AUTH_TIMEOUT_SECOND 600
 #define SECURE_SIGN_VERSION 0x01000001
 
 /**
@@ -654,7 +654,7 @@ enum OH_Huks_Tag {
      * @since 11
      */
     OH_HUKS_TAG_AUTH_STORAGE_LEVEL = OH_HUKS_TAG_TYPE_UINT | 316,
-    
+
     /**
      * Authentication mode of the user authtoken, whose optional values are from enum HuksUserAuthMode.
      *
