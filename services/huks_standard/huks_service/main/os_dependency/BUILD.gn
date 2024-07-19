@@ -57,6 +57,11 @@ if (os_level == "standard") {
       # both client side and server side will include hks_sa_interface.cpp
       "sa/hks_sa_interface.cpp",
     ]
+
+    if (huks_enable_upgrade_key_storage_secure_level) {
+      sources += [ "sa/hks_osaccount_check.cpp" ]
+    }
+
     defines = []
     if (huks_security_level == "software") {
       defines += [ "HKS_UNTRUSTED_RUNNING_ENV" ]

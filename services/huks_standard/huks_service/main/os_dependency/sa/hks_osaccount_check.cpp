@@ -15,7 +15,7 @@
 
 #ifdef L2_STANDARD
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
-#include "hks_file_transfer.h"
+#include "hks_upgrade.h"
 #include "hks_log.h"
 #include "hks_type.h"
 #include "hks_osaccount_check.h"
@@ -30,6 +30,7 @@ static bool HksIsOsAccountVerified(const int32_t userId)
 {
     bool isVerified = false;
 #ifdef HAS_OS_ACCOUNT_PART
+    HKS_LOG_D("enter HksIsOsAccountVerified");
     OHOS::AccountSA::OsAccountManager::IsOsAccountVerified(userId, isVerified);
     if (!isVerified) {
         HKS_LOG_E("os account verify failed, userid is : %" LOG_PUBLIC "d", userId);
@@ -43,7 +44,7 @@ static bool HksIsOsAccountVerified(const int32_t userId)
 void HksCheckIfNeedTransferFile(const uint32_t storageLevel, const int32_t storeUserId)
 {
     if (!g_isCeUpgradeSucc && storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId)) {
-        UpgradeFileTransfer();
+        HksUpgradeOnUserUnlock(storeUserId);
         g_isCeUpgradeSucc = true;
     }
 }

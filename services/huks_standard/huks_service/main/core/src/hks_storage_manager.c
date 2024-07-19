@@ -37,7 +37,9 @@
 
 #ifdef L2_STANDARD
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#ifndef HKS_USE_RKC_IN_STANDARD
 #include "hks_osaccount_check.h"
+#endif
 #endif
 
 static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* processInfo,
@@ -60,7 +62,9 @@ static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* p
     *storageLevel = storageLevelParam->uint32Param;
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#ifndef HKS_USE_RKC_IN_STANDARD
     HksCheckIfNeedTransferFile(*storageLevel, *storeUserId);
+#endif
 #endif
     return ret;
 }
