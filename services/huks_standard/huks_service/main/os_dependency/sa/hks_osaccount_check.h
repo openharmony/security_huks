@@ -22,7 +22,7 @@
 extern "C" {
 #endif
 
-void HksCheckIfNeedTransferFile(uint32_t storageLevel, int32_t storeUserId);
+void HksCheckIfNeedTransferFile(const uint32_t storageLevel, const int32_t storeUserId);
 
 #ifdef __cplusplus
 }

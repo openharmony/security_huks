@@ -32,6 +32,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
       "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
+      "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
     ]
 
     sources = [
@@ -53,7 +54,6 @@ if (os_level == "standard") {
 
     if (huks_security_level == "trusted_environment") {
       sources += [ "src/hks_client_service_dcm.cpp" ]
-      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa" ]  # hks_dcm_callback_handler.h
     }
 
     sources += [ "../plugin_proxy/src/hks_plugin_adapter.cpp" ]
@@ -108,7 +108,6 @@ if (os_level == "standard") {
 
     if (huks_enable_upgrade_key_storage_secure_level) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static" ]
-      sources += [ "src/hks_osaccount_check.cpp" ]
     }
 
     if (enable_bundle_framework) {
