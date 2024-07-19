@@ -245,7 +245,7 @@ static int ProcessFileUpgrade(const char *filePath, const struct stat *st, int t
     return 0;
 }
 
-ENABLE_CFI(static int32_t UpgradeFileTransfer(void))
+ENABLE_CFI(int32_t UpgradeFileTransfer(void))
 {
     // depth first and ignore soft link
     int nftwRet = nftw(HKS_KEY_STORE_TMP_PATH, ProcessFileUpgrade, OPEN_FDS, FTW_DEPTH | FTW_PHYS);

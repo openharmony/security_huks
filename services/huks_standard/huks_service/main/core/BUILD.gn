@@ -108,6 +108,7 @@ if (os_level == "standard") {
 
     if (huks_enable_upgrade_key_storage_secure_level) {
       deps += [ "//base/security/huks/services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static" ]
+      sources += [ "src/hks_osaccount_check.cpp" ]
     }
 
     if (enable_bundle_framework) {

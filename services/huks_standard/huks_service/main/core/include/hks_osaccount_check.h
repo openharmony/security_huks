@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,21 +13,19 @@
  * limitations under the License.
  */
 
-#ifndef HKS_UPGRADE_FILE_TRANSFER_H
-#define HKS_UPGRADE_FILE_TRANSFER_H
+#ifndef HKS_OSACCOUNT_CHECK_H
+#define HKS_OSACCOUNT_CHECK_H
 
-#include "hks_type.h"
+#include <stdint.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-int32_t HksUpgradeFileTransferOnPowerOn(void);
-int32_t HksUpgradeFileTransferOnUserUnlock(uint32_t userId);
-int32_t UpgradeFileTransfer(void);
+void HksCheckIfNeedTransferFile(uint32_t storageLevel, int32_t storeUserId);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // HKS_UPGRADE_FILE_TRANSFER_H
+#endif // HKS_OSACCOUNT_CHECK_H
