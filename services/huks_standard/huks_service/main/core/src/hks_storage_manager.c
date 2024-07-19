@@ -36,13 +36,17 @@
 #include "hks_type_inner.h"
 
 #ifdef L2_STANDARD
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+#include "hks_osaccount_check.h"
+#endif
+
 static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* processInfo,
-    const struct HksParamSet *paramSet, uint32_t *storageLevel, uint32_t *storeUserId)
+    const struct HksParamSet *paramSet, uint32_t *storageLevel, int32_t *storeUserId)
 {
     struct HksParam *specificUserIdParam = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_SPECIFIC_USER_ID, &specificUserIdParam);
     if (ret == HKS_SUCCESS) {
-        *storeUserId = specificUserIdParam->uint32Param;
+        *storeUserId = specificUserIdParam->int32Param;
     } else if (ret == HKS_ERROR_PARAM_NOT_EXIST) {
         *storeUserId = processInfo->userIdInt;
         ret = HKS_SUCCESS;
@@ -55,6 +59,9 @@ static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* p
 
     *storageLevel = storageLevelParam->uint32Param;
 
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
+    HksCheckIfNeedTransferFile(*storageLevel, *storeUserId);
+#endif
     return ret;
 }
 #endif
@@ -82,7 +89,7 @@ static int32_t GetKeyAliasPath(const struct HksBlob *keyAlias, struct HksStoreMa
     return ConstructName(keyAlias, outMaterial->keyAliasPath, HKS_MAX_FILE_NAME_LEN);
 }
 
-static int32_t GetUserIdPath(uint32_t userId, bool isPlain, struct HksStoreMaterial *outMaterial)
+static int32_t GetUserIdPath(int32_t userId, bool isPlain, struct HksStoreMaterial *outMaterial)
 {
     outMaterial->userIdPath = (char *)HksMalloc(HKS_MAX_DIRENT_FILE_LEN);
     HKS_IF_NULL_LOGE_RETURN(outMaterial->userIdPath, HKS_ERROR_MALLOC_FAIL, "malloc userIdPath failed.")
@@ -225,7 +232,7 @@ static int32_t InitStorageMaterial(const struct HksProcessInfo *processInfo,
 {
     (void)paramSet;
     uint32_t storageLevel = HKS_AUTH_STORAGE_LEVEL_DE;
-    uint32_t storeUserId = processInfo->userIdInt;
+    int32_t storeUserId = processInfo->userIdInt;
     int32_t ret;
 #ifdef L2_STANDARD
     ret = GetStorageLevelAndStoreUserIdParam(processInfo, paramSet, &storageLevel, &storeUserId);
