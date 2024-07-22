@@ -100,4 +100,7 @@ declare_args() {
 
   # hap temporary skip upgrade config
   huks_hap_skip_upgrade_config = "{}"
+
+  # whether enable huks hdi in system in standard
+  huks_enable_hdi_in_standard = true
 }

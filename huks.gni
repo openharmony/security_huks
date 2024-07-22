@@ -19,7 +19,6 @@ enable_user_auth_framework = true
 enable_huks_lite_hap = false
 enable_bundle_framework = true
 enable_interact_across_local_accounts = false
-has_huks_hdi_driver = true
 fuzz_module_out_path = "huks/huks"
 
 # always set as false for upload code
@@ -37,11 +36,6 @@ if (!defined(global_parts_info) ||
 
 if (!defined(global_parts_info.useriam_user_auth_framework)) {
   enable_user_auth_framework = false
-}
-
-if (!defined(global_parts_info.hdf_drivers_peripheral_huks) &&
-    !defined(global_parts_info.hdf_drivers_peripheral_huks_override)) {
-  has_huks_hdi_driver = false
 }
 
 if (os_level == "mini" && defined(global_parts_info.arkui_ace_engine_lite)) {
