@@ -667,6 +667,7 @@ enum HksAuthStorageLevel {
 enum HksAgreePubKeyType {
     HKS_PUBKEY_DEFAULT = 0,
     HKS_PUBKEY_CERT_CHAIN = 1,
+};
 
 #ifdef __cplusplus
 }
