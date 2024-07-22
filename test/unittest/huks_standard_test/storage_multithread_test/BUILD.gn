@@ -60,6 +60,7 @@ ohos_unittest("huks_multithread_test") {
     "//base/security/huks/utils/mutex",
     "unittest/include",
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",  # hks_response.h
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
   ]
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
