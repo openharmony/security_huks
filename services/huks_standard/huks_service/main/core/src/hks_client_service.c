@@ -217,27 +217,25 @@ bool HksCheckIsAcrossDevices(const struct HksParamSet *paramSet)
 }
 
 static int32_t AppendOwnerInfoForAcrossDevicesIfNeed(const struct HksProcessInfo *processInfo,
-    struct HksParamSet *newParamSet)
+    struct HksParamSet *newParamSet, struct HksBlob *appInfo)
 {
     if (!HksCheckIsAcrossDevices(newParamSet)) {
         return HKS_SUCCESS;
     }
 
-    struct HksBlob appInfo = { 0, NULL };
     int32_t ret;
     do {
-        ret = GetCallerName(processInfo, &appInfo);
+        ret = GetCallerName(processInfo, appInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "GetCallerName failed")
 
         struct HksParam paramArr[] = {
-            { .tag = HKS_TAG_OWNER_ID, .blob = appInfo },
+            { .tag = HKS_TAG_OWNER_ID, .blob = *appInfo },
             { .tag = HKS_TAG_OWNER_TYPE, .uint32Param = HksGetCallerType() },
         };
 
         ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
     } while (0);
 
-    HKS_FREE_BLOB(appInfo);
     return ret;
 }
 #endif
@@ -248,7 +246,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
     int32_t ret;
     (void)operation;
     struct HksParamSet *newParamSet = NULL;
-
+    struct HksBlob appInfo = { 0, NULL };
     do {
         if (paramSet != NULL) {
             ret = AppendToNewParamSet(paramSet, &newParamSet);
@@ -276,7 +274,7 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add processInfo failed")
 
 #ifdef HKS_SUPPORT_GET_BUNDLE_INFO
-        ret = AppendOwnerInfoForAcrossDevicesIfNeed(processInfo, newParamSet);
+        ret = AppendOwnerInfoForAcrossDevicesIfNeed(processInfo, newParamSet, &appInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add ownerInfo failed")
 #endif
 
@@ -288,9 +286,10 @@ static int32_t AppendProcessInfoAndDefaultStrategy(const struct HksParamSet *par
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
 
         *outParamSet = newParamSet;
+        HKS_FREE_BLOB(appInfo);
         return ret;
     } while (0);
-
+    HKS_FREE_BLOB(appInfo);
     HksFreeParamSet(&newParamSet);
     return ret;
 }
