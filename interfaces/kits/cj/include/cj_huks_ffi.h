@@ -19,42 +19,44 @@
 #include "hks_param.h"
 #include "hks_errcode_adapter.h"
 
-int32_t FfiOHOSGetSdkVersion(struct HksBlob *sdkVersion);
+#define FFI_EXPORT __attribute__((visibility("default")))
 
-int32_t FfiOHOSInitSession(const char *keyAlias, const struct HksParamSet *paramSet,
-                           struct HksBlob *handle, struct HksBlob *token);
+FFI_EXPORT int32_t FfiOHOSGetSdkVersion(struct HksBlob *sdkVersion);
 
-int32_t FfiOHOSUpdateSession(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                             const struct HksBlob *inData, struct HksBlob *outData);
+FFI_EXPORT int32_t FfiOHOSInitSession(const char *keyAlias, const struct HksParamSet *paramSet,
+    struct HksBlob *handle, struct HksBlob *token);
 
-int32_t FfiOHOSFinishSession(const struct HksBlob *handle, const struct HksParamSet *paramSet,
-                             const struct HksBlob *inData, struct HksBlob *outData);
+FFI_EXPORT int32_t FfiOHOSUpdateSession(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t FfiOHOSAbortSession(const struct HksBlob *handle, const struct HksParamSet *paramSet);
+FFI_EXPORT int32_t FfiOHOSFinishSession(const struct HksBlob *handle, const struct HksParamSet *paramSet,
+    const struct HksBlob *inData, struct HksBlob *outData);
 
-int32_t FfiOHOSIsKeyExist(const char *keyAlias, const struct HksParamSet *paramSet);
+FFI_EXPORT int32_t FfiOHOSAbortSession(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
-int32_t FfiOHOSGetKeyItemProperties(const char *keyAlias,
-                                    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
+FFI_EXPORT int32_t FfiOHOSIsKeyExist(const char *keyAlias, const struct HksParamSet *paramSet);
 
-int32_t FfiOHOSHAttestKey(const char *keyAlias, const struct HksParamSet *paramSet,
-                          struct HksCertChain *certChain);
+FFI_EXPORT int32_t FfiOHOSGetKeyItemProperties(const char *keyAlias,
+    const struct HksParamSet *paramSetIn, struct HksParamSet *paramSetOut);
 
-int32_t FfiOHOSHAnonAttestKey(const char *keyAlias, const struct HksParamSet *paramSet,
-                              struct HksCertChain *certChain);
+FFI_EXPORT int32_t FfiOHOSHAttestKey(const char *keyAlias, const struct HksParamSet *paramSet,
+    struct HksCertChain *certChain);
 
-int32_t FfiOHOSExportKey(const char *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key);
+FFI_EXPORT int32_t FfiOHOSHAnonAttestKey(const char *keyAlias, const struct HksParamSet *paramSet,
+    struct HksCertChain *certChain);
 
-int32_t FfiOHOSImportWrappedKey(const char *keyAlias, const char *wrappingKeyAlias,
-                                const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
+FFI_EXPORT int32_t FfiOHOSExportKey(const char *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key);
 
-int32_t FfiOHOSGenerateKey(const char *keyAlias, const struct HksParamSet *paramSetIn,
-                           struct HksParamSet *paramSetOut);
+FFI_EXPORT int32_t FfiOHOSImportWrappedKey(const char *keyAlias, const char *wrappingKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *wrappedKeyData);
 
-int32_t FfiOHOSDeleteKey(const char *keyAlias, const struct HksParamSet *paramSet);
+FFI_EXPORT int32_t FfiOHOSGenerateKey(const char *keyAlias, const struct HksParamSet *paramSetIn,
+    struct HksParamSet *paramSetOut);
 
-int32_t FfiOHOSImportKey(const char *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key);
+FFI_EXPORT int32_t FfiOHOSDeleteKey(const char *keyAlias, const struct HksParamSet *paramSet);
 
-void FfiOHOSConvertErrCode(int32_t hksCode, struct HksResult *ret);
+FFI_EXPORT int32_t FfiOHOSImportKey(const char *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key);
+
+FFI_EXPORT void FfiOHOSConvertErrCode(int32_t hksCode, struct HksResult *ret);
 
 #endif
