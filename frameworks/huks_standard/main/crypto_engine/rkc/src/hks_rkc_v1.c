@@ -71,7 +71,7 @@ static int32_t RkcReadAllKsfV1(struct HksRkcKsfDataV1 *validKsfData)
 {
     /* Read all rkc ksf */
     int32_t readRet[HKS_KSF_NUM] = { 0 };
-    struct HksRkcKsfDataV1 allRkcData[HKS_KSF_NUM] = { 0 };
+    struct HksRkcKsfDataV1 allRkcData[HKS_KSF_NUM] = { { 0 } };
     for (uint32_t i = 0; i < HKS_KSF_NUM; ++i) {
         readRet[i] = HksRkcReadKsfV1(GetGlobalKsfAttrRkc()->name[i], &(allRkcData[i]));
     }
@@ -279,7 +279,9 @@ int32_t UpgradeV1ToV2(void)
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Encrypt mk failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
         /* Initialize rkc keystore file name (mk already done in HksRkcInit) */
-        struct HksKsfAttr ksfAttrRkc = {{ "rinfo1_v2.data", "rinfo2_v2.data" }};
+        char rinfo1[] = "rinfo1_v2.data";
+        char rinfo2[] = "rinfo2_v2.data";
+        struct HksKsfAttr ksfAttrRkc = {{ rinfo1, rinfo2 }};
         ret = InitKsfAttr(&ksfAttrRkc, HKS_KSF_TYPE_RKC);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "Init attribute of rkc keystore file failed! ret = 0x%" LOG_PUBLIC "X", ret)
 
