@@ -63,7 +63,6 @@ ohos_unittest("hukssdk_test") {
     defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
   }
   include_dirs = [
-    "//third_party/bounds_checking_function/include",
     "./include",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/interface_test/include",
     "//base/security/huks/utils/file_operator",
@@ -81,7 +80,6 @@ ohos_unittest("hukssdk_test") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
     "//base/security/huks/interfaces/kits/c:huks_ndk",
-    "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [
     "c_utils:utils",
