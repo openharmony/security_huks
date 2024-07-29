@@ -25,7 +25,6 @@
 #include "hks_rkc_rw.c"
 #include "hks_rkc_v1.c"
 
-
 #include "cstring"
 #include "unistd.h"
 #include "securec.h"

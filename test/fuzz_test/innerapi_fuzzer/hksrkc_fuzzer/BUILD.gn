@@ -23,8 +23,6 @@ ohos_fuzztest("HksRkcFuzzTest") {
   include_dirs = [
     ".",
     "..",
-    "//third_party/bounds_checking_function/include",
-    "//unittest/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
     "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/src",
@@ -48,7 +46,6 @@ ohos_fuzztest("HksRkcFuzzTest") {
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "c_utils:utils" ]
 }
