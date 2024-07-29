@@ -237,7 +237,7 @@ ohos_unittest("huks_module_test") {
     ]
   }
 
-  include_dirs += [ "//test/xts/acts/security_lite/huks/common/include" ]
+  include_dirs += [ "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include" ]
 
   cflags = [
     "-DHKS_KEY_VERSION=${huks_key_version}",
@@ -287,7 +287,6 @@ ohos_unittest("huks_module_test") {
   deps = [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/inner_kits_passthrough:libhukssdk_static",
     "//base/security/huks/test/unittest/modify_old_version_key_test_util:huks_modify_old_version_key_util",
-    "//third_party/openssl:libcrypto_shared",
   ]
 
   external_deps = [
@@ -297,6 +296,11 @@ ohos_unittest("huks_module_test") {
     "hitrace:libhitracechain",
     "ipc:ipc_single",
   ]
+
+  if (os_level == "standard") {
+    external_deps += [ "openssl:libcrypto_shared" ]
+  }
+
   if (support_jsapi) {
     sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_event_observer_test.cpp" ]
     external_deps += [

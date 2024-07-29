@@ -80,7 +80,6 @@ ohos_moduletest("huks_mt_test") {
   defines += [ "_HUKS_LOG_ENABLE_" ]
 
   include_dirs = [
-    "//third_party/bounds_checking_function/include",
     "../unittest/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "include",
@@ -94,8 +93,6 @@ ohos_moduletest("huks_mt_test") {
   deps = [
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//third_party/bounds_checking_function:libsec_static",
-    "//third_party/openssl:libcrypto_shared",
   ]
   external_deps = [
     "c_utils:utils",
@@ -103,6 +100,9 @@ ohos_moduletest("huks_mt_test") {
   ]
   if (os_level == "standard") {
     defines += [ "L2_STANDARD" ]
-    external_deps += [ "googletest:gtest" ]
+    external_deps += [
+      "googletest:gtest",
+      "openssl:libcrypto_shared",
+    ]
   }
 }

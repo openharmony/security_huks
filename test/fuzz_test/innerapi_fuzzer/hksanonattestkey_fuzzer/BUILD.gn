@@ -22,7 +22,6 @@ ohos_fuzztest("HksAnonAttestKeyFuzzTest") {
   include_dirs = [
     ".",
     "..",
-    "//third_party/bounds_checking_function/include",
     "../../../../frameworks/huks_standard/main/common/include/",
   ]
   cflags = [
@@ -37,7 +36,6 @@ ohos_fuzztest("HksAnonAttestKeyFuzzTest") {
     "..:hks_fuzz_util",
     "../../../../frameworks/huks_standard/main:huks_standard_frameworks",
     "../../../../interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//third_party/bounds_checking_function:libsec_static",
   ]
   external_deps = [ "c_utils:utils" ]
 }
