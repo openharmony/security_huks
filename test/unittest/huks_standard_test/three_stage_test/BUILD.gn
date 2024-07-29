@@ -141,7 +141,6 @@ ohos_unittest("huks_UT_test") {
     "include",
     "include/asymmetric_alg_test",
     "include/symmetric_alg_test",
-    "//test/xts/acts/security_lite/huks/common/include",
     "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
     "//base/security/huks/interfaces/kits/c/include",
@@ -150,6 +149,7 @@ ohos_unittest("huks_UT_test") {
     "//base/security/huks/utils/file_operator",
     "//base/security/huks/services/huks_standard/huks_service/main/core/include",
     "//base/security/huks/test/unittest/huks_common_test/include",
+    "//base/security/huks/test/unittest/huks_standard_test/interface_inner_test/sdk_test/include",
   ]
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
@@ -177,11 +177,6 @@ ohos_unittest("huks_UT_test") {
   sources += [ "src/hks_chipset_platform_encrypt_test.cpp" ]
 
   # used by hks_chipset_platform_encrypt_test.cpp
-  deps += [
-    "//third_party/json:nlohmann_json_static",
-    "//third_party/openssl:libcrypto_shared",
-  ]
-
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
@@ -191,6 +186,8 @@ ohos_unittest("huks_UT_test") {
     external_deps += [
       "access_token:libnativetoken_shared",
       "access_token:libtokensetproc_shared",
+      "json:nlohmann_json_static",
+      "openssl:libcrypto_shared",
     ]
   }
 

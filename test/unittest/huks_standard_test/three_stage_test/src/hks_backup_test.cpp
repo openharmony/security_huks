@@ -23,7 +23,6 @@
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
 #include "hks_file_operator.h"
-#include "hks_test_mem.h"
 
 #include <gtest/gtest.h>
 #include <vector>
