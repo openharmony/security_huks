@@ -341,8 +341,9 @@ static int32_t SignVerifyAuth(const struct HksKeyNode *keyNode, const struct Hks
         ret = HksGetParam(paramSet, HKS_TAG_PADDING, &padding);
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append sign/verify get padding param failed!")
         if (padding->uint32Param == HKS_PADDING_PSS) {
-            ret = HksCheckParamsetOneAndPatamsetTwoExist(keyNode->paramSet, paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckParamsetOneAndPatamsetTwoExist failed!")
+            ret = HksCheckKeyBlobParamSetEqualRuntimeParamSet(keyNode->paramSet,
+                paramSet, HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksCheckKeyBlobParamSetEqualRuntimeParamSet failed!")
         }
         return HksAuth(HKS_AUTH_ID_SIGN_VERIFY_RSA, keyNode, paramSet);
     } else if (algParam->uint32Param == HKS_ALG_ECC) {
