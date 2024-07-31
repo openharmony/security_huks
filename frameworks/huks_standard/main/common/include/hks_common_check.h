@@ -66,7 +66,7 @@ int32_t HksGetBlobFromWrappedData(const struct HksBlob *wrappedData, uint32_t bl
 
 int32_t HksCheckKeyNeedStored(const struct HksParamSet *paramSet, bool *isNeedStorage);
 
-int32_t HksCheckParamsetOneAndPatamsetTwoExist(const struct HksParamSet *keyBlobParamSet,
+int32_t HksCheckKeyBlobParamSetEqualRuntimeParamSet(const struct HksParamSet *keyBlobParamSet,
     const struct HksParamSet *runtimeParamSet, uint32_t tag);
 
 void SetRsaPssSaltLenType(const struct HksParamSet *paramSet, struct HksUsageSpec *usageSpec);
