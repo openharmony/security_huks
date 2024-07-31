@@ -16,6 +16,7 @@
 #include "hks_session_manager.h"
 #include "hks_client_service_util.h"
 
+#include <inttypes.h>
 #include <pthread.h>
 #include <sched.h>
 #include <securec.h>
@@ -30,6 +31,13 @@
 #include "hks_util.h"
 
 #define MAX_OPERATIONS_COUNT 32
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+#define MAX_OPERATIONS_EACH_TOKEN_ID 10
+#else
+#define MAX_OPERATIONS_EACH_TOKEN_ID MAX_OPERATIONS_COUNT
+#endif
+
 #define S_TO_MS 1000
 
 static struct DoubleList g_operationList = { &g_operationList, &g_operationList };
@@ -70,76 +78,140 @@ static void FreeOperation(struct HksOperation **operation)
     HKS_FREE(*operation);
 }
 
+/* Need to lock before calling DeleteKeyNodeAndDecreaseGlobalCount */
+static void DeleteKeyNodeAndDecreaseGlobalCount(struct HksOperation *operation)
+{
+    DeleteKeyNode(operation->handle);
+    FreeOperation(&operation);
+    --g_operationCount;
+    HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
+}
+
 /* Need to lock before calling DeleteFirstAbortableOperation */
 static bool DeleteFirstAbortableOperation(void)
 {
     struct HksOperation *operation = NULL;
 
     HKS_DLIST_ITER(operation, &g_operationList) {
-        if (operation != NULL && operation->abortable) {
-            if (operation->isInUse) {
-                HKS_LOG_I("operation is in use, do not delete");
-                continue;
-            }
-            DeleteKeyNode(operation->handle);
-            FreeOperation(&operation);
-            --g_operationCount;
-            HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
-            return true;
+        if (operation == NULL) {
+            continue;
         }
+        if (operation->isInUse) {
+            HKS_LOG_W("DeleteFirstAbortableOperation can not delete using session! userIdInt %" LOG_PUBLIC "d",
+                operation->processInfo.userIdInt);
+            continue;
+        }
+        HKS_LOG_E("DeleteFirstAbortableOperation delete old not using session! userIdInt %"
+            LOG_PUBLIC "d", operation->processInfo.userIdInt);
+        DeleteKeyNodeAndDecreaseGlobalCount(operation);
+        return true;
     }
     return false;
 }
 
-static bool DeleteTimeOutOperation(void)
+/* Need to lock before calling DeleteFirstTimeOutBatchOperation */
+static void DeleteFirstTimeOutBatchOperation(void)
 {
+    if (g_operationCount < MAX_OPERATIONS_COUNT) {
+        return;
+    }
+    HKS_LOG_I("maximum number of sessions reached: delete timeout session.");
     struct HksOperation *operation = NULL;
 
     HKS_DLIST_ITER(operation, &g_operationList) {
-        if (operation != NULL && operation->isBatchOperation) {
-            uint64_t curTime = 0;
-            int32_t ret = HksElapsedRealTime(&curTime);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "HksElapsedRealTime failed");
-            if (operation->batchOperationTimestamp < curTime) {
-                HKS_LOG_E("Batch operation timeout");
-                DeleteKeyNode(operation->handle);
-                FreeOperation(&operation);
-                --g_operationCount;
-                HKS_LOG_I("delete operation count:%" LOG_PUBLIC "u", g_operationCount);
-                return true;
-            }
+        if (operation == NULL || !operation->isBatchOperation) {
+            continue;
+        }
+        uint64_t curTime = 0;
+        int32_t ret = HksElapsedRealTime(&curTime);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksElapsedRealTime failed %" LOG_PUBLIC "d, err %" LOG_PUBLIC "s", ret, strerror(errno));
+            continue; // find next and try again
+        }
+        if (operation->batchOperationTimestamp >= curTime) {
+            continue;
+        }
+        if (operation->isInUse) {
+            HKS_LOG_W("Batch operation timeout but is in use, not delete, userIdInt %" LOG_PUBLIC "d",
+                operation->processInfo.userIdInt);
+            continue;
+        }
+        HKS_LOG_E("Batch operation timeout! delete operation! userIdInt %" LOG_PUBLIC "d",
+            operation->processInfo.userIdInt);
+        return DeleteKeyNodeAndDecreaseGlobalCount(operation);
+    }
+}
+
+/* Need to lock before calling DeleteFirstAbortableOperationForTokenId */
+static bool DeleteFirstAbortableOperationForTokenId(uint32_t tokenId)
+{
+    struct HksOperation *operation = NULL;
+    HKS_DLIST_ITER(operation, &g_operationList) {
+        if (operation == NULL || operation->accessTokenId != tokenId) {
+            continue;
+        }
+        if (operation->isInUse) {
+            HKS_LOG_W("DeleteFirstAbortableOperationForTokenId can not delete using session! userIdInt %"
+                LOG_PUBLIC "d", operation->processInfo.userIdInt);
+            continue;
+        }
+        HKS_LOG_E("DeleteFirstAbortableOperationForTokenId delete old not using session! userIdInt %"
+            LOG_PUBLIC "d", operation->processInfo.userIdInt);
+        DeleteKeyNodeAndDecreaseGlobalCount(operation);
+        return true;
+    }
+    return false;
+}
+
+/* Need to lock before calling DeleteForTokenIdIfExceedLimit */
+static int32_t DeleteForTokenIdIfExceedLimit(uint32_t tokenId)
+{
+    if (g_operationCount < MAX_OPERATIONS_EACH_TOKEN_ID) {
+        return HKS_SUCCESS;
+    }
+    uint32_t ownedSessionCount = 0;
+    struct HksOperation *operation = NULL;
+    HKS_DLIST_ITER(operation, &g_operationList) {
+        if (operation != NULL && operation->accessTokenId == tokenId) {
+            ++ownedSessionCount;
         }
     }
-    return true;
+    if (ownedSessionCount >= MAX_OPERATIONS_EACH_TOKEN_ID) {
+        HKS_LOG_E("current tokenId have owned too many %" LOG_PUBLIC "u sessions", ownedSessionCount);
+        if (DeleteFirstAbortableOperationForTokenId(tokenId)) {
+            return HKS_SUCCESS;
+        }
+        return HKS_ERROR_SESSION_REACHED_LIMIT;
+    }
+    return HKS_SUCCESS;
 }
 
 static int32_t AddOperation(struct HksOperation *operation)
 {
     pthread_mutex_lock(&g_lock);
 
-    if (g_operationCount >= MAX_OPERATIONS_COUNT) {
-        HKS_LOG_I("maximum number of sessions reached: delete timeout session.");
-        if (!DeleteTimeOutOperation()) {
-            pthread_mutex_unlock(&g_lock);
-            HKS_LOG_E("delete timeout session failed");
-            return HKS_ERROR_BAD_STATE;
-        }
-    }
+    int32_t ret = HKS_ERROR_SESSION_REACHED_LIMIT;
+    do {
+        DeleteFirstTimeOutBatchOperation();
 
-    if (g_operationCount >= MAX_OPERATIONS_COUNT) {
-        HKS_LOG_I("maximum number of sessions reached: delete oldest session.");
-        if (!DeleteFirstAbortableOperation()) {
-            pthread_mutex_unlock(&g_lock);
-            HKS_LOG_E("not found abortable session");
-            return HKS_ERROR_SESSION_REACHED_LIMIT;
-        }
-    }
+        ret = DeleteForTokenIdIfExceedLimit(operation->accessTokenId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "DeleteForTokenIdIfExceedLimit fail %" LOG_PUBLIC "d", ret)
 
-    AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
-    ++g_operationCount;
-    HKS_LOG_D("add operation count:%" LOG_PUBLIC "u", g_operationCount);
+        if (g_operationCount >= MAX_OPERATIONS_COUNT) {
+            HKS_LOG_I("maximum number of sessions reached: delete oldest session.");
+            if (!DeleteFirstAbortableOperation()) {
+                HKS_LOG_E("DeleteFirstAbortableOperation fail!");
+                ret = HKS_ERROR_SESSION_REACHED_LIMIT;
+                break;
+            }
+        }
+
+        AddNodeAtDoubleListTail(&g_operationList, &operation->listHead);
+        ++g_operationCount;
+        HKS_LOG_I("add operation count:%" LOG_PUBLIC "u", g_operationCount);
+    } while (false);
     pthread_mutex_unlock(&g_lock);
-    return HKS_SUCCESS;
+    return ret;
 }
 
 static int32_t ConstructOperationProcessInfo(const struct HksProcessInfo *processInfo, struct HksOperation *operation)
@@ -362,10 +434,7 @@ static void DeleteSession(const struct HksProcessInfo *processInfo, struct HksOp
     }
 
     if (isNeedDelete) {
-        DeleteKeyNode(operation->handle);
-        FreeOperation(&operation);
-        --g_operationCount;
-        HKS_LOG_I("delete session count = %" LOG_PUBLIC "u", g_operationCount);
+        DeleteKeyNodeAndDecreaseGlobalCount(operation);
     }
 }
 

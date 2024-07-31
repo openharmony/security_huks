@@ -32,14 +32,170 @@
 
 #define S_TO_MS 1000
 #define MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME 10
-#ifdef _SUPPORT_HKS_TEE_
-#define MAX_KEYNODE_COUNT 64
+#define INVALID_TOKEN_ID 0U
+#define MAX_KEY_NODES_COUNT 32
+
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+#define MAX_KEY_NODES_EACH_TOKEN_ID 10
 #else
-#define MAX_KEYNODE_COUNT 100
+#define MAX_KEY_NODES_EACH_TOKEN_ID MAX_KEY_NODES_COUNT
 #endif
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
+
+static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
+{
+    if ((paramSet == NULL) || (*paramSet == NULL)) {
+        HKS_LOG_E("invalid keyblob paramset");
+        return;
+    }
+    struct HksParam *keyParam = NULL;
+    int32_t ret = HksGetParam(*paramSet, HKS_TAG_KEY, &keyParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("get key param failed!");
+        HksFreeParamSet(paramSet);
+        return;
+    }
+    (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
+    HksFreeParamSet(paramSet);
+}
+
+static int32_t SetAesCcmModeTag(struct HksParamSet *paramSet, const uint32_t alg, const uint32_t pur, bool *tag)
+{
+    if (alg != HKS_ALG_AES) {
+        *tag = false;
+        return HKS_SUCCESS;
+    }
+
+    if (pur != HKS_KEY_PURPOSE_ENCRYPT && pur != HKS_KEY_PURPOSE_DECRYPT) {
+        *tag = false;
+        return HKS_SUCCESS;
+    }
+
+    struct HksParam *modParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modParam);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("aes get block mode tag fail");
+        return HKS_ERROR_UNKNOWN_ERROR;
+    }
+
+    *tag = (modParam->uint32Param == HKS_MODE_CCM);
+    return HKS_SUCCESS;
+}
+
+static void FreeCachedData(void **ctx)
+{
+    struct HksBlob *cachedData = (struct HksBlob *)*ctx;
+    if (cachedData == NULL) {
+        return;
+    }
+    if (cachedData->data != NULL) {
+        (void)memset_s(cachedData->data, cachedData->size, 0, cachedData->size);
+        HKS_FREE(cachedData->data);
+    }
+    HKS_FREE(*ctx);
+}
+
+static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, bool hasCalcHash, void **ctx)
+{
+    switch (purpose) {
+        case HKS_KEY_PURPOSE_AGREE:
+        case HKS_KEY_PURPOSE_DERIVE:
+            FreeCachedData(ctx);
+            break;
+        case HKS_KEY_PURPOSE_SIGN:
+        case HKS_KEY_PURPOSE_VERIFY:
+            if (hasCalcHash) {
+                HksCryptoHalHashFreeCtx(ctx);
+            } else {
+                FreeCachedData(ctx);
+            }
+            break;
+        case HKS_KEY_PURPOSE_ENCRYPT:
+        case HKS_KEY_PURPOSE_DECRYPT:
+            if (alg != HKS_ALG_RSA) {
+                HksCryptoHalEncryptFreeCtx(ctx, alg);
+            } else {
+                FreeCachedData(ctx);
+            }
+            break;
+        case HKS_KEY_PURPOSE_MAC:
+            HksCryptoHalHmacFreeCtx(ctx);
+            break;
+        default:
+            return;
+    }
+}
+
+static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
+{
+    if ((paramSet == NULL) || (*paramSet == NULL)) {
+        HKS_LOG_E("invalid keyblob paramset");
+        return;
+    }
+
+    struct HksParam *ctxParam = NULL;
+    int32_t ret = HksGetParam(*paramSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    if (ret != HKS_SUCCESS) {
+        HksFreeParamSet(paramSet);
+        HKS_LOG_E("get ctx from keyNode failed!");
+        return;
+    }
+
+    if (ctxParam->uint64Param != 0) {
+        void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+        struct HksParam *param1 = NULL;
+        struct HksParam *param2 = NULL;
+        if (HksGetParam(*paramSet, HKS_TAG_PURPOSE, &param1) != HKS_SUCCESS ||
+            HksGetParam(*paramSet, HKS_TAG_ALGORITHM, &param2) != HKS_SUCCESS) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+        struct HksParam *param3 = NULL;
+        ret = HksGetParam(*paramSet, HKS_TAG_DIGEST, &param3);
+        if (ret == HKS_ERROR_INVALID_ARGUMENT) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+        bool hasCalcHash = true;
+        /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
+           hash value has been passed in by the user. So the hash value does not need to be free.
+        */
+        if (ret == HKS_SUCCESS) {
+            hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
+        }
+        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519);
+
+        bool isAesCcm = false;
+        ret = SetAesCcmModeTag(*paramSet, param2->uint32Param, param1->uint32Param, &isAesCcm);
+        if (ret != HKS_SUCCESS) {
+            HksFreeParamSet(paramSet);
+            return;
+        }
+
+        if (isAesCcm) {
+            HKS_LOG_D("FreeRuntimeParamSet fee ccm cache data!");
+            FreeCachedData(&ctx);
+        } else {
+            KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, hasCalcHash, &ctx);
+        }
+
+        ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    }
+    HksFreeParamSet(paramSet);
+}
+
+static void DeleteKeyNodeFree(struct HuksKeyNode *keyNode)
+{
+    RemoveDoubleListNode(&keyNode->listHead);
+    FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
+    FreeRuntimeParamSet(&keyNode->runtimeParamSet);
+    FreeRuntimeParamSet(&keyNode->authRuntimeParamSet);
+    HKS_FREE(keyNode);
+    --g_keyNodeCount;
+    HKS_LOG_I("delete keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
+}
 
 static int32_t BuildRuntimeParamSet(const struct HksParamSet *inParamSet, struct HksParamSet **outParamSet)
 {
@@ -124,57 +280,111 @@ static int32_t GenerateKeyNodeHandle(uint64_t *handle)
     return ret;
 }
 
-static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
+static void DeleteFirstTimeOutBatchKeyNode(void)
 {
-    if ((paramSet == NULL) || (*paramSet == NULL)) {
-        HKS_LOG_E("invalid keyblob paramset");
+    if (g_keyNodeCount < MAX_KEY_NODES_COUNT) {
         return;
     }
-    struct HksParam *keyParam = NULL;
-    int32_t ret = HksGetParam(*paramSet, HKS_TAG_KEY, &keyParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("get key param failed!");
-        HksFreeParamSet(paramSet);
-        return;
+    struct HuksKeyNode *keyNode = NULL;
+    HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        if (keyNode == NULL || !keyNode->isBatchOperation) {
+            continue;
+        }
+        uint64_t curTime = 0;
+        int32_t ret = HksElapsedRealTime(&curTime);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("DeleteFirstTimeOutBatchKeyNode HksElapsedRealTime failed %" LOG_PUBLIC "d", ret);
+            continue;
+        }
+        if (keyNode->batchOperationTimestamp >= curTime) {
+            continue;
+        }
+        HKS_LOG_E("Batch operation timeout, delete keyNode!");
+        return DeleteKeyNodeFree(keyNode);
     }
-    (void)memset_s(keyParam->blob.data, keyParam->blob.size, 0, keyParam->blob.size);
-    HksFreeParamSet(paramSet);
 }
 
-static int32_t DeleteTimeOutKeyNode(void)
+static uint32_t GetTokenIdFromParamSet(const struct HksParamSet *p)
 {
-    if (g_keyNodeCount < MAX_KEYNODE_COUNT) {
+    struct HksParam *accessTokenId = NULL;
+    int32_t ret = HksGetParam(p, HKS_TAG_ACCESS_TOKEN_ID, &accessTokenId);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_W("find token id failed");
+        return INVALID_TOKEN_ID;
+    }
+    return accessTokenId->uint32Param;
+}
+
+static bool DeleteFirstKeyNodeForTokenId(uint32_t tokenId)
+{
+    struct HuksKeyNode *keyNode = NULL;
+    HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        if (keyNode == NULL) {
+            continue;
+        }
+        if (GetTokenIdFromParamSet(keyNode->runtimeParamSet) != tokenId) {
+            continue;
+        }
+        HKS_LOG_E("DeleteFirstKeyNodeForTokenId delete old not using key node!");
+        DeleteKeyNodeFree(keyNode);
+        return true;
+    }
+    return false;
+}
+
+static int32_t DeleteKeyNodeForTokenIdIfExceedLimit(uint32_t tokenId)
+{
+    if (g_keyNodeCount < MAX_KEY_NODES_EACH_TOKEN_ID) {
         return HKS_SUCCESS;
     }
-    struct HuksKeyNode *tmpKeyNode = NULL;
-    HKS_DLIST_ITER(tmpKeyNode, &g_keyNodeList) {
-        if (tmpKeyNode != NULL && tmpKeyNode->isBatchOperation) {
-            uint64_t curTime = 0;
-            int32_t ret = HksElapsedRealTime(&curTime);
-            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksElapsedRealTime failed")
-            if (tmpKeyNode->batchOperationTimestamp < curTime) {
-                HKS_LOG_E("Batch operation timeout");
-                HksDeleteKeyNode(tmpKeyNode->handle);
-            }
+    uint32_t ownedNodeCount = 0;
+    struct HuksKeyNode *keyNode = NULL;
+    HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        if (keyNode != NULL && GetTokenIdFromParamSet(keyNode->runtimeParamSet) == tokenId) {
+            ++ownedNodeCount;
         }
+    }
+    if (ownedNodeCount >= MAX_KEY_NODES_EACH_TOKEN_ID) {
+        HKS_LOG_E("current token id have owned too many %" LOG_PUBLIC "u nodes", ownedNodeCount);
+        if (DeleteFirstKeyNodeForTokenId(tokenId)) {
+            return HKS_SUCCESS;
+        }
+        return HKS_ERROR_SESSION_REACHED_LIMIT;
     }
     return HKS_SUCCESS;
 }
 
-static int32_t AddKeyNode(struct HuksKeyNode *keyNode)
+static bool DeleteFirstKeyNode(void)
+{
+    struct HuksKeyNode *keyNode = NULL;
+    HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
+        HKS_LOG_E("DeleteFirstKeyNode delete old not using key node!");
+        DeleteKeyNodeFree(keyNode);
+        return true;
+    }
+    return false;
+}
+
+static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
 {
     int32_t ret = HKS_SUCCESS;
     HksMutexLock(HksCoreGetHuksMutex());
     do {
-        ret = DeleteTimeOutKeyNode();
-        HKS_IF_NOT_SUCC_BREAK(ret);
-        if (g_keyNodeCount >= MAX_KEYNODE_COUNT) {
+        DeleteFirstTimeOutBatchKeyNode();
+
+        ret = DeleteKeyNodeForTokenIdIfExceedLimit(tokenId);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "CheckKeyNodeEachTokenId fail %" LOG_PUBLIC "d", ret)
+
+        if (g_keyNodeCount >= MAX_KEY_NODES_COUNT) {
             HKS_LOG_E("maximum number of keyNode reached");
-            ret = HKS_ERROR_SESSION_REACHED_LIMIT;
-            break;
+            if (!DeleteFirstKeyNode()) {
+                HKS_LOG_E("DeleteFirstKeyNode fail!");
+                ret = HKS_ERROR_SESSION_REACHED_LIMIT;
+                break;
+            }
         }
 
-        AddNodeAfterDoubleListHead(&g_keyNodeList, &keyNode->listHead);
+        AddNodeAtDoubleListTail(&g_keyNodeList, &keyNode->listHead);
         ++g_keyNodeCount;
         HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
     } while (0);
@@ -247,7 +457,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         return NULL;
     }
 
-    ret = AddKeyNode(keyNode);
+    ret = AddKeyNode(keyNode, GetTokenIdFromParamSet(runtimeParamSet));
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("add keyNode failed");
         HksFreeParamSet(&runtimeParamSet);
@@ -302,7 +512,7 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
         ret = HksDecryptKeyBlob(&aad, keyBlobParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "decrypt keyBlob failed")
 
-        ret = AddKeyNode(keyNode);
+        ret = AddKeyNode(keyNode, GetTokenIdFromParamSet(runtimeParamSet));
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add keyNode failed")
     } while (0);
 
@@ -334,144 +544,13 @@ struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
     return NULL;
 }
 
-static void FreeCachedData(void **ctx)
-{
-    struct HksBlob *cachedData = (struct HksBlob *)*ctx;
-    if (cachedData == NULL) {
-        return;
-    }
-    if (cachedData->data != NULL) {
-        (void)memset_s(cachedData->data, cachedData->size, 0, cachedData->size);
-        HKS_FREE(cachedData->data);
-    }
-    HKS_FREE(*ctx);
-}
-
-static void KeyNodeFreeCtx(uint32_t purpose, uint32_t alg, bool hasCalcHash, void **ctx)
-{
-    switch (purpose) {
-        case HKS_KEY_PURPOSE_AGREE:
-        case HKS_KEY_PURPOSE_DERIVE:
-            FreeCachedData(ctx);
-            break;
-        case HKS_KEY_PURPOSE_SIGN:
-        case HKS_KEY_PURPOSE_VERIFY:
-            if (hasCalcHash) {
-                HksCryptoHalHashFreeCtx(ctx);
-            } else {
-                FreeCachedData(ctx);
-            }
-            break;
-        case HKS_KEY_PURPOSE_ENCRYPT:
-        case HKS_KEY_PURPOSE_DECRYPT:
-            if (alg != HKS_ALG_RSA) {
-                HksCryptoHalEncryptFreeCtx(ctx, alg);
-            } else {
-                FreeCachedData(ctx);
-            }
-            break;
-        case HKS_KEY_PURPOSE_MAC:
-            HksCryptoHalHmacFreeCtx(ctx);
-            break;
-        default:
-            return;
-    }
-}
-
-static int32_t SetAesCcmModeTag(struct HksParamSet *paramSet, const uint32_t alg, const uint32_t pur, bool *tag)
-{
-    if (alg != HKS_ALG_AES) {
-        *tag = false;
-        return HKS_SUCCESS;
-    }
-
-    if (pur != HKS_KEY_PURPOSE_ENCRYPT && pur != HKS_KEY_PURPOSE_DECRYPT) {
-        *tag = false;
-        return HKS_SUCCESS;
-    }
-
-    struct HksParam *modParam = NULL;
-    int32_t ret = HksGetParam(paramSet, HKS_TAG_BLOCK_MODE, &modParam);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("aes get block mode tag fail");
-        return HKS_ERROR_UNKNOWN_ERROR;
-    }
-
-    *tag = (modParam->uint32Param == HKS_MODE_CCM);
-    return HKS_SUCCESS;
-}
-
-static void FreeRuntimeParamSet(struct HksParamSet **paramSet)
-{
-    if ((paramSet == NULL) || (*paramSet == NULL)) {
-        HKS_LOG_E("invalid keyblob paramset");
-        return;
-    }
-
-    struct HksParam *ctxParam = NULL;
-    int32_t ret = HksGetParam(*paramSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
-    if (ret != HKS_SUCCESS) {
-        HksFreeParamSet(paramSet);
-        HKS_LOG_E("get ctx from keyNode failed!");
-        return;
-    }
-
-    if (ctxParam->uint64Param != 0) {
-        void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
-        struct HksParam *param1 = NULL;
-        struct HksParam *param2 = NULL;
-        if (HksGetParam(*paramSet, HKS_TAG_PURPOSE, &param1) != HKS_SUCCESS ||
-            HksGetParam(*paramSet, HKS_TAG_ALGORITHM, &param2) != HKS_SUCCESS) {
-            HksFreeParamSet(paramSet);
-            return;
-        }
-        struct HksParam *param3 = NULL;
-        ret = HksGetParam(*paramSet, HKS_TAG_DIGEST, &param3);
-        if (ret == HKS_ERROR_INVALID_ARGUMENT) {
-            HksFreeParamSet(paramSet);
-            return;
-        }
-        bool hasCalcHash = true;
-        /* If the algorithm is ed25519, the plaintext is directly cached, and if the digest is HKS_DIGEST_NONE, the
-           hash value has been passed in by the user. So the hash value does not need to be free.
-        */
-        if (ret == HKS_SUCCESS) {
-            hasCalcHash = param3->uint32Param != HKS_DIGEST_NONE;
-        }
-        hasCalcHash &= (param2->uint32Param != HKS_ALG_ED25519);
-
-        bool isAesCcm = false;
-        ret = SetAesCcmModeTag(*paramSet, param2->uint32Param, param1->uint32Param, &isAesCcm);
-        if (ret != HKS_SUCCESS) {
-            HksFreeParamSet(paramSet);
-            return;
-        }
-
-        if (isAesCcm) {
-            HKS_LOG_D("FreeRuntimeParamSet fee ccm cache data!");
-            FreeCachedData(&ctx);
-        } else {
-            KeyNodeFreeCtx(param1->uint32Param, param2->uint32Param, hasCalcHash, &ctx);
-        }
-
-        ctxParam->uint64Param = 0; /* clear ctx to NULL */
-    }
-    HksFreeParamSet(paramSet);
-}
-
 void HksDeleteKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
     HksMutexLock(HksCoreGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
-            RemoveDoubleListNode(&keyNode->listHead);
-            FreeKeyBlobParamSet(&keyNode->keyBlobParamSet);
-            FreeRuntimeParamSet(&keyNode->runtimeParamSet);
-            FreeRuntimeParamSet(&keyNode->authRuntimeParamSet);
-            HKS_FREE(keyNode);
-            --g_keyNodeCount;
-            HKS_LOG_I("delete keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
+            DeleteKeyNodeFree(keyNode);
             HksMutexUnlock(HksCoreGetHuksMutex());
             return;
         }
