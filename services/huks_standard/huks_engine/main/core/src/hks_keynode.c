@@ -300,7 +300,8 @@ static void DeleteFirstTimeOutBatchKeyNode(void)
             continue;
         }
         HKS_LOG_E("Batch operation timeout, delete keyNode!");
-        return DeleteKeyNodeFree(keyNode);
+        DeleteKeyNodeFree(keyNode); // IAR iccarm can not compile `return DeleteKeyNodeFree(keyNode)`
+        return; // IAR iccarm will report `a void function may not return a value`
     }
 }
 
