@@ -20,6 +20,7 @@
 #include "hks_template.h"
 
 HksMutex *g_upgradeMutex = NULL;
+HksMutex *g_upgradingMutex = NULL;
 volatile bool g_upgrading = false;
 
 HksCondition *g_processCondition = NULL;
@@ -46,9 +47,18 @@ static int32_t HksProcessConditionNotifyAll(void)
 
 int32_t HksWaitIfUpgrading(void)
 {
+    if (HksMutexLock(g_upgradingMutex) != 0) {
+        HKS_LOG_E("lock g_upgrading failed.");
+    }
     if (g_upgrading) {
+        if (HksMutexUnlock(g_upgradingMutex) != 0) {
+            HKS_LOG_E("unlock g_upgrading failed.");
+        }
         HKS_LOG_I("upgrading, wait...");
         return HksProcessConditionWait();
+    }
+    if (HksMutexUnlock(g_upgradingMutex) != 0) {
+        HKS_LOG_E("unlock g_upgrading failed.");
     }
     return HKS_SUCCESS;
 }
@@ -59,6 +69,10 @@ int32_t HksUpgradeLockCreate(void)
     if (g_upgradeMutex == NULL) {
         HKS_LOG_E("create upgrade mutex failed.");
         return HKS_ERROR_BAD_STATE;
+    }
+    g_upgradingMutex = HksMutexCreate();
+    if (g_upgradingMutex == NULL) {
+        HKS_LOG_E("create g_upgrading mutex failed.");
     }
     return HKS_SUCCESS;
 }
@@ -80,6 +94,12 @@ void HksUpgradeUnlock(void)
         HKS_LOG_E("unlock upgrade failed.");
         // if fail, continue so the huks can work properly
     }
+    if (HksMutexLock(g_upgradingMutex) != 0) {
+        HKS_LOG_E("lock g_upgrading failed.");
+    }
     g_upgrading = false;
+    if (HksMutexUnlock(g_upgradingMutex) != 0) {
+        HKS_LOG_E("unlock g_upgrading failed.");
+    }
     HksProcessConditionNotifyAll();
 }
