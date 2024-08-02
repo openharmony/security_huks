@@ -33,6 +33,7 @@
 #include <securec.h>
 
 #include "hks_log.h"
+#include "hks_report.h"
 #include "hks_sa_interface.h"
 #include "hks_template.h"
 #include "hks_type.h"
@@ -174,7 +175,11 @@ void HksDcmCallback(DcmAnonymousResponse *response)
 {
     if (response == nullptr) {
         HKS_LOG_E("dcm callback got null response");
+        HksReport(__func__, nullptr, nullptr, HUKS_ERR_CODE_EXTERNAL_ERROR);
         return;
+    }
+    if (response->errCode != DCM_SUCCESS) {
+        HksReport(__func__, nullptr, nullptr, response->errCode);
     }
     HKS_LOG_I("dcm callback requestId %" LOG_PUBLIC PRIu64, response->requestId);
     std::lock_guard<std::mutex> lockGuard(g_instancesList.GetMutex());
