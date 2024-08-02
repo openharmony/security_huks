@@ -138,7 +138,10 @@ static void DeleteFirstTimeOutBatchOperation(void)
         }
         HKS_LOG_E("Batch operation timeout! delete operation! userIdInt %" LOG_PUBLIC "d",
             operation->processInfo.userIdInt);
-        return DeleteKeyNodeAndDecreaseGlobalCount(operation);
+        // IAR iccarm can not compile `return DeleteKeyNodeAndDecreaseGlobalCount(operation)`
+        // IAR iccarm will report `a void function may not return a value`
+        DeleteKeyNodeAndDecreaseGlobalCount(operation);
+        return;
     }
 }
 
