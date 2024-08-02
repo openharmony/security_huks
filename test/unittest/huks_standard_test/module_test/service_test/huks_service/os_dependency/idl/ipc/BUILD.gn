@@ -21,7 +21,10 @@ module_output_path = "huks_standard/huks_module_test/service_ipc_test"
 ohos_unittest("service_ipc_test") {
   module_out_path = module_output_path
 
-  sources = [ "src/huks_ipc_serialization_test.cpp" ]
+  sources = [
+    "src/huks_ipc_serialization_test.cpp",
+    "src/huks_ipc_service_test.cpp",
+  ]
 
   configs = [
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
@@ -32,14 +35,21 @@ ohos_unittest("service_ipc_test") {
     "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
   ]
 
-  sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c" ]
+  sources += [
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_ipc_service.c",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
+  ]
 
   deps = [
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
+    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
+    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
   ]
 
   external_deps = [
     "c_utils:utils",
     "hilog:libhilog",
+    "ipc:ipc_single",
   ]
 }
