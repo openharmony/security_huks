@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//base/security/huks/build/config.gni")
+import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 if (os_level == "standard") {
@@ -50,6 +51,7 @@ if (os_level == "standard") {
     deps = []
     defines = []
     include_dirs = []
+    external_deps = []
     if (huks_use_rkc_in_standard) {
       defines += [ "HKS_USE_RKC_IN_STANDARD" ]
 
@@ -64,6 +66,17 @@ if (os_level == "standard") {
         "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
         "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
       ]
+
+      # when uks_use_rkc_in_standard and HKS_ENABLE_CLEAN_FILE are enabled at the same time, add the dependency of HDI to the engine
+      if (huks_enable_hdi_in_standard) {
+        sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_hdi_access.c" ]
+        external_deps += [ "drivers_interface_huks:libhuks_proxy_1.0" ]
+      } else {
+        sources += [
+          "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
+          "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_dynamic_hal.c",
+        ]
+      }
 
       deps += [
         "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
@@ -91,7 +104,7 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
-    external_deps = [
+    external_deps += [
       "c_utils:utils",
       "hilog:libhilog",
     ]
