@@ -190,6 +190,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_check_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_client_service_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/core/src/hks_storage_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/huks_sa_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
   ]
 
