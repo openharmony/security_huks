@@ -194,6 +194,10 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/systemapi_mock/src/useridm_mock_test.cpp",
   ]
 
+  if (huks_security_level != "software") {
+    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_dcm_callback_handler.cpp" ]
+  }
+
   # engine test
   sources += [
     "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_engine/core/src/hks_asn1_test.cpp",
