@@ -551,7 +551,6 @@ int32_t HksAesDecryptForBatch(const struct HksBlob *keyAlias, struct HksParamSet
     EXPECT_EQ(ret, HKS_SUCCESS) << "TestUpdateLoopFinish failed.";
     EXPECT_EQ(inData.size, plainText.size) << "plainText not equals inData";
     if (inData.size != plainText.size) {
-        HKS_LOG_E("xxxxxxxxxxx");
         return -1;
     }
     EXPECT_EQ(memcmp(inData.data, plainText.data, inData.size), HKS_SUCCESS) << "plainText not equals inData";
