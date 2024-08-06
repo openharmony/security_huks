@@ -21,7 +21,10 @@ module_output_path = "huks_standard/huks_upgrade"
 ohos_unittest("huks_file_transfer_config_parser_test") {
   module_out_path = module_output_path
 
-  sources = [ "src/hks_config_parser_test.cpp" ]
+  sources = [
+    "src/hks_config_parser_test.cpp",
+    "src/hks_file_transfer_test.cpp",
+  ]
 
   configs = [ "../../../../../../../../../frameworks/config/build:l2_standard_common_config" ]
 
@@ -35,6 +38,8 @@ ohos_unittest("huks_file_transfer_config_parser_test") {
   deps = [
     "../../../../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static",
     "../../../../../../../../../frameworks/huks_standard/main/os_dependency:libhuks_mem_standard_static",
+    "../../../../../../../../../services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
+    "../../../../../../../../../services/huks_standard/huks_service/main/upgrade/file_transfer:libhuks_upgrade_file_transfer_static",
   ]
 
   external_deps = [
