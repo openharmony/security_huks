@@ -164,6 +164,7 @@ ohos_unittest("huks_module_test") {
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_errorcode_adapter_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_param_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/common_test/src/hks_template_test.cpp",
+    "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/os_dependency_test/src/hks_client_ipc_serialization_test.cpp",
     "//base/security/huks/test/unittest/huks_standard_test/module_test/framework_test/os_dependency_test/src/hks_ipc_check_test.cpp",
   ]
 
@@ -195,7 +196,7 @@ ohos_unittest("huks_module_test") {
   ]
 
   if (huks_security_level != "software") {
-    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_dcm_callback_handler.cpp" ]
+    sources += [ "//base/security/huks/test/unittest/huks_standard_test/module_test/service_test/huks_service/os_dependency/sa/src/hks_dcm_callback_handler_test.cpp" ]
   }
 
   # engine test
