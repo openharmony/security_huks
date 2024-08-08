@@ -22,7 +22,6 @@
 extern "C" {
 #endif
 
-// NOTICE! The value of tag HKS_TAG_PACKAGE_NAME in paramSetIn MUST BE terminated with '\0' zero.
 void HksReport(const char *funcName, const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSetIn, int32_t errorCode);
 
