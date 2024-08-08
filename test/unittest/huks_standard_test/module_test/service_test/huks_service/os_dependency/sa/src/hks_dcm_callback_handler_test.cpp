@@ -58,7 +58,7 @@ HWTEST_F(HksDcmCallbackHandlerTest, HksDcmCallbackHandlerTest001, TestSize.Level
 {
     HKS_LOG_I("enter HksDcmCallbackHandlerTest001");
     HksOpenDcmFunction();
-    std::lock_guardstd::mutex lockGuard(HksDcmCallbackHandlerGetMapMutex());
+    std::lock_guard<std::mutex> lockGuard(HksDcmCallbackHandlerGetMapMutex());
 }
 
 /**
