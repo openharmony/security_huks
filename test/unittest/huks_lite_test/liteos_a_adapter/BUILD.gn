@@ -109,6 +109,7 @@ unittest("huks_3.0_test") {
 
   deps = [
     "../../../../frameworks/huks_standard/main/crypto_engine/mbedtls:libhuks_mbedtls_small_static",
+    "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_small_static",
     "//base/security/huks/interfaces/inner_api/huks_lite:huks_3.0_sdk",
     "//base/security/huks/test/unittest/huks_lite_test/common:huks_3.0_test_common",
   ]

@@ -42,13 +42,16 @@ if (os_level == "standard") {
       "//base/security/huks/frameworks/config/build:l2_standard_common_config",
     ]
 
-    include_dirs = [ "//base/security/huks/utils/crypto_adapter" ]
+    include_dirs = [
+      "//base/security/huks/utils/crypto_adapter",
+      "../source",
+    ]
     if (huks_security_level == "software") {
       defines = [ "HKS_UNTRUSTED_RUNNING_ENV" ]
     }
     sources = [
-      "src/hks_api.c",
-      "src/hks_api_adapter.c",
+      "../source/hks_api.c",
+      "../source/hks_api_adapter.c",
     ]
 
     deps = [
