@@ -29,7 +29,12 @@
 #include "hks_client_service.h"
 #include "hks_storage_manager.h"
 
-#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_chipset_platform_derive.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c"
+#include "base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_other.c"
 
 using namespace testing::ext;
 namespace Unittest::HksCoreServiceTest {
