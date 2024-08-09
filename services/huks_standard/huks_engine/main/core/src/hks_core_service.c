@@ -1898,8 +1898,11 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
         return ret;
     }
 
-    ret = CreateAttestCertChain(keyNode, paramSet, certChain);
+    struct HksBlob rawKey;
+    HksGetRawKey(keyNode->paramSet, &rawKey);
+    ret = CreateAttestCertChain(keyNode->paramSet, paramSet, certChain, &rawKey);
     HksFreeKeyNode(&keyNode);
+    HKS_FREE_BLOB(rawKey);
     return ret;
 #else
     (void)key;

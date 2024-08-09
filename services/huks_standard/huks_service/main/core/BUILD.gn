@@ -18,6 +18,8 @@ import("//build/ohos.gni")
 config("huks_config") {
   include_dirs = [
     "include",
+    "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/dcm/include",
+    "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
     "//base/security/huks/services/huks_standard/huks_service/main/plugin_proxy/include",
   ]
 }
@@ -36,14 +38,14 @@ if (os_level == "standard") {
     ]
 
     sources = [
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_file_lock.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
       "src/hks_client_check.c",
       "src/hks_client_service.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
-      "src/hks_storage.c",
-      "src/hks_storage_file_lock.c",
-      "src/hks_storage_manager.c",
-      "src/hks_storage_utils.c",
     ]
 
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
@@ -53,7 +55,7 @@ if (os_level == "standard") {
     }
 
     if (huks_security_level == "trusted_environment") {
-      sources += [ "src/hks_client_service_dcm.cpp" ]
+      sources += [ "//base/security/huks/services/huks_standard/huks_service/main/systemapi_wrap/dcm/src/hks_client_service_dcm.cpp" ]
     }
 
     sources += [ "../plugin_proxy/src/hks_plugin_adapter.cpp" ]
@@ -64,9 +66,9 @@ if (os_level == "standard") {
     ]
 
     if (non_rwlock_support) {
-      sources += [ "src/hks_lock_lite.c" ]
+      sources += [ "../hks_storage/src/hks_lock_lite.c" ]
     } else {
-      sources += [ "src/hks_lock.c" ]
+      sources += [ "../hks_storage/src/hks_lock.c" ]
     }
 
     deps = [
@@ -138,14 +140,14 @@ if (os_level == "standard") {
     defines = [ "HKS_ENABLE_CLEAN_FILE" ]
 
     sources = [
+      "../hks_storage/src/hks_storage_file_lock.c",
+      "../hks_storage/src/hks_storage_lite.c",
+      "../hks_storage/src/hks_storage_manager.c",
+      "../hks_storage/src/hks_storage_utils.c",
       "src/hks_client_check.c",
       "src/hks_client_service.c",
       "src/hks_client_service_util.c",
       "src/hks_session_manager.c",
-      "src/hks_storage_file_lock.c",
-      "src/hks_storage_lite.c",
-      "src/hks_storage_manager.c",
-      "src/hks_storage_utils.c",
     ]
     sources += [
       "src/hks_hitrace.c",
@@ -161,16 +163,16 @@ if (os_level == "standard") {
 
     if (huks_use_lite_storage == true) {
       sources += [
-        "src/hks_storage_adapter.c",
-        "src/hks_storage_lite.c",
+        "../hks_storage/src/hks_storage_adapter.c",
+        "../hks_storage/src/hks_storage_lite.c",
       ]
     } else {
-      sources += [ "src/hks_storage.c" ]
+      sources += [ "../hks_storage/src/hks_storage.c" ]
     }
     if (non_rwlock_support) {
-      sources += [ "src/hks_lock_lite.c" ]
+      sources += [ "../hks_storage/src/hks_lock_lite.c" ]
     } else {
-      sources += [ "src/hks_lock.c" ]
+      sources += [ "../hks_storage/src/hks_lock.c" ]
     }
 
     cflags = []
