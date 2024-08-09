@@ -22,11 +22,17 @@
 #include "huks_access.h"
 
 #include "hks_cfi.h"
-#include "hks_core_service.h"
 
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_template.h"
+
+#include "hks_core_service_key_attest.h"
+#include "hks_core_service_key_chipset_platform_derive.h"
+#include "hks_core_service_key_generate.h"
+#include "hks_core_service_key_operate_one_stage.h"
+#include "hks_core_service_key_operate_three_stage.h"
+#include "hks_core_service_key_other.h"
 
 #ifndef _CUT_AUTHENTICATE_
 ENABLE_CFI(int32_t HuksAccessModuleInit(void))

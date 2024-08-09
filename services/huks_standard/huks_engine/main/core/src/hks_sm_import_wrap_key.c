@@ -32,7 +32,6 @@
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
-#include "hks_core_service.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
@@ -40,6 +39,7 @@
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_core_service_key_generate.h"
 
 #define HKS_PADDING_SUPPLENMENT 16
 

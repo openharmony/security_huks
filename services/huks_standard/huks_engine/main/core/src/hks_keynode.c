@@ -19,7 +19,6 @@
 
 #include <stddef.h>
 
-#include "hks_core_service.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
 #include "hks_log.h"
@@ -29,6 +28,7 @@
 #include "hks_template.h"
 #include "securec.h"
 #include "hks_util.h"
+#include "hks_core_service_key_other.h"
 
 #define S_TO_MS 1000
 #define MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME 10
