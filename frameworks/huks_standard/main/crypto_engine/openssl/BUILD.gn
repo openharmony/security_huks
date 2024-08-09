@@ -16,7 +16,10 @@ import("//build/ohos.gni")
 
 if (os_level == "standard") {
   config("huks_config") {
-    include_dirs = [ "include" ]
+    include_dirs = [
+      "include",
+      "../crypto_common/include",
+    ]
     if (huks_use_rkc_in_standard) {
       include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
     }
@@ -38,7 +41,6 @@ if (os_level == "standard") {
       "src/hks_openssl_ecc.c",
       "src/hks_openssl_ed25519tox25519.c",
       "src/hks_openssl_engine.c",
-      "src/hks_openssl_get_main_key.c",
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",
@@ -53,15 +55,18 @@ if (os_level == "standard") {
     if (huks_use_rkc_in_standard) {
       defines += [ "HKS_USE_RKC_IN_STANDARD" ]
 
-      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
+      include_dirs += [
+        "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
+      ]
       sources += [
         "../rkc/src/hks_rkc.c",
         "../rkc/src/hks_rkc_rw.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_lock.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_file_lock.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_manager.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_lock.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_file_lock.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
         "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
       ]
 
@@ -106,6 +111,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_openssl_small_static") {
+    include_dirs = [ "../crypto_common/include" ]
     sources = [
       "src/hks_openssl_ability.c",
       "src/hks_openssl_aes.c",
@@ -117,7 +123,6 @@ if (os_level == "standard") {
       "src/hks_openssl_ecc.c",
       "src/hks_openssl_ed25519tox25519.c",
       "src/hks_openssl_engine.c",
-      "src/hks_openssl_get_main_key.c",
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",

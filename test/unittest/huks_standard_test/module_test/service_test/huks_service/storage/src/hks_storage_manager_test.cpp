@@ -38,7 +38,7 @@
 #include "hks_storage_manager.h"
 #include "hks_storage_utils.h"
 
-#include "base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_manager.c"
+#include "base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c"
 
 using namespace testing::ext;
 namespace Unittest::HksStorageManagerTest {

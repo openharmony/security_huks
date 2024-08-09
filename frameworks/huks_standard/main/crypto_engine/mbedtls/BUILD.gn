@@ -18,6 +18,7 @@ if (os_level == "standard") {
   config("huks_config") {
     include_dirs = [
       "include",
+      "../crypto_common/include",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
     ]
   }
@@ -38,7 +39,6 @@ if (os_level == "standard") {
       "src/hks_mbedtls_ecdh.c",
       "src/hks_mbedtls_ecdsa.c",
       "src/hks_mbedtls_engine.c",
-      "src/hks_mbedtls_get_main_key.c",
       "src/hks_mbedtls_hash.c",
       "src/hks_mbedtls_hmac.c",
       "src/hks_mbedtls_kdf.c",
@@ -80,6 +80,7 @@ if (os_level == "standard") {
     include_dirs = [
       "include",
       "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
       "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
     ]
   }
@@ -87,7 +88,10 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_mbedtls_small_static") {
     public_configs = [ ":huks_config" ]
 
-    include_dirs = [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
+    include_dirs = [
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include",
+      "../crypto_common/include",
+    ]
 
     defines = []
 
@@ -105,7 +109,6 @@ if (os_level == "standard") {
       "src/hks_mbedtls_ecdh.c",
       "src/hks_mbedtls_ecdsa.c",
       "src/hks_mbedtls_engine.c",
-      "src/hks_mbedtls_get_main_key.c",
       "src/hks_mbedtls_hash.c",
       "src/hks_mbedtls_hmac.c",
       "src/hks_mbedtls_kdf.c",
@@ -114,9 +117,9 @@ if (os_level == "standard") {
     ]
 
     sources += [
-      "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
-      "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_manager.c",
-      "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
     ]
 
     if (huks_enable_upgrade_rkc_v1tov2) {

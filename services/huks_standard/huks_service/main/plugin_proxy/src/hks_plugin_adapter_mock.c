@@ -44,3 +44,8 @@ void HksPluginOnReceiveEvent(const void *data)
 {
     (void)(data);
 }
+
+int32_t RetryLoadPlugin(void)
+{
+    return HKS_SUCCESS;
+}

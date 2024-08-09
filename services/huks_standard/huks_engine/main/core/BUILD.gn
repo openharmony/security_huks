@@ -107,6 +107,7 @@ if (os_level == "standard") {
       "//base/security/huks/utils/list",
       "//base/security/huks/utils/mutex",
       "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+      "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
     ]
 
     sources = [
@@ -129,16 +130,16 @@ if (os_level == "standard") {
 
     if (huks_use_lite_storage == true) {
       sources += [
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_adapter.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_lite.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_manager.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_adapter.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_lite.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
       ]
     } else {
       sources += [
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_manager.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
       ]
     }
 

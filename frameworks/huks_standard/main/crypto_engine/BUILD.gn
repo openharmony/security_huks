@@ -26,6 +26,18 @@ if (os_level == "standard") {
       public_deps = [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/mbedtls:libhuks_mbedtls_standard_static" ]
     }
 
+    sources = [
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/src/hks_core_ability.c",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/src/hks_core_get_main_key.c",
+    ]
+    include_dirs = [
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/include",
+    ]
+
+    external_deps = [ "c_utils:utils" ]
+
     complete_static_lib = true
 
     branch_protector_ret = "pac_ret"
@@ -46,6 +58,17 @@ if (os_level == "standard") {
   ohos_static_library("libhuks_crypto_engine_small_static") {
     configs = [
       "//base/security/huks/frameworks/config/build:l1_small_common_config",
+    ]
+
+    sources = [
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/src/hks_core_ability.c",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/src/hks_core_get_main_key.c",
+    ]
+    include_dirs = [
+      "//base/security/huks/interfaces/inner_api/huks_standard/main/include",
+      "//base/security/huks/frameworks/huks_standard/main/common/include",
+      "//base/security/huks/frameworks/huks_standard/main/crypto_engine/crypto_common/include",
+      "//third_party/bounds_checking_function/include",
     ]
 
     if (huks_use_mbedtls) {
