@@ -1273,16 +1273,13 @@ static int32_t GetCertOrKey(enum HksCertType type, struct HksBlob *out)
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
-static int32_t GetCertAndKey(const struct HksKeyNode *keyNode, struct HksAttestSpec *attestSpec)
+static int32_t GetCertAndKey(struct HksAttestSpec *attestSpec)
 {
     int32_t ret = GetCertOrKey(HKS_DEVICE_CERT, &attestSpec->devCert);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devCert fail")
 
     ret = GetCertOrKey(HKS_DEVICE_KEY, &attestSpec->devKey);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get devKey fail")
-
-    ret = HksGetRawKey(keyNode->paramSet, &attestSpec->attestKey);
-    HKS_IF_NOT_SUCC_LOGE(ret, "get attestKey fail")
 
     return ret;
 }
@@ -1327,8 +1324,8 @@ static int32_t CheckAttestUsageSpec(const struct HksUsageSpec *usageSpec)
     return HKS_SUCCESS;
 }
 
-static int32_t BuildAttestSpec(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
-    struct HksAttestSpec **outAttestSpec)
+static int32_t BuildAttestSpec(const struct HksParamSet *keyNodeParamSet, const struct HksParamSet *paramSet,
+    struct HksBlob *rawKey, struct HksAttestSpec **outAttestSpec)
 {
     struct HksAttestSpec *attestSpec = HksMalloc(sizeof(struct HksAttestSpec));
     HKS_IF_NULL_LOGE_RETURN(attestSpec, HKS_ERROR_MALLOC_FAIL, "malloc attestSpec fail\n")
@@ -1337,22 +1334,26 @@ static int32_t BuildAttestSpec(const struct HksKeyNode *keyNode, const struct Hk
 
     SetAttestCertValid(&attestSpec->validity);
 
-    HksFillUsageSpec(keyNode->paramSet, &attestSpec->usageSpec);
+    HksFillUsageSpec(keyNodeParamSet, &attestSpec->usageSpec);
     int32_t ret = CheckAttestUsageSpec(&attestSpec->usageSpec);
     if (ret != HKS_SUCCESS) {
         FreeAttestSpec(&attestSpec);
         return ret;
     }
 
-    ret = BuildAttestClaims(paramSet, keyNode->paramSet, attestSpec);
+    ret = BuildAttestClaims(paramSet, keyNodeParamSet, attestSpec);
     if (ret != HKS_SUCCESS) {
         FreeAttestSpec(&attestSpec);
         return ret;
     }
 
     attestSpec->claimsOid = hksAttestationExtensionOid;
+    attestSpec->attestKey.size = rawKey->size;
+    attestSpec->attestKey.data = HksMalloc(rawKey->size);
+    HKS_IF_NULL_LOGE_RETURN(attestSpec->attestKey.data, HKS_ERROR_MALLOC_FAIL, "fail to malloc raw key")
+    (void)memcpy_s(attestSpec->attestKey.data, rawKey->size, rawKey->data, rawKey->size);
 
-    ret = GetCertAndKey(keyNode, attestSpec);
+    ret = GetCertAndKey(attestSpec);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("get cert and key fail\n");
         FreeAttestSpec(&attestSpec);
@@ -1441,11 +1442,11 @@ static int32_t FormatAttestChain(const struct HksBlob *attestCert, const struct 
     return HKS_SUCCESS;
 }
 
-int32_t CreateAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
-    struct HksBlob *certChain)
+int32_t CreateAttestCertChain(const struct HksParamSet *keyNodeParamSet, const struct HksParamSet *paramSet,
+    struct HksBlob *certChain, struct HksBlob *rawKey)
 {
     struct HksAttestSpec *attestSpec = NULL;
-    int32_t ret = BuildAttestSpec(keyNode, paramSet, &attestSpec);
+    int32_t ret = BuildAttestSpec(keyNodeParamSet, paramSet, rawKey, &attestSpec);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "build attest spec failed")
 
     struct HksBlob attestCert;
