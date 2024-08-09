@@ -268,6 +268,11 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
+        int32_t ret = RetryLoadPlugin();
+        if (ret != HKS_SUCCESS) {
+            HksSendResponse(reinterpret_cast<const uint8_t *>(&reply), ret, nullptr);
+            return HKS_SUCCESS; // send error code by IPC.
+        }
         return HksPluginOnRemoteRequest(code, &data, &reply, &option);
     }
     // this is the temporary version which comments the descriptor check
