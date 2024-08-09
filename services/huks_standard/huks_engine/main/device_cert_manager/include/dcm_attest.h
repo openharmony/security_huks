@@ -120,8 +120,8 @@ struct HksAttestSpec {
 extern "C" {
 #endif
 
-int32_t CreateAttestCertChain(struct HksKeyNode *keyNode, const struct HksParamSet *paramSet,
-    struct HksBlob *certChain);
+int32_t CreateAttestCertChain(const struct HksParamSet *keyNodeParamSet, const struct HksParamSet *paramSet,
+    struct HksBlob *certChain, struct HksBlob *rawKey);
 
 #ifdef __cplusplus
 }

@@ -12,12 +12,14 @@
 # limitations under the License.
 
 import("//base/security/huks/build/config.gni")
-import("//base/security/huks/huks.gni")
 import("//build/ohos.gni")
 
 if (os_level == "standard") {
   config("huks_config") {
-    include_dirs = [ "include" ]
+    include_dirs = [
+      "include",
+      "../crypto_common/include",
+    ]
     if (huks_use_rkc_in_standard) {
       include_dirs += [ "//base/security/huks/frameworks/huks_standard/main/crypto_engine/rkc/include" ]
     }
@@ -39,7 +41,6 @@ if (os_level == "standard") {
       "src/hks_openssl_ecc.c",
       "src/hks_openssl_ed25519tox25519.c",
       "src/hks_openssl_engine.c",
-      "src/hks_openssl_get_main_key.c",
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",
@@ -51,32 +52,23 @@ if (os_level == "standard") {
     deps = []
     defines = []
     include_dirs = []
-    external_deps = []
     if (huks_use_rkc_in_standard) {
       defines += [ "HKS_USE_RKC_IN_STANDARD" ]
 
-      include_dirs += [ "//base/security/huks/services/huks_standard/huks_service/main/core/include" ]
+      include_dirs += [
+        "//base/security/huks/services/huks_standard/huks_service/main/core/include",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/include",
+      ]
       sources += [
         "../rkc/src/hks_rkc.c",
         "../rkc/src/hks_rkc_rw.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_lock.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_file_lock.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_manager.c",
-        "//base/security/huks/services/huks_standard/huks_service/main/core/src/hks_storage_utils.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_lock.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_file_lock.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_manager.c",
+        "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src/hks_storage_utils.c",
         "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/posix/hks_rwlock.c",
       ]
-
-      # when uks_use_rkc_in_standard and HKS_ENABLE_CLEAN_FILE are enabled at the same time, add the dependency of HDI to the engine
-      if (huks_enable_hdi_in_standard) {
-        sources += [ "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_hdi_access.c" ]
-        external_deps += [ "drivers_interface_huks:libhuks_proxy_1.0" ]
-      } else {
-        sources += [
-          "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_access.c",
-          "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/passthrough/huks_core_dynamic_hal.c",
-        ]
-      }
 
       deps += [
         "//base/security/huks/frameworks/huks_standard/main/os_dependency:libhuks_os_dependency_standard_static",
@@ -104,7 +96,7 @@ if (os_level == "standard") {
       boundary_sanitize = true
       ubsan = true
     }
-    external_deps += [
+    external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
     ]
@@ -119,6 +111,7 @@ if (os_level == "standard") {
   }
 } else {
   ohos_static_library("libhuks_openssl_small_static") {
+    include_dirs = [ "../crypto_common/include" ]
     sources = [
       "src/hks_openssl_ability.c",
       "src/hks_openssl_aes.c",
@@ -130,7 +123,6 @@ if (os_level == "standard") {
       "src/hks_openssl_ecc.c",
       "src/hks_openssl_ed25519tox25519.c",
       "src/hks_openssl_engine.c",
-      "src/hks_openssl_get_main_key.c",
       "src/hks_openssl_hash.c",
       "src/hks_openssl_hmac.c",
       "src/hks_openssl_kdf.c",

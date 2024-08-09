@@ -41,7 +41,10 @@ ohos_static_library("libhuks_core_hal_api_static") {
     "src/hks_core_useriam_wrap.cpp",
   ]
 
-  deps = [ "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static" ]
+  deps = [
+    "//base/security/huks/frameworks/huks_standard/main/common:libhuks_common_standard_static",
+    "//base/security/huks/frameworks/huks_standard/main/crypto_engine:libhuks_crypto_engine_standard_static",
+  ]
   include_dirs = [
     "include",
     "//base/security/huks/services/huks_standard/huks_engine/main/core/include",

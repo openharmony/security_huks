@@ -22,6 +22,7 @@
 #include <stdint.h>
 
 #include "hks_ability.h"
+#include "hks_core_ability.h"
 #include "hks_openssl_aes.h"
 #include "hks_openssl_bn.h"
 #include "hks_openssl_common.h"
@@ -29,7 +30,6 @@
 #include "hks_openssl_dh.h"
 #include "hks_openssl_dsa.h"
 #include "hks_openssl_ecc.h"
-#include "hks_openssl_get_main_key.h"
 #include "hks_openssl_hash.h"
 #include "hks_openssl_hmac.h"
 #include "hks_openssl_kdf.h"
@@ -254,11 +254,6 @@ static void RegisterAbilityHmac(void)
 #endif
 }
 
-static void RegisterAbilityGetMainKey(void)
-{
-    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GET_MAIN_KEY, HksOpensslGetMainKey);
-}
-
 static void RegisterAbilityFillRandom(void)
 {
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_FILL_RANDOM, HksOpensslFillRandom);
@@ -272,9 +267,8 @@ static void RegisterAbilityBnExpMod(void)
 #endif
 }
 
-int32_t HksCryptoAbilityInit(void)
+int32_t HksCryptoAbilityInitBase(void)
 {
-    RegisterAbilityGetMainKey();
     RegisterAbilityGenerateKey();
     RegisterAbilityGetPublicKey();
     RegisterAbilitySign();
