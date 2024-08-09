@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@
 
 #include "hks_double_list.h"
 #include "hks_type.h"
+#include "hks_mutex.h"
 
 #define HKS_OPERATION_PARAM_CNT 3
 #define HKS_UINT64_MAX 0xFFFFFFFFFFFFFFFF
@@ -56,6 +57,12 @@ struct HuksKeyNode {
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+HksMutex *HksGetHuksMutex(void);
+
+int32_t HksInitHuksMutex(void);
+
+void HksDestroyHuksMutex(void);
 
 struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
 
