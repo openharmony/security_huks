@@ -23,7 +23,6 @@
 #include "hks_keyblob.h"
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_mutex.h"
 #include "hks_param.h"
 #include "hks_template.h"
 #include "securec.h"

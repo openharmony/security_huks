@@ -19,6 +19,7 @@
 #include <stdint.h>
 
 #include "hks_type.h"
+#include "hks_keynode.h"
 
 #ifdef __cplusplus
 extern "C" {
