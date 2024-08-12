@@ -32,6 +32,8 @@
 #include "hks_template.h"
 #include "hks_keynode.h"
 
+#include "securec.h"
+
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
 #endif
