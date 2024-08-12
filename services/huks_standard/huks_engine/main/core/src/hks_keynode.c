@@ -44,7 +44,7 @@ static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
 static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
 
-HksMutex *HksCoreGetHuksMutex(void)
+HksMutex *HksGetHuksMutex(void)
 {
     if (g_huksMutex == NULL) {
         HKS_LOG_E("Hks mutex init failed, reinit!");
@@ -399,7 +399,7 @@ static bool DeleteFirstKeyNode(void)
 static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
 {
     int32_t ret = HKS_SUCCESS;
-    HksMutexLock(HksCoreGetHuksMutex());
+    HksMutexLock(HksGetHuksMutex());
     do {
         DeleteFirstTimeOutBatchKeyNode();
 
@@ -420,7 +420,7 @@ static int32_t AddKeyNode(struct HuksKeyNode *keyNode, uint32_t tokenId)
         HKS_LOG_I("add keynode count:%" LOG_PUBLIC "u", g_keyNodeCount);
     } while (0);
 
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    HksMutexUnlock(HksGetHuksMutex());
     return ret;
 }
 
@@ -564,29 +564,29 @@ struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct Hks
 struct HuksKeyNode *HksQueryKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
-    HksMutexLock(HksCoreGetHuksMutex());
+    HksMutexLock(HksGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
-            HksMutexUnlock(HksCoreGetHuksMutex());
+            HksMutexUnlock(HksGetHuksMutex());
             return keyNode;
         }
     }
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    HksMutexUnlock(HksGetHuksMutex());
     return NULL;
 }
 
 void HksDeleteKeyNode(uint64_t handle)
 {
     struct HuksKeyNode *keyNode = NULL;
-    HksMutexLock(HksCoreGetHuksMutex());
+    HksMutexLock(HksGetHuksMutex());
     HKS_DLIST_ITER(keyNode, &g_keyNodeList) {
         if (keyNode != NULL && keyNode->handle == handle) {
             DeleteKeyNodeFree(keyNode);
-            HksMutexUnlock(HksCoreGetHuksMutex());
+            HksMutexUnlock(HksGetHuksMutex());
             return;
         }
     }
-    HksMutexUnlock(HksCoreGetHuksMutex());
+    HksMutexUnlock(HksGetHuksMutex());
 }
 
 // free batch update keynode
