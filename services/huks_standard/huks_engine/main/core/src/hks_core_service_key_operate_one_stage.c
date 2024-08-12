@@ -48,9 +48,6 @@
 #include "hks_rkc.h"
 #endif
 
-#ifndef _CUT_AUTHENTICATE_
-#define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
-
 static int32_t CipherAuth(const struct HksKeyNode *keyNode, const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
@@ -444,5 +441,3 @@ int32_t HksCoreUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet
     return HKS_ERROR_NOT_SUPPORTED;
 }
 #endif
-
-#endif /* _CUT_AUTHENTICATE_ */
