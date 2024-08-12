@@ -28,7 +28,7 @@
 #include "hks_template.h"
 #include "securec.h"
 #include "hks_util.h"
-#include "hks_core_service_key_other.h"
+#include "hks_type_inner.h"
 
 #define S_TO_MS 1000
 #define MAX_RETRY_CHECK_UNIQUE_HANDLE_TIME 10
@@ -43,6 +43,37 @@
 
 static struct DoubleList g_keyNodeList = { &g_keyNodeList, &g_keyNodeList };
 static uint32_t g_keyNodeCount = 0;
+static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
+
+HksMutex *HksCoreGetHuksMutex(void)
+{
+    if (g_huksMutex == NULL) {
+        HKS_LOG_E("Hks mutex init failed, reinit!");
+        g_huksMutex = HksMutexCreate();
+        HKS_IF_NULL_LOGE_RETURN(g_huksMutex, NULL, "Hks mutex reinit failed!")
+    }
+
+    return g_huksMutex;
+}
+
+int32_t HksInitHuksMutex(void)
+{
+    if (g_huksMutex == NULL) {
+        g_huksMutex = HksMutexCreate();
+        if (g_huksMutex == NULL) {
+            return HKS_ERROR_NULL_POINTER;
+        }
+    }
+    return HKS_SUCCESS;
+}
+
+void HksDestroyHuksMutex(void)
+{
+    if (g_huksMutex != NULL) {
+        HksMutexClose(g_huksMutex);
+        g_huksMutex = NULL;
+    }
+}
 
 static void FreeKeyBlobParamSet(struct HksParamSet **paramSet)
 {

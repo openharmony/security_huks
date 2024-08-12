@@ -20,6 +20,7 @@
 
 #include "hks_double_list.h"
 #include "hks_type.h"
+#include "hks_mutex.h"
 
 #define HKS_OPERATION_PARAM_CNT 3
 #define HKS_UINT64_MAX 0xFFFFFFFFFFFFFFFF
@@ -57,6 +58,8 @@ struct HuksKeyNode {
 extern "C" {
 #endif
 
+HksMutex *HksCoreGetHuksMutex(void);
+
 struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
 
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet);
@@ -66,6 +69,10 @@ struct HuksKeyNode *HksQueryKeyNode(uint64_t handle);
 void HksDeleteKeyNode(uint64_t handle);
 
 void HksFreeUpdateKeyNode(struct HuksKeyNode *keyNode);
+
+int32_t HksInitHuksMutex(void);
+
+void HksDestroyHuksMutex(void);
 
 #ifdef __cplusplus
 }

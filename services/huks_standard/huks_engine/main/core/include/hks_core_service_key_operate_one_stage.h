@@ -18,7 +18,7 @@
 
 #include <stdint.h>
 
-#include "hks_keynode.h"
+#include "hks_type.h"
 
 #define MAX_HASH_SIZE 64
 

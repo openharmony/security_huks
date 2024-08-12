@@ -18,9 +18,7 @@
 
 #include <stdint.h>
 
-#include "hks_keynode.h"
-#include "hks_mutex.h"
-#include "hks_type_inner.h"
+#include "hks_type.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -39,9 +39,6 @@
 #include "hks_rkc.h"
 #endif
 
-#ifndef _CUT_AUTHENTICATE_
-#define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
-
 #define S_TO_MS 1000
 
 static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
@@ -563,5 +560,3 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     return ret;
 }
-
-#endif /* _CUT_AUTHENTICATE_ */

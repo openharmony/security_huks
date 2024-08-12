@@ -30,15 +30,40 @@
 #include "hks_crypto_hal.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_keynode.h"
 
 #ifndef _HARDWARE_ROOT_KEY_
 #include "hks_rkc.h"
 #endif
 
-#ifndef _CUT_AUTHENTICATE_
-#define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
+int32_t HksCoreModuleInit(void)
+{
+    int32_t ret = HksInitHuksMutex();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks mutex init failed, ret = %" LOG_PUBLIC "d", ret)
 
-static HksMutex *g_huksMutex = NULL;  /* global mutex using in keynode */
+    ret = HksCryptoAbilityInit();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks init crypto ability failed, ret = %" LOG_PUBLIC "d", ret)
+
+    ret = HksCoreInitAuthTokenKey();
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks init auth token key failed, ret = %" LOG_PUBLIC "d", ret)
+#ifndef _HARDWARE_ROOT_KEY_
+    ret = HksRkcInit();
+    HKS_IF_NOT_SUCC_LOGE(ret, "Hks rkc init failed! ret = 0x%" LOG_PUBLIC "X", ret)
+#endif
+
+    return ret;
+}
+
+int32_t HksCoreModuleDestroy(void)
+{
+    HksDestroyHuksMutex();
+    HksCoreDestroyAuthTokenKey();
+#ifndef _HARDWARE_ROOT_KEY_
+    HksCfgDestroy();
+    HksMkDestroy();
+#endif
+    return HKS_SUCCESS;
+}
 
 int32_t HksCoreRefreshKeyInfo(void)
 {
@@ -100,45 +125,6 @@ int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct Hk
 }
 #endif
 
-int32_t HksCoreModuleInit(void)
-{
-    int32_t ret;
-    if (g_huksMutex == NULL) {
-        g_huksMutex = HksMutexCreate();
-    }
-    if (g_huksMutex == NULL) {
-        HKS_LOG_E("Hks mutex init failed, null pointer!");
-        ret = HKS_ERROR_NULL_POINTER;
-        return ret;
-    }
-
-    ret = HksCryptoAbilityInit();
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks init crypto ability failed, ret = %" LOG_PUBLIC "d", ret)
-
-    ret = HksCoreInitAuthTokenKey();
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Hks init auth token key failed, ret = %" LOG_PUBLIC "d", ret)
-#ifndef _HARDWARE_ROOT_KEY_
-    ret = HksRkcInit();
-    HKS_IF_NOT_SUCC_LOGE(ret, "Hks rkc init failed! ret = 0x%" LOG_PUBLIC "X", ret)
-#endif
-
-    return ret;
-}
-
-int32_t HksCoreModuleDestroy(void)
-{
-    if (g_huksMutex != NULL) {
-        HksMutexClose(g_huksMutex);
-        g_huksMutex = NULL;
-    }
-    HksCoreDestroyAuthTokenKey();
-#ifndef _HARDWARE_ROOT_KEY_
-    HksCfgDestroy();
-    HksMkDestroy();
-#endif
-    return HKS_SUCCESS;
-}
-
 int32_t HksCoreRefresh(void)
 {
     return HksCoreRefreshKeyInfo();
@@ -154,16 +140,3 @@ int32_t HksCoreGetHardwareInfo(void)
 {
     return 0;
 }
-
-HksMutex *HksCoreGetHuksMutex(void)
-{
-    if (g_huksMutex == NULL) {
-        HKS_LOG_E("Hks mutex init failed, reinit!");
-        g_huksMutex = HksMutexCreate();
-        HKS_IF_NULL_LOGE_RETURN(g_huksMutex, NULL, "Hks mutex reinit failed!")
-    }
-
-    return g_huksMutex;
-}
-
-#endif /* _CUT_AUTHENTICATE_ */

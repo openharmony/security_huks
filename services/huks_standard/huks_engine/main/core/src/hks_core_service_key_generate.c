@@ -44,9 +44,6 @@
 #include "hks_rkc.h"
 #endif
 
-#ifndef _CUT_AUTHENTICATE_
-#define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
-
 static const uint8_t g_defaultRsaPubExponent[] = { 0x01, 0x00, 0x01 }; /* default 65537 */
 
 static int32_t GetGenType(const struct HksParamSet *paramSet, uint32_t *genType)
@@ -821,8 +818,6 @@ int32_t HksCoreImportWrappedKey(const struct HksBlob *keyAlias, const struct Hks
     ClearAndFreeKeyBlobsIfNeed(&peerPublicKey, &agreeSharedSecret, &originKey, &kek);
     return ret;
 }
-
-#endif /* _CUT_AUTHENTICATE_ */
 
 int32_t HksCoreGenerateRandom(const struct HksParamSet *paramSet, struct HksBlob *random)
 {
