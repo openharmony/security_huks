@@ -19,28 +19,25 @@
 #include <stdint.h>
 
 #include "hks_type.h"
-#include "hks_keynode.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+int32_t HksCoreModuleInit(void);
+
+int32_t HksCoreModuleDestroy(void);
 
 int32_t HksCoreRefreshKeyInfo(void);
 
 int32_t HksCoreCalcMacHeader(const struct HksParamSet *paramSet, const struct HksBlob *salt,
     const struct HksBlob *srcData, struct HksBlob *mac);
 
-int32_t HksCoreModuleInit(void);
-
-int32_t HksCoreModuleDestroy(void);
-
 int32_t HksCoreRefresh(void);
 
 int32_t HksCoreGetAbility(int32_t funcType);
 
 int32_t HksCoreGetHardwareInfo(void);
-
-HksMutex *HksCoreGetHuksMutex(void);
 
 int32_t HksCoreUpgradeKeyInfo(const struct HksBlob *keyAlias, const struct HksBlob *keyInfo, struct HksBlob *keyOut);
 

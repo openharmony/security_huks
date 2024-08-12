@@ -40,6 +40,7 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "hks_core_service_key_generate.h"
+#include "hks_core_service_key_operate_one_stage.h"
 
 #define HKS_PADDING_SUPPLENMENT 16
 
