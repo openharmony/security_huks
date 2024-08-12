@@ -19,7 +19,6 @@
 #include <stdint.h>
 
 #include "hks_type.h"
-#include "hks_core_service_key_operate_one_stage.h"
 
 #ifdef __cplusplus
 extern "C" {
