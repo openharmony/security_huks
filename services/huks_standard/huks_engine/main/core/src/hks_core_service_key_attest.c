@@ -51,6 +51,8 @@
 #include "hks_rkc.h"
 #endif
 
+#ifndef _CUT_AUTHENTICATE_
+
 #ifdef HKS_SUPPORT_API_ATTEST_KEY
 static int32_t CheckAttestKeyParams(const struct HksBlob *key, const struct HksParamSet *paramSet,
     struct HksBlob *certChain)
@@ -107,3 +109,5 @@ int32_t HksCoreAttestKey(const struct HksBlob *key, const  struct HksParamSet *p
     return HKS_ERROR_NOT_SUPPORTED;
 #endif
 }
+
+#endif /* _CUT_AUTHENTICATE_ */

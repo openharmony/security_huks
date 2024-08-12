@@ -52,6 +52,8 @@
 #include "hks_rkc.h"
 #endif
 
+#ifndef _CUT_AUTHENTICATE_
+
 int32_t HksCoreModuleInit(void)
 {
     int32_t ret = HksInitHuksMutex();
@@ -156,3 +158,5 @@ int32_t HksCoreGetHardwareInfo(void)
 {
     return 0;
 }
+
+#endif /* _CUT_AUTHENTICATE_ */

@@ -51,6 +51,8 @@
 #include "hks_rkc.h"
 #endif
 
+#ifndef _CUT_AUTHENTICATE_
+
 #define S_TO_MS 1000
 
 static struct HksCoreInitHandler g_hksCoreInitHandler[] = {
@@ -572,3 +574,5 @@ int32_t HksCoreAbort(const struct HksBlob *handle, const struct HksParamSet *par
 
     return ret;
 }
+
+#endif /* _CUT_AUTHENTICATE_ */

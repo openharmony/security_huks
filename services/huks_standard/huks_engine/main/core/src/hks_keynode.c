@@ -60,6 +60,7 @@ int32_t HksInitHuksMutex(void)
     if (g_huksMutex == NULL) {
         g_huksMutex = HksMutexCreate();
         if (g_huksMutex == NULL) {
+            HKS_LOG_E("create huks mutex failed!");
             return HKS_ERROR_NULL_POINTER;
         }
     }
