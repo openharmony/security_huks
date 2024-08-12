@@ -51,7 +51,6 @@
 #include "hks_rkc.h"
 #endif
 
-
 #ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
 int32_t HksCoreChipsetPlatformDecrypt(const struct HksParamSet *paramSet,
     enum HksChipsetPlatformDecryptScene scene, struct HksBlob *plainText)

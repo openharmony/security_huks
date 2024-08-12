@@ -60,6 +60,10 @@ extern "C" {
 
 HksMutex *HksGetHuksMutex(void);
 
+int32_t HksInitHuksMutex(void);
+
+void HksDestroyHuksMutex(void);
+
 struct HuksKeyNode *HksCreateBatchKeyNode(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet);
 
 struct HuksKeyNode *HksCreateKeyNode(const struct HksBlob *key, const struct HksParamSet *paramSet);
@@ -69,10 +73,6 @@ struct HuksKeyNode *HksQueryKeyNode(uint64_t handle);
 void HksDeleteKeyNode(uint64_t handle);
 
 void HksFreeUpdateKeyNode(struct HuksKeyNode *keyNode);
-
-int32_t HksInitHuksMutex(void);
-
-void HksDestroyHuksMutex(void);
 
 #ifdef __cplusplus
 }
