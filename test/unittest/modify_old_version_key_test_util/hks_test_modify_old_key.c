@@ -15,19 +15,24 @@
 
 #include "hks_test_modify_old_key.h"
 
-#include "hks_client_service.h"
-#include "hks_type_inner.h"
-#include "hks_core_service.h"
-#include "hks_storage.h"
-#include "hks_param.h"
-#include "hks_log.h"
-#include "hks_storage_manager.h"
-
 #include <dirent.h>
 #include <errno.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include <stdio.h>
+
+#include "hks_client_service.h"
+#include "hks_type_inner.h"
+#include "hks_storage.h"
+#include "hks_param.h"
+#include "hks_log.h"
+#include "hks_storage_manager.h"
+#include "hks_core_service_key_attest.h"
+#include "hks_core_service_key_chipset_platform_derive.h"
+#include "hks_core_service_key_generate.h"
+#include "hks_core_service_key_operate_one_stage.h"
+#include "hks_core_service_key_operate_three_stage.h"
+#include "hks_core_service_key_other.h"
 
 #define KEY_MAX_SIZE 4096
 #define DIR_TYPE 4
