@@ -31,7 +31,6 @@
 #include "hks_client_service_adapter_common.h"
 #include "hks_cmd_id.h"
 #include "hks_common_check.h"
-#include "hks_core_service.h"
 #include "hks_crypto_adapter.h"
 #include "hks_crypto_hal.h"
 #include "hks_keyblob.h"
@@ -40,6 +39,7 @@
 #include "hks_param.h"
 #include "hks_template.h"
 #include "securec.h"
+#include "hks_core_service_key_generate.h"
 
 #ifndef _CUT_AUTHENTICATE_
 #define CURVE25519_KEY_BYTE_SIZE HKS_KEY_BYTES(HKS_CURVE25519_KEY_SIZE_256)
