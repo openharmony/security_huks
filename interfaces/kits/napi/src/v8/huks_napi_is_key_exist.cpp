@@ -98,7 +98,7 @@ static napi_value IsKeyExistWriteResult(napi_env env, IsKeyExistAsyncContext con
     return isKeyExist;
 }
 
-static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext context)
+static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
