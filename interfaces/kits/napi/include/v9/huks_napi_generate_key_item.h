@@ -38,7 +38,7 @@ GenerateKeyAsyncContext CreateGenerateKeyAsyncContext();
 
 void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext &context);
 
-napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context);
+napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context);
 
 napi_value HuksNapiItemGenerateKey(napi_env env, napi_callback_info info);
 }  // namespace HuksNapi
