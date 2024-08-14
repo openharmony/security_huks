@@ -77,7 +77,7 @@ static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, 
     return GetInt32(env, 0);
 }
 
-napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context)
+napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
