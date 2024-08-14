@@ -259,7 +259,7 @@ static napi_value ParseUpdateParams(napi_env env, napi_callback_info info, Updat
     return GetInt32(env, 0);
 }
 
-napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context)
+napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

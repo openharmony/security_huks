@@ -96,7 +96,7 @@ static napi_value GenerateKeyWriteResult(napi_env env, GenerateKeyAsyncContext c
     return GenerateHksResult(env, context->result, nullptr, 0);
 }
 
-static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context)
+static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
