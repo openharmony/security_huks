@@ -15,7 +15,6 @@
 
 #include "hks_client_check.h"
 
-#include <stdbool.h>
 #include <stddef.h>
 
 #include "hks_base_check.h"
