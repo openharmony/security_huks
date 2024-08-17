@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -64,6 +64,9 @@ static JSIValue CreateHuksKeyPurpose(void)
 
     AddInt32PropertyInLite(keyPurpose, "HUKS_KEY_PURPOSE_ENCRYPT", HKS_KEY_PURPOSE_ENCRYPT);
     AddInt32PropertyInLite(keyPurpose, "HUKS_KEY_PURPOSE_DECRYPT", HKS_KEY_PURPOSE_DECRYPT);
+    AddInt32PropertyInLite(keyPurpose, "HUKS_KEY_PURPOSE_SIGN", HKS_KEY_PURPOSE_SIGN);
+    AddInt32PropertyInLite(keyPurpose, "HUKS_KEY_PURPOSE_VERIFY", HKS_KEY_PURPOSE_VERIFY);
+    AddInt32PropertyInLite(keyPurpose, "HUKS_KEY_PURPOSE_MAC", HKS_KEY_PURPOSE_MAC);
 
     return keyPurpose;
 }
@@ -74,6 +77,11 @@ static JSIValue CreateHuksKeyPadding(void)
 
     AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_NONE", HKS_PADDING_NONE);
     AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_PKCS7", HKS_PADDING_PKCS7);
+    AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_PKCS1_V1_5", HKS_PADDING_PKCS1_V1_5);
+    AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_OAEP", HKS_PADDING_OAEP);
+    AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_PSS", HKS_PADDING_PSS);
+    AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_ISO_IEC_9796_2", HKS_PADDING_ISO_IEC_9796_2);
+    AddInt32PropertyInLite(keyPadding, "HUKS_PADDING_ISO_IEC_9797_1", HKS_PADDING_ISO_IEC_9797_1);
 
     return keyPadding;
 }
@@ -99,6 +107,13 @@ static JSIValue CreateHuksKeySize(void)
     AddInt32PropertyInLite(keySize, "HUKS_AES_KEY_SIZE_256", HKS_AES_KEY_SIZE_256);
     AddInt32PropertyInLite(keySize, "HUKS_AES_KEY_SIZE_512", HKS_AES_KEY_SIZE_512);
 
+    AddInt32PropertyInLite(keySize, "HUKS_DES_KEY_SIZE_64", HKS_DES_KEY_SIZE_64);
+    AddInt32PropertyInLite(keySize, "HUKS_3DES_KEY_SIZE_128", HKS_3DES_KEY_SIZE_128);
+    AddInt32PropertyInLite(keySize, "HUKS_3DES_KEY_SIZE_192", HKS_3DES_KEY_SIZE_192);
+
+    AddInt32PropertyInLite(keySize, "HUKS_RSA_KEY_SIZE_1024", HKS_RSA_KEY_SIZE_1024);
+    AddInt32PropertyInLite(keySize, "HUKS_RSA_KEY_SIZE_2048", HKS_RSA_KEY_SIZE_2048);
+
     return keySize;
 }
 
@@ -107,6 +122,13 @@ static JSIValue CreateHuksKeyAlg(void)
     JSIValue keyAlg = JSI::CreateObject();
 
     AddInt32PropertyInLite(keyAlg, "HUKS_ALG_AES", HKS_ALG_AES);
+    AddInt32PropertyInLite(keyAlg, "HUKS_ALG_DES", HKS_ALG_DES);
+    AddInt32PropertyInLite(keyAlg, "HUKS_ALG_3DES", HKS_ALG_3DES);
+
+    AddInt32PropertyInLite(keyAlg, "HUKS_ALG_HMAC", HKS_ALG_HMAC);
+    AddInt32PropertyInLite(keyAlg, "HUKS_ALG_CMAC", HKS_ALG_CMAC);
+
+    AddInt32PropertyInLite(keyAlg, "HUKS_ALG_RSA", HKS_ALG_RSA);
 
     return keyAlg;
 }
@@ -196,14 +218,53 @@ static void AddHuksTagPart2(JSIValue tag)
     AddInt32PropertyInLite(tag, "HUKS_TAG_SYMMETRIC_KEY_DATA", HKS_TAG_SYMMETRIC_KEY_DATA);
 }
 
+static void AddHuksTagPart3(JSIValue tag)
+{
+    AddInt32PropertyInLite(tag, "HUKS_TAG_DIGEST", HKS_TAG_DIGEST);
+    AddInt32PropertyInLite(tag, "HUKS_TAG_RSA_PSS_SALT_LEN_TYPE", HKS_TAG_RSA_PSS_SALT_LEN_TYPE);
+    AddInt32PropertyInLite(tag, "HUKS_TAG_IMPORT_KEY_TYPE", HKS_TAG_IMPORT_KEY_TYPE);
+}
+
 static JSIValue CreateHuksTag(void)
 {
     JSIValue tag = JSI::CreateObject();
 
     AddHuksTagPart1(tag);
     AddHuksTagPart2(tag);
+    AddHuksTagPart3(tag);
 
     return tag;
+}
+
+static JSIValue CreateHuksKeyDigest()
+{
+    JSIValue keyDigest = JSI::CreateObject();
+
+    AddInt32PropertyInLite(keyDigest, "HUKS_DIGEST_SHA1", HKS_DIGEST_SHA1);
+    AddInt32PropertyInLite(keyDigest, "HUKS_DIGEST_SHA256", HKS_DIGEST_SHA256);
+
+    return keyDigest;
+}
+
+static JSIValue CreateHuksImportKeyType()
+{
+    JSIValue importKeyType = JSI::CreateObject();
+
+    AddInt32PropertyInLite(importKeyType, "HUKS_KEY_TYPE_PUBLIC_KEY", HKS_KEY_TYPE_PUBLIC_KEY);
+    AddInt32PropertyInLite(importKeyType, "HUKS_KEY_TYPE_PRIVATE_KEY", HKS_KEY_TYPE_PRIVATE_KEY);
+    AddInt32PropertyInLite(importKeyType, "HUKS_KEY_TYPE_KEY_PAIR", HKS_KEY_TYPE_KEY_PAIR);
+
+    return importKeyType;
+}
+
+static JSIValue CreateHuksRsaPssSaltLenType()
+{
+    JSIValue rsaPssSaltLenType = JSI::CreateObject();
+
+    AddInt32PropertyInLite(rsaPssSaltLenType, "HUKS_RSA_PSS_SALT_LEN_DIGEST", HKS_RSA_PSS_SALTLEN_DIGEST);
+    AddInt32PropertyInLite(rsaPssSaltLenType, "HUKS_RSA_PSS_SALT_LEN_MAX", HKS_RSA_PSS_SALTLEN_MAX);
+
+    return rsaPssSaltLenType;
 }
 
 static void InitHuksModuleEnum(JSIValue exports)
@@ -218,18 +279,26 @@ static void InitHuksModuleEnum(JSIValue exports)
     JSI::SetNamedProperty(exports, "HuksKeyStorageType", CreateHuksKeyStorageType());
     JSI::SetNamedProperty(exports, "HuksTagType", CreateHuksTagType());
     JSI::SetNamedProperty(exports, "HuksTag", CreateHuksTag());
+    JSI::SetNamedProperty(exports, "HuksKeyDigest", CreateHuksKeyDigest());
+    JSI::SetNamedProperty(exports, "HuksImportKeyType", CreateHuksImportKeyType());
+    JSI::SetNamedProperty(exports, "HuksRsaPssSaltLenType", CreateHuksRsaPssSaltLenType());
 }
 
 void InitHuksModule(JSIValue exports)
 {
     JSI::SetModuleAPI(exports, "generateKeyItem", HksLiteModule::generateKeyItem);
+    JSI::SetModuleAPI(exports, "deleteKeyItem", HksLiteModule::deleteKeyItem);
+    JSI::SetModuleAPI(exports, "isKeyItemExist", HksLiteModule::isKeyItemExist);
+    JSI::SetModuleAPI(exports, "hasKeyItem", HksLiteModule::hasKeyItem);
+    JSI::SetModuleAPI(exports, "importKeyItem", HksLiteModule::importKeyItem);
+    JSI::SetModuleAPI(exports, "exportKeyItem", HksLiteModule::exportKeyItem);
+    JSI::SetModuleAPI(exports, "getKeyProperties", HksLiteModule::getKeyProperties);
+    JSI::SetModuleAPI(exports, "importWrappedKeyItem", HksLiteModule::importWrappedKeyItem);
+
     JSI::SetModuleAPI(exports, "initSession", HksLiteModule::initSession);
     JSI::SetModuleAPI(exports, "updateSession", HksLiteModule::updateSession);
     JSI::SetModuleAPI(exports, "finishSession", HksLiteModule::finishSession);
     JSI::SetModuleAPI(exports, "abortSession", HksLiteModule::abortSession);
-    JSI::SetModuleAPI(exports, "deleteKeyItem", HksLiteModule::deleteKeyItem);
-    JSI::SetModuleAPI(exports, "isKeyItemExist", HksLiteModule::isKeyItemExist);
-    JSI::SetModuleAPI(exports, "hasKeyItem", HksLiteModule::hasKeyItem);
 
     InitHuksModuleEnum(exports);
 }
