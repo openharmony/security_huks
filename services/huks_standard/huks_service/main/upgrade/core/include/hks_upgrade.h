@@ -16,17 +16,17 @@
 #ifndef HKS_UPGRADE_H
 #define HKS_UPGRADE_H
 
-#include "hks_type.h"
+#include <cstdint>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace OHOS {
+namespace Security {
+namespace Hks {
 
 void HksUpgradeOnPowerOn(void);
 void HksUpgradeOnUserUnlock(uint32_t userId);
 
-#ifdef __cplusplus
 }
-#endif
+}
+}
 
 #endif // HKS_UPGRADE_H

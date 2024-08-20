@@ -19,6 +19,10 @@
 #include "hks_template.h"
 
 #include <errno.h>
+#include <pthread.h>
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stdlib.h>
 #include <string.h>
 
 #ifdef __cplusplus
@@ -26,8 +30,7 @@ extern "C" {
 #endif
 
 struct HksCondition {
-    bool notified;
-    bool waited;
+    volatile atomic_bool notified;
     pthread_mutex_t mutex;
     pthread_cond_t cond;
 };
@@ -45,21 +48,18 @@ int32_t HksConditionWait(HksCondition *condition)
         HKS_LOG_ERRNO("HksConditionWait pthread_mutex_lock fail!", ret);
         return ret;
     }
-    if (condition->notified) {
-        condition->notified = false;
+    if (atomic_load(&condition->notified)) {
         int unlockRet = pthread_mutex_unlock(&condition->mutex);
         if (unlockRet != 0) {
             HKS_LOG_ERRNO("HksConditionWait notified pthread_mutex_unlock fail!", unlockRet);
         }
         return 0;
     } else {
-        condition->waited = true;
+        HKS_LOG_I("HksConditionWait begin wait...");
         ret = pthread_cond_wait(&condition->cond, &condition->mutex);
         if (ret != 0) {
             HKS_LOG_ERRNO("HksConditionWait pthread_cond_wait fail!", ret);
         }
-        condition->waited = false;
-        condition->notified = false;
         int unlockRet = pthread_mutex_unlock(&condition->mutex);
         if (unlockRet != 0) {
             HKS_LOG_ERRNO("HksConditionWait waited pthread_mutex_unlock fail!", unlockRet);
@@ -78,11 +78,13 @@ int32_t HksConditionNotify(HksCondition *condition)
         return ret;
     }
 
-    if (!condition->waited) {
-        condition->notified = true;
+    bool flag = false;
+    if (atomic_compare_exchange_strong(&condition->notified, &flag, true)) {
+        HKS_LOG_I("never pthread_cond_signal before, first time notify!");
     } else {
-        condition->notified = false;
+        HKS_LOG_W("do pthread_cond_signal again!");
     }
+
     ret = pthread_cond_signal(&condition->cond);
     if (ret != 0) {
         HKS_LOG_ERRNO("HksConditionNotify pthread_cond_signal fail!", ret);
@@ -104,11 +106,13 @@ int32_t HksConditionNotifyAll(HksCondition *condition)
         return ret;
     }
 
-    if (!condition->waited) {
-        condition->notified = true;
+    bool flag = false;
+    if (atomic_compare_exchange_strong(&condition->notified, &flag, true)) {
+        HKS_LOG_I("never pthread_cond_broadcast before, first time notify!");
     } else {
-        condition->notified = false;
+        HKS_LOG_W("do pthread_cond_broadcast again!");
     }
+
     ret = pthread_cond_broadcast(&condition->cond);
     if (ret != 0) {
         HKS_LOG_ERRNO("HksConditionNotifyAll pthread_cond_broadcast fail!", ret);
@@ -124,8 +128,7 @@ HksCondition *HksConditionCreate(void)
 {
     HksCondition *condition = (HksCondition *)HksMalloc(sizeof(HksCondition));
     HKS_IF_NULL_RETURN(condition, NULL)
-    condition->notified = false;
-    condition->waited = false;
+    atomic_store(&condition->notified, false);
     int32_t ret = pthread_mutex_init(&condition->mutex, NULL);
     if (ret != 0) {
         HKS_LOG_ERRNO("HksConditionCreate pthread_mutex_init fail!", ret);

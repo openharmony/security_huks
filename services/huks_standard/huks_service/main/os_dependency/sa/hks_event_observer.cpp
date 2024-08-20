@@ -16,6 +16,7 @@
 #include "hks_event_observer.h"
 
 #include "common_event_support.h"
+#include "rwlock.h"
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
 #endif
@@ -102,10 +103,11 @@ void SystemEventSubscriber::OnReceiveEvent(const OHOS::EventFwk::CommonEventData
     std::string action = want.GetAction();
 
     // judge whether is upgrading, wait for upgrade finished
-    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
+    if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
         HKS_LOG_E("wait on upgrading failed.");
         return;
     }
+    OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
 
     if (action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_PACKAGE_REMOVED ||
         action == OHOS::EventFwk::CommonEventSupport::COMMON_EVENT_SANDBOX_PACKAGE_REMOVED) {
