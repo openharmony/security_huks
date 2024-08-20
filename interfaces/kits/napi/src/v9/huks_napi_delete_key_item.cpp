@@ -76,7 +76,7 @@ static napi_value DeleteKeyParseParams(napi_env env, napi_callback_info info, De
     return GetInt32(env, 0);
 }
 
-napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context)
+napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

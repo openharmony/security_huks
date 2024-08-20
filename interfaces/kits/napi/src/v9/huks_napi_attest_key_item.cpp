@@ -112,7 +112,7 @@ static void InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCap
     }
 }
 
-napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context)
+napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
