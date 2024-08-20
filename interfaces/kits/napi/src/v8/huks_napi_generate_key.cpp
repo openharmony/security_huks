@@ -26,8 +26,8 @@
 
 namespace HuksNapi {
 namespace {
-constexpr int HUKS_NAPI_GETNRATEKEY_MIN_ARGS = 2;
-constexpr int HUKS_NAPI_GENERATEKEY_MAX_ARGS = 3;
+constexpr int HUKS_NAPI_GENERATE_KEY_MIN_ARGS = 2;
+constexpr int HUKS_NAPI_GENERATE_KEY_MAX_ARGS = 3;
 }  // namespace
 
 struct GenerateKeyAsyncContextT {
@@ -66,11 +66,11 @@ static void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext 
 
 static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, GenerateKeyAsyncContext context)
 {
-    size_t argc = HUKS_NAPI_GENERATEKEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_GENERATEKEY_MAX_ARGS] = { 0 };
+    size_t argc = HUKS_NAPI_GENERATE_KEY_MAX_ARGS;
+    napi_value argv[HUKS_NAPI_GENERATE_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
-    if (argc < HUKS_NAPI_GETNRATEKEY_MIN_ARGS) {
+    if (argc < HUKS_NAPI_GENERATE_KEY_MIN_ARGS) {
         napi_throw_error(env, nullptr, "invalid arguments");
         HKS_LOG_E("no enough params");
         return nullptr;
@@ -96,7 +96,7 @@ static napi_value GenerateKeyWriteResult(napi_env env, GenerateKeyAsyncContext c
     return GenerateHksResult(env, context->result, nullptr, 0);
 }
 
-static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext context)
+static napi_value GenerateKeyAsyncWork(napi_env env, GenerateKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

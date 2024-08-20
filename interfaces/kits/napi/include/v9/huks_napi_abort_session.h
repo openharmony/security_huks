@@ -38,7 +38,7 @@ AbortAsyncContext CreateAbortAsyncContext();
 
 void DeleteAbortAsyncContext(napi_env env, AbortAsyncContext &context);
 
-napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context);
+napi_value AbortAsyncWork(napi_env env, AbortAsyncContext &context);
 
 napi_value HuksNapiAbortSession(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

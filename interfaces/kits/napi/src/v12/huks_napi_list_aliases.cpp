@@ -96,7 +96,7 @@ static napi_value ListAliasesParseParams(napi_env env, napi_callback_info info, 
     return GetInt32(env, 0);
 }
 
-static napi_value ListAliasesAsyncWork(napi_env env, ListAliasesAsyncContext context)
+static napi_value ListAliasesAsyncWork(napi_env env, ListAliasesAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

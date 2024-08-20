@@ -86,7 +86,7 @@ static napi_value ParseAbortParams(napi_env env, napi_callback_info info, AbortA
     return GetInt32(env, 0);
 }
 
-napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
+napi_value AbortAsyncWork(napi_env env, AbortAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
