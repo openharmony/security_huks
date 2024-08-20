@@ -100,7 +100,7 @@ static napi_value GetKeyPropertiesWriteResult(napi_env env, GetKeyPropertiesAsyn
     return GenerateHksResult(env, context->result, nullptr, 0, *context->paramSetOut);
 }
 
-static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext context)
+static napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
