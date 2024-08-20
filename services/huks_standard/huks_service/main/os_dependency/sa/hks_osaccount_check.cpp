@@ -20,11 +20,14 @@
 #include "hks_type.h"
 #include "hks_osaccount_check.h"
 
+#include <atomic>
+
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
 #endif // HAS_OS_ACCOUNT_PART
 
-static volatile bool g_isCeUpgradeSucc = false;
+namespace {
+static volatile std::atomic_bool g_isCeUpgradeSucc = false;
 
 static bool HksIsOsAccountVerified(const int32_t userId)
 {
@@ -40,12 +43,18 @@ static bool HksIsOsAccountVerified(const int32_t userId)
 #endif
     return isVerified;
 }
+}
 
-void HksCheckIfNeedTransferFile(const uint32_t storageLevel, const int32_t storeUserId)
+extern "C" void HksCheckIfNeedTransferFile(const uint32_t storageLevel, const int32_t storeUserId)
 {
-    if (!g_isCeUpgradeSucc && storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId)) {
-        HksUpgradeOnUserUnlock(storeUserId);
-        g_isCeUpgradeSucc = true;
+    bool flag = false;
+    bool equal = std::atomic_compare_exchange_strong(&g_isCeUpgradeSucc, &flag, true);
+    if (!equal) {
+        return;
+    }
+    HKS_LOG_I("never HksCheckIfNeedTransferFile before, first time upgrade ce!");
+    if (storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId)) {
+        OHOS::Security::Hks::HksUpgradeOnUserUnlock(storeUserId);
     }
 }
 

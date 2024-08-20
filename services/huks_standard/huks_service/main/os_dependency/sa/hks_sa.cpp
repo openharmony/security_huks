@@ -19,6 +19,7 @@
 #include <hap_token_info.h>
 #include <ipc_skeleton.h>
 #include <iservice_registry.h>
+#include <mutex>
 #include <string_ex.h>
 #include <system_ability_definition.h>
 
@@ -39,6 +40,7 @@
 #include "hks_upgrade_lock.h"
 #include "hks_util.h"
 #include "huks_service_ipc_interface_code.h"
+#include "rwlock.h"
 
 #ifdef HAS_OS_ACCOUNT_PART
 #include "os_account_manager.h"
@@ -385,10 +387,11 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     }
 
     // judge whether is upgrading, wait for upgrade finished
-    if (HksWaitIfUpgrading() != HKS_SUCCESS) {
+    if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
         HKS_LOG_E("wait on upgrading failed.");
         return HW_SYSTEM_ERROR;
     }
+    OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
 
     ProcessRemoteRequest(code, data, reply);
 
@@ -491,6 +494,11 @@ void MoveDirectoryTree(const char *oldDir, const char *newDir)
 void HksService::OnStart()
 {
     HKS_LOG_I("HksService OnStart");
+    std::lock_guard<std::mutex> lock(runningStateLock);
+    if (std::atomic_load(&runningState_) == STATE_RUNNING) {
+        HKS_LOG_I("HksService has already started");
+        return;
+    }
     MoveDirectoryTree(OLD_PATH, NEW_PATH);
 #ifdef HKS_USE_RKC_IN_STANDARD
     // the intermediate mine's rkc is located in INTERMEDIATE_MINE_RKC_PATH, normal keys is located in NEW_PATH
@@ -498,15 +506,7 @@ void HksService::OnStart()
     // the original mine's rkc and normal keys are both located in OLD_MINE_PATH, should move all expect for rkc files
     MoveMineOldFile(OLD_MINE_PATH, NEW_PATH);
 #endif
-    if (runningState_ == STATE_RUNNING) {
-        HKS_LOG_I("HksService has already Started");
-        return;
-    }
 
-    if (HksUpgradeLockCreate() != HKS_SUCCESS) {
-        HKS_LOG_E("create upgrade lock on init failed.");
-        return;
-    }
     if (HksProcessConditionCreate() != HKS_SUCCESS) {
         HKS_LOG_E("create process condition on init failed.");
         return;
@@ -514,22 +514,27 @@ void HksService::OnStart()
 
     // lock before huks init, for the upgrading will be thread safe.
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
-    HksUpgradeLock();
+    {
+        OHOS::Utils::UniqueWriteGuard<OHOS::Utils::RWLock> writeGuard(g_upgradeOrRequestLock);
 #endif
 
-    if (!Init()) {
-        HKS_LOG_E("Failed to init HksService");
-        return;
+        if (!Init()) {
+            HKS_LOG_E("Failed to init HksService");
+            return;
+        }
+
+        #ifdef SUPPORT_COMMON_EVENT
+            (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+        #endif
+
+        // this should be excuted after huks published and listener added.
+        HksUpgradeOnPowerOn();
+#ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     }
-
-#ifdef SUPPORT_COMMON_EVENT
-    (void)AddSystemAbilityListener(COMMON_EVENT_SERVICE_ID);
+    HksUpgradeOnPowerOnDoneNotifyAll();
 #endif
 
-    // this should be excuted after huks published and listener added.
-    HksUpgradeOnPowerOn();
-
-    runningState_ = STATE_RUNNING;
+    std::atomic_store(&runningState_, STATE_RUNNING);
     IPCSkeleton::SetMaxWorkThreadNum(HUKS_IPC_THREAD_NUM);
     HKS_LOG_I("HksService start success.");
 }
@@ -550,7 +555,8 @@ void HksService::OnRemoveSystemAbility(int32_t systemAbilityId, const std::strin
 void HksService::OnStop()
 {
     HKS_LOG_I("HksService Service OnStop");
-    runningState_ = STATE_NOT_START;
+    std::lock_guard<std::mutex> lock(runningStateLock);
+    std::atomic_store(&runningState_, STATE_NOT_START);
     registerToService_ = false;
 #ifndef HKS_UNTRUSTED_RUNNING_ENV
     HksCloseDcmFunction();
