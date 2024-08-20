@@ -39,7 +39,7 @@ AttestKeyAsyncContext CreateAttestKeyAsyncContext(bool isAnon);
 
 void DeleteAttestKeyAsyncContext(napi_env env, AttestKeyAsyncContext &context);
 
-napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context);
+napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context);
 
 napi_value HuksNapiAttestKeyItem(napi_env env, napi_callback_info info);
 

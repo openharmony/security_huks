@@ -92,7 +92,7 @@ static napi_value DeleteKeyWriteResult(napi_env env, DeleteKeyAsyncContext conte
     return GenerateHksResult(env, context->result, nullptr, 0);
 }
 
-static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context)
+static napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
