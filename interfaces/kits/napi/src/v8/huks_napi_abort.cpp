@@ -92,7 +92,7 @@ static napi_value AbortWriteResult(napi_env env, AbortAsyncContext context)
     return GenerateHksResult(env, context->result, nullptr, 0);
 }
 
-static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext context)
+static napi_value AbortAsyncWork(napi_env env, AbortAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

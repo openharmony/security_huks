@@ -87,7 +87,7 @@ static napi_value IsKeyExistParseParams(napi_env env, napi_callback_info info, I
     return GetInt32(env, 0);
 }
 
-static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext context)
+static napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
