@@ -115,7 +115,7 @@ static int32_t InitOutParams(InitAsyncCtxPtr context)
     return HKS_SUCCESS;
 }
 
-napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
+napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

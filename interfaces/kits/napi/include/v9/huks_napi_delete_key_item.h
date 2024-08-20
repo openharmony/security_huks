@@ -38,7 +38,7 @@ DeleteKeyAsyncContext CreateDeleteKeyAsyncContext();
 
 void DeleteDeleteKeyAsyncContext(napi_env env, DeleteKeyAsyncContext &context);
 
-napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext context);
+napi_value DeleteKeyAsyncWork(napi_env env, DeleteKeyAsyncContext &context);
 
 napi_value HuksNapiDeleteKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

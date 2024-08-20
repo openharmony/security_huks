@@ -25,8 +25,8 @@
 #include "huks_napi_common_item.h"
 
 namespace HuksNapiItem {
-constexpr int HUKS_NAPI_GETNRATEKEY_MIN_ARGS = 2;
-constexpr int HUKS_NAPI_GENERATEKEY_MAX_ARGS = 3;
+constexpr int HUKS_NAPI_GENERATE_KEY_MIN_ARGS = 2;
+constexpr int HUKS_NAPI_GENERATE_KEY_MAX_ARGS = 3;
 
 GenerateKeyAsyncContext CreateGenerateKeyAsyncContext()
 {
@@ -52,11 +52,11 @@ void DeleteGenerateKeyAsyncContext(napi_env env, GenerateKeyAsyncContext &contex
 
 static napi_value GenerateKeyParseParams(napi_env env, napi_callback_info info, GenerateKeyAsyncContext context)
 {
-    size_t argc = HUKS_NAPI_GENERATEKEY_MAX_ARGS;
-    napi_value argv[HUKS_NAPI_GENERATEKEY_MAX_ARGS] = { 0 };
+    size_t argc = HUKS_NAPI_GENERATE_KEY_MAX_ARGS;
+    napi_value argv[HUKS_NAPI_GENERATE_KEY_MAX_ARGS] = { 0 };
     NAPI_CALL(env, napi_get_cb_info(env, info, &argc, argv, nullptr, nullptr));
 
-    if (argc < HUKS_NAPI_GETNRATEKEY_MIN_ARGS) {
+    if (argc < HUKS_NAPI_GENERATE_KEY_MIN_ARGS) {
         HksNapiThrow(env, HUKS_ERR_CODE_ILLEGAL_ARGUMENT, "no enough params input");
         HKS_LOG_E("no enough params");
         return nullptr;

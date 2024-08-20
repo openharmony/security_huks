@@ -85,7 +85,7 @@ static napi_value ImportKeyParseParams(napi_env env, napi_callback_info info, Im
     return GetInt32(env, 0);
 }
 
-napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context)
+napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
