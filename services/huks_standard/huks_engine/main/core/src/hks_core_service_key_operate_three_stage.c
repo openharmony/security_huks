@@ -152,14 +152,7 @@ static int32_t CoreInitPreCheck(const struct  HksBlob *key, const struct HksPara
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    enum {
-        HKS_PARAM_SET_MAX_PARAMS_CNT = HKS_PARAM_SET_MAX_SIZE / sizeof(struct HksParam),
-    };
-
-    if (paramSet->paramsCnt > HKS_PARAM_SET_MAX_PARAMS_CNT) {
-        HKS_LOG_E("the paramsCnt is too big, paramsCnt : %" LOG_PUBLIC "u", paramSet->paramsCnt);
-        return HKS_ERROR_INVALID_ARGUMENT;
-    }
+    return HksCheckParamSet(paramSet, paramSet->paramSetSize);
 
     return HksCheckParamSetTag(paramSet);
 }
