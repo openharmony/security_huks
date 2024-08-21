@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -32,6 +32,10 @@ public:
     static JSIValue deleteKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
     static JSIValue isKeyItemExist(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
     static JSIValue hasKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
+    static JSIValue importKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
+    static JSIValue exportKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
+    static JSIValue getKeyProperties(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
+    static JSIValue importWrappedKeyItem(const JSIValue thisVal, const JSIValue *args, uint8_t argsNum);
 };
 
 void InitHuksModule(JSIValue exports);

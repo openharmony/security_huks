@@ -241,6 +241,10 @@ static napi_value CreateHuksKeySize(napi_env env)
     AddInt32Property(env, keySize, "HUKS_SM2_KEY_SIZE_256", HKS_SM2_KEY_SIZE_256);
     AddInt32Property(env, keySize, "HUKS_SM4_KEY_SIZE_128", HKS_SM4_KEY_SIZE_128);
 
+    AddInt32Property(env, keySize, "HUKS_DES_KEY_SIZE_64", HKS_DES_KEY_SIZE_64);
+    AddInt32Property(env, keySize, "HUKS_3DES_KEY_SIZE_128", HKS_3DES_KEY_SIZE_128);
+    AddInt32Property(env, keySize, "HUKS_3DES_KEY_SIZE_192", HKS_3DES_KEY_SIZE_192);
+
     return keySize;
 }
 
@@ -266,6 +270,10 @@ static napi_value CreateHuksKeyAlg(napi_env env)
     AddInt32Property(env, keyAlg, "HUKS_ALG_SM2", HKS_ALG_SM2);
     AddInt32Property(env, keyAlg, "HUKS_ALG_SM3", HKS_ALG_SM3);
     AddInt32Property(env, keyAlg, "HUKS_ALG_SM4", HKS_ALG_SM4);
+
+    AddInt32Property(env, keyAlg, "HUKS_ALG_DES", HKS_ALG_DES);
+    AddInt32Property(env, keyAlg, "HUKS_ALG_3DES", HKS_ALG_3DES);
+    AddInt32Property(env, keyAlg, "HUKS_ALG_CMAC", HKS_ALG_CMAC);
 
     return keyAlg;
 }
@@ -299,6 +307,8 @@ static napi_value CreateHuksKeyPadding(napi_env env)
     AddInt32Property(env, keyPadding, "HUKS_PADDING_PKCS1_V1_5", HKS_PADDING_PKCS1_V1_5);
     AddInt32Property(env, keyPadding, "HUKS_PADDING_PKCS5", HKS_PADDING_PKCS5);
     AddInt32Property(env, keyPadding, "HUKS_PADDING_PKCS7", HKS_PADDING_PKCS7);
+    AddInt32Property(env, keyPadding, "HUKS_PADDING_ISO_IEC_9796_2", HKS_PADDING_ISO_IEC_9796_2);
+    AddInt32Property(env, keyPadding, "HUKS_PADDING_ISO_IEC_9797_1", HKS_PADDING_ISO_IEC_9797_1);
 
     return keyPadding;
 }

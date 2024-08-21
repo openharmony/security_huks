@@ -39,7 +39,7 @@ GetKeyPropertiesAsyncContext CreateGetKeyPropertiesAsyncContext();
 
 void DeleteGetKeyPropertiesAsyncContext(napi_env env, GetKeyPropertiesAsyncContext &context);
 
-napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext context);
+napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext &context);
 
 napi_value HuksNapiGetKeyItemProperties(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

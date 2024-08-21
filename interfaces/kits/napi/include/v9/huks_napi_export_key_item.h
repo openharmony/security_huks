@@ -37,7 +37,7 @@ ExportKeyAsyncContext CreateExportKeyAsyncContext();
 
 void DeleteExportKeyAsyncContext(napi_env env, ExportKeyAsyncContext &context);
 
-napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context);
+napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &context);
 
 napi_value HuksNapiExportKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

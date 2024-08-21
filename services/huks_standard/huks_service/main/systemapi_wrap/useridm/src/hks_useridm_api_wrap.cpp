@@ -141,7 +141,12 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
     std::shared_ptr<USER_IAM::GetSecUserInfoCallback> callback = mCallback;
 
     int32_t ret = USER_IAM::UserIdmClient::GetInstance().GetSecUserInfo(userId, callback);
-    HksConditionWait(condition);
+    int32_t waitRet = HksConditionWait(condition);
+    if (waitRet != HKS_SUCCESS) {
+        HKS_LOG_E("HksConditionWait GetSecUserInfo fail! %" LOG_PUBLIC "d", waitRet);
+    } else {
+        HKS_LOG_I("HksConditionWait GetSecUserInfo succ!");
+    }
     HksConditionDestroy(condition);
 
     if (ret != USER_IAM::ResultCode::SUCCESS || !mCallback->isCallbacked || *outSecInfo == NULL) {
@@ -149,6 +154,7 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
             ret, mCallback->isCallbacked);
         return HKS_ERROR_GET_USERIAM_SECINFO_FAILED;
     }
+    HKS_LOG_I("GetSecUserInfo succ! ret %" LOG_PUBLIC "d", ret);
     return HKS_SUCCESS;
 }
 
@@ -195,8 +201,14 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
     }
 
     ret = USER_IAM::UserIdmClient::GetInstance().GetCredentialInfo(userId, authType, callback);
-    HksConditionWait(condition);
+    int32_t waitRet = HksConditionWait(condition);
+    if (waitRet != HKS_SUCCESS) {
+        HKS_LOG_E("HksConditionWait GetCredentialInfo fail! %" LOG_PUBLIC "d", waitRet);
+    } else {
+        HKS_LOG_I("HksConditionWait GetCredentialInfo succ!");
+    }
     if (ret == USER_IAM::ResultCode::SUCCESS && huksCallback->isCallbacked) {
+        HKS_LOG_I("GetCredentialInfo succ!");
         ret = HKS_SUCCESS;
     } else if (ret == USER_IAM::ResultCode::NOT_ENROLLED) { // follow userIam errorCode
         HKS_LOG_E("no credential enrolled");

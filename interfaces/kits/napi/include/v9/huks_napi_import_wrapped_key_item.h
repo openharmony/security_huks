@@ -37,7 +37,7 @@ struct ImportWrappedKeyAsyncContextT {
 using ImportWrappedKeyAsyncContext = ImportWrappedKeyAsyncContextT *;
 ImportWrappedKeyAsyncContext CreateImportWrappedKeyAsyncContext();
 void DeleteImportWrappedKeyAsyncContext(napi_env env, ImportWrappedKeyAsyncContext &context);
-napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext context);
+napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext &context);
 
 napi_value HuksNapiImportWrappedKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem
