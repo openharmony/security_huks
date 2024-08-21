@@ -152,7 +152,9 @@ static int32_t CoreInitPreCheck(const struct  HksBlob *key, const struct HksPara
         return HKS_ERROR_INSUFFICIENT_MEMORY;
     }
 
-    return HksCheckParamSet(paramSet, paramSet->paramSetSize);
+    if (HksCheckParamSet(paramSet, paramSet->paramSetSize) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     return HksCheckParamSetTag(paramSet);
 }
