@@ -95,7 +95,7 @@ static int32_t PrePareExportKeyContextBuffer(ExportKeyAsyncContext context)
     return HKS_SUCCESS;
 }
 
-napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext context)
+napi_value ExportKeyAsyncWork(napi_env env, ExportKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

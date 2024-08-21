@@ -103,7 +103,7 @@ static napi_value ImportWrappedKeyParseParams(napi_env env, napi_callback_info i
     return GetInt32(env, 0);
 }
 
-napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext context)
+napi_value ImportWrappedKeyAsyncWork(napi_env env, ImportWrappedKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

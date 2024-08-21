@@ -45,7 +45,7 @@ int32_t GetTokenOrCallback(napi_env env, napi_value *argv, UpdateAsyncContext co
 
 void DeleteUpdateAsyncContext(napi_env env, UpdateAsyncContext &context);
 
-napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context);
+napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context);
 
 napi_value HuksNapiUpdateSession(napi_env env, napi_callback_info info);
 

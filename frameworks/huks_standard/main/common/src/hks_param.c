@@ -370,6 +370,11 @@ HKS_API_EXPORT int32_t HksGetParam(const struct HksParamSet *paramSet, uint32_t 
     for (uint32_t i = 0; i < paramSet->paramsCnt; i++) {
         if (tag == paramSet->params[i].tag) {
             *param = (struct HksParam *)&paramSet->params[i];
+            if ((GetTagType((enum HksTag)tag) == HKS_TAG_TYPE_BYTES) &&
+                (CheckBlob(&(*param)->blob) != HKS_SUCCESS)) {
+                HKS_LOG_E("invalid paramSet!");
+                return HKS_ERROR_INVALID_ARGUMENT;
+            }
             return HKS_SUCCESS;
         }
     }
