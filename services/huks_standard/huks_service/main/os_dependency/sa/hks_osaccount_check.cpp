@@ -45,14 +45,14 @@ static bool HksIsOsAccountVerified(const int32_t userId)
 }
 }
 
-extern "C" void HksCheckIfNeedTransferFile(const uint32_t storageLevel, const int32_t storeUserId)
+extern "C" void HksTransferFileIfNeed(const uint32_t storageLevel, const int32_t storeUserId)
 {
     bool flag = false;
     bool equal = std::atomic_compare_exchange_strong(&g_isCeUpgradeSucc, &flag, true);
     if (!equal) {
         return;
     }
-    HKS_LOG_I("never HksCheckIfNeedTransferFile before, first time upgrade ce!");
+    HKS_LOG_I("never HksTransferFileIfNeed before, first time upgrade ce!");
     if (storageLevel == HKS_AUTH_STORAGE_LEVEL_CE && HksIsOsAccountVerified(storeUserId)) {
         OHOS::Security::Hks::HksUpgradeOnUserUnlock(storeUserId);
     }
