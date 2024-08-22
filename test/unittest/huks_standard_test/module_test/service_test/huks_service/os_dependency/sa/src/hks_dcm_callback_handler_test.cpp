@@ -57,8 +57,9 @@ void HksDcmCallbackHandlerTest::TearDown()
 HWTEST_F(HksDcmCallbackHandlerTest, HksDcmCallbackHandlerTest001, TestSize.Level0)
 {
     HKS_LOG_I("enter HksDcmCallbackHandlerTest001");
-    HksOpenDcmFunction();
+    ASSERT_NE(HksOpenDcmFunction(), nullptr);
     std::lock_guard<std::mutex> lockGuard(HksDcmCallbackHandlerGetMapMutex());
+    HksCloseDcmFunction();
 }
 
 /**
@@ -69,6 +70,7 @@ HWTEST_F(HksDcmCallbackHandlerTest, HksDcmCallbackHandlerTest001, TestSize.Level
 HWTEST_F(HksDcmCallbackHandlerTest, HksDcmCallbackHandlerTest002, TestSize.Level0)
 {
     HKS_LOG_I("enter HksDcmCallbackHandlerTest002");
+    ASSERT_NE(HksOpenDcmFunction(), nullptr);
     HksDcmCallback(nullptr);
 
     DcmAnonymousResponse response1 = {
@@ -82,16 +84,5 @@ HWTEST_F(HksDcmCallbackHandlerTest, HksDcmCallbackHandlerTest002, TestSize.Level
         .errCode = 0
     };
     HksDcmCallback(&response2);
-}
-
-/**
- * @tc.name: HksDcmCallbackHandlerTest.HksDcmCallbackHandlerTest003
- * @tc.desc: tdd HksCloseDcmFunction
- * @tc.type: FUNC
- */
-HWTEST_F(HksDcmCallbackHandlerTest, HksDcmCallbackHandlerTest003, TestSize.Level0)
-{
-    HKS_LOG_I("enter HksDcmCallbackHandlerTest003");
-    HksCloseDcmFunction();
 }
 }
