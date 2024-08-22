@@ -269,6 +269,13 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
     g_sessionId++;
     HKS_LOG_I("OnRemoteRequest code:%" LOG_PUBLIC "d, sessionId = %" LOG_PUBLIC "u", code, g_sessionId);
 
+    // judge whether is upgrading, wait for upgrade finished
+    if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
+        HKS_LOG_E("wait on upgrading failed.");
+        return HW_SYSTEM_ERROR;
+    }
+    OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
+
     if (code < HksIpcInterfaceCode::HKS_MSG_BASE || code >= HksIpcInterfaceCode::HKS_MSG_MAX) {
         int32_t ret = RetryLoadPlugin();
         if (ret != HKS_SUCCESS) {
@@ -282,13 +289,6 @@ int HksService::OnRemoteRequest(uint32_t code, MessageParcel &data, MessageParce
         HKS_LOG_E("descriptor is diff.");
         return HW_SYSTEM_ERROR;
     }
-
-    // judge whether is upgrading, wait for upgrade finished
-    if (HksWaitIfPowerOnUpgrading() != HKS_SUCCESS) {
-        HKS_LOG_E("wait on upgrading failed.");
-        return HW_SYSTEM_ERROR;
-    }
-    OHOS::Utils::UniqueReadGuard<OHOS::Utils::RWLock> readGuard(g_upgradeOrRequestLock);
 
     ProcessRemoteRequest(code, data, reply);
 
