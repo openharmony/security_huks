@@ -23,6 +23,8 @@ namespace Security {
 namespace Hks {
 
 void HksUpgradeOnPowerOn(void);
+
+// The lock for reading of g_upgradeOrRequestLock MUST be acuquired before calling HksUpgradeOnUserUnlock.
 void HksUpgradeOnUserUnlock(uint32_t userId);
 
 }
