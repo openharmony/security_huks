@@ -24,7 +24,7 @@ ohos_static_library("libhuks_upgrade_lock_static") {
   part_name = "huks"
   public_configs = [ ":huks_config" ]
 
-  sources = [ "src/hks_upgrade_lock.c" ]
+  sources = [ "src/hks_upgrade_lock.cpp" ]
 
   deps = [
     "../../../../../../frameworks/huks_standard/main/common:libhuks_common_standard_static",
@@ -47,5 +47,8 @@ ohos_static_library("libhuks_upgrade_lock_static") {
 
   configs =
       [ "../../../../../../frameworks/config/build:l2_standard_common_config" ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+  ]
 }

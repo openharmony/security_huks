@@ -16,9 +16,10 @@
 #ifndef HKS_CONDITION_H
 #define HKS_CONDITION_H
 
-#include "pthread.h"
-#include "hks_type.h"
+#include <stdint.h>
 
+// One-time condition struct, you CAN NOT reset it after notify or notify-all,
+// you can only create a new one.
 typedef struct HksCondition HksCondition;
 
 #ifdef __cplusplus
