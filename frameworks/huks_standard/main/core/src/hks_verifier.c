@@ -374,7 +374,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
             return NULL;
         }
 
-        buf = (uint8_t *)OPENSSL_malloc(len);
+        buf = (uint8_t *)HksMalloc(len);
         HKS_IF_NULL_LOGE_RETURN(buf, NULL, "openssl malloc fail")
 
         len = a2d_ASN1_OBJECT(buf, len, oid, -1);
@@ -386,7 +386,7 @@ static ASN1_OBJECT *GetObjByOid(int32_t nid, const char *oid, const char *sn, co
         obj = ASN1_OBJECT_create(nid, buf, len, sn, ln);
         HKS_IF_NULL_LOGE_BREAK(obj, "ASN1_OBJECT_create fail")
     } while (0);
-    OPENSSL_free(buf);
+    HKS_FREE(buf);
     return obj;
 }
 
