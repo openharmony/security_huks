@@ -16,20 +16,24 @@
 #ifndef HKS_UPGRADE_LOCK_H
 #define HKS_UPGRADE_LOCK_H
 
-#include "hks_type.h"
+#include <rwlock.h>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace OHOS {
+namespace Security {
+namespace Hks {
+
+// OnStart upgrade <==> write, first time using ce level key upgrade <==> write
+// OnRemoteRequest <==> read, OnReceiveEvent <==> read
+extern OHOS::Utils::RWLock g_upgradeOrRequestLock;
+
 int32_t HksProcessConditionCreate(void);
-int32_t HksWaitIfUpgrading(void);
 
-int32_t HksUpgradeLockCreate(void);
-void HksUpgradeLock(void);
-void HksUpgradeUnlock(void);
+int32_t HksWaitIfPowerOnUpgrading(void);
 
-#ifdef __cplusplus
+void HksUpgradeOnPowerOnDoneNotifyAll(void);
+
 }
-#endif
+}
+}
 
 #endif // HKS_UPGRADE_LOCK_H
