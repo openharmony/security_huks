@@ -257,8 +257,6 @@ int32_t HksCheckAndGetUserAuthInfo(const struct HksParamSet *paramSet, uint32_t 
 
 bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet)
 {
-    HKS_IF_NULL_LOGE_RETURN(paramSet, HKS_ERROR_NULL_POINTER, "paramSet is null!")
-
     struct HksParam *isAllowedWrap = NULL;
     int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_ALLOWED_WRAP, &isAllowedWrap);
     if (ret == HKS_SUCCESS) {
