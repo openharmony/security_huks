@@ -23,10 +23,10 @@
 #define HKS_USE_RKC_IN_STANDARD
 
 #undef HKS_KEY_STORE_LITE_HAP
-#define HKS_KEY_STORE_LITE_HAP "/lite/hap"
+#define HKS_KEY_STORE_LITE_HAP "/data/lite/hap"
 
 #undef HKS_CONFIG_RKC_STORE_PATH
-#define HKS_CONFIG_RKC_STORE_PATH ""
+#define HKS_CONFIG_RKC_STORE_PATH "/data"
 
 #include <gtest/gtest.h>
 #include <cstring>
