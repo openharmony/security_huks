@@ -53,7 +53,10 @@ int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
 
 #else /* _STORAGE_LITE_ */
 
-static const uint32_t SENSITIVE_DELETE_TAG[] = { HKS_TAG_KEY, HKS_TAG_ACCESS_TOKEN_ID };
+static const uint32_t SENSITIVE_DELETE_TAG[] = {
+    HKS_TAG_KEY, HKS_TAG_ACCESS_TOKEN_ID, HKS_TAG_USER_AUTH_ENROLL_ID_INFO,
+    HKS_TAG_USER_AUTH_SECURE_UID, HKS_TAG_OWNER_ID, HKS_TAG_ACCOUNT_ID
+};
 
 int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
 {
