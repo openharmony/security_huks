@@ -63,7 +63,7 @@ static int32_t GetStorageLevelAndStoreUserIdParam(const struct HksProcessInfo* p
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #ifndef HKS_USE_RKC_IN_STANDARD
-    HksCheckIfNeedTransferFile(*storageLevel, *storeUserId);
+    HksTransferFileIfNeed(*storageLevel, *storeUserId);
 #endif
 #endif
     return ret;

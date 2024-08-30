@@ -19,6 +19,7 @@
 #include "huks_service_ipc_interface_code.h"
 #include "hks_sa_interface.h"
 
+#include <atomic>
 #include "iremote_broker.h"
 #include "iremote_stub.h"
 #include "nocopyable.h"
@@ -62,7 +63,8 @@ private:
     bool Init();
 
     bool registerToService_;
-    ServiceRunningState runningState_;
+    volatile std::atomic_int runningState_;
+    std::mutex runningStateLock;
     static std::mutex instanceLock;
     static sptr<HksService> instance;
     int OnRemotePluginRequest(uint32_t code, MessageParcel &data, MessageParcel &reply, MessageOption &option);

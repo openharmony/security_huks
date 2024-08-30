@@ -16,29 +16,47 @@
 #include "hks_upgrade.h"
 
 #include "hks_template.h"
+#include "hks_type_enum.h"
 #include "hks_upgrade_lock.h"
+#include "rwlock.h"
 
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 #include "hks_file_transfer.h"
 #endif
 
+namespace OHOS {
+namespace Security {
+namespace Hks {
 void HksUpgradeOnPowerOn(void)
 {
-    HKS_LOG_I("enter HksUpgradeOnPowerOn.");
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     HKS_IF_NOT_SUCC_LOGE(HksUpgradeFileTransferOnPowerOn(), "HksUpgradeFileTransfer on power on failed!")
-    HksUpgradeUnlock();
 #endif
-    HKS_LOG_I("leave HksUpgradeOnPowerOn.");
 }
 
 void HksUpgradeOnUserUnlock(uint32_t userId)
 {
     HKS_LOG_I("enter HksUpgradeOnUserUnlock.");
 #ifdef HUKS_ENABLE_UPGRADE_KEY_STORAGE_SECURE_LEVEL
-    HksUpgradeLock();
-    HKS_IF_NOT_SUCC_LOGE(HksUpgradeFileTransferOnUserUnlock(userId), "HksUpgradeFileTransfer on user unlock failed!")
-    HksUpgradeUnlock();
+    g_upgradeOrRequestLock.UnLockRead();
+
+    // Since current thread have owned read lock, the power on upgrade have ended at earlier time,
+    // waiting for notify is not necessary.
+    {
+        HKS_LOG_I("acquiring for write lock...");
+        OHOS::Utils::UniqueWriteGuard<OHOS::Utils::RWLock> writeGuard(g_upgradeOrRequestLock);
+        int ret = HksUpgradeFileTransferOnUserUnlock(userId);
+        if (ret != HKS_SUCCESS) {
+            HKS_LOG_E("HksUpgradeFileTransferOnUserUnlock failed! %" LOG_PUBLIC "d", ret);
+        } else {
+            HKS_LOG_I("HksUpgradeFileTransferOnUserUnlock ok!");
+        }
+    }
+
+    g_upgradeOrRequestLock.LockRead();
 #endif
     HKS_LOG_I("leave HksUpgradeOnUserUnlock.");
+}
+}
+}
 }
