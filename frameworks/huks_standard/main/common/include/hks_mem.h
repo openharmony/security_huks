@@ -32,6 +32,8 @@
 extern "C" {
 #endif
 
+#define MAX_MALLOC_SIZE 0x800000 // 8M
+
 void *HksMalloc(size_t size);
 void HksFreeImpl(void *addr);
 int32_t HksMemCmp(const void *ptr1, const void *ptr2, uint32_t size);
