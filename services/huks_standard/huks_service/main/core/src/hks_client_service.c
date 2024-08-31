@@ -552,6 +552,7 @@ static int32_t AddEnrolledInfoInParamSet(struct SecInfoWrap *secInfo, struct Hks
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ConstructEnrolledInfoBlob failed!")
 
         ret = HksAddParams(paramSet, &tmpParam, 1);
+        HKS_FREE(enrolledInfo->data);
         return ret;
     } while (0);
     HKS_FREE(enrolledInfo->data);
