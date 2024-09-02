@@ -552,8 +552,10 @@ static int32_t AddEnrolledInfoInParamSet(struct SecInfoWrap *secInfo, struct Hks
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ConstructEnrolledInfoBlob failed!")
 
         ret = HksAddParams(paramSet, &tmpParam, 1);
-        HKS_FREE(enrolledInfo->data);
-        return ret;
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add params failed")
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
     } while (0);
     HKS_FREE(enrolledInfo->data);
     return ret;
@@ -610,9 +612,6 @@ static int32_t AppendUserAuthInfo(const struct HksParamSet *paramSet, int32_t us
 
         ret = AddEnrolledInfoInParamSet(secInfo, &enrolledInfo, newParamSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "AddEnrolledInfoInParamSet failed!")
-
-        ret = HksBuildParamSet(&newParamSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
 
         *outParamSet = newParamSet;
     } while (0);
