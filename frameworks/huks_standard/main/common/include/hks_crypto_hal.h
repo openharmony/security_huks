@@ -206,6 +206,12 @@ int32_t HksCryptoHalSign(const struct HksBlob *key, const struct HksUsageSpec *u
 int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const struct HksBlob *signature);
 
+int32_t HksCryptoHalSignIsoIec97962(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature);
+
+int32_t HksCryptoHalVerifyIsoIec97962(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature);
+
 int32_t HksCryptoHalHmacInit(const struct HksBlob *key, uint32_t digestAlg, void **ctx);
 
 int32_t HksCryptoHalHmacUpdate(const struct HksBlob *chunk, void *ctx);

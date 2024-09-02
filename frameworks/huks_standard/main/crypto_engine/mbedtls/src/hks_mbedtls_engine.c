@@ -297,6 +297,35 @@ int32_t HksCryptoHalVerify(const struct HksBlob *key, const struct HksUsageSpec 
     HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
     return func(key, usageSpec, message, signature);
 }
+
+int32_t HksCryptoHalSignIsoIec97962(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, struct HksBlob *signature)
+    
+{
+    if (CheckBlob(key) != HKS_SUCCESS || usageSpec == NULL || CheckBlob(message) != HKS_SUCCESS ||
+        CheckBlob(signature) != HKS_SUCCESS) {
+        HKS_LOG_E("Crypt Hal Sign param error");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    Sign func = (Sign)GetAbility(HKS_CRYPTO_ABILITY_SIGN_ISO_IEC_9796_2);
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+    return func(key, usageSpec, message, signature);
+}
+
+int32_t HksCryptoHalVerifyIsoIec97962(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const struct HksBlob *signature)
+{
+    if (CheckBlob(key) != HKS_SUCCESS || usageSpec == NULL || CheckBlob(message) != HKS_SUCCESS ||
+        CheckBlob(signature) != HKS_SUCCESS) {
+        HKS_LOG_E("Crypt Hal Verify param error");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    Verify func = (Verify)GetAbility(HKS_CRYPTO_ABILITY_VERIFY_ISO_IEC_9796_2);
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+    return func(key, usageSpec, message, signature);
+}
 #endif /* _CUT_AUTHENTICATE_ */
 
 int32_t HksCryptoHalFillRandom(struct HksBlob *randomData)
