@@ -25,12 +25,14 @@
 
 #include "hks_cfi.h"
 #include "hks_log.h"
+#include "hks_mutex.h"
 #include "hks_template.h"
 
 typedef struct HuksHdi *(*HalCreateHandle)(void);
 typedef void (*HalDestroyHandle)(struct HuksHdi *);
 
 void *g_halDeviceHandle = NULL;
+static HksMutex *g_halDevicePtrMutex = NULL;
 
 ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
 {
@@ -40,29 +42,42 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
         return HKS_SUCCESS;
     }
 
+    if (HksMutexLock(g_halDevicePtrMutex) != 0) {
+        HKS_LOG_E("g_halDevicePtrMutex HksMutexLock failed");
+        return HKS_FAILURE;
+    }
+
+    if (*halDevice != NULL) {
+        (void)HksMutexUnlock(g_halDevicePtrMutex);
+        return HKS_SUCCESS;
+    }
+
 #ifdef HKS_L1_SMALL
     g_halDeviceHandle = dlopen("libhuks_engine_core_standard.so", RTLD_NOW);
 #else
     g_halDeviceHandle = dlopen("libhuks_engine_core_standard.z.so", RTLD_NOW);
 #endif
-
-    HKS_IF_NULL_LOGE_RETURN(g_halDeviceHandle, HKS_FAILURE, "dlopen failed, %" LOG_PUBLIC "s!", dlerror())
-
-    HalCreateHandle devicePtr = (HalCreateHandle)dlsym(g_halDeviceHandle, "HuksCreateHdiDevicePtr");
-    if (devicePtr == NULL) {
-        HKS_LOG_E("dlsym failed, %" LOG_PUBLIC "s!", dlerror());
-        dlclose(g_halDeviceHandle);
-        return HKS_ERROR_NULL_POINTER;
+    if (g_halDeviceHandle == NULL) {
+        (void)HksMutexUnlock(g_halDevicePtrMutex);
+        HKS_LOG_E("dlopen failed, %" LOG_PUBLIC "s!", dlerror());
+        return HKS_FAILURE;
     }
 
-    *halDevice = (*devicePtr)();
-    if (*halDevice == NULL) {
-        HKS_LOG_E("g_hksHalDevicePtr is NULL!");
-        dlclose(g_halDeviceHandle);
-        return HKS_ERROR_NULL_POINTER;
-    }
+    do {
+        HalCreateHandle devicePtr = (HalCreateHandle)dlsym(g_halDeviceHandle, "HuksCreateHdiDevicePtr");
+        HKS_IF_NULL_LOGE_BREAK(devicePtr, "dlsym failed, %" LOG_PUBLIC "s!", dlerror())
 
-    return HKS_SUCCESS;
+        *halDevice = (*devicePtr)();
+        HKS_IF_NULL_LOGE_BREAK(*halDevice, "g_hksHalDevicePtr is NULL!")
+
+        (void)HksMutexUnlock(g_halDevicePtrMutex);
+        return HKS_SUCCESS;
+    } while (0);
+
+    dlclose(g_halDeviceHandle);
+    g_halDeviceHandle = NULL;
+    (void)HksMutexUnlock(g_halDevicePtrMutex);
+    return HKS_ERROR_NULL_POINTER;
 }
 
 ENABLE_CFI(int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice))
@@ -71,12 +86,46 @@ ENABLE_CFI(int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice))
         return HKS_SUCCESS;
     }
 
-    HKS_IF_NULL_LOGE_RETURN(g_halDeviceHandle, HKS_ERROR_NULL_POINTER, "g_halDeviceHandle is NULL!")
+    if (HksMutexLock(g_halDevicePtrMutex) != 0) {
+        HKS_LOG_E("g_halDevicePtrMutex HksMutexLock failed");
+        return HKS_FAILURE;
+    }
+
+    if ((halDevice == NULL) || (*halDevice == NULL)) {
+        (void)HksMutexUnlock(g_halDevicePtrMutex);
+        return HKS_SUCCESS;
+    }
+
+    if (g_halDeviceHandle == NULL) {
+        (void)HksMutexUnlock(g_halDevicePtrMutex);
+        HKS_LOG_E("g_halDeviceHandle is NULL!");
+        return HKS_ERROR_NULL_POINTER;
+    }
 
     HalDestroyHandle halDestroyHandle = (HalDestroyHandle)dlsym(g_halDeviceHandle, "HuksDestoryHdiDevicePtr");
     (*halDestroyHandle)(*halDevice);
     *halDevice = NULL;
 
     dlclose(g_halDeviceHandle);
+    g_halDeviceHandle = NULL;
+    (void)HksMutexUnlock(g_halDevicePtrMutex);
+
     return HKS_SUCCESS;
+}
+
+int32_t HksCreateHalDevicePtrMutex(void)
+{
+    if (g_halDevicePtrMutex == NULL) {
+        g_halDevicePtrMutex = HksMutexCreate();
+        HKS_IF_NULL_LOGE_RETURN(g_halDevicePtrMutex, HKS_FAILURE, "create g_halDevicePtrMutex fail")
+    }
+    return HKS_SUCCESS;
+}
+
+void HksDestroyHalDevicePtrMutex(void)
+{
+    if (g_halDevicePtrMutex != NULL) {
+        HksMutexClose(g_halDevicePtrMutex);
+        g_halDevicePtrMutex = NULL;
+    }
 }
