@@ -554,7 +554,7 @@ static int32_t AddEnrolledInfoInParamSet(struct SecInfoWrap *secInfo, struct Hks
         ret = HksAddParams(paramSet, &tmpParam, 1);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add params failed")
 
-        ret = HksBuildParamSet(&newParamSet);
+        ret = HksBuildParamSet(&paramSet);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build append info failed")
     } while (0);
     HKS_FREE(enrolledInfo->data);
