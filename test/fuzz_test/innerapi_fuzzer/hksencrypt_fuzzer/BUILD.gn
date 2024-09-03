@@ -15,36 +15,28 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksStorageFuzzTest") {
+ohos_fuzztest("HksEncryptFuzzTest") {
   module_out_path = fuzz_module_out_path
   fuzz_config_file =
-      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksstorage_fuzzer"
+      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksencrypt_fuzzer"
 
   include_dirs = [
     ".",
     "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
-    "//base/security/huks/services/huks_standard/huks_service/main/hks_storage/src",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/sa",  # hks_osaccount_check.h
   ]
-
-  configs = [ "../../../../frameworks/config/build:l2_standard_common_config" ]
-
   cflags = [
     "-g",
     "-O0",
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [ "hksstorage_fuzzer.cpp" ]
+  sources = [ "hksencrypt_fuzzer.cpp" ]
 
   deps = [
     "..:hks_fuzz_util",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//base/security/huks/services/huks_standard/huks_service/main/core:libhuks_service_core_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
-    "//base/security/huks/utils/file_operator:libhuks_utils_file_operator_static",
   ]
   external_deps = [ "c_utils:utils" ]
 }
@@ -55,7 +47,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":HksStorageFuzzTest",
+    ":HksEncryptFuzzTest",
   ]
 }
 ###############################################################################
