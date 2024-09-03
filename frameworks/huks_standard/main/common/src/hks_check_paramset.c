@@ -46,6 +46,7 @@
 #endif /* _CUT_AUTHENTICATE_ */
 
 #define HKS_DEFAULT_PBKDF2_ITERATION 1000
+#define HKS_MAX_PBKDF2_ITERATION 0x1000000U
 #define HKS_DEFAULT_PBKDF2_SALT_SIZE 16
 
 #ifndef _CUT_AUTHENTICATE_
@@ -461,7 +462,9 @@ static int32_t CheckPbkdf2DeriveKeyParams(const struct HksParamSet *paramSet)
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ITERATION, &iterationParam);
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_CHECK_GET_ITERATION_FAIL)
 
-    if (iterationParam->uint32Param < HKS_DEFAULT_PBKDF2_ITERATION) {
+    if (iterationParam->uint32Param < HKS_DEFAULT_PBKDF2_ITERATION ||
+        iterationParam->uint32Param > HKS_MAX_PBKDF2_ITERATION) {
+        HKS_LOG_E("invalid iteration param %" LOG_PUBLIC "u", iterationParam->uint32Param);
         return HKS_ERROR_INVALID_ITERATION;
     }
 
