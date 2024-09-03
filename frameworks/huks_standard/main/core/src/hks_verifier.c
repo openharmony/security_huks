@@ -254,6 +254,7 @@ static int32_t EncodeTlvAndGetLength(uint8_t **buf, uint32_t *outLength, uint32_
     uint32_t length = 0; /* length of the payload */
 
     uint32_t tmp;
+    HKS_IF_NULL_LOGE_RETURN(*buf, HKS_ERROR_INVALID_ARGUMENT, "invalid input param");
     HKS_ASN1_DECODE_BYTE(*buf, tmp); /* get type */
     if ((*buf)[0] < ASN_1_MIN_VAL_1_EXTRA_LEN_BYTE) {
         /* Current byte tells the length */
