@@ -12,6 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#undef HKS_ENABLE_LITE_HAP
+#define HKS_ENABLE_LITE_HAP
+
+#undef HKS_USE_RKC_IN_STANDARD
+#define HKS_USE_RKC_IN_STANDARD
+
+#undef HKS_KEY_STORE_LITE_HAP
+#define HKS_KEY_STORE_LITE_HAP "/data/lite/hap"
+
+#undef HKS_CONFIG_RKC_STORE_PATH
+#define HKS_CONFIG_RKC_STORE_PATH "/data"
+
 #include "hksstorage_fuzzer.h"
 
 #include <string>
@@ -427,7 +440,6 @@ static void HksStorageManagerTest003()
     HksFreeParamSet(&paramSet);
 }
 
-#ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
 static void HksStorageManagerTest004()
 {
     HKS_LOG_I("enter HksStorageManagerTest004");
@@ -507,7 +519,6 @@ static void HksStorageManagerTest005()
     FreeStorageMaterial(&material);
     HksFreeParamSet(&paramSet);
 }
-#endif
 
 static void HksStorageManagerTest006()
 {
@@ -548,6 +559,146 @@ static void HksStorageManagerTest006()
     FreeStorageMaterial(&material);
     HksFreeParamSet(&paramSet);
 }
+
+static void HksStorageUtilTest001()
+{
+    HKS_LOG_I("enter HksStorageUtilTest001");
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("123");
+    material.userIdPath = const_cast<char *>("999");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_KEY_STORE_PATH "/999/123/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
+
+static void HksStorageUtilTest002()
+{
+    HKS_LOG_I("enter HksStorageUtilTest002");
+    struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("222");
+    material.userIdPath = const_cast<char *>("");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_KEY_STORE_PATH "/222/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
+
+static void HksStorageUtilTest003()
+{
+    HKS_LOG_I("enter HksStorageUtilTest003");
+    struct HksStoreMaterial material = { CE_PATH, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("333");
+    material.userIdPath = const_cast<char *>("100");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_CE_ROOT_PATH "/100/" HKS_STORE_SERVICE_PATH "/333/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
+
+static void HksStorageUtilTest004()
+{
+    HKS_LOG_I("enter HksStorageUtilTest004");
+    struct HksStoreMaterial material = { ECE_PATH, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("444");
+    material.userIdPath = const_cast<char *>("100");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_ECE_ROOT_PATH "/100/" HKS_STORE_SERVICE_PATH "/444/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
+
+static void HksStorageUtilTest005()
+{
+    HKS_LOG_I("enter HksStorageUtilTest005");
+    struct HksStoreMaterial material = { TMP_PATH, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("555");
+    material.userIdPath = const_cast<char *>("555");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_KEY_STORE_TMP_PATH "/555/555/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
+
+static void HksStorageUtilTest006()
+{
+    HKS_LOG_I("enter HksStorageUtilTest006");
+    struct HksStoreMaterial material = { LITE_HAP_PATH, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("hks_client");
+    material.userIdPath = const_cast<char *>("");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_KEY_STORE_LITE_HAP "/hks_client/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
+
+static void HksStorageUtilTest007()
+{
+    HKS_LOG_I("enter HksStorageUtilTest007");
+    struct HksStoreMaterial material = { RKC_IN_STANDARD_PATH, 0 };
+    material.keyAliasPath = const_cast<char *>("alias");
+    material.storageTypePath = const_cast<char *>("key");
+    material.uidPath = const_cast<char *>("hks_client");
+    material.userIdPath = const_cast<char *>("0");
+#ifdef SUPPORT_STORAGE_BACKUP
+    struct HksStoreFileInfo fileInfo = { { 0 }, { 0 } };
+#else
+    struct HksStoreFileInfo fileInfo = { { 0 } };
+#endif
+    HksGetFileInfo(&material, &fileInfo);
+    HksMemCmp(fileInfo.mainPath.fileName, material.keyAliasPath, strlen(material.keyAliasPath));
+
+    const char *expectPath = HKS_KEY_RKC_PATH "/hks_client/key";
+    HksMemCmp(fileInfo.mainPath.path, expectPath, strlen(expectPath));
+}
 }
 }
 }
@@ -572,10 +723,15 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     OHOS::Security::Hks::HksStorageManagerTest001();
     OHOS::Security::Hks::HksStorageManagerTest002();
     OHOS::Security::Hks::HksStorageManagerTest003();
-#ifdef HUKS_ENABLE_SKIP_UPGRADE_KEY_STORAGE_SECURE_LEVEL
     OHOS::Security::Hks::HksStorageManagerTest004();
     OHOS::Security::Hks::HksStorageManagerTest005();
-#endif
     OHOS::Security::Hks::HksStorageManagerTest006();
+    OHOS::Security::Hks::HksStorageUtilTest001();
+    OHOS::Security::Hks::HksStorageUtilTest002();
+    OHOS::Security::Hks::HksStorageUtilTest003();
+    OHOS::Security::Hks::HksStorageUtilTest004();
+    OHOS::Security::Hks::HksStorageUtilTest005();
+    OHOS::Security::Hks::HksStorageUtilTest006();
+    OHOS::Security::Hks::HksStorageUtilTest007();
     return 0;
 }
