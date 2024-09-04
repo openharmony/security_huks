@@ -99,10 +99,9 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
 static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
 {
     certChain->certsCount = HKS_CERT_COUNT;
+    certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
+    HKS_IF_NULL_LOGE_RETURN(certChain->certs, HKS_ERROR_MALLOC_FAIL, "malloc certChain->certs error!");
     do {
-        certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
-        HKS_IF_NULL_LOGE_BREAK(certChain->certs, "malloc certChain->certs error!");
-
         *certChainCapacity = certChain->certsCount;
         certChain->certs[INDEX_0].size = HKS_CERT_APP_SIZE;
         certChain->certs[INDEX_0].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_0].size));
