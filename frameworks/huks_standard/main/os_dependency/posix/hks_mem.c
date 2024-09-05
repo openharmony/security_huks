@@ -26,7 +26,7 @@
 
 void *HksMalloc(size_t size)
 {
-    if (size == 0) {
+    if (size == 0 || size > MAX_MALLOC_SIZE) {
         return NULL;
     }
     void *ret = NULL;
