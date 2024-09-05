@@ -31,6 +31,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define MAX_MALLOC_SIZE 0x800000 // 8M
 
 void *HksMalloc(size_t size);
 void HksFreeImpl(void *addr);
