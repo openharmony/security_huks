@@ -558,6 +558,10 @@ static int32_t GetPathInfo(const struct HksStoreMaterial *material, const char *
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "make full dir failed.")
     }
     if (material->keyAliasPath != NULL) {
+        if (strstr(material->keyAliasPath, "../") != NULL) {
+            HKS_LOG_E("invalid filePath, ../ is included in file path");
+            return HKS_ERROR_INVALID_ARGUMENT;
+        }
         if (memcpy_s(fileInfoPath->fileName, HKS_MAX_FILE_NAME_LEN,
             material->keyAliasPath, strlen(material->keyAliasPath)) != EOK) {
             ret = HKS_ERROR_INSUFFICIENT_MEMORY;
