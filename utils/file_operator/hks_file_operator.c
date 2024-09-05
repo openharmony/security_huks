@@ -76,6 +76,20 @@ static int32_t GetFullFileName(const char *path, const char *fileName, char **fu
     return HKS_SUCCESS;
 }
 
+static int32_t IsValidPath(const char *path)
+{
+    if (path == NULL) {
+        HKS_LOG_E("path is NULL!");
+        return HKS_ERROR_NULL_POINTER;
+    }
+    if (strstr(path, "../") != NULL) {
+        HKS_LOG_E("dangerous filePath, ../ is not allowed to be included");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    return HKS_SUCCESS;
+}
+
 static int32_t IsFileExist(const char *fileName)
 {
     if (access(fileName, F_OK) != 0) {
@@ -91,13 +105,13 @@ static int32_t FileRead(const char *fileName, uint32_t offset, struct HksBlob *b
     HKS_IF_NOT_SUCC_RETURN(IsFileExist(fileName), HKS_ERROR_NOT_EXIST)
 
     if (strstr(fileName, "../") != NULL) {
-        HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", fileName);
+        HKS_LOG_E("invalid filePath, ../ is included in file path");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     char filePath[PATH_MAX + 1] = {0};
     if (realpath(fileName, filePath) == NULL) {
-        HKS_LOG_E("invalid filePath, path %" LOG_PUBLIC "s", fileName);
+        HKS_LOG_E("invalid filePath, realpath failed");
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
@@ -236,6 +250,10 @@ int32_t HksFileRemove(const char *path, const char *fileName)
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (IsValidPath(fullFileName) != HKS_SUCCESS) {
+        HKS_FREE(fullFileName);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     ret = FileRemove(fullFileName);
     HKS_FREE(fullFileName);
@@ -249,6 +267,10 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (IsValidPath(fullFileName) != HKS_SUCCESS) {
+        HKS_FREE(fullFileName);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     ret = IsFileExist(fullFileName);
     HKS_FREE(fullFileName);
@@ -258,11 +280,17 @@ int32_t HksIsFileExist(const char *path, const char *fileName)
 int32_t HksIsDirExist(const char *path)
 {
     HKS_IF_NULL_RETURN(path, HKS_ERROR_NULL_POINTER)
+    if (IsValidPath(path) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     return IsFileExist(path);
 }
 
 int32_t HksMakeDir(const char *path)
 {
+    if (IsValidPath(path) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     int result = mkdir(path, S_IRWXU);
     if (result == 0) {
         return HKS_SUCCESS;
@@ -278,6 +306,9 @@ int32_t HksMakeDir(const char *path)
 
 void *HksOpenDir(const char *path)
 {
+    if (IsValidPath(path) != HKS_SUCCESS) {
+        return NULL;
+    }
     return (void *)opendir(path);
 }
 
@@ -310,6 +341,9 @@ int32_t HksGetDirFile(void *dirp, struct HksFileDirentInfo *direntInfo)
 
 int32_t HksRemoveDir(const char *dirPath)
 {
+    if (IsValidPath(dirPath) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     struct stat fileStat;
     int32_t ret = stat(dirPath, &fileStat);
     if (ret != 0) {
@@ -412,6 +446,9 @@ static int32_t HksDeletDirPartOne(const char *path)
 
 int32_t HksDeleteDir(const char *path)
 {
+    if (IsValidPath(path) != HKS_SUCCESS) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
     int32_t ret;
     char deletePath[HKS_MAX_FILE_NAME_LEN] = { 0 };
 
@@ -457,6 +494,10 @@ int32_t HksFileRead(const char *path, const char *fileName, uint32_t offset, str
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (IsValidPath(fullFileName) != HKS_SUCCESS) {
+        HKS_FREE(fullFileName);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     ret = FileRead(fullFileName, offset, blob, size);
     HKS_FREE(fullFileName);
@@ -472,6 +513,10 @@ int32_t HksFileWrite(const char *path, const char *fileName, uint32_t offset, co
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    if (IsValidPath(fullFileName) != HKS_SUCCESS) {
+        HKS_FREE(fullFileName);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
 
     ret = FileWrite(fullFileName, offset, buf, len);
     HKS_FREE(fullFileName);
@@ -485,6 +530,10 @@ uint32_t HksFileSize(const char *path, const char *fileName)
     char *fullFileName = NULL;
     int32_t ret = GetFullFileName(path, fileName, &fullFileName);
     HKS_IF_NOT_SUCC_RETURN(ret, 0)
+    if (IsValidPath(fullFileName) != HKS_SUCCESS) {
+        HKS_FREE(fullFileName);
+        return 0;
+    }
 
     uint32_t size = FileSize(fullFileName);
     HKS_FREE(fullFileName);
