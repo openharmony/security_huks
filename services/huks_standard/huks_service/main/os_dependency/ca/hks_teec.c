@@ -94,7 +94,6 @@ static TEEC_Result TeecUuidInit(TEEC_Context *context, const char *taPath,
             return TEEC_ERROR_GENERIC;
         }
 
-        HKS_LOG_I("run on ta path:%" LOG_PUBLIC "s ", taPath);
         return TEEC_SUCCESS;
     }
 
