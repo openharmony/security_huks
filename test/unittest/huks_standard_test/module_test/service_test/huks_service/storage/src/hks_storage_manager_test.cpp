@@ -152,7 +152,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest002, TestSize.Level0)
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE
         }
     };
-    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
+    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 1));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest002 build paramset failed.";
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -203,7 +203,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest003, TestSize.Level0)
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE
         }
     };
-    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
+    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 1));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest003 build paramset failed.";
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -255,7 +255,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest004, TestSize.Level0)
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP
         }
     };
-    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
+    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 1));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest004 build paramset failed.";
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -306,7 +306,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest005, TestSize.Level0)
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP
         }
     };
-    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
+    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 1));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet)) << "HksStorageManagerTest005 build paramset failed.";
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -358,7 +358,7 @@ HWTEST_F(HksStorageManagerTest, HksStorageManagerTest006, TestSize.Level0)
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
         }
     };
-    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 2));
+    ASSERT_EQ(HKS_SUCCESS, HksAddParams(paramSet, params, 1));
     ASSERT_EQ(HKS_SUCCESS, HksBuildParamSet(&paramSet));
 
     struct HksStoreMaterial material = { ECE_PATH, 0 };

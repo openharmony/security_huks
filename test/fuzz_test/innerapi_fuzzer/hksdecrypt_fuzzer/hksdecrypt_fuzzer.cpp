@@ -41,7 +41,7 @@ int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
 
     WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
 
-    [[maybe_unused]] int ret = HksEncrypt(&key, ps.s, &cipherText, &plainText);
+    [[maybe_unused]] int ret = HksDecrypt(&key, ps.s, &cipherText, &plainText);
 
     return 0;
 }
