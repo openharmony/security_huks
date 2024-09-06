@@ -37,6 +37,7 @@ static uint32_t g_signVerifyEccPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST
 static uint32_t g_signVerifyEd25519PolicyTag[] = { HKS_TAG_PURPOSE };
 static uint32_t g_macPolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_macSm3PolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
+static uint32_t g_macCmacPolicyTag[] = { HKS_TAG_ALGORITHM, HKS_TAG_PURPOSE };
 static uint32_t g_derivePolicyTag[] = { HKS_TAG_DIGEST, HKS_TAG_PURPOSE };
 static uint32_t g_agreePolicyTag[] = { HKS_TAG_PURPOSE };
 
@@ -49,7 +50,8 @@ struct HksAuthPolicy g_authPolicyList[] = {
     { HKS_AUTH_ID_MAC_HMAC, HKS_ARRAY_SIZE(g_macPolicyTag), g_macPolicyTag },
     { HKS_AUTH_ID_MAC_SM3, HKS_ARRAY_SIZE(g_macSm3PolicyTag), g_macSm3PolicyTag },
     { HKS_AUTH_ID_DERIVE, HKS_ARRAY_SIZE(g_derivePolicyTag), g_derivePolicyTag },
-    { HKS_AUTH_ID_AGREE, HKS_ARRAY_SIZE(g_agreePolicyTag), g_agreePolicyTag }
+    { HKS_AUTH_ID_AGREE, HKS_ARRAY_SIZE(g_agreePolicyTag), g_agreePolicyTag },
+    { HKS_AUTH_ID_MAC_CMAC, HKS_ARRAY_SIZE(g_macCmacPolicyTag), g_macCmacPolicyTag },
 };
 
 static int32_t CheckPurpose(const struct HksParam *authParam, const struct HksParam *requestParam)

@@ -58,6 +58,10 @@ enum HksOperationType {
                                                                 /* see hks_chipset_platform_key_hardcoded.c */
     HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_PUB_KEY = 0x20,       /* hardcoded key implementation did not use the enum */
                                                                 /* see hks_chipset_platform_key_hardcoded.c */
+    HKS_OPERATION_CMAC_INIT,                                    /* cmac init */
+    HKS_OPERATION_CMAC_UPDATE,                                  /* cmac update */
+    HKS_OPERATION_CMAC_FINAL,                                   /* cmac final */
+    HKS_OPERATION_CMAC_FREE_CTX                                 /* cmac free ctx */
 };
 
 struct HksAbility {
@@ -85,6 +89,11 @@ struct HksAbility {
 #define HKS_CRYPTO_ABILITY_HMAC_UPDATE          HKS_CRYPTO_ABILITY(HKS_OPERATION_HMAC_UPDATE, 0)
 #define HKS_CRYPTO_ABILITY_HMAC_FINAL           HKS_CRYPTO_ABILITY(HKS_OPERATION_HMAC_FINAL, 0)
 #define HKS_CRYPTO_ABILITY_HMAC_FREE_CTX        HKS_CRYPTO_ABILITY(HKS_OPERATION_HMAC_FREE_CTX, 0)
+
+#define HKS_CRYPTO_ABILITY_CMAC_INIT            HKS_CRYPTO_ABILITY(HKS_OPERATION_CMAC_INIT, 0)
+#define HKS_CRYPTO_ABILITY_CMAC_UPDATE          HKS_CRYPTO_ABILITY(HKS_OPERATION_CMAC_UPDATE, 0)
+#define HKS_CRYPTO_ABILITY_CMAC_FINAL           HKS_CRYPTO_ABILITY(HKS_OPERATION_CMAC_FINAL, 0)
+#define HKS_CRYPTO_ABILITY_CMAC_FREE_CTX        HKS_CRYPTO_ABILITY(HKS_OPERATION_CMAC_FREE_CTX, 0)
 
 #define HKS_CRYPTO_ABILITY_HASH                 HKS_CRYPTO_ABILITY(HKS_OPERATION_HASH, 0)
 #define HKS_CRYPTO_ABILITY_HASH_INIT            HKS_CRYPTO_ABILITY(HKS_OPERATION_HASH_INIT, 0)

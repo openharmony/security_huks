@@ -99,6 +99,58 @@ void HksCryptoHalHmacFreeCtx(void **ctx)
     func(ctx);
 }
 
+#ifdef HKS_SUPPORT_CMAC_C
+int32_t HksCryptoHalCmacInit(const struct HksBlob *key, uint32_t digestAlg, void **ctx)
+{
+    if (CheckBlob(key) != HKS_SUCCESS || ctx == NULL) {
+        HKS_LOG_E("Crypt Hal Cmac init msg is NULL");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    CmacInit func = (CmacInit)GetAbility(HKS_CRYPTO_ABILITY_CMAC_INIT);
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+
+    return func(ctx, key, digestAlg);
+}
+
+int32_t HksCryptoHalCmacUpdate(const struct HksBlob *chunk, void *ctx)
+{
+    if (CheckBlob(chunk) != HKS_SUCCESS || ctx == NULL) {
+        HKS_LOG_E("Crypt Hal Cmac update chunk is invalid param");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    CmacUpdate func = (CmacUpdate)GetAbility(HKS_CRYPTO_ABILITY_CMAC_UPDATE);
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+
+    return func(ctx, chunk);
+}
+
+int32_t HksCryptoHalCmacFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *mac)
+{
+    if (msg == NULL || ctx == NULL || *ctx == NULL || CheckBlob(mac) != HKS_SUCCESS) {
+        HKS_LOG_E("Crypt Hal Cmac final msg or mac is NULL");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    CmacFinal func = (CmacFinal)GetAbility(HKS_CRYPTO_ABILITY_CMAC_FINAL);
+    HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+
+    return func(ctx, msg, mac);
+}
+
+void HksCryptoHalCmacFreeCtx(void **ctx)
+{
+    FreeCtx func = (FreeCtx)GetAbility(HKS_CRYPTO_ABILITY_CMAC_FREE_CTX);
+    if (func == NULL) {
+        HKS_LOG_E("CryptoHalCmacFreeCtx func is null");
+        return;
+    }
+
+    func(ctx);
+}
+#endif
+
 #ifndef _CUT_AUTHENTICATE_
 int32_t HksCryptoHalHash(uint32_t alg, const struct HksBlob *msg, struct HksBlob *hash)
 {
@@ -363,6 +415,12 @@ int32_t HksCryptoHalDecryptFinal(const struct HksBlob *message, void **ctx, stru
     if (ctx == NULL || *ctx == NULL) {
         HKS_LOG_E("Invalid param ctx!");
         return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    if ((algtype == HKS_ALG_DES) || (algtype == HKS_ALG_3DES)) {
+        DecryptFinalDes func = (DecryptFinalDes)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(algtype));
+        HKS_IF_NULL_RETURN(func, HKS_ERROR_INVALID_ARGUMENT)
+        return func(ctx, message, cipherText, false);
     }
 
     DecryptFinal func = (DecryptFinal)GetAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(algtype));
