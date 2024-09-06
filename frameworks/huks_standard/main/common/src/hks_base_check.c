@@ -116,6 +116,52 @@ static const uint32_t g_aesEcbPadding[] = {
 };
 #endif
 
+#ifdef HKS_SUPPORT_DES_C
+static const uint32_t g_desKeySize[] = {
+    HKS_DES_KEY_SIZE_64
+};
+static const uint32_t g_desMacKeySize[] = {
+    HKS_DES_KEY_SIZE_64
+};
+static const uint32_t g_desPadding[] = {
+    HKS_PADDING_NONE
+};
+static const uint32_t g_desMode[] = {
+    HKS_MODE_CBC,
+    HKS_MODE_ECB
+};
+static const uint32_t g_desCbcPadding[] = {
+    HKS_PADDING_NONE
+};
+static const uint32_t g_desEcbPadding[] = {
+    HKS_PADDING_NONE
+};
+#endif
+
+#ifdef HKS_SUPPORT_3DES_C
+static const uint32_t g_3desKeySize[] = {
+    HKS_3DES_KEY_SIZE_128,
+    HKS_3DES_KEY_SIZE_192
+};
+static const uint32_t g_3desMacKeySize[] = {
+    HKS_3DES_KEY_SIZE_128,
+    HKS_3DES_KEY_SIZE_192
+};
+static const uint32_t g_3desPadding[] = {
+    HKS_PADDING_NONE
+};
+static const uint32_t g_3desMode[] = {
+    HKS_MODE_CBC,
+    HKS_MODE_ECB
+};
+static const uint32_t g_3desCbcPadding[] = {
+    HKS_PADDING_NONE
+};
+static const uint32_t g_3desEcbPadding[] = {
+    HKS_PADDING_NONE
+};
+#endif
+
 #ifdef HKS_SUPPORT_SM4_C
 static const uint32_t g_sm4KeySize[] = {
     HKS_SM4_KEY_SIZE_128,
@@ -228,6 +274,7 @@ static const uint32_t g_hmacDigest[] = {
     HKS_DIGEST_SM3
 };
 #endif
+
 #ifdef HKS_SUPPORT_DSA_C
 static const uint32_t g_dsaDigest[] = {
     HKS_DIGEST_NONE,
@@ -312,6 +359,102 @@ static const struct ExpectParamsValuesChecker g_expectAesParams[] = {
     },
     { HKS_CHECK_TYPE_GEN_DERIVE_KEY, {
         { true, g_aesKeySize, HKS_ARRAY_SIZE(g_aesKeySize) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_digest, HKS_ARRAY_SIZE(g_digest) },
+        { false, NULL, 0 }
+        }
+    }
+};
+#endif
+
+#ifdef HKS_SUPPORT_DES_C
+static const struct ParamsValuesChecker g_desParamSet[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } }
+};
+
+static const struct ExpectParamsValuesChecker g_expectDesParams[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, {
+        { true, g_desKeySize, HKS_ARRAY_SIZE(g_desKeySize) },
+        { true, g_desPadding, HKS_ARRAY_SIZE(g_desPadding) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_desMode, HKS_ARRAY_SIZE(g_desMode) }
+        }
+    },
+    { HKS_CHECK_TYPE_USE_KEY, {
+        { false, NULL, 0 },
+        { true, g_desPadding, HKS_ARRAY_SIZE(g_desPadding) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_desMode, HKS_ARRAY_SIZE(g_desMode) }
+        }
+    },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, {
+        { true, g_desMacKeySize, HKS_ARRAY_SIZE(g_desMacKeySize) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_macDigest, HKS_ARRAY_SIZE(g_macDigest) },
+        { false, NULL, 0 }
+        }
+    },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, {
+        { true, g_desKeySize, HKS_ARRAY_SIZE(g_desKeySize) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_digest, HKS_ARRAY_SIZE(g_digest) },
+        { false, NULL, 0 }
+        }
+    }
+};
+#endif
+
+#ifdef HKS_SUPPORT_3DES_C
+static const struct ParamsValuesChecker g_3desParamSet[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { true, 0, false}, { true, 0, false}, { false, 0, false},
+        { true, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, { { true, 0, false}, { false, 0, false}, { false, 0, false}, { true, 0, false},
+        { false, 0, false} } }
+};
+
+static const struct ExpectParamsValuesChecker g_expect3DesParams[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, {
+        { true, g_3desKeySize, HKS_ARRAY_SIZE(g_3desKeySize) },
+        { true, g_3desPadding, HKS_ARRAY_SIZE(g_3desPadding) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_3desMode, HKS_ARRAY_SIZE(g_3desMode) }
+        }
+    },
+    { HKS_CHECK_TYPE_USE_KEY, {
+        { false, NULL, 0 },
+        { true, g_3desPadding, HKS_ARRAY_SIZE(g_3desPadding) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_3desMode, HKS_ARRAY_SIZE(g_3desMode) }
+        }
+    },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, {
+        { true, g_3desMacKeySize, HKS_ARRAY_SIZE(g_3desMacKeySize) },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { true, g_macDigest, HKS_ARRAY_SIZE(g_macDigest) },
+        { false, NULL, 0 }
+        }
+    },
+    { HKS_CHECK_TYPE_GEN_DERIVE_KEY, {
+        { true, g_3desKeySize, HKS_ARRAY_SIZE(g_3desKeySize) },
         { false, NULL, 0 },
         { false, NULL, 0 },
         { true, g_digest, HKS_ARRAY_SIZE(g_digest) },
@@ -503,6 +646,43 @@ static const struct ExpectParamsValuesChecker g_expectHmacParams[] = {
 };
 #endif
 
+#ifdef HKS_SUPPORT_CMAC_C
+static const struct ParamsValuesChecker g_cmacParamSet[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_USE_KEY, { { false, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
+        { false, 0, false} } }
+};
+static const struct ExpectParamsValuesChecker g_expectCmacParams[] = {
+    { HKS_CHECK_TYPE_GEN_KEY, {
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 }
+        }
+    },
+    { HKS_CHECK_TYPE_USE_KEY, {
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 }
+        }
+    },
+    { HKS_CHECK_TYPE_GEN_MAC_KEY, {
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 },
+        { false, NULL, 0 }
+        }
+    }
+};
+#endif
+
 #ifdef HKS_SUPPORT_DSA_C
 static const struct ParamsValuesChecker g_dsaParamSet[] = {
     { HKS_CHECK_TYPE_GEN_KEY, { { true, 0, false}, { false, 0, false}, { true, 0, false}, { true, 0, false},
@@ -627,6 +807,20 @@ static const uint32_t g_invalidPurpose[][2] = {
             HKS_KEY_PURPOSE_UNWRAP,
     },
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    {
+        HKS_ALG_DES,
+        HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_AGREE | HKS_KEY_PURPOSE_WRAP |
+            HKS_KEY_PURPOSE_UNWRAP,
+    },
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    {
+        HKS_ALG_3DES,
+        HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_AGREE | HKS_KEY_PURPOSE_WRAP |
+            HKS_KEY_PURPOSE_UNWRAP,
+    },
+#endif
 #ifdef HKS_SUPPORT_ED25519_C
     {
         HKS_ALG_ED25519,
@@ -644,6 +838,13 @@ static const uint32_t g_invalidPurpose[][2] = {
 #ifdef HKS_SUPPORT_HMAC_C
     {
         HKS_ALG_HMAC,
+        HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_WRAP |
+            HKS_KEY_PURPOSE_UNWRAP | HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT | HKS_KEY_PURPOSE_AGREE,
+    },
+#endif
+#ifdef HKS_SUPPORT_CMAC_C
+    {
+        HKS_ALG_CMAC,
         HKS_KEY_PURPOSE_DERIVE | HKS_KEY_PURPOSE_SIGN | HKS_KEY_PURPOSE_VERIFY | HKS_KEY_PURPOSE_WRAP |
             HKS_KEY_PURPOSE_UNWRAP | HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT | HKS_KEY_PURPOSE_AGREE,
     },
@@ -758,6 +959,46 @@ static const struct KeyInfoParams g_validAesKeyInfo[] = {
 };
 #endif
 
+#ifdef HKS_SUPPORT_DES_C
+static const uint32_t g_supportDesPurpose[] = {
+    HKS_KEY_PURPOSE_ENCRYPT,
+    HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_DERIVE,
+    HKS_KEY_PURPOSE_MAC
+};
+
+static const uint32_t g_supportDesCipherMode[] = {
+    HKS_MODE_CBC,
+    HKS_MODE_ECB
+};
+
+static const struct KeyInfoParams g_validDesKeyInfo[] = {
+    { true, HKS_TAG_PURPOSE, g_supportDesPurpose, HKS_ARRAY_SIZE(g_supportDesPurpose) },
+    { true, HKS_TAG_BLOCK_MODE, g_supportDesCipherMode, HKS_ARRAY_SIZE(g_supportDesCipherMode) }
+};
+#endif
+
+#ifdef HKS_SUPPORT_3DES_C
+static const uint32_t g_support3DesPurpose[] = {
+    HKS_KEY_PURPOSE_ENCRYPT,
+    HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_ENCRYPT | HKS_KEY_PURPOSE_DECRYPT,
+    HKS_KEY_PURPOSE_DERIVE,
+    HKS_KEY_PURPOSE_MAC
+};
+
+static const uint32_t g_support3DesCipherMode[] = {
+    HKS_MODE_CBC,
+    HKS_MODE_ECB
+};
+
+static const struct KeyInfoParams g_valid3DesKeyInfo[] = {
+    { true, HKS_TAG_PURPOSE, g_support3DesPurpose, HKS_ARRAY_SIZE(g_support3DesPurpose) },
+    { true, HKS_TAG_BLOCK_MODE, g_support3DesCipherMode, HKS_ARRAY_SIZE(g_support3DesCipherMode) }
+};
+#endif
+
 #ifdef HKS_SUPPORT_SM4_C
 static const uint32_t g_supportSm4Purpose[] = {
     HKS_KEY_PURPOSE_ENCRYPT,
@@ -778,6 +1019,12 @@ static const struct KeyInfoParams g_validSm4KeyInfo[] = {
 static const struct AuthAcceessKeyInfoChecker g_validKeyInfo[] = {
 #ifdef HKS_SUPPORT_AES_C
     { HKS_ALG_AES, g_validAesKeyInfo, HKS_ARRAY_SIZE(g_validAesKeyInfo) },
+#endif
+#ifdef HKS_SUPPORT_DES_C
+    { HKS_ALG_DES, g_validDesKeyInfo, HKS_ARRAY_SIZE(g_validDesKeyInfo) },
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    { HKS_ALG_3DES, g_valid3DesKeyInfo, HKS_ARRAY_SIZE(g_valid3DesKeyInfo) },
 #endif
 #ifdef HKS_SUPPORT_SM4_C
     { HKS_ALG_SM4, g_validSm4KeyInfo, HKS_ARRAY_SIZE(g_validSm4KeyInfo) }
@@ -959,6 +1206,35 @@ static int32_t InitInputParams(enum CheckKeyType checkType, struct ParamsValues 
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
+
+static int32_t InitInputParamsByAlgOne(uint32_t alg, enum CheckKeyType checkType, struct ParamsValues *inputParams)
+{
+    switch (alg) {
+#ifdef HKS_SUPPORT_HMAC_C
+        case HKS_ALG_HMAC:
+            return InitInputParams(checkType, inputParams, g_hmacParamSet, HKS_ARRAY_SIZE(g_hmacParamSet));
+#endif
+#ifdef HKS_SUPPORT_CMAC_C
+        case HKS_ALG_CMAC:
+            return InitInputParams(checkType, inputParams, g_cmacParamSet, HKS_ARRAY_SIZE(g_cmacParamSet));
+#endif
+#ifdef HKS_SUPPORT_DSA_C
+        case HKS_ALG_DSA:
+            return InitInputParams(checkType, inputParams, g_dsaParamSet, HKS_ARRAY_SIZE(g_dsaParamSet));
+#endif
+#ifdef HKS_SUPPORT_DH_C
+        case HKS_ALG_DH:
+            return InitInputParams(checkType, inputParams, g_dhParamSet, HKS_ARRAY_SIZE(g_dhParamSet));
+#endif
+#ifdef HKS_SUPPORT_ECDH_C
+        case HKS_ALG_ECDH:
+            return InitInputParams(checkType, inputParams, g_ecdhParamSet, HKS_ARRAY_SIZE(g_ecdhParamSet));
+#endif
+        default:
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
 static int32_t InitInputParamsByAlg(uint32_t alg, enum CheckKeyType checkType, struct ParamsValues *inputParams)
 {
     switch (alg) {
@@ -966,8 +1242,18 @@ static int32_t InitInputParamsByAlg(uint32_t alg, enum CheckKeyType checkType, s
         case HKS_ALG_RSA:
             return InitInputParams(checkType, inputParams, g_rsaParamSet, HKS_ARRAY_SIZE(g_rsaParamSet));
 #endif
+#ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             return InitInputParams(checkType, inputParams, g_aesParamSet, HKS_ARRAY_SIZE(g_aesParamSet));
+#endif
+#ifdef HKS_SUPPORT_DES_C
+        case HKS_ALG_DES:
+            return InitInputParams(checkType, inputParams, g_desParamSet, HKS_ARRAY_SIZE(g_desParamSet));
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+        case HKS_ALG_3DES:
+            return InitInputParams(checkType, inputParams, g_3desParamSet, HKS_ARRAY_SIZE(g_3desParamSet));
+#endif
 #ifdef HKS_SUPPORT_ECC_C
         case HKS_ALG_ECC:
             return InitInputParams(checkType, inputParams, g_eccParamSet, HKS_ARRAY_SIZE(g_eccParamSet));
@@ -989,24 +1275,8 @@ static int32_t InitInputParamsByAlg(uint32_t alg, enum CheckKeyType checkType, s
         case HKS_ALG_ED25519:
             return InitInputParams(checkType, inputParams, g_curve25519ParamSet, HKS_ARRAY_SIZE(g_curve25519ParamSet));
 #endif
-#ifdef HKS_SUPPORT_HMAC_C
-        case HKS_ALG_HMAC:
-            return InitInputParams(checkType, inputParams, g_hmacParamSet, HKS_ARRAY_SIZE(g_hmacParamSet));
-#endif
-#ifdef HKS_SUPPORT_DSA_C
-        case HKS_ALG_DSA:
-            return InitInputParams(checkType, inputParams, g_dsaParamSet, HKS_ARRAY_SIZE(g_dsaParamSet));
-#endif
-#ifdef HKS_SUPPORT_DH_C
-        case HKS_ALG_DH:
-            return InitInputParams(checkType, inputParams, g_dhParamSet, HKS_ARRAY_SIZE(g_dhParamSet));
-#endif
-#ifdef HKS_SUPPORT_ECDH_C
-        case HKS_ALG_ECDH:
-            return InitInputParams(checkType, inputParams, g_ecdhParamSet, HKS_ARRAY_SIZE(g_ecdhParamSet));
-#endif
         default:
-            return HKS_ERROR_INVALID_ALGORITHM;
+            return InitInputParamsByAlgOne(alg, checkType, inputParams);
     }
 }
 
@@ -1023,6 +1293,34 @@ static int32_t InitExpectParams(enum CheckKeyType checkType, struct ExpectParams
     return HKS_ERROR_NOT_SUPPORTED;
 }
 
+static int32_t GetExpectParamsByAlg(uint32_t alg, enum CheckKeyType checkType, struct ExpectParamsValues *expectValues)
+{
+    switch (alg) {
+#ifdef HKS_SUPPORT_HMAC_C
+        case HKS_ALG_HMAC:
+            return InitExpectParams(checkType, expectValues, g_expectHmacParams, HKS_ARRAY_SIZE(g_expectHmacParams));
+#endif
+#ifdef HKS_SUPPORT_CMAC_C
+        case HKS_ALG_CMAC:
+            return InitExpectParams(checkType, expectValues, g_expectCmacParams, HKS_ARRAY_SIZE(g_expectCmacParams));
+#endif
+#ifdef HKS_SUPPORT_DSA_C
+        case HKS_ALG_DSA:
+            return InitExpectParams(checkType, expectValues, g_expectDsaParams, HKS_ARRAY_SIZE(g_expectDsaParams));
+#endif
+#ifdef HKS_SUPPORT_DH_C
+        case HKS_ALG_DH:
+            return InitExpectParams(checkType, expectValues, g_expectDhParams, HKS_ARRAY_SIZE(g_expectDhParams));
+#endif
+#ifdef HKS_SUPPORT_ECDH_C
+        case HKS_ALG_ECDH:
+            return InitExpectParams(checkType, expectValues, g_expectEcdhParams, HKS_ARRAY_SIZE(g_expectEcdhParams));
+#endif
+        default:
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+}
+
 static int32_t GetExpectParams(uint32_t alg, enum CheckKeyType checkType, struct ExpectParamsValues *expectValues)
 {
     switch (alg) {
@@ -1030,8 +1328,18 @@ static int32_t GetExpectParams(uint32_t alg, enum CheckKeyType checkType, struct
         case HKS_ALG_RSA:
             return InitExpectParams(checkType, expectValues, g_expectRsaParams, HKS_ARRAY_SIZE(g_expectRsaParams));
 #endif
+#ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             return InitExpectParams(checkType, expectValues, g_expectAesParams, HKS_ARRAY_SIZE(g_expectAesParams));
+#endif
+#ifdef HKS_SUPPORT_DES_C
+        case HKS_ALG_DES:
+            return InitExpectParams(checkType, expectValues, g_expectDesParams, HKS_ARRAY_SIZE(g_expectDesParams));
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+        case HKS_ALG_3DES:
+            return InitExpectParams(checkType, expectValues, g_expect3DesParams, HKS_ARRAY_SIZE(g_expect3DesParams));
+#endif
 #ifdef HKS_SUPPORT_ECC_C
         case HKS_ALG_ECC:
             return InitExpectParams(checkType, expectValues, g_expectEccParams, HKS_ARRAY_SIZE(g_expectEccParams));
@@ -1054,24 +1362,8 @@ static int32_t GetExpectParams(uint32_t alg, enum CheckKeyType checkType, struct
             return InitExpectParams(checkType, expectValues, g_expectCurve25519Params,
                 HKS_ARRAY_SIZE(g_expectCurve25519Params));
 #endif
-#ifdef HKS_SUPPORT_HMAC_C
-        case HKS_ALG_HMAC:
-            return InitExpectParams(checkType, expectValues, g_expectHmacParams, HKS_ARRAY_SIZE(g_expectHmacParams));
-#endif
-#ifdef HKS_SUPPORT_DSA_C
-        case HKS_ALG_DSA:
-            return InitExpectParams(checkType, expectValues, g_expectDsaParams, HKS_ARRAY_SIZE(g_expectDsaParams));
-#endif
-#ifdef HKS_SUPPORT_DH_C
-        case HKS_ALG_DH:
-            return InitExpectParams(checkType, expectValues, g_expectDhParams, HKS_ARRAY_SIZE(g_expectDhParams));
-#endif
-#ifdef HKS_SUPPORT_ECDH_C
-        case HKS_ALG_ECDH:
-            return InitExpectParams(checkType, expectValues, g_expectEcdhParams, HKS_ARRAY_SIZE(g_expectEcdhParams));
-#endif
         default:
-            return HKS_ERROR_INVALID_ALGORITHM;
+            return GetExpectParamsByAlg(alg, checkType, expectValues);
     }
 }
 
@@ -1266,7 +1558,8 @@ static int32_t CheckRsaCipherData(uint32_t cmdId, const struct ParamsValues *inp
 static int32_t CheckAesAeCipherData(uint32_t cmdId, const struct HksBlob *inData, const struct HksBlob *outData);
 #endif
 
-#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+#if defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C) || \
+    defined(HKS_SUPPORT_SM4_C)
 static int32_t CheckBlockCbcCipherData(uint32_t mode, uint32_t cmdId, uint32_t padding,
     const struct HksBlob *inData, const struct HksBlob *outData)
 {
@@ -1335,6 +1628,24 @@ static int32_t CheckBlockCipherData(uint32_t cmdId, const struct ParamsValues *i
     }
 #endif
 
+#if defined(HKS_SUPPORT_DES_C)
+    if (alg == HKS_ALG_DES) {
+        if (mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) {
+            uint32_t padding = inputParams->padding.value;
+            return CheckBlockCbcCipherData(mode, cmdId, padding, inData, outData);
+        }
+    }
+#endif
+
+#if defined(HKS_SUPPORT_3DES_C)
+    if (alg == HKS_ALG_3DES) {
+        if (mode == HKS_MODE_CBC || mode == HKS_MODE_ECB) {
+            uint32_t padding = inputParams->padding.value;
+            return CheckBlockCbcCipherData(mode, cmdId, padding, inData, outData);
+        }
+    }
+#endif
+
 #if defined(HKS_SUPPORT_SM4_C)
     if (alg == HKS_ALG_SM4) {
         for (uint32_t i = 0; i < HKS_ARRAY_SIZE(g_sm4Mode); i++) {
@@ -1362,7 +1673,8 @@ static int32_t CheckBlockCipherIvMaterial(const struct HksParamSet *paramSet)
 
     return ret;
 }
-#endif // defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_SM4_C)
+#endif // defined(HKS_SUPPORT_AES_C) || defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C)
+       // || defined(HKS_SUPPORT_SM4_C)
 
 #ifdef HKS_SUPPORT_AES_C
 static int32_t CheckAesPadding(const struct ParamsValues *inputParams)
@@ -1482,6 +1794,46 @@ static int32_t CheckCipherAeMaterial(uint32_t mode, const struct HksParamSet *pa
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check ae cipher nonce failed!")
 
     return ret;
+}
+#endif
+
+#ifdef HKS_SUPPORT_DES_C
+static int32_t CheckDesPadding(const struct ParamsValues *inputParams)
+{
+    if ((inputParams->mode.isAbsent) || (inputParams->padding.isAbsent)) {
+        return HKS_SUCCESS;
+    }
+    uint32_t mode = inputParams->mode.value;
+    uint32_t padding = inputParams->padding.value;
+    if (mode == HKS_MODE_CBC) {
+        return HksCheckValue(padding, g_desCbcPadding, HKS_ARRAY_SIZE(g_desCbcPadding));
+    }
+
+    if (mode == HKS_MODE_ECB) {
+        return HksCheckValue(padding, g_desEcbPadding, HKS_ARRAY_SIZE(g_desEcbPadding));
+    }
+
+    return HKS_SUCCESS;
+}
+#endif
+
+#ifdef HKS_SUPPORT_3DES_C
+static int32_t Check3DesPadding(const struct ParamsValues *inputParams)
+{
+    if ((inputParams->mode.isAbsent) || (inputParams->padding.isAbsent)) {
+        return HKS_SUCCESS;
+    }
+    uint32_t mode = inputParams->mode.value;
+    uint32_t padding = inputParams->padding.value;
+    if (mode == HKS_MODE_CBC) {
+        return HksCheckValue(padding, g_3desCbcPadding, HKS_ARRAY_SIZE(g_3desCbcPadding));
+    }
+
+    if (mode == HKS_MODE_ECB) {
+        return HksCheckValue(padding, g_3desEcbPadding, HKS_ARRAY_SIZE(g_3desEcbPadding));
+    }
+
+    return HKS_SUCCESS;
 }
 #endif
 
@@ -1648,7 +2000,8 @@ int32_t HksCheckOptionalParam(uint32_t tag, uint32_t alg, uint32_t purpose, bool
 {
     enum CheckKeyType checkType = HKS_CHECK_TYPE_GEN_KEY;
     if (((purpose & HKS_KEY_PURPOSE_DERIVE) != 0) || ((purpose & HKS_KEY_PURPOSE_MAC) != 0)) {
-        if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3) {
+        if ((alg != HKS_ALG_AES) && (alg != HKS_ALG_DES) && (alg != HKS_ALG_3DES) &&
+            (alg != HKS_ALG_HMAC) && (alg != HKS_ALG_CMAC) && (alg != HKS_ALG_SM3)) {
             HKS_LOG_E("check mac or derive, not aes alg, alg: %u", alg);
             return HKS_ERROR_INVALID_PURPOSE;
         }
@@ -1731,6 +2084,20 @@ int32_t HksCheckGenKeyMutableParams(uint32_t alg, const struct ParamsValues *inp
 #ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             ret = CheckAesPadding(inputParams);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
+            break;
+#endif
+#ifdef HKS_SUPPORT_DES_C
+        case HKS_ALG_DES:
+            ret = CheckDesPadding(inputParams);
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
+                "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
+            break;
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+        case HKS_ALG_3DES:
+            ret = Check3DesPadding(inputParams);
             HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
                 "Check padding not expected, padding = %" LOG_PUBLIC "u", inputParams->padding.value);
             break;
@@ -1872,6 +2239,29 @@ int32_t HksCheckSignVerifyMutableParams(uint32_t cmdId, uint32_t alg, const stru
 }
 #endif /* _CUT_AUTHENTICATE_ */
 
+#if defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C)
+static int32_t HksCheckCipherMutableParamsByAlg(uint32_t alg, const struct ParamsValues *inputParams)
+{
+    int32_t ret = HKS_ERROR_INVALID_PADDING;
+    switch (alg) {
+#ifdef HKS_SUPPORT_DES_C
+        case HKS_ALG_DES:
+            ret = CheckDesPadding(inputParams);
+            break;
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+        case HKS_ALG_3DES:
+            ret = Check3DesPadding(inputParams);
+            break;
+#endif
+        default:
+            return HKS_ERROR_INVALID_ALGORITHM;
+    }
+
+    return ret;
+}
+#endif
+
 int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct ParamsValues *inputParams)
 {
     switch (cmdId) {
@@ -1912,7 +2302,13 @@ int32_t HksCheckCipherMutableParams(uint32_t cmdId, uint32_t alg, const struct P
             break;
 #endif
         default:
-            return HKS_ERROR_INVALID_ALGORITHM;
+#if defined(HKS_SUPPORT_DES_C) || defined(HKS_SUPPORT_3DES_C)
+            ret = HksCheckCipherMutableParamsByAlg(alg, inputParams);
+            if (ret == HKS_ERROR_INVALID_ALGORITHM) {
+                return HKS_ERROR_INVALID_ALGORITHM;
+            }
+#endif
+            break;
     }
     HKS_IF_NOT_SUCC_RETURN(ret, HKS_ERROR_INVALID_PADDING)
     return ret;
@@ -1929,6 +2325,14 @@ int32_t HksCheckCipherData(uint32_t cmdId, uint32_t alg, const struct ParamsValu
 #ifdef HKS_SUPPORT_AES_C
         case HKS_ALG_AES:
             return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_AES);
+#endif
+#ifdef HKS_SUPPORT_DES_C
+        case HKS_ALG_DES:
+            return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_DES);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+        case HKS_ALG_3DES:
+            return CheckBlockCipherData(cmdId, inputParams, inData, outData, HKS_ALG_3DES);
 #endif
 #ifdef HKS_SUPPORT_SM4_C
         case HKS_ALG_SM4:
@@ -1953,6 +2357,22 @@ int32_t HksCheckCipherMaterialParams(uint32_t alg, const struct ParamsValues *in
             return CheckBlockCipherIvMaterial(paramSet);
         } else if ((mode == HKS_MODE_CCM) || (mode == HKS_MODE_GCM)) {
             return CheckCipherAeMaterial(mode, paramSet);
+        }
+    }
+#endif
+#ifdef HKS_SUPPORT_DES_C
+    if (alg == HKS_ALG_DES) {
+        uint32_t mode = inputParams->mode.value;
+        if (mode == HKS_MODE_CBC) {
+            return CheckBlockCipherIvMaterial(paramSet);
+        }
+    }
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    if (alg == HKS_ALG_3DES) {
+        uint32_t mode = inputParams->mode.value;
+        if (mode == HKS_MODE_CBC) {
+            return CheckBlockCipherIvMaterial(paramSet);
         }
     }
 #endif

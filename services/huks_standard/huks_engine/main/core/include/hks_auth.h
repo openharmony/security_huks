@@ -32,6 +32,7 @@ enum HksAuthId {
     HKS_AUTH_ID_DERIVE = 0x7,
     HKS_AUTH_ID_SIGN_VERIFY_ED25519 = 0x8,
     HKS_AUTH_ID_AGREE = 0x9,
+    HKS_AUTH_ID_MAC_CMAC = 0x10,
 };
 
 #ifdef __cplusplus

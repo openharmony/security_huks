@@ -56,11 +56,20 @@ static uint32_t g_genKeyAlg[] = {
 #ifdef HKS_SUPPORT_AES_C
     HKS_ALG_AES,
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    HKS_ALG_DES,
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    HKS_ALG_3DES,
+#endif
 #ifdef HKS_SUPPORT_ECC_C
     HKS_ALG_ECC,
 #endif
 #ifdef HKS_SUPPORT_HMAC_C
     HKS_ALG_HMAC,
+#endif
+#ifdef HKS_SUPPORT_CMAC_C
+    HKS_ALG_CMAC,
 #endif
 #ifdef HKS_SUPPORT_ED25519_C
     HKS_ALG_ED25519,
@@ -95,6 +104,12 @@ static uint32_t g_importKeyAlg[] = {
 #ifdef HKS_SUPPORT_AES_C
     HKS_ALG_AES,
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    HKS_ALG_DES,
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    HKS_ALG_3DES,
+#endif
 #ifdef HKS_SUPPORT_ECC_C
     HKS_ALG_ECC,
 #endif
@@ -113,6 +128,9 @@ static uint32_t g_importKeyAlg[] = {
 #ifdef HKS_SUPPORT_HMAC_C
     HKS_ALG_HMAC,
 #endif
+#ifdef HKS_SUPPORT_CMAC_C
+    HKS_ALG_CMAC,
+#endif
 #ifdef HKS_SUPPORT_SM2_C
     HKS_ALG_SM2,
 #endif
@@ -130,6 +148,12 @@ static uint32_t g_cipherAlg[] = {
 #endif
 #ifdef HKS_SUPPORT_AES_C
     HKS_ALG_AES,
+#endif
+#ifdef HKS_SUPPORT_DES_C
+    HKS_ALG_DES,
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    HKS_ALG_3DES,
 #endif
 #ifdef HKS_SUPPORT_SM2_C
     HKS_ALG_SM2,
@@ -237,6 +261,17 @@ static uint32_t g_aesKeySizeLocal[] = {
     HKS_AES_KEY_SIZE_256,
 };
 #endif
+#ifdef HKS_SUPPORT_DES_C
+static uint32_t g_desKeySizeLocal[] = {
+    HKS_DES_KEY_SIZE_64
+};
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+static uint32_t g_3desKeySizeLocal[] = {
+    HKS_3DES_KEY_SIZE_128,
+    HKS_3DES_KEY_SIZE_192
+};
+#endif
 #ifdef HKS_SUPPORT_RSA_C
 static uint32_t g_rsaKeySizeLocal[] = {
     HKS_RSA_KEY_SIZE_512,
@@ -252,6 +287,12 @@ static uint32_t g_cipherAlgLocal[] = {
 #ifdef HKS_SUPPORT_AES_C
     HKS_ALG_AES,
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    HKS_ALG_DES,
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    HKS_ALG_3DES,
+#endif
 #ifdef HKS_SUPPORT_RSA_C
     HKS_ALG_RSA,
 #endif
@@ -261,8 +302,17 @@ static uint32_t g_symmetricAlgorithm[] = {
 #ifdef HKS_SUPPORT_AES_C
     HKS_ALG_AES,
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    HKS_ALG_DES,
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    HKS_ALG_3DES,
+#endif
 #ifdef HKS_SUPPORT_HMAC_C
     HKS_ALG_HMAC,
+#endif
+#ifdef HKS_SUPPORT_CMAC_C
+    HKS_ALG_CMAC,
 #endif
 #ifdef HKS_SUPPORT_SM3_C
     HKS_ALG_SM3,
@@ -325,7 +375,8 @@ static int32_t CheckGenKeyMacDeriveParams(
     uint32_t alg, uint32_t inputPurpose, const struct HksParamSet *paramSet, struct ParamsValues *params,
     uint32_t keyFlag)
 {
-    if (alg != HKS_ALG_AES && alg != HKS_ALG_HMAC && alg != HKS_ALG_SM3 && alg != HKS_ALG_SM4) {
+    if (alg != HKS_ALG_AES && alg != HKS_ALG_DES && alg != HKS_ALG_3DES && alg != HKS_ALG_HMAC &&
+        alg != HKS_ALG_CMAC && alg != HKS_ALG_SM3 && alg != HKS_ALG_SM4) {
         HKS_LOG_E("check mac or derive, not valid alg, alg: %" LOG_PUBLIC "u", alg);
         return HKS_ERROR_INVALID_PURPOSE;
     }
@@ -768,7 +819,8 @@ int32_t HksCoreCheckImportKeyParams(const struct HksBlob *keyAlias, const struct
     ret = CheckAndGetAlgorithm(paramSet, g_importKeyAlg, HKS_ARRAY_SIZE(g_importKeyAlg), &alg);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "import key check and get alg failed")
 
-    if ((alg == HKS_ALG_AES) || (alg == HKS_ALG_SM3) || (alg == HKS_ALG_SM4) || (alg == HKS_ALG_HMAC)) {
+    if ((alg == HKS_ALG_AES) || (alg == HKS_ALG_DES) || (alg == HKS_ALG_3DES) || (alg == HKS_ALG_SM3) ||
+        (alg == HKS_ALG_SM4) || (alg == HKS_ALG_HMAC) || (alg == HKS_ALG_CMAC)) {
         return CheckImportSymmetricKeySize(&params, key);
     }
 
@@ -982,6 +1034,18 @@ int32_t HksLocalCheckCipherParams(uint32_t cmdId, uint32_t keySize, const struct
     if (alg == HKS_ALG_AES) {
 #ifdef HKS_SUPPORT_AES_C
         ret = HksCheckValue(keySize, g_aesKeySizeLocal, HKS_ARRAY_SIZE(g_aesKeySizeLocal));
+#else
+        ret = HKS_ERROR_NOT_SUPPORTED;
+#endif
+    } else if (alg == HKS_ALG_DES) {
+#ifdef HKS_SUPPORT_DES_C
+        ret = HksCheckValue(keySize, g_desKeySizeLocal, HKS_ARRAY_SIZE(g_desKeySizeLocal));
+#else
+        ret = HKS_ERROR_NOT_SUPPORTED;
+#endif
+    } else if (alg == HKS_ALG_3DES) {
+#ifdef HKS_SUPPORT_3DES_C
+        ret = HksCheckValue(keySize, g_3desKeySizeLocal, HKS_ARRAY_SIZE(g_3desKeySizeLocal));
 #else
         ret = HKS_ERROR_NOT_SUPPORTED;
 #endif
