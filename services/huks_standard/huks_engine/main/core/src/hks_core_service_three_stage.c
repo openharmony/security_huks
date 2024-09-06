@@ -208,6 +208,8 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
         case HKS_ALG_SM2:
             return CheckSm2CipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_AES:
+        case HKS_ALG_DES:
+        case HKS_ALG_3DES:
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
@@ -262,6 +264,8 @@ static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParam
 
     if (algParam->uint32Param == HKS_ALG_HMAC) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_HMAC, keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_3DES) {  // CMACinit校验密钥算法，只支持3DES
+        return HksThreeStageAuth(HKS_AUTH_ID_MAC_CMAC, keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM3) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_SM3, keyNode);
     }
@@ -274,7 +278,8 @@ static int32_t CipherAuth(const struct HuksKeyNode *keyNode, const struct HksPar
     int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append cipher get alg param failed!")
 
-    if (algParam->uint32Param == HKS_ALG_AES) {
+    if ((algParam->uint32Param == HKS_ALG_AES) || (algParam->uint32Param == HKS_ALG_DES) ||
+        (algParam->uint32Param == HKS_ALG_3DES)) {
         return HksThreeStageAuth(HKS_AUTH_ID_SYM_CIPHER, keyNode);
     } else if ((algParam->uint32Param == HKS_ALG_RSA) || (algParam->uint32Param == HKS_ALG_SM2)) {
         return HksThreeStageAuth(HKS_AUTH_ID_ASYM_CIPHER, keyNode);
@@ -992,6 +997,168 @@ static int32_t CoreAesCipherFinish(const struct HuksKeyNode *keyNode, const bool
     return CoreAesDecryptFinish(keyNode, inData, outData, alg);
 }
 
+static int32_t CoreDesCipherInit(const struct HuksKeyNode *keyNode)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher init get block mode failed")
+
+    return CoreCipherInit(keyNode);
+}
+
+static int32_t CoreDesCipherUpdate(const struct HuksKeyNode *keyNode, const struct HksBlob *inData,
+    struct HksBlob *outData, uint32_t alg)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher update get block mode failed")
+
+    return CoreCipherUpdate(keyNode, inData, outData, alg);
+}
+
+static int32_t CoreDesEncryptFinish(
+    const struct HuksKeyNode *keyNode, const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    struct HksBlob tag = {0, NULL};
+
+    int32_t ret = HksCheckFinishOutSize(true, keyNode->runtimeParamSet, inData, outData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "des encrypt finish check data size failed")
+
+    struct HksParam *ctxParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
+
+    void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
+
+    ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, &tag, alg);
+    ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("des encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+
+    outData->size += tag.size;
+    return HKS_SUCCESS;
+}
+
+static int32_t CoreDesDecryptFinish(
+    const struct HuksKeyNode *keyNode, const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    struct HksBlob tag = {0, NULL};
+
+    int32_t ret = HksCheckFinishOutSize(false, keyNode->runtimeParamSet, inData, outData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "des decrypt finish check data size failed")
+
+    struct HksParam *ctxParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
+
+    void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
+
+    ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, &tag, alg);
+    HKS_IF_NOT_SUCC_LOGE(ret, "cipher DecryptFinish failed! ret : %" LOG_PUBLIC "d", ret)
+
+    ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    return ret;
+}
+
+static int32_t CoreDesCipherFinish(const struct HuksKeyNode *keyNode, const bool isEncrypt,
+    const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher finish get block mode failed")
+
+    if (isEncrypt) {
+        return CoreDesEncryptFinish(keyNode, inData, outData, alg);
+    }
+
+    return CoreDesDecryptFinish(keyNode, inData, outData, alg);
+}
+
+static int32_t Core3DesCipherInit(const struct HuksKeyNode *keyNode)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher init get block mode failed")
+
+    return CoreCipherInit(keyNode);
+}
+
+static int32_t Core3DesCipherUpdate(const struct HuksKeyNode *keyNode, const struct HksBlob *inData,
+    struct HksBlob *outData, uint32_t alg)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher update get block mode failed")
+
+    return CoreCipherUpdate(keyNode, inData, outData, alg);
+}
+
+static int32_t Core3DesEncryptFinish(
+    const struct HuksKeyNode *keyNode, const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    struct HksBlob tag = {0, NULL};
+
+    int32_t ret = HksCheckFinishOutSize(true, keyNode->runtimeParamSet, inData, outData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "3des encrypt finish check data size failed")
+
+    struct HksParam *ctxParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
+
+    void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
+
+    ret = HksCryptoHalEncryptFinal(inData, &ctx, outData, &tag, alg);
+    ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("3des encrypt Finish failed! ret : %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+
+    outData->size += tag.size;
+    return HKS_SUCCESS;
+}
+
+static int32_t Core3DesDecryptFinish(
+    const struct HuksKeyNode *keyNode, const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    struct HksBlob tag = {0, NULL};
+
+    int32_t ret = HksCheckFinishOutSize(false, keyNode->runtimeParamSet, inData, outData);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "3des decrypt finish check data size failed")
+
+    struct HksParam *ctxParam = NULL;
+    ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_CRYPTO_CTX, &ctxParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get ctx from keyNode failed!")
+
+    void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
+    HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is invalid: null!")
+
+    ret = HksCryptoHalDecryptFinal(inData, &ctx, outData, &tag, alg);
+    HKS_IF_NOT_SUCC_LOGE(ret, "cipher DecryptFinish failed! ret : %" LOG_PUBLIC "d", ret)
+
+    ctxParam->uint64Param = 0; /* clear ctx to NULL */
+    return ret;
+}
+
+static int32_t Core3DesCipherFinish(const struct HuksKeyNode *keyNode, const bool isEncrypt,
+    const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
+{
+    struct HksParam *modeParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "cipher finish get block mode failed")
+
+    if (isEncrypt) {
+        return Core3DesEncryptFinish(keyNode, inData, outData, alg);
+    }
+
+    return Core3DesDecryptFinish(keyNode, inData, outData, alg);
+}
+
 static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
 {
@@ -1142,7 +1309,7 @@ static void FreeCryptoCtx(const struct HuksKeyNode *keyNode, uint32_t alg)
         return;
     }
 
-    if (alg == HKS_ALG_AES) {
+    if ((alg == HKS_ALG_AES) || (alg == HKS_ALG_DES) || (alg == HKS_ALG_3DES)) {
         struct HksParam *modeParam = NULL;
         ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_BLOCK_MODE, &modeParam);
         if (ret != HKS_SUCCESS) {
@@ -1300,12 +1467,13 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
 
-    struct HksBlob signVerifyData = { 0, NULL };
+    struct HksBlob signVerifyData = {0, NULL};
     if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
         ret = FinishCachedData(keyNode, &message, &signVerifyData);
     } else {
         ret = CoreHashFinish(keyNode, &message, &signVerifyData);
     }
+
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "signVerify Finish get Data failed, ret = %" LOG_PUBLIC "d", ret)
 
     /* inData indicates signature when processing verify */
@@ -1344,6 +1512,10 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
         return SetCacheModeCtx(keyNode);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherInit(keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_DES) {
+        return CoreDesCipherInit(keyNode);
+    } else if (algParam->uint32Param == HKS_ALG_3DES) {
+        return Core3DesCipherInit(keyNode);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreCipherInit(keyNode);
     } else {
@@ -1364,6 +1536,10 @@ int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         return UpdateCachedData(keyNode, inData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherUpdate(keyNode, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_DES) {
+        return CoreDesCipherUpdate(keyNode, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_3DES) {
+        return Core3DesCipherUpdate(keyNode, inData, outData, alg);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreCipherUpdate(keyNode, inData, outData, alg);
     } else {
@@ -1388,6 +1564,10 @@ int32_t HksCoreEncryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return CoreSm2CipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherFinish(keyNode, true, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_DES) {
+        return CoreDesCipherFinish(keyNode, true, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_3DES) {
+        return Core3DesCipherFinish(keyNode, true, inData, outData, alg);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreSm4EncryptFinish(keyNode, inData, outData, alg);
     } else {
@@ -1412,6 +1592,10 @@ int32_t HksCoreDecryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return CoreSm2CipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherFinish(keyNode, false, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_DES) {
+        return CoreDesCipherFinish(keyNode, false, inData, outData, alg);
+    } else if (algParam->uint32Param == HKS_ALG_3DES) {
+        return Core3DesCipherFinish(keyNode, false, inData, outData, alg);
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreSm4DecryptFinish(keyNode, inData, outData, alg);
     } else {
@@ -1695,7 +1879,16 @@ int32_t HksCoreMacThreeStageInit(const struct HuksKeyNode *keyNode, const struct
         HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "Derive get raw key failed!")
 
         void *ctx = NULL;
-        ret = HksCryptoHalHmacInit(&rawKey, alg, &ctx);
+        struct HksParam *algParam = NULL;
+        ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!");
+        if (algParam->uint32Param == HKS_ALG_3DES) {  // CMACinit阶段校验密钥，只支持3DES
+#ifdef HKS_SUPPORT_CMAC_C
+            ret = HksCryptoHalCmacInit(&rawKey, alg, &ctx);
+#endif
+        } else {
+            ret = HksCryptoHalHmacInit(&rawKey, alg, &ctx);
+        }
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hmac init failed! ret : %" LOG_PUBLIC "d", ret)
 
         ctxParam->uint64Param = (uint64_t)(uintptr_t)ctx;
@@ -1720,7 +1913,17 @@ int32_t HksCoreMacThreeStageUpdate(const struct HuksKeyNode *keyNode, const stru
     void *ctx = GetCryptoCtx(keyNode);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx is NULL!")
 
-    ret = HksCryptoHalHmacUpdate(srcData, ctx);
+    struct HksParam *algParam = NULL;
+    ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!");
+    if (algParam->uint32Param == HKS_ALG_CMAC) {
+#ifdef HKS_SUPPORT_CMAC_C
+        ret = HksCryptoHalCmacUpdate(srcData, ctx);
+#endif
+    } else {
+        ret = HksCryptoHalHmacUpdate(srcData, ctx);
+    }
+
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "hmac update failed! ret : %" LOG_PUBLIC "d", ret)
 
     return HKS_SUCCESS;
@@ -1732,17 +1935,23 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
     (void)paramSet;
     (void)alg;
 
-    struct HksParam *digestParam = NULL;
-    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_DIGEST, &digestParam);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "get ctx from keyNode failed!")
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!")
 
-    uint32_t macLen;
-    ret = HksGetDigestLen(digestParam->uint32Param, &macLen);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get digest len failed")
+    if (algParam->uint32Param != HKS_ALG_CMAC) {
+        struct HksParam *digestParam = NULL;
+        ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_DIGEST, &digestParam);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_DIGEST_FAIL, "get ctx from keyNode failed!")
 
-    if ((CheckBlob(outData) != HKS_SUCCESS) || (outData->size < macLen)) {
-        HKS_LOG_E("out buffer too small");
-        return HKS_ERROR_BUFFER_TOO_SMALL;
+        uint32_t macLen;
+        ret = HksGetDigestLen(digestParam->uint32Param, &macLen);
+        HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "get digest len failed")
+
+        if ((CheckBlob(outData) != HKS_SUCCESS) || (outData->size < macLen)) {
+            HKS_LOG_E("out buffer too small");
+            return HKS_ERROR_BUFFER_TOO_SMALL;
+        }
     }
 
     struct HksParam *ctxParam = NULL;
@@ -1752,7 +1961,14 @@ int32_t HksCoreMacThreeStageFinish(const struct HuksKeyNode *keyNode, const stru
     void *ctx = (void *)(uintptr_t)ctxParam->uint64Param;
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx invalid")
 
-    ret = HksCryptoHalHmacFinal(inData, &ctx, outData);
+    if (algParam->uint32Param == HKS_ALG_CMAC) {
+#ifdef HKS_SUPPORT_CMAC_C
+        ret = HksCryptoHalCmacFinal(inData, &ctx, outData);
+#endif
+    } else {
+        ret = HksCryptoHalHmacFinal(inData, &ctx, outData);
+    }
+
     HKS_IF_NOT_SUCC_LOGE(ret, "hmac final failed! ret : %" LOG_PUBLIC "d", ret)
 
     ctxParam->uint64Param = 0; /* clear ctx to NULL */
@@ -1766,8 +1982,17 @@ int32_t HksCoreMacThreeStageAbort(const struct HuksKeyNode *keyNode, const struc
 
     void *ctx = GetCryptoCtx(keyNode);
     HKS_IF_NULL_LOGE_RETURN(ctx, HKS_ERROR_NULL_POINTER, "ctx invalid")
-
-    HksCryptoHalHmacFreeCtx(&ctx);
+    
+    struct HksParam *algParam = NULL;
+    int32_t ret = HksGetParam(paramSet, HKS_TAG_ALGORITHM, &algParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "append hmac get alg param failed!")
+    if (algParam->uint32Param == HKS_ALG_CMAC) {
+#ifdef HKS_SUPPORT_CMAC_C
+        HksCryptoHalCmacFreeCtx(&ctx);
+#endif
+    } else {
+        HksCryptoHalHmacFreeCtx(&ctx);
+    }
     ClearCryptoCtx(keyNode);
 
     return HKS_SUCCESS;
