@@ -143,6 +143,12 @@ typedef int32_t (*HmacUpdate)(void *, const struct HksBlob *);
 
 typedef int32_t (*HmacFinal)(void **, const struct HksBlob *, struct HksBlob *);
 
+typedef int32_t (*CmacInit)(void **, const struct HksBlob *, uint32_t);
+
+typedef int32_t (*CmacUpdate)(void *, const struct HksBlob *);
+
+typedef int32_t (*CmacFinal)(void **, const struct HksBlob *, struct HksBlob *);
+
 typedef int32_t (*Hash)(uint32_t, const struct HksBlob *, struct HksBlob *);
 
 typedef int32_t (*HashInit)(void **, uint32_t);
@@ -168,6 +174,8 @@ typedef int32_t (*DecryptInit)(void **, const struct HksBlob *, const struct Hks
 typedef int32_t (*DecryptUpdate)(void *, const struct HksBlob *, struct HksBlob *, const bool);
 
 typedef int32_t (*DecryptFinal)(void **, const struct HksBlob *, struct HksBlob *, struct HksBlob *, const bool);
+
+typedef int32_t (*DecryptFinalDes)(void **, const struct HksBlob *, struct HksBlob *, const bool);
 
 typedef int32_t (*BnExpMod)(struct HksBlob *, const struct HksBlob *,
     const struct HksBlob *, const struct HksBlob *);
@@ -208,6 +216,14 @@ void HksCryptoHalHmacFreeCtx(void **ctx);
 
 int32_t HksCryptoHalHmac(const struct HksBlob *key, uint32_t digestAlg, const struct HksBlob *msg,
     struct HksBlob *mac);
+
+int32_t HksCryptoHalCmacInit(const struct HksBlob *key, uint32_t digestAlg, void **ctx);
+
+int32_t HksCryptoHalCmacUpdate(const struct HksBlob *chunk, void *ctx);
+
+int32_t HksCryptoHalCmacFinal(const struct HksBlob *msg, void **ctx, struct HksBlob *mac);
+
+void HksCryptoHalCmacFreeCtx(void **ctx);
 
 int32_t HksCryptoHalHashInit(uint32_t alg, void **ctx);
 

@@ -27,6 +27,8 @@
 #include "hks_mbedtls_aes.h"
 #include "hks_mbedtls_bn.h"
 #include "hks_mbedtls_common.h"
+#include "hks_mbedtls_des.h"
+#include "hks_mbedtls_3des.h"
 #include "hks_mbedtls_dh.h"
 #include "hks_mbedtls_dsa.h"
 #include "hks_mbedtls_ecc.h"
@@ -51,6 +53,12 @@ static void RegisterAbilityGenerateKey(void)
 {
 #if defined(HKS_SUPPORT_AES_C) && defined(HKS_SUPPORT_AES_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_AES), (void *)HksMbedtlsAesGenerateKey);
+#endif
+#if defined(HKS_SUPPORT_DES_C) && defined(HKS_SUPPORT_DES_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_DES), (void *)HksMbedtlsDesGenerateKey);
+#endif
+#if defined(HKS_SUPPORT_3DES_C) && defined(HKS_SUPPORT_3DES_GENERATE_KEY)
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_3DES), (void *)HksMbedtls3DesGenerateKey);
 #endif
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_GENERATE_KEY)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_GENERATE_KEY(HKS_ALG_RSA), (void *)HksMbedtlsRsaGenerateKey);
@@ -136,6 +144,26 @@ static void RegisterAbilityEncrypt(void)
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_AES),
         (void *)HksMbedtlsAesHalFreeCtx);
 #endif
+#ifdef HKS_SUPPORT_DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(HKS_ALG_DES),
+        (void *)HksMbedtlsDesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(HKS_ALG_DES),
+        (void *)HksMbedtlsDesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(HKS_ALG_DES),
+        (void *)HksMbedtlsDesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_DES),
+        (void *)HksMbedtlsDesHalFreeCtx);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_INIT(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_UPDATE(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FINAL(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_ENCRYPT_FREE_CTX(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesHalFreeCtx);
+#endif
 }
 
 static void RegisterAbilityDecrypt(void)
@@ -153,6 +181,26 @@ static void RegisterAbilityDecrypt(void)
         (void *)HksMbedtlsAesCryptoFinal);
     (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_AES),
         (void *)HksMbedtlsAesHalFreeCtx);
+#endif
+#ifdef HKS_SUPPORT_DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(HKS_ALG_DES),
+        (void *)HksMbedtlsDesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(HKS_ALG_DES),
+        (void *)HksMbedtlsDesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(HKS_ALG_DES),
+        (void *)HksMbedtlsDesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_DES),
+        (void *)HksMbedtlsDesHalFreeCtx);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_INIT(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesCryptoInit);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_UPDATE(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesCryptoUpdate);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FINAL(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesCryptoFinal);
+    (void)RegisterAbility(HKS_CRYPTO_ABILITY_DECRYPT_FREE_CTX(HKS_ALG_3DES),
+        (void *)HksMbedtls3DesHalFreeCtx);
 #endif
 }
 
