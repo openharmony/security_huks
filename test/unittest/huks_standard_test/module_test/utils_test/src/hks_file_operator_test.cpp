@@ -101,7 +101,7 @@ HWTEST_F(HksFileOperatorTest, HksFileOperatorTest006, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFileOperatorTest006");
     int32_t ret = HksRemoveDir(nullptr);
-    ASSERT_EQ(ret, HKS_FAILURE) << "HksRemoveDir failed, ret = " << ret;
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksRemoveDir failed, ret = " << ret;
 }
 
 /**
@@ -113,7 +113,7 @@ HWTEST_F(HksFileOperatorTest, HksFileOperatorTest008, TestSize.Level0)
 {
     HKS_LOG_I("enter HksFileOperatorTest008");
     int32_t ret = HksMakeDir(nullptr);
-    ASSERT_EQ(ret, HKS_ERROR_MAKE_DIR_FAIL) << "HksMakeDir failed, ret = " << ret;
+    ASSERT_EQ(ret, HKS_ERROR_INVALID_ARGUMENT) << "HksMakeDir failed, ret = " << ret;
 }
 
 /**
