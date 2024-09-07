@@ -19,6 +19,7 @@
 
 #include "hks_api.h"
 #include "hks_log.h"
+#include "hks_template.h"
 #include "hks_mem.h"
 #include "hks_param.h"
 #include "hks_type.h"
@@ -95,21 +96,38 @@ static napi_value AttestKeyParseParams(napi_env env, napi_callback_info info, At
     return GetInt32(env, 0);
 }
 
-static void InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
+static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChainCapacity)
 {
     certChain->certsCount = HKS_CERT_COUNT;
     certChain->certs = static_cast<struct HksBlob *>(HksMalloc(certChain->certsCount * sizeof(struct HksBlob)));
-    if (certChain->certs != nullptr) {
+    HKS_IF_NULL_LOGE_RETURN(certChain->certs, HKS_ERROR_MALLOC_FAIL, "malloc certChain->certs error!");
+    do {
         *certChainCapacity = certChain->certsCount;
         certChain->certs[INDEX_0].size = HKS_CERT_APP_SIZE;
         certChain->certs[INDEX_0].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_0].size));
+        HKS_IF_NULL_LOGE_BREAK(certChain->certs[INDEX_0].data, "malloc certChain->certs[INDEX_0].data error!");
+        
         certChain->certs[INDEX_1].size = HKS_CERT_DEVICE_SIZE;
         certChain->certs[INDEX_1].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_1].size));
+        HKS_IF_NULL_LOGE_BREAK(certChain->certs[INDEX_1].data, "malloc certChain->certs[INDEX_1].data error!");
+
         certChain->certs[INDEX_2].size = HKS_CERT_CA_SIZE;
         certChain->certs[INDEX_2].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_2].size));
+        HKS_IF_NULL_LOGE_BREAK(certChain->certs[INDEX_2].data, "malloc certChain->certs[INDEX_2].data error!");
+
         certChain->certs[INDEX_3].size = HKS_CERT_ROOT_SIZE;
         certChain->certs[INDEX_3].data = static_cast<uint8_t *>(HksMalloc(certChain->certs[INDEX_3].size));
-    }
+        HKS_IF_NULL_LOGE_BREAK(certChain->certs[INDEX_3].data, "malloc certChain->certs[INDEX_3].data error!");
+        
+        return HKS_SUCCESS;
+    } while (0);
+
+    HKS_FREE(certChain->certs[INDEX_2].data);
+    HKS_FREE(certChain->certs[INDEX_1].data);
+    HKS_FREE(certChain->certs[INDEX_0].data);
+    HKS_FREE(certChain->certs);
+
+    return HKS_ERROR_MALLOC_FAIL;
 }
 
 napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context)
@@ -131,7 +149,10 @@ napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context)
 
             napiContext->certChain = static_cast<struct HksCertChain *>(HksMalloc(sizeof(struct HksCertChain)));
             if (napiContext->certChain != nullptr) {
-                InitCertChain(napiContext->certChain, &napiContext->certChainCapacity);
+                napiContext->result = InitCertChain(napiContext->certChain, &napiContext->certChainCapacity);
+                if (napiContext->result != HKS_SUCCESS) {
+                    return;
+                }
             }
 
             if (napiContext->isAnon) {
