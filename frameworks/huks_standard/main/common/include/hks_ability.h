@@ -49,19 +49,21 @@ enum HksOperationType {
     HKS_OPERATION_ENCRYPT = 0x17,
     HKS_OPERATION_DECRYPT = 0x18,
     HKS_OPERATION_BN_EXP_MOD = 0x19,
-    HKS_OPERATION_HASH_FREE_CTX = 0x1a,      /* hash free ctx */
-    HKS_OPERATION_HMAC_FREE_CTX = 0x1b,      /* hmac free ctx */
-    HKS_OPERATION_ENCRYPT_FREE_CTX = 0x1c,   /* encrypt free ctx */
-    HKS_OPERATION_DECRYPT_FREE_CTX = 0x1d,   /* decrypt free ctx */
-    HKS_OPERATION_FILL_PRI_RANDOM = 0x1e,    /* fill private random */
-    HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_KEY_AND_ECDH = 0x1f,  /* hardcoded key implementation did not use the enum */
-                                                                /* see hks_chipset_platform_key_hardcoded.c */
-    HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_PUB_KEY = 0x20,       /* hardcoded key implementation did not use the enum */
-                                                                /* see hks_chipset_platform_key_hardcoded.c */
-    HKS_OPERATION_CMAC_INIT,                                    /* cmac init */
-    HKS_OPERATION_CMAC_UPDATE,                                  /* cmac update */
-    HKS_OPERATION_CMAC_FINAL,                                   /* cmac final */
-    HKS_OPERATION_CMAC_FREE_CTX                                 /* cmac free ctx */
+    HKS_OPERATION_HASH_FREE_CTX = 0x1a,                        /* hash free ctx */
+    HKS_OPERATION_HMAC_FREE_CTX = 0x1b,                        /* hmac free ctx */
+    HKS_OPERATION_ENCRYPT_FREE_CTX = 0x1c,                     /* encrypt free ctx */
+    HKS_OPERATION_DECRYPT_FREE_CTX = 0x1d,                     /* decrypt free ctx */
+    HKS_OPERATION_FILL_PRI_RANDOM = 0x1e,                      /* fill private random */
+    HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_KEY_AND_ECDH = 0x1f, /* hardcoded key implementation did not use the enum */
+                                                               /* see hks_chipset_platform_key_hardcoded.c */
+    HKS_OPERATION_CHIPSET_PLATFORM_DERIVE_PUB_KEY = 0x20,      /* hardcoded key implementation did not use the enum */
+                                                               /* see hks_chipset_platform_key_hardcoded.c */
+    HKS_OPERATION_CMAC_INIT = 0x21,                            /* cmac init */
+    HKS_OPERATION_CMAC_UPDATE = 0x22,                          /* cmac update */
+    HKS_OPERATION_CMAC_FINAL = 0x23,                           /* cmac final */
+    HKS_OPERATION_CMAC_FREE_CTX = 0x24,                        /* cmac free ctx */
+    HKS_OPERATION_SIGN_ISO_IEC_9796_2 = 0x25,                  /* sign ISO/IEC 9796-2 */
+    HKS_OPERATION_VERIFY_ISO_IEC_9796_2 = 0x26,                /* verify ISO/IEC 9796-2 */
 };
 
 struct HksAbility {
@@ -83,6 +85,9 @@ struct HksAbility {
 #define HKS_CRYPTO_ABILITY_AGREE_KEY(alg)       HKS_CRYPTO_ABILITY(HKS_OPERATION_AGREE_KEY, alg)
 #define HKS_CRYPTO_ABILITY_SIGN(alg)            HKS_CRYPTO_ABILITY(HKS_OPERATION_SIGN, alg)
 #define HKS_CRYPTO_ABILITY_VERIFY(alg)          HKS_CRYPTO_ABILITY(HKS_OPERATION_VERIFY, alg)
+
+#define HKS_CRYPTO_ABILITY_SIGN_ISO_IEC_9796_2  HKS_CRYPTO_ABILITY(HKS_OPERATION_SIGN_ISO_IEC_9796_2, 0)
+#define HKS_CRYPTO_ABILITY_VERIFY_ISO_IEC_9796_2  HKS_CRYPTO_ABILITY(HKS_OPERATION_VERIFY_ISO_IEC_9796_2, 0)
 
 #define HKS_CRYPTO_ABILITY_HMAC                 HKS_CRYPTO_ABILITY(HKS_OPERATION_HMAC, 0)
 #define HKS_CRYPTO_ABILITY_HMAC_INIT            HKS_CRYPTO_ABILITY(HKS_OPERATION_HMAC_INIT, 0)

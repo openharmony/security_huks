@@ -540,17 +540,62 @@ static int32_t CoreSignVerify(const struct HuksKeyNode *keyNode, const struct Hk
     HksFillUsageSpec(keyNode->runtimeParamSet, &usageSpec);
     SetRsaPssSaltLenType(keyNode->runtimeParamSet, &usageSpec);
 
-    if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
-        ret = HksCryptoHalSign(&rawKey, &usageSpec, inData, outData);
+    if ((usageSpec.algType == HKS_ALG_RSA) && (usageSpec.padding == HKS_PADDING_ISO_IEC_9796_2)) {
+#ifdef HKS_SUPPORT_RSA_ISO_IEC_9796_2
+        if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
+            ret = HksCryptoHalSignIsoIec97962(&rawKey, &usageSpec, inData, outData);
+        } else {
+            ret = HksCryptoHalVerifyIsoIec97962(&rawKey, &usageSpec, inData, outData);
+        }
+#else
+        ret = HKS_ERROR_NOT_SUPPORTED;
+#endif
     } else {
-        ret = HksCryptoHalVerify(&rawKey, &usageSpec, inData, outData);
+        if (usageSpec.purpose == HKS_KEY_PURPOSE_SIGN) {
+            ret = HksCryptoHalSign(&rawKey, &usageSpec, inData, outData);
+        } else {
+            ret = HksCryptoHalVerify(&rawKey, &usageSpec, inData, outData);
+        }
     }
+
     HKS_IF_NOT_SUCC_LOGE(ret, "SignVerify Finish failed, purpose = 0x%" LOG_PUBLIC "x, ret = %" LOG_PUBLIC "d",
         usageSpec.purpose, ret)
 
     (void)memset_s(rawKey.data, rawKey.size, 0, rawKey.size);
     HKS_FREE(rawKey.data);
     return ret;
+}
+
+#ifdef HKS_SUPPORT_RSA_ISO_IEC_9796_2
+static int32_t HksGetParamPadding(const struct HuksKeyNode *keyNode, uint32_t *padding)
+{
+    *padding = HKS_PADDING_NONE;
+    struct HksParam *paddingParam = NULL;
+    int32_t ret = HksGetParam(keyNode->runtimeParamSet, HKS_TAG_PADDING, &paddingParam);
+    if (ret != HKS_SUCCESS) {
+        return HKS_ERROR_CHECK_GET_PADDING_FAIL;
+    }
+    *padding = paddingParam->uint32Param;
+
+    return HKS_SUCCESS;
+}
+#endif
+
+static int32_t HksCheckNeedCachePadding(uint32_t alg, const struct HuksKeyNode *keyNode)
+{
+    if (alg != HKS_ALG_RSA) {
+        return HKS_FAILURE;
+    }
+
+#ifdef HKS_SUPPORT_RSA_ISO_IEC_9796_2
+    uint32_t padding;
+    uint32_t ret = HksGetParamPadding(keyNode, &padding);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_CHECK_GET_PADDING_FAIL,
+        "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_PADDING)
+    return HKS_SUCCESS;
+#else
+    return HKS_FAILURE;
+#endif
 }
 
 static void FreeSignVerifyCtx(const struct HuksKeyNode *keyNode)
@@ -578,7 +623,8 @@ static void FreeSignVerifyCtx(const struct HuksKeyNode *keyNode)
         HKS_LOG_E("append cipher get digest param failed!");
         return;
     }
-    if (HksCheckNeedCache(algParam->uint32Param, digestParam->uint32Param) == HKS_SUCCESS) {
+    if ((HksCheckNeedCache(algParam->uint32Param, digestParam->uint32Param) == HKS_SUCCESS) ||
+        (HksCheckNeedCachePadding(algParam->uint32Param, keyNode) == HKS_SUCCESS)) {
         struct HksBlob *cachedData = (struct HksBlob *)ctx;
         FreeCachedData(&cachedData);
     } else {
@@ -1400,7 +1446,6 @@ static int32_t ConstructAgreeBlob(struct HksBlob **agreeOut)
     return HKS_SUCCESS;
 }
 
-
 int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const struct HksParamSet *paramSet,
     uint32_t alg)
 {
@@ -1414,8 +1459,10 @@ int32_t HksCoreSignVerifyThreeStageInit(const struct HuksKeyNode *keyNode, const
         "get param get 0x%" LOG_PUBLIC "x failed", HKS_TAG_ALGORITHM)
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
+
     HKS_LOG_I("Init cache or hash init.");
-    if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
+    if ((HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) ||
+        (HksCheckNeedCachePadding(algParam->uint32Param, keyNode) == HKS_SUCCESS)) {
         return SetCacheModeCtx(keyNode);
     } else {
         return CoreHashInit(keyNode, alg);
@@ -1436,7 +1483,8 @@ int32_t HksCoreSignVerifyThreeStageUpdate(const struct HuksKeyNode *keyNode, con
 
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
     HKS_LOG_I("Update cache or hash update.");
-    if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
+    if ((HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) ||
+        (HksCheckNeedCachePadding(algParam->uint32Param, keyNode) == HKS_SUCCESS)) {
         return UpdateCachedData(keyNode, srcData);
     } else {
         return CoreHashUpdate(keyNode, srcData);
@@ -1468,7 +1516,8 @@ int32_t HksCoreSignVerifyThreeStageFinish(const struct HuksKeyNode *keyNode, con
     uint32_t digest = alg;  // In signature or verify scenario, alg represents digest. See code {GetPurposeAndAlgorithm}
 
     struct HksBlob signVerifyData = {0, NULL};
-    if (HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) {
+    if ((HksCheckNeedCache(algParam->uint32Param, digest) == HKS_SUCCESS) ||
+        (HksCheckNeedCachePadding(algParam->uint32Param, keyNode) == HKS_SUCCESS)) {
         ret = FinishCachedData(keyNode, &message, &signVerifyData);
     } else {
         ret = CoreHashFinish(keyNode, &message, &signVerifyData);
