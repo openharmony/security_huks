@@ -45,7 +45,8 @@ const std::string TEST_PROCESS_NAME = "test_process";
 const std::string TEST_USER_ID = "123465";
 const std::string TEST_KEY_ALIAS = "key_alias";
 constexpr uint32_t TEST_BLOB_SIZE = 16;
-constexpr uint32_t PARAM_INDEX = 2;
+constexpr uint32_t PARAM_NUM_ONE = 1;
+constexpr uint32_t PARAM_NUM_TWO = 2;
 constexpr uint8_t TEST_BLOB[TEST_BLOB_SIZE] = {0};
 constexpr size_t MAX_TEST_COUNT = 1024;
 
@@ -344,7 +345,7 @@ static void HksStorageManagerTest001()
             .uint32Param = 1
         }
     };
-    HksAddParams(paramSet, params, PARAM_INDEX);
+    HksAddParams(paramSet, params, PARAM_NUM_TWO);
     HksBuildParamSet(&paramSet);
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -384,7 +385,7 @@ static void HksStorageManagerTest002()
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_CE
         }
     };
-    HksAddParams(paramSet, params, PARAM_INDEX);
+    HksAddParams(paramSet, params, PARAM_NUM_ONE);
     HksBuildParamSet(&paramSet);
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -424,7 +425,7 @@ static void HksStorageManagerTest003()
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_ECE
         }
     };
-    HksAddParams(paramSet, params, PARAM_INDEX);
+    HksAddParams(paramSet, params, PARAM_NUM_ONE);
     HksBuildParamSet(&paramSet);
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -464,7 +465,7 @@ static void HksStorageManagerTest004()
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP
         }
     };
-    HksAddParams(paramSet, params, PARAM_INDEX);
+    HksAddParams(paramSet, params, PARAM_NUM_ONE);
     HksBuildParamSet(&paramSet);
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -504,7 +505,7 @@ static void HksStorageManagerTest005()
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_OLD_DE_TMP
         }
     };
-    HksAddParams(paramSet, params, PARAM_INDEX);
+    HksAddParams(paramSet, params, PARAM_NUM_ONE);
     HksBuildParamSet(&paramSet);
 
     struct HksStoreMaterial material = { DE_PATH, 0, 0, 0, 0 };
@@ -544,7 +545,7 @@ static void HksStorageManagerTest006()
             .uint32Param = HKS_AUTH_STORAGE_LEVEL_DE
         }
     };
-    HksAddParams(paramSet, params, PARAM_INDEX);
+    HksAddParams(paramSet, params, PARAM_NUM_ONE);
     HksBuildParamSet(&paramSet);
 
     struct HksStoreMaterial material = { ECE_PATH, 0 };

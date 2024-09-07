@@ -35,13 +35,13 @@ int DoSomethingInterestingWithMyAPI(uint8_t *data, size_t size)
         return -1;
     }
 
-    uint32_t listCount = *ReadData<uint8_t *>(data, size, sizeof(uint32_t));
-
-    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    uint32_t listCount = *ReadData<uint32_t *>(data, size, sizeof(uint32_t));
     struct HksKeyInfo keyInfoList = {
         .alias = { ALIAS_SIZE, ReadData<uint8_t *>(data, size, ALIAS_SIZE) },
-        .paramSet = ps.s
+        .paramSet = nullptr
     };
+    WrapParamSet ps = ConstructHksParamSetFromFuzz(data, size);
+    keyInfoList.paramSet = ps.s;
 
     [[maybe_unused]] int ret = HksGetKeyInfoList(ps.s, &keyInfoList, &listCount);
 
