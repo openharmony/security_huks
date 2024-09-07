@@ -1999,7 +1999,7 @@ int32_t HksGetKeySize(uint32_t alg, const struct HksBlob *key, uint32_t *keySize
             return CheckAndGetKeySize(key, g_sm2KeySize, HKS_ARRAY_SIZE(g_sm2KeySize), keySize);
 #endif
         default:
-            return HKS_ERROR_INVALID_ALGORITHM;
+            return ret;
     }
 }
 #endif /* _CUT_AUTHENTICATE_ */
@@ -2256,7 +2256,7 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
             return CheckEccSignature(cmdId, keySize, signature);
 #endif
         default:
-            return HKS_ERROR_INVALID_ALGORITHM;
+            return ret;
     }
 }
 
