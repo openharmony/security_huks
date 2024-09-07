@@ -15,16 +15,14 @@ import("//build/config/features.gni")
 import("//build/test.gni")
 
 ##############################fuzztest##########################################
-ohos_fuzztest("HksIpcFuzzTest") {
+ohos_fuzztest("HksValidateCertChainFuzzTest") {
   module_out_path = fuzz_module_out_path
-  fuzz_config_file =
-      "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksipc_fuzzer"
+  fuzz_config_file = "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksvalidatecertchain_fuzzer"
 
   include_dirs = [
     ".",
     "..",
     "//base/security/huks/frameworks/huks_standard/main/common/include/",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc",
   ]
   cflags = [
     "-g",
@@ -32,22 +30,14 @@ ohos_fuzztest("HksIpcFuzzTest") {
     "-Wno-unused-variable",
     "-fno-omit-frame-pointer",
   ]
-  sources = [
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl/ipc/hks_service_ipc_serialization.c",
-    "hksipc_fuzzer.cpp",
-  ]
+  sources = [ "hksvalidatecertchain_fuzzer.cpp" ]
 
   deps = [
     "..:hks_fuzz_util",
     "//base/security/huks/frameworks/huks_standard/main:huks_standard_frameworks",
     "//base/security/huks/interfaces/inner_api/huks_standard/main:libhukssdk",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency:libhuks_service_os_dependency_standard_static",
-    "//base/security/huks/services/huks_standard/huks_service/main/os_dependency/idl:libhuks_service_idl_standard_static",
   ]
-  external_deps = [
-    "c_utils:utils",
-    "ipc:ipc_single",
-  ]
+  external_deps = [ "c_utils:utils" ]
 }
 
 ###############################################################################
@@ -56,7 +46,7 @@ group("fuzztest") {
   deps = []
   deps += [
     # deps file
-    ":HksIpcFuzzTest",
+    ":HksValidateCertChainFuzzTest",
   ]
 }
 ###############################################################################
