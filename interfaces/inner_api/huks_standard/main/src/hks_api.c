@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 
+#include "hks_type_enum.h"
 #ifdef HKS_CONFIG_FILE
 #include HKS_CONFIG_FILE
 #else
