@@ -40,7 +40,8 @@
 #define HKS_AES_CCM_NONCE_LEN_MAX   13
 #define HKS_AES_GCM_NONCE_LEN_MIN   12
 
-#define HKS_RSA_OAEP_DIGEST_NUM     2
+#define HKS_RSA_OAEP_DIGEST_NUM 2
+#define HKS_RSA_KEY_BLOCK_SIZE 8
 #define HKS_BLOCK_CIPHER_CBC_BLOCK_SIZE 16
 
 #define HKS_ECC_SIGN_MAX_TL_SIZE    8
@@ -58,7 +59,8 @@ static const uint32_t g_rsaPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_OAEP,
     HKS_PADDING_PSS,
-    HKS_PADDING_PKCS1_V1_5
+    HKS_PADDING_PKCS1_V1_5,
+    HKS_PADDING_ISO_IEC_9796_2
 };
 static const uint32_t g_rsaDigest[] = {
     HKS_DIGEST_MD5,
@@ -71,12 +73,14 @@ static const uint32_t g_rsaDigest[] = {
 };
 static const uint32_t g_rsaSignPadding[] = {
     HKS_PADDING_PSS,
-    HKS_PADDING_PKCS1_V1_5
+    HKS_PADDING_PKCS1_V1_5,
+    HKS_PADDING_ISO_IEC_9796_2
 };
 static const uint32_t g_rsaCipherPadding[] = {
     HKS_PADDING_NONE,
     HKS_PADDING_OAEP,
-    HKS_PADDING_PKCS1_V1_5
+    HKS_PADDING_PKCS1_V1_5,
+    HKS_PADDING_ISO_IEC_9796_2
 };
 #endif
 
@@ -1076,6 +1080,44 @@ static int32_t CheckAndGetKeySize(const struct HksBlob *key, const uint32_t *exp
 }
 #endif
 
+#ifdef HKS_SUPPORT_RSA_C
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+static int32_t CheckRsaKeySize(uint32_t keyLen)
+{
+    if ((keyLen >= HKS_RSA_KEY_SIZE_1024) &&
+        (keyLen <= HKS_RSA_KEY_SIZE_2048) &&
+        ((keyLen % HKS_RSA_KEY_BLOCK_SIZE) == 0)) {
+        return HKS_SUCCESS;
+    } else {
+        return HKS_ERROR_INVALID_KEY_FILE;
+    }
+}
+
+static int32_t CheckAndGetRsaKeySize(const struct HksBlob *key, uint32_t *keySize)
+{
+    if (key->size < sizeof(struct HksParamSet)) {
+        HKS_LOG_E("check key size: invalid keyfile size: %" LOG_PUBLIC "u", key->size);
+        return HKS_ERROR_INVALID_KEY_FILE;
+    }
+
+    struct HksParamSet *keyParamSet = (struct HksParamSet *)key->data;
+    int32_t ret = HksCheckParamSetValidity(keyParamSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE, "check key size: paramset invalid failed")
+
+    struct HksParam *keySizeParam = NULL;
+    ret = HksGetParam(keyParamSet, HKS_TAG_KEY_SIZE, &keySizeParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
+        "check key size: get param get tag:0x%" LOG_PUBLIC "x failed", HKS_TAG_KEY_SIZE)
+    ret = CheckRsaKeySize(keySizeParam->uint32Param);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_FILE,
+        "check key size: key size value %" LOG_PUBLIC "u not expected", keySizeParam->uint32Param)
+    *keySize = keySizeParam->uint32Param;
+
+    return ret;
+}
+#endif
+#endif
+
 static int32_t CheckPurposeUnique(uint32_t inputPurpose)
 {
     /* key usage uniqueness */
@@ -1911,10 +1953,17 @@ static int32_t HksGetDsaKeySize(const struct HksBlob *key, uint32_t *keySize)
 
 int32_t HksGetKeySize(uint32_t alg, const struct HksBlob *key, uint32_t *keySize)
 {
+    int32_t ret = HKS_ERROR_INVALID_ALGORITHM;
     switch (alg) {
 #ifdef HKS_SUPPORT_RSA_C
         case HKS_ALG_RSA:
-            return CheckAndGetKeySize(key, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize), keySize);
+            ret = CheckAndGetKeySize(key, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize), keySize);
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+            if (ret != HKS_SUCCESS) {
+                ret = CheckAndGetRsaKeySize(key, keySize);
+            }
+#endif
+            return ret;
 #endif
 #ifdef HKS_SUPPORT_DSA_C
         case HKS_ALG_DSA:
@@ -2048,8 +2097,13 @@ int32_t HksCheckFixedParams(uint32_t alg, enum CheckKeyType checkType, const str
 
     ret = CheckOptionalParams(expectValues.keyLen.needCheck, inputParams->keyLen.isAbsent, inputParams->keyLen.value,
         expectValues.keyLen.values, expectValues.keyLen.valueCnt);
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+    if ((ret != HKS_SUCCESS) && (alg == HKS_ALG_RSA)) {
+        ret = CheckRsaKeySize(inputParams->keyLen.value);
+    }
+#endif
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_KEY_SIZE,
-            "check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value);
+        "check keyLen not expected, len = %" LOG_PUBLIC "u", inputParams->keyLen.value);
     ret = CheckOptionalParams(expectValues.padding.needCheck, inputParams->padding.isAbsent, inputParams->padding.value,
         expectValues.padding.values, expectValues.padding.valueCnt);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, HKS_ERROR_INVALID_PADDING,
@@ -2167,10 +2221,17 @@ int32_t HksCheckSignature(uint32_t cmdId, uint32_t alg, uint32_t keySize, const 
     (void)cmdId;
     (void)keySize;
     (void)signature;
+    int32_t ret = HKS_ERROR_INVALID_ALGORITHM;
     switch (alg) {
 #if defined(HKS_SUPPORT_RSA_C) && defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
         case HKS_ALG_RSA:
-            HKS_IF_NOT_SUCC_LOGE_RETURN(HksCheckValue(keySize, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize)),
+            ret = HksCheckValue(keySize, g_rsaKeySize, HKS_ARRAY_SIZE(g_rsaKeySize));
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+            if (ret != HKS_SUCCESS) {
+                ret = CheckRsaKeySize(keySize);
+            }
+#endif
+            HKS_IF_NOT_SUCC_LOGE_RETURN(ret,
                 HKS_ERROR_INVALID_ARGUMENT, "check key size: key size value %" LOG_PUBLIC "u not expected", keySize)
             return CheckRsaSignature(cmdId, keySize, signature);
 #endif

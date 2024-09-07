@@ -60,7 +60,7 @@ static int32_t RsaCheckKeySize(const uint32_t keySize)
     return HKS_SUCCESS;
 }
 
-static int32_t RsaKeyMaterialNedSizeCheck(const struct KeyMaterialRsa *keyMaterial)
+int32_t RsaKeyMaterialNedSizeCheck(const struct KeyMaterialRsa *keyMaterial)
 {
     const uint32_t maxKeyByteLen = HKS_RSA_KEY_SIZE_4096 / HKS_BITS_PER_BYTE;
     if ((keyMaterial->nSize > maxKeyByteLen) || (keyMaterial->eSize > maxKeyByteLen) ||
@@ -76,7 +76,7 @@ static int32_t RsaKeyMaterialNedSizeCheck(const struct KeyMaterialRsa *keyMateri
     return HKS_SUCCESS;
 }
 
-static int32_t RsaKeyCheck(const struct HksBlob *key)
+int32_t RsaKeyCheck(const struct HksBlob *key)
 {
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
 
@@ -184,7 +184,7 @@ int32_t HksMbedtlsRsaGenerateKey(const struct HksKeySpec *spec, struct HksBlob *
 #endif /* HKS_SUPPORT_RSA_GENERATE_KEY */
 
 #if defined(HKS_SUPPORT_RSA_CRYPT) || defined(HKS_SUPPORT_RSA_SIGN_VERIFY)
-static int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPrivateExponent, mbedtls_rsa_context *ctx)
+int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPrivateExponent, mbedtls_rsa_context *ctx)
 {
     const struct KeyMaterialRsa *keyMaterial = (struct KeyMaterialRsa *)(key->data);
 
