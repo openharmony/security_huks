@@ -81,6 +81,10 @@ int32_t HksCheckIpcDeleteKey(const struct HksBlob *keyAlias, const struct HksPar
     int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
 
+    if (keyAlias->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     if (((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
         ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
         HKS_LOG_E("ipc delete key check size failed");
@@ -131,6 +135,10 @@ int32_t HksCheckIpcKeyExist(const struct HksBlob *keyAlias, const struct HksPara
     int32_t ret = HksCheckBlobAndParamSet(keyAlias, paramSet);
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
 
+    if (keyAlias->size > MAX_PROCESS_SIZE) {
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
     if (((sizeof(keyAlias->size) + ALIGN_SIZE(keyAlias->size) +
         ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
         HKS_LOG_E("ipc key exist check size failed");
@@ -176,7 +184,11 @@ int32_t HksCheckIpcGetKeyInfoList(const struct HksKeyInfo *keyInfoList, const st
 {
     HKS_IF_NOT_SUCC_RETURN(HksCheckParamSet(paramSet, paramSet->paramSetSize), HKS_ERROR_INVALID_ARGUMENT)
 
-    if ((listCount == 0) || (listCount > (MAX_PROCESS_SIZE / (sizeof(uint32_t) + sizeof(uint32_t))))) {
+    enum {
+        HKS_GET_KEY_LIST_MAX_COUNT = 2048U,
+    };
+    if (listCount == 0 || listCount > HKS_GET_KEY_LIST_MAX_COUNT) {
+        HKS_LOG_E("invalid listCount %" LOG_PUBLIC "u", listCount);
         return HKS_ERROR_INVALID_ARGUMENT;
     }
 
