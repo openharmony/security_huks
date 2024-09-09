@@ -222,15 +222,19 @@ static int32_t ProcessAttestOrNormalMessage(
 
 static void ProcessRemoteRequest(uint32_t code, MessageParcel &data, MessageParcel &reply)
 {
-    uint32_t outSize = static_cast<uint32_t>(data.ReadUint32());
+    uint32_t outSize = 0;
     struct HksBlob srcData = { 0, nullptr };
-    int32_t ret = HKS_SUCCESS;
+    int32_t ret = HKS_ERROR_INVALID_ARGUMENT;
     do {
+        if (!data.ReadUint32(outSize)) {
+            HKS_LOG_E("Read outSize failed!");
+            break;
+        }
+
         ret = HksPluginOnLocalRequest(CODE_UPGRADE, NULL, NULL);
         HKS_IF_NOT_SUCC_BREAK(ret, "Failed to handle local request. ret = %" LOG_PUBLIC "d", ret);
 
-        srcData.size = static_cast<uint32_t>(data.ReadUint32());
-        if (IsInvalidLength(srcData.size)) {
+        if (!data.ReadUint32(srcData.size) || IsInvalidLength(srcData.size)) {
             HKS_LOG_E("srcData size is invalid, size:%" LOG_PUBLIC "u", srcData.size);
             ret = HKS_ERROR_INVALID_ARGUMENT;
             break;
