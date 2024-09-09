@@ -137,7 +137,11 @@ int32_t HksUserIdmGetSecInfo(int32_t userId, struct SecInfoWrap **outSecInfo)
     HKS_IF_NULL_LOGE_RETURN(condition, HKS_FAILURE, "create condition failed!")
 
     auto mCallback = std::make_shared<GetSecUserInfoCallbackImplHuks>(outSecInfo, condition);
-
+    if (mCallback == nullptr) {
+        HKS_LOG_E("make_shared GetSecUserInfoCallbackImplHuks failed!");
+        HksConditionDestroy(condition);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     std::shared_ptr<USER_IAM::GetSecUserInfoCallback> callback = mCallback;
 
     int32_t ret = USER_IAM::UserIdmClient::GetInstance().GetSecUserInfo(userId, callback);
@@ -189,6 +193,11 @@ int32_t HksUserIdmGetAuthInfoNum(int32_t userId, enum HksUserAuthType hksAuthTyp
     HKS_IF_NULL_LOGE_RETURN(condition, HKS_ERROR_BAD_STATE, "create condition failed!")
 
     auto huksCallback = std::make_shared<GetCredentialInfoCallbackImplHuks>(numOfAuthInfo, condition);
+    if (huksCallback == nullptr) {
+        HKS_LOG_E("make_shared GetCredentialInfoCallbackImplHuks failed!");
+        HksConditionDestroy(condition);
+        return HKS_ERROR_MALLOC_FAIL;
+    }
     std::shared_ptr<USER_IAM::GetCredentialInfoCallback> callback = huksCallback;
 
     enum USER_IAM::AuthType authType;
