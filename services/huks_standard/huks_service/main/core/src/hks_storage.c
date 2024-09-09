@@ -830,12 +830,11 @@ static int32_t GetHksFileEntry(const struct HksStoreFileInfo *fileInfo, struct H
     do {
         ret = FileNameListInit(&tempFileNameList, fileCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init file name list failed, ret = %" LOG_PUBLIC "d", ret)
- 
         ret = GetFileNameList(fileInfo->mainPath.path, tempFileNameList, &realfileCount);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get file name list failed, ret = %" LOG_PUBLIC "d", ret)
     } while (0);
 
-    if (ret != HKS_SUCCESS) {
+    if (ret != HKS_SUCCESS || realfileCount < fileCount) {
         FileNameListFree(&tempFileNameList, fileCount);
         return ret;
     }
