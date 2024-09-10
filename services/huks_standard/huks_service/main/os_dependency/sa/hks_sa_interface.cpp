@@ -47,8 +47,8 @@ void HksStub::SendAsyncReply(uint32_t errCode, std::unique_ptr<uint8_t[]> &certC
 int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
 {
     std::unique_ptr<uint8_t[]> certChain{};
-    uint32_t errCode = data.ReadUint32();
-    if (errCode != DCM_SUCCESS) {
+    uint32_t errCode = 1;
+    if (!data.ReadUint32(errCode) || errCode != DCM_SUCCESS) {
         HKS_LOG_E("ipc client read errCode %" LOG_PUBLIC "u", errCode);
         SendAsyncReply(errCode, certChain, 0);
         return ERR_INVALID_DATA;
@@ -56,8 +56,8 @@ int HksStub::ProcessAttestKeyAsyncReply(MessageParcel& data)
     uint32_t certChainLen = 0;
     int err = ERR_INVALID_DATA;
     do {
-        uint32_t sz = data.ReadUint32();
-        if (sz == 0 || sz > MAX_OUT_BLOB_SIZE) {
+        uint32_t sz = 0;
+        if (!data.ReadUint32(sz) || sz == 0 || sz > MAX_OUT_BLOB_SIZE) {
             HKS_LOG_E("invalid sz %" LOG_PUBLIC "u", sz);
             break;
         }
