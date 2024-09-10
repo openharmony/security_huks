@@ -41,9 +41,17 @@
 #define HKS_RSA_KEYPAIR_CNT 3
 #define MBEDTLS_RSA_PUBLIC	0
 #define MBEDTLS_RSA_PRIVATE	1
+#define HKS_RSA_KEYSIZE_CNT 8
 
 static int32_t RsaCheckKeySize(const uint32_t keySize)
 {
+#ifdef HKS_SUPPORT_RSA_C_FLEX_KEYSIZE
+    if ((keySize >= HKS_RSA_KEY_SIZE_1024) && (keySize <= HKS_RSA_KEY_SIZE_2048)) {
+        if ((keySize % HKS_RSA_KEYSIZE_CNT) == 0) {
+            return HKS_SUCCESS;
+        }
+    }
+#endif
     switch (keySize) {
         case HKS_RSA_KEY_SIZE_512:
         case HKS_RSA_KEY_SIZE_768:
@@ -248,6 +256,10 @@ int32_t RsaKeyMaterialToCtx(const struct HksBlob *key, const bool needPrivateExp
 static int32_t HksToMbedtlsPadding(uint32_t hksPadding, int32_t *padding)
 {
     switch (hksPadding) {
+#ifdef HKS_SUPPORT_RSA_ECB_NOPADDING
+        case HKS_PADDING_NONE:
+            return HKS_SUCCESS;
+#endif
         case HKS_PADDING_PKCS1_V1_5:
             *padding = MBEDTLS_RSA_PKCS_V15;
             break;
@@ -260,58 +272,85 @@ static int32_t HksToMbedtlsPadding(uint32_t hksPadding, int32_t *padding)
     return HKS_SUCCESS;
 }
 
+static int32_t HksMbedtlsRsaCryptMbedtls(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
+    const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText, size_t *outlen,
+    mbedtls_rsa_context *ctx)
+{
+    mbedtls_ctr_drbg_context ctrDrbg;
+    mbedtls_entropy_context entropy;
+    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
+    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
+    int32_t ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    do {
+        ret = RsaKeyMaterialToCtx(key, !encrypt, ctx); /* encrypt don't need private exponent (d) */
+        HKS_IF_NOT_SUCC_BREAK(ret)
+#ifdef HKS_SUPPORT_RSA_ECB_NOPADDING
+        if (usageSpec->padding == HKS_PADDING_NONE) {
+            if (ctx->private_len != message->size) {
+                HKS_LOG_E("Mbedtls rsa crypt nopadding failed! message size = 0x%" LOG_PUBLIC "X", message->size);
+                ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
+                break;
+            }
+            if (encrypt) {
+                ret = mbedtls_rsa_public(ctx, message->data, cipherText->data);
+                *outlen = mbedtls_rsa_get_len(ctx);
+            } else {
+                ret = mbedtls_rsa_private(ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
+                    message->data, cipherText->data);
+                *outlen = mbedtls_rsa_get_len(ctx);
+            }
+            break;
+        }
+#endif
+        if (encrypt) {
+            ret = mbedtls_rsa_pkcs1_encrypt(ctx, mbedtls_ctr_drbg_random,
+                &ctrDrbg, (size_t)message->size, message->data, cipherText->data);
+            *outlen = mbedtls_rsa_get_len(ctx);
+        } else {
+            ret = mbedtls_rsa_pkcs1_decrypt(ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
+                outlen, message->data, cipherText->data, (size_t)cipherText->size);
+        }
+    } while (0);
+
+    mbedtls_rsa_free(ctx);
+    mbedtls_ctr_drbg_free(&ctrDrbg);
+    mbedtls_entropy_free(&entropy);
+
+    return ret;
+}
+
 static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsageSpec *usageSpec,
     const struct HksBlob *message, const bool encrypt, struct HksBlob *cipherText)
 {
     int32_t ret = RsaKeyCheck(key);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
-    int32_t padding;
+    int32_t padding = MBEDTLS_RSA_PKCS_V15;
     ret = HksToMbedtlsPadding(usageSpec->padding, &padding);
-    HKS_IF_NOT_SUCC_RETURN(ret, ret)
-
-    uint32_t mbedtlsAlg;
-    if (padding == MBEDTLS_RSA_PKCS_V21) {
-        ret = HksToMbedtlsDigestAlg(usageSpec->digest, &mbedtlsAlg);
-        HKS_IF_NOT_SUCC_RETURN(ret, ret)
-    }
-
-    mbedtls_ctr_drbg_context ctrDrbg;
-    mbedtls_entropy_context entropy;
-    (void)memset_s(&entropy, sizeof(mbedtls_entropy_context), 0, sizeof(mbedtls_entropy_context));
-    (void)memset_s(&ctrDrbg, sizeof(mbedtls_ctr_drbg_context), 0, sizeof(mbedtls_ctr_drbg_context));
-    ret = HksCtrDrbgSeed(&ctrDrbg, &entropy);
     HKS_IF_NOT_SUCC_RETURN(ret, ret)
 
     mbedtls_rsa_context ctx;
     (void)memset_s(&ctx, sizeof(mbedtls_rsa_context), 0, sizeof(mbedtls_rsa_context));
-    mbedtls_rsa_init(&ctx); /* only support oaep padding */
+    mbedtls_rsa_init(&ctx);
 
-    do {
-        ret = RsaKeyMaterialToCtx(key, !encrypt, &ctx); /* encrypt don't need private exponent (d) */
-        HKS_IF_NOT_SUCC_BREAK(ret)
+    if (padding == MBEDTLS_RSA_PKCS_V21) {
+        uint32_t mbedtlsAlg;
+        ret = HksToMbedtlsDigestAlg(usageSpec->digest, &mbedtlsAlg);
+        mbedtls_rsa_set_padding(&ctx, padding, mbedtlsAlg);
+        HKS_IF_NOT_SUCC_RETURN(ret, ret)
+    }
 
-        size_t outlen;
-        if (encrypt) {
-            ret = mbedtls_rsa_pkcs1_encrypt(&ctx, mbedtls_ctr_drbg_random,
-                &ctrDrbg, (size_t)message->size, message->data, cipherText->data);
-            outlen = mbedtls_rsa_get_len(&ctx);
-        } else {
-            ret = mbedtls_rsa_pkcs1_decrypt(&ctx, mbedtls_ctr_drbg_random, &ctrDrbg,
-                &outlen, message->data, cipherText->data, (size_t)cipherText->size);
-        }
-        if (ret != HKS_SUCCESS) {
-            HKS_LOG_E("Mbedtls rsa crypt failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
-            (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
-            ret = HKS_ERROR_CRYPTO_ENGINE_ERROR;
-            break;
-        }
-        cipherText->size = (uint32_t)outlen;
-    } while (0);
+    size_t outlen;
+    ret = HksMbedtlsRsaCryptMbedtls(key, usageSpec, message, encrypt, cipherText, &outlen, &ctx);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("Mbedtls rsa crypt failed! mbedtls ret = 0x%" LOG_PUBLIC "X", ret);
+        (void)memset_s(cipherText->data, cipherText->size, 0, cipherText->size);
+        return HKS_ERROR_CRYPTO_ENGINE_ERROR;
+    }
+    cipherText->size = (uint32_t)outlen;
 
-    mbedtls_rsa_free(&ctx);
-    mbedtls_ctr_drbg_free(&ctrDrbg);
-    mbedtls_entropy_free(&entropy);
     return ret;
 }
 
