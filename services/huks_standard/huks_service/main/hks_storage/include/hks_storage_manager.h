@@ -46,6 +46,10 @@ int32_t HksManageGetKeyCountByProcessName(const struct HksProcessInfo *processIn
 int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData);
 
+int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias, uint32_t storageType);
+
 #ifdef __cplusplus
 }
 #endif

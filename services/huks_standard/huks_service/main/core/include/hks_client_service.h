@@ -114,6 +114,9 @@ int32_t AppendStorageLevelIfNotExist(const struct HksParamSet *paramSet, struct 
 int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const struct HksParamSet *paramSet,
     struct HksKeyAliasSet **outData);
 
+int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const struct HksBlob *oldKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *newKeyAlias);
+
 #ifdef __cplusplus
 }
 #endif

@@ -976,3 +976,30 @@ void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *cont
     HKS_FREE_BLOB(processInfo.userId);
     HKS_FREE_BLOB(outBlob);
 }
+
+void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *context)
+{
+    int32_t ret;
+    struct HksBlob oldKeyAlias = { 0, NULL };
+    struct HksBlob newKeyAlias = { 0, NULL };
+    struct HksParamSet *paramSet = NULL;
+    struct HksProcessInfo processInfo = { { 0, NULL }, { 0, NULL }, 0, 0 };
+    do {
+        ret  = HksRenameKeyAliasUnpack(srcData, &oldKeyAlias, &newKeyAlias, &paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasUnpack Ipc fail")
+
+        ret = HksGetProcessInfoForIPC(context, &processInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetProcessInfoForIPC fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckAcrossAccountsPermission(paramSet, processInfo.userIdInt);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckAcrossAccountsPermission fail, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksServiceRenameKeyAlias(&processInfo, &oldKeyAlias, paramSet, &newKeyAlias);
+        HKS_IF_NOT_SUCC_LOGE(ret, "HksServiceRenameKeyAliasy fail")
+    } while (0);
+
+    HksSendResponse(context, ret, NULL);
+
+    HKS_FREE_BLOB(processInfo.processName);
+    HKS_FREE_BLOB(processInfo.userId);
+}
