@@ -268,3 +268,18 @@ int32_t HksCheckIpcListAliases(const struct HksParamSet *paramSet)
     }
     return HKS_SUCCESS;
 }
+
+int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias)
+{
+    int32_t ret = HksCheckBlob2AndParamSet(oldKeyAlias, newKeyAlias, paramSet);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "check keyAlias or paramSet failed")
+
+    if (((sizeof(oldKeyAlias->size) + ALIGN_SIZE(oldKeyAlias->size) +
+        sizeof(newKeyAlias->size) + ALIGN_SIZE(newKeyAlias->size) +
+        ALIGN_SIZE(paramSet->paramSetSize)) > MAX_PROCESS_SIZE)) {
+        HKS_LOG_E("ipc rename key alias check size failed");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    return HKS_SUCCESS;
+}

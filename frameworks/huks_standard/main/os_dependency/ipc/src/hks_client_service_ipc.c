@@ -902,3 +902,35 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
     HKS_FREE_BLOB(outBlob);
     return ret;
 }
+
+int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob inBlob = { 0, NULL };
+    do {
+        ret = BuildParamSetNotNull(paramSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "ensure paramSet not null failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckIpcRenameKeyAlias(oldKeyAlias, newParamSet, newKeyAlias);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksCheckIpcRenameKeyAlias failed!")
+        
+        inBlob.size = sizeof(oldKeyAlias->size) + ALIGN_SIZE(oldKeyAlias->size) +
+            sizeof(newKeyAlias->size) + ALIGN_SIZE(newKeyAlias->size) +
+            ALIGN_SIZE(newParamSet->paramSetSize);
+        inBlob.data = (uint8_t *)HksMalloc(inBlob.size);
+        if (inBlob.data == NULL) {
+            ret = HKS_ERROR_MALLOC_FAIL;
+            break;
+        }
+        ret = HksRenameKeyAliasPack(oldKeyAlias, newKeyAlias, newParamSet, &inBlob);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasPack failed!")
+
+        ret = HksSendRequest(HKS_MSG_RENAME_KEY_ALIASES, &inBlob, NULL, newParamSet);
+
+    } while (0);
+    HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(inBlob);
+    return ret;
+}

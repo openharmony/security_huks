@@ -868,5 +868,24 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
     return ret;
 }
 
+int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo, 
+    const struct HksStoreFileInfo *newFileInfo, bool isCopy)
+{
+    int32_t ret;
+    do {
+        ret = CopyKeyBlobFromSrc(oldFileInfo->mainPath.path, oldFileInfo->mainPath.fileName,
+            newFileInfo->mainPath.path, newFileInfo->mainPath.fileName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks copy old key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        ret = CopyKeyBlobFromSrc(oldFileInfo->bakPath.path, oldFileInfo->bakPath.fileName,
+            newFileInfo->bakPath.path, newFileInfo->bakPath.fileName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks copy old key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        if (!isCopy) {
+            ret = HksStoreDeleteKeyBlob(oldFileInfo);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+        }
+    } while (0);
+    return ret;
+}
+
 #endif
 #endif /* _CUT_AUTHENTICATE_ */
