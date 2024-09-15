@@ -38,6 +38,7 @@ group("fuzztest") {
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksinit_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksipc_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hkskeyexist_fuzzer:fuzztest",
+        "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksrename_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksrkc_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksstorage_fuzzer:fuzztest",
         "//base/security/huks/test/fuzz_test/innerapi_fuzzer/hksupdate_fuzzer:fuzztest",

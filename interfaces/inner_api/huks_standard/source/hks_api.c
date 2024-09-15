@@ -760,3 +760,15 @@ HKS_API_EXPORT int32_t HksListAliases(const struct HksParamSet *paramSet, struct
     HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
     return ret;
 }
+
+HKS_API_EXPORT int32_t HksRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias)
+{
+    HKS_LOG_D("enter %" LOG_PUBLIC "s", __func__);
+    if (oldKeyAlias == NULL || paramSet == NULL || newKeyAlias == NULL) {
+        return HKS_ERROR_NULL_POINTER;
+    }
+    int32_t ret = HksClientRenameKeyAlias(oldKeyAlias, paramSet, newKeyAlias);
+    HKS_LOG_D("leave %" LOG_PUBLIC "s, result = %" LOG_PUBLIC "d", __func__, ret);
+    return ret;
+}

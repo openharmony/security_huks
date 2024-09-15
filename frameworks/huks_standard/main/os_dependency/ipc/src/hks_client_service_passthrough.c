@@ -461,3 +461,12 @@ int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAl
     };
     return HksServiceListAliases(&processInfo, paramSet, outData);
 }
+
+int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias)
+{
+    (void)oldKeyAlias;
+    (void)paramSet;
+    (void)newKeyAlias;
+    return HKS_ERROR_NOT_SUPPORTED;
+}

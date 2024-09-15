@@ -25,7 +25,7 @@
 #include <stdint.h>
 
 #include "hks_type.h"
-
+#include "hks_type_inner.h"
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -71,6 +71,15 @@ int32_t HksCheckUserAuthKeyPurposeValidity(const struct HksParamSet *paramSet);
 int32_t HksCheckListAliasesParam(const struct HksBlob *processName);
 
 bool HksCheckIsAllowedWrap(const struct HksParamSet *paramSet);
+
+int32_t HKsCheckOldKeyAliasDiffNewKeyAlias(const struct HksBlob *oldKeyAlias,
+    const struct HksBlob *newKeyAlias);
+
+int32_t HksCheckOldKeyExist(const struct HksProcessInfo *processInfo, const struct HksBlob *oldKeyAlias,
+    const struct HksParamSet *paramSet);
+
+int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const struct HksBlob *newKeyAlias,
+    const struct HksParamSet *paramSet);
 
 #ifdef __cplusplus
 }
