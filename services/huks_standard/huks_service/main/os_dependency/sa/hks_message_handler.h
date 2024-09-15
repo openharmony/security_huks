@@ -46,7 +46,7 @@ const struct HksIpcEntryPoint HKS_IPC_MESSAGE_HANDLER[] = {
     { HKS_MSG_MAC, HksIpcServiceMac },
     { HKS_MSG_GET_KEY_INFO_LIST, HksIpcServiceGetKeyInfoList },
     { HKS_MSG_LIST_ALIASES, HksIpcServiceListAliases },
-    { HKS_MSG_RENAME_KEY_ALIASES, HksIpcServiceRenameKeyAlias },
+    { HKS_MSG_RENAME_KEY_ALIAS, HksIpcServiceRenameKeyAlias },
 };
 
 typedef void (*HksIpcThreeStageHandlerFuncProc)(const struct HksBlob *msg, struct HksBlob *outData,

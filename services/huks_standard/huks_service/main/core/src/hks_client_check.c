@@ -339,8 +339,8 @@ int32_t HksCheckOldKeyExist(const struct HksProcessInfo *processInfo, const stru
     HKS_IF_NOT_SUCC_RETURN(ret, ret);
 
     ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, oldKeyAlias, HKS_STORAGE_TYPE_KEY);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("oldKey not exist !");
+    if (ret == HKS_ERROR_NOT_EXIST) {
+        HKS_LOG_E("the oldKey not exist!");
     }
     return ret;
 }
@@ -353,10 +353,11 @@ int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const s
 
     ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, newKeyAlias, HKS_STORAGE_TYPE_KEY);
     if (ret == HKS_SUCCESS) {
-        HKS_LOG_E("newKey is exist!");
+        HKS_LOG_E("the newKey is already exist!");
         return HKS_ERROR_ALREADY_EXISTS;
     }
     if (ret == HKS_ERROR_NOT_EXIST) {
+        HKS_LOG_I("the newKey is  not exist!");
         return HKS_SUCCESS;
     }
     return ret;

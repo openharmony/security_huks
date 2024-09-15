@@ -1003,9 +1003,6 @@ void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *c
 
     HksSendResponse(context, ret, NULL);
 
-    HksFreeParamSet(&paramSet);
     HKS_FREE_BLOB(processInfo.processName);
     HKS_FREE_BLOB(processInfo.userId);
-    HKS_FREE_BLOB(oldKeyAlias);
-    HKS_FREE_BLOB(newKeyAlias);
 }

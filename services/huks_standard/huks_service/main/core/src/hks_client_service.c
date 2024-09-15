@@ -2084,18 +2084,18 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
     ret = HKsCheckOldKeyAliasDiffNewKeyAlias(oldKeyAlias, newKeyAlias);
     if (ret != HKS_SUCCESS) {
         HKS_LOG_E("the new key alias same as old key alias !, ret = %" LOG_PUBLIC "d", ret);
-        return HKS_ERROR_BAD_STATE;
+        return HKS_ERROR_INVALID_ARGUMENT;
     }
 
     ret = HksCheckOldKeyExist(processInfo, oldKeyAlias, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("the old key is not exist !, ret = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("HksCheckOldKeyExist failed!, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
     ret = HksCheckNewKeyNotExist(processInfo, newKeyAlias, paramSet);
     if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("the new key is already exist !, ret = %" LOG_PUBLIC "d", ret);
+        HKS_LOG_E("HksCheckNewKeyNotExist failed!, ret = %" LOG_PUBLIC "d", ret);
         return ret;
     }
 
