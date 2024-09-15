@@ -69,6 +69,8 @@ void HksIpcServiceExportChipsetPlatformPublicKey(
 
 void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *context);
 
+void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *context);
+
 #ifdef __cplusplus
 }
 #endif

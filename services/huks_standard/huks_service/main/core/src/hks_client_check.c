@@ -22,6 +22,8 @@
 #include "hks_log.h"
 #include "hks_param.h"
 #include "hks_template.h"
+#include "hks_mem.h"
+#include "hks_storage_manager.h"
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
@@ -313,4 +315,49 @@ int32_t HksCheckListAliasesParam(const struct HksBlob *processName)
         return HKS_ERROR_INVALID_ARGUMENT;
     }
     return HKS_SUCCESS;
+}
+
+int32_t HKsCheckOldKeyAliasDiffNewKeyAlias(const struct HksBlob *oldKeyAlias,
+    const struct HksBlob *newKeyAlias)
+{
+    if (oldKeyAlias == NULL || newKeyAlias == NULL) {
+        HKS_LOG_E("oldKeyAlias or newKeyAlias is null !");
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+    if ((oldKeyAlias->size == newKeyAlias->size) &&
+        (HksMemCmp(oldKeyAlias->data, newKeyAlias->data, oldKeyAlias->size) == 0)) {
+        HKS_LOG_E("oldKeyAlias same as newKeyAlias !");
+        return HKS_ERROR_ALREADY_EXISTS;
+    }
+    return HKS_SUCCESS;
+}
+
+int32_t HksCheckOldKeyExist(const struct HksProcessInfo *processInfo, const struct HksBlob *oldKeyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckProcessNameAndKeyAlias(&processInfo->processName, oldKeyAlias);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+    ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, oldKeyAlias, HKS_STORAGE_TYPE_KEY);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("oldKey not exist !");
+    }
+    return ret;
+}
+
+int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const struct HksBlob *newKeyAlias,
+    const struct HksParamSet *paramSet)
+{
+    int32_t ret = HksCheckProcessNameAndKeyAlias(&processInfo->processName, newKeyAlias);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+    ret = HksManageStoreIsKeyBlobExist(processInfo, paramSet, newKeyAlias, HKS_STORAGE_TYPE_KEY);
+    if (ret == HKS_SUCCESS) {
+        HKS_LOG_E("newKey is exist!");
+        return HKS_ERROR_ALREADY_EXISTS;
+    }
+    if (ret == HKS_ERROR_NOT_EXIST) {
+        return HKS_SUCCESS;
+    }
+    return ret;
 }

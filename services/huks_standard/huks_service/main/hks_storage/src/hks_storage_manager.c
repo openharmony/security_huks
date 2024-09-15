@@ -29,7 +29,7 @@
 #include "hks_log.h"
 #include "hks_mem.h"
 #include "hks_param.h"
-
+#include "hks_common_check.h"
 #include "hks_storage.h"
 #include "hks_storage_manager.h"
 #include "hks_template.h"
@@ -554,6 +554,44 @@ int32_t HksManageListAliasesByProcessName(const struct HksProcessInfo *processIn
     (void)outData;
     return HKS_SUCCESS;
 #endif
+}
+
+int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias, uint32_t storageType)
+{
+    (void)processInfo;
+    (void)paramSet;
+    struct HksStoreFileInfo oldKeyFileInfo = { { 0 } };
+    struct HksStoreFileInfo newKeyFileInfo = { { 0 } };
+    struct HksStoreMaterial oldKeyMaterial = { DE_PATH, 0, 0, 0, 0 };
+    struct HksStoreMaterial newKeyMaterial = { DE_PATH, 0, 0, 0, 0 };
+    int32_t ret;
+    do {
+        ret = InitStorageMaterial(processInfo, paramSet, oldKeyAlias, storageType, &oldKeyMaterial);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init old key storage material failed, ret = %" LOG_PUBLIC "d.", ret);
+        ret = InitStorageMaterial(processInfo, paramSet, newKeyAlias, storageType, &newKeyMaterial);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "init new key storage material failed, ret = %" LOG_PUBLIC "d.", ret);
+
+        ret = HksConstructStoreFileInfo(processInfo, paramSet, &oldKeyMaterial, &oldKeyFileInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct old store file info failed, ret = %" LOG_PUBLIC "d.", ret);
+        ret = HksConstructStoreFileInfo(processInfo, paramSet, &newKeyMaterial, &newKeyFileInfo);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct new store file info failed, ret = %" LOG_PUBLIC "d.", ret);
+
+        ret = HksCheckParamSetValidity(paramSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check paramset invalid failed!");
+
+        struct HksParam *isNeedCopy = NULL;
+        int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_COPY_NEW_KEY, &isNeedCopy);
+        if (ret == HKS_ERROR_PARAM_NOT_EXIST || isNeedCopy->boolParam == false) {
+            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, false);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
+        } else {
+            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, true);
+            HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
+        }
+    } while (0);
+    return ret;
 }
 
 #endif
