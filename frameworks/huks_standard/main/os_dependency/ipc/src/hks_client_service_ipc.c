@@ -926,9 +926,7 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
         }
         ret = HksRenameKeyAliasPack(oldKeyAlias, newKeyAlias, newParamSet, &inBlob);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksRenameKeyAliasPack failed!")
-
-        ret = HksSendRequest(HKS_MSG_RENAME_KEY_ALIASES, &inBlob, NULL, newParamSet);
-
+        ret = HksSendRequest(HKS_MSG_RENAME_KEY_ALIAS, &inBlob, NULL, newParamSet);
     } while (0);
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(inBlob);

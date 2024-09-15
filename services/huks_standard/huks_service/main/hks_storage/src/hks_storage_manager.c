@@ -582,15 +582,19 @@ int32_t HksManageStoreRenameKeyAlias(const struct HksProcessInfo *processInfo,
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check paramset invalid failed!");
 
         struct HksParam *isNeedCopy = NULL;
-        int32_t ret = HksGetParam(paramSet, HKS_TAG_IS_COPY_NEW_KEY, &isNeedCopy);
-        if (ret == HKS_ERROR_PARAM_NOT_EXIST || isNeedCopy->boolParam == false) {
-            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, false);
+        ret = HksGetParam(paramSet, HKS_TAG_IS_COPY_NEW_KEY, &isNeedCopy);
+        if (ret == HKS_SUCCESS && isNeedCopy->boolParam == true) {
+            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, true);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
         } else {
-            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, true);
+            ret = HksStoreRenameKeyAlias(&oldKeyFileInfo, &newKeyFileInfo, false);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks rename key blod failed, ret = %" LOG_PUBLIC "d.", ret);
         }
     } while (0);
+    FileInfoFree(&oldKeyFileInfo);
+    FileInfoFree(&newKeyFileInfo);
+    FreeStorageMaterial(&oldKeyMaterial);
+    FreeStorageMaterial(&newKeyMaterial);
     return ret;
 }
 

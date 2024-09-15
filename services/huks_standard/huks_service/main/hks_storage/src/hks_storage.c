@@ -148,7 +148,6 @@ static int32_t HksStorageRemoveFile(const char *path, const char *fileName)
     return ret;
 }
 
-#ifdef SUPPORT_STORAGE_BACKUP
 static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
     const char *destPath, const char *destFileName)
 {
@@ -185,7 +184,6 @@ static int32_t CopyKeyBlobFromSrc(const char *srcPath, const char *srcFileName,
     HKS_FREE(buffer);
     return ret;
 }
-#endif
 
 static int32_t GetKeyBlobFromFile(const char *path, const char *fileName, struct HksBlob *keyBlob)
 {
@@ -868,7 +866,9 @@ int32_t HksListAliasesByProcessName(const struct HksStoreFileInfo *fileInfo, str
     return ret;
 }
 
-int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo, 
+#endif
+
+int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
     const struct HksStoreFileInfo *newFileInfo, bool isCopy)
 {
     int32_t ret;
@@ -876,9 +876,11 @@ int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
         ret = CopyKeyBlobFromSrc(oldFileInfo->mainPath.path, oldFileInfo->mainPath.fileName,
             newFileInfo->mainPath.path, newFileInfo->mainPath.fileName);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks copy old key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+#ifdef SUPPORT_STORAGE_BACKUP
         ret = CopyKeyBlobFromSrc(oldFileInfo->bakPath.path, oldFileInfo->bakPath.fileName,
             newFileInfo->bakPath.path, newFileInfo->bakPath.fileName);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks copy old key blob failed, ret = %" LOG_PUBLIC "d.", ret)
+#endif
         if (!isCopy) {
             ret = HksStoreDeleteKeyBlob(oldFileInfo);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
@@ -887,5 +889,4 @@ int32_t HksStoreRenameKeyAlias(const struct HksStoreFileInfo *oldFileInfo,
     return ret;
 }
 
-#endif
 #endif /* _CUT_AUTHENTICATE_ */
