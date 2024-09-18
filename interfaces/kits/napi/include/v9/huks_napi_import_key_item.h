@@ -39,7 +39,7 @@ ImportKeyAsyncContext CreateImportKeyAsyncContext();
 
 void DeleteImportKeyAsyncContext(napi_env env, ImportKeyAsyncContext &context);
 
-napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context);
+napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &context);
 
 napi_value HuksNapiImportKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

@@ -81,7 +81,7 @@ static napi_value GetKeyPropertiesParseParams(
     return GetInt32(env, 0);
 }
 
-napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext context)
+napi_value GetKeyPropertiesAsyncWork(napi_env env, GetKeyPropertiesAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

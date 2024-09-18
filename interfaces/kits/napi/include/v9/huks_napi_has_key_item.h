@@ -38,7 +38,7 @@ IsKeyExistAsyncContext CreateIsKeyExistAsyncContext();
 
 void DeleteIsKeyExistAsyncContext(napi_env env, IsKeyExistAsyncContext &context);
 
-napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext context);
+napi_value IsKeyExistAsyncWork(napi_env env, IsKeyExistAsyncContext &context);
 
 napi_value HuksNapihasKeyItem(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

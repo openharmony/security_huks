@@ -39,7 +39,7 @@ InitAsyncCtxPtr CreateInitAsyncContext();
 
 void DeleteInitAsyncContext(napi_env env, InitAsyncCtxPtr &context);
 
-napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context);
+napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context);
 
 napi_value HuksNapiInitSession(napi_env env, napi_callback_info info);
 }  // namespace HuksNapiItem

@@ -130,7 +130,7 @@ static int32_t InitCertChain(struct HksCertChain *certChain, uint32_t *certChain
     return HKS_ERROR_MALLOC_FAIL;
 }
 
-napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext context)
+napi_value AttestKeyAsyncWork(napi_env env, AttestKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
