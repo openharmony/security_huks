@@ -208,8 +208,12 @@ static int32_t HksCheckFinishOutSize(bool isEncrypt, struct HksParamSet *paramSe
         case HKS_ALG_SM2:
             return CheckSm2CipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_AES:
+#ifdef HKS_SUPPORT_DES_C
         case HKS_ALG_DES:
+#endif
+#ifdef HKS_SUPPORT_3DES_C
         case HKS_ALG_3DES:
+#endif
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
         case HKS_ALG_SM4:
             return CheckBlockCipherData(isEncrypt, &usageSpec, inData, outData);
@@ -264,8 +268,10 @@ static int32_t HmacAuth(const struct HuksKeyNode *keyNode, const struct HksParam
 
     if (algParam->uint32Param == HKS_ALG_HMAC) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_HMAC, keyNode);
+#ifdef HKS_SUPPORT_CMAC_C
     } else if (algParam->uint32Param == HKS_ALG_3DES) {  // CMACinit校验密钥算法，只支持3DES
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_CMAC, keyNode);
+#endif
     } else if (algParam->uint32Param == HKS_ALG_SM3) {
         return HksThreeStageAuth(HKS_AUTH_ID_MAC_SM3, keyNode);
     }
@@ -1047,6 +1053,7 @@ static int32_t CoreAesCipherFinish(const struct HuksKeyNode *keyNode, const bool
     return CoreAesDecryptFinish(keyNode, inData, outData, alg);
 }
 
+#ifdef HKS_SUPPORT_DES_C
 static int32_t CoreDesCipherInit(const struct HuksKeyNode *keyNode)
 {
     struct HksParam *modeParam = NULL;
@@ -1127,7 +1134,9 @@ static int32_t CoreDesCipherFinish(const struct HuksKeyNode *keyNode, const bool
 
     return CoreDesDecryptFinish(keyNode, inData, outData, alg);
 }
+#endif
 
+#ifdef HKS_SUPPORT_3DES_C
 static int32_t Core3DesCipherInit(const struct HuksKeyNode *keyNode)
 {
     struct HksParam *modeParam = NULL;
@@ -1208,6 +1217,7 @@ static int32_t Core3DesCipherFinish(const struct HuksKeyNode *keyNode, const boo
 
     return Core3DesDecryptFinish(keyNode, inData, outData, alg);
 }
+#endif
 
 static int32_t CoreSm4EncryptFinish(const struct HuksKeyNode *keyNode,
     const struct HksBlob *inData, struct HksBlob *outData, uint32_t alg)
@@ -1577,10 +1587,14 @@ int32_t HksCoreCryptoThreeStageInit(const struct HuksKeyNode *keyNode, const str
         return SetCacheModeCtx(keyNode);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherInit(keyNode);
+#ifdef HKS_SUPPORT_DES_C
     } else if (algParam->uint32Param == HKS_ALG_DES) {
         return CoreDesCipherInit(keyNode);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
     } else if (algParam->uint32Param == HKS_ALG_3DES) {
         return Core3DesCipherInit(keyNode);
+#endif
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreCipherInit(keyNode);
     } else {
@@ -1601,10 +1615,14 @@ int32_t HksCoreCryptoThreeStageUpdate(const struct HuksKeyNode *keyNode, const s
         return UpdateCachedData(keyNode, inData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherUpdate(keyNode, inData, outData, alg);
+#ifdef HKS_SUPPORT_DES_C
     } else if (algParam->uint32Param == HKS_ALG_DES) {
         return CoreDesCipherUpdate(keyNode, inData, outData, alg);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
     } else if (algParam->uint32Param == HKS_ALG_3DES) {
         return Core3DesCipherUpdate(keyNode, inData, outData, alg);
+#endif
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreCipherUpdate(keyNode, inData, outData, alg);
     } else {
@@ -1629,10 +1647,14 @@ int32_t HksCoreEncryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return CoreSm2CipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherFinish(keyNode, true, inData, outData, alg);
+#ifdef HKS_SUPPORT_DES_C
     } else if (algParam->uint32Param == HKS_ALG_DES) {
         return CoreDesCipherFinish(keyNode, true, inData, outData, alg);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
     } else if (algParam->uint32Param == HKS_ALG_3DES) {
         return Core3DesCipherFinish(keyNode, true, inData, outData, alg);
+#endif
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreSm4EncryptFinish(keyNode, inData, outData, alg);
     } else {
@@ -1657,10 +1679,14 @@ int32_t HksCoreDecryptThreeStageFinish(const struct HuksKeyNode *keyNode, const 
         return CoreSm2CipherFinish(keyNode, inData, outData);
     } else if (algParam->uint32Param == HKS_ALG_AES) {
         return CoreAesCipherFinish(keyNode, false, inData, outData, alg);
+#ifdef HKS_SUPPORT_DES_C
     } else if (algParam->uint32Param == HKS_ALG_DES) {
         return CoreDesCipherFinish(keyNode, false, inData, outData, alg);
+#endif
+#ifdef HKS_SUPPORT_3DES_C
     } else if (algParam->uint32Param == HKS_ALG_3DES) {
         return Core3DesCipherFinish(keyNode, false, inData, outData, alg);
+#endif
     } else if (algParam->uint32Param == HKS_ALG_SM4) {
         return CoreSm4DecryptFinish(keyNode, inData, outData, alg);
     } else {

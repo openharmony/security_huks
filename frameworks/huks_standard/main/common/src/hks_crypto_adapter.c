@@ -183,6 +183,7 @@ static bool HksIsAlgorithmSm4(const struct HksParamSet *paramSet)
     return (algParam->uint32Param == HKS_ALG_SM4);
 }
 
+#ifdef HKS_SUPPORT_3DES_C
 static bool HksIsAlgorithm3DES(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
@@ -190,7 +191,9 @@ static bool HksIsAlgorithm3DES(const struct HksParamSet *paramSet)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check 3DES get alg param failed!")
     return (algParam->uint32Param == HKS_ALG_3DES);
 }
+#endif
 
+#ifdef HKS_SUPPORT_DES_C
 static bool HksIsAlgorithmDES(const struct HksParamSet *paramSet)
 {
     struct HksParam *algParam = NULL;
@@ -198,6 +201,7 @@ static bool HksIsAlgorithmDES(const struct HksParamSet *paramSet)
     HKS_IF_NOT_SUCC_LOGE_RETURN(ret, false, "check DES get alg param failed!")
     return (algParam->uint32Param == HKS_ALG_DES);
 }
+#endif
 
 int32_t HksBuildCipherUsageSpec(
     const struct HksParamSet *paramSet, bool isEncrypt, struct HksBlob *inputText, struct HksUsageSpec **outUsageSpec)
@@ -218,10 +222,14 @@ int32_t HksBuildCipherUsageSpec(
 
     if (HksIsAlgorithmSm4(paramSet)) { // is sm4
         ret = HksFillIvParam(paramSet, usageSpec);
+#ifdef HKS_SUPPORT_3DES_C
     } else if (HksIsAlgorithm3DES(paramSet)) { // is 3des
         ret = HksFillIvParam(paramSet, usageSpec);
+#endif
+#ifdef HKS_SUPPORT_DES_C
     } else if (HksIsAlgorithmDES(paramSet)) { // is des
         ret = HksFillIvParam(paramSet, usageSpec);
+#endif
     } else if (!isAes) { // not sm4, not aes
         *outUsageSpec = usageSpec;
         return HKS_SUCCESS;

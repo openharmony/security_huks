@@ -338,7 +338,7 @@ static int32_t HksMbedtlsRsaCrypt(const struct HksBlob *key, const struct HksUsa
     if (padding == MBEDTLS_RSA_PKCS_V21) {
         uint32_t mbedtlsAlg;
         ret = HksToMbedtlsDigestAlg(usageSpec->digest, &mbedtlsAlg);
-        mbedtls_rsa_set_padding(&ctx, padding, mbedtlsAlg);
+        mbedtls_rsa_set_padding(&ctx, padding, (mbedtls_md_type_t)mbedtlsAlg);
         HKS_IF_NOT_SUCC_RETURN(ret, ret)
     }
 
