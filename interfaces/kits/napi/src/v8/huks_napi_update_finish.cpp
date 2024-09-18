@@ -347,7 +347,7 @@ static napi_value UpdateWriteResult(napi_env env, UpdateAsyncContext context)
         (context->result == HKS_SUCCESS && context->outData != nullptr) ? context->outData->size : 0);
 }
 
-static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext context)
+static napi_value UpdateFinishAsyncWork(napi_env env, UpdateAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
