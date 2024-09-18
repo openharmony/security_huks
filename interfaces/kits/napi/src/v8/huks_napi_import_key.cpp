@@ -105,7 +105,7 @@ static napi_value ImportKeyWriteResult(napi_env env, ImportKeyAsyncContext conte
     return GenerateHksResult(env, context->result, nullptr, 0);
 }
 
-static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext context)
+static napi_value ImportKeyAsyncWork(napi_env env, ImportKeyAsyncContext &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {

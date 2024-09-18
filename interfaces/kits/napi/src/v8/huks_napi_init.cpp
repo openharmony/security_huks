@@ -136,7 +136,7 @@ static napi_value InitWriteResult(napi_env env, InitAsyncCtxPtr context)
     return GenerateHksHandle(env, context->result, context->handle, context->token);
 }
 
-static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr context)
+static napi_value InitAsyncWork(napi_env env, InitAsyncCtxPtr &context)
 {
     napi_value promise = nullptr;
     if (context->callback == nullptr) {
