@@ -307,7 +307,7 @@ int32_t HksManageStoreKeyBlob(const struct HksProcessInfo *processInfo, const st
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = HksStoreKeyBlob(&fileInfo, keyBlob);
+        ret = HksStoreKeyBlob(&fileInfo, &material, keyBlob);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks store key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
@@ -339,7 +339,7 @@ int32_t HksManageStoreDeleteKeyBlob(const struct HksProcessInfo *processInfo, co
         ret = HksConstructStoreFileInfo(processInfo, paramSet, &material, &fileInfo);
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
-        ret = HksStoreDeleteKeyBlob(&fileInfo);
+        ret = HksStoreDeleteKeyBlob(&fileInfo, &material);
 #endif
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks delete key blob failed, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
@@ -404,11 +404,11 @@ int32_t HksManageStoreGetKeyBlob(const struct HksProcessInfo *processInfo, const
         HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks construct store file info failed, ret = %" LOG_PUBLIC "d.", ret)
 
         if (storageType != HKS_STORAGE_TYPE_BAK_KEY) {
-            ret = HksStoreGetKeyBlob(&fileInfo.mainPath, keyBlob);
+            ret = HksStoreGetKeyBlob(&fileInfo.mainPath, &material, keyBlob);
         }
 #ifdef SUPPORT_STORAGE_BACKUP
         else {
-            ret = HksStoreGetKeyBlob(&fileInfo.bakPath, keyBlob);
+            ret = HksStoreGetKeyBlob(&fileInfo.bakPath, &material, keyBlob);
             HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "hks get key blob failed, ret = %" LOG_PUBLIC "d.", ret)
 
             if (HksStorageWriteFile(fileInfo.mainPath.path, fileInfo.mainPath.fileName, 0,

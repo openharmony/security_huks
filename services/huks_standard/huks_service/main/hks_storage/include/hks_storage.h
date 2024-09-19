@@ -42,13 +42,15 @@ int32_t HksStoreGetKeyBlobSize(const struct HksBlob *processName,
 int32_t HksGetKeyCountByProcessName(const struct HksBlob *processName, uint32_t *fileCount);
 #else // _STORAGE_LITE_
 
-int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyBlob);
+int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material,
+    const struct HksBlob *keyBlob);
 
-int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo);
+int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material);
 
 int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo);
 
-int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, struct HksBlob *keyBlob);
+int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, const struct HksStoreMaterial *material,
+    struct HksBlob *keyBlob);
 
 int32_t HksStoreGetKeyBlobSize(const struct HksStoreInfo *fileInfoPath, uint32_t *keyBlobSize);
 

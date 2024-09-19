@@ -101,7 +101,7 @@ int32_t HksFileInfoInit(struct HksStoreFileInfo *fileInfo);
 
 void FileInfoFree(struct HksStoreFileInfo *fileInfo);
 
-int32_t RecordKeyOperation(uint32_t operation, const char *path, const char *keyAlias);
+int32_t RecordKeyOperation(uint32_t operation, const struct HksStoreMaterial *material, const char *keyAlias);
 
 void FileNameListFree(struct HksFileEntry **fileNameList, uint32_t keyCount);
 

@@ -275,11 +275,12 @@ static int32_t IsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
     return HKS_SUCCESS;
 }
 
-int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksBlob *keyBlob)
+int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material,
+    const struct HksBlob *keyBlob)
 {
     int32_t ret;
     do {
-        ret = RecordKeyOperation(KEY_OPERATION_SAVE, fileInfo->mainPath.path, fileInfo->mainPath.fileName);
+        ret = RecordKeyOperation(KEY_OPERATION_SAVE, material, fileInfo->mainPath.fileName);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = HksStorageWriteFile(fileInfo->mainPath.path, fileInfo->mainPath.fileName, 0,
@@ -297,11 +298,11 @@ int32_t HksStoreKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct Hk
     return ret;
 }
 
-int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo)
+int32_t HksStoreDeleteKeyBlob(const struct HksStoreFileInfo *fileInfo, const struct HksStoreMaterial *material)
 {
     int32_t ret;
     do {
-        ret = RecordKeyOperation(KEY_OPERATION_DELETE, fileInfo->mainPath.path, fileInfo->mainPath.fileName);
+        ret = RecordKeyOperation(KEY_OPERATION_DELETE, material, fileInfo->mainPath.fileName);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = DeleteKeyBlob(fileInfo);
@@ -321,11 +322,12 @@ int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
     return ret;
 }
 
-int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, struct HksBlob *keyBlob)
+int32_t HksStoreGetKeyBlob(const struct HksStoreInfo *fileInfoPath, const struct HksStoreMaterial *material,
+    struct HksBlob *keyBlob)
 {
     int32_t ret;
     do {
-        ret = RecordKeyOperation(KEY_OPERATION_GET, fileInfoPath->path, fileInfoPath->fileName);
+        ret = RecordKeyOperation(KEY_OPERATION_GET, material, fileInfoPath->fileName);
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         ret = GetKeyBlob(fileInfoPath, keyBlob);
@@ -578,7 +580,7 @@ static void DeleteUserIdMainPathAndBakPath(const char *userData, const char *deD
     int32_t offset = sprintf_s(dePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s",
         deDataPath, userData);
     if (offset > 0) {
-        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", dePath);
+        HKS_LOG_I("delete de path, userid: %" LOG_PUBLIC "s", userData);
         (void)HksDeleteDir(dePath);
     } else {
         HKS_LOG_E("get de path failed");
@@ -588,7 +590,7 @@ static void DeleteUserIdMainPathAndBakPath(const char *userData, const char *deD
     offset = sprintf_s(cePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
         HKS_CE_ROOT_PATH, userData, ceOrEceDataPath);
     if (offset > 0) {
-        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", cePath);
+        HKS_LOG_I("delete ce path, userid: %" LOG_PUBLIC "s", userData);
         (void)HksDeleteDir(cePath);
     } else {
         HKS_LOG_E("get ce path failed");
@@ -598,7 +600,7 @@ static void DeleteUserIdMainPathAndBakPath(const char *userData, const char *deD
     offset = sprintf_s(ecePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
         HKS_ECE_ROOT_PATH, userData, ceOrEceDataPath);
     if (offset > 0) {
-        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", ecePath);
+        HKS_LOG_I("delete ece path, userid: %" LOG_PUBLIC "s", userData);
         (void)HksDeleteDir(ecePath);
     } else {
         HKS_LOG_E("get ece path failed");
@@ -632,7 +634,7 @@ static void DeleteUidMainPathAndBakPath(const char *userData, const char *uidDat
     int32_t offset = sprintf_s(dePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s",
         deDataPath, userData, uidData);
     if (offset > 0) {
-        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", dePath);
+        HKS_LOG_I("delete de path, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s", userData, uidData);
         (void)HksDeleteDir(dePath);
     } else {
         HKS_LOG_E("get de path failed");
@@ -642,7 +644,7 @@ static void DeleteUidMainPathAndBakPath(const char *userData, const char *uidDat
     offset = sprintf_s(cePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
         HKS_CE_ROOT_PATH, userData, ceOrEceDataPath, uidData);
     if (offset > 0) {
-        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", cePath);
+        HKS_LOG_I("delete ce path, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s", userData, uidData);
         (void)HksDeleteDir(cePath);
     } else {
         HKS_LOG_E("get ce path failed");
@@ -652,7 +654,7 @@ static void DeleteUidMainPathAndBakPath(const char *userData, const char *uidDat
     offset = sprintf_s(ecePath, HKS_MAX_DIRENT_FILE_LEN, "%s/%s/%s/%s",
         HKS_ECE_ROOT_PATH, userData, ceOrEceDataPath, uidData);
     if (offset > 0) {
-        HKS_LOG_I("delete path: %" LOG_PUBLIC "s", ecePath);
+        HKS_LOG_I("delete ece path, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s", userData, uidData);
         (void)HksDeleteDir(ecePath);
     } else {
         HKS_LOG_E("get ece path failed");
@@ -710,7 +712,8 @@ void HksServiceDeleteUserIDKeyAliasFile(const struct HksBlob *userId)
 
         // ignore these results for ensure to clear data as most as possible
         ret = HksDeleteDir(userProcess);
-        HKS_IF_NOT_SUCC_LOGE(ret, "delete de path: %" LOG_PUBLIC "s failed, ret = %" LOG_PUBLIC "d", userProcess, ret)
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete de path, userid: %" LOG_PUBLIC "s failed, ret = %" LOG_PUBLIC "d",
+            userData, ret)
 #ifdef L2_STANDARD
         (void)DeleteUserIdPath(userId);
 #endif
@@ -752,11 +755,12 @@ void HksServiceDeleteUIDKeyAliasFile(const struct HksProcessInfo *processInfo)
             break;
         }
 
-        HKS_LOG_I("delete path : %" LOG_PUBLIC "s", userProcess);
+        HKS_LOG_I("delete de path, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s", userData, uidData);
 
         // ignore these results for ensure to clear data as most as possible
         ret = HksDeleteDir(userProcess);
-        HKS_IF_NOT_SUCC_LOGE(ret, "delete de path: %" LOG_PUBLIC "s failed, ret = %" LOG_PUBLIC "d", userProcess, ret)
+        HKS_IF_NOT_SUCC_LOGE(ret, "delete de path, userid: %" LOG_PUBLIC "s, uid: %" LOG_PUBLIC "s failed, "
+            "ret = %" LOG_PUBLIC "d", userData, uidData, ret)
 #ifdef L2_STANDARD
         (void)DeleteUidPath(processInfo);
 #endif
