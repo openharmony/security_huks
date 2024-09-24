@@ -78,29 +78,17 @@ static int32_t InitHdiProxyInstance()
 
 ENABLE_CFI(int32_t HuksAccessModuleInit(void))
 {
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHdiProxyPtrMutex(), HKS_FAILURE)
+    HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
-    do {
-        HKS_IF_NOT_SUCC_LOGE_BREAK(InitHdiProxyInstance(), "init hdi proxy instance fail")
+    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ModuleInit, HKS_ERROR_NULL_POINTER,
+        "Module Init function is null pointer")
 
-        HKS_IF_NULL_LOGE_BREAK(g_hksHdiProxyInstance->ModuleInit, "Module Init function is null pointer")
-
-        return g_hksHdiProxyInstance->ModuleInit(g_hksHdiProxyInstance);
-    } while (0);
-
-    HksDestroyHdiProxyMutex();
-    return HKS_FAILURE;
+    return g_hksHdiProxyInstance->ModuleInit(g_hksHdiProxyInstance);
 }
 
 ENABLE_CFI(int32_t HuksAccessModuleDestroy(void))
 {
-    if (InitHdiProxyInstance() != HKS_SUCCESS) {
-        HksDestroyHdiProxyMutex();
-        HKS_LOG_E("access destroy init hdi instance fail");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    HksDestroyHdiProxyMutex();
+    HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ModuleDestroy, HKS_ERROR_NULL_POINTER,
         "Module Init function is null pointer")
