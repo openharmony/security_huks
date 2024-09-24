@@ -21,6 +21,8 @@
 
 #include "huks_access.h"
 
+#include <pthread.h>
+
 #include "hks_cfi.h"
 #include "huks_hdi.h"
 #include "v1_0/ihuks.h"
@@ -31,9 +33,8 @@
 #include "hks_mutex.h"
 #include "hks_template.h"
 
-static HksMutex *g_hdiProxyMutex = NULL;
-
 static struct IHuks *g_hksHdiProxyInstance = NULL;
+static pthread_mutex_t g_hdiProxyMutex = PTHREAD_MUTEX_INITIALIZER;
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t InitHdiProxyInstance()
@@ -42,41 +43,37 @@ static int32_t InitHdiProxyInstance()
         return HKS_SUCCESS;
     }
 
-    if (HksMutexLock(g_hdiProxyMutex) != 0) {
-        HKS_LOG_E("g_hdiProxyMutex HksMutexLock failed");
+    int32_t ret = pthread_mutex_lock(&g_hdiProxyMutex);
+    if (ret != 0) {
+        HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_lock failed", ret);
         return HKS_FAILURE;
     }
 
     if (g_hksHdiProxyInstance != NULL) {
-        (void)HksMutexUnlock(g_hdiProxyMutex);
+        ret = pthread_mutex_unlock(&g_hdiProxyMutex);
+        if (ret != 0) {
+            HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_unlock failed 1", ret);
+            return HKS_FAILURE;
+        }
         return HKS_SUCCESS;
     }
 
     g_hksHdiProxyInstance = IHuksGetInstance("hdi_service", true);
     if (g_hksHdiProxyInstance == NULL) {
         HKS_LOG_E("IHuksGet hdi huks service failed");
-        (void)HksMutexUnlock(g_hdiProxyMutex);
+        ret = pthread_mutex_unlock(&g_hdiProxyMutex);
+        if (ret != 0) {
+            HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_unlock failed 2", ret);
+            return HKS_FAILURE;
+        }
         return HKS_ERROR_NULL_POINTER;
     }
-    (void)HksMutexUnlock(g_hdiProxyMutex);
-    return HKS_SUCCESS;
-}
-
-static int32_t HksCreateHdiProxyPtrMutex(void)
-{
-    if (g_hdiProxyMutex == NULL) {
-        g_hdiProxyMutex = HksMutexCreate();
-        HKS_IF_NULL_LOGE_RETURN(g_hdiProxyMutex, HKS_FAILURE, "create g_hdiProxyMutex fail")
+    ret = pthread_mutex_unlock(&g_hdiProxyMutex);
+    if (ret != 0) {
+        HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_unlock failed 3", ret);
+        return HKS_FAILURE;
     }
     return HKS_SUCCESS;
-}
-
-static void HksDestroyHdiProxyMutex(void)
-{
-    if (g_hdiProxyMutex != NULL) {
-        HksMutexClose(g_hdiProxyMutex);
-        g_hdiProxyMutex = NULL;
-    }
 }
 
 ENABLE_CFI(int32_t HuksAccessModuleInit(void))

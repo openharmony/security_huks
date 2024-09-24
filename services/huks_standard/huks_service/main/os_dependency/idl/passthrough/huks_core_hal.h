@@ -27,10 +27,6 @@ int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice);
 
 int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice);
 
-int32_t HksCreateHalDevicePtrMutex(void);
-
-void HksDestroyHalDevicePtrMutex(void);
-
 #ifdef __cplusplus
 }
 #endif

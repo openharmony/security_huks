@@ -16,6 +16,9 @@
 #ifndef HKS_TEMPLATE_H
 #define HKS_TEMPLATE_H
 
+#include <errno.h>
+#include <string.h>
+
 #include "hks_log.h"
 
 #undef HKS_NULL_POINTER
@@ -96,4 +99,9 @@ do { \
         return; \
     } \
 } while (0)
+
+#define HKS_LOG_ERRNO(msg, ret) ({ int currentErrno = errno; \
+    HKS_LOG_E(msg " %" LOG_PUBLIC "d, errno %" LOG_PUBLIC "d, strerror %" LOG_PUBLIC "s", \
+        (ret), currentErrno, strerror(currentErrno)); })
+
 #endif /* HKS_TEMPLATE_H */

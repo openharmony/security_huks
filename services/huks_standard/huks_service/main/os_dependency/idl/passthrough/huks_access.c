@@ -33,29 +33,17 @@ static struct HuksHdi *g_hksHalDevicePtr = NULL;
 #ifndef _CUT_AUTHENTICATE_
 ENABLE_CFI(int32_t HuksAccessModuleInit(void))
 {
-    HKS_IF_NOT_SUCC_RETURN(HksCreateHalDevicePtrMutex(), HKS_FAILURE)
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
-    do {
-        HKS_IF_NOT_SUCC_LOGE_BREAK(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), "create huks hdi device failed")
+    HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiModuleInit, HKS_ERROR_NULL_POINTER,
+        "Module Init function is null pointer")
 
-        HKS_IF_NULL_LOGE_BREAK(g_hksHalDevicePtr->HuksHdiModuleInit, "Module Init function is null pointer")
-
-        return g_hksHalDevicePtr->HuksHdiModuleInit();
-    } while (0);
-
-    HksDestroyHalDevicePtrMutex();
-    return HKS_FAILURE;
+    return g_hksHalDevicePtr->HuksHdiModuleInit();
 }
 
 ENABLE_CFI(int32_t HuksAccessModuleDestroy(void))
 {
-    if (HksCreateHuksHdiDevice(&g_hksHalDevicePtr) != HKS_SUCCESS) {
-        HksDestroyHalDevicePtrMutex();
-        HKS_LOG_E("access destroy init device failed");
-        return HKS_ERROR_NULL_POINTER;
-    }
-
-    HksDestroyHalDevicePtrMutex();
+    HKS_IF_NOT_SUCC_RETURN(HksCreateHuksHdiDevice(&g_hksHalDevicePtr), HKS_ERROR_NULL_POINTER)
 
     HKS_IF_NULL_LOGE_RETURN(g_hksHalDevicePtr->HuksHdiModuleDestroy, HKS_ERROR_NULL_POINTER,
         "Module Destroy function is null pointer")
