@@ -56,13 +56,3 @@ void HksEnableSetHid(bool isEnable)
 {
     g_isEnableHdi = isEnable;
 }
-
-int32_t HksCreateHalDevicePtrMutex(void)
-{
-    return HKS_SUCCESS;
-}
-
-void HksDestroyHalDevicePtrMutex(void)
-{
-    return;
-}

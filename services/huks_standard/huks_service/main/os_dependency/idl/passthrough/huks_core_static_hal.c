@@ -48,13 +48,3 @@ int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
     *halDevice = NULL;
     return HKS_SUCCESS;
 }
-
-int32_t HksCreateHalDevicePtrMutex(void)
-{
-    return HKS_SUCCESS;
-}
-
-void HksDestroyHalDevicePtrMutex(void)
-{
-    return;
-}
