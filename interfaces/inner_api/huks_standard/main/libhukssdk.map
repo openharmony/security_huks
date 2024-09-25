@@ -46,7 +46,6 @@
     HksUpdate;
     HksFinish;
     HksAbort;
-    HksExportChipsetPlatformPublicKey;
     HksInitParamSet;
     HksAddParams;
     HksBuildParamSet;

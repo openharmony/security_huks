@@ -94,9 +94,6 @@ int32_t HuksAccessMac(const struct HksBlob *key, const struct HksParamSet *param
 
 int32_t HuksAccessUpgradeKey(const struct HksBlob *oldKey, const struct HksParamSet *paramSet, struct HksBlob *newKey);
 
-int32_t HuksAccessExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
-
 #ifdef __cplusplus
 }
 #endif
