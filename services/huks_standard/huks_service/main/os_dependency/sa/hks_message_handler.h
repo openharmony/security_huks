@@ -61,9 +61,6 @@ const struct HksIpcThreeStagePoint HKS_IPC_THREE_STAGE_HANDLER[] = {
     { HKS_MSG_UPDATE, HksIpcServiceUpdate },
     { HKS_MSG_FINISH, HksIpcServiceFinish },
     { HKS_MSG_ABORT, HksIpcServiceAbort },
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-    { HKS_MSG_CHIPSET_PLATFORM_DECRYPT, HksIpcServiceExportChipsetPlatformPublicKey },
-#endif
 };
 
 void HksIpcErrorResponse(const uint8_t *context);

@@ -2010,14 +2010,6 @@ int32_t HksServiceGenerateRandom(const struct HksProcessInfo *processInfo, struc
     return ret;
 }
 
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-int32_t HksServiceExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
-{
-    return HuksAccessExportChipsetPlatformPublicKey(salt, scene, publicKey);
-}
-#endif
-
 int32_t BuildFrontUserIdParamSet(const struct HksParamSet *paramSet, struct HksParamSet **outParamSet, int frontUserId)
 {
     struct HksParamSet *newParamSet = NULL;

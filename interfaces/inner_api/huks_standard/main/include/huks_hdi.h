@@ -305,17 +305,6 @@
                  HDI_ADAPTER_PARAM(newKey, &newKeyCore));  \
     HDI_CONVERTER_PARAM_OUT_BLOB(newKeyCore, newKey)
 
-#define HDI_CONVERTER_FUNC_EXPORTCHIPSETPLATFORMPUBLICKEY(salt, scene, publicKey, ret, func)  \
-    struct HuksBlob saltCore = {0};  \
-    struct HuksBlob publicKeyCore = {0};  \
-    uint32_t sceneInt = (uint32_t) scene;  \
-    HDI_CONVERTER_PARAM_IN_BLOB(salt, saltCore)  \
-    HDI_CONVERTER_PARAM_IN_BLOB(publicKey, publicKeyCore)  \
-    ret = (func)(HDI_ADAPTER_PARAM(salt, &saltCore),  \
-              sceneInt,  \
-              HDI_ADAPTER_PARAM(publicKey, &publicKeyCore));  \
-    HDI_CONVERTER_PARAM_OUT_BLOB(publicKeyCore, publicKey)
-
 struct HuksHdi {
     /**
      * @brief HUKS initialize
@@ -565,16 +554,6 @@ struct HuksHdi {
      */
     int32_t (*HuksHdiUpgradeKey)(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
         struct HksBlob *newKey);
-
-    /**
-     * @brief Export chipset platform publicKey
-     * @param salt salt value
-     * @param scene scene
-     * @param publicKey public key
-     * @return error code, see hks_type.h
-     */
-    int32_t (*HuksHdiExportChipsetPlatformPublicKey)(const struct HksBlob *salt,
-        enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
 };
 
 #endif /* HUKS_HDI_H */

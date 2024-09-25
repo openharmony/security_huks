@@ -37,7 +37,6 @@ ohos_static_library("libhuks_core_hal_api_static") {
     "//base/security/huks/frameworks/config/build:l2_standard_common_config",
   ]
   sources = [
-    "src/hks_chipset_platform_key_hardcoded.c",
     "src/hks_core_useriam_wrap.cpp",
   ]
 

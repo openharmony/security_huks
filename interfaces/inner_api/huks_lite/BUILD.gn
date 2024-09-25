@@ -174,7 +174,6 @@ if (ohos_kernel_type == "liteos_m") {
       "../../../services/huks_standard/huks_engine/main/core/src/hks_auth.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c",
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_chipset_platform_derive.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c",
       "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c",

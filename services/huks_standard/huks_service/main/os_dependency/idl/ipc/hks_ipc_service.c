@@ -906,42 +906,6 @@ void HksIpcErrorResponse(const uint8_t *context)
     HksSendResponse(context, HKS_ERROR_IPC_MSG_FAIL, NULL);
 }
 
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-void HksIpcServiceExportChipsetPlatformPublicKey(
-    const struct HksBlob *paramSetBlob, struct HksBlob *publicKey, const uint8_t *context)
-{
-    int32_t ret;
-    struct HksParamSet *paramSet = NULL;
-    struct HksBlob salt = { 0, NULL };
-    enum HksChipsetPlatformDecryptScene scene = 0;
-
-    do {
-        ret = HksGetParamSet((struct HksParamSet *)paramSetBlob->data, paramSetBlob->size, &paramSet);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "HksGetParamSet fail, ret = %" LOG_PUBLIC "d", ret)
-
-        struct HksParamOut params[] = {
-            { .tag = HKS_TAG_PARAM0_BUFFER, .blob = &salt },
-            { .tag = HKS_TAG_PARAM1_UINT32, .uint32Param = &scene },
-        };
-
-        ret = HksParamSetToParams(paramSet, params, HKS_ARRAY_SIZE(params));
-        HKS_IF_NOT_SUCC_BREAK(ret)
-
-        HKS_LOG_I("scene = %" LOG_PUBLIC "d", scene);
-        ret = HksServiceExportChipsetPlatformPublicKey(&salt, scene, publicKey);
-        HKS_IF_NOT_SUCC_LOGE_BREAK(ret,
-            "HksServiceExportChipsetPlatformPublicKey fail, ret = %" LOG_PUBLIC "d", ret)
-        HksSendResponse(context, ret, publicKey);
-    } while (0);
-
-    if (ret != HKS_SUCCESS) {
-        HksSendResponse(context, ret, NULL);
-    }
-
-    HksFreeParamSet(&paramSet);
-}
-#endif
-
 void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *context)
 {
     struct HksParamSet *paramSet = NULL;

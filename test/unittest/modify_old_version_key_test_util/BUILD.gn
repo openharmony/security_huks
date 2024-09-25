@@ -53,7 +53,6 @@ ohos_static_library("huks_modify_old_version_key_util") {
     "../../../services/huks_standard/huks_engine/main/core/src/hks_auth.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c",
-    "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_chipset_platform_derive.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c",
     "../../../services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c",
@@ -85,7 +84,6 @@ ohos_static_library("huks_modify_old_version_key_util") {
     }
 
     sources += [
-      "../../../services/huks_standard/huks_engine/main/core/src/hks_chipset_platform_decrypt.c",
       "../../../services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_asn1.c",
       "../../../services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_attest.c",
       "../../../services/huks_standard/huks_engine/main/device_cert_manager/src/dcm_attest_utils.c",
