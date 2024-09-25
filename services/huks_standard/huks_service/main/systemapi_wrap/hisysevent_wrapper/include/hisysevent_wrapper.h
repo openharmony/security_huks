@@ -36,9 +36,14 @@ enum EventType {
     BEHAVIOR,
 };
 
+enum EventPerformanceID {
+    HUKS_TRANSFER_KEY = 1 << 5,
+};
+
 int WriteEvent(enum EventType eventType, const char *functionName, const struct EventValues *eventValues,
     const char *extra);
 
+int WritePerformanceEvent(enum EventPerformanceID performanceId);
 #ifdef __cplusplus
 }
 #endif
