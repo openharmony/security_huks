@@ -428,7 +428,6 @@ HksChipsetPlatformTestCase Encrypt(HksCipsetPlatformEncryptInput &input)
         .salt = std::vector<uint8_t>(input.salt),
         .expectPlain = std::vector<uint8_t>(input.plainText),
     };
-    HksBlob saltBlob = { .size = static_cast<uint32_t>(input.salt.size()), .data = input.salt.data() };
     HksBlob plainText = { .size = static_cast<uint32_t>(input.plainText.size()), .data = input.plainText.data() };
 
     std::vector<uint8_t> rawPubKey{};
