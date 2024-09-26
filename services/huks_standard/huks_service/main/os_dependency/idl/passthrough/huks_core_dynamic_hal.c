@@ -44,17 +44,11 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
     }
 
     int32_t ret = pthread_mutex_lock(&g_halDevicePtrMutex);
-    if (ret != 0) {
-        HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_lock failed", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_lock failed", ret);
 
     if (*halDevice != NULL) {
         ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
-        if (ret != 0) {
-            HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 1", ret);
-            return HKS_FAILURE;
-        }
+        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_unlock failed before dlopen", ret);
         return HKS_SUCCESS;
     }
 
@@ -65,10 +59,7 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
 #endif
     if (g_halDeviceHandle == NULL) {
         ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
-        if (ret != 0) {
-            HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 2", ret);
-            return HKS_FAILURE;
-        }
+        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_unlock failed after dlopen", ret);
         HKS_LOG_E("dlopen failed, %" LOG_PUBLIC "s!", dlerror());
         return HKS_FAILURE;
     }
@@ -82,8 +73,8 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
 
         ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
         if (ret != 0) {
-            HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 3", ret);
-            return HKS_FAILURE;
+            HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed before SUCC", ret);
+            break;
         }
         return HKS_SUCCESS;
     } while (0);
@@ -91,10 +82,7 @@ ENABLE_CFI(int32_t HksCreateHuksHdiDevice(struct HuksHdi **halDevice))
     dlclose(g_halDeviceHandle);
     g_halDeviceHandle = NULL;
     ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
-    if (ret != 0) {
-        HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 4", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_unlock failed before return", ret);
     return HKS_ERROR_NULL_POINTER;
 }
 
@@ -105,26 +93,17 @@ ENABLE_CFI(int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice))
     }
 
     int32_t ret = pthread_mutex_lock(&g_halDevicePtrMutex);
-    if (ret != 0) {
-        HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_lock failed 2", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_lock failed in destroy", ret);
 
     if ((halDevice == NULL) || (*halDevice == NULL)) {
         ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
-        if (ret != 0) {
-            HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 5", ret);
-            return HKS_FAILURE;
-        }
+        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_unlock failed after lock", ret);
         return HKS_SUCCESS;
     }
 
     if (g_halDeviceHandle == NULL) {
         ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
-        if (ret != 0) {
-            HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 6", ret);
-            return HKS_FAILURE;
-        }
+        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_unlock failed before dlsym", ret);
         HKS_LOG_E("g_halDeviceHandle is NULL!");
         return HKS_ERROR_NULL_POINTER;
     }
@@ -137,9 +116,6 @@ ENABLE_CFI(int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice))
     g_halDeviceHandle = NULL;
 
     ret = pthread_mutex_unlock(&g_halDevicePtrMutex);
-    if (ret != 0) {
-        HKS_LOG_ERRNO("g_halDevicePtrMutex pthread_mutex_unlock failed 7", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_halDevicePtrMutex pthread_mutex_unlock failed before SUCC in destroy", ret);
     return HKS_SUCCESS;
 }

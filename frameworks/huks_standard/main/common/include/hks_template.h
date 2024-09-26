@@ -104,4 +104,11 @@ do { \
     HKS_LOG_E(msg " %" LOG_PUBLIC "d, errno %" LOG_PUBLIC "d, strerror %" LOG_PUBLIC "s", \
         (ret), currentErrno, strerror(currentErrno)); })
 
+#define HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN(msg, ret) ({ int currentErrno = errno; \
+    if ((ret) != 0) { \
+        HKS_LOG_E(msg " %" LOG_PUBLIC "d, errno %" LOG_PUBLIC "d, strerror %" LOG_PUBLIC "s", \
+            (ret), currentErrno, strerror(currentErrno)); \
+        return HKS_FAILURE; \
+    }})
+
 #endif /* HKS_TEMPLATE_H */
