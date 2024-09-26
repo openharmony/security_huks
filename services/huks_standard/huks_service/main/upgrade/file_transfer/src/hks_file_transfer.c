@@ -24,6 +24,7 @@
 #include "hks_type_inner.h"
 
 #include "hks_storage_utils.h"
+#include "hisysevent_wrapper.h"
 
 #include <errno.h>
 #include <ftw.h>
@@ -343,6 +344,7 @@ ENABLE_CFI(static int32_t CopyRdbCeToDePathIfNeed(void))
 
 int32_t HksUpgradeFileTransferOnPowerOn(void)
 {
+    WritePerformanceEvent(HUKS_TRANSFER_KEY);
     CopyDeToTmpPathIfNeed();
     int32_t ret = CopyRdbCeToDePathIfNeed();
     // If the ret is fail, continue to upgrade next step instead of return.

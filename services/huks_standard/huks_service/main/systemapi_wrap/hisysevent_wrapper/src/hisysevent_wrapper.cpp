@@ -17,6 +17,7 @@
 #include "hisysevent_wrapper.h"
 #include "hisysevent.h"
 
+#include "hks_cfi.h"
 #include "hks_log.h"
 #include "hks_template.h"
 
@@ -29,6 +30,7 @@ static constexpr const char g_tagProcessUID[] = "PROCESS_UID";
 static constexpr const char g_tagKeyType[] = "KEY_TYPE";
 static constexpr const char g_tagErrorCode[] = "ERROR_CODE";
 static constexpr const char g_tagExtra[] = "EXTRA";
+static constexpr const char g_stats[] = "PERFORMANCE";
 
 static int32_t ConvertToHiSysEventType(enum EventType inEventType,
     int32_t *outEventTypeInt)
@@ -67,4 +69,17 @@ int WriteEvent(enum EventType eventType, const char *functionName, const struct 
         eventValues->processName, g_tagKeyType, eventValues->keyType, g_tagErrorCode, eventValues->errorCode,
         g_tagExtra, extra);
     return ret;
+}
+
+ENABLE_CFI(int WritePerformanceEvent(enum EventPerformanceID performanceId))
+{
+    int id = performanceId;
+    std::chrono::milliseconds ms = std::chrono::duration_cast< std::chrono::milliseconds >(
+    std::chrono::system_clock::now().time_since_epoch());
+
+    return HiSysEventWrite(g_stats, "CPU_SCENE_ENTRY",
+        OHOS::HiviewDFX::HiSysEvent::EventType::BEHAVIOR,
+        "PACKAGE_NAME", "huks_service",
+        "SCENE_ID", std::to_string(id).c_str(),
+        "HAPPEN_TIME", ms.count());
 }
