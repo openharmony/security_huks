@@ -554,6 +554,16 @@ struct HuksHdi {
      */
     int32_t (*HuksHdiUpgradeKey)(const struct HksBlob *oldKey, const struct HksParamSet *paramSet,
         struct HksBlob *newKey);
+
+    /**
+     * @brief Export chipset platform publicKey
+     * @param salt salt value
+     * @param scene scene
+     * @param publicKey public key
+     * @return error code, see hks_type.h
+     */
+    int32_t (*HuksHdiExportChipsetPlatformPublicKey)(const struct HksBlob *salt,
+        enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
 };
 
 #endif /* HUKS_HDI_H */
