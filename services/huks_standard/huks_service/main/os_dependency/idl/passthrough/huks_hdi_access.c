@@ -30,7 +30,6 @@
 
 #include "hks_log.h"
 #include "hks_mem.h"
-#include "hks_mutex.h"
 #include "hks_template.h"
 
 static struct IHuks *g_hksHdiProxyInstance = NULL;
@@ -47,20 +46,18 @@ static int32_t InitHdiProxyInstance()
     HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_lock failed", ret);
 
     if (g_hksHdiProxyInstance != NULL) {
-        ret = pthread_mutex_unlock(&g_hdiProxyMutex);
-        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_unlock failed before get", ret);
+        (void)pthread_mutex_unlock(&g_hdiProxyMutex);
         return HKS_SUCCESS;
     }
 
     g_hksHdiProxyInstance = IHuksGetInstance("hdi_service", true);
     if (g_hksHdiProxyInstance == NULL) {
         HKS_LOG_E("IHuksGet hdi huks service failed");
-        ret = pthread_mutex_unlock(&g_hdiProxyMutex);
-        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_unlock failed after get", ret);
+        (void)pthread_mutex_unlock(&g_hdiProxyMutex);
         return HKS_ERROR_NULL_POINTER;
     }
-    ret = pthread_mutex_unlock(&g_hdiProxyMutex);
-    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_unlock failed before SUCC", ret);
+
+    (void)pthread_mutex_unlock(&g_hdiProxyMutex);
     return HKS_SUCCESS;
 }
 
