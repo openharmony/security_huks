@@ -52,6 +52,4 @@ ohos_unittest("huks_mock_test") {
     "c_utils:utils",
     "hilog:libhilog",
   ]
-
-  deps = [ "//base/security/huks/utils/mutex:libhuks_utils_mutex_static" ]
 }
