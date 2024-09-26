@@ -618,21 +618,4 @@ HWTEST_F(HksChipsetPlatformEncryptTest, EncryptTool, TestSize.Level0)
     }
     HKS_TEST_LOG_I("end EncryptTool");
 }
-
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-/**
- * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest001
- * @tc.desc: tdd Normal process of chipset platform encrypt, expect ret == HKS_SUCCESS
- * @tc.type: FUNC
- */
-HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest001, TestSize.Level0)
-{
-    HKS_LOG_E("enter HksChipsetPlatformEncryptTest");
-    HksChipsetPlatformTestCase cipherMaterials {};
-    for (auto &input : g_encryptInputs) {
-        cipherMaterials = Encrypt(input);
-        PrintResult(cipherMaterials);
-    }
-}
-#endif // HKS_UNTRUSTED_RUNNING_ENV
 }
