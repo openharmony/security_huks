@@ -21,6 +21,8 @@
 
 #include "huks_access.h"
 
+#include <pthread.h>
+
 #include "hks_cfi.h"
 #include "huks_hdi.h"
 #include "v1_0/ihuks.h"
@@ -31,6 +33,7 @@
 #include "hks_template.h"
 
 static struct IHuks *g_hksHdiProxyInstance = NULL;
+static pthread_mutex_t g_hdiProxyMutex = PTHREAD_MUTEX_INITIALIZER;
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t InitHdiProxyInstance()
@@ -39,8 +42,22 @@ static int32_t InitHdiProxyInstance()
         return HKS_SUCCESS;
     }
 
+    int32_t ret = pthread_mutex_lock(&g_hdiProxyMutex);
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_lock failed", ret);
+
+    if (g_hksHdiProxyInstance != NULL) {
+        (void)pthread_mutex_unlock(&g_hdiProxyMutex);
+        return HKS_SUCCESS;
+    }
+
     g_hksHdiProxyInstance = IHuksGetInstance("hdi_service", true);
-    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance, HKS_ERROR_NULL_POINTER, "IHuksGet hdi huks service failed")
+    if (g_hksHdiProxyInstance == NULL) {
+        HKS_LOG_E("IHuksGet hdi huks service failed");
+        (void)pthread_mutex_unlock(&g_hdiProxyMutex);
+        return HKS_ERROR_NULL_POINTER;
+    }
+
+    (void)pthread_mutex_unlock(&g_hdiProxyMutex);
     return HKS_SUCCESS;
 }
 

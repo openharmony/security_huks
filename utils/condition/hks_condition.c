@@ -35,10 +35,6 @@ struct HksCondition {
     pthread_cond_t cond;
 };
 
-#define HKS_LOG_ERRNO(msg, ret) ({ int currentErrno = errno; \
-    HKS_LOG_E(msg " %" LOG_PUBLIC "d, errno %" LOG_PUBLIC "d, strerror %" LOG_PUBLIC "s", \
-        (ret), currentErrno, strerror(currentErrno)); })
-
 int32_t HksConditionWait(HksCondition *condition)
 {
     HKS_IF_NULL_LOGE_RETURN(condition, -1, "HksConditionWait condition is NULL!")

@@ -48,4 +48,3 @@ int32_t HksDestroyHuksHdiDevice(struct HuksHdi **halDevice)
     *halDevice = NULL;
     return HKS_SUCCESS;
 }
-
