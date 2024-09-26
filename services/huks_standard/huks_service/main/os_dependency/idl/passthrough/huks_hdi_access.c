@@ -44,17 +44,11 @@ static int32_t InitHdiProxyInstance()
     }
 
     int32_t ret = pthread_mutex_lock(&g_hdiProxyMutex);
-    if (ret != 0) {
-        HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_lock failed", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_lock failed", ret);
 
     if (g_hksHdiProxyInstance != NULL) {
         ret = pthread_mutex_unlock(&g_hdiProxyMutex);
-        if (ret != 0) {
-            HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_unlock failed 1", ret);
-            return HKS_FAILURE;
-        }
+        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_unlock failed before get", ret);
         return HKS_SUCCESS;
     }
 
@@ -62,17 +56,11 @@ static int32_t InitHdiProxyInstance()
     if (g_hksHdiProxyInstance == NULL) {
         HKS_LOG_E("IHuksGet hdi huks service failed");
         ret = pthread_mutex_unlock(&g_hdiProxyMutex);
-        if (ret != 0) {
-            HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_unlock failed 2", ret);
-            return HKS_FAILURE;
-        }
+        HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_unlock failed after get", ret);
         return HKS_ERROR_NULL_POINTER;
     }
     ret = pthread_mutex_unlock(&g_hdiProxyMutex);
-    if (ret != 0) {
-        HKS_LOG_ERRNO("g_hdiProxyMutex pthread_mutex_unlock failed 3", ret);
-        return HKS_FAILURE;
-    }
+    HKS_IF_NOT_SUCC_LOG_ERRNO_RETURN("g_hdiProxyMutex pthread_mutex_unlock failed before SUCC", ret);
     return HKS_SUCCESS;
 }
 
