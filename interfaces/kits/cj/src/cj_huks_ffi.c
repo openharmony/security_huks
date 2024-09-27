@@ -114,3 +114,16 @@ void FfiOHOSConvertErrCode(int32_t hksCode, struct HksResult *ret)
 {
     *ret = HksConvertErrCode(hksCode);
 }
+
+int32_t FfiOHOSListAliases(const struct HksParamSet *paramSet, uint32_t *retAliasesCnt, struct HksBlob **retAliases)
+{
+    struct HksKeyAliasSet *outSet = NULL;
+    int32_t result = HksListAliases(paramSet, &outSet);
+    if (result == HKS_SUCCESS) {
+        *retAliasesCnt = outSet->aliasesCnt;
+        // ATTENSION: aliases will be released by caller
+        *retAliases = outSet->aliases;
+        free(outSet);
+    }
+    return result;
+}
