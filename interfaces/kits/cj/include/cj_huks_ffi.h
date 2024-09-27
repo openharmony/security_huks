@@ -57,6 +57,9 @@ FFI_EXPORT int32_t FfiOHOSDeleteKey(const char *keyAlias, const struct HksParamS
 
 FFI_EXPORT int32_t FfiOHOSImportKey(const char *keyAlias, const struct HksParamSet *paramSet, struct HksBlob *key);
 
+FFI_EXPORT int32_t FfiOHOSListAliases(const struct HksParamSet *paramSet, uint32_t *retAliasesCnt,
+    struct HksBlob **retAliases);
+
 FFI_EXPORT void FfiOHOSConvertErrCode(int32_t hksCode, struct HksResult *ret);
 
 #endif
