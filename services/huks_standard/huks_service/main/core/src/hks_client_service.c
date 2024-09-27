@@ -2074,3 +2074,36 @@ int32_t HksServiceListAliases(const struct HksProcessInfo *processInfo, const st
     return HKS_SUCCESS;
 #endif
 }
+
+int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const struct HksBlob *oldKeyAlias,
+    const struct HksParamSet *paramSet, const struct HksBlob *newKeyAlias)
+{
+    int32_t ret = HksCheckProcessNameAndKeyAlias(&processInfo->processName, oldKeyAlias);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret);
+
+    ret = HKsCheckOldKeyAliasDiffNewKeyAlias(oldKeyAlias, newKeyAlias);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("the new key alias same as old key alias !, ret = %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_INVALID_ARGUMENT;
+    }
+
+    ret = HksCheckOldKeyExist(processInfo, oldKeyAlias, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCheckOldKeyExist failed!, ret = %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+
+    ret = HksCheckNewKeyNotExist(processInfo, newKeyAlias, paramSet);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("HksCheckNewKeyNotExist failed!, ret = %" LOG_PUBLIC "d", ret);
+        return ret;
+    }
+
+    ret = HksManageStoreRenameKeyAlias(processInfo, oldKeyAlias, paramSet, newKeyAlias,
+        HKS_STORAGE_TYPE_KEY);
+    if (ret != HKS_SUCCESS) {
+        HKS_LOG_E("bad state, rename faild !, ret = %" LOG_PUBLIC "d", ret);
+        return HKS_ERROR_BAD_STATE;
+    }
+    return HKS_SUCCESS;
+}

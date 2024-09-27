@@ -358,6 +358,16 @@ HKS_API_EXPORT int32_t HksExportChipsetPlatformPublicKey(const struct HksBlob *s
  */
 HKS_API_EXPORT int32_t HksListAliases(const struct HksParamSet *paramSet, struct HksKeyAliasSet **outData);
 
+/**
+ * @brief Rename key alias
+ * @param oldKeyAlias the old key alias
+ * @param paramSet required parameter set
+ * @param newKeyAlias the new key alias
+ * @return error code, see hks_type.h
+ */
+HKS_API_EXPORT int32_t HksRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias);
+
 #ifdef __cplusplus
 }
 #endif

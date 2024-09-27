@@ -575,3 +575,21 @@ int32_t HksListAliasesUnpackFromService(const struct HksBlob *srcBlob, struct Hk
     *destData = tempAliasSet;
     return ret;
 }
+
+int32_t HksRenameKeyAliasPack(const struct HksBlob *oldKeyAlias, const struct HksBlob *newKeyAlias,
+    const struct HksParamSet *paramSet, struct HksBlob *destData)
+{
+    uint32_t offset = 0;
+    int32_t ret;
+    do {
+        ret = CopyBlobToBuffer(oldKeyAlias, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy oldKeyAlias failed");
+        
+        ret = CopyBlobToBuffer(newKeyAlias, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy newKeyAlias failed");
+
+        ret = CopyParamSetToBuffer(paramSet, destData, &offset);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "copy paramSet failed");
+    } while (0);
+    return ret;
+}

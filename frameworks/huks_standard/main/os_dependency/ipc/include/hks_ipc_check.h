@@ -57,6 +57,9 @@ int32_t HksCheckIpcCertificateChain(const struct HksBlob *keyAlias, const struct
 
 int32_t HksCheckIpcListAliases(const struct HksParamSet *paramSet);
 
+int32_t HksCheckIpcRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,
+    const struct HksBlob *newKeyAlias);
+
 #ifdef __cplusplus
 }
 #endif
