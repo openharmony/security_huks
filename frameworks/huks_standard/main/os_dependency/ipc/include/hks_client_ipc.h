@@ -85,9 +85,6 @@ int32_t HksClientFinish(const struct HksBlob *handle, const struct HksParamSet *
 
 int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
-int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
-
 int32_t HksClientListAliases(const struct HksParamSet *paramSet, struct HksKeyAliasSet **outData);
 
 int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct HksParamSet *paramSet,

@@ -824,37 +824,6 @@ int32_t HksClientAbort(const struct HksBlob *handle, const struct HksParamSet *p
     return ret;
 }
 
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-int32_t HksClientExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey)
-{
-    struct HksParamSet *sendParamSet = NULL;
-    struct HksParam params[] = {
-        { .tag = HKS_TAG_PARAM0_BUFFER,
-          .blob = *salt, },
-        { .tag = HKS_TAG_PARAM1_UINT32,
-          .uint32Param = scene, },
-    };
-
-    int32_t ret = HksParamsToParamSet(params, HKS_ARRAY_SIZE(params), &sendParamSet);
-    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "HksParamSetPack fail")
-
-    struct HksBlob parcelBlob = {
-        .size = sendParamSet->paramSetSize,
-        .data = (uint8_t *)sendParamSet
-    };
-    ret = HksSendRequest(HKS_MSG_CHIPSET_PLATFORM_DECRYPT, &parcelBlob, publicKey, NULL);
-    if (ret != HKS_SUCCESS) {
-        HKS_LOG_E("HksParamSet send fail");
-        HksFreeParamSet(&sendParamSet);
-        return ret;
-    }
-
-    HksFreeParamSet(&sendParamSet);
-    return ret;
-}
-#endif
-
 static int32_t ListAliasesInitBlob(const struct HksParamSet *paramSet,
     struct HksBlob *inBlob, struct HksBlob *outBlob)
 {

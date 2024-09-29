@@ -64,9 +64,6 @@ void HksIpcServiceFinish(const struct HksBlob *paramSetBlob, struct HksBlob *out
 
 void HksIpcServiceAbort(const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
 
-void HksIpcServiceExportChipsetPlatformPublicKey(
-    const struct HksBlob *paramSetBlob, struct HksBlob *outData, const uint8_t *context);
-
 void HksIpcServiceListAliases(const struct HksBlob *srcData, const uint8_t *context);
 
 void HksIpcServiceRenameKeyAlias(const struct HksBlob *srcData, const uint8_t *context);

@@ -265,17 +265,6 @@ void ConvertRawEcPubKeyToX509Key(const std::vector<uint8_t> &rawPk, std::vector<
     EXPECT_EQ(i2d_PUBKEY(pkey.get(), &tmp), length);
 }
 
-int32_t ExportX509ChipsetPlatformPubKey(const struct HksBlob &salt,
-    enum HksChipsetPlatformDecryptScene scene, std::vector<uint8_t> &rawPubKey)
-{
-    rawPubKey.resize(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
-    std::fill(rawPubKey.begin(), rawPubKey.end(), 0);
-    HksBlob publicKeyBlob = { .size = PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE, .data = rawPubKey.data() };
-    int32_t ret = HksExportChipsetPlatformPublicKey(&salt, scene, &publicKeyBlob);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    return ret;
-}
-
 int32_t GenerateTmpKeyPairAndExportPublicKey(std::vector<uint8_t> &resTmpPk)
 {
     WrapParamSet genParamSet {};
@@ -439,15 +428,14 @@ HksChipsetPlatformTestCase Encrypt(HksCipsetPlatformEncryptInput &input)
         .salt = std::vector<uint8_t>(input.salt),
         .expectPlain = std::vector<uint8_t>(input.plainText),
     };
-    HksBlob saltBlob = { .size = static_cast<uint32_t>(input.salt.size()), .data = input.salt.data() };
     HksBlob plainText = { .size = static_cast<uint32_t>(input.plainText.size()), .data = input.plainText.data() };
 
     std::vector<uint8_t> rawPubKey{};
     if (input.inputPlatformPubKeyManually) {
         rawPubKey = input.platformPubKey;
     } else {
-        int32_t ret = ExportX509ChipsetPlatformPubKey(saltBlob, input.scene, rawPubKey);
-        EXPECT_EQ(ret, HKS_SUCCESS);
+        EXPECT_EQ(input.inputPlatformPubKeyManually, true);
+        return {};
     }
     EXPECT_EQ(rawPubKey.size(), PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
     std::vector<uint8_t> x509PubKeyData{};
@@ -630,86 +618,4 @@ HWTEST_F(HksChipsetPlatformEncryptTest, EncryptTool, TestSize.Level0)
     }
     HKS_TEST_LOG_I("end EncryptTool");
 }
-
-#ifdef HKS_UNTRUSTED_RUNNING_ENV
-/**
- * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest001
- * @tc.desc: tdd Normal process of chipset platform encrypt, expect ret == HKS_SUCCESS
- * @tc.type: FUNC
- */
-HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest001, TestSize.Level0)
-{
-    HKS_LOG_E("enter HksChipsetPlatformEncryptTest");
-    HksChipsetPlatformTestCase cipherMaterials {};
-    for (auto &input : g_encryptInputs) {
-        cipherMaterials = Encrypt(input);
-        PrintResult(cipherMaterials);
-    }
-}
-
-/**
- * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest002
- * @tc.desc: tdd HksExportChipsetPlatformPublicKey normal case
- * @tc.type: FUNC
- */
-HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest002, TestSize.Level0)
-{
-    HKS_LOG_E("enter HksChipsetPlatformEncryptTest");
-    std::vector<uint8_t> saltData = std::vector<uint8_t>(PLATFORM_KEY_SALT_SIZE);
-    HksBlob salt = { .size = static_cast<uint32_t>(saltData.size()), .data = saltData.data() };
-    std::vector<uint8_t> pubKey = std::vector<uint8_t>(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
-    HksBlob pk = { .size = static_cast<uint32_t>(pubKey.size()), .data = pubKey.data() };
-    int32_t ret = HksExportChipsetPlatformPublicKey(&salt, HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA, &pk);
-    EXPECT_EQ(ret, HKS_SUCCESS);
-    std::vector<uint8_t> allZero(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
-    EXPECT_NE(memcmp(pubKey.data(), allZero.data(), PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE), 0);
-}
-
-/**
- * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest003
- * @tc.desc: tdd HksExportChipsetPlatformPublicKey bad case, nullptr
- * @tc.type: FUNC
- */
-HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest003, TestSize.Level0)
-{
-    HKS_LOG_E("enter HksChipsetPlatformEncryptTest");
-    // bad case, nullptr
-    int32_t ret = HksExportChipsetPlatformPublicKey(nullptr, HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA, nullptr);
-    EXPECT_NE(ret, HKS_SUCCESS);
-}
-
-/**
- * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest004
- * @tc.desc: tdd HksExportChipsetPlatformPublicKey bad case, salt too long, pubKey too long
- * @tc.type: FUNC
- */
-HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest004, TestSize.Level0)
-{
-    HKS_LOG_E("enter HksChipsetPlatformEncryptTest");
-    // bad case, salt too long, pubKey too long
-    std::vector<uint8_t> saltData(PLATFORM_KEY_SALT_SIZE + 1);
-    HksBlob salt = { .size = static_cast<uint32_t>(saltData.size()), .data = saltData.data() };
-    std::vector<uint8_t> pubKey(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE + 1);
-    HksBlob pk = { .size = static_cast<uint32_t>(pubKey.size()), .data = pubKey.data() };
-    int32_t ret = HksExportChipsetPlatformPublicKey(&salt, HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA, &pk);
-    EXPECT_NE(ret, HKS_SUCCESS);
-}
-
-/**
- * @tc.name: HksChipsetPlatformEncryptTest.HksChipsetPlatformEncryptTest005
- * @tc.desc: tdd HksExportChipsetPlatformPublicKey bad case, salt too short
- * @tc.type: FUNC
- */
-HWTEST_F(HksChipsetPlatformEncryptTest, HksChipsetPlatformEncryptTest005, TestSize.Level0)
-{
-    HKS_LOG_E("enter HksChipsetPlatformEncryptTest");
-    // bad case, salt too short
-    std::vector<uint8_t> saltData = std::vector<uint8_t>(PLATFORM_KEY_SALT_SIZE - 1);
-    HksBlob salt = { .size = static_cast<uint32_t>(saltData.size()), .data = saltData.data() };
-    std::vector<uint8_t> pubKey = std::vector<uint8_t>(PLATFORM_KEY_PLATFORM_PUB_KEY_SIZE);
-    HksBlob pk = { .size = static_cast<uint32_t>(pubKey.size()), .data = pubKey.data() };
-    int32_t ret = HksExportChipsetPlatformPublicKey(&salt, HKS_CHIPSET_PLATFORM_DECRYPT_SCENE_TA_TO_TA, &pk);
-    EXPECT_NE(ret, HKS_SUCCESS);
-}
-#endif // HKS_UNTRUSTED_RUNNING_ENV
 }

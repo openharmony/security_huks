@@ -28,7 +28,6 @@
 #include "hks_template.h"
 
 #include "hks_core_service_key_attest.h"
-#include "hks_core_service_key_chipset_platform_derive.h"
 #include "hks_core_service_key_generate.h"
 #include "hks_core_service_key_operate_one_stage.h"
 #include "hks_core_service_key_operate_three_stage.h"
@@ -184,11 +183,3 @@ ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, 
 {
     return HksCoreGenerateRandom(paramSet, random);
 }
-
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-ENABLE_CFI(int32_t HuksAccessExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey))
-{
-    return HksCoreExportChipsetPlatformPublicKey(salt, scene, publicKey);
-}
-#endif

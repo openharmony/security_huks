@@ -24,7 +24,6 @@
 #include "hks_type_inner.h"
 #include "securec.h"
 #include "hks_core_service_key_attest.h"
-#include "hks_core_service_key_chipset_platform_derive.h"
 #include "hks_core_service_key_generate.h"
 #include "hks_core_service_key_operate_one_stage.h"
 #include "hks_core_service_key_operate_three_stage.h"
@@ -210,10 +209,6 @@ struct HuksHdi *HuksCreateHdiDevicePtr(void)
 #endif /* _CUT_AUTHENTICATE_ */
 
     hdiDevicePtr->HuksHdiGenerateRandom   = HksCoreGenerateRandom;
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-    hdiDevicePtr->HuksHdiExportChipsetPlatformPublicKey = HksCoreExportChipsetPlatformPublicKey;
-#endif
-
     return hdiDevicePtr;
 }
 
