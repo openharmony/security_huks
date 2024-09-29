@@ -2099,3 +2099,143 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
     }
     return HKS_SUCCESS;
 }
+
+static int32_t AppendChangeStorageLevelInfoInService(const struct HksProcessInfo *processInfo,
+    const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
+{
+    int32_t ret;
+    struct HksParamSet *newParamSet = NULL;
+    do {
+        if (paramSet != NULL) {
+            ret = AppendToNewParamSet(paramSet, &newParamSet);
+        } else {
+            ret = HksInitParamSet(&newParamSet);
+        }
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append client service tag failed")
+
+        // process name only can be inserted by service
+        if (CheckProcessNameTagExist(newParamSet)) {
+            ret = HKS_ERROR_INVALID_ARGUMENT;
+            break;
+        }
+
+        struct HksParam paramArr[] = {
+            { .tag = HKS_TAG_PROCESS_NAME, .blob = processInfo->processName },
+            { .tag = HKS_TAG_USER_ID, .uint32Param = processInfo->userIdInt },
+            { .tag = HKS_TAG_IS_CHANGE_STORAGE_LEVEL, .boolParam = true },
+#ifdef HKS_SUPPORT_ACCESS_TOKEN
+            { .tag = HKS_TAG_ACCESS_TOKEN_ID, .uint64Param = processInfo->accessTokenId },
+#endif
+        };
+
+        ret = HksAddParams(newParamSet, paramArr, HKS_ARRAY_SIZE(paramArr));
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "add processInfo failed")
+
+        ret = HksBuildParamSet(&newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "build paramset failed")
+
+        *outParamSet = newParamSet;
+        return ret;
+    } while (0);
+    HksFreeParamSet(&newParamSet);
+    return ret;
+}
+
+/*
+ * dest key exist and src key exist, which means HKS_ERROR_KEY_CONFLICT
+ * dest key exist and src key not exist, which means HKS_SUCCESS(not need update)
+ * dest key not exist and src key exist, which means need update
+ * dest key not exist and src key not exist, which means HKS_ERROR_NOT_EXIST
+ */
+static int32_t HksCheckSrcKeyAndDestKeyCondition(const struct HksProcessInfo *processInfo,
+    const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet,
+    bool *isSkipUpdate)
+{
+    int32_t ret = HksManageStoreIsKeyBlobExist(processInfo, destParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+    if (ret == HKS_SUCCESS) {
+        ret = HksManageStoreIsKeyBlobExist(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+        if (ret == HKS_SUCCESS) {
+            HKS_LOG_E("source and destination both have key, key conflict");
+            ret = HKS_ERROR_KEY_CONFLICT;
+        } else if (ret == HKS_ERROR_NOT_EXIST) {
+            HKS_LOG_I("destination already has key, source doesn't have key, no need to transfer key ");
+            // no need to update key, actually return success
+            *isSkipUpdate = true;
+        } else {
+            HKS_LOG_E("hks get key blob is exist failed");
+        }
+    } else if (ret == HKS_ERROR_NOT_EXIST) {
+        ret = HksManageStoreIsKeyBlobExist(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+        if (ret == HKS_ERROR_NOT_EXIST) {
+            HKS_LOG_E("source and destination both don't have key");
+        }
+    } else {
+        HKS_LOG_E("hks get key blob is exist failed");
+    }
+    return ret;
+}
+
+static int32_t HksMallocNewKey(struct HksBlob *newKey)
+{
+    newKey->data = (uint8_t *)HksMalloc(MAX_KEY_SIZE);
+    HKS_IF_NULL_RETURN(newKey->data, HKS_ERROR_MALLOC_FAIL)
+
+    newKey->size = MAX_KEY_SIZE;
+    return HKS_SUCCESS;
+}
+
+int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
+    const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet)
+{
+    int32_t ret;
+    bool isSkipUpdate = false;
+    struct HksParamSet *newParamSet = NULL;
+    struct HksBlob oldKey = { 0, NULL };
+    struct HksBlob newKey = { 0, NULL };
+    do {
+        ret = HksCheckProcessInConfigList(&processInfo->processName);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check process in config list failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckChangeStorageLevelParams(&processInfo->processName, keyAlias, srcParamSet, destParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check change storage level params failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksCheckSrcKeyAndDestKeyCondition(processInfo, keyAlias, srcParamSet, destParamSet, &isSkipUpdate);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "check src key and dest key condition failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = GetKeyFileData(processInfo, srcParamSet, keyAlias, &oldKey, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "get key data failed, ret = %" LOG_PUBLIC "d.", ret)
+
+        ret = AppendChangeStorageLevelInfoInService(processInfo, destParamSet, &newParamSet);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "append change storage level info failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksMallocNewKey(&newKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "new key malloc failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HuksAccessUpgradeKey(&oldKey, newParamSet, &newKey);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "access upgrade key failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksManageStoreKeyBlob(processInfo, newParamSet, keyAlias, &newKey, HKS_STORAGE_TYPE_KEY);
+        HKS_IF_NOT_SUCC_LOGE_BREAK(ret, "store keyblob to storage failed, ret = %" LOG_PUBLIC "d", ret)
+
+        ret = HksManageStoreDeleteKeyBlob(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+        if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST) {
+            ret = HksManageStoreDeleteKeyBlob(processInfo, srcParamSet, keyAlias, HKS_STORAGE_TYPE_KEY);
+            if (ret != HKS_SUCCESS && ret != HKS_ERROR_NOT_EXIST) {
+                ret = HKS_ERROR_KEY_CLEAR_FAILED;
+                HKS_LOG_E("delete src key failed");
+            }
+        }
+    } while (0);
+
+    HksFreeParamSet(&newParamSet);
+    HKS_FREE_BLOB(oldKey);
+    HKS_FREE_BLOB(newKey);
+
+#ifdef L2_STANDARD
+    HksReport(__func__, processInfo, newParamSet, ret);
+#endif
+    if (isSkipUpdate) {
+        ret = HKS_SUCCESS;
+    }
+    return ret;
+}

@@ -45,6 +45,8 @@ enum HksIpcInterfaceCode {
     HKS_MSG_ATTEST_KEY_ASYNC_REPLY,
     HKS_MSG_LIST_ALIASES,
     HKS_MSG_RENAME_KEY_ALIAS,
+    HKS_MSG_CHANGE_STORAGE_LEVEL,
+
     /* new cmd type must be added before HKS_MSG_MAX */
     HKS_MSG_MAX,
 };

@@ -462,3 +462,12 @@ int32_t HksClientRenameKeyAlias(const struct HksBlob *oldKeyAlias, const struct 
     (void)newKeyAlias;
     return HKS_ERROR_NOT_SUPPORTED;
 }
+
+int32_t HksClientChangeStorageLevel(const struct HksBlob *keyAlias, const struct HksParamSet *srcParamSet,
+    const struct HksParamSet *destParamSet)
+{
+    (void)keyAlias;
+    (void)srcParamSet;
+    (void)destParamSet;
+    return HKS_ERROR_NOT_SUPPORTED;
+}

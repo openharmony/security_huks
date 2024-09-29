@@ -314,7 +314,7 @@ int32_t HksStoreIsKeyBlobExist(const struct HksStoreFileInfo *fileInfo)
 {
     int32_t ret;
     do {
-        ret = IsKeyBlobExist(fileInfo);   //  hks_storage.c:319  ？
+        ret = IsKeyBlobExist(fileInfo);
         HKS_IF_NOT_SUCC_LOGE(ret, "check is key exist, ret = %" LOG_PUBLIC "d.", ret)
     } while (0);
 
