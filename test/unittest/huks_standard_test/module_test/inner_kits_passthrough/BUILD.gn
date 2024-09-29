@@ -105,7 +105,6 @@ huks_core_sources = [
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_auth.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_interfaces.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_attest.c",
-  "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_chipset_platform_derive.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_generate.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_one_stage.c",
   "//base/security/huks/services/huks_standard/huks_engine/main/core/src/hks_core_service_key_operate_three_stage.c",

@@ -442,24 +442,3 @@ ENABLE_CFI(int32_t HuksAccessGenerateRandom(const struct HksParamSet *paramSet, 
     HDI_CONVERTER_FUNC_GENERATERANDOM(paramSet, random, ret, HdiProxyGenerateRandom)
     return ret;
 }
-
-#ifdef HKS_SUPPORT_CHIPSET_PLATFORM_DECRYPT
-static int32_t HdiProxyExportChipsetPlatformPublicKey(const struct HuksBlob *salt,
-    enum HuksChipsetPlatformDecryptScene scene, struct HuksBlob *publicKey)
-{
-    HKS_IF_NOT_SUCC_RETURN(InitHdiProxyInstance(), HKS_ERROR_NULL_POINTER)
-
-    HKS_IF_NULL_LOGE_RETURN(g_hksHdiProxyInstance->ExportChipsetPlatformPublicKey, HKS_ERROR_NULL_POINTER,
-        "ExportChipsetPlatformPublicKey function is null pointer")
-    return g_hksHdiProxyInstance->ExportChipsetPlatformPublicKey(g_hksHdiProxyInstance, salt, scene, publicKey);
-}
-
-ENABLE_CFI(int32_t HuksAccessExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey))
-{
-    int32_t ret = HDF_FAILURE;
-    HDI_CONVERTER_FUNC_EXPORTCHIPSETPLATFORMPUBLICKEY(salt, scene, publicKey, ret,
-        HdiProxyExportChipsetPlatformPublicKey)
-    return ret;
-}
-#endif

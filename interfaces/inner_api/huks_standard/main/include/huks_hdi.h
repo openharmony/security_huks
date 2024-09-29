@@ -305,17 +305,6 @@
                  HDI_ADAPTER_PARAM(newKey, &newKeyCore));  \
     HDI_CONVERTER_PARAM_OUT_BLOB(newKeyCore, newKey)
 
-#define HDI_CONVERTER_FUNC_EXPORTCHIPSETPLATFORMPUBLICKEY(salt, scene, publicKey, ret, func)  \
-    struct HuksBlob saltCore = {0};  \
-    struct HuksBlob publicKeyCore = {0};  \
-    uint32_t sceneInt = (uint32_t) scene;  \
-    HDI_CONVERTER_PARAM_IN_BLOB(salt, saltCore)  \
-    HDI_CONVERTER_PARAM_IN_BLOB(publicKey, publicKeyCore)  \
-    ret = (func)(HDI_ADAPTER_PARAM(salt, &saltCore),  \
-              sceneInt,  \
-              HDI_ADAPTER_PARAM(publicKey, &publicKeyCore));  \
-    HDI_CONVERTER_PARAM_OUT_BLOB(publicKeyCore, publicKey)
-
 struct HuksHdi {
     /**
      * @brief HUKS initialize

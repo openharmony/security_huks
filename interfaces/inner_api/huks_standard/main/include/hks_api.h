@@ -341,16 +341,6 @@ HKS_API_EXPORT int32_t HksFinish(const struct HksBlob *handle, const struct HksP
 HKS_API_EXPORT int32_t HksAbort(const struct HksBlob *handle, const struct HksParamSet *paramSet);
 
 /**
- * @brief Export chipset platform publicKey
- * @param salt salt value
- * @param scene scene
- * @param publicKey public key
- * @return error code, see hks_type.h
- */
-HKS_API_EXPORT int32_t HksExportChipsetPlatformPublicKey(const struct HksBlob *salt,
-    enum HksChipsetPlatformDecryptScene scene, struct HksBlob *publicKey);
-
-/**
  * @brief Get key alias list
  * @param paramSet required parameter set
  * @param outData key alias list

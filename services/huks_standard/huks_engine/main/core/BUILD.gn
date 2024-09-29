@@ -39,10 +39,8 @@ if (os_level == "standard") {
 
     sources = [
       "src/hks_auth.c",
-      "src/hks_chipset_platform_decrypt.c",
       "src/hks_core_interfaces.c",
       "src/hks_core_service_key_attest.c",
-      "src/hks_core_service_key_chipset_platform_derive.c",
       "src/hks_core_service_key_generate.c",
       "src/hks_core_service_key_operate_one_stage.c",
       "src/hks_core_service_key_operate_three_stage.c",
@@ -119,7 +117,6 @@ if (os_level == "standard") {
       "src/hks_auth.c",
       "src/hks_core_interfaces.c",
       "src/hks_core_service_key_attest.c",
-      "src/hks_core_service_key_chipset_platform_derive.c",
       "src/hks_core_service_key_generate.c",
       "src/hks_core_service_key_operate_one_stage.c",
       "src/hks_core_service_key_operate_three_stage.c",
