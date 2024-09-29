@@ -25,6 +25,8 @@
 #include "hks_mem.h"
 #include "hks_storage_manager.h"
 
+static const uint32_t CHANGE_STORAGE_LEVEL_CFG_LIST[] = HUKS_CHANGE_STORAGE_LEVEL_CONFIG;
+
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
 {
@@ -361,4 +363,53 @@ int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const s
         return HKS_SUCCESS;
     }
     return ret;
+}
+
+int32_t HksCheckProcessInConfigList(const struct HksBlob *processName)
+{
+    uint32_t uid = 0;
+    if (memcpy_s(&uid, sizeof(uid), processName->data, processName->size) != EOK) {
+        HKS_LOG_E("illegal uid, please check your process name");
+        return HKS_ERROR_NO_PERMISSION;
+    }
+
+    for (uint32_t i = 0; i < HKS_ARRAY_SIZE(CHANGE_STORAGE_LEVEL_CFG_LIST); ++i) {
+        if (uid == CHANGE_STORAGE_LEVEL_CFG_LIST[i]) {
+            HKS_LOG_I("%" LOG_PUBLIC "u could change storage level", uid);
+            return HKS_SUCCESS;
+        }
+    }
+    HKS_LOG_E("%" LOG_PUBLIC "u don't have permission to change storage level", uid);
+    return HKS_ERROR_NO_PERMISSION;
+}
+
+int32_t HksCheckChangeStorageLevelParams(const struct HksBlob *processName, const struct HksBlob *keyAlias,
+    const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet)
+{
+    // step 1. common check
+    int32_t ret = HksCheckBlob2AndParamSet2(processName, keyAlias, srcParamSet, destParamSet);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    ret = CheckProcessNameAndKeyAliasSize(processName->size, keyAlias->size);
+    HKS_IF_NOT_SUCC_RETURN(ret, ret)
+
+    // step 2. Judge whether storage level is expected, currently only support d->c
+    struct HksParam *srcStorageLevelParam = NULL;
+    ret = HksGetParam(srcParamSet, HKS_TAG_AUTH_STORAGE_LEVEL, &srcStorageLevelParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "srcParamSet not set storage level!")
+
+    if (srcStorageLevelParam->uint32Param != HKS_AUTH_STORAGE_LEVEL_DE) {
+        HKS_LOG_E("storage level in srcParamSet must be DE");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+
+    struct HksParam *destStorageLevelParam = NULL;
+    ret = HksGetParam(destParamSet, HKS_TAG_AUTH_STORAGE_LEVEL, &destStorageLevelParam);
+    HKS_IF_NOT_SUCC_LOGE_RETURN(ret, ret, "destParamSet not set storage level!")
+
+    if (destStorageLevelParam->uint32Param != HKS_AUTH_STORAGE_LEVEL_CE) {
+        HKS_LOG_E("storage level in destParamSet must be CE");
+        return HKS_ERROR_NOT_SUPPORTED;
+    }
+    return HKS_SUCCESS;
 }
