@@ -343,7 +343,11 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
         HKS_IF_NOT_SUCC_BREAK(ret)
 
         handle->size = sizeof(uint64_t);
-        (void)memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size);
+        if (memcpy_s(handle->data, handle->size, &(keyNode->handle), handle->size) != EOK) {
+            HKS_LOG_E("memcpy handle data failed!");
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            break;
+        }
 
         ret = GetPurposeAndAlgorithm(paramSet, &pur, &alg);
         HKS_IF_NOT_SUCC_BREAK(ret)
@@ -363,7 +367,6 @@ int32_t HksCoreInit(const struct  HksBlob *key, const struct HksParamSet *paramS
     if (ret != HKS_SUCCESS) {
         HksDeleteKeyNode(keyNode->handle);
     }
-
     HKS_LOG_D("HksCoreInit in Core end");
     return ret;
 }

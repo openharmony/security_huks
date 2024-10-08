@@ -219,7 +219,11 @@ static int32_t AesCbcNoPaddingCryptUpdate(void *cryptoCtx,
         }
 
         cipherText->size = message->size;
-        (void)memcpy_s(aesCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, tmpIv, HKS_AES_CBC_NOPADDING_IV_SIZE);
+        if (memcpy_s(aesCtx->iv, HKS_AES_CBC_NOPADDING_IV_SIZE, tmpIv, HKS_AES_CBC_NOPADDING_IV_SIZE) != EOK) {
+            HKS_LOG_E("copy aesCtx failed!");
+            ret = HKS_ERROR_INSUFFICIENT_MEMORY;
+            break;
+        }
     } while (0);
 
     return ret;
