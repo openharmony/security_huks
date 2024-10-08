@@ -25,7 +25,9 @@
 #include "hks_mem.h"
 #include "hks_storage_manager.h"
 
+#ifdef L2_STANDARD
 static const uint32_t CHANGE_STORAGE_LEVEL_CFG_LIST[] = HUKS_CHANGE_STORAGE_LEVEL_CONFIG;
+#endif
 
 #ifndef _CUT_AUTHENTICATE_
 static int32_t CheckProcessNameAndKeyAliasSize(uint32_t processNameSize, uint32_t keyAliasSize)
@@ -365,6 +367,7 @@ int32_t HksCheckNewKeyNotExist(const struct HksProcessInfo *processInfo, const s
     return ret;
 }
 
+#ifdef L2_STANDARD
 int32_t HksCheckProcessInConfigList(const struct HksBlob *processName)
 {
     uint32_t uid = 0;
@@ -413,3 +416,4 @@ int32_t HksCheckChangeStorageLevelParams(const struct HksBlob *processName, cons
     }
     return HKS_SUCCESS;
 }
+#endif

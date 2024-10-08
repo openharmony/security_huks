@@ -2100,6 +2100,7 @@ int32_t HksServiceRenameKeyAlias(const struct HksProcessInfo *processInfo, const
     return HKS_SUCCESS;
 }
 
+#ifdef L2_STANDARD
 static int32_t AppendChangeStorageLevelInfoInService(const struct HksProcessInfo *processInfo,
     const struct HksParamSet *paramSet, struct HksParamSet **outParamSet)
 {
@@ -2183,10 +2184,12 @@ static int32_t HksMallocNewKey(struct HksBlob *newKey)
     newKey->size = MAX_KEY_SIZE;
     return HKS_SUCCESS;
 }
+#endif
 
 int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, const struct HksBlob *keyAlias,
     const struct HksParamSet *srcParamSet, const struct HksParamSet *destParamSet)
 {
+#ifdef L2_STANDARD
     int32_t ret;
     bool isSkipUpdate = false;
     struct HksParamSet *newParamSet = NULL;
@@ -2230,12 +2233,16 @@ int32_t HksServiceChangeStorageLevel(const struct HksProcessInfo *processInfo, c
     HksFreeParamSet(&newParamSet);
     HKS_FREE_BLOB(oldKey);
     HKS_FREE_BLOB(newKey);
-
-#ifdef L2_STANDARD
     HksReport(__func__, processInfo, newParamSet, ret);
-#endif
     if (isSkipUpdate) {
         ret = HKS_SUCCESS;
     }
     return ret;
+#else
+    (void)processInfo;
+    (void)keyAlias;
+    (void)srcParamSet;
+    (void)destParamSet;
+    return HKS_SUCCESS;
+#endif
 }
