@@ -35,7 +35,10 @@ int32_t CopyUint32ToBuffer(uint32_t value, const struct HksBlob *destBlob, uint3
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value, sizeof(value));
+    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &value, sizeof(value)) != EOK) {
+        HKS_LOG_E("copy destBlob data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     *destOffset += sizeof(value);
 
     return HKS_SUCCESS;
@@ -48,10 +51,17 @@ static int32_t CopyBlobToBuffer(const struct HksBlob *blob, const struct HksBlob
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size), sizeof(blob->size));
+    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, &(blob->size),
+        sizeof(blob->size)) != EOK) {
+        HKS_LOG_E("copy destBlob data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     *destOffset += sizeof(blob->size);
 
-    (void)memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size);
+    if (memcpy_s(destBlob->data + *destOffset, destBlob->size - *destOffset, blob->data, blob->size) != EOK) {
+        HKS_LOG_E("copy destBlob data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     *destOffset += ALIGN_SIZE(blob->size);
 
     return HKS_SUCCESS;

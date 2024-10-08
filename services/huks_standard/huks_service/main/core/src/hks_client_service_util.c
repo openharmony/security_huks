@@ -75,7 +75,11 @@ int32_t GetKeyParamSet(const struct HksBlob *key, struct HksParamSet *paramSet)
         HksFreeParamSet(&outParamSet);
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
-    (void)memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize);
+    if (memcpy_s(paramSet, paramSet->paramSetSize, outParamSet, outParamSet->paramSetSize) != EOK) {
+        HksFreeParamSet(&outParamSet);
+        HKS_LOG_E("copy paramSet failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     ret = HksFreshParamSet(paramSet, false);
 

@@ -193,7 +193,11 @@ int32_t ConstructBlob(const char *src, struct HksBlob *blob)
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memcpy_s(blob->data, blob->size, outputBlob, count);
+    if (memcpy_s(blob->data, blob->size, outputBlob, count) != EOK) {
+        HKS_FREE(outputBlob);
+        HKS_LOG_E("copy blob data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     blob->size = count;
     HKS_FREE(outputBlob);

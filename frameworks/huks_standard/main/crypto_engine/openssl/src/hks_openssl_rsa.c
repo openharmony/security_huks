@@ -103,7 +103,6 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
     struct HksBlob bufBlob = { 0, NULL };
     int32_t ret = InitRsaKeyBuf(keyMaterial, &bufBlob);
     HKS_IF_NOT_SUCC_RETURN(ret, NULL)
-
     bool copyFail = false;
     uint32_t offset = sizeof(*keyMaterial);
     if (memcpy_s(bufBlob.data, bufBlob.size, key->data + offset, keyMaterial->nSize) != EOK) {
@@ -123,13 +122,11 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
         }
         d = BN_bin2bn(bufBlob.data, keyMaterial->dSize, NULL);
     }
-
     RSA *rsa = NULL;
     do {
         if (copyFail) {
             break;
         }
-
         rsa = RSA_new();
         if (rsa != NULL) {
             ret = RSA_set0_key(rsa, n, e, d);
@@ -140,15 +137,13 @@ static RSA *InitRsaStruct(const struct HksBlob *key, const bool needPrivateExpon
             }
         }
     } while (0);
-
     if (rsa == NULL) {
         SELF_FREE_PTR(n, BN_free);
         SELF_FREE_PTR(e, BN_free);
         SELF_FREE_PTR(d, BN_free);
     }
-
-    (void)memset_s(bufBlob.data, bufBlob.size, 0, HKS_KEY_BYTES(keyMaterial->keySize));
-    HKS_FREE(bufBlob.data);
+    memset_s(bufBlob.data, bufBlob.size, 0, bufBlob.size);
+    HKS_MEMSET_FREE_BLOB(bufBlob);
     return rsa;
 }
 
@@ -276,8 +271,11 @@ int32_t HksOpensslGetRsaPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->eSize = keyMaterial->eSize;
     publickeyMaterial->dSize = 0;
 
-    (void)memcpy_s(output->data + sizeof(struct KeyMaterialRsa), output->size - sizeof(struct KeyMaterialRsa),
-        input->data + sizeof(struct KeyMaterialRsa), keyMaterial->nSize + keyMaterial->eSize);
+    if (memcpy_s(output->data + sizeof(struct KeyMaterialRsa), output->size - sizeof(struct KeyMaterialRsa),
+        input->data + sizeof(struct KeyMaterialRsa), keyMaterial->nSize + keyMaterial->eSize) != EOK) {
+            HKS_LOG_E("copy output->data + sizeof(struct KeyMaterialRsa) failed!");
+            return HKS_ERROR_INSUFFICIENT_MEMORY;
+        }
 
     return HKS_SUCCESS;
 }

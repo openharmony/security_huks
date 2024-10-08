@@ -221,8 +221,11 @@ int32_t HksOpensslGetEccPubKey(const struct HksBlob *input, struct HksBlob *outp
     publickeyMaterial->ySize = keyMaterial->ySize;
     publickeyMaterial->zSize = 0;
 
-    (void)memcpy_s(output->data + sizeof(struct KeyMaterialEcc), output->size - sizeof(struct KeyMaterialEcc),
-        input->data + sizeof(struct KeyMaterialEcc), keyMaterial->xSize + keyMaterial->ySize);
+    if (memcpy_s(output->data + sizeof(struct KeyMaterialEcc), output->size - sizeof(struct KeyMaterialEcc),
+        input->data + sizeof(struct KeyMaterialEcc), keyMaterial->xSize + keyMaterial->ySize) != EOK) {
+        HKS_LOG_E("copy output data + sizeof(struct KeyMaterialEcc) failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
 
     return HKS_SUCCESS;
 }

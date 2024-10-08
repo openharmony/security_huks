@@ -70,7 +70,10 @@ static int32_t BnExpModExport(BIGNUM *bnX, struct HksBlob *x)
         return HKS_ERROR_BUFFER_TOO_SMALL;
     }
 
-    (void)memset_s(x->data, x->size, 0, x->size);
+    if (memset_s(x->data, x->size, 0, x->size) != EOK) {
+        HKS_LOG_E("memset x data failed!");
+        return HKS_ERROR_INSUFFICIENT_MEMORY;
+    }
     if (outLen == 0) {
         return HKS_SUCCESS;
     }
